@@ -1,17 +1,25 @@
 import { NavLink, Outlet, useLocation } from "react-router";
-import { Flame, Search, Bell } from "lucide-react";
+import { Flame, Search, Bell, Plus } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
+import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
 import { Background } from "@/app/components/common/Background";
 import { Logo } from "@/app/components/common/Logo";
 import { NAV_ITEMS } from "@/app/data/mock";
 
+const ADMIN_LABEL = { path: "/admin/courses", label: "Gestion des cours" };
+
 export function MainLayout() {
   const th = useTh();
+  const { role } = useAuth();
   const { profile } = useProfile();
   const location = useLocation();
   const name = profile.name.split(" ")[0] || "Alex";
-  const current = NAV_ITEMS.find((n) => n.path === location.pathname) ?? NAV_ITEMS[0];
+  const allLabels = role === "admin" ? [...NAV_ITEMS, ADMIN_LABEL] : NAV_ITEMS;
+  const current =
+    [...allLabels].sort((a, b) => b.path.length - a.path.length)
+      .find((n) => location.pathname === n.path || location.pathname.startsWith(`${n.path}/`))
+    ?? allLabels[0];
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: th.bg, fontFamily: "'Inter',sans-serif" }}>
@@ -26,6 +34,17 @@ export function MainLayout() {
             </NavLink>
           ))}
         </nav>
+        {role === "admin" && (
+          <div className="px-3 pb-3">
+            <NavLink to="/admin/courses" className="w-full flex items-center gap-3 px-2.5 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
+              style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.3)", color: "#4ADE80" }}>
+              <span className="w-6 h-6 rounded-full flex items-center justify-center shrink-0" style={{ background: "linear-gradient(135deg,#22C55E,#4ADE80)", boxShadow: "0 0 14px rgba(34,197,94,0.4)" }}>
+                <Plus className="w-4 h-4" style={{ color: "#08060F" }} />
+              </span>
+              Créer un cours
+            </NavLink>
+          </div>
+        )}
         <div className="p-4" style={{ borderTop: `1px solid ${th.sidebarB}` }}>
           <div className="flex items-center gap-3 px-2">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black shrink-0" style={{ background: "linear-gradient(135deg,#9B5DE5,#DDAEEA)", color: "#08060F" }}>{name[0]}</div>

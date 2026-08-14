@@ -14,6 +14,9 @@ import { PracticePage } from "@/app/pages/practice/PracticePage";
 import { CalendarPage } from "@/app/pages/calendar/CalendarPage";
 import { BenefitsPage } from "@/app/pages/benefits/BenefitsPage";
 import { ProfilePage } from "@/app/pages/profile/ProfilePage";
+import { AdminCoursesPage } from "@/app/pages/admin/AdminCoursesPage";
+import { AdminCourseEditorPage } from "@/app/pages/admin/AdminCourseEditorPage";
+import { AdminLessonEditorPage } from "@/app/pages/admin/AdminLessonEditorPage";
 
 function LoadingScreen() {
   const th = useTh();
@@ -51,6 +54,16 @@ function SignupGuard({ children }: { children: ReactElement }) {
   return children;
 }
 
+// Zone admin : le rôle n'est connu qu'une fois le profil chargé (juste après
+// RequireAuth), donc on affiche un loader tant qu'il vaut encore null plutôt
+// que de rediriger un admin par erreur pendant ce court instant.
+function RequireAdmin({ children }: { children: ReactElement }) {
+  const { role } = useAuth();
+  if (role === null) return <LoadingScreen />;
+  if (role !== "admin") return <Navigate to="/" replace />;
+  return children;
+}
+
 function AppRoutes() {
   return (
     <Routes>
@@ -63,6 +76,11 @@ function AppRoutes() {
         <Route path="calendar" element={<CalendarPage />} />
         <Route path="benefits" element={<BenefitsPage />} />
         <Route path="profile" element={<ProfilePage />} />
+        <Route path="admin/courses" element={<RequireAdmin><AdminCoursesPage /></RequireAdmin>} />
+        <Route path="admin/courses/new" element={<RequireAdmin><AdminCourseEditorPage /></RequireAdmin>} />
+        <Route path="admin/courses/:courseId" element={<RequireAdmin><AdminCourseEditorPage /></RequireAdmin>} />
+        <Route path="admin/courses/:courseId/lessons/new" element={<RequireAdmin><AdminLessonEditorPage /></RequireAdmin>} />
+        <Route path="admin/courses/:courseId/lessons/:lessonId" element={<RequireAdmin><AdminLessonEditorPage /></RequireAdmin>} />
       </Route>
       <Route path="/lesson/:lessonId" element={<RequireAuth><LessonPage /></RequireAuth>} />
       <Route path="*" element={<Navigate to="/" replace />} />
