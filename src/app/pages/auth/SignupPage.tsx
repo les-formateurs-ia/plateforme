@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
+import { useNavigate, Link } from "react-router";
 import {
   ChevronRight, ChevronLeft, Sparkles, CheckCircle,
-  ArrowRight, Wand2, RefreshCw,
+  ArrowRight, Wand2, RefreshCw, Mail,
 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
+import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
 import { Background } from "@/app/components/common/Background";
 import { Logo } from "@/app/components/common/Logo";
@@ -14,18 +16,45 @@ import { cx } from "@/app/lib/cx";
 import { LEARN_STYLES, TUTOR_STYLES } from "@/app/data/mock";
 import type { Profile } from "@/app/types";
 
-export function OnboardingPage() {
+const TOTAL_STEPS = 4;
+
+export function SignupPage() {
   const th = useTh();
-  const { completeOnboarding } = useProfile();
-  const [step, setStep] = useState(1);
+  const navigate = useNavigate();
+  const { user, signUp } = useAuth();
+  const { saveOnboarding } = useProfile();
+
+  const firstStep = user ? 2 : 1;
+  const [step, setStep] = useState(firstStep);
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [accountError, setAccountError] = useState<string | null>(null);
+  const [accountLoading, setAccountLoading] = useState(false);
+  const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
+
   const [p, setP] = useState<Profile>({ name: "", age: "", profession: "", goal: "", goalFinal: "", style: "", tutor: "" });
   const [aiState, setAiState] = useState<"idle" | "loading" | "proposal">("idle");
   const [aiProposal, setAiProposal] = useState("");
+  const [finishing, setFinishing] = useState(false);
 
   const canNext = () => {
-    if (step === 1) return p.name.trim() && p.age.trim() && p.profession.trim();
-    if (step === 2) return !!p.style;
+    if (step === 2) return p.name.trim() && p.age.trim() && p.profession.trim();
+    if (step === 3) return !!p.style;
     return !!p.tutor;
+  };
+
+  const handleCreateAccount = async (e: FormEvent) => {
+    e.preventDefault();
+    if (password !== passwordConfirm) { setAccountError("Les mots de passe ne correspondent pas."); return; }
+    setAccountError(null);
+    setAccountLoading(true);
+    const { error, needsEmailConfirmation } = await signUp(email, password);
+    setAccountLoading(false);
+    if (error) { setAccountError(error); return; }
+    if (needsEmailConfirmation) { setAwaitingConfirmation(true); return; }
+    setStep(2);
   };
 
   const formulateWithAI = () => {
@@ -41,6 +70,33 @@ export function OnboardingPage() {
   const acceptProposal = () => { setP(x => ({ ...x, goal: aiProposal, goalFinal: aiProposal })); setAiState("idle"); setAiProposal(""); };
   const discardProposal = () => { setAiState("idle"); setAiProposal(""); };
 
+  const finishOnboarding = async () => {
+    setFinishing(true);
+    await saveOnboarding(p);
+    navigate("/");
+  };
+
+  if (awaitingConfirmation) {
+    return (
+      <div className="relative min-h-screen flex items-center justify-center p-4" style={{ background: th.bg, fontFamily: "'Inter',sans-serif" }}>
+        <Background />
+        <div className="relative z-10 w-full max-w-[480px] fade-up">
+          <div className="flex justify-center mb-10"><Logo h={30} /></div>
+          <GCard glow>
+            <div className="p-8 sm:p-10 text-center">
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5" style={{ background: "rgba(155,93,229,0.12)", border: "1px solid rgba(155,93,229,0.25)" }}>
+                <Mail className="w-6 h-6" style={{ color: th.navAC }} />
+              </div>
+              <h1 className="text-xl font-black mb-2" style={{ color: th.fg }}>Confirme ton email</h1>
+              <p className="text-sm mb-6" style={{ color: th.fg3 }}>On t'a envoyé un lien de confirmation à <strong>{email}</strong>. Clique dessus, puis reviens te connecter.</p>
+              <Link to="/login"><VBtn full>Aller à la connexion</VBtn></Link>
+            </div>
+          </GCard>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative min-h-screen flex items-center justify-center p-4" style={{ background: th.bg, fontFamily: "'Inter',sans-serif" }}>
       <Background />
@@ -50,32 +106,63 @@ export function OnboardingPage() {
           <div className="p-8 sm:p-10">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
-                {[1, 2, 3].map(i => (
+                {[1, 2, 3, 4].map(i => (
                   <div key={i} className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300"
                       style={{ background: i < step ? "linear-gradient(135deg,#9B5DE5,#DDAEEA)" : i === step ? "rgba(155,93,229,0.12)" : "transparent", border: i === step ? "1px solid rgba(155,93,229,0.4)" : "1px solid " + th.sep, color: i < step ? "#08060F" : i === step ? "#9B5DE5" : th.fg3, boxShadow: i === step ? "0 0 16px rgba(155,93,229,0.25)" : "none" }}>
                       {i < step ? <CheckCircle className="w-3.5 h-3.5" /> : i}
                     </div>
-                    {i < 3 && <div className="w-8 h-px" style={{ background: i < step ? "rgba(155,93,229,0.5)" : th.sep }} />}
+                    {i < 4 && <div className="w-8 h-px" style={{ background: i < step ? "rgba(155,93,229,0.5)" : th.sep }} />}
                   </div>
                 ))}
               </div>
-              <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: th.fg3 }}>Étape {step} / 3</span>
+              <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: th.fg3 }}>Étape {step} / {TOTAL_STEPS}</span>
             </div>
 
             <div className="relative mb-6">
               <div className="absolute -top-2 -left-1 text-7xl font-black leading-none pointer-events-none select-none" style={{ color: th.isDark ? "rgba(155,93,229,0.04)" : "rgba(155,93,229,0.06)", fontFamily: "'Funnel Display',sans-serif" }}>0{step}</div>
               <h1 className="relative text-2xl font-black leading-tight mb-2" style={{ fontFamily: "'Funnel Display',sans-serif" }}>
                 <GT from={th.isDark ? "#FFFFFF" : "#2D0F6F"} to={th.isDark ? "#DDAEEA" : "#9B5DE5"}>
-                  {step === 1 && "L'IA configure ton académie personnalisée"}{step === 2 && "Comment apprends-tu le mieux ?"}{step === 3 && "Choisis ton style de Tuteur IA"}
+                  {step === 1 && "Crée ton compte"}{step === 2 && "L'IA configure ton académie personnalisée"}{step === 3 && "Comment apprends-tu le mieux ?"}{step === 4 && "Choisis ton style de Tuteur IA"}
                 </GT>
               </h1>
               <p className="text-sm" style={{ color: th.fg3 }}>
-                {step === 1 && "Quelques infos pour adapter chaque leçon à ton profil exact."}{step === 2 && "L'IA sélectionnera les formats adaptés à ta façon de mémoriser."}{step === 3 && "Le ton de ton assistant s'adapte à ta personnalité."}
+                {step === 1 && "Une adresse email et un mot de passe pour retrouver ton parcours."}
+                {step === 2 && "Quelques infos pour adapter chaque leçon à ton profil exact."}
+                {step === 3 && "L'IA sélectionnera les formats adaptés à ta façon de mémoriser."}
+                {step === 4 && "Le ton de ton assistant s'adapte à ta personnalité."}
               </p>
             </div>
 
             {step === 1 && (
+              <form onSubmit={handleCreateAccount} className="space-y-4 fade-up">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Email</label>
+                  <input type="email" required autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="toi@exemple.com" className="w-full rounded-xl px-4 py-3 text-sm g-input" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Mot de passe</label>
+                    <input type="password" required minLength={6} autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="w-full rounded-xl px-4 py-3 text-sm g-input" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Confirmer</label>
+                    <input type="password" required minLength={6} autoComplete="new-password" value={passwordConfirm} onChange={e => setPasswordConfirm(e.target.value)} placeholder="••••••••" className="w-full rounded-xl px-4 py-3 text-sm g-input" />
+                  </div>
+                </div>
+                {accountError && <p className="text-xs" style={{ color: "#F87171" }}>{accountError}</p>}
+                <div className="pt-2">
+                  <ShimBtn full disabled={accountLoading}>
+                    <span className="flex items-center justify-center gap-2.5">{accountLoading ? "Création…" : <>Continuer<ArrowRight className="w-5 h-5" /></>}</span>
+                  </ShimBtn>
+                </div>
+                <p className="text-xs text-center" style={{ color: th.fg3 }}>
+                  Déjà un compte ? <Link to="/login" style={{ color: th.navAC }} className="font-semibold hover:opacity-80">Se connecter</Link>
+                </p>
+              </form>
+            )}
+
+            {step === 2 && (
               <div className="space-y-4 fade-up">
                 <div className="grid grid-cols-2 gap-4">
                   <div><label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Prénom</label><input value={p.name} onChange={e => setP(x => ({ ...x, name: e.target.value }))} placeholder="Alex" className="w-full rounded-xl px-4 py-3 text-sm g-input" /></div>
@@ -115,7 +202,7 @@ export function OnboardingPage() {
               </div>
             )}
 
-            {step === 2 && (
+            {step === 3 && (
               <div className="grid grid-cols-2 gap-3 fade-up">
                 {LEARN_STYLES.map(({ id, Icon, label, desc }) => {
                   const sel = p.style === id;
@@ -135,7 +222,7 @@ export function OnboardingPage() {
               </div>
             )}
 
-            {step === 3 && (
+            {step === 4 && (
               <div className="space-y-3 fade-up">
                 {TUTOR_STYLES.map(({ id, emoji, label, desc }) => {
                   const sel = p.tutor === id;
@@ -154,17 +241,19 @@ export function OnboardingPage() {
                   );
                 })}
                 <div className="pt-4">
-                  <ShimBtn onClick={() => completeOnboarding(p)} full>
-                    <span className="flex items-center justify-center gap-2.5"><Sparkles className="w-5 h-5" />Générer mon parcours IA<ArrowRight className="w-5 h-5" /></span>
+                  <ShimBtn onClick={finishOnboarding} disabled={finishing} full>
+                    <span className="flex items-center justify-center gap-2.5"><Sparkles className="w-5 h-5" />{finishing ? "Finalisation…" : "Générer mon parcours IA"}{!finishing && <ArrowRight className="w-5 h-5" />}</span>
                   </ShimBtn>
                 </div>
               </div>
             )}
 
-            <div className="flex items-center justify-between mt-8 pt-5" style={{ borderTop: `1px solid ${th.sep}` }}>
-              <button onClick={() => setStep(s => Math.max(1, s - 1))} className={cx("flex items-center gap-1.5 text-sm transition-colors", step === 1 ? "invisible" : "hover:opacity-70")} style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />Retour</button>
-              {step < 3 && <VBtn onClick={() => canNext() && setStep(s => s + 1)} sm>Continuer <ChevronRight className="inline w-4 h-4 ml-1" /></VBtn>}
-            </div>
+            {step !== 1 && (
+              <div className="flex items-center justify-between mt-8 pt-5" style={{ borderTop: `1px solid ${th.sep}` }}>
+                <button onClick={() => setStep(s => Math.max(firstStep, s - 1))} className={cx("flex items-center gap-1.5 text-sm transition-colors", step === firstStep ? "invisible" : "hover:opacity-70")} style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />Retour</button>
+                {step < 4 && <VBtn onClick={() => canNext() && setStep(s => s + 1)} sm>Continuer <ChevronRight className="inline w-4 h-4 ml-1" /></VBtn>}
+              </div>
+            )}
           </div>
         </GCard>
       </div>

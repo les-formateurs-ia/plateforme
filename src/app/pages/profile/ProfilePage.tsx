@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { Trophy, CheckCircle, Lock, Award, Sparkles, Sun, Moon } from "lucide-react";
+import { useNavigate } from "react-router";
+import { Trophy, CheckCircle, Lock, Award, Sparkles, Sun, Moon, LogOut } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
+import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
 import { GCard } from "@/app/components/common/GCard";
 import { CircleProgress } from "@/app/components/common/CircleProgress";
@@ -10,9 +12,16 @@ import { CERT_CHAPTERS, BADGES } from "@/app/data/mock";
 
 export function ProfilePage() {
   const th = useTh();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   const { profile } = useProfile();
   const name = profile.name || "Alex Dubois";
   const [tab, setTab] = useState<"overview" | "badges" | "settings">("overview");
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/login");
+  };
 
   return (
     <div className="flex-1 overflow-y-auto px-8 py-6 space-y-5">
@@ -114,7 +123,7 @@ export function ProfilePage() {
 
           {/* Info fields */}
           <div className="grid grid-cols-2 gap-4">
-            {[["Prénom", profile.name || "Alex"], ["Âge", "28 ans"], ["Profession", profile.profession || "Chef de projet"], ["Email", "alex@example.com"]].map(([label, val]) => (
+            {[["Prénom", profile.name || "Alex"], ["Âge", profile.age ? `${profile.age} ans` : "Non renseigné"], ["Profession", profile.profession || "Chef de projet"], ["Email", user?.email || "—"]].map(([label, val]) => (
               <div key={label}>
                 <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>{label}</label>
                 <div className="w-full rounded-xl px-4 py-3 text-sm flex items-center justify-between" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
@@ -135,6 +144,17 @@ export function ProfilePage() {
               <p className="text-[10px] mt-1.5 flex items-center gap-1" style={{ color: th.navAC }}><Sparkles className="w-3 h-3" />Reformulé par l'IA lors de l'inscription</p>
             )}
           </div>
+
+          <GCard><div className="p-5 flex items-center justify-between">
+            <div>
+              <div className="text-sm font-bold mb-0.5" style={{ color: th.fg }}>Session</div>
+              <div className="text-xs" style={{ color: th.fg3 }}>Connecté·e en tant que {user?.email}</div>
+            </div>
+            <button onClick={handleSignOut} className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80"
+              style={{ background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.25)", color: "#F87171" }}>
+              <LogOut className="w-4 h-4" />Se déconnecter
+            </button>
+          </div></GCard>
         </div>
       )}
     </div>

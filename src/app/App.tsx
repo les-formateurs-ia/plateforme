@@ -1,9 +1,12 @@
 import type { ReactElement } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router";
-import { ThemeProvider } from "@/app/theme/theme";
-import { ProfileProvider, useProfile } from "@/app/state/profile-context";
+import { ThemeProvider, useTh } from "@/app/theme/theme";
+import { AuthProvider, useAuth } from "@/app/state/auth-context";
+import { ProfileProvider } from "@/app/state/profile-context";
+import { Background } from "@/app/components/common/Background";
 import { MainLayout } from "@/app/components/layout/MainLayout";
-import { OnboardingPage } from "@/app/pages/OnboardingPage";
+import { LoginPage } from "@/app/pages/auth/LoginPage";
+import { SignupPage } from "@/app/pages/auth/SignupPage";
 import { LessonPage } from "@/app/pages/LessonPage";
 import { DashboardPage } from "@/app/pages/dashboard/DashboardPage";
 import { LessonsPage } from "@/app/pages/lessons/LessonsPage";
@@ -12,21 +15,48 @@ import { CalendarPage } from "@/app/pages/calendar/CalendarPage";
 import { BenefitsPage } from "@/app/pages/benefits/BenefitsPage";
 import { ProfilePage } from "@/app/pages/profile/ProfilePage";
 
-function RequireOnboarding({ children }: { children: ReactElement }) {
-  const { isOnboarded } = useProfile();
-  return isOnboarded ? children : <Navigate to="/onboarding" replace />;
+function LoadingScreen() {
+  const th = useTh();
+  return (
+    <div className="relative min-h-screen flex items-center justify-center" style={{ background: th.bg }}>
+      <Background />
+      <div className="relative z-10 text-sm" style={{ color: th.fg3 }}>Chargement…</div>
+    </div>
+  );
 }
 
-function RedirectIfOnboarded({ children }: { children: ReactElement }) {
-  const { isOnboarded } = useProfile();
-  return isOnboarded ? <Navigate to="/" replace /> : children;
+// Accès à l'app : session valide + onboarding terminé, sinon renvoie vers /login ou /signup.
+function RequireAuth({ children }: { children: ReactElement }) {
+  const { status, mustOnboard } = useAuth();
+  if (status === "loading") return <LoadingScreen />;
+  if (status === "unauthenticated") return <Navigate to="/login" replace />;
+  if (mustOnboard) return <Navigate to="/signup" replace />;
+  return children;
+}
+
+// /login : inutile si déjà connecté et onboardé.
+function RedirectIfAuthenticated({ children }: { children: ReactElement }) {
+  const { status, mustOnboard } = useAuth();
+  if (status === "loading") return <LoadingScreen />;
+  if (status === "authenticated" && !mustOnboard) return <Navigate to="/" replace />;
+  return children;
+}
+
+// /signup : reste accessible tant que l'onboarding n'est pas terminé (reprise possible),
+// mais inutile si le compte est déjà complet.
+function SignupGuard({ children }: { children: ReactElement }) {
+  const { status, mustOnboard } = useAuth();
+  if (status === "loading") return <LoadingScreen />;
+  if (status === "authenticated" && !mustOnboard) return <Navigate to="/" replace />;
+  return children;
 }
 
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="/onboarding" element={<RedirectIfOnboarded><OnboardingPage /></RedirectIfOnboarded>} />
-      <Route element={<RequireOnboarding><MainLayout /></RequireOnboarding>}>
+      <Route path="/login" element={<RedirectIfAuthenticated><LoginPage /></RedirectIfAuthenticated>} />
+      <Route path="/signup" element={<SignupGuard><SignupPage /></SignupGuard>} />
+      <Route element={<RequireAuth><MainLayout /></RequireAuth>}>
         <Route index element={<DashboardPage />} />
         <Route path="lessons" element={<LessonsPage />} />
         <Route path="practice" element={<PracticePage />} />
@@ -34,7 +64,7 @@ function AppRoutes() {
         <Route path="benefits" element={<BenefitsPage />} />
         <Route path="profile" element={<ProfilePage />} />
       </Route>
-      <Route path="/lesson/:lessonId" element={<RequireOnboarding><LessonPage /></RequireOnboarding>} />
+      <Route path="/lesson/:lessonId" element={<RequireAuth><LessonPage /></RequireAuth>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
@@ -43,11 +73,13 @@ function AppRoutes() {
 export default function App() {
   return (
     <ThemeProvider>
-      <ProfileProvider>
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </ProfileProvider>
+      <AuthProvider>
+        <ProfileProvider>
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </ProfileProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }
