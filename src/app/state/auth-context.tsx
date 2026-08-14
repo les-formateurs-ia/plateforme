@@ -39,19 +39,6 @@ function translateAuthError(message: string) {
   return message;
 }
 
-async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
-  let timeoutId: ReturnType<typeof setTimeout> | undefined;
-  const timeout = new Promise<never>((_, reject) => {
-    timeoutId = setTimeout(() => reject(new Error("Auth initialization timed out")), timeoutMs);
-  });
-
-  try {
-    return await Promise.race([promise, timeout]);
-  } finally {
-    if (timeoutId) clearTimeout(timeoutId);
-  }
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<Role | null>(null);
@@ -75,25 +62,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    let cancelled = false;
+    // Fail-safe only: onAuthStateChange (below) fires an INITIAL_SESSION event
+    // synchronously on subscribe, so this should never actually be needed —
+    // it just prevents a permanent loading screen if that ever doesn't happen
+    // (e.g. Supabase unreachable).
+    const failSafe = setTimeout(() => {
+      setStatus((current) => (current === "loading" ? "unauthenticated" : current));
+    }, AUTH_INIT_TIMEOUT_MS);
 
-    withTimeout(supabase.auth.getSession(), AUTH_INIT_TIMEOUT_MS)
-      .then(async ({ data }) => {
-        if (cancelled) return;
-        setSession(data.session);
-        if (data.session) await loadProfile(data.session.user.id);
-        if (!cancelled) setStatus(data.session ? "authenticated" : "unauthenticated");
-      })
-      .catch(async (error) => {
-        console.warn("Unable to initialize auth session", error);
-        await supabase.auth.signOut().catch(() => {});
-        if (!cancelled) resetAuthState();
-      });
-
+    // Single source of truth for auth state. We deliberately don't also call
+    // getSession() here — running it alongside this listener was racing two
+    // lock acquisitions on the same auth client and could leave the browser
+    // profile's auth lock stuck (see client.ts for the matching fix).
     const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      clearTimeout(failSafe);
       setSession(newSession);
       if (newSession) {
         setStatus("authenticated");
+        // Deferred: Supabase warns against awaiting inside this callback directly.
         setTimeout(() => {
           void loadProfile(newSession.user.id);
         }, 0);
@@ -103,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => {
-      cancelled = true;
+      clearTimeout(failSafe);
       sub.subscription.unsubscribe();
     };
   }, []);
