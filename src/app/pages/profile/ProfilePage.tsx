@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { Trophy, CheckCircle, Lock, Award, Sparkles, Sun, Moon, LogOut } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
@@ -14,13 +14,35 @@ export function ProfilePage() {
   const th = useTh();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const { profile } = useProfile();
+  const { profile, updateProfile } = useProfile();
   const name = profile.name || "Alex Dubois";
   const [tab, setTab] = useState<"overview" | "badges" | "settings">("overview");
+  const [objectiveDraft, setObjectiveDraft] = useState(profile.goalFinal || profile.goal || "");
+  const [objectiveEditing, setObjectiveEditing] = useState(false);
+  const [objectiveSaving, setObjectiveSaving] = useState(false);
+  const [objectiveError, setObjectiveError] = useState<string | null>(null);
+  const currentObjective = profile.goalFinal || profile.goal || "";
+
+  useEffect(() => {
+    if (!objectiveEditing) setObjectiveDraft(currentObjective);
+  }, [currentObjective, objectiveEditing]);
 
   const handleSignOut = async () => {
     await signOut();
     navigate("/login");
+  };
+
+  const saveObjective = async () => {
+    setObjectiveSaving(true);
+    setObjectiveError(null);
+    const cleanedObjective = objectiveDraft.trim();
+    const { error } = await updateProfile({ goal: cleanedObjective, goalFinal: cleanedObjective });
+    setObjectiveSaving(false);
+    if (error) {
+      setObjectiveError(error);
+      return;
+    }
+    setObjectiveEditing(false);
   };
 
   return (
@@ -110,6 +132,43 @@ export function ProfilePage() {
       {tab === "settings" && (
         <div className="space-y-5 max-w-xl">
           {/* Theme toggle */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-xs font-bold uppercase tracking-widest" style={{ color: th.fg3 }}>Modifier l'objectif professionnel</label>
+              {!objectiveEditing && (
+                <button onClick={() => setObjectiveEditing(true)} className="text-xs font-semibold transition-colors hover:opacity-70" style={{ color: th.navAC }}>
+                  Modifier
+                </button>
+              )}
+            </div>
+            {objectiveEditing ? (
+              <div className="space-y-2">
+                <textarea
+                  value={objectiveDraft}
+                  onChange={e => setObjectiveDraft(e.target.value)}
+                  rows={5}
+                  placeholder="Decris ton objectif professionnel..."
+                  className="w-full rounded-xl px-4 py-3 text-sm g-input resize-none"
+                />
+                {objectiveError && <p className="text-xs" style={{ color: "#F87171" }}>{objectiveError}</p>}
+                <div className="flex items-center gap-2">
+                  <button onClick={saveObjective} disabled={objectiveSaving} className="px-4 py-2 rounded-lg text-xs font-bold transition-all hover:opacity-80 disabled:opacity-50"
+                    style={{ background: "rgba(155,93,229,0.12)", border: "1px solid rgba(155,93,229,0.25)", color: th.navAC }}>
+                    {objectiveSaving ? "Enregistrement..." : "Enregistrer"}
+                  </button>
+                  <button onClick={() => { setObjectiveDraft(currentObjective); setObjectiveEditing(false); setObjectiveError(null); }} disabled={objectiveSaving}
+                    className="px-4 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-70 disabled:opacity-50" style={{ color: th.fg3 }}>
+                    Annuler
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="w-full rounded-xl px-4 py-3 text-sm flex items-center justify-between" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
+                <span style={{ color: currentObjective ? th.fg2 : th.fg3 }}>{currentObjective || "Non renseigne - complete ton objectif ici."}</span>
+              </div>
+            )}
+          </div>
+
           <GCard><div className="p-5 flex items-center justify-between">
             <div>
               <div className="text-sm font-bold mb-0.5" style={{ color: th.fg }}>Thème de l'interface</div>
@@ -135,7 +194,7 @@ export function ProfilePage() {
           </div>
 
           {/* Objectif professionnel */}
-          <div>
+          <div className="hidden">
             <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Objectif professionnel</label>
             <div className="w-full rounded-xl px-4 py-3 text-sm" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg2, lineHeight: 1.7, minHeight: 80 }}>
               {profile.goalFinal || profile.goal || <span style={{ color: th.fg3 }}>Non renseigné — complète ton profil lors de l'onboarding.</span>}

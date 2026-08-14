@@ -9,12 +9,14 @@ interface ProfileContextValue {
   profile: Profile;
   loading: boolean;
   saveOnboarding: (profile: Profile) => Promise<void>;
+  updateProfile: (patch: Partial<Profile>) => Promise<{ error: string | null }>;
 }
 
 const ProfileContext = createContext<ProfileContextValue>({
   profile: EMPTY_PROFILE,
   loading: true,
   saveOnboarding: async () => {},
+  updateProfile: async () => ({ error: "Profil non initialisé" }),
 });
 
 export const useProfile = () => useContext(ProfileContext);
@@ -74,8 +76,43 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     markOnboarded();
   };
 
+  const updateProfile = async (patch: Partial<Profile>) => {
+    if (!user) return { error: "Utilisateur non connecté" };
+
+    const nextProfile = { ...profile, ...patch };
+
+    const profileUpdate =
+      patch.name !== undefined
+        ? supabase.from("profiles").update({ first_name: patch.name }).eq("id", user.id)
+        : Promise.resolve({ error: null });
+
+    const onboardingUpdate =
+      patch.age !== undefined ||
+      patch.profession !== undefined ||
+      patch.goal !== undefined ||
+      patch.goalFinal !== undefined ||
+      patch.style !== undefined ||
+      patch.tutor !== undefined
+        ? supabase.from("student_onboarding").upsert({
+            user_id: user.id,
+            age: nextProfile.age,
+            profession: nextProfile.profession,
+            goal: nextProfile.goal,
+            goal_detail: nextProfile.goalFinal && nextProfile.goalFinal !== nextProfile.goal ? nextProfile.goalFinal : null,
+            learning_style: nextProfile.style,
+            ai_tutor_persona: nextProfile.tutor,
+          })
+        : Promise.resolve({ error: null });
+
+    const [{ error: profileError }, { error: onboardingError }] = await Promise.all([profileUpdate, onboardingUpdate]);
+    const error = profileError?.message ?? onboardingError?.message ?? null;
+
+    if (!error) setProfile(nextProfile);
+    return { error };
+  };
+
   return (
-    <ProfileContext.Provider value={{ profile, loading, saveOnboarding }}>
+    <ProfileContext.Provider value={{ profile, loading, saveOnboarding, updateProfile }}>
       {children}
     </ProfileContext.Provider>
   );
