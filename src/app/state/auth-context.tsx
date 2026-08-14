@@ -4,6 +4,7 @@ import { supabase } from "@/app/lib/supabase/client";
 
 type Role = "admin" | "student";
 type AuthStatus = "loading" | "authenticated" | "unauthenticated";
+const AUTH_INIT_TIMEOUT_MS = 8000;
 
 interface AuthContextValue {
   status: AuthStatus;
@@ -11,7 +12,7 @@ interface AuthContextValue {
   role: Role | null;
   mustOnboard: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
-  signUp: (email: string, password: string) => Promise<{ error: string | null; needsEmailConfirmation: boolean }>;
+  signUp: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   markOnboarded: () => void;
 }
@@ -22,7 +23,7 @@ const AuthContext = createContext<AuthContextValue>({
   role: null,
   mustOnboard: true,
   signIn: async () => ({ error: "Auth non initialisée" }),
-  signUp: async () => ({ error: "Auth non initialisée", needsEmailConfirmation: false }),
+  signUp: async () => ({ error: "Auth non initialisée" }),
   signOut: async () => {},
   markOnboarded: () => {},
 });
@@ -31,10 +32,24 @@ export const useAuth = () => useContext(AuthContext);
 
 function translateAuthError(message: string) {
   if (message.includes("Invalid login credentials")) return "Email ou mot de passe incorrect.";
+  if (message.toLowerCase().includes("email not confirmed")) return "La confirmation email est encore activée dans Supabase.";
   if (message.includes("User already registered")) return "Un compte existe déjà avec cet email.";
   if (message.toLowerCase().includes("password should be at least")) return "Mot de passe trop court (6 caractères minimum).";
   if (message.toLowerCase().includes("unable to validate email")) return "Adresse email invalide.";
   return message;
+}
+
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error("Auth initialization timed out")), timeoutMs);
+  });
+
+  try {
+    return await Promise.race([promise, timeout]);
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+  }
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -43,8 +58,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [mustOnboard, setMustOnboard] = useState(true);
   const [status, setStatus] = useState<AuthStatus>("loading");
 
+  const resetAuthState = () => {
+    setSession(null);
+    setRole(null);
+    setMustOnboard(true);
+    setStatus("unauthenticated");
+  };
+
   const loadProfile = async (userId: string) => {
-    const { data } = await supabase.from("profiles").select("role, must_onboard").eq("id", userId).single();
+    const { data, error } = await supabase.from("profiles").select("role, must_onboard").eq("id", userId).maybeSingle();
+    if (error) {
+      console.warn("Unable to load profile", error);
+    }
     setRole((data?.role as Role) ?? "student");
     setMustOnboard(data?.must_onboard ?? true);
   };
@@ -52,22 +77,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
 
-    supabase.auth.getSession().then(async ({ data }) => {
-      if (cancelled) return;
-      setSession(data.session);
-      if (data.session) await loadProfile(data.session.user.id);
-      if (!cancelled) setStatus(data.session ? "authenticated" : "unauthenticated");
-    });
+    withTimeout(supabase.auth.getSession(), AUTH_INIT_TIMEOUT_MS)
+      .then(async ({ data }) => {
+        if (cancelled) return;
+        setSession(data.session);
+        if (data.session) await loadProfile(data.session.user.id);
+        if (!cancelled) setStatus(data.session ? "authenticated" : "unauthenticated");
+      })
+      .catch(async (error) => {
+        console.warn("Unable to initialize auth session", error);
+        await supabase.auth.signOut().catch(() => {});
+        if (!cancelled) resetAuthState();
+      });
 
-    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
       if (newSession) {
-        await loadProfile(newSession.user.id);
         setStatus("authenticated");
+        setTimeout(() => {
+          void loadProfile(newSession.user.id);
+        }, 0);
       } else {
-        setRole(null);
-        setMustOnboard(true);
-        setStatus("unauthenticated");
+        resetAuthState();
       }
     });
 
@@ -83,9 +114,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signUp: AuthContextValue["signUp"] = async (email, password) => {
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) return { error: translateAuthError(error.message), needsEmailConfirmation: false };
-    return { error: null, needsEmailConfirmation: !data.session };
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) return { error: translateAuthError(error.message) };
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    if (signInError) return { error: translateAuthError(signInError.message) };
+    return { error: null };
   };
 
   const signOut = async () => {

@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useNavigate, Link } from "react-router";
 import {
   ChevronRight, ChevronLeft, Sparkles, CheckCircle,
-  ArrowRight, Wand2, RefreshCw, Mail,
+  ArrowRight, Wand2, RefreshCw,
 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
@@ -32,7 +32,6 @@ export function SignupPage() {
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [accountError, setAccountError] = useState<string | null>(null);
   const [accountLoading, setAccountLoading] = useState(false);
-  const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
 
   const [p, setP] = useState<Profile>({ name: "", age: "", profession: "", goal: "", goalFinal: "", style: "", tutor: "" });
   const [aiState, setAiState] = useState<"idle" | "loading" | "proposal">("idle");
@@ -50,10 +49,9 @@ export function SignupPage() {
     if (password !== passwordConfirm) { setAccountError("Les mots de passe ne correspondent pas."); return; }
     setAccountError(null);
     setAccountLoading(true);
-    const { error, needsEmailConfirmation } = await signUp(email, password);
+    const { error } = await signUp(email, password);
     setAccountLoading(false);
     if (error) { setAccountError(error); return; }
-    if (needsEmailConfirmation) { setAwaitingConfirmation(true); return; }
     setStep(2);
   };
 
@@ -76,26 +74,6 @@ export function SignupPage() {
     navigate("/");
   };
 
-  if (awaitingConfirmation) {
-    return (
-      <div className="relative min-h-screen flex items-center justify-center p-4" style={{ background: th.bg, fontFamily: "'Inter',sans-serif" }}>
-        <Background />
-        <div className="relative z-10 w-full max-w-[480px] fade-up">
-          <div className="flex justify-center mb-10"><Logo h={30} /></div>
-          <GCard glow>
-            <div className="p-8 sm:p-10 text-center">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5" style={{ background: "rgba(155,93,229,0.12)", border: "1px solid rgba(155,93,229,0.25)" }}>
-                <Mail className="w-6 h-6" style={{ color: th.navAC }} />
-              </div>
-              <h1 className="text-xl font-black mb-2" style={{ color: th.fg }}>Confirme ton email</h1>
-              <p className="text-sm mb-6" style={{ color: th.fg3 }}>On t'a envoyé un lien de confirmation à <strong>{email}</strong>. Clique dessus, puis reviens te connecter.</p>
-              <Link to="/login"><VBtn full>Aller à la connexion</VBtn></Link>
-            </div>
-          </GCard>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="relative min-h-screen flex items-center justify-center p-4" style={{ background: th.bg, fontFamily: "'Inter',sans-serif" }}>

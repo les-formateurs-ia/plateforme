@@ -33,21 +33,27 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     setLoading(true);
     (async () => {
-      const [{ data: p }, { data: o }] = await Promise.all([
-        supabase.from("profiles").select("first_name").eq("id", user.id).single(),
-        supabase.from("student_onboarding").select("*").eq("user_id", user.id).maybeSingle(),
-      ]);
-      if (cancelled) return;
-      setProfile({
-        name: p?.first_name ?? "",
-        age: o?.age ?? "",
-        profession: o?.profession ?? "",
-        goal: o?.goal ?? "",
-        goalFinal: o?.goal_detail ?? o?.goal ?? "",
-        style: o?.learning_style ?? "",
-        tutor: o?.ai_tutor_persona ?? "",
-      });
-      setLoading(false);
+      try {
+        const [{ data: p }, { data: o }] = await Promise.all([
+          supabase.from("profiles").select("first_name").eq("id", user.id).maybeSingle(),
+          supabase.from("student_onboarding").select("*").eq("user_id", user.id).maybeSingle(),
+        ]);
+        if (cancelled) return;
+        setProfile({
+          name: p?.first_name ?? "",
+          age: o?.age ?? "",
+          profession: o?.profession ?? "",
+          goal: o?.goal ?? "",
+          goalFinal: o?.goal_detail ?? o?.goal ?? "",
+          style: o?.learning_style ?? "",
+          tutor: o?.ai_tutor_persona ?? "",
+        });
+      } catch (error) {
+        console.warn("Unable to load profile details", error);
+        if (!cancelled) setProfile(EMPTY_PROFILE);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     })();
     return () => { cancelled = true; };
   }, [user]);
