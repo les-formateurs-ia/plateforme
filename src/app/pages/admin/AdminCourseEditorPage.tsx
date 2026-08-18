@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router";
 import {
   ChevronLeft, Plus, Trash2, ChevronUp, ChevronDown,
-  ChevronRight as ChevronRightIcon, GripVertical, UserPlus, X,
+  ChevronRight as ChevronRightIcon, GripVertical, UserPlus, X, ExternalLink,
 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
+import { useAuth } from "@/app/state/auth-context";
 import { supabase } from "@/app/lib/supabase/client";
 import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
@@ -37,12 +38,14 @@ const slugify = (s: string) => s.toLowerCase().trim()
 export function AdminCourseEditorPage() {
   const th = useTh();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { courseId: routeCourseId } = useParams();
   const isNew = !routeCourseId;
 
   const [courseId, setCourseId] = useState<string | undefined>(routeCourseId);
   const [course, setCourse] = useState<CourseForm>(EMPTY_COURSE);
   const [slugTouched, setSlugTouched] = useState(false);
+  const [slugEditing, setSlugEditing] = useState(false);
   const [sections, setSections] = useState<SectionRow[]>([]);
   const [lessonsBySection, setLessonsBySection] = useState<Record<string, LessonRow[]>>({});
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
@@ -125,6 +128,9 @@ export function AdminCourseEditorPage() {
       const { data, error: insertError } = await supabase.from("formations").insert(payload).select("id").single();
       if (insertError || !data) { setError(insertError?.message ?? "Erreur inconnue"); setSaving(false); return; }
       setCourseId(data.id);
+      // Le créateur du cours s'y inscrit automatiquement, comme un élève,
+      // pour pouvoir tester le parcours réel sans compte séparé.
+      if (user) await supabase.from("enrollments").insert({ user_id: user.id, formation_id: data.id });
       navigate(`/admin/courses/${data.id}`, { replace: true });
     }
     setSaving(false);
@@ -202,15 +208,18 @@ export function AdminCourseEditorPage() {
       <GCard glow><div className="p-6 space-y-4">
         <h2 className="text-lg font-black" style={{ color: th.fg }}><GT>{isNew ? "Nouveau cours" : "Informations du cours"}</GT></h2>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Nom</label>
-            <input value={course.name} onChange={(e) => handleNameChange(e.target.value)} placeholder="Maîtriser l'IA Générative" className="w-full rounded-xl px-4 py-3 text-sm g-input" />
-          </div>
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Slug</label>
-            <input value={course.slug} onChange={(e) => { setSlugTouched(true); setCourse((c) => ({ ...c, slug: e.target.value })); }} placeholder="maitriser-ia-generative" className="w-full rounded-xl px-4 py-3 text-sm g-input font-mono" />
-          </div>
+        <div>
+          <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Nom</label>
+          <input value={course.name} onChange={(e) => handleNameChange(e.target.value)} placeholder="Maîtriser l'IA Générative" className="w-full rounded-xl px-4 py-3 text-sm g-input" />
+          {!slugEditing ? (
+            <p className="text-xs mt-1.5" style={{ color: th.fg3 }}>
+              URL : <span className="font-mono">{course.slug || "…"}</span>{" "}
+              <button type="button" onClick={() => setSlugEditing(true)} className="underline hover:opacity-70">modifier</button>
+            </p>
+          ) : (
+            <input value={course.slug} onChange={(e) => { setSlugTouched(true); setCourse((c) => ({ ...c, slug: e.target.value })); }} placeholder="maitriser-ia-generative"
+              className="w-full mt-2 rounded-xl px-4 py-2 text-xs g-input font-mono" />
+          )}
         </div>
 
         <div>
@@ -291,6 +300,10 @@ export function AdminCourseEditorPage() {
                           <div key={lesson.id} className="flex items-center gap-3 px-4 py-2.5" style={{ borderBottom: `1px solid ${th.sep}` }}>
                             <button onClick={() => navigate(`/admin/courses/${courseId}/lessons/${lesson.id}`)} className="flex-1 text-left text-sm hover:opacity-70" style={{ color: th.fg2 }}>{lesson.title}</button>
                             <span className="text-xs font-mono" style={{ color: th.fg3 }}>{lesson.duration_minutes ? `${lesson.duration_minutes} min` : "—"}</span>
+                            <a href={`/lesson/${lesson.id}`} target="_blank" rel="noreferrer" title="Voir la leçon comme un élève" onClick={(e) => e.stopPropagation()}
+                              className="flex items-center gap-1 text-xs font-semibold hover:opacity-70" style={{ color: th.navAC }}>
+                              <ExternalLink className="w-3.5 h-3.5" />Aperçu
+                            </a>
                             <button onClick={() => deleteLesson(section.id, lesson.id)}><Trash2 className="w-3.5 h-3.5" style={{ color: "#F87171" }} /></button>
                           </div>
                         ))}

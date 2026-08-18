@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useLocation, Link } from "react-router";
-import { ChevronLeft, Upload, Video, Plus, Trash2, CheckCircle } from "lucide-react";
+import { ChevronLeft, Upload, Plus, Trash2, CheckCircle, ExternalLink } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { supabase } from "@/app/lib/supabase/client";
 import { GCard } from "@/app/components/common/GCard";
@@ -29,6 +29,7 @@ export function AdminLessonEditorPage() {
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
+  const [slugEditing, setSlugEditing] = useState(false);
   const [durationMinutes, setDurationMinutes] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const [aiContentPrompt, setAiContentPrompt] = useState("");
@@ -168,7 +169,15 @@ export function AdminLessonEditorPage() {
 
   return (
     <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
-      <Link to={`/admin/courses/${courseId}`} className="flex items-center gap-1.5 text-sm w-fit transition-colors hover:opacity-70" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />Cours</Link>
+      <div className="flex items-center justify-between">
+        <Link to={`/admin/courses/${courseId}`} className="flex items-center gap-1.5 text-sm w-fit transition-colors hover:opacity-70" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />Cours</Link>
+        {!isNew && (
+          <a href={`/lesson/${routeLessonId}`} target="_blank" rel="noreferrer" title="Voir la leçon comme un élève"
+            className="flex items-center gap-1.5 text-sm font-semibold hover:opacity-70" style={{ color: th.navAC }}>
+            <ExternalLink className="w-4 h-4" />Aperçu élève
+          </a>
+        )}
+      </div>
 
       <GCard glow><div className="p-6 space-y-4">
         <h2 className="text-lg font-black" style={{ color: th.fg }}><GT>{isNew ? "Nouvelle leçon" : "Éditer la leçon"}</GT></h2>
@@ -177,6 +186,15 @@ export function AdminLessonEditorPage() {
           <div className="col-span-2">
             <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Titre</label>
             <input value={title} onChange={(e) => handleTitleChange(e.target.value)} placeholder="Les bases du prompting" className="w-full rounded-xl px-4 py-3 text-sm g-input" />
+            {!slugEditing ? (
+              <p className="text-xs mt-1.5" style={{ color: th.fg3 }}>
+                Identifiant : <span className="font-mono">{slug || "…"}</span>{" "}
+                <button type="button" onClick={() => setSlugEditing(true)} className="underline hover:opacity-70">modifier</button>
+              </p>
+            ) : (
+              <input value={slug} onChange={(e) => { setSlugTouched(true); setSlug(e.target.value); }}
+                className="w-full mt-2 rounded-xl px-4 py-2 text-xs g-input font-mono" />
+            )}
           </div>
           <div>
             <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Durée (min)</label>
@@ -185,17 +203,9 @@ export function AdminLessonEditorPage() {
         </div>
 
         <div>
-          <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Identifiant</label>
-          <input value={slug} onChange={(e) => { setSlugTouched(true); setSlug(e.target.value); }} className="w-full rounded-xl px-4 py-3 text-sm g-input font-mono" />
-        </div>
-
-        <div>
           <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Vidéo</label>
           {videoUrl && (
-            <div className="mb-2 flex items-center gap-2 text-xs" style={{ color: th.fg2 }}>
-              <Video className="w-4 h-4" style={{ color: th.navAC }} />
-              <span className="truncate">{videoUrl}</span>
-            </div>
+            <video src={videoUrl} controls className="w-full max-w-md rounded-xl mb-3 bg-black" style={{ aspectRatio: "16/9" }} />
           )}
           <input ref={fileInputRef} type="file" accept="video/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])} />
           <button onClick={() => fileInputRef.current?.click()} disabled={uploading}

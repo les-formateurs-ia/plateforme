@@ -1,31 +1,55 @@
-import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router";
+import { toast } from "sonner";
 import {
   ChevronRight, ChevronLeft, Mic, Send,
   Sparkles, MessageSquare, CheckCircle, X,
-  Lightbulb, Pause, Monitor, AlignLeft,
-  Network, RotateCcw, Volume2, Maximize2,
-  Play, Brain, Zap,
+  Lightbulb, Monitor, AlignLeft,
+  Network, RotateCcw, Play, Brain, Zap, Clock, PartyPopper,
 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
+import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
+import { useCourseProgress } from "@/app/state/useCourseProgress";
 import { Background } from "@/app/components/common/Background";
 import { GCard } from "@/app/components/common/GCard";
 import { VBtn } from "@/app/components/common/Buttons";
 import { cx } from "@/app/lib/cx";
-import { QUIZ_Q, AI_RESPONSES, DEFAULT_AI } from "@/app/data/mock";
+import { AI_RESPONSES, DEFAULT_AI } from "@/app/data/mock";
 import type { ChatMsg } from "@/app/types";
+import {
+  getLessonDetail, ensureLessonStarted, addTimeSpent, submitQuiz, flattenLessons, QUIZ_PASS_THRESHOLD,
+  type LessonDetail, type QuizAnswer,
+} from "@/app/lib/learning";
 
 export function LessonPage() {
   const th = useTh();
   const { profile } = useProfile();
+  const { user, role } = useAuth();
   const navigate = useNavigate();
-  const goBack = () => navigate("/");
+  const { lessonId } = useParams<{ lessonId: string }>();
+  const goBack = () => navigate("/lessons");
+
   type LTab = "video" | "transcript" | "mindmap";
   const [tab, setTab] = useState<LTab>("video");
-  const [playing, setPlaying] = useState(false);
-  const [quizSel, setQuizSel] = useState<number | null>(null);
-  const [showExpl, setShowExpl] = useState(false);
+
+  const [lesson, setLesson] = useState<LessonDetail | null>(null);
+  const [lessonLoading, setLessonLoading] = useState(true);
+  const [lessonError, setLessonError] = useState<string | null>(null);
+  const [access, setAccess] = useState<"checking" | "granted" | "denied">("checking");
+  // Scopé à la formation de CETTE leçon (pas "la formation active" de l'utilisateur) —
+  // sinon un admin/élève inscrit à plusieurs cours resterait bloqué sur une leçon
+  // d'un cours différent de celui utilisé pour calculer sa progression "active".
+  const course = useCourseProgress(lesson?.formationId);
+
+  const [quizStep, setQuizStep] = useState(0);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [answers, setAnswers] = useState<QuizAnswer[]>([]);
+  const [quizResult, setQuizResult] = useState<{ score: number; passed: boolean } | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [retaking, setRetaking] = useState(false);
+
+  // Copilote : réponses temporaires par mots-clés en attendant l'intégration de Claude.
   const [msgs, setMsgs] = useState<ChatMsg[]>([{ role: "ai", text: DEFAULT_AI }]);
   const [chatIn, setChatIn] = useState("");
   const [typing, setTyping] = useState(false);
@@ -37,33 +61,170 @@ export function LessonPage() {
 
   const sendMsg = (text: string) => {
     if (!text.trim()) return;
-    setMsgs(m => [...m, { role: "user", text: text.trim() }]);
+    setMsgs((m) => [...m, { role: "user", text: text.trim() }]);
     setChatIn(""); setTyping(true);
-    setTimeout(() => { const lc = text.toLowerCase(); const hit = AI_RESPONSES.find(r => r.kw.some(k => lc.includes(k))); setTyping(false); setMsgs(m => [...m, { role: "ai", text: hit?.text ?? DEFAULT_AI }]); }, 900);
+    setTimeout(() => {
+      const lc = text.toLowerCase();
+      const hit = AI_RESPONSES.find((r) => r.kw.some((k) => lc.includes(k)));
+      setTyping(false);
+      setMsgs((m) => [...m, { role: "ai", text: hit?.text ?? DEFAULT_AI }]);
+    }, 900);
   };
+
+  useEffect(() => {
+    if (!lessonId) return;
+    let cancelled = false;
+    (async () => {
+      setLessonLoading(true);
+      setLessonError(null);
+      setQuizStep(0); setSelected(null); setAnswers([]); setQuizResult(null); setRetaking(false); setTab("video");
+      try {
+        const detail = await getLessonDetail(lessonId);
+        if (cancelled) return;
+        if (!detail) { setLessonError("Cette leçon est introuvable."); return; }
+        setLesson(detail);
+      } catch (err) {
+        console.error(err);
+        if (!cancelled) setLessonError("Impossible de charger cette leçon.");
+      } finally {
+        if (!cancelled) setLessonLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [lessonId]);
+
+  // Vérifie que la leçon est déverrouillée (élève arrivé dans l'ordre) une fois la progression connue.
+  // Un admin peut toujours prévisualiser n'importe quelle leçon (pas de verrouillage
+  // par ordre) — il a besoin de tester son contenu sans suivre le parcours élève.
+  useEffect(() => {
+    if (!lessonId || course.loading || !user) return;
+    const state = course.lessonStates.find((s) => s.lesson.id === lessonId);
+    if (!state) {
+      if (role === "admin") setAccess("granted");
+      return;
+    }
+    if (state.state === "locked" && role !== "admin") {
+      setAccess("denied");
+      toast.error("Cette leçon n'est pas encore débloquée — termine les précédentes d'abord.");
+      navigate("/lessons", { replace: true });
+      return;
+    }
+    setAccess("granted");
+    if (state.state === "available") {
+      void ensureLessonStarted(user.id, lessonId);
+    }
+  }, [lessonId, course.loading, course.lessonStates, user, role, navigate]);
+
+  // Cumule le temps passé sur la leçon toutes les 30s + au démontage.
+  const elapsedRef = useRef(0);
+  const lastTickRef = useRef(Date.now());
+  useEffect(() => {
+    if (!user || !lessonId || access !== "granted") return;
+    lastTickRef.current = Date.now();
+    const flush = () => {
+      const now = Date.now();
+      elapsedRef.current += (now - lastTickRef.current) / 1000;
+      lastTickRef.current = now;
+      if (elapsedRef.current >= 1) {
+        const toSend = Math.round(elapsedRef.current);
+        elapsedRef.current = 0;
+        void addTimeSpent(user.id, lessonId, toSend);
+      }
+    };
+    const interval = setInterval(flush, 30000);
+    return () => { clearInterval(interval); flush(); };
+  }, [user, lessonId, access]);
+
+  const currentQuestion = lesson?.questions[quizStep] ?? null;
+  const isLastQuestion = lesson ? quizStep === lesson.questions.length - 1 : true;
+
+  const selectOption = (optionId: string) => {
+    if (selected !== null) return;
+    setSelected(optionId);
+  };
+
+  const finishQuiz = async (finalAnswers: QuizAnswer[]) => {
+    if (!user || !lessonId) return;
+    setSubmitting(true);
+    try {
+      const result = await submitQuiz(user.id, lessonId, finalAnswers);
+      setQuizResult(result);
+      if (result.passed) {
+        toast.success(`Quiz validé — ${result.score}% de bonnes réponses !`);
+        course.refresh();
+      } else {
+        toast.error(`Score : ${result.score}% — il faut ${QUIZ_PASS_THRESHOLD}% pour valider.`);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Impossible d'enregistrer ce quiz. Réessayez.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const nextQuestionOrFinish = () => {
+    if (!currentQuestion || selected === null) return;
+    const option = currentQuestion.options.find((o) => o.id === selected);
+    const answer: QuizAnswer = { questionId: currentQuestion.id, selectedOptionId: selected, correct: !!option?.isCorrect };
+    const nextAnswers = [...answers, answer];
+    setAnswers(nextAnswers);
+    setSelected(null);
+    if (isLastQuestion) void finishQuiz(nextAnswers);
+    else setQuizStep((s) => s + 1);
+  };
+
+  const retryQuiz = () => { setQuizStep(0); setSelected(null); setAnswers([]); setQuizResult(null); setRetaking(true); };
+
+  const orderedLessons = course.outline ? flattenLessons(course.outline) : [];
+  const currentIndex = orderedLessons.findIndex((l) => l.id === lessonId);
+  const nextLesson = currentIndex >= 0 ? orderedLessons[currentIndex + 1] : undefined;
+  const currentLessonState = course.lessonStates.find((s) => s.lesson.id === lessonId);
+  const isCompleted = currentLessonState?.state === "completed" || !!quizResult?.passed;
+
+  const totalLessons = course.lessonStates.length;
+  const completedCount = course.lessonStates.filter((s) => s.state === "completed").length;
+  const overallPct = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
 
   const TABS: { id: LTab; Icon: typeof Monitor; label: string }[] = [
     { id: "video", Icon: Monitor, label: "Vidéo" }, { id: "transcript", Icon: AlignLeft, label: "Transcription" }, { id: "mindmap", Icon: Network, label: "Mindmap" },
   ];
+
+  if (lessonLoading || access === "checking") {
+    return (
+      <div className="flex h-screen items-center justify-center" style={{ background: th.bg }}>
+        <span className="text-sm" style={{ color: th.fg3 }}>Chargement de la leçon…</span>
+      </div>
+    );
+  }
+
+  if (lessonError || !lesson) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center gap-3" style={{ background: th.bg }}>
+        <span className="text-sm text-red-400">{lessonError ?? "Leçon introuvable."}</span>
+        <VBtn onClick={goBack}>Retour aux leçons</VBtn>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen overflow-hidden" style={{ background: th.bg, fontFamily: "'Inter',sans-serif" }}>
       <Background />
       <div className="relative z-10 shrink-0 flex items-center justify-between px-6 py-3" style={{ borderBottom: `1px solid ${th.sep}`, background: th.topbar, backdropFilter: "blur(24px)" }}>
         <div className="flex items-center gap-4">
-          <button onClick={goBack} className="flex items-center gap-1.5 text-sm transition-colors hover:opacity-70" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />Dashboard</button>
+          <button onClick={goBack} className="flex items-center gap-1.5 text-sm transition-colors hover:opacity-70" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />Mes leçons</button>
           <div className="w-px h-4" style={{ background: th.sep }} />
-          <span className="text-xs" style={{ color: th.fg3 }}>Module 2</span><span className="text-xs mx-1" style={{ color: th.fg3 }}>›</span><span className="text-xs font-medium" style={{ color: th.fg }}>Maîtriser le Prompt Engineering</span>
+          <span className="text-xs" style={{ color: th.fg3 }}>{lesson.sectionTitle}</span><span className="text-xs mx-1" style={{ color: th.fg3 }}>›</span><span className="text-xs font-medium" style={{ color: th.fg }}>{lesson.title}</span>
         </div>
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex items-center gap-2 text-xs" style={{ color: th.fg3 }}>
             Progression
             <div className="w-28 h-1.5 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.07)" : "rgba(155,93,229,0.1)" }}>
-              <div className="h-full rounded-full" style={{ width: "64%", background: "linear-gradient(90deg,#7C3AED,#DDAEEA)" }} />
+              <div className="h-full rounded-full" style={{ width: `${overallPct}%`, background: "linear-gradient(90deg,#7C3AED,#DDAEEA)" }} />
             </div>
-            <span className="font-bold" style={{ color: th.navAC }}>64%</span>
+            <span className="font-bold" style={{ color: th.navAC }}>{overallPct}%</span>
           </div>
-          <VBtn sm>Leçon suivante <ChevronRight className="inline w-4 h-4" /></VBtn>
+          {isCompleted && nextLesson && <VBtn sm onClick={() => navigate(`/lesson/${nextLesson.id}`)}>Leçon suivante <ChevronRight className="inline w-4 h-4" /></VBtn>}
         </div>
       </div>
 
@@ -71,38 +232,39 @@ export function LessonPage() {
         <div className="flex-1 min-w-0 overflow-y-auto">
           <div className="relative" style={{ paddingBottom: "40%", background: "#060410" }}>
             <div className="absolute inset-0 overflow-hidden">
-              <div className="absolute inset-0" style={{ background: "linear-gradient(135deg,#0d0522,#1a0b3c 45%,#08060F)" }} />
-              <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 28% 55%,rgba(155,93,229,0.25),transparent 55%)" }} />
-              {tab === "video" && <div className="absolute inset-0 flex items-center justify-center"><button onClick={() => setPlaying(p => !p)} className="w-16 h-16 rounded-full flex items-center justify-center border border-white/15 hover:scale-110 transition-transform" style={{ background: "rgba(255,255,255,0.08)", backdropFilter: "blur(20px)", boxShadow: "0 0 40px rgba(155,93,229,0.3)" }}>{playing ? <Pause className="w-6 h-6 text-white" /> : <Play className="w-6 h-6 text-white ml-1" />}</button></div>}
+              {tab === "video" && lesson.videoUrl && (
+                <video src={lesson.videoUrl} controls className="absolute inset-0 w-full h-full bg-black" />
+              )}
+              {tab === "video" && !lesson.videoUrl && (
+                <>
+                  <div className="absolute inset-0" style={{ background: "linear-gradient(135deg,#0d0522,#1a0b3c 45%,#08060F)" }} />
+                  <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 28% 55%,rgba(155,93,229,0.25),transparent 55%)" }} />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center border border-white/15" style={{ background: "rgba(255,255,255,0.08)", backdropFilter: "blur(20px)" }}>
+                      <Play className="w-6 h-6 text-white ml-1" />
+                    </div>
+                    <span className="text-xs text-white/40">Vidéo pas encore ajoutée pour cette leçon</span>
+                  </div>
+                </>
+              )}
               {tab === "transcript" && (
-                <div className="absolute inset-0 overflow-y-auto p-6" style={{ background: "rgba(8,6,15,0.8)", backdropFilter: "blur(8px)" }}>
-                  <div className="max-w-xl mx-auto space-y-3">
-                    {[{ t: "00:00", txt: "Introduction au prompt engineering et à la formule fondamentale.", hi: false }, { t: "01:24", txt: "Rôle + Contexte + Tâche + Format — ce framework peut tripler la qualité de vos résultats.", hi: true }, { t: "03:52", txt: "Exemple : 'Tu es expert en vente SaaS. Rédige un email de 120 mots pour relancer un prospect…'", hi: false }, { t: "07:10", txt: "La température contrôle la créativité. Basse = précision, haute = créativité.", hi: true }].map(({ t, txt, hi }) => (
-                      <div key={t} className={cx("flex gap-3 p-3 rounded-xl", hi && "border")} style={hi ? { background: "rgba(155,93,229,0.07)", borderColor: "rgba(155,93,229,0.2)" } : {}}>
-                        <span className="text-[10px] text-white/30 font-mono shrink-0 pt-0.5">{t}</span>
-                        <p className={cx("text-sm leading-relaxed", hi ? "text-white/80" : "text-white/40")}>{txt}</p>
-                        {hi && <Lightbulb className="w-3.5 h-3.5 text-violet-400/50 shrink-0 mt-0.5" />}
-                      </div>
-                    ))}
+                <div className="absolute inset-0 flex items-center justify-center p-6" style={{ background: "linear-gradient(135deg,#0d0522,#1a0b3c 45%,#08060F)" }}>
+                  <div className="text-center max-w-sm">
+                    <AlignLeft className="w-6 h-6 mx-auto mb-2 text-white/30" />
+                    <p className="text-sm text-white/60">Transcription générée par IA</p>
+                    <p className="text-xs text-white/30 mt-1">Bientôt disponible — en attente de l'activation du moteur IA.</p>
                   </div>
                 </div>
               )}
               {tab === "mindmap" && (
-                <div className="absolute inset-0 flex items-center justify-center p-6" style={{ background: "rgba(8,6,15,0.8)", backdropFilter: "blur(8px)" }}>
-                  <svg viewBox="0 0 520 300" className="w-full max-w-xl">
-                    <ellipse cx="260" cy="150" rx="78" ry="34" fill="rgba(155,93,229,0.15)" stroke="rgba(221,174,234,0.6)" strokeWidth="1.5" />
-                    <text x="260" y="155" textAnchor="middle" fill="#DDAEEA" fontSize="11" fontWeight="800">Prompt Engineering</text>
-                    {[{ cx: 80, cy: 75, label: "Rôle", color: "#60A5FA", lx: 185, ly: 127 }, { cx: 80, cy: 225, label: "Contexte", color: "#4ADE80", lx: 187, ly: 170 }, { cx: 440, cy: 75, label: "Tâche", color: "#F59E0B", lx: 333, ly: 127 }, { cx: 440, cy: 225, label: "Format", color: "#F472B6", lx: 335, ly: 170 }].map(({ cx: ccx, cy, label, color, lx, ly }) => (
-                      <g key={label}><line x1={lx} y1={ly} x2={ccx} y2={cy} stroke={color} strokeWidth="1" strokeOpacity="0.35" strokeDasharray="4 3" /><ellipse cx={ccx} cy={cy} rx="48" ry="24" fill={`${color}15`} stroke={color} strokeWidth="1" strokeOpacity="0.55" /><text x={ccx} y={cy + 4} textAnchor="middle" fill={color} fontSize="10" fontWeight="700">{label}</text></g>
-                    ))}
-                  </svg>
+                <div className="absolute inset-0 flex items-center justify-center p-6" style={{ background: "linear-gradient(135deg,#0d0522,#1a0b3c 45%,#08060F)" }}>
+                  <div className="text-center max-w-sm">
+                    <Network className="w-6 h-6 mx-auto mb-2 text-white/30" />
+                    <p className="text-sm text-white/60">Mindmap générée par IA</p>
+                    <p className="text-xs text-white/30 mt-1">Bientôt disponible — en attente de l'activation du moteur IA.</p>
+                  </div>
                 </div>
               )}
-              <div className="absolute bottom-0 left-0 right-0 px-5 pb-4" style={{ background: "linear-gradient(to top,rgba(8,6,15,0.9),transparent)" }}>
-                <div className="flex items-center justify-between mb-2"><span className="text-xs text-white/40">Maîtriser le Prompt Engineering</span><div className="flex items-center gap-3 text-white/40">{[Volume2, Maximize2].map((Icon, i) => <button key={i}><Icon className="w-4 h-4" /></button>)}</div></div>
-                <div className="h-1 rounded-full cursor-pointer overflow-hidden mb-1" style={{ background: "rgba(255,255,255,0.1)" }}><div className="h-full rounded-full" style={{ width: "38%", background: "linear-gradient(90deg,#7C3AED,#DDAEEA)" }} /></div>
-                <div className="flex justify-between text-[10px] text-white/25 font-mono"><span>8:47</span><span>23:00</span></div>
-              </div>
             </div>
           </div>
 
@@ -113,36 +275,88 @@ export function LessonPage() {
                 <Icon className="w-3.5 h-3.5" />{label}
               </button>
             ))}
+            {lesson.durationMinutes && (
+              <span className="ml-auto flex items-center gap-1.5 px-5 text-xs" style={{ color: th.fg3 }}><Clock className="w-3.5 h-3.5" />{lesson.durationMinutes} min</span>
+            )}
           </div>
 
           <div className="p-6 space-y-5">
             <GCard><div className="p-5">
               <div className="flex items-center gap-2.5 mb-4">
                 <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "rgba(155,93,229,0.1)", border: "1px solid rgba(155,93,229,0.2)" }}><Brain className="w-4 h-4" style={{ color: th.navAC }} /></div>
-                <span className="text-sm font-black" style={{ color: th.fg }}>Quiz Adaptatif IA</span>
-                <span className="ml-auto text-[10px] font-bold px-2.5 py-1 rounded-full" style={{ background: "rgba(155,93,229,0.06)", color: th.navAC, border: "1px solid rgba(155,93,229,0.15)" }}>Généré en direct</span>
+                <span className="text-sm font-black" style={{ color: th.fg }}>Quiz de la leçon</span>
+                {lesson.questions.length > 0 && !quizResult && (retaking || currentLessonState?.state !== "completed") && (
+                  <span className="ml-auto text-[10px] font-bold px-2.5 py-1 rounded-full" style={{ background: "rgba(155,93,229,0.06)", color: th.navAC, border: "1px solid rgba(155,93,229,0.15)" }}>
+                    Question {quizStep + 1}/{lesson.questions.length}
+                  </span>
+                )}
               </div>
-              <p className="text-sm font-semibold mb-4" style={{ color: th.fg }}>{QUIZ_Q.question}</p>
-              <div className="space-y-2 mb-4">
-                {QUIZ_Q.options.map((opt, i) => {
-                  let bg = th.isDark ? "rgba(255,255,255,0.03)" : th.inputBg, border = th.inputB, color = th.fg2;
-                  if (quizSel !== null) { if (i === QUIZ_Q.correct) { bg = "rgba(74,222,128,0.1)"; border = "rgba(74,222,128,0.35)"; color = "#4ADE80"; } else if (i === quizSel) { bg = "rgba(248,113,113,0.1)"; border = "rgba(248,113,113,0.35)"; color = "#F87171"; } else { bg = "transparent"; border = th.sep; color = th.fg3; } }
-                  return (
-                    <button key={i} onClick={() => { if (quizSel === null) { setQuizSel(i); setShowExpl(true); } }}
-                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-left transition-all"
-                      style={{ background: bg, border: `1px solid ${border}`, color }}>
-                      <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(155,93,229,0.06)" }}>
-                        {quizSel !== null && i === QUIZ_Q.correct ? <CheckCircle className="w-4 h-4 text-green-400" /> : quizSel !== null && i === quizSel ? <X className="w-4 h-4 text-red-400" /> : String.fromCharCode(65 + i)}
-                      </span>{opt}
-                    </button>
-                  );
-                })}
-              </div>
-              {showExpl && <div className="rounded-xl p-4" style={{ background: "rgba(96,165,250,0.07)", border: "1px solid rgba(96,165,250,0.2)" }}>
-                <div className="flex items-center gap-1.5 mb-2 text-xs font-bold text-blue-400"><Lightbulb className="w-3.5 h-3.5" />Explication IA</div>
-                <p className="text-xs leading-relaxed" style={{ color: th.fg2 }}>{QUIZ_Q.explanation}</p>
-                <button onClick={() => { setQuizSel(null); setShowExpl(false); }} className="mt-3 flex items-center gap-1.5 text-xs font-semibold transition-opacity hover:opacity-70" style={{ color: th.navAC }}><RotateCcw className="w-3 h-3" />Nouvelle question</button>
-              </div>}
+
+              {lesson.questions.length === 0 && (
+                <p className="text-sm" style={{ color: th.fg3 }}>Aucun quiz n'a encore été configuré pour cette leçon.</p>
+              )}
+
+              {lesson.questions.length > 0 && !quizResult && !retaking && currentLessonState?.state === "completed" && (
+                <div className="rounded-xl p-5 text-center" style={{ background: "rgba(74,222,128,0.08)", border: "1px solid rgba(74,222,128,0.3)" }}>
+                  <CheckCircle className="w-6 h-6 mx-auto mb-2 text-green-400" />
+                  <p className="text-sm font-semibold mb-1" style={{ color: "#4ADE80" }}>Leçon déjà validée</p>
+                  <p className="text-xs mb-4" style={{ color: th.fg3 }}>
+                    {currentLessonState.progress?.bestQuizScore != null ? `Meilleur score : ${currentLessonState.progress.bestQuizScore}%` : ""}
+                  </p>
+                  <VBtn onClick={() => setRetaking(true)} sm><span className="flex items-center gap-2"><RotateCcw className="w-3.5 h-3.5" />Refaire le quiz</span></VBtn>
+                </div>
+              )}
+
+              {lesson.questions.length > 0 && quizResult && (
+                <div className="rounded-xl p-5 text-center" style={{ background: quizResult.passed ? "rgba(74,222,128,0.08)" : "rgba(248,113,113,0.08)", border: `1px solid ${quizResult.passed ? "rgba(74,222,128,0.3)" : "rgba(248,113,113,0.3)"}` }}>
+                  {quizResult.passed ? <PartyPopper className="w-6 h-6 mx-auto mb-2 text-green-400" /> : <X className="w-6 h-6 mx-auto mb-2 text-red-400" />}
+                  <p className="text-lg font-black mb-1" style={{ color: quizResult.passed ? "#4ADE80" : "#F87171" }}>{quizResult.score}%</p>
+                  <p className="text-xs mb-4" style={{ color: th.fg3 }}>
+                    {quizResult.passed ? "Leçon validée — bravo !" : `Il faut au moins ${QUIZ_PASS_THRESHOLD}% pour valider cette leçon.`}
+                  </p>
+                  {quizResult.passed
+                    ? nextLesson && <VBtn onClick={() => navigate(`/lesson/${nextLesson.id}`)} sm><span className="flex items-center gap-2">Leçon suivante<ChevronRight className="w-3.5 h-3.5" /></span></VBtn>
+                    : <VBtn onClick={retryQuiz} sm><span className="flex items-center gap-2"><RotateCcw className="w-3.5 h-3.5" />Réessayer le quiz</span></VBtn>}
+                </div>
+              )}
+
+              {lesson.questions.length > 0 && !quizResult && currentQuestion && (retaking || currentLessonState?.state !== "completed") && (
+                <>
+                  <p className="text-sm font-semibold mb-4" style={{ color: th.fg }}>{currentQuestion.question}</p>
+                  <div className="space-y-2 mb-4">
+                    {currentQuestion.options.map((opt, i) => {
+                      let bg = th.isDark ? "rgba(255,255,255,0.03)" : th.inputBg, border = th.inputB, color = th.fg2;
+                      if (selected !== null) {
+                        if (opt.isCorrect) { bg = "rgba(74,222,128,0.1)"; border = "rgba(74,222,128,0.35)"; color = "#4ADE80"; }
+                        else if (opt.id === selected) { bg = "rgba(248,113,113,0.1)"; border = "rgba(248,113,113,0.35)"; color = "#F87171"; }
+                        else { bg = "transparent"; border = th.sep; color = th.fg3; }
+                      }
+                      return (
+                        <button key={opt.id} onClick={() => selectOption(opt.id)}
+                          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-left transition-all"
+                          style={{ background: bg, border: `1px solid ${border}`, color }}>
+                          <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(155,93,229,0.06)" }}>
+                            {selected !== null && opt.isCorrect ? <CheckCircle className="w-4 h-4 text-green-400" /> : selected !== null && opt.id === selected ? <X className="w-4 h-4 text-red-400" /> : String.fromCharCode(65 + i)}
+                          </span>{opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {selected !== null && (
+                    <div className="rounded-xl p-4" style={{ background: "rgba(96,165,250,0.07)", border: "1px solid rgba(96,165,250,0.2)" }}>
+                      {currentQuestion.explanation && (
+                        <>
+                          <div className="flex items-center gap-1.5 mb-2 text-xs font-bold text-blue-400"><Lightbulb className="w-3.5 h-3.5" />Explication</div>
+                          <p className="text-xs leading-relaxed mb-3" style={{ color: th.fg2 }}>{currentQuestion.explanation}</p>
+                        </>
+                      )}
+                      <VBtn onClick={nextQuestionOrFinish} sm disabled={submitting}>
+                        {submitting ? "Envoi…" : isLastQuestion ? "Valider le quiz" : "Question suivante"}
+                      </VBtn>
+                    </div>
+                  )}
+                </>
+              )}
             </div></GCard>
           </div>
         </div>
@@ -152,8 +366,8 @@ export function LessonPage() {
           <div className="shrink-0 px-4 py-4" style={{ borderBottom: `1px solid ${th.sep}` }}>
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg,#9B5DE5,#DDAEEA)" }}><Sparkles className="w-4 h-4" style={{ color: "#08060F" }} /></div>
-              <div><div className="text-sm font-black" style={{ color: th.fg }}>Copilote IA</div><div className="text-[10px]" style={{ color: th.fg3 }}>Tuteur activé</div></div>
-              <div className="ml-auto flex items-center gap-1.5 text-[10px] text-green-500 font-bold"><div className="w-1.5 h-1.5 rounded-full bg-green-500" style={{ animation: "dot-blink 2s ease-in-out infinite" }} />En ligne</div>
+              <div><div className="text-sm font-black" style={{ color: th.fg }}>Copilote IA</div><div className="text-[10px]" style={{ color: th.fg3 }}>Réponses de démonstration</div></div>
+              <div className="ml-auto flex items-center gap-1.5 text-[10px] font-bold" style={{ color: th.fg3 }}>Bêta</div>
             </div>
             <div className="rounded-xl px-3 py-2.5" style={{ background: "rgba(155,93,229,0.07)", border: "1px solid rgba(155,93,229,0.15)" }}>
               <p className="text-[11px] leading-relaxed" style={{ color: th.navAC }}>💡 <strong>Pour {firstName} :</strong> Chaque concept → applique-le immédiatement en pratique.</p>

@@ -11,6 +11,10 @@ interface AuthContextValue {
   user: User | null;
   role: Role | null;
   mustOnboard: boolean;
+  // true tant que le profil (role/must_onboard) n'a pas encore été chargé pour la
+  // session courante — tant que c'est vrai, `mustOnboard` peut encore valoir sa
+  // valeur par défaut et ne doit pas servir à décider d'une redirection.
+  profileLoading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signUp: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
@@ -22,6 +26,7 @@ const AuthContext = createContext<AuthContextValue>({
   user: null,
   role: null,
   mustOnboard: true,
+  profileLoading: true,
   signIn: async () => ({ error: "Auth non initialisée" }),
   signUp: async () => ({ error: "Auth non initialisée" }),
   signOut: async () => {},
@@ -43,12 +48,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<Role | null>(null);
   const [mustOnboard, setMustOnboard] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(true);
   const [status, setStatus] = useState<AuthStatus>("loading");
 
   const resetAuthState = () => {
     setSession(null);
     setRole(null);
     setMustOnboard(true);
+    setProfileLoading(true);
     setStatus("unauthenticated");
   };
 
@@ -59,6 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     setRole((data?.role as Role) ?? "student");
     setMustOnboard(data?.must_onboard ?? true);
+    setProfileLoading(false);
   };
 
   useEffect(() => {
@@ -79,6 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(newSession);
       if (newSession) {
         setStatus("authenticated");
+        setProfileLoading(true);
         // Deferred: Supabase warns against awaiting inside this callback directly.
         setTimeout(() => {
           void loadProfile(newSession.user.id);
@@ -114,7 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const markOnboarded = () => setMustOnboard(false);
 
   return (
-    <AuthContext.Provider value={{ status, user: session?.user ?? null, role, mustOnboard, signIn, signUp, signOut, markOnboarded }}>
+    <AuthContext.Provider value={{ status, user: session?.user ?? null, role, mustOnboard, profileLoading, signIn, signUp, signOut, markOnboarded }}>
       {children}
     </AuthContext.Provider>
   );

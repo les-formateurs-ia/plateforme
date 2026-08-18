@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 import { ThemeProvider, useTh } from "@/app/theme/theme";
 import { AuthProvider, useAuth } from "@/app/state/auth-context";
 import { ProfileProvider } from "@/app/state/profile-context";
+import { Toaster } from "@/app/components/ui/sonner";
 import { Background } from "@/app/components/common/Background";
 import { MainLayout } from "@/app/components/layout/MainLayout";
 import { LoginPage } from "@/app/pages/auth/LoginPage";
@@ -29,18 +30,23 @@ function LoadingScreen() {
 }
 
 // Accès à l'app : session valide + onboarding terminé, sinon renvoie vers /login ou /signup.
+// On attend que le profil soit chargé avant de décider quoi que ce soit sur mustOnboard —
+// sinon sa valeur par défaut (true) provoque un aller-retour visible vers /signup au
+// rechargement d'une page profonde (ex: /lessons, /lesson/:id).
 function RequireAuth({ children }: { children: ReactElement }) {
-  const { status, mustOnboard } = useAuth();
+  const { status, mustOnboard, profileLoading } = useAuth();
   if (status === "loading") return <LoadingScreen />;
   if (status === "unauthenticated") return <Navigate to="/login" replace />;
+  if (profileLoading) return <LoadingScreen />;
   if (mustOnboard) return <Navigate to="/signup" replace />;
   return children;
 }
 
 // /login : inutile si déjà connecté et onboardé.
 function RedirectIfAuthenticated({ children }: { children: ReactElement }) {
-  const { status, mustOnboard } = useAuth();
+  const { status, mustOnboard, profileLoading } = useAuth();
   if (status === "loading") return <LoadingScreen />;
+  if (status === "authenticated" && profileLoading) return <LoadingScreen />;
   if (status === "authenticated" && !mustOnboard) return <Navigate to="/" replace />;
   return children;
 }
@@ -48,8 +54,9 @@ function RedirectIfAuthenticated({ children }: { children: ReactElement }) {
 // /signup : reste accessible tant que l'onboarding n'est pas terminé (reprise possible),
 // mais inutile si le compte est déjà complet.
 function SignupGuard({ children }: { children: ReactElement }) {
-  const { status, mustOnboard } = useAuth();
+  const { status, mustOnboard, profileLoading } = useAuth();
   if (status === "loading") return <LoadingScreen />;
+  if (status === "authenticated" && profileLoading) return <LoadingScreen />;
   if (status === "authenticated" && !mustOnboard) return <Navigate to="/" replace />;
   return children;
 }
@@ -96,6 +103,7 @@ export default function App() {
           <BrowserRouter>
             <AppRoutes />
           </BrowserRouter>
+          <Toaster />
         </ProfileProvider>
       </AuthProvider>
     </ThemeProvider>
