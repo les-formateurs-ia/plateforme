@@ -32,6 +32,7 @@ export function AdminLessonEditorPage() {
   const [slugEditing, setSlugEditing] = useState(false);
   const [durationMinutes, setDurationMinutes] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
+  const [referenceContent, setReferenceContent] = useState("");
   const [aiContentPrompt, setAiContentPrompt] = useState("");
   const [practicalExercisePrompt, setPracticalExercisePrompt] = useState("");
   const [questions, setQuestions] = useState<QuizQuestionDraft[]>([]);
@@ -54,6 +55,7 @@ export function AdminLessonEditorPage() {
       setSlugTouched(true);
       setDurationMinutes(lesson.duration_minutes?.toString() ?? "");
       setVideoUrl(lesson.video_url ?? "");
+      setReferenceContent(lesson.reference_content ?? "");
       setAiContentPrompt(lesson.ai_content_prompt ?? "");
       setPracticalExercisePrompt(lesson.practical_exercise_prompt ?? "");
 
@@ -123,6 +125,7 @@ export function AdminLessonEditorPage() {
       duration_minutes: durationMinutes ? parseInt(durationMinutes, 10) : null,
       video_provider: "external_url" as const,
       video_url: videoUrl || null,
+      reference_content: referenceContent || null,
       ai_content_prompt: aiContentPrompt || null,
       practical_exercise_prompt: practicalExercisePrompt || null,
     };
@@ -200,6 +203,13 @@ export function AdminLessonEditorPage() {
             <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Durée (min)</label>
             <input type="number" value={durationMinutes} onChange={(e) => setDurationMinutes(e.target.value)} className="w-full rounded-xl px-4 py-3 text-sm g-input" />
           </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Contenu du cours (texte de référence, Markdown)</label>
+          <textarea value={referenceContent} onChange={(e) => setReferenceContent(e.target.value)} rows={14}
+            className="w-full rounded-xl px-4 py-3 text-sm g-input resize-y font-mono" placeholder="## Objectif&#10;&#10;...&#10;&#10;### Théorie&#10;..." />
+          <p className="text-xs mt-1.5" style={{ color: th.fg3 }}>Contenu fixe affiché à tous les élèves — sert de base à la personnalisation IA (Étape 2).</p>
         </div>
 
         <div>

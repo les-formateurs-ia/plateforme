@@ -193,6 +193,7 @@ export interface LessonDetail {
   videoUrl: string | null;
   aiContentPrompt: string | null;
   practicalExercisePrompt: string | null;
+  referenceContent: string | null;
   sectionTitle: string;
   formationId: string;
   formationName: string;
@@ -202,7 +203,7 @@ export interface LessonDetail {
 export async function getLessonDetail(lessonId: string): Promise<LessonDetail | null> {
   const { data: lesson, error: lessonError } = await supabase
     .from("lessons")
-    .select("id, section_id, slug, title, video_provider, video_url, duration_minutes, ai_content_prompt, practical_exercise_prompt")
+    .select("id, section_id, slug, title, video_provider, video_url, duration_minutes, ai_content_prompt, practical_exercise_prompt, reference_content")
     .eq("id", lessonId)
     .maybeSingle();
   if (lessonError) throw lessonError;
@@ -248,6 +249,7 @@ export async function getLessonDetail(lessonId: string): Promise<LessonDetail | 
     videoUrl: lesson.video_url,
     aiContentPrompt: lesson.ai_content_prompt,
     practicalExercisePrompt: lesson.practical_exercise_prompt,
+    referenceContent: lesson.reference_content,
     sectionTitle: section?.title ?? "",
     formationId: section?.formation_id ?? "",
     formationName: formation?.name ?? "",

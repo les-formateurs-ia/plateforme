@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import {
   ChevronRight, ChevronLeft, Mic, Send,
   Sparkles, MessageSquare, CheckCircle, X,
   Lightbulb, Monitor, AlignLeft,
-  Network, RotateCcw, Play, Brain, Zap, Clock, PartyPopper,
+  Network, RotateCcw, Play, Brain, Zap, Clock, PartyPopper, BookOpen,
 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
@@ -281,6 +283,37 @@ export function LessonPage() {
           </div>
 
           <div className="p-6 space-y-5">
+            {lesson.referenceContent && (
+              <GCard><div className="p-6">
+                <div className="flex items-center gap-2.5 mb-4">
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "rgba(155,93,229,0.1)", border: "1px solid rgba(155,93,229,0.2)" }}><BookOpen className="w-4 h-4" style={{ color: th.navAC }} /></div>
+                  <span className="text-sm font-black" style={{ color: th.fg }}>Cours</span>
+                </div>
+                <div style={{ color: th.fg2, fontSize: "0.9rem", lineHeight: 1.7 }}>
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      h1: (p) => <h2 className="text-lg font-black mt-6 mb-3 first:mt-0" style={{ color: th.fg }} {...p} />,
+                      h2: (p) => <h3 className="text-base font-black mt-6 mb-2.5 first:mt-0" style={{ color: th.fg }} {...p} />,
+                      h3: (p) => <h4 className="text-sm font-bold mt-5 mb-2" style={{ color: th.fg }} {...p} />,
+                      p: (p) => <p className="mb-3" {...p} />,
+                      ul: (p) => <ul className="list-disc pl-5 mb-3 space-y-1" {...p} />,
+                      ol: (p) => <ol className="list-decimal pl-5 mb-3 space-y-1" {...p} />,
+                      strong: (p) => <strong style={{ color: th.fg }} {...p} />,
+                      blockquote: (p) => <blockquote className="pl-4 my-3 italic" style={{ borderLeft: `3px solid ${th.navAC}`, color: th.fg3 }} {...p} />,
+                      code: (p) => <code className="px-1.5 py-0.5 rounded text-xs font-mono" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(155,93,229,0.08)" }} {...p} />,
+                      hr: () => <hr className="my-5" style={{ borderColor: th.sep }} />,
+                      table: (p) => <div className="overflow-x-auto mb-3"><table className="w-full text-xs border-collapse" {...p} /></div>,
+                      th: (p) => <th className="text-left px-3 py-2 font-bold" style={{ color: th.fg, borderBottom: `1px solid ${th.sep}` }} {...p} />,
+                      td: (p) => <td className="px-3 py-2 align-top" style={{ borderBottom: `1px solid ${th.sep}` }} {...p} />,
+                    }}
+                  >
+                    {lesson.referenceContent}
+                  </ReactMarkdown>
+                </div>
+              </div></GCard>
+            )}
+
             <GCard><div className="p-5">
               <div className="flex items-center gap-2.5 mb-4">
                 <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "rgba(155,93,229,0.1)", border: "1px solid rgba(155,93,229,0.2)" }}><Brain className="w-4 h-4" style={{ color: th.navAC }} /></div>
