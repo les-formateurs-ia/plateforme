@@ -18,6 +18,7 @@ import { ProfilePage } from "@/app/pages/profile/ProfilePage";
 import { AdminCoursesPage } from "@/app/pages/admin/AdminCoursesPage";
 import { AdminCourseEditorPage } from "@/app/pages/admin/AdminCourseEditorPage";
 import { AdminLessonEditorPage } from "@/app/pages/admin/AdminLessonEditorPage";
+import { AdminAppointmentsPage } from "@/app/pages/admin/AdminAppointmentsPage";
 
 function LoadingScreen() {
   const th = useTh();
@@ -88,6 +89,7 @@ function AppRoutes() {
         <Route path="admin/courses/:courseId" element={<RequireAdmin><AdminCourseEditorPage /></RequireAdmin>} />
         <Route path="admin/courses/:courseId/lessons/new" element={<RequireAdmin><AdminLessonEditorPage /></RequireAdmin>} />
         <Route path="admin/courses/:courseId/lessons/:lessonId" element={<RequireAdmin><AdminLessonEditorPage /></RequireAdmin>} />
+        <Route path="admin/appointments" element={<RequireAdmin><AdminAppointmentsPage /></RequireAdmin>} />
       </Route>
       <Route path="/lesson/:lessonId" element={<RequireAuth><LessonPage /></RequireAuth>} />
       <Route path="*" element={<Navigate to="/" replace />} />

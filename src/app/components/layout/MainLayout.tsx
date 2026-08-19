@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useLocation } from "react-router";
-import { Flame, Search, Bell, Plus } from "lucide-react";
+import { Flame, Search, Bell, Plus, CalendarClock } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
@@ -7,7 +7,10 @@ import { Background } from "@/app/components/common/Background";
 import { Logo } from "@/app/components/common/Logo";
 import { NAV_ITEMS } from "@/app/data/mock";
 
-const ADMIN_LABEL = { path: "/admin/courses", label: "Gestion des cours" };
+const ADMIN_LABELS = [
+  { path: "/admin/courses", label: "Gestion des cours" },
+  { path: "/admin/appointments", label: "Rendez-vous élèves" },
+];
 
 export function MainLayout() {
   const th = useTh();
@@ -15,7 +18,7 @@ export function MainLayout() {
   const { profile } = useProfile();
   const location = useLocation();
   const name = profile.name.split(" ")[0] || "Alex";
-  const allLabels = role === "admin" ? [...NAV_ITEMS, ADMIN_LABEL] : NAV_ITEMS;
+  const allLabels = role === "admin" ? [...NAV_ITEMS, ...ADMIN_LABELS] : NAV_ITEMS;
   const current =
     [...allLabels].sort((a, b) => b.path.length - a.path.length)
       .find((n) => location.pathname === n.path || location.pathname.startsWith(`${n.path}/`))
@@ -35,13 +38,17 @@ export function MainLayout() {
           ))}
         </nav>
         {role === "admin" && (
-          <div className="px-3 pb-3">
+          <div className="px-3 pb-3 space-y-1.5">
             <NavLink to="/admin/courses" className="w-full flex items-center gap-3 px-2.5 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
               style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.3)", color: "#4ADE80" }}>
               <span className="w-6 h-6 rounded-full flex items-center justify-center shrink-0" style={{ background: "linear-gradient(135deg,#22C55E,#4ADE80)", boxShadow: "0 0 14px rgba(34,197,94,0.4)" }}>
                 <Plus className="w-4 h-4" style={{ color: "#08060F" }} />
               </span>
               Créer un cours
+            </NavLink>
+            <NavLink to="/admin/appointments" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all"
+              style={({ isActive }) => isActive ? { background: th.navA, border: `1px solid ${th.navAB}`, color: th.navAC } : { color: th.fg3, background: "transparent", border: "1px solid transparent" }}>
+              <CalendarClock className="w-4 h-4 shrink-0" />Rendez-vous élèves
             </NavLink>
           </div>
         )}
