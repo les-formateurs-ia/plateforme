@@ -134,7 +134,7 @@ export function ProfilePage() {
           {/* Theme toggle */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-xs font-bold uppercase tracking-widest" style={{ color: th.fg3 }}>Modifier l'objectif professionnel</label>
+              <label className="block text-xs font-bold uppercase tracking-widest" style={{ color: th.fg3 }}>Objectif professionnel</label>
               {!objectiveEditing && (
                 <button onClick={() => setObjectiveEditing(true)} className="text-xs font-semibold transition-colors hover:opacity-70" style={{ color: th.navAC }}>
                   Modifier

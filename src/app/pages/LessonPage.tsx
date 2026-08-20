@@ -7,7 +7,7 @@ import {
   ChevronRight, ChevronLeft, Mic, Send,
   Sparkles, MessageSquare, CheckCircle, X,
   Lightbulb, Monitor, AlignLeft,
-  Network, RotateCcw, Play, Brain, Zap, Clock, PartyPopper, BookOpen,
+  Network, RotateCcw, Play, Brain, Zap, Clock, PartyPopper, BookOpen, Headphones, Wand2,
 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
@@ -23,6 +23,7 @@ import {
   getLessonDetail, ensureLessonStarted, addTimeSpent, submitQuiz, flattenLessons, QUIZ_PASS_THRESHOLD,
   type LessonDetail, type QuizAnswer,
 } from "@/app/lib/learning";
+import { getMyPodcast, getPodcastSignedUrl, requestPodcastGeneration, pollForPodcast, type Podcast } from "@/app/lib/podcasts";
 
 export function LessonPage() {
   const th = useTh();
@@ -32,8 +33,13 @@ export function LessonPage() {
   const { lessonId } = useParams<{ lessonId: string }>();
   const goBack = () => navigate("/lessons");
 
-  type LTab = "video" | "transcript" | "mindmap";
+  type LTab = "video" | "transcript" | "mindmap" | "podcast";
   const [tab, setTab] = useState<LTab>("video");
+
+  const [podcast, setPodcast] = useState<Podcast | null>(null);
+  const [podcastAudioUrl, setPodcastAudioUrl] = useState<string | null>(null);
+  const [podcastLoading, setPodcastLoading] = useState(false);
+  const [podcastGenerating, setPodcastGenerating] = useState(false);
 
   const [lesson, setLesson] = useState<LessonDetail | null>(null);
   const [lessonLoading, setLessonLoading] = useState(true);
@@ -80,6 +86,7 @@ export function LessonPage() {
       setLessonLoading(true);
       setLessonError(null);
       setQuizStep(0); setSelected(null); setAnswers([]); setQuizResult(null); setRetaking(false); setTab("video");
+      setPodcast(null); setPodcastAudioUrl(null);
       try {
         const detail = await getLessonDetail(lessonId);
         if (cancelled) return;
@@ -116,6 +123,45 @@ export function LessonPage() {
       void ensureLessonStarted(user.id, lessonId);
     }
   }, [lessonId, course.loading, course.lessonStates, user, role, navigate]);
+
+  const loadPodcast = async () => {
+    if (!user || !lessonId) return;
+    setPodcastLoading(true);
+    try {
+      const p = await getMyPodcast(user.id, lessonId);
+      setPodcast(p);
+      setPodcastAudioUrl(p ? await getPodcastSignedUrl(p.storagePath) : null);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setPodcastLoading(false);
+    }
+  };
+
+  useEffect(() => { void loadPodcast(); }, [user, lessonId]);
+
+  const handleGeneratePodcast = async () => {
+    if (!lessonId || !user) return;
+    setPodcastGenerating(true);
+    const startedAt = Date.now();
+    try {
+      await requestPodcastGeneration(lessonId);
+      toast.info("Génération du podcast en cours — ça peut prendre 1 à 2 minutes.");
+      const result = await pollForPodcast(user.id, lessonId, startedAt);
+      if (!result) {
+        toast.error("La génération prend plus de temps que prévu. Réessaie dans un instant.");
+        return;
+      }
+      setPodcast(result);
+      setPodcastAudioUrl(await getPodcastSignedUrl(result.storagePath));
+      toast.success("Podcast généré avec succès.");
+    } catch (err) {
+      console.error(err);
+      toast.error(err instanceof Error ? err.message : "Impossible de générer le podcast.");
+    } finally {
+      setPodcastGenerating(false);
+    }
+  };
 
   // Cumule le temps passé sur la leçon toutes les 30s + au démontage.
   const elapsedRef = useRef(0);
@@ -189,7 +235,8 @@ export function LessonPage() {
   const overallPct = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
 
   const TABS: { id: LTab; Icon: typeof Monitor; label: string }[] = [
-    { id: "video", Icon: Monitor, label: "Vidéo" }, { id: "transcript", Icon: AlignLeft, label: "Transcription" }, { id: "mindmap", Icon: Network, label: "Mindmap" },
+    { id: "video", Icon: Monitor, label: "Vidéo" }, { id: "transcript", Icon: AlignLeft, label: "Transcription" },
+    { id: "mindmap", Icon: Network, label: "Mindmap" }, { id: "podcast", Icon: Headphones, label: "Podcast" },
   ];
 
   if (lessonLoading || access === "checking") {
@@ -264,6 +311,33 @@ export function LessonPage() {
                     <Network className="w-6 h-6 mx-auto mb-2 text-white/30" />
                     <p className="text-sm text-white/60">Mindmap générée par IA</p>
                     <p className="text-xs text-white/30 mt-1">Bientôt disponible — en attente de l'activation du moteur IA.</p>
+                  </div>
+                </div>
+              )}
+              {tab === "podcast" && (
+                <div className="absolute inset-0 flex items-center justify-center p-6" style={{ background: "linear-gradient(135deg,#0d0522,#1a0b3c 45%,#08060F)" }}>
+                  <div className="text-center max-w-md w-full">
+                    <Headphones className="w-6 h-6 mx-auto mb-2 text-white/30" />
+                    {podcastLoading ? (
+                      <p className="text-sm text-white/60">Chargement…</p>
+                    ) : podcastAudioUrl ? (
+                      <>
+                        <p className="text-sm text-white/60 mb-3">Ton podcast personnalisé pour cette leçon</p>
+                        <audio src={podcastAudioUrl} controls className="w-full" />
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-sm text-white/60">Pas encore de podcast personnalisé pour cette leçon.</p>
+                        {role !== "admin" && <p className="text-xs text-white/30 mt-1">Bientôt disponible.</p>}
+                      </>
+                    )}
+                    {role === "admin" && (
+                      <button onClick={handleGeneratePodcast} disabled={podcastGenerating}
+                        className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80 disabled:opacity-50"
+                        style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff" }}>
+                        <Wand2 className="w-4 h-4" />{podcastGenerating ? "Génération en cours…" : podcastAudioUrl ? "Régénérer le podcast" : "Générer le podcast"}
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
