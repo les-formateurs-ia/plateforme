@@ -7,7 +7,7 @@ import {
   ChevronRight, ChevronLeft, Mic, Send,
   Sparkles, MessageSquare, CheckCircle, X,
   Lightbulb, Monitor, AlignLeft,
-  Network, RotateCcw, Play, Brain, Zap, Clock, PartyPopper, BookOpen, Headphones, Wand2,
+  Network, RotateCcw, Play, Brain, Zap, Clock, PartyPopper, BookOpen, Headphones, Wand2, Bot,
 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
@@ -25,6 +25,7 @@ import {
 import { getMyPodcast, getPodcastSignedUrl, requestPodcastGeneration, pollForPodcast, type Podcast } from "@/app/lib/podcasts";
 import { getMyMindmap, requestMindmapGeneration, type MindmapTree } from "@/app/lib/mindmaps";
 import { getChatHistory, sendLessonChatMessage } from "@/app/lib/chat";
+import { getMyAvatarVideo, getAvatarVideoSignedUrl, requestAvatarVideoGeneration, pollAvatarVideoStatus, type AvatarVideo } from "@/app/lib/avatarVideos";
 import { MindmapView } from "@/app/components/lesson/MindmapView";
 
 const DEFAULT_AI = "Je suis ton Copilote IA. Pose-moi n'importe quelle question sur cette leçon ou sur comment l'appliquer à ton métier 👋";
@@ -37,13 +38,18 @@ export function LessonPage() {
   const { lessonId } = useParams<{ lessonId: string }>();
   const goBack = () => navigate("/lessons");
 
-  type LTab = "video" | "transcript" | "mindmap" | "podcast";
+  type LTab = "video" | "transcript" | "mindmap" | "podcast" | "avatar";
   const [tab, setTab] = useState<LTab>("video");
 
   const [podcast, setPodcast] = useState<Podcast | null>(null);
   const [podcastAudioUrl, setPodcastAudioUrl] = useState<string | null>(null);
   const [podcastLoading, setPodcastLoading] = useState(false);
   const [podcastGenerating, setPodcastGenerating] = useState(false);
+
+  const [avatarVideo, setAvatarVideo] = useState<AvatarVideo | null>(null);
+  const [avatarVideoUrl, setAvatarVideoUrl] = useState<string | null>(null);
+  const [avatarLoading, setAvatarLoading] = useState(false);
+  const [avatarGenerating, setAvatarGenerating] = useState(false);
 
   const [mindmap, setMindmap] = useState<MindmapTree | null>(null);
   const [mindmapLoading, setMindmapLoading] = useState(false);
@@ -114,6 +120,7 @@ export function LessonPage() {
       setQuizStep(0); setSelected(null); setAnswers([]); setQuizResult(null); setRetaking(false); setTab("video");
       setPodcast(null); setPodcastAudioUrl(null);
       setMindmap(null);
+      setAvatarVideo(null); setAvatarVideoUrl(null);
       try {
         const detail = await getLessonDetail(lessonId);
         if (cancelled) return;
@@ -218,6 +225,50 @@ export function LessonPage() {
     }
   };
 
+  const loadAvatarVideo = async () => {
+    if (!user || !lessonId) return;
+    setAvatarLoading(true);
+    try {
+      const v = await getMyAvatarVideo(user.id, lessonId);
+      setAvatarVideo(v);
+      setAvatarVideoUrl(v?.status === "ready" && v.storagePath ? await getAvatarVideoSignedUrl(v.storagePath) : null);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setAvatarLoading(false);
+    }
+  };
+
+  useEffect(() => { void loadAvatarVideo(); }, [user, lessonId]);
+
+  const handleGenerateAvatarVideo = async () => {
+    if (!lessonId || !user) return;
+    setAvatarGenerating(true);
+    try {
+      await requestAvatarVideoGeneration(lessonId);
+      setAvatarVideo({ status: "pending", storagePath: null, transcript: "", error: null });
+      toast.info("Génération de la vidéo en cours — ça peut prendre plusieurs minutes.");
+      const result = await pollAvatarVideoStatus(lessonId);
+      if (!result) {
+        toast.error("La génération prend plus de temps que prévu. Réessaie dans un instant.");
+        return;
+      }
+      if (result.status === "failed") {
+        toast.error(result.error ?? "La génération de la vidéo a échoué.");
+        setAvatarVideo(result);
+        return;
+      }
+      setAvatarVideo(result);
+      setAvatarVideoUrl(result.storagePath ? await getAvatarVideoSignedUrl(result.storagePath) : null);
+      toast.success("Vidéo générée avec succès.");
+    } catch (err) {
+      console.error(err);
+      toast.error(err instanceof Error ? err.message : "Impossible de générer la vidéo.");
+    } finally {
+      setAvatarGenerating(false);
+    }
+  };
+
   // Cumule le temps passé sur la leçon toutes les 30s + au démontage.
   const elapsedRef = useRef(0);
   const lastTickRef = useRef(Date.now());
@@ -292,6 +343,7 @@ export function LessonPage() {
   const TABS: { id: LTab; Icon: typeof Monitor; label: string }[] = [
     { id: "video", Icon: Monitor, label: "Vidéo" }, { id: "transcript", Icon: AlignLeft, label: "Transcription" },
     { id: "mindmap", Icon: Network, label: "Mindmap" }, { id: "podcast", Icon: Headphones, label: "Podcast" },
+    { id: "avatar", Icon: Bot, label: "Vidéo IA" },
   ];
 
   if (lessonLoading || access === "checking") {
@@ -415,6 +467,37 @@ export function LessonPage() {
                         className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80 disabled:opacity-50"
                         style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff" }}>
                         <Wand2 className="w-4 h-4" />{podcastGenerating ? "Génération en cours…" : podcastAudioUrl ? "Régénérer le podcast" : "Générer le podcast"}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+              {tab === "avatar" && (
+                <div className="absolute inset-0 flex items-center justify-center p-6" style={{ background: "linear-gradient(135deg,#0d0522,#1a0b3c 45%,#08060F)" }}>
+                  <div className="text-center max-w-md w-full">
+                    <Bot className="w-6 h-6 mx-auto mb-2 text-white/30" />
+                    {avatarLoading ? (
+                      <p className="text-sm text-white/60">Chargement…</p>
+                    ) : avatarVideoUrl ? (
+                      <>
+                        <p className="text-sm text-white/60 mb-3">Ta vidéo personnalisée pour cette leçon</p>
+                        <video src={avatarVideoUrl} controls className="w-full rounded-xl bg-black" style={{ aspectRatio: "16/9" }} />
+                      </>
+                    ) : avatarVideo?.status === "pending" ? (
+                      <p className="text-sm text-white/60">Génération en cours…</p>
+                    ) : avatarVideo?.status === "failed" ? (
+                      <p className="text-sm text-red-400">{avatarVideo.error ?? "Échec de la génération."}</p>
+                    ) : (
+                      <>
+                        <p className="text-sm text-white/60">Pas encore de vidéo personnalisée pour cette leçon.</p>
+                        {role !== "admin" && <p className="text-xs text-white/30 mt-1">Bientôt disponible.</p>}
+                      </>
+                    )}
+                    {role === "admin" && (
+                      <button onClick={handleGenerateAvatarVideo} disabled={avatarGenerating}
+                        className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80 disabled:opacity-50"
+                        style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff" }}>
+                        <Wand2 className="w-4 h-4" />{avatarGenerating ? "Génération en cours…" : avatarVideoUrl ? "Régénérer la vidéo" : "Générer la vidéo"}
                       </button>
                     )}
                   </div>
