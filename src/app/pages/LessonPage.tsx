@@ -17,13 +17,17 @@ import { Background } from "@/app/components/common/Background";
 import { GCard } from "@/app/components/common/GCard";
 import { VBtn } from "@/app/components/common/Buttons";
 import { cx } from "@/app/lib/cx";
-import { AI_RESPONSES, DEFAULT_AI } from "@/app/data/mock";
 import type { ChatMsg } from "@/app/types";
 import {
   getLessonDetail, ensureLessonStarted, addTimeSpent, submitQuiz, flattenLessons, QUIZ_PASS_THRESHOLD,
   type LessonDetail, type QuizAnswer,
 } from "@/app/lib/learning";
 import { getMyPodcast, getPodcastSignedUrl, requestPodcastGeneration, pollForPodcast, type Podcast } from "@/app/lib/podcasts";
+import { getMyMindmap, requestMindmapGeneration, type MindmapTree } from "@/app/lib/mindmaps";
+import { getChatHistory, sendLessonChatMessage } from "@/app/lib/chat";
+import { MindmapView } from "@/app/components/lesson/MindmapView";
+
+const DEFAULT_AI = "Je suis ton Copilote IA. Pose-moi n'importe quelle question sur cette leçon ou sur comment l'appliquer à ton métier 👋";
 
 export function LessonPage() {
   const th = useTh();
@@ -41,6 +45,10 @@ export function LessonPage() {
   const [podcastLoading, setPodcastLoading] = useState(false);
   const [podcastGenerating, setPodcastGenerating] = useState(false);
 
+  const [mindmap, setMindmap] = useState<MindmapTree | null>(null);
+  const [mindmapLoading, setMindmapLoading] = useState(false);
+  const [mindmapGenerating, setMindmapGenerating] = useState(false);
+
   const [lesson, setLesson] = useState<LessonDetail | null>(null);
   const [lessonLoading, setLessonLoading] = useState(true);
   const [lessonError, setLessonError] = useState<string | null>(null);
@@ -57,7 +65,6 @@ export function LessonPage() {
   const [submitting, setSubmitting] = useState(false);
   const [retaking, setRetaking] = useState(false);
 
-  // Copilote : réponses temporaires par mots-clés en attendant l'intégration de Claude.
   const [msgs, setMsgs] = useState<ChatMsg[]>([{ role: "ai", text: DEFAULT_AI }]);
   const [chatIn, setChatIn] = useState("");
   const [typing, setTyping] = useState(false);
@@ -67,16 +74,35 @@ export function LessonPage() {
 
   useEffect(() => { chatEnd.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs, typing]);
 
-  const sendMsg = (text: string) => {
-    if (!text.trim()) return;
-    setMsgs((m) => [...m, { role: "user", text: text.trim() }]);
+  useEffect(() => {
+    if (!user || !lessonId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const history = await getChatHistory(user.id, lessonId);
+        if (cancelled) return;
+        setMsgs(history.length ? history.map((h) => ({ role: h.role, text: h.content })) : [{ role: "ai", text: DEFAULT_AI }]);
+      } catch (err) {
+        console.error(err);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user, lessonId]);
+
+  const sendMsg = async (text: string) => {
+    if (!text.trim() || !lessonId) return;
+    const question = text.trim();
+    setMsgs((m) => [...m, { role: "user", text: question }]);
     setChatIn(""); setTyping(true);
-    setTimeout(() => {
-      const lc = text.toLowerCase();
-      const hit = AI_RESPONSES.find((r) => r.kw.some((k) => lc.includes(k)));
+    try {
+      const { reply } = await sendLessonChatMessage(lessonId, question);
+      setMsgs((m) => [...m, { role: "ai", text: reply }]);
+    } catch (err) {
+      console.error(err);
+      setMsgs((m) => [...m, { role: "ai", text: "Désolé, je n'ai pas pu répondre — réessaie dans un instant." }]);
+    } finally {
       setTyping(false);
-      setMsgs((m) => [...m, { role: "ai", text: hit?.text ?? DEFAULT_AI }]);
-    }, 900);
+    }
   };
 
   useEffect(() => {
@@ -87,6 +113,7 @@ export function LessonPage() {
       setLessonError(null);
       setQuizStep(0); setSelected(null); setAnswers([]); setQuizResult(null); setRetaking(false); setTab("video");
       setPodcast(null); setPodcastAudioUrl(null);
+      setMindmap(null);
       try {
         const detail = await getLessonDetail(lessonId);
         if (cancelled) return;
@@ -139,6 +166,34 @@ export function LessonPage() {
   };
 
   useEffect(() => { void loadPodcast(); }, [user, lessonId]);
+
+  const loadMindmap = async () => {
+    if (!user || !lessonId) return;
+    setMindmapLoading(true);
+    try {
+      setMindmap(await getMyMindmap(user.id, lessonId));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setMindmapLoading(false);
+    }
+  };
+
+  useEffect(() => { void loadMindmap(); }, [user, lessonId]);
+
+  const handleGenerateMindmap = async () => {
+    if (!lessonId) return;
+    setMindmapGenerating(true);
+    try {
+      setMindmap(await requestMindmapGeneration(lessonId));
+      toast.success("Mindmap générée avec succès.");
+    } catch (err) {
+      console.error(err);
+      toast.error(err instanceof Error ? err.message : "Impossible de générer la mindmap.");
+    } finally {
+      setMindmapGenerating(false);
+    }
+  };
 
   const handleGeneratePodcast = async () => {
     if (!lessonId || !user) return;
@@ -309,8 +364,7 @@ export function LessonPage() {
                 <div className="absolute inset-0 flex items-center justify-center p-6" style={{ background: "linear-gradient(135deg,#0d0522,#1a0b3c 45%,#08060F)" }}>
                   <div className="text-center max-w-sm">
                     <Network className="w-6 h-6 mx-auto mb-2 text-white/30" />
-                    <p className="text-sm text-white/60">Mindmap générée par IA</p>
-                    <p className="text-xs text-white/30 mt-1">Bientôt disponible — en attente de l'activation du moteur IA.</p>
+                    <p className="text-sm text-white/60">{mindmap ? "Mindmap interactive juste en dessous ↓" : "Pas encore de mindmap pour cette leçon."}</p>
                   </div>
                 </div>
               )}
@@ -357,6 +411,29 @@ export function LessonPage() {
           </div>
 
           <div className="p-6 space-y-5">
+            {tab === "mindmap" && (
+              <GCard><div className="p-6">
+                <div className="flex items-center gap-2.5 mb-4">
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "rgba(155,93,229,0.1)", border: "1px solid rgba(155,93,229,0.2)" }}><Network className="w-4 h-4" style={{ color: th.navAC }} /></div>
+                  <span className="text-sm font-black" style={{ color: th.fg }}>Mindmap de la leçon</span>
+                  {role === "admin" && (
+                    <button onClick={handleGenerateMindmap} disabled={mindmapGenerating}
+                      className="ml-auto flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80 disabled:opacity-50"
+                      style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg }}>
+                      <Wand2 className="w-3.5 h-3.5" />{mindmapGenerating ? "Génération…" : mindmap ? "Régénérer" : "Générer la mindmap"}
+                    </button>
+                  )}
+                </div>
+                {mindmapLoading ? (
+                  <p className="text-sm" style={{ color: th.fg3 }}>Chargement…</p>
+                ) : mindmap ? (
+                  <MindmapView tree={mindmap} />
+                ) : (
+                  <p className="text-sm" style={{ color: th.fg3 }}>Pas encore de mindmap pour cette leçon.{role !== "admin" && " Bientôt disponible."}</p>
+                )}
+              </div></GCard>
+            )}
+
             {lesson.referenceContent && (
               <GCard><div className="p-6">
                 <div className="flex items-center gap-2.5 mb-4">
@@ -473,7 +550,7 @@ export function LessonPage() {
           <div className="shrink-0 px-4 py-4" style={{ borderBottom: `1px solid ${th.sep}` }}>
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg,#9B5DE5,#DDAEEA)" }}><Sparkles className="w-4 h-4" style={{ color: "#08060F" }} /></div>
-              <div><div className="text-sm font-black" style={{ color: th.fg }}>Copilote IA</div><div className="text-[10px]" style={{ color: th.fg3 }}>Réponses de démonstration</div></div>
+              <div><div className="text-sm font-black" style={{ color: th.fg }}>Copilote IA</div><div className="text-[10px]" style={{ color: th.fg3 }}>Ton formateur pour cette leçon</div></div>
               <div className="ml-auto flex items-center gap-1.5 text-[10px] font-bold" style={{ color: th.fg3 }}>Bêta</div>
             </div>
             <div className="rounded-xl px-3 py-2.5" style={{ background: "rgba(155,93,229,0.07)", border: "1px solid rgba(155,93,229,0.15)" }}>

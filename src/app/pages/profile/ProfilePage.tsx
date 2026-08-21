@@ -8,7 +8,16 @@ import { GCard } from "@/app/components/common/GCard";
 import { CircleProgress } from "@/app/components/common/CircleProgress";
 import { ShimBtn } from "@/app/components/common/Buttons";
 import { cx } from "@/app/lib/cx";
-import { CERT_CHAPTERS, BADGES } from "@/app/data/mock";
+import {
+  getDashboardStats, getPromptsCount, getRecentActivity, getAllBadges, getEarnedBadgeIds, getEnrolledSince, formatDuration,
+  type DashboardStats, type DailyActivity, type BadgeRow,
+} from "@/app/lib/learning";
+
+const MONTHS_FR = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+const formatEnrolledSince = (iso: string) => {
+  const d = new Date(iso);
+  return `${MONTHS_FR[d.getMonth()]} ${d.getFullYear()}`;
+};
 
 export function ProfilePage() {
   const th = useTh();
@@ -23,9 +32,50 @@ export function ProfilePage() {
   const [objectiveError, setObjectiveError] = useState<string | null>(null);
   const currentObjective = profile.goalFinal || profile.goal || "";
 
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [promptsCount, setPromptsCount] = useState(0);
+  const [activity, setActivity] = useState<DailyActivity[]>([]);
+  const [allBadges, setAllBadges] = useState<BadgeRow[]>([]);
+  const [earnedBadgeIds, setEarnedBadgeIds] = useState<Set<string>>(new Set());
+  const [enrolledSince, setEnrolledSince] = useState<string | null>(null);
+
   useEffect(() => {
     if (!objectiveEditing) setObjectiveDraft(currentObjective);
   }, [currentObjective, objectiveEditing]);
+
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const [dashStats, prompts, recentActivity, badges, earned, since] = await Promise.all([
+          getDashboardStats(user.id),
+          getPromptsCount(user.id),
+          getRecentActivity(user.id),
+          getAllBadges(),
+          getEarnedBadgeIds(user.id),
+          getEnrolledSince(user.id),
+        ]);
+        if (cancelled) return;
+        setStats(dashStats);
+        setPromptsCount(prompts);
+        setActivity(recentActivity);
+        setAllBadges(badges);
+        setEarnedBadgeIds(earned);
+        setEnrolledSince(since);
+      } catch (err) {
+        console.error(err);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
+
+  const certChapters = (stats?.sections ?? []).map((s) => {
+    const pct = s.total > 0 ? Math.round((s.done / s.total) * 100) : 0;
+    return { title: s.title, pct, done: pct === 100 };
+  });
+  const firstActiveIndex = certChapters.findIndex((c) => !c.done);
+  const maxActivity = Math.max(1, ...activity.map((a) => a.count));
 
   const handleSignOut = async () => {
     await signOut();
@@ -55,17 +105,22 @@ export function ProfilePage() {
               <h2 className="text-xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif", color: th.fg }}>{name}</h2>
               <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: "rgba(155,93,229,0.1)", color: th.navAC, border: "1px solid rgba(155,93,229,0.25)" }}>Apprenant IA Pro</span>
             </div>
-            <p className="text-sm mb-3" style={{ color: th.fg3 }}>{profile.profession || "Chef de projet digital"} · En formation depuis août 2026</p>
+            <p className="text-sm mb-3" style={{ color: th.fg3 }}>{profile.profession || "Chef de projet digital"}{enrolledSince && ` · En formation depuis ${formatEnrolledSince(enrolledSince)}`}</p>
             <div className="flex items-center gap-6">
-              {[{ val: "13", sub: "Leçons" }, { val: "47", sub: "Prompts" }, { val: "4h32", sub: "Pratique" }, { val: "67%", sub: "Certif." }].map(({ val, sub }) => (
+              {[
+                { val: stats ? `${stats.completedLessons}/${stats.totalLessons}` : "—", sub: "Leçons" },
+                { val: String(promptsCount), sub: "Prompts" },
+                { val: stats ? formatDuration(stats.totalTimeSeconds) : "—", sub: "Pratique" },
+                { val: stats ? `${stats.completionPct}%` : "—", sub: "Certif." },
+              ].map(({ val, sub }) => (
                 <div key={sub} className="text-center"><div className="text-lg font-black" style={{ fontFamily: "'Funnel Display',sans-serif", color: th.navAC }}>{val}</div><div className="text-[10px]" style={{ color: th.fg3 }}>{sub}</div></div>
               ))}
             </div>
           </div>
           <div className="relative shrink-0">
-            <CircleProgress pct={67} size={80} />
+            <CircleProgress pct={stats?.completionPct ?? 0} size={80} />
             <div className="absolute inset-0 flex items-center justify-center flex-col">
-              <span className="text-base font-black" style={{ color: th.fg }}>67%</span>
+              <span className="text-base font-black" style={{ color: th.fg }}>{stats?.completionPct ?? 0}%</span>
               <span className="text-[8px]" style={{ color: th.fg3 }}>certif.</span>
             </div>
           </div>
@@ -86,7 +141,10 @@ export function ProfilePage() {
           <GCard><div className="p-5">
             <div className="flex items-center gap-2 mb-4"><Trophy className="w-4 h-4 text-amber-400" /><span className="text-sm font-black" style={{ color: th.fg }}>Progression certification</span></div>
             <div className="space-y-3">
-              {CERT_CHAPTERS.map(({ title, pct, done, active }) => (
+              {certChapters.length === 0 && <p className="text-xs" style={{ color: th.fg3 }}>Aucun module pour l'instant.</p>}
+              {certChapters.map(({ title, pct, done }, i) => {
+                const active = i === firstActiveIndex;
+                return (
                 <div key={title}>
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
@@ -99,7 +157,8 @@ export function ProfilePage() {
                   </div>
                   <div className="h-1 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.05)" : "rgba(155,93,229,0.08)" }}><div className="h-full rounded-full" style={{ width: `${pct}%`, background: done ? "linear-gradient(90deg,#16A34A,#4ADE80)" : active ? "linear-gradient(90deg,#9B5DE5,#DDAEEA)" : "transparent" }} /></div>
                 </div>
-              ))}
+                );
+              })}
             </div>
             <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${th.sep}` }}>
               <ShimBtn sm><span className="flex items-center gap-2"><Award className="w-4 h-4" />S'entraîner pour la soutenance</span></ShimBtn>
@@ -109,8 +168,8 @@ export function ProfilePage() {
           <GCard><div className="p-5">
             <div className="text-[10px] font-black uppercase tracking-widest mb-3" style={{ color: th.fg3 }}>Activité — 4 semaines</div>
             <div className="flex items-end gap-1 h-16">
-              {[4, 7, 3, 8, 5, 6, 2, 9, 6, 7, 4, 5, 8, 6, 3, 7, 8, 5, 6, 9, 7, 4, 6, 8, 5, 7, 9, 6].map((h, i) => (
-                <div key={i} className="flex-1 rounded-sm" style={{ height: `${h * 10}%`, background: i === 27 ? "linear-gradient(to top,#9B5DE5,#DDAEEA)" : "rgba(155,93,229,0.25)", opacity: i > 24 ? 1 : 0.5 }} />
+              {activity.map(({ date, count }, i) => (
+                <div key={date} title={`${date} : ${count}`} className="flex-1 rounded-sm" style={{ height: `${Math.max(4, (count / maxActivity) * 100)}%`, background: i === activity.length - 1 ? "linear-gradient(to top,#9B5DE5,#DDAEEA)" : "rgba(155,93,229,0.25)", opacity: count > 0 ? 1 : 0.25 }} />
               ))}
             </div>
           </div></GCard>
@@ -119,13 +178,17 @@ export function ProfilePage() {
 
       {tab === "badges" && (
         <div className="grid grid-cols-3 gap-4">
-          {BADGES.map(({ emoji, label, done }) => (
-            <GCard key={label}><div className={cx("p-5 text-center", !done && "opacity-40")}>
-              <span className={cx("text-4xl block mb-3", !done && "grayscale")}>{emoji}</span>
-              <div className="text-sm font-bold mb-1" style={{ color: done ? th.fg : th.fg3 }}>{label}</div>
-              {done ? <span className="text-[10px] font-bold text-green-500">Obtenu ✓</span> : <span className="text-[10px] flex items-center justify-center gap-1" style={{ color: th.fg3 }}><Lock className="w-3 h-3" />Non débloqué</span>}
-            </div></GCard>
-          ))}
+          {allBadges.map(({ id, icon, name: label, description }) => {
+            const done = earnedBadgeIds.has(id);
+            return (
+              <GCard key={id}><div className={cx("p-5 text-center", !done && "opacity-40")} title={description ?? undefined}>
+                <span className={cx("text-4xl block mb-3", !done && "grayscale")}>{icon ?? "🏅"}</span>
+                <div className="text-sm font-bold mb-1" style={{ color: done ? th.fg : th.fg3 }}>{label}</div>
+                {done ? <span className="text-[10px] font-bold text-green-500">Obtenu ✓</span> : <span className="text-[10px] flex items-center justify-center gap-1" style={{ color: th.fg3 }}><Lock className="w-3 h-3" />Non débloqué</span>}
+              </div></GCard>
+            );
+          })}
+          {allBadges.length === 0 && <p className="text-xs" style={{ color: th.fg3 }}>Aucun badge configuré pour l'instant.</p>}
         </div>
       )}
 

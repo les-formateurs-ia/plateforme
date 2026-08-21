@@ -394,6 +394,70 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats 
   };
 }
 
+export async function getEnrolledSince(userId: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from("enrollments")
+    .select("enrolled_at")
+    .eq("user_id", userId)
+    .order("enrolled_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return data?.enrolled_at ?? null;
+}
+
+export async function getPromptsCount(userId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from("chat_messages")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("role", "user");
+  if (error) throw error;
+  return count ?? 0;
+}
+
+export interface DailyActivity {
+  date: string; // YYYY-MM-DD
+  count: number;
+}
+
+// Approximation de l'activité quotidienne à partir des événements réels
+// existants (pas de table de log dédiée) : messages au copilote, tentatives
+// de quiz, et débuts/fins de leçon.
+export async function getRecentActivity(userId: string, days = 28): Promise<DailyActivity[]> {
+  const since = new Date();
+  since.setHours(0, 0, 0, 0);
+  since.setDate(since.getDate() - (days - 1));
+  const sinceIso = since.toISOString();
+
+  const [{ data: chats }, { data: quizzes }, { data: progress }] = await Promise.all([
+    supabase.from("chat_messages").select("created_at").eq("user_id", userId).gte("created_at", sinceIso),
+    supabase.from("quiz_attempts").select("created_at").eq("user_id", userId).gte("created_at", sinceIso),
+    supabase.from("lesson_progress").select("started_at, completed_at").eq("user_id", userId),
+  ]);
+
+  const counts = new Map<string, number>();
+  const bump = (iso: string | null) => {
+    if (!iso) return;
+    const d = new Date(iso);
+    if (d < since) return;
+    const key = d.toISOString().slice(0, 10);
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  };
+  (chats ?? []).forEach((r) => bump(r.created_at));
+  (quizzes ?? []).forEach((r) => bump(r.created_at));
+  (progress ?? []).forEach((r) => { bump(r.started_at); bump(r.completed_at); });
+
+  const result: DailyActivity[] = [];
+  for (let i = 0; i < days; i++) {
+    const d = new Date(since);
+    d.setDate(d.getDate() + i);
+    const key = d.toISOString().slice(0, 10);
+    result.push({ date: key, count: counts.get(key) ?? 0 });
+  }
+  return result;
+}
+
 export function formatDuration(totalSeconds: number): string {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.round((totalSeconds % 3600) / 60);
