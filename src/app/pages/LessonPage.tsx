@@ -361,11 +361,36 @@ export function LessonPage() {
                 </div>
               )}
               {tab === "mindmap" && (
-                <div className="absolute inset-0 flex items-center justify-center p-6" style={{ background: "linear-gradient(135deg,#0d0522,#1a0b3c 45%,#08060F)" }}>
-                  <div className="text-center max-w-sm">
-                    <Network className="w-6 h-6 mx-auto mb-2 text-white/30" />
-                    <p className="text-sm text-white/60">{mindmap ? "Mindmap interactive juste en dessous ↓" : "Pas encore de mindmap pour cette leçon."}</p>
-                  </div>
+                <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at center,#150a2e,#08060F 75%)" }}>
+                  {mindmapLoading ? (
+                    <div className="absolute inset-0 flex items-center justify-center"><p className="text-sm text-white/60">Chargement…</p></div>
+                  ) : mindmap ? (
+                    <>
+                      <MindmapView tree={mindmap} />
+                      {role === "admin" && (
+                        <button onMouseDown={(e) => e.stopPropagation()} onClick={handleGenerateMindmap} disabled={mindmapGenerating}
+                          className="absolute top-3 left-3 flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80 disabled:opacity-50 z-10"
+                          style={{ background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff" }}>
+                          <Wand2 className="w-3.5 h-3.5" />{mindmapGenerating ? "Génération…" : "Régénérer"}
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center p-6">
+                      <div className="text-center max-w-sm">
+                        <Network className="w-6 h-6 mx-auto mb-2 text-white/30" />
+                        <p className="text-sm text-white/60 mb-1">Pas encore de mindmap pour cette leçon.</p>
+                        {role !== "admin" && <p className="text-xs text-white/30">Bientôt disponible.</p>}
+                        {role === "admin" && (
+                          <button onClick={handleGenerateMindmap} disabled={mindmapGenerating}
+                            className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80 disabled:opacity-50"
+                            style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff" }}>
+                            <Wand2 className="w-4 h-4" />{mindmapGenerating ? "Génération en cours…" : "Générer la mindmap"}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
               {tab === "podcast" && (
@@ -411,29 +436,6 @@ export function LessonPage() {
           </div>
 
           <div className="p-6 space-y-5">
-            {tab === "mindmap" && (
-              <GCard><div className="p-6">
-                <div className="flex items-center gap-2.5 mb-4">
-                  <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "rgba(155,93,229,0.1)", border: "1px solid rgba(155,93,229,0.2)" }}><Network className="w-4 h-4" style={{ color: th.navAC }} /></div>
-                  <span className="text-sm font-black" style={{ color: th.fg }}>Mindmap de la leçon</span>
-                  {role === "admin" && (
-                    <button onClick={handleGenerateMindmap} disabled={mindmapGenerating}
-                      className="ml-auto flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80 disabled:opacity-50"
-                      style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg }}>
-                      <Wand2 className="w-3.5 h-3.5" />{mindmapGenerating ? "Génération…" : mindmap ? "Régénérer" : "Générer la mindmap"}
-                    </button>
-                  )}
-                </div>
-                {mindmapLoading ? (
-                  <p className="text-sm" style={{ color: th.fg3 }}>Chargement…</p>
-                ) : mindmap ? (
-                  <MindmapView tree={mindmap} />
-                ) : (
-                  <p className="text-sm" style={{ color: th.fg3 }}>Pas encore de mindmap pour cette leçon.{role !== "admin" && " Bientôt disponible."}</p>
-                )}
-              </div></GCard>
-            )}
-
             {lesson.referenceContent && (
               <GCard><div className="p-6">
                 <div className="flex items-center gap-2.5 mb-4">
