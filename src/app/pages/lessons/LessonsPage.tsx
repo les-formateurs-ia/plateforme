@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { Lock, ChevronDown, CheckCircle, Play, Clock } from "lucide-react";
+import { toast } from "sonner";
+import { Lock, ChevronDown, CheckCircle, Play, Clock, Pencil, Loader2, XCircle, Network, Headphones, Bot } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
@@ -8,14 +9,37 @@ import { VBtn } from "@/app/components/common/Buttons";
 import { cx } from "@/app/lib/cx";
 import { formatDuration, type LessonWithState } from "@/app/lib/learning";
 import { useCourseProgress } from "@/app/state/useCourseProgress";
+import { useAuth } from "@/app/state/auth-context";
+import { Checkbox } from "@/app/components/ui/checkbox";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/app/components/ui/dialog";
+import { requestAvatarVideoGeneration, pollAvatarVideoStatus } from "@/app/lib/avatarVideos";
+import { requestPodcastGeneration, pollForPodcast } from "@/app/lib/podcasts";
+import { requestMindmapGeneration } from "@/app/lib/mindmaps";
 
 type SectionStatus = "complete" | "active" | "locked";
+type GenType = "mindmap" | "podcast" | "avatar_video";
+type GenStatus = "pending" | "running" | "done" | "error";
+
+const GEN_TYPES: { id: GenType; label: string; hint: string; Icon: typeof Network }[] = [
+  { id: "mindmap", label: "Mindmap", hint: "Carte mentale interactive de la leçon", Icon: Network },
+  { id: "podcast", label: "Podcast", hint: "Dialogue audio à deux voix", Icon: Headphones },
+  { id: "avatar_video", label: "Vidéo IA", hint: "Avatar vidéo qui explique la leçon", Icon: Bot },
+];
 
 export function LessonsPage() {
   const th = useTh();
   const navigate = useNavigate();
+  const { user, role } = useAuth();
   const { loading, error: errorMsg, outline, lessonStates } = useCourseProgress();
   const [openSection, setOpenSection] = useState<string | null>(null);
+
+  const [editMode, setEditMode] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [genDialogOpen, setGenDialogOpen] = useState(false);
+  const [genView, setGenView] = useState<"choose" | "progress">("choose");
+  const [genType, setGenType] = useState<GenType>("mindmap");
+  const [genStatuses, setGenStatuses] = useState<Record<string, GenStatus>>({});
+  const [genRunning, setGenRunning] = useState(false);
 
   useEffect(() => {
     if (!outline || openSection) return;
@@ -32,6 +56,70 @@ export function LessonsPage() {
   const successRate = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
 
   const goLesson = (lessonId: string) => navigate(`/lesson/${lessonId}`);
+
+  const toggleLesson = (lessonId: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(lessonId)) next.delete(lessonId);
+      else next.add(lessonId);
+      return next;
+    });
+  };
+
+  const startEdit = () => setEditMode(true);
+  const cancelEdit = () => { setEditMode(false); setSelected(new Set()); };
+  const openGenDialog = () => { setGenView("choose"); setGenDialogOpen(true); };
+
+  const runBulkGeneration = async () => {
+    const ids = Array.from(selected);
+    if (ids.length === 0) return;
+    setGenRunning(true);
+    setGenView("progress");
+    const initial: Record<string, GenStatus> = {};
+    ids.forEach((id) => { initial[id] = "pending"; });
+    setGenStatuses(initial);
+
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const id of ids) {
+      setGenStatuses((s) => ({ ...s, [id]: "running" }));
+      const since = Date.now();
+      try {
+        if (genType === "mindmap") {
+          await requestMindmapGeneration(id);
+        } else if (genType === "podcast") {
+          if (!user) throw new Error("Session invalide.");
+          await requestPodcastGeneration(id);
+          const result = await pollForPodcast(user.id, id, since);
+          if (!result) throw new Error("Délai de génération dépassé.");
+        } else {
+          await requestAvatarVideoGeneration(id);
+          const result = await pollAvatarVideoStatus(id);
+          if (!result) throw new Error("Délai de génération dépassé.");
+          if (result.status === "failed") throw new Error(result.error ?? "Échec de la génération HeyGen.");
+        }
+        successCount += 1;
+        setGenStatuses((s) => ({ ...s, [id]: "done" }));
+      } catch (err) {
+        console.error(err);
+        failCount += 1;
+        setGenStatuses((s) => ({ ...s, [id]: "error" }));
+      }
+    }
+
+    setGenRunning(false);
+    if (failCount === 0) toast.success(`${successCount} leçon(s) générée(s) avec succès.`);
+    else toast.warning(`${successCount} réussie(s), ${failCount} échouée(s).`);
+  };
+
+  const finishGenDialog = () => {
+    setGenDialogOpen(false);
+    setGenView("choose");
+    setGenStatuses({});
+    setEditMode(false);
+    setSelected(new Set());
+  };
 
   if (loading) {
     return <div className="flex-1 flex items-center justify-center"><span className="text-sm" style={{ color: th.fg3 }}>Chargement de vos leçons…</span></div>;
@@ -52,14 +140,43 @@ export function LessonsPage() {
     );
   }
 
+  const greenBtn = { background: "rgba(74,222,128,0.12)", border: "1px solid rgba(74,222,128,0.35)", color: "#4ADE80" };
+
   return (
     <div className="flex-1 overflow-y-auto px-8 py-6">
-      <div className="mb-6 flex items-start justify-between">
+      <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Mes leçons</GT></h2>
           <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>{outline.formationName} · {outline.sections.length} modules · {totalLessons} leçons</p>
         </div>
+
+        {role === "admin" && !editMode && (
+          <button onClick={startEdit}
+            className="shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-80"
+            style={greenBtn}>
+            <Pencil className="w-3.5 h-3.5" />Éditer
+          </button>
+        )}
+        {role === "admin" && editMode && (
+          <div className="shrink-0 flex items-center gap-3">
+            <span className="text-xs font-semibold" style={{ color: th.fg3 }}>{selected.size} sélectionnée{selected.size > 1 ? "s" : ""}</span>
+            <button onClick={cancelEdit} className="px-3.5 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-80" style={{ background: "transparent", border: `1px solid ${th.sep}`, color: th.fg3 }}>
+              Annuler
+            </button>
+            <button onClick={openGenDialog} disabled={selected.size === 0}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-80 disabled:opacity-40 disabled:pointer-events-none"
+              style={greenBtn}>
+              Valider
+            </button>
+          </div>
+        )}
       </div>
+
+      {editMode && (
+        <div className="mb-4 px-4 py-2.5 rounded-xl text-xs" style={{ background: "rgba(74,222,128,0.08)", border: "1px solid rgba(74,222,128,0.25)", color: th.fg3 }}>
+          Sélectionne les leçons pour lesquelles générer un contenu IA (mindmap, podcast ou vidéo avatar), puis clique sur <strong style={{ color: "#4ADE80" }}>Valider</strong>.
+        </div>
+      )}
 
       <GCard className="mb-6"><div className="p-5 flex items-center gap-8">
         {[
@@ -87,7 +204,7 @@ export function LessonsPage() {
           const total = mod.lessons.length;
           const status: SectionStatus = total === 0 ? "locked" : done === total ? "complete" : modStates.some((s) => s.state !== "locked") ? "active" : "locked";
           const pct = total > 0 ? Math.round((done / total) * 100) : 0;
-          const open = openSection === mod.id;
+          const open = editMode || openSection === mod.id;
           const SC = {
             complete: { bg: "rgba(74,222,128,0.1)", text: "#4ADE80", border: "rgba(74,222,128,0.25)", label: "Validé ✓" },
             active: { bg: "rgba(155,93,229,0.1)", text: "#9B5DE5", border: "rgba(155,93,229,0.3)", label: "En cours" },
@@ -97,7 +214,7 @@ export function LessonsPage() {
           const nextLesson = modStates.find((s) => s.state === "available");
           return (
             <GCard key={mod.id}>
-              <button className="w-full text-left" onClick={() => setOpenSection(open ? null : mod.id)}>
+              <button className="w-full text-left" onClick={() => !editMode && setOpenSection(open ? null : mod.id)}>
                 <div className="px-5 py-4 flex items-center gap-4">
                   <div className="w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0" style={{ background: sc.bg, border: `1px solid ${sc.border}` }}>
                     {status === "locked" ? <Lock className="w-4 h-4" style={{ color: th.fg3 }} /> : status === "complete" ? <CheckCircle className="w-5 h-5 text-green-400" /> : <Play className="w-4 h-4" style={{ color: th.navAC }} />}
@@ -119,7 +236,7 @@ export function LessonsPage() {
                       )}
                     </div>
                   </div>
-                  <ChevronDown className="w-4 h-4 shrink-0 transition-transform" style={{ color: th.fg3, transform: open ? "rotate(180deg)" : "none" }} />
+                  {!editMode && <ChevronDown className="w-4 h-4 shrink-0 transition-transform" style={{ color: th.fg3, transform: open ? "rotate(180deg)" : "none" }} />}
                 </div>
               </button>
               {open && (
@@ -130,23 +247,26 @@ export function LessonsPage() {
                   {mod.lessons.map((lesson, i) => {
                     const s = stateFor(lesson.id);
                     const state = s?.state ?? "locked";
-                    const clickable = state !== "locked";
+                    const clickable = !editMode && state !== "locked";
                     return (
-                      <div key={lesson.id} className={cx("flex items-center gap-4 px-5 py-3 transition-colors", clickable && "cursor-pointer hover:opacity-80")}
-                        onClick={() => clickable && goLesson(lesson.id)}
+                      <div key={lesson.id} className={cx("flex items-center gap-4 px-5 py-3 transition-colors", (clickable || editMode) && "cursor-pointer hover:opacity-80")}
+                        onClick={() => { if (editMode) toggleLesson(lesson.id); else if (clickable) goLesson(lesson.id); }}
                         style={i < mod.lessons.length - 1 ? { borderBottom: `1px solid ${th.sep}` } : {}}>
+                        {editMode && (
+                          <Checkbox checked={selected.has(lesson.id)} onCheckedChange={() => toggleLesson(lesson.id)} onClick={(e) => e.stopPropagation()} className="shrink-0" />
+                        )}
                         <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: state === "completed" ? "rgba(74,222,128,0.12)" : state === "available" ? "rgba(155,93,229,0.12)" : "transparent", border: `1px solid ${state === "completed" ? "rgba(74,222,128,0.3)" : state === "available" ? "rgba(155,93,229,0.35)" : th.sep}` }}>
                           {state === "completed" ? <CheckCircle className="w-3.5 h-3.5 text-green-400" /> : state === "available" ? <Play className="w-3 h-3 ml-0.5" style={{ color: th.navAC }} /> : <Lock className="w-3 h-3" style={{ color: th.fg3 }} />}
                         </div>
                         <span className="flex-1 text-sm truncate" style={{ color: state === "completed" ? "rgba(74,222,128,0.7)" : state === "available" ? th.navAC : th.fg3 }}>{lesson.title}</span>
-                        {state === "available" && <span className="text-[10px] px-2 py-0.5 rounded-full font-bold shrink-0" style={{ background: "rgba(155,93,229,0.1)", color: th.navAC, border: "1px solid rgba(155,93,229,0.25)" }}>En cours</span>}
+                        {state === "available" && !editMode && <span className="text-[10px] px-2 py-0.5 rounded-full font-bold shrink-0" style={{ background: "rgba(155,93,229,0.1)", color: th.navAC, border: "1px solid rgba(155,93,229,0.25)" }}>En cours</span>}
                         <span className="text-xs font-mono shrink-0 flex items-center gap-1" style={{ color: th.fg3 }}>
                           {lesson.durationMinutes ? <><Clock className="w-3 h-3" />{lesson.durationMinutes}min</> : "—"}
                         </span>
                       </div>
                     );
                   })}
-                  {nextLesson && (
+                  {nextLesson && !editMode && (
                     <div className="px-5 py-3" style={{ borderTop: `1px solid ${th.sep}` }}>
                       <VBtn onClick={() => goLesson(nextLesson.lesson.id)} sm><span className="flex items-center gap-2"><Play className="w-3.5 h-3.5" />Reprendre le module</span></VBtn>
                     </div>
@@ -157,6 +277,72 @@ export function LessonsPage() {
           );
         })}
       </div>
+
+      <Dialog open={genDialogOpen} onOpenChange={(v) => { if (!genRunning) setGenDialogOpen(v); }}>
+        <DialogContent className="sm:max-w-md">
+          {genView === "choose" ? (
+            <>
+              <DialogHeader>
+                <DialogTitle>Générer un contenu IA</DialogTitle>
+                <DialogDescription>
+                  Pour {selected.size} leçon{selected.size > 1 ? "s" : ""} sélectionnée{selected.size > 1 ? "s" : ""} — personnalisé automatiquement à partir du cours et du profil de l'élève, comme dans une leçon normale.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-2 py-2">
+                {GEN_TYPES.map(({ id, label, hint, Icon }) => (
+                  <button key={id} onClick={() => setGenType(id)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all"
+                    style={{ background: genType === id ? "rgba(155,93,229,0.1)" : "transparent", border: `1px solid ${genType === id ? "#9B5DE5" : th.sep}` }}>
+                    <Icon className="w-4 h-4 shrink-0" style={{ color: genType === id ? th.navAC : th.fg3 }} />
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold" style={{ color: th.fg }}>{label}</div>
+                      <div className="text-xs" style={{ color: th.fg3 }}>{hint}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+              <DialogFooter>
+                <button onClick={() => setGenDialogOpen(false)} className="px-4 py-2 rounded-xl text-sm font-semibold" style={{ background: "transparent", border: `1px solid ${th.sep}`, color: th.fg3 }}>
+                  Annuler
+                </button>
+                <button onClick={() => void runBulkGeneration()} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold" style={greenBtn}>
+                  Générer
+                </button>
+              </DialogFooter>
+            </>
+          ) : (
+            <>
+              <DialogHeader>
+                <DialogTitle>Génération en cours</DialogTitle>
+                <DialogDescription>
+                  {genRunning ? "Ne ferme pas cette fenêtre — chaque leçon est générée l'une après l'autre." : "Terminé."}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="max-h-72 overflow-y-auto space-y-1.5 py-1">
+                {Array.from(selected).map((id) => {
+                  const lesson = outline.sections.flatMap((s) => s.lessons).find((l) => l.id === id);
+                  const st = genStatuses[id] ?? "pending";
+                  return (
+                    <div key={id} className="flex items-center gap-3 px-3 py-2 rounded-lg" style={{ background: th.isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)" }}>
+                      {st === "done" && <CheckCircle className="w-4 h-4 shrink-0 text-green-400" />}
+                      {st === "error" && <XCircle className="w-4 h-4 shrink-0 text-red-400" />}
+                      {st === "running" && <Loader2 className="w-4 h-4 shrink-0 animate-spin" style={{ color: th.navAC }} />}
+                      {st === "pending" && <div className="w-4 h-4 shrink-0 rounded-full" style={{ border: `1px solid ${th.sep}` }} />}
+                      <span className="flex-1 text-xs truncate" style={{ color: th.fg }}>{lesson?.title ?? id}</span>
+                    </div>
+                  );
+                })}
+              </div>
+              <DialogFooter>
+                <button onClick={finishGenDialog} disabled={genRunning}
+                  className="px-4 py-2 rounded-xl text-sm font-semibold disabled:opacity-40 disabled:pointer-events-none" style={greenBtn}>
+                  Terminer
+                </button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
