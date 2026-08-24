@@ -6,6 +6,7 @@
 // au moment de parser la réponse JSON/base64 de Gemini.
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse, base64ToUint8Array } from "../_shared/podcast-utils.ts";
+import { resolvePodcastFormat } from "../_shared/podcast-formats.ts";
 
 const GEMINI_TTS_MODEL = "gemini-3.1-flash-tts-preview";
 const VOICE_A = "Puck";
@@ -20,10 +21,11 @@ Deno.serve(async (req) => {
     const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
     if (!geminiApiKey) return jsonResponse({ error: "GEMINI_API_KEY non configurée côté serveur." }, 500);
 
-    const { lessonId, chunkIndex, chunkText } = await req.json();
+    const { lessonId, chunkIndex, chunkText, variant } = await req.json();
     if (!lessonId || chunkIndex === undefined || !chunkText) {
       return jsonResponse({ error: "lessonId, chunkIndex ou chunkText manquant." }, 400);
     }
+    const format = resolvePodcastFormat(variant);
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) return jsonResponse({ error: "Non authentifié." }, 401);
@@ -64,7 +66,7 @@ Deno.serve(async (req) => {
     }
 
     const pcmBytes = base64ToUint8Array(audioContent.data);
-    const storagePath = `${userId}/tmp/${lessonId}/${chunkIndex}.pcm`;
+    const storagePath = `${userId}/tmp/${lessonId}/${format.id}/${chunkIndex}.pcm`;
     const { error: uploadErr } = await supabase.storage
       .from("lesson-podcasts")
       .upload(storagePath, pcmBytes, { contentType: "application/octet-stream", upsert: true });

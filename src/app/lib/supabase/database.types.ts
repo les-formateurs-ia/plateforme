@@ -188,6 +188,7 @@ export interface Database {
           source_prompt: string;
           content: Record<string, unknown>;
           model: string | null;
+          variant: string | null;
           regenerated_from: string | null;
           created_at: string;
         };
@@ -199,6 +200,7 @@ export interface Database {
           source_prompt: string;
           content: Record<string, unknown>;
           model?: string | null;
+          variant?: string | null;
           regenerated_from?: string | null;
           created_at?: string;
         };

@@ -8,13 +8,15 @@
 // via getMyPodcast() côté client.
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse, runInBackground, splitScriptIntoChunks } from "../_shared/podcast-utils.ts";
+import { resolvePodcastFormat } from "../_shared/podcast-formats.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
 
   try {
-    const { lessonId, script } = await req.json();
+    const { lessonId, script, variant } = await req.json();
     if (!lessonId || !script) return jsonResponse({ error: "lessonId ou script manquant." }, 400);
+    const format = resolvePodcastFormat(variant);
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) return jsonResponse({ error: "Non authentifié." }, 401);
@@ -46,12 +48,12 @@ Deno.serve(async (req) => {
         let sampleRate = 24000;
         let channels = 1;
         for (let i = 0; i < chunks.length; i++) {
-          const result = await callFn("process-podcast-chunk", { lessonId, chunkIndex: i, chunkText: chunks[i] });
+          const result = await callFn("process-podcast-chunk", { lessonId, chunkIndex: i, chunkText: chunks[i], variant: format.id });
           sampleRate = result.sampleRate ?? sampleRate;
           channels = result.channels ?? channels;
         }
-        await callFn("finalize-podcast-audio", { lessonId, chunkCount: chunks.length, sampleRate, channels, transcript: script });
-        console.log(`Podcast (audio) généré pour user=${userId} lesson=${lessonId} (${chunks.length} morceaux)`);
+        await callFn("finalize-podcast-audio", { lessonId, chunkCount: chunks.length, sampleRate, channels, transcript: script, variant: format.id });
+        console.log(`Podcast (audio, format=${format.id}) généré pour user=${userId} lesson=${lessonId} (${chunks.length} morceaux)`);
       } catch (err) {
         console.error(`Échec synthèse audio user=${userId} lesson=${lessonId}:`, err);
       }

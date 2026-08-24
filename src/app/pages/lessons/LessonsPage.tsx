@@ -14,6 +14,7 @@ import { Checkbox } from "@/app/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/app/components/ui/dialog";
 import { requestAvatarVideoGeneration, pollAvatarVideoStatus } from "@/app/lib/avatarVideos";
 import { requestPodcastGeneration, pollForPodcast } from "@/app/lib/podcasts";
+import { DEFAULT_PODCAST_VARIANT } from "@/app/lib/podcastFormats";
 import { requestMindmapGeneration } from "@/app/lib/mindmaps";
 
 type SectionStatus = "complete" | "active" | "locked";
@@ -90,8 +91,8 @@ export function LessonsPage() {
           await requestMindmapGeneration(id);
         } else if (genType === "podcast") {
           if (!user) throw new Error("Session invalide.");
-          await requestPodcastGeneration(id);
-          const result = await pollForPodcast(user.id, id, since);
+          await requestPodcastGeneration(id, DEFAULT_PODCAST_VARIANT);
+          const result = await pollForPodcast(user.id, id, DEFAULT_PODCAST_VARIANT, since);
           if (!result) throw new Error("Délai de génération dépassé.");
         } else {
           await requestAvatarVideoGeneration(id);

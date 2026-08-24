@@ -22,7 +22,8 @@ import {
   getLessonDetail, ensureLessonStarted, addTimeSpent, submitQuiz, flattenLessons, QUIZ_PASS_THRESHOLD,
   type LessonDetail, type QuizAnswer,
 } from "@/app/lib/learning";
-import { getMyPodcast, getPodcastSignedUrl, requestPodcastGeneration, pollForPodcast, type Podcast } from "@/app/lib/podcasts";
+import { getMyPodcasts, getPodcastSignedUrl, requestPodcastGeneration, pollForPodcast, type Podcast } from "@/app/lib/podcasts";
+import { PODCAST_FORMATS, type PodcastVariantId } from "@/app/lib/podcastFormats";
 import { getMyMindmap, requestMindmapGeneration, type MindmapTree } from "@/app/lib/mindmaps";
 import { getChatHistory, sendLessonChatMessage } from "@/app/lib/chat";
 import { getMyAvatarVideo, getAvatarVideoSignedUrl, requestAvatarVideoGeneration, pollAvatarVideoStatus, type AvatarVideo } from "@/app/lib/avatarVideos";
@@ -41,10 +42,10 @@ export function LessonPage() {
   type LTab = "video" | "transcript" | "mindmap" | "podcast" | "avatar";
   const [tab, setTab] = useState<LTab>("video");
 
-  const [podcast, setPodcast] = useState<Podcast | null>(null);
-  const [podcastAudioUrl, setPodcastAudioUrl] = useState<string | null>(null);
+  type PodcastVariantState = { podcast: Podcast; audioUrl: string };
+  const [podcastByVariant, setPodcastByVariant] = useState<Partial<Record<PodcastVariantId, PodcastVariantState>>>({});
   const [podcastLoading, setPodcastLoading] = useState(false);
-  const [podcastGenerating, setPodcastGenerating] = useState(false);
+  const [podcastGeneratingVariant, setPodcastGeneratingVariant] = useState<PodcastVariantId | null>(null);
 
   const [avatarVideo, setAvatarVideo] = useState<AvatarVideo | null>(null);
   const [avatarVideoUrl, setAvatarVideoUrl] = useState<string | null>(null);
@@ -118,7 +119,7 @@ export function LessonPage() {
       setLessonLoading(true);
       setLessonError(null);
       setQuizStep(0); setSelected(null); setAnswers([]); setQuizResult(null); setRetaking(false); setTab("video");
-      setPodcast(null); setPodcastAudioUrl(null);
+      setPodcastByVariant({});
       setMindmap(null);
       setAvatarVideo(null); setAvatarVideoUrl(null);
       try {
@@ -162,9 +163,11 @@ export function LessonPage() {
     if (!user || !lessonId) return;
     setPodcastLoading(true);
     try {
-      const p = await getMyPodcast(user.id, lessonId);
-      setPodcast(p);
-      setPodcastAudioUrl(p ? await getPodcastSignedUrl(p.storagePath) : null);
+      const podcasts = await getMyPodcasts(user.id, lessonId);
+      const entries = await Promise.all(
+        podcasts.map(async (p) => [p.variant, { podcast: p, audioUrl: await getPodcastSignedUrl(p.storagePath) }] as const),
+      );
+      setPodcastByVariant(Object.fromEntries(entries));
     } catch (err) {
       console.error(err);
     } finally {
@@ -202,26 +205,26 @@ export function LessonPage() {
     }
   };
 
-  const handleGeneratePodcast = async () => {
+  const handleGeneratePodcast = async (variant: PodcastVariantId) => {
     if (!lessonId || !user) return;
-    setPodcastGenerating(true);
+    setPodcastGeneratingVariant(variant);
     const startedAt = Date.now();
     try {
-      await requestPodcastGeneration(lessonId);
+      await requestPodcastGeneration(lessonId, variant);
       toast.info("Génération du podcast en cours — ça peut prendre 1 à 2 minutes.");
-      const result = await pollForPodcast(user.id, lessonId, startedAt);
+      const result = await pollForPodcast(user.id, lessonId, variant, startedAt);
       if (!result) {
         toast.error("La génération prend plus de temps que prévu. Réessaie dans un instant.");
         return;
       }
-      setPodcast(result);
-      setPodcastAudioUrl(await getPodcastSignedUrl(result.storagePath));
+      const audioUrl = await getPodcastSignedUrl(result.storagePath);
+      setPodcastByVariant((prev) => ({ ...prev, [variant]: { podcast: result, audioUrl } }));
       toast.success("Podcast généré avec succès.");
     } catch (err) {
       console.error(err);
       toast.error(err instanceof Error ? err.message : "Impossible de générer le podcast.");
     } finally {
-      setPodcastGenerating(false);
+      setPodcastGeneratingVariant(null);
     }
   };
 
@@ -445,33 +448,72 @@ export function LessonPage() {
                   )}
                 </div>
               )}
-              {tab === "podcast" && (
-                <div className="absolute inset-0 flex items-center justify-center p-6" style={{ background: "linear-gradient(135deg,#0d0522,#1a0b3c 45%,#08060F)" }}>
-                  <div className="text-center max-w-md w-full">
-                    <Headphones className="w-6 h-6 mx-auto mb-2 text-white/30" />
-                    {podcastLoading ? (
-                      <p className="text-sm text-white/60">Chargement…</p>
-                    ) : podcastAudioUrl ? (
-                      <>
-                        <p className="text-sm text-white/60 mb-3">Ton podcast personnalisé pour cette leçon</p>
-                        <audio src={podcastAudioUrl} controls className="w-full" />
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-sm text-white/60">Pas encore de podcast personnalisé pour cette leçon.</p>
-                        {role !== "admin" && <p className="text-xs text-white/30 mt-1">Bientôt disponible.</p>}
-                      </>
-                    )}
-                    {role === "admin" && (
-                      <button onClick={handleGeneratePodcast} disabled={podcastGenerating}
-                        className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80 disabled:opacity-50"
-                        style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff" }}>
-                        <Wand2 className="w-4 h-4" />{podcastGenerating ? "Génération en cours…" : podcastAudioUrl ? "Régénérer le podcast" : "Générer le podcast"}
-                      </button>
-                    )}
+              {tab === "podcast" && (() => {
+                const generatedVariants = Object.keys(podcastByVariant) as PodcastVariantId[];
+                const remainingFormats = PODCAST_FORMATS.filter((f) => !generatedVariants.includes(f.id));
+                return (
+                  <div className="absolute inset-0 overflow-y-auto p-6" style={{ background: "linear-gradient(135deg,#0d0522,#1a0b3c 45%,#08060F)" }}>
+                    <div className="max-w-md w-full mx-auto space-y-4">
+                      {podcastLoading && (
+                        <div className="text-center pt-6"><Headphones className="w-6 h-6 mx-auto mb-2 text-white/30" /><p className="text-sm text-white/60">Chargement…</p></div>
+                      )}
+
+                      {!podcastLoading && generatedVariants.length === 0 && role !== "admin" && (
+                        <div className="text-center pt-6">
+                          <Headphones className="w-6 h-6 mx-auto mb-2 text-white/30" />
+                          <p className="text-sm text-white/60">Pas encore de podcast personnalisé pour cette leçon.</p>
+                          <p className="text-xs text-white/30 mt-1">Bientôt disponible.</p>
+                        </div>
+                      )}
+
+                      {!podcastLoading && generatedVariants.map((variantId) => {
+                        const format = PODCAST_FORMATS.find((f) => f.id === variantId);
+                        const entry = podcastByVariant[variantId];
+                        if (!format || !entry) return null;
+                        const isGeneratingThis = podcastGeneratingVariant === variantId;
+                        return (
+                          <div key={variantId} className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                            <div className="flex items-center gap-2 mb-2">
+                              <format.Icon className="w-4 h-4 text-white/50 shrink-0" />
+                              <span className="text-sm font-semibold text-white">{format.label}</span>
+                              {role === "admin" && (
+                                <button onClick={() => handleGeneratePodcast(variantId)} disabled={podcastGeneratingVariant !== null}
+                                  className="ml-auto flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all hover:opacity-80 disabled:opacity-50 shrink-0"
+                                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff" }}>
+                                  <Wand2 className="w-3 h-3" />{isGeneratingThis ? "Génération…" : "Régénérer"}
+                                </button>
+                              )}
+                            </div>
+                            <audio src={entry.audioUrl} controls className="w-full" />
+                          </div>
+                        );
+                      })}
+
+                      {!podcastLoading && role === "admin" && remainingFormats.length > 0 && (
+                        <div>
+                          <p className="text-sm text-white/60 mb-3 text-center">
+                            {generatedVariants.length === 0 ? "Choisis un format de podcast pour cette leçon :" : "Générer un autre format :"}
+                          </p>
+                          <div className="space-y-2">
+                            {remainingFormats.map(({ id, label, hint, Icon }) => (
+                              <button key={id} onClick={() => handleGeneratePodcast(id)} disabled={podcastGeneratingVariant !== null}
+                                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all hover:opacity-80 disabled:opacity-50"
+                                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.12)" }}>
+                                <Icon className="w-4 h-4 shrink-0 text-white/60" />
+                                <div className="min-w-0 flex-1">
+                                  <div className="text-sm font-semibold text-white">{label}</div>
+                                  <div className="text-xs text-white/40">{hint}</div>
+                                </div>
+                                {podcastGeneratingVariant === id && <span className="text-[11px] text-white/50 shrink-0">Génération…</span>}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
               {tab === "avatar" && (
                 <div className="absolute inset-0 flex items-center justify-center p-6" style={{ background: "linear-gradient(135deg,#0d0522,#1a0b3c 45%,#08060F)" }}>
                   <div className="text-center max-w-md w-full">

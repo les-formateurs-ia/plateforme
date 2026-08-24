@@ -3,7 +3,7 @@
 -- de nouvelle colonne, juste de faire passer un compte de 'student' à 'admin'.
 update public.profiles
 set role = 'admin'
-where email = 'contact@les-formateurs-ia.fr';  -- adapte l'email si besoin
+where email = 'yyuliapvv@gmail.com';  -- adapte l'email si besoin
 
 -- Vérification :
 select id, email, role, must_onboard from public.profiles;
