@@ -99,11 +99,11 @@ export function ProfilePage() {
     <div className="flex-1 overflow-y-auto px-8 py-6 space-y-5">
       <GCard glow>
         <div className="p-6 flex items-center gap-6">
-          <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-black shrink-0" style={{ background: "linear-gradient(135deg,#7C3AED,#DDAEEA)", color: "#08060F" }}>{name[0]}</div>
+          <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-black shrink-0" style={{ background: "linear-gradient(135deg,#b58de0,#dbacf0)", color: "#08060F" }}>{name[0]}</div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-1">
               <h2 className="text-xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif", color: th.fg }}>{name}</h2>
-              <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: "rgba(155,93,229,0.1)", color: th.navAC, border: "1px solid rgba(155,93,229,0.25)" }}>Apprenant IA Pro</span>
+              <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: "rgba(181,141,224,0.1)", color: th.navAC, border: "1px solid rgba(181,141,224,0.25)" }}>Apprenant IA Pro</span>
             </div>
             <p className="text-sm mb-3" style={{ color: th.fg3 }}>{profile.profession || "Chef de projet digital"}{enrolledSince && ` · En formation depuis ${formatEnrolledSince(enrolledSince)}`}</p>
             <div className="flex items-center gap-6">
@@ -127,10 +127,10 @@ export function ProfilePage() {
         </div>
       </GCard>
 
-      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background: th.isDark ? "rgba(255,255,255,0.04)" : "rgba(155,93,229,0.06)", border: `1px solid ${th.sep}` }}>
+      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background: th.isDark ? "rgba(255,255,255,0.04)" : "rgba(181,141,224,0.06)", border: `1px solid ${th.sep}` }}>
         {(["overview", "badges", "settings"] as const).map(t => (
           <button key={t} onClick={() => setTab(t)} className="px-5 py-2 rounded-lg text-sm font-semibold transition-all"
-            style={tab === t ? { background: th.isDark ? "rgba(155,93,229,0.14)" : "rgba(255,255,255,0.8)", color: th.navAC, border: `1px solid rgba(155,93,229,0.25)` } : { color: th.fg3, background: "transparent", border: "1px solid transparent" }}>
+            style={tab === t ? { background: th.isDark ? "rgba(181,141,224,0.14)" : "rgba(255,255,255,0.8)", color: th.navAC, border: `1px solid rgba(181,141,224,0.25)` } : { color: th.fg3, background: "transparent", border: "1px solid transparent" }}>
             {t === "overview" ? "Vue d'ensemble" : t === "badges" ? "Badges" : "Préférences"}
           </button>
         ))}
@@ -139,7 +139,7 @@ export function ProfilePage() {
       {tab === "overview" && (
         <div className="grid grid-cols-2 gap-5">
           <GCard><div className="p-5">
-            <div className="flex items-center gap-2 mb-4"><Trophy className="w-4 h-4 text-amber-400" /><span className="text-sm font-black" style={{ color: th.fg }}>Progression certification</span></div>
+            <div className="flex items-center gap-2 mb-4"><Trophy className="w-4 h-4 text-[#fbc2ad]" /><span className="text-sm font-black" style={{ color: th.fg }}>Progression certification</span></div>
             <div className="space-y-3">
               {certChapters.length === 0 && <p className="text-xs" style={{ color: th.fg3 }}>Aucun module pour l'instant.</p>}
               {certChapters.map(({ title, pct, done }, i) => {
@@ -148,14 +148,14 @@ export function ProfilePage() {
                 <div key={title}>
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0" style={{ background: done ? "rgba(74,222,128,0.15)" : active ? "rgba(155,93,229,0.12)" : "transparent", border: `1px solid ${done ? "rgba(74,222,128,0.4)" : active ? "rgba(155,93,229,0.3)" : th.sep}` }}>
-                        {done ? <CheckCircle className="w-2.5 h-2.5 text-green-400" /> : active ? <div className="w-1.5 h-1.5 rounded-full" style={{ background: th.navAC }} /> : <Lock className="w-2 h-2" style={{ color: th.fg3 }} />}
+                      <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0" style={{ background: done ? "rgba(106,222,177,0.15)" : active ? "rgba(181,141,224,0.12)" : "transparent", border: `1px solid ${done ? "rgba(106,222,177,0.4)" : active ? "rgba(181,141,224,0.3)" : th.sep}` }}>
+                        {done ? <CheckCircle className="w-2.5 h-2.5 text-[#6adeb1]" /> : active ? <div className="w-1.5 h-1.5 rounded-full" style={{ background: th.navAC }} /> : <Lock className="w-2 h-2" style={{ color: th.fg3 }} />}
                       </div>
-                      <span className="text-xs" style={{ color: done ? "rgba(74,222,128,0.8)" : active ? th.navAC : th.fg3 }}>{title}</span>
+                      <span className="text-xs" style={{ color: done ? "rgba(106,222,177,0.8)" : active ? th.navAC : th.fg3 }}>{title}</span>
                     </div>
-                    <span className="text-xs font-bold" style={{ color: done ? "#4ADE80" : active ? th.navAC : th.fg3 }}>{pct}%</span>
+                    <span className="text-xs font-bold" style={{ color: done ? "#6adeb1" : active ? th.navAC : th.fg3 }}>{pct}%</span>
                   </div>
-                  <div className="h-1 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.05)" : "rgba(155,93,229,0.08)" }}><div className="h-full rounded-full" style={{ width: `${pct}%`, background: done ? "linear-gradient(90deg,#16A34A,#4ADE80)" : active ? "linear-gradient(90deg,#9B5DE5,#DDAEEA)" : "transparent" }} /></div>
+                  <div className="h-1 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.05)" : "rgba(181,141,224,0.08)" }}><div className="h-full rounded-full" style={{ width: `${pct}%`, background: done ? "linear-gradient(90deg,#78d5e2,#6adeb1)" : active ? "linear-gradient(90deg,#b58de0,#dbacf0)" : "transparent" }} /></div>
                 </div>
                 );
               })}
@@ -169,7 +169,7 @@ export function ProfilePage() {
             <div className="text-[10px] font-black uppercase tracking-widest mb-3" style={{ color: th.fg3 }}>Activité — 4 semaines</div>
             <div className="flex items-end gap-1 h-16">
               {activity.map(({ date, count }, i) => (
-                <div key={date} title={`${date} : ${count}`} className="flex-1 rounded-sm" style={{ height: `${Math.max(4, (count / maxActivity) * 100)}%`, background: i === activity.length - 1 ? "linear-gradient(to top,#9B5DE5,#DDAEEA)" : "rgba(155,93,229,0.25)", opacity: count > 0 ? 1 : 0.25 }} />
+                <div key={date} title={`${date} : ${count}`} className="flex-1 rounded-sm" style={{ height: `${Math.max(4, (count / maxActivity) * 100)}%`, background: i === activity.length - 1 ? "linear-gradient(to top,#b58de0,#dbacf0)" : "rgba(181,141,224,0.25)", opacity: count > 0 ? 1 : 0.25 }} />
               ))}
             </div>
           </div></GCard>
@@ -184,7 +184,7 @@ export function ProfilePage() {
               <GCard key={id}><div className={cx("p-5 text-center", !done && "opacity-40")} title={description ?? undefined}>
                 <span className={cx("text-4xl block mb-3", !done && "grayscale")}>{icon ?? "🏅"}</span>
                 <div className="text-sm font-bold mb-1" style={{ color: done ? th.fg : th.fg3 }}>{label}</div>
-                {done ? <span className="text-[10px] font-bold text-green-500">Obtenu ✓</span> : <span className="text-[10px] flex items-center justify-center gap-1" style={{ color: th.fg3 }}><Lock className="w-3 h-3" />Non débloqué</span>}
+                {done ? <span className="text-[10px] font-bold text-[#6adeb1]">Obtenu ✓</span> : <span className="text-[10px] flex items-center justify-center gap-1" style={{ color: th.fg3 }}><Lock className="w-3 h-3" />Non débloqué</span>}
               </div></GCard>
             );
           })}
@@ -213,10 +213,10 @@ export function ProfilePage() {
                   placeholder="Decris ton objectif professionnel..."
                   className="w-full rounded-xl px-4 py-3 text-sm g-input resize-none"
                 />
-                {objectiveError && <p className="text-xs" style={{ color: "#F87171" }}>{objectiveError}</p>}
+                {objectiveError && <p className="text-xs" style={{ color: "#fbc2ad" }}>{objectiveError}</p>}
                 <div className="flex items-center gap-2">
                   <button onClick={saveObjective} disabled={objectiveSaving} className="px-4 py-2 rounded-lg text-xs font-bold transition-all hover:opacity-80 disabled:opacity-50"
-                    style={{ background: "rgba(155,93,229,0.12)", border: "1px solid rgba(155,93,229,0.25)", color: th.navAC }}>
+                    style={{ background: "rgba(181,141,224,0.12)", border: "1px solid rgba(181,141,224,0.25)", color: th.navAC }}>
                     {objectiveSaving ? "Enregistrement..." : "Enregistrer"}
                   </button>
                   <button onClick={() => { setObjectiveDraft(currentObjective); setObjectiveEditing(false); setObjectiveError(null); }} disabled={objectiveSaving}
@@ -238,8 +238,8 @@ export function ProfilePage() {
               <div className="text-xs" style={{ color: th.fg3 }}>{th.isDark ? "Mode sombre activé — ambiance dark glass" : "Mode clair activé — interface lumineuse"}</div>
             </div>
             <button onClick={th.toggleTheme} className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80"
-              style={{ background: th.isDark ? "rgba(255,255,255,0.08)" : "rgba(155,93,229,0.1)", border: `1px solid ${th.sep}`, color: th.fg }}>
-              {th.isDark ? <><Sun className="w-4 h-4 text-amber-400" />Passer en mode clair</> : <><Moon className="w-4 h-4" style={{ color: th.navAC }} />Passer en mode sombre</>}
+              style={{ background: th.isDark ? "rgba(255,255,255,0.08)" : "rgba(181,141,224,0.1)", border: `1px solid ${th.sep}`, color: th.fg }}>
+              {th.isDark ? <><Sun className="w-4 h-4 text-[#fbc2ad]" />Passer en mode clair</> : <><Moon className="w-4 h-4" style={{ color: th.navAC }} />Passer en mode sombre</>}
             </button>
           </div></GCard>
 
@@ -273,7 +273,7 @@ export function ProfilePage() {
               <div className="text-xs" style={{ color: th.fg3 }}>Connecté·e en tant que {user?.email}</div>
             </div>
             <button onClick={handleSignOut} className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80"
-              style={{ background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.25)", color: "#F87171" }}>
+              style={{ background: "rgba(251,194,173,0.1)", border: "1px solid rgba(251,194,173,0.25)", color: "#fbc2ad" }}>
               <LogOut className="w-4 h-4" />Se déconnecter
             </button>
           </div></GCard>

@@ -27,18 +27,18 @@ export const mkCSS = (isDark: boolean) => `
   }
   .fade-up { animation: fade-up 0.4s ease both; }
   .g-input {
-    background: ${isDark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.85)"};
-    border: 1px solid ${isDark ? "rgba(221,174,234,0.14)" : "rgba(155,93,229,0.22)"};
-    color: ${isDark ? "rgba(242,235,249,0.85)" : "rgba(26,13,46,0.85)"};
+    background: ${isDark ? "rgba(255,255,255,0.05)" : "rgba(15,14,20,0.03)"};
+    border: 1px solid ${isDark ? "rgba(255,255,255,0.1)" : "rgba(15,14,20,0.1)"};
+    color: ${isDark ? "rgba(255,255,255,0.9)" : "rgba(15,14,20,0.9)"};
     transition: border-color 0.2s, box-shadow 0.2s;
   }
-  .g-input::placeholder { color: ${isDark ? "rgba(242,235,249,0.22)" : "rgba(26,13,46,0.28)"}; }
+  .g-input::placeholder { color: ${isDark ? "rgba(255,255,255,0.3)" : "rgba(15,14,20,0.3)"}; }
   .g-input:focus {
     outline: none;
-    border-color: rgba(155,93,229,0.5);
-    box-shadow: 0 0 0 3px rgba(155,93,229,0.08), 0 0 20px rgba(155,93,229,0.1);
+    border-color: rgba(181,141,224,0.5);
+    box-shadow: 0 0 0 3px rgba(181,141,224,0.12);
   }
   ::-webkit-scrollbar { width:4px; height:4px; }
   ::-webkit-scrollbar-track { background:transparent; }
-  ::-webkit-scrollbar-thumb { background:rgba(155,93,229,0.2); border-radius:4px; }
+  ::-webkit-scrollbar-thumb { background:rgba(181,141,224,0.2); border-radius:4px; }
 `;

@@ -258,7 +258,7 @@ export function AdminCourseEditorPage() {
           </div>
         )}
 
-        {error && <p className="text-xs" style={{ color: "#F87171" }}>{error}</p>}
+        {error && <p className="text-xs" style={{ color: "#fbc2ad" }}>{error}</p>}
 
         <ShimBtn onClick={saveCourse} disabled={saving}>{saving ? "Enregistrement…" : "Enregistrer"}</ShimBtn>
       </div></GCard>
@@ -288,7 +288,7 @@ export function AdminCourseEditorPage() {
                       <span className="text-xs shrink-0" style={{ color: th.fg3 }}>{lessons.length} leçon{lessons.length !== 1 ? "s" : ""}</span>
                       <button onClick={() => moveSection(index, -1)} disabled={index === 0} className="disabled:opacity-20"><ChevronUp className="w-4 h-4" style={{ color: th.fg3 }} /></button>
                       <button onClick={() => moveSection(index, 1)} disabled={index === sections.length - 1} className="disabled:opacity-20"><ChevronDown className="w-4 h-4" style={{ color: th.fg3 }} /></button>
-                      <button onClick={() => deleteSection(section.id)}><Trash2 className="w-4 h-4" style={{ color: "#F87171" }} /></button>
+                      <button onClick={() => deleteSection(section.id)}><Trash2 className="w-4 h-4" style={{ color: "#fbc2ad" }} /></button>
                       <button onClick={() => setExpanded((m) => ({ ...m, [section.id]: !isOpen }))}>
                         <ChevronRightIcon className="w-4 h-4 transition-transform" style={{ color: th.fg3, transform: isOpen ? "rotate(90deg)" : "none" }} />
                       </button>
@@ -304,7 +304,7 @@ export function AdminCourseEditorPage() {
                               className="flex items-center gap-1 text-xs font-semibold hover:opacity-70" style={{ color: th.navAC }}>
                               <ExternalLink className="w-3.5 h-3.5" />Aperçu
                             </a>
-                            <button onClick={() => deleteLesson(section.id, lesson.id)}><Trash2 className="w-3.5 h-3.5" style={{ color: "#F87171" }} /></button>
+                            <button onClick={() => deleteLesson(section.id, lesson.id)}><Trash2 className="w-3.5 h-3.5" style={{ color: "#fbc2ad" }} /></button>
                           </div>
                         ))}
                         <div className="px-4 py-2.5">
@@ -333,7 +333,7 @@ export function AdminCourseEditorPage() {
             </div>
             <div className="space-y-2">
               {enrolled.map((s) => (
-                <div key={s.id} className="flex items-center gap-3 px-3 py-2.5 rounded-xl" style={{ background: th.isDark ? "rgba(255,255,255,0.03)" : "rgba(155,93,229,0.04)", border: `1px solid ${th.sep}` }}>
+                <div key={s.id} className="flex items-center gap-3 px-3 py-2.5 rounded-xl" style={{ background: th.isDark ? "rgba(255,255,255,0.03)" : "rgba(181,141,224,0.04)", border: `1px solid ${th.sep}` }}>
                   <span className="flex-1 text-sm" style={{ color: th.fg2 }}>{s.first_name || s.email} <span style={{ color: th.fg3 }}>({s.email})</span></span>
                   <button onClick={() => unenroll(s.id)}><X className="w-4 h-4" style={{ color: th.fg3 }} /></button>
                 </div>

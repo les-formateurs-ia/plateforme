@@ -78,7 +78,7 @@ export const PROMPT_CATS = [
 
 export const AI_TOOLS = [
   { name: "ChatGPT", sub: "GPT-4o", color: "#10A37F", letter: "G" },
-  { name: "Claude", sub: "Sonnet 4.5", color: "#DDAEEA", letter: "C" },
+  { name: "Claude", sub: "Sonnet 4.5", color: "#dbacf0", letter: "C" },
   { name: "Gemini", sub: "Pro 2.0", color: "#4285F4", letter: "G" },
   { name: "Mistral", sub: "Large 2", color: "#FF7000", letter: "M" },
   { name: "Perplexity", sub: "Pro", color: "#20808D", letter: "P" },

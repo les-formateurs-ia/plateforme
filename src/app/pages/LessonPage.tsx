@@ -31,6 +31,36 @@ import { MindmapView } from "@/app/components/lesson/MindmapView";
 
 const DEFAULT_AI = "Je suis ton Copilote IA. Pose-moi n'importe quelle question sur cette leçon ou sur comment l'appliquer à ton métier 👋";
 
+// Le contenu de cours est rédigé par les formateurs et mentionne parfois les critères de
+// certification (ex: "Lien avec la certification — Cr1.3 : ..."), une info interne qui ne
+// doit pas apparaître côté élève. On la retire à l'affichage plutôt qu'en base, pour ne pas
+// devoir ré-éditer chaque leçon existante.
+function stripCertificationMentions(markdown: string): string {
+  const lines = markdown.split("\n");
+  const kept: string[] = [];
+  let skipping = false;
+  let skipLevel = 0;
+  for (const line of lines) {
+    const heading = line.match(/^(#{1,6})\s+(.*)$/);
+    if (heading) {
+      const level = heading[1].length;
+      if (skipping && level <= skipLevel) skipping = false;
+      if (!skipping && /lien avec la certification/i.test(heading[2])) {
+        skipping = true;
+        skipLevel = level;
+        continue;
+      }
+    }
+    if (!skipping) kept.push(line);
+  }
+  return kept
+    .join("\n")
+    .split(/\n{2,}/)
+    .filter((block) => !/^[\s>*_-]*\**\s*lien avec la certification/i.test(block.trim()))
+    .join("\n\n")
+    .trim();
+}
+
 export function LessonPage() {
   const th = useTh();
   const { profile } = useProfile();
@@ -76,6 +106,7 @@ export function LessonPage() {
   const [chatIn, setChatIn] = useState("");
   const [typing, setTyping] = useState(false);
   const [voice, setVoice] = useState(false);
+  const [assistantOpen, setAssistantOpen] = useState(true);
   const chatEnd = useRef<HTMLDivElement>(null);
   const firstName = profile.name.split(" ")[0] || "Alex";
 
@@ -360,14 +391,14 @@ export function LessonPage() {
   if (lessonError || !lesson) {
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-3" style={{ background: th.bg }}>
-        <span className="text-sm text-red-400">{lessonError ?? "Leçon introuvable."}</span>
+        <span className="text-sm text-[#fbc2ad]">{lessonError ?? "Leçon introuvable."}</span>
         <VBtn onClick={goBack}>Retour aux leçons</VBtn>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden" style={{ background: th.bg, fontFamily: "'Inter',sans-serif" }}>
+    <div className="flex flex-col h-screen overflow-hidden" style={{ background: th.bg, fontFamily: "'Funnel Display',sans-serif" }}>
       <Background />
       <div className="relative z-10 shrink-0 flex items-center justify-between px-6 py-3" style={{ borderBottom: `1px solid ${th.sep}`, background: th.topbar, backdropFilter: "blur(24px)" }}>
         <div className="flex items-center gap-4">
@@ -378,8 +409,8 @@ export function LessonPage() {
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex items-center gap-2 text-xs" style={{ color: th.fg3 }}>
             Progression
-            <div className="w-28 h-1.5 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.07)" : "rgba(155,93,229,0.1)" }}>
-              <div className="h-full rounded-full" style={{ width: `${overallPct}%`, background: "linear-gradient(90deg,#7C3AED,#DDAEEA)" }} />
+            <div className="w-28 h-1.5 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.07)" : "rgba(181,141,224,0.1)" }}>
+              <div className="h-full rounded-full" style={{ width: `${overallPct}%`, background: "linear-gradient(90deg,#b58de0,#dbacf0)" }} />
             </div>
             <span className="font-bold" style={{ color: th.navAC }}>{overallPct}%</span>
           </div>
@@ -388,16 +419,29 @@ export function LessonPage() {
       </div>
 
       <div className="flex-1 flex overflow-hidden relative z-10">
-        <div className="flex-1 min-w-0 overflow-y-auto">
-          <div className="relative" style={{ paddingBottom: "40%", background: "#060410" }}>
+        <div className="flex-1 min-w-0 overflow-y-auto px-16 py-6">
+          <h1 className="text-2xl font-black mb-4" style={{ color: th.fg }}>{lesson.title}</h1>
+
+          <div className="flex shrink-0 mb-4 rounded-2xl overflow-hidden" style={{ background: th.card, border: `1px solid ${th.sep}` }}>
+            {TABS.map(({ id, Icon, label }) => (
+              <button key={id} onClick={() => setTab(id)} className="flex items-center gap-2 px-5 py-3.5 text-sm font-semibold transition-all border-b-2 -mb-px"
+                style={{ borderColor: tab === id ? th.navAC : "transparent", color: tab === id ? th.navAC : th.fg3 }}>
+                <Icon className="w-3.5 h-3.5" />{label}
+              </button>
+            ))}
+            {lesson.durationMinutes && (
+              <span className="ml-auto flex items-center gap-1.5 px-5 text-xs" style={{ color: th.fg3 }}><Clock className="w-3.5 h-3.5" />{lesson.durationMinutes} min</span>
+            )}
+          </div>
+
+          <div className="relative rounded-2xl overflow-hidden mb-5" style={{ paddingBottom: "40%", background: "#060410", border: `1px solid ${th.sep}` }}>
             <div className="absolute inset-0 overflow-hidden">
               {tab === "video" && lesson.videoUrl && (
                 <video src={lesson.videoUrl} controls className="absolute inset-0 w-full h-full bg-black" />
               )}
               {tab === "video" && !lesson.videoUrl && (
                 <>
-                  <div className="absolute inset-0" style={{ background: "linear-gradient(135deg,#0d0522,#1a0b3c 45%,#08060F)" }} />
-                  <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 28% 55%,rgba(155,93,229,0.25),transparent 55%)" }} />
+                  <div className="absolute inset-0" style={{ background: "#101017" }} />
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
                     <div className="w-16 h-16 rounded-full flex items-center justify-center border border-white/15" style={{ background: "rgba(255,255,255,0.08)", backdropFilter: "blur(20px)" }}>
                       <Play className="w-6 h-6 text-white ml-1" />
@@ -407,7 +451,7 @@ export function LessonPage() {
                 </>
               )}
               {tab === "transcript" && (
-                <div className="absolute inset-0 flex items-center justify-center p-6" style={{ background: "linear-gradient(135deg,#0d0522,#1a0b3c 45%,#08060F)" }}>
+                <div className="absolute inset-0 flex items-center justify-center p-6" style={{ background: "#101017" }}>
                   <div className="text-center max-w-sm">
                     <AlignLeft className="w-6 h-6 mx-auto mb-2 text-white/30" />
                     <p className="text-sm text-white/60">Transcription générée par IA</p>
@@ -416,7 +460,7 @@ export function LessonPage() {
                 </div>
               )}
               {tab === "mindmap" && (
-                <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at center,#150a2e,#08060F 75%)" }}>
+                <div className="absolute inset-0" style={{ background: "#101017" }}>
                   {mindmapLoading ? (
                     <div className="absolute inset-0 flex items-center justify-center"><p className="text-sm text-white/60">Chargement…</p></div>
                   ) : mindmap ? (
@@ -452,7 +496,7 @@ export function LessonPage() {
                 const generatedVariants = Object.keys(podcastByVariant) as PodcastVariantId[];
                 const remainingFormats = PODCAST_FORMATS.filter((f) => !generatedVariants.includes(f.id));
                 return (
-                  <div className="absolute inset-0 overflow-y-auto p-6" style={{ background: "linear-gradient(135deg,#0d0522,#1a0b3c 45%,#08060F)" }}>
+                  <div className="absolute inset-0 overflow-y-auto p-6" style={{ background: "#101017" }}>
                     <div className="max-w-md w-full mx-auto space-y-4">
                       {podcastLoading && (
                         <div className="text-center pt-6"><Headphones className="w-6 h-6 mx-auto mb-2 text-white/30" /><p className="text-sm text-white/60">Chargement…</p></div>
@@ -515,7 +559,7 @@ export function LessonPage() {
                 );
               })()}
               {tab === "avatar" && (
-                <div className="absolute inset-0 flex items-center justify-center p-6" style={{ background: "linear-gradient(135deg,#0d0522,#1a0b3c 45%,#08060F)" }}>
+                <div className="absolute inset-0 flex items-center justify-center p-6" style={{ background: "#101017" }}>
                   <div className="text-center max-w-md w-full">
                     <Bot className="w-6 h-6 mx-auto mb-2 text-white/30" />
                     {avatarLoading ? (
@@ -528,7 +572,7 @@ export function LessonPage() {
                     ) : avatarVideo?.status === "pending" ? (
                       <p className="text-sm text-white/60">Génération en cours…</p>
                     ) : avatarVideo?.status === "failed" ? (
-                      <p className="text-sm text-red-400">{avatarVideo.error ?? "Échec de la génération."}</p>
+                      <p className="text-sm text-[#fbc2ad]">{avatarVideo.error ?? "Échec de la génération."}</p>
                     ) : (
                       <>
                         <p className="text-sm text-white/60">Pas encore de vidéo personnalisée pour cette leçon.</p>
@@ -548,23 +592,11 @@ export function LessonPage() {
             </div>
           </div>
 
-          <div className="flex shrink-0" style={{ background: th.topbar, backdropFilter: "blur(20px)", borderBottom: `1px solid ${th.sep}` }}>
-            {TABS.map(({ id, Icon, label }) => (
-              <button key={id} onClick={() => setTab(id)} className="flex items-center gap-2 px-5 py-3 text-sm font-semibold transition-all border-b-2 -mb-px"
-                style={{ borderColor: tab === id ? th.navAC : "transparent", color: tab === id ? th.navAC : th.fg3 }}>
-                <Icon className="w-3.5 h-3.5" />{label}
-              </button>
-            ))}
-            {lesson.durationMinutes && (
-              <span className="ml-auto flex items-center gap-1.5 px-5 text-xs" style={{ color: th.fg3 }}><Clock className="w-3.5 h-3.5" />{lesson.durationMinutes} min</span>
-            )}
-          </div>
-
-          <div className="p-6 space-y-5">
-            {lesson.referenceContent && (
+          <div className="space-y-5">
+            {lesson.referenceContent && stripCertificationMentions(lesson.referenceContent) && (
               <GCard><div className="p-6">
                 <div className="flex items-center gap-2.5 mb-4">
-                  <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "rgba(155,93,229,0.1)", border: "1px solid rgba(155,93,229,0.2)" }}><BookOpen className="w-4 h-4" style={{ color: th.navAC }} /></div>
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "rgba(181,141,224,0.1)", border: "1px solid rgba(181,141,224,0.2)" }}><BookOpen className="w-4 h-4" style={{ color: th.navAC }} /></div>
                   <span className="text-sm font-black" style={{ color: th.fg }}>Cours</span>
                 </div>
                 <div style={{ color: th.fg2, fontSize: "0.9rem", lineHeight: 1.7 }}>
@@ -579,14 +611,14 @@ export function LessonPage() {
                       ol: (p) => <ol className="list-decimal pl-5 mb-3 space-y-1" {...p} />,
                       strong: (p) => <strong style={{ color: th.fg }} {...p} />,
                       blockquote: (p) => <blockquote className="pl-4 my-3 italic" style={{ borderLeft: `3px solid ${th.navAC}`, color: th.fg3 }} {...p} />,
-                      code: (p) => <code className="px-1.5 py-0.5 rounded text-xs font-mono" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(155,93,229,0.08)" }} {...p} />,
+                      code: (p) => <code className="px-1.5 py-0.5 rounded text-xs font-mono" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(181,141,224,0.08)" }} {...p} />,
                       hr: () => <hr className="my-5" style={{ borderColor: th.sep }} />,
                       table: (p) => <div className="overflow-x-auto mb-3"><table className="w-full text-xs border-collapse" {...p} /></div>,
                       th: (p) => <th className="text-left px-3 py-2 font-bold" style={{ color: th.fg, borderBottom: `1px solid ${th.sep}` }} {...p} />,
                       td: (p) => <td className="px-3 py-2 align-top" style={{ borderBottom: `1px solid ${th.sep}` }} {...p} />,
                     }}
                   >
-                    {lesson.referenceContent}
+                    {stripCertificationMentions(lesson.referenceContent)}
                   </ReactMarkdown>
                 </div>
               </div></GCard>
@@ -594,10 +626,10 @@ export function LessonPage() {
 
             <GCard><div className="p-5">
               <div className="flex items-center gap-2.5 mb-4">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "rgba(155,93,229,0.1)", border: "1px solid rgba(155,93,229,0.2)" }}><Brain className="w-4 h-4" style={{ color: th.navAC }} /></div>
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "rgba(181,141,224,0.1)", border: "1px solid rgba(181,141,224,0.2)" }}><Brain className="w-4 h-4" style={{ color: th.navAC }} /></div>
                 <span className="text-sm font-black" style={{ color: th.fg }}>Quiz de la leçon</span>
                 {lesson.questions.length > 0 && !quizResult && (retaking || currentLessonState?.state !== "completed") && (
-                  <span className="ml-auto text-[10px] font-bold px-2.5 py-1 rounded-full" style={{ background: "rgba(155,93,229,0.06)", color: th.navAC, border: "1px solid rgba(155,93,229,0.15)" }}>
+                  <span className="ml-auto text-[10px] font-bold px-2.5 py-1 rounded-full" style={{ background: "rgba(181,141,224,0.06)", color: th.navAC, border: "1px solid rgba(181,141,224,0.15)" }}>
                     Question {quizStep + 1}/{lesson.questions.length}
                   </span>
                 )}
@@ -608,9 +640,9 @@ export function LessonPage() {
               )}
 
               {lesson.questions.length > 0 && !quizResult && !retaking && currentLessonState?.state === "completed" && (
-                <div className="rounded-xl p-5 text-center" style={{ background: "rgba(74,222,128,0.08)", border: "1px solid rgba(74,222,128,0.3)" }}>
-                  <CheckCircle className="w-6 h-6 mx-auto mb-2 text-green-400" />
-                  <p className="text-sm font-semibold mb-1" style={{ color: "#4ADE80" }}>Leçon déjà validée</p>
+                <div className="rounded-xl p-5 text-center" style={{ background: "rgba(106,222,177,0.08)", border: "1px solid rgba(106,222,177,0.3)" }}>
+                  <CheckCircle className="w-6 h-6 mx-auto mb-2 text-[#6adeb1]" />
+                  <p className="text-sm font-semibold mb-1" style={{ color: "#6adeb1" }}>Leçon déjà validée</p>
                   <p className="text-xs mb-4" style={{ color: th.fg3 }}>
                     {currentLessonState.progress?.bestQuizScore != null ? `Meilleur score : ${currentLessonState.progress.bestQuizScore}%` : ""}
                   </p>
@@ -619,9 +651,9 @@ export function LessonPage() {
               )}
 
               {lesson.questions.length > 0 && quizResult && (
-                <div className="rounded-xl p-5 text-center" style={{ background: quizResult.passed ? "rgba(74,222,128,0.08)" : "rgba(248,113,113,0.08)", border: `1px solid ${quizResult.passed ? "rgba(74,222,128,0.3)" : "rgba(248,113,113,0.3)"}` }}>
-                  {quizResult.passed ? <PartyPopper className="w-6 h-6 mx-auto mb-2 text-green-400" /> : <X className="w-6 h-6 mx-auto mb-2 text-red-400" />}
-                  <p className="text-lg font-black mb-1" style={{ color: quizResult.passed ? "#4ADE80" : "#F87171" }}>{quizResult.score}%</p>
+                <div className="rounded-xl p-5 text-center" style={{ background: quizResult.passed ? "rgba(106,222,177,0.08)" : "rgba(251,194,173,0.08)", border: `1px solid ${quizResult.passed ? "rgba(106,222,177,0.3)" : "rgba(251,194,173,0.3)"}` }}>
+                  {quizResult.passed ? <PartyPopper className="w-6 h-6 mx-auto mb-2 text-[#6adeb1]" /> : <X className="w-6 h-6 mx-auto mb-2 text-[#fbc2ad]" />}
+                  <p className="text-lg font-black mb-1" style={{ color: quizResult.passed ? "#6adeb1" : "#fbc2ad" }}>{quizResult.score}%</p>
                   <p className="text-xs mb-4" style={{ color: th.fg3 }}>
                     {quizResult.passed ? "Leçon validée — bravo !" : `Il faut au moins ${QUIZ_PASS_THRESHOLD}% pour valider cette leçon.`}
                   </p>
@@ -638,26 +670,26 @@ export function LessonPage() {
                     {currentQuestion.options.map((opt, i) => {
                       let bg = th.isDark ? "rgba(255,255,255,0.03)" : th.inputBg, border = th.inputB, color = th.fg2;
                       if (selected !== null) {
-                        if (opt.isCorrect) { bg = "rgba(74,222,128,0.1)"; border = "rgba(74,222,128,0.35)"; color = "#4ADE80"; }
-                        else if (opt.id === selected) { bg = "rgba(248,113,113,0.1)"; border = "rgba(248,113,113,0.35)"; color = "#F87171"; }
+                        if (opt.isCorrect) { bg = "rgba(106,222,177,0.1)"; border = "rgba(106,222,177,0.35)"; color = "#6adeb1"; }
+                        else if (opt.id === selected) { bg = "rgba(251,194,173,0.1)"; border = "rgba(251,194,173,0.35)"; color = "#fbc2ad"; }
                         else { bg = "transparent"; border = th.sep; color = th.fg3; }
                       }
                       return (
                         <button key={opt.id} onClick={() => selectOption(opt.id)}
                           className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-left transition-all"
                           style={{ background: bg, border: `1px solid ${border}`, color }}>
-                          <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(155,93,229,0.06)" }}>
-                            {selected !== null && opt.isCorrect ? <CheckCircle className="w-4 h-4 text-green-400" /> : selected !== null && opt.id === selected ? <X className="w-4 h-4 text-red-400" /> : String.fromCharCode(65 + i)}
+                          <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(181,141,224,0.06)" }}>
+                            {selected !== null && opt.isCorrect ? <CheckCircle className="w-4 h-4 text-[#6adeb1]" /> : selected !== null && opt.id === selected ? <X className="w-4 h-4 text-[#fbc2ad]" /> : String.fromCharCode(65 + i)}
                           </span>{opt.label}
                         </button>
                       );
                     })}
                   </div>
                   {selected !== null && (
-                    <div className="rounded-xl p-4" style={{ background: "rgba(96,165,250,0.07)", border: "1px solid rgba(96,165,250,0.2)" }}>
+                    <div className="rounded-xl p-4" style={{ background: "rgba(106,222,177,0.07)", border: "1px solid rgba(106,222,177,0.2)" }}>
                       {currentQuestion.explanation && (
                         <>
-                          <div className="flex items-center gap-1.5 mb-2 text-xs font-bold text-blue-400"><Lightbulb className="w-3.5 h-3.5" />Explication</div>
+                          <div className="flex items-center gap-1.5 mb-2 text-xs font-bold text-[#78d5e2]"><Lightbulb className="w-3.5 h-3.5" />Explication</div>
                           <p className="text-xs leading-relaxed mb-3" style={{ color: th.fg2 }}>{currentQuestion.explanation}</p>
                         </>
                       )}
@@ -673,50 +705,67 @@ export function LessonPage() {
         </div>
 
         {/* Copilot */}
-        <div className="w-80 shrink-0 flex flex-col" style={{ borderLeft: `1px solid ${th.sep}`, background: th.sidebar, backdropFilter: "blur(24px)" }}>
-          <div className="shrink-0 px-4 py-4" style={{ borderBottom: `1px solid ${th.sep}` }}>
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg,#9B5DE5,#DDAEEA)" }}><Sparkles className="w-4 h-4" style={{ color: "#08060F" }} /></div>
-              <div><div className="text-sm font-black" style={{ color: th.fg }}>Copilote IA</div><div className="text-[10px]" style={{ color: th.fg3 }}>Ton formateur pour cette leçon</div></div>
-              <div className="ml-auto flex items-center gap-1.5 text-[10px] font-bold" style={{ color: th.fg3 }}>Bêta</div>
+        {assistantOpen ? (
+        <div className="w-[27rem] shrink-0 py-6 pr-6">
+        <div className="h-full flex flex-col rounded-2xl overflow-hidden" style={{ background: "linear-gradient(165deg,#b58de0,#dbacf0)", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 12px 32px rgba(0,0,0,0.35)" }}>
+          <div className="shrink-0 px-5 py-4">
+            <div className="flex items-center gap-2.5 mb-3">
+              <Sparkles className="w-5 h-5 text-white shrink-0" />
+              <div className="min-w-0 flex-1"><div className="text-base font-black text-white">Copilote IA</div><div className="text-[11px] truncate text-white/60">Ton formateur pour cette leçon</div></div>
+              <span className="text-[10px] font-bold shrink-0 text-white/50">Bêta</span>
+              <button onClick={() => setAssistantOpen(false)} className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-colors hover:bg-white/10">
+                <X className="w-4 h-4 text-white/70" />
+              </button>
             </div>
-            <div className="rounded-xl px-3 py-2.5" style={{ background: "rgba(155,93,229,0.07)", border: "1px solid rgba(155,93,229,0.15)" }}>
-              <p className="text-[11px] leading-relaxed" style={{ color: th.navAC }}>💡 <strong>Pour {firstName} :</strong> Chaque concept → applique-le immédiatement en pratique.</p>
+            <div className="rounded-xl px-3.5 py-3" style={{ background: "rgba(255,255,255,0.1)" }}>
+              <p className="text-xs leading-relaxed text-white/85">💡 <strong>Pour {firstName} :</strong> Chaque concept → applique-le immédiatement en pratique.</p>
             </div>
           </div>
-          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+          <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
             {msgs.map((m, i) => (
               <div key={i} className={cx("flex", m.role === "user" ? "justify-end" : "justify-start")}>
-                {m.role === "ai" && <div className="w-6 h-6 rounded-full flex items-center justify-center mr-2 mt-0.5 shrink-0" style={{ background: "linear-gradient(135deg,#9B5DE5,#DDAEEA)" }}><Sparkles className="w-3 h-3" style={{ color: "#08060F" }} /></div>}
+                {m.role === "ai" && <div className="w-6 h-6 rounded-full flex items-center justify-center mr-2 mt-0.5 shrink-0" style={{ background: "rgba(255,255,255,0.15)" }}><Sparkles className="w-3 h-3 text-white" /></div>}
                 <div className="max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-line"
-                  style={m.role === "user" ? { background: "linear-gradient(135deg,#7C3AED,#DDAEEA)", color: "#08060F", fontWeight: 600, borderRadius: "16px 16px 4px 16px" } : { background: th.isDark ? "rgba(255,255,255,0.05)" : "rgba(155,93,229,0.06)", border: `1px solid ${th.sep}`, color: th.fg2, borderRadius: "16px 16px 16px 4px" }}>
+                  style={m.role === "user" ? { background: "rgba(255,255,255,0.92)", color: "#b58de0", fontWeight: 600, borderRadius: "16px 16px 4px 16px" } : { background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.9)", borderRadius: "16px 16px 16px 4px" }}>
                   {m.text}
                 </div>
               </div>
             ))}
-            {typing && <div className="flex"><div className="w-6 h-6 rounded-full flex items-center justify-center mr-2 shrink-0" style={{ background: "linear-gradient(135deg,#9B5DE5,#DDAEEA)" }}><Sparkles className="w-3 h-3" style={{ color: "#08060F" }} /></div><div className="px-4 py-3 rounded-2xl flex gap-1 items-center" style={{ background: th.isDark ? "rgba(255,255,255,0.05)" : "rgba(155,93,229,0.06)", border: `1px solid ${th.sep}` }}>{[0, 1, 2].map(i => <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ background: "rgba(155,93,229,0.6)", animation: `bounce-dot 1.2s ease-in-out ${i * 0.15}s infinite` }} />)}</div></div>}
+            {typing && <div className="flex"><div className="w-6 h-6 rounded-full flex items-center justify-center mr-2 shrink-0" style={{ background: "rgba(255,255,255,0.15)" }}><Sparkles className="w-3 h-3 text-white" /></div><div className="px-4 py-3 rounded-2xl flex gap-1 items-center" style={{ background: "rgba(255,255,255,0.1)" }}>{[0, 1, 2].map(i => <div key={i} className="w-1.5 h-1.5 rounded-full bg-white/60" style={{ animation: `bounce-dot 1.2s ease-in-out ${i * 0.15}s infinite` }} />)}</div></div>}
             <div ref={chatEnd} />
           </div>
-          <div className="px-4 py-3 shrink-0" style={{ borderTop: `1px solid ${th.sep}` }}>
-            <div className="text-[10px] font-black uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Actions rapides</div>
-            {[{ Icon: MessageSquare, label: "Reformule simplement", cmd: "reformule simplement" }, { Icon: Lightbulb, label: "Exemple pour mon métier", cmd: "exemple concret métier" }, { Icon: Zap, label: "Crash test 2 min", cmd: "crash test" }].map(({ Icon, label, cmd }) => (
-              <button key={label} onClick={() => sendMsg(cmd)} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs text-left mb-1.5 transition-opacity hover:opacity-70" style={{ background: th.isDark ? "rgba(255,255,255,0.025)" : "rgba(155,93,229,0.05)", border: `1px solid ${th.sep}`, color: th.fg2 }}>
-                <Icon className="w-3.5 h-3.5 shrink-0" style={{ color: th.navAC }} />{label}
-              </button>
-            ))}
+          <div className="px-5 py-4 shrink-0">
+            <div className="text-[11px] font-bold mb-2.5 text-white/60">Actions rapides</div>
+            <div className="space-y-2">
+              {[{ Icon: MessageSquare, label: "Reformule simplement", cmd: "reformule simplement" }, { Icon: Lightbulb, label: "Exemple pour mon métier", cmd: "exemple concret métier" }, { Icon: Zap, label: "Crash test 2 min", cmd: "crash test" }].map(({ Icon, label, cmd }) => (
+                <button key={label} onClick={() => sendMsg(cmd)} className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left transition-colors hover:bg-white/15" style={{ background: "rgba(255,255,255,0.1)" }}>
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(255,255,255,0.15)" }}><Icon className="w-4 h-4 text-white" /></div>
+                  <span className="text-sm font-semibold text-white">{label}</span>
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="px-4 pb-4 pt-1 shrink-0">
+          <div className="px-5 pb-5 pt-1 shrink-0">
             <div className="flex gap-2">
-              <input value={chatIn} onChange={e => setChatIn(e.target.value)} onKeyDown={e => e.key === "Enter" && !typing && sendMsg(chatIn)} placeholder="Pose ta question…" className="flex-1 rounded-xl px-3 py-2.5 text-sm g-input" />
-              <button onClick={() => setVoice(v => !v)} className="w-10 h-10 rounded-xl flex items-center justify-center transition-all shrink-0" style={voice ? { background: "linear-gradient(135deg,#9B5DE5,#DDAEEA)" } : { background: th.inputBg, border: `1px solid ${th.inputB}` }}>
-                <Mic className="w-4 h-4" style={{ color: voice ? "#08060F" : th.fg3 }} />
+              <input value={chatIn} onChange={e => setChatIn(e.target.value)} onKeyDown={e => e.key === "Enter" && !typing && sendMsg(chatIn)} placeholder="Pose ta question…"
+                className="flex-1 rounded-full px-4 py-2.5 text-sm text-white placeholder-white/40 outline-none" style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.15)" }} />
+              <button onClick={() => setVoice(v => !v)} className="w-10 h-10 rounded-full flex items-center justify-center transition-all shrink-0" style={{ background: voice ? "#fff" : "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.15)" }}>
+                <Mic className="w-4 h-4" style={{ color: voice ? "#b58de0" : "#fff" }} />
               </button>
-              <button onClick={() => sendMsg(chatIn)} disabled={!chatIn.trim() || typing} className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 disabled:opacity-30" style={{ background: "linear-gradient(135deg,#9B5DE5,#DDAEEA)" }}>
-                <Send className="w-4 h-4" style={{ color: "#08060F" }} />
+              <button onClick={() => sendMsg(chatIn)} disabled={!chatIn.trim() || typing} className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 disabled:opacity-30" style={{ background: "#fff" }}>
+                <Send className="w-4 h-4" style={{ color: "#b58de0" }} />
               </button>
             </div>
           </div>
         </div>
+        </div>
+        ) : (
+          <button onClick={() => setAssistantOpen(true)}
+            className="absolute right-6 top-20 z-20 w-11 h-11 rounded-full flex items-center justify-center shrink-0"
+            style={{ background: "linear-gradient(135deg,#b58de0,#dbacf0)", boxShadow: "0 4px 16px rgba(181,141,224,0.4)" }}>
+            <Sparkles className="w-5 h-5 text-white" />
+          </button>
+        )}
       </div>
     </div>
   );

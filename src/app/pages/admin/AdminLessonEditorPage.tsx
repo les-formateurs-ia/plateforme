@@ -248,13 +248,13 @@ export function AdminLessonEditorPage() {
               <div className="flex items-start gap-2 mb-3">
                 <input value={q.question} onChange={(e) => updateQuestion(qIndex, { question: e.target.value })} placeholder="Intitulé de la question"
                   className="flex-1 rounded-xl px-3 py-2 text-sm g-input" />
-                <button onClick={() => removeQuestion(qIndex)}><Trash2 className="w-4 h-4" style={{ color: "#F87171" }} /></button>
+                <button onClick={() => removeQuestion(qIndex)}><Trash2 className="w-4 h-4" style={{ color: "#fbc2ad" }} /></button>
               </div>
               <div className="space-y-2 mb-3">
                 {q.options.map((o, oIndex) => (
                   <div key={oIndex} className="flex items-center gap-2">
                     <button onClick={() => setCorrectOption(qIndex, oIndex)} title="Marquer comme bonne réponse">
-                      <CheckCircle className="w-4 h-4 shrink-0" style={{ color: o.is_correct ? "#4ADE80" : th.fg3 }} />
+                      <CheckCircle className="w-4 h-4 shrink-0" style={{ color: o.is_correct ? "#6adeb1" : th.fg3 }} />
                     </button>
                     <input value={o.label} onChange={(e) => updateOptionLabel(qIndex, oIndex, e.target.value)} placeholder={`Réponse ${oIndex + 1}`}
                       className="flex-1 rounded-lg px-3 py-2 text-xs g-input" />
@@ -271,7 +271,7 @@ export function AdminLessonEditorPage() {
         </div>
       </div></GCard>
 
-      {error && <p className="text-xs" style={{ color: "#F87171" }}>{error}</p>}
+      {error && <p className="text-xs" style={{ color: "#fbc2ad" }}>{error}</p>}
       <ShimBtn onClick={save} disabled={saving}>{saving ? "Enregistrement…" : "Enregistrer la leçon"}</ShimBtn>
     </div>
   );

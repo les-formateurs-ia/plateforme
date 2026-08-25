@@ -76,7 +76,7 @@ export function SignupPage() {
 
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4" style={{ background: th.bg, fontFamily: "'Inter',sans-serif" }}>
+    <div className="relative min-h-screen flex items-center justify-center p-4" style={{ background: th.bg, fontFamily: "'Funnel Display',sans-serif" }}>
       <Background />
       <div className="relative z-10 w-full max-w-[620px] fade-up">
         <div className="flex justify-center mb-10"><Logo h={30} /></div>
@@ -87,10 +87,10 @@ export function SignupPage() {
                 {[1, 2, 3, 4].map(i => (
                   <div key={i} className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300"
-                      style={{ background: i < step ? "linear-gradient(135deg,#9B5DE5,#DDAEEA)" : i === step ? "rgba(155,93,229,0.12)" : "transparent", border: i === step ? "1px solid rgba(155,93,229,0.4)" : "1px solid " + th.sep, color: i < step ? "#08060F" : i === step ? "#9B5DE5" : th.fg3, boxShadow: i === step ? "0 0 16px rgba(155,93,229,0.25)" : "none" }}>
+                      style={{ background: i < step ? "linear-gradient(135deg,#b58de0,#dbacf0)" : i === step ? "rgba(181,141,224,0.12)" : "transparent", border: i === step ? "1px solid rgba(181,141,224,0.4)" : "1px solid " + th.sep, color: i < step ? "#08060F" : i === step ? "#dbacf0" : th.fg3, boxShadow: i === step ? "0 0 16px rgba(181,141,224,0.25)" : "none" }}>
                       {i < step ? <CheckCircle className="w-3.5 h-3.5" /> : i}
                     </div>
-                    {i < 4 && <div className="w-8 h-px" style={{ background: i < step ? "rgba(155,93,229,0.5)" : th.sep }} />}
+                    {i < 4 && <div className="w-8 h-px" style={{ background: i < step ? "rgba(181,141,224,0.5)" : th.sep }} />}
                   </div>
                 ))}
               </div>
@@ -98,9 +98,9 @@ export function SignupPage() {
             </div>
 
             <div className="relative mb-6">
-              <div className="absolute -top-2 -left-1 text-7xl font-black leading-none pointer-events-none select-none" style={{ color: th.isDark ? "rgba(155,93,229,0.04)" : "rgba(155,93,229,0.06)", fontFamily: "'Funnel Display',sans-serif" }}>0{step}</div>
+              <div className="absolute -top-2 -left-1 text-7xl font-black leading-none pointer-events-none select-none" style={{ color: th.isDark ? "rgba(181,141,224,0.04)" : "rgba(181,141,224,0.06)", fontFamily: "'Funnel Display',sans-serif" }}>0{step}</div>
               <h1 className="relative text-2xl font-black leading-tight mb-2" style={{ fontFamily: "'Funnel Display',sans-serif" }}>
-                <GT from={th.isDark ? "#FFFFFF" : "#2D0F6F"} to={th.isDark ? "#DDAEEA" : "#9B5DE5"}>
+                <GT from={th.isDark ? "#FFFFFF" : "#b58de0"} to={th.isDark ? "#dbacf0" : "#dbacf0"}>
                   {step === 1 && "Crée ton compte"}{step === 2 && "L'IA configure ton académie personnalisée"}{step === 3 && "Comment apprends-tu le mieux ?"}{step === 4 && "Choisis ton style de Tuteur IA"}
                 </GT>
               </h1>
@@ -128,7 +128,7 @@ export function SignupPage() {
                     <input type="password" required minLength={6} autoComplete="new-password" value={passwordConfirm} onChange={e => setPasswordConfirm(e.target.value)} placeholder="••••••••" className="w-full rounded-xl px-4 py-3 text-sm g-input" />
                   </div>
                 </div>
-                {accountError && <p className="text-xs" style={{ color: "#F87171" }}>{accountError}</p>}
+                {accountError && <p className="text-xs" style={{ color: "#fbc2ad" }}>{accountError}</p>}
                 <div className="pt-2">
                   <ShimBtn full disabled={accountLoading}>
                     <span className="flex items-center justify-center gap-2.5">{accountLoading ? "Création…" : <>Continuer<ArrowRight className="w-5 h-5" /></>}</span>
@@ -160,15 +160,15 @@ export function SignupPage() {
                   <div className="mt-2">
                     <button onClick={formulateWithAI} disabled={!p.goal.trim() || aiState === "loading"}
                       className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-80 disabled:opacity-40"
-                      style={{ background: "rgba(155,93,229,0.1)", border: "1px solid rgba(155,93,229,0.25)", color: "#9B5DE5" }}>
+                      style={{ background: "rgba(181,141,224,0.1)", border: "1px solid rgba(181,141,224,0.25)", color: "#dbacf0" }}>
                       {aiState === "loading"
                         ? <><RefreshCw className="w-3.5 h-3.5 animate-spin" />L'IA formule…</>
                         : <><Wand2 className="w-3.5 h-3.5" />Formuler mon objectif avec l'IA</>}
                     </button>
                   </div>
                   {aiState === "proposal" && (
-                    <div className="mt-3 rounded-xl p-4" style={{ background: "rgba(155,93,229,0.07)", border: "1px solid rgba(155,93,229,0.2)" }}>
-                      <div className="flex items-center gap-2 mb-2 text-xs font-bold" style={{ color: "#9B5DE5" }}><Sparkles className="w-3.5 h-3.5" />Proposition de l'IA — tu peux modifier ci-dessous</div>
+                    <div className="mt-3 rounded-xl p-4" style={{ background: "rgba(181,141,224,0.07)", border: "1px solid rgba(181,141,224,0.2)" }}>
+                      <div className="flex items-center gap-2 mb-2 text-xs font-bold" style={{ color: "#dbacf0" }}><Sparkles className="w-3.5 h-3.5" />Proposition de l'IA — tu peux modifier ci-dessous</div>
                       <textarea value={aiProposal} onChange={e => setAiProposal(e.target.value)} rows={4} className="w-full rounded-xl px-3 py-2.5 text-sm g-input resize-none mb-3" />
                       <div className="flex items-center gap-2">
                         <VBtn onClick={acceptProposal} sm><span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5" />Valider cet objectif</span></VBtn>
@@ -186,12 +186,12 @@ export function SignupPage() {
                   const sel = p.style === id;
                   return (
                     <button key={id} onClick={() => setP(x => ({ ...x, style: id }))} className="rounded-2xl text-left transition-all duration-200 hover:scale-[1.02]"
-                      style={{ background: sel ? "rgba(155,93,229,0.1)" : "transparent", border: sel ? `1px solid rgba(155,93,229,0.4)` : `1px solid ${th.sep}`, boxShadow: sel ? "0 0 24px rgba(155,93,229,0.15)" : "none" }}>
+                      style={{ background: sel ? "rgba(181,141,224,0.1)" : "transparent", border: sel ? `1px solid rgba(181,141,224,0.4)` : `1px solid ${th.sep}`, boxShadow: sel ? "0 0 24px rgba(181,141,224,0.15)" : "none" }}>
                       <div className="p-5 h-full rounded-2xl">
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ background: sel ? "rgba(155,93,229,0.15)" : "rgba(155,93,229,0.05)" }}>
-                          <Icon className="w-5 h-5" style={{ color: sel ? "#9B5DE5" : th.fg3 }} />
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ background: sel ? "rgba(181,141,224,0.15)" : "rgba(181,141,224,0.05)" }}>
+                          <Icon className="w-5 h-5" style={{ color: sel ? "#dbacf0" : th.fg3 }} />
                         </div>
-                        <div className="text-sm font-bold mb-1" style={{ color: sel ? "#9B5DE5" : th.fg }}>{label}</div>
+                        <div className="text-sm font-bold mb-1" style={{ color: sel ? "#dbacf0" : th.fg }}>{label}</div>
                         <div className="text-xs leading-relaxed" style={{ color: th.fg3 }}>{desc}</div>
                       </div>
                     </button>
@@ -206,14 +206,14 @@ export function SignupPage() {
                   const sel = p.tutor === id;
                   return (
                     <button key={id} onClick={() => setP(x => ({ ...x, tutor: id }))} className="w-full rounded-2xl text-left transition-all hover:scale-[1.01]"
-                      style={{ background: sel ? "rgba(155,93,229,0.08)" : "transparent", border: `1px solid ${sel ? "rgba(155,93,229,0.35)" : th.sep}`, boxShadow: sel ? "0 0 20px rgba(155,93,229,0.12)" : "none" }}>
+                      style={{ background: sel ? "rgba(181,141,224,0.08)" : "transparent", border: `1px solid ${sel ? "rgba(181,141,224,0.35)" : th.sep}`, boxShadow: sel ? "0 0 20px rgba(181,141,224,0.12)" : "none" }}>
                       <div className="px-5 py-4 flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0" style={{ background: sel ? "rgba(155,93,229,0.1)" : "rgba(155,93,229,0.04)" }}>{emoji}</div>
+                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0" style={{ background: sel ? "rgba(181,141,224,0.1)" : "rgba(181,141,224,0.04)" }}>{emoji}</div>
                         <div className="flex-1 min-w-0">
-                          <div className="text-sm font-bold mb-0.5" style={{ color: sel ? "#9B5DE5" : th.fg }}>{label}</div>
+                          <div className="text-sm font-bold mb-0.5" style={{ color: sel ? "#dbacf0" : th.fg }}>{label}</div>
                           <div className="text-xs" style={{ color: th.fg3 }}>{desc}</div>
                         </div>
-                        {sel && <CheckCircle className="w-4 h-4 shrink-0" style={{ color: "#9B5DE5" }} />}
+                        {sel && <CheckCircle className="w-4 h-4 shrink-0" style={{ color: "#dbacf0" }} />}
                       </div>
                     </button>
                   );

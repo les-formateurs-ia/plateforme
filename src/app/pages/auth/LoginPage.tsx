@@ -29,14 +29,14 @@ export function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4" style={{ background: th.bg, fontFamily: "'Inter',sans-serif" }}>
+    <div className="relative min-h-screen flex items-center justify-center p-4" style={{ background: th.bg, fontFamily: "'Funnel Display',sans-serif" }}>
       <Background />
       <div className="relative z-10 w-full max-w-[440px] fade-up">
         <div className="flex justify-center mb-10"><Logo h={30} /></div>
         <GCard glow>
           <form onSubmit={handleSubmit} className="p-8 sm:p-10">
             <h1 className="text-2xl font-black leading-tight mb-2" style={{ fontFamily: "'Funnel Display',sans-serif" }}>
-              <GT from={th.isDark ? "#FFFFFF" : "#2D0F6F"} to={th.isDark ? "#DDAEEA" : "#9B5DE5"}>Content de te revoir</GT>
+              <GT from={th.isDark ? "#FFFFFF" : "#b58de0"} to={th.isDark ? "#dbacf0" : "#dbacf0"}>Content de te revoir</GT>
             </h1>
             <p className="text-sm mb-6" style={{ color: th.fg3 }}>Connecte-toi pour reprendre ton parcours.</p>
 
@@ -51,7 +51,7 @@ export function LoginPage() {
               </div>
             </div>
 
-            {error && <p className="text-xs mt-3" style={{ color: "#F87171" }}>{error}</p>}
+            {error && <p className="text-xs mt-3" style={{ color: "#fbc2ad" }}>{error}</p>}
 
             <div className="pt-6">
               <ShimBtn full disabled={loading}>

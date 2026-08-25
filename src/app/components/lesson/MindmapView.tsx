@@ -3,7 +3,7 @@ import { Plus, Minus, Maximize2 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import type { MindmapNode, MindmapTree } from "@/app/lib/mindmaps";
 
-const PALETTE = ["#9B5DE5", "#00BBF9", "#00F5D4", "#F15BB5", "#FEE440", "#FB923C", "#4ADE80", "#60A5FA"];
+const PALETTE = ["#b58de0", "#78d5e2", "#73d8d2", "#fbc2ad", "#fcd7bd", "#fceccd", "#6fdbc2", "#6adeb1"];
 const RADIUS_STEP = 165;
 
 interface Positioned {
@@ -56,10 +56,10 @@ function NodeButton({ pos, selected, onSelect, th }: { pos: Positioned; selected
         maxWidth: isRoot ? 220 : 170,
         padding: isRoot ? "12px 18px" : "8px 12px",
         fontSize: isRoot ? 14 : 12,
-        background: isRoot ? "linear-gradient(135deg,#7C3AED,#DDAEEA)" : selected ? pos.color : th.isDark ? "rgba(255,255,255,0.06)" : "#fff",
+        background: isRoot ? "linear-gradient(135deg,#b58de0,#dbacf0)" : selected ? pos.color : th.isDark ? "rgba(255,255,255,0.06)" : "#fff",
         color: isRoot ? "#08060F" : selected ? "#08060F" : th.fg2,
         border: `1.5px solid ${isRoot ? "transparent" : pos.color}`,
-        boxShadow: selected ? `0 0 0 3px ${pos.color}33` : isRoot ? "0 4px 20px rgba(124,58,237,0.4)" : "none",
+        boxShadow: selected ? `0 0 0 3px ${pos.color}33` : isRoot ? "0 4px 20px rgba(181,141,224,0.4)" : "none",
         cursor: hasChildren || pos.node.summary || pos.node.examples?.length ? "pointer" : "default",
         zIndex: selected ? 5 : isRoot ? 4 : 3,
         whiteSpace: "normal",
@@ -84,7 +84,7 @@ export function MindmapView({ tree }: { tree: MindmapTree }) {
   const rootNode: MindmapNode = { label: tree.title, children: tree.children };
   const positions = useMemo(() => {
     const out: Positioned[] = [];
-    layout(rootNode, "root", 0, 0, Math.PI * 2, "#9B5DE5", undefined, expanded, out);
+    layout(rootNode, "root", 0, 0, Math.PI * 2, "#b58de0", undefined, expanded, out);
     return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tree, expanded]);

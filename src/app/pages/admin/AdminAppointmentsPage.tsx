@@ -12,11 +12,11 @@ import {
 } from "@/app/lib/appointments";
 
 const STATUS_LABEL: Record<AppointmentStatus, { label: string; color: string; bg: string }> = {
-  requested: { label: "Demande envoyée", color: "#F59E0B", bg: "rgba(245,158,11,0.1)" },
-  preparing: { label: "En préparation", color: "#F59E0B", bg: "rgba(245,158,11,0.1)" },
-  confirmed: { label: "Confirmé", color: "#4ADE80", bg: "rgba(74,222,128,0.1)" },
+  requested: { label: "Demande envoyée", color: "#fbc2ad", bg: "rgba(251,194,173,0.1)" },
+  preparing: { label: "En préparation", color: "#fbc2ad", bg: "rgba(251,194,173,0.1)" },
+  confirmed: { label: "Confirmé", color: "#6adeb1", bg: "rgba(106,222,177,0.1)" },
   completed: { label: "Terminé", color: "#94A3B8", bg: "rgba(148,163,184,0.1)" },
-  cancelled: { label: "Annulé", color: "#F87171", bg: "rgba(248,113,113,0.1)" },
+  cancelled: { label: "Annulé", color: "#fbc2ad", bg: "rgba(251,194,173,0.1)" },
 };
 
 // input[type=datetime-local] veut "YYYY-MM-DDTHH:mm" en heure locale, pas un ISO UTC.

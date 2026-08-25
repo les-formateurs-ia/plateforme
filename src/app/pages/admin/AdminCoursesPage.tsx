@@ -17,8 +17,8 @@ interface FormationRow {
 }
 
 const STATUS_LABEL: Record<string, { label: string; color: string; bg: string }> = {
-  draft: { label: "Brouillon", color: "#F59E0B", bg: "rgba(245,158,11,0.1)" },
-  published: { label: "Publié", color: "#4ADE80", bg: "rgba(74,222,128,0.1)" },
+  draft: { label: "Brouillon", color: "#fbc2ad", bg: "rgba(251,194,173,0.1)" },
+  published: { label: "Publié", color: "#6adeb1", bg: "rgba(106,222,177,0.1)" },
   archived: { label: "Archivé", color: "#94A3B8", bg: "rgba(148,163,184,0.1)" },
 };
 

@@ -127,7 +127,7 @@ export function LessonsPage() {
   }
 
   if (errorMsg) {
-    return <div className="flex-1 flex items-center justify-center"><span className="text-sm text-red-400">{errorMsg}</span></div>;
+    return <div className="flex-1 flex items-center justify-center"><span className="text-sm text-[#fbc2ad]">{errorMsg}</span></div>;
   }
 
   if (!outline) {
@@ -141,7 +141,7 @@ export function LessonsPage() {
     );
   }
 
-  const greenBtn = { background: "rgba(74,222,128,0.12)", border: "1px solid rgba(74,222,128,0.35)", color: "#4ADE80" };
+  const greenBtn = { background: "rgba(106,222,177,0.12)", border: "1px solid rgba(106,222,177,0.35)", color: "#6adeb1" };
 
   return (
     <div className="flex-1 overflow-y-auto px-8 py-6">
@@ -174,8 +174,8 @@ export function LessonsPage() {
       </div>
 
       {editMode && (
-        <div className="mb-4 px-4 py-2.5 rounded-xl text-xs" style={{ background: "rgba(74,222,128,0.08)", border: "1px solid rgba(74,222,128,0.25)", color: th.fg3 }}>
-          Sélectionne les leçons pour lesquelles générer un contenu IA (mindmap, podcast ou vidéo avatar), puis clique sur <strong style={{ color: "#4ADE80" }}>Valider</strong>.
+        <div className="mb-4 px-4 py-2.5 rounded-xl text-xs" style={{ background: "rgba(106,222,177,0.08)", border: "1px solid rgba(106,222,177,0.25)", color: th.fg3 }}>
+          Sélectionne les leçons pour lesquelles générer un contenu IA (mindmap, podcast ou vidéo avatar), puis clique sur <strong style={{ color: "#6adeb1" }}>Valider</strong>.
         </div>
       )}
 
@@ -192,8 +192,8 @@ export function LessonsPage() {
         ))}
         <div className="flex-1 ml-4">
           <div className="flex justify-between text-xs mb-1.5" style={{ color: th.fg3 }}><span>Progression globale</span><span>{overallPct}%</span></div>
-          <div className="h-2 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(155,93,229,0.1)" }}>
-            <div className="h-full rounded-full" style={{ width: `${overallPct}%`, background: "linear-gradient(90deg,#7C3AED,#DDAEEA)" }} />
+          <div className="h-2 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(181,141,224,0.1)" }}>
+            <div className="h-full rounded-full" style={{ width: `${overallPct}%`, background: "linear-gradient(90deg,#b58de0,#dbacf0)" }} />
           </div>
         </div>
       </div></GCard>
@@ -207,8 +207,8 @@ export function LessonsPage() {
           const pct = total > 0 ? Math.round((done / total) * 100) : 0;
           const open = editMode || openSection === mod.id;
           const SC = {
-            complete: { bg: "rgba(74,222,128,0.1)", text: "#4ADE80", border: "rgba(74,222,128,0.25)", label: "Validé ✓" },
-            active: { bg: "rgba(155,93,229,0.1)", text: "#9B5DE5", border: "rgba(155,93,229,0.3)", label: "En cours" },
+            complete: { bg: "rgba(106,222,177,0.1)", text: "#6adeb1", border: "rgba(106,222,177,0.25)", label: "Validé ✓" },
+            active: { bg: "rgba(181,141,224,0.1)", text: "#dbacf0", border: "rgba(181,141,224,0.3)", label: "En cours" },
             locked: { bg: "transparent", text: th.fg3, border: th.sep, label: "Verrouillé" },
           };
           const sc = SC[status];
@@ -218,7 +218,7 @@ export function LessonsPage() {
               <button className="w-full text-left" onClick={() => !editMode && setOpenSection(open ? null : mod.id)}>
                 <div className="px-5 py-4 flex items-center gap-4">
                   <div className="w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0" style={{ background: sc.bg, border: `1px solid ${sc.border}` }}>
-                    {status === "locked" ? <Lock className="w-4 h-4" style={{ color: th.fg3 }} /> : status === "complete" ? <CheckCircle className="w-5 h-5 text-green-400" /> : <Play className="w-4 h-4" style={{ color: th.navAC }} />}
+                    {status === "locked" ? <Lock className="w-4 h-4" style={{ color: th.fg3 }} /> : status === "complete" ? <CheckCircle className="w-5 h-5 text-[#6adeb1]" /> : <Play className="w-4 h-4" style={{ color: th.navAC }} />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
@@ -229,8 +229,8 @@ export function LessonsPage() {
                       <span className="text-xs" style={{ color: th.fg3 }}>{done}/{total} leçons</span>
                       {status !== "locked" && total > 0 && (
                         <div className="flex items-center gap-2">
-                          <div className="w-20 h-1 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(155,93,229,0.1)" }}>
-                            <div className="h-full rounded-full" style={{ width: `${pct}%`, background: status === "complete" ? "linear-gradient(90deg,#16A34A,#4ADE80)" : "linear-gradient(90deg,#9B5DE5,#DDAEEA)" }} />
+                          <div className="w-20 h-1 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(181,141,224,0.1)" }}>
+                            <div className="h-full rounded-full" style={{ width: `${pct}%`, background: status === "complete" ? "linear-gradient(90deg,#78d5e2,#6adeb1)" : "linear-gradient(90deg,#b58de0,#dbacf0)" }} />
                           </div>
                           <span className="text-[10px] font-bold" style={{ color: sc.text }}>{pct}%</span>
                         </div>
@@ -256,11 +256,11 @@ export function LessonsPage() {
                         {editMode && (
                           <Checkbox checked={selected.has(lesson.id)} onCheckedChange={() => toggleLesson(lesson.id)} onClick={(e) => e.stopPropagation()} className="shrink-0" />
                         )}
-                        <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: state === "completed" ? "rgba(74,222,128,0.12)" : state === "available" ? "rgba(155,93,229,0.12)" : "transparent", border: `1px solid ${state === "completed" ? "rgba(74,222,128,0.3)" : state === "available" ? "rgba(155,93,229,0.35)" : th.sep}` }}>
-                          {state === "completed" ? <CheckCircle className="w-3.5 h-3.5 text-green-400" /> : state === "available" ? <Play className="w-3 h-3 ml-0.5" style={{ color: th.navAC }} /> : <Lock className="w-3 h-3" style={{ color: th.fg3 }} />}
+                        <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: state === "completed" ? "rgba(106,222,177,0.12)" : state === "available" ? "rgba(181,141,224,0.12)" : "transparent", border: `1px solid ${state === "completed" ? "rgba(106,222,177,0.3)" : state === "available" ? "rgba(181,141,224,0.35)" : th.sep}` }}>
+                          {state === "completed" ? <CheckCircle className="w-3.5 h-3.5 text-[#6adeb1]" /> : state === "available" ? <Play className="w-3 h-3 ml-0.5" style={{ color: th.navAC }} /> : <Lock className="w-3 h-3" style={{ color: th.fg3 }} />}
                         </div>
-                        <span className="flex-1 text-sm truncate" style={{ color: state === "completed" ? "rgba(74,222,128,0.7)" : state === "available" ? th.navAC : th.fg3 }}>{lesson.title}</span>
-                        {state === "available" && !editMode && <span className="text-[10px] px-2 py-0.5 rounded-full font-bold shrink-0" style={{ background: "rgba(155,93,229,0.1)", color: th.navAC, border: "1px solid rgba(155,93,229,0.25)" }}>En cours</span>}
+                        <span className="flex-1 text-sm truncate" style={{ color: state === "completed" ? "rgba(106,222,177,0.7)" : state === "available" ? th.navAC : th.fg3 }}>{lesson.title}</span>
+                        {state === "available" && !editMode && <span className="text-[10px] px-2 py-0.5 rounded-full font-bold shrink-0" style={{ background: "rgba(181,141,224,0.1)", color: th.navAC, border: "1px solid rgba(181,141,224,0.25)" }}>En cours</span>}
                         <span className="text-xs font-mono shrink-0 flex items-center gap-1" style={{ color: th.fg3 }}>
                           {lesson.durationMinutes ? <><Clock className="w-3 h-3" />{lesson.durationMinutes}min</> : "—"}
                         </span>
@@ -293,7 +293,7 @@ export function LessonsPage() {
                 {GEN_TYPES.map(({ id, label, hint, Icon }) => (
                   <button key={id} onClick={() => setGenType(id)}
                     className="flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all"
-                    style={{ background: genType === id ? "rgba(155,93,229,0.1)" : "transparent", border: `1px solid ${genType === id ? "#9B5DE5" : th.sep}` }}>
+                    style={{ background: genType === id ? "rgba(181,141,224,0.1)" : "transparent", border: `1px solid ${genType === id ? "#dbacf0" : th.sep}` }}>
                     <Icon className="w-4 h-4 shrink-0" style={{ color: genType === id ? th.navAC : th.fg3 }} />
                     <div className="min-w-0">
                       <div className="text-sm font-semibold" style={{ color: th.fg }}>{label}</div>
@@ -325,8 +325,8 @@ export function LessonsPage() {
                   const st = genStatuses[id] ?? "pending";
                   return (
                     <div key={id} className="flex items-center gap-3 px-3 py-2 rounded-lg" style={{ background: th.isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)" }}>
-                      {st === "done" && <CheckCircle className="w-4 h-4 shrink-0 text-green-400" />}
-                      {st === "error" && <XCircle className="w-4 h-4 shrink-0 text-red-400" />}
+                      {st === "done" && <CheckCircle className="w-4 h-4 shrink-0 text-[#6adeb1]" />}
+                      {st === "error" && <XCircle className="w-4 h-4 shrink-0 text-[#fbc2ad]" />}
                       {st === "running" && <Loader2 className="w-4 h-4 shrink-0 animate-spin" style={{ color: th.navAC }} />}
                       {st === "pending" && <div className="w-4 h-4 shrink-0 rounded-full" style={{ border: `1px solid ${th.sep}` }} />}
                       <span className="flex-1 text-xs truncate" style={{ color: th.fg }}>{lesson?.title ?? id}</span>
