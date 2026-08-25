@@ -121,6 +121,7 @@ export interface Database {
           ai_content_prompt: string | null;
           practical_exercise_prompt: string | null;
           reference_content: string | null;
+          custom_html_content: string | null;
           order_index: number;
           created_at: string;
           updated_at: string;
@@ -137,6 +138,7 @@ export interface Database {
           ai_content_prompt?: string | null;
           practical_exercise_prompt?: string | null;
           reference_content?: string | null;
+          custom_html_content?: string | null;
           order_index: number;
           created_at?: string;
           updated_at?: string;

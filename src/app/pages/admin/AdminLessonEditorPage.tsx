@@ -33,6 +33,7 @@ export function AdminLessonEditorPage() {
   const [durationMinutes, setDurationMinutes] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const [referenceContent, setReferenceContent] = useState("");
+  const [customHtmlContent, setCustomHtmlContent] = useState("");
   const [aiContentPrompt, setAiContentPrompt] = useState("");
   const [practicalExercisePrompt, setPracticalExercisePrompt] = useState("");
   const [questions, setQuestions] = useState<QuizQuestionDraft[]>([]);
@@ -56,6 +57,7 @@ export function AdminLessonEditorPage() {
       setDurationMinutes(lesson.duration_minutes?.toString() ?? "");
       setVideoUrl(lesson.video_url ?? "");
       setReferenceContent(lesson.reference_content ?? "");
+      setCustomHtmlContent(lesson.custom_html_content ?? "");
       setAiContentPrompt(lesson.ai_content_prompt ?? "");
       setPracticalExercisePrompt(lesson.practical_exercise_prompt ?? "");
 
@@ -126,6 +128,7 @@ export function AdminLessonEditorPage() {
       video_provider: "external_url" as const,
       video_url: videoUrl || null,
       reference_content: referenceContent || null,
+      custom_html_content: customHtmlContent || null,
       ai_content_prompt: aiContentPrompt || null,
       practical_exercise_prompt: practicalExercisePrompt || null,
     };
@@ -223,6 +226,13 @@ export function AdminLessonEditorPage() {
             style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg }}>
             <Upload className="w-4 h-4" />{uploading ? "Envoi…" : videoUrl ? "Remplacer la vidéo" : "Choisir un fichier vidéo"}
           </button>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Page HTML personnalisée (onglet "HTML")</label>
+          <textarea value={customHtmlContent} onChange={(e) => setCustomHtmlContent(e.target.value)} rows={10}
+            className="w-full rounded-xl px-4 py-3 text-sm g-input resize-y font-mono" placeholder="&lt;!DOCTYPE html&gt;&#10;&lt;html&gt;&#10;  ...&#10;&lt;/html&gt;" />
+          <p className="text-xs mt-1.5" style={{ color: th.fg3 }}>Optionnel. Si rempli, un onglet "HTML" apparaît sur la leçon et affiche cette page (seule, sans Vidéo/Cours/Quiz) dans un cadre isolé.</p>
         </div>
 
         <div>

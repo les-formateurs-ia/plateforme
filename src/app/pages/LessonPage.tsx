@@ -7,9 +7,10 @@ import {
   ChevronRight, ChevronLeft, Mic, Send,
   Sparkles, MessageSquare, CheckCircle, X,
   Lightbulb, Monitor, AlignLeft,
-  Network, RotateCcw, Play, Brain, Zap, Clock, PartyPopper, BookOpen, Headphones, Wand2, Bot,
+  Network, RotateCcw, Play, Brain, Zap, Clock, PartyPopper, BookOpen, Headphones, Wand2, Bot, Code,
 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
+import { supabase } from "@/app/lib/supabase/client";
 import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
 import { useCourseProgress } from "@/app/state/useCourseProgress";
@@ -61,6 +62,24 @@ function stripCertificationMentions(markdown: string): string {
     .trim();
 }
 
+// Une page HTML personnalisée est embarquée dans une iframe sandboxée (pas de
+// allow-same-origin) : elle ne peut donc pas lire la session Supabase de l'élève
+// depuis le localStorage du site principal. On la lui transmet explicitement en
+// injectant sa propre session (déjà accessible à l'élève dans son navigateur —
+// on ne lui donne rien qu'il n'ait déjà) via window.__PLATFORM_AUTH__, pour que
+// la page appelle ses propres edge functions (ex: proxy Gemini) en son nom.
+function injectPlatformAuth(html: string, accessToken: string): string {
+  const payload = JSON.stringify({
+    supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+    supabaseAnonKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+    accessToken,
+  }).replace(/</g, "\\u003c");
+  const script = `<script>window.__PLATFORM_AUTH__=${payload};</script>`;
+  if (/<head[^>]*>/i.test(html)) return html.replace(/<head[^>]*>/i, (m) => `${m}\n${script}`);
+  if (/<html[^>]*>/i.test(html)) return html.replace(/<html[^>]*>/i, (m) => `${m}\n${script}`);
+  return script + html;
+}
+
 export function LessonPage() {
   const th = useTh();
   const { profile } = useProfile();
@@ -69,8 +88,9 @@ export function LessonPage() {
   const { lessonId } = useParams<{ lessonId: string }>();
   const goBack = () => navigate("/lessons");
 
-  type LTab = "video" | "transcript" | "mindmap" | "podcast" | "avatar";
+  type LTab = "video" | "transcript" | "mindmap" | "podcast" | "avatar" | "html";
   const [tab, setTab] = useState<LTab>("video");
+  const [platformAccessToken, setPlatformAccessToken] = useState<string | null>(null);
 
   type PodcastVariantState = { podcast: Podcast; audioUrl: string };
   const [podcastByVariant, setPodcastByVariant] = useState<Partial<Record<PodcastVariantId, PodcastVariantState>>>({});
@@ -275,6 +295,16 @@ export function LessonPage() {
 
   useEffect(() => { void loadAvatarVideo(); }, [user, lessonId]);
 
+  useEffect(() => {
+    if (tab !== "html" || !lesson?.customHtmlContent) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!cancelled) setPlatformAccessToken(data.session?.access_token ?? null);
+    })();
+    return () => { cancelled = true; };
+  }, [tab, lesson?.customHtmlContent]);
+
   const handleGenerateAvatarVideo = async () => {
     if (!lessonId || !user) return;
     setAvatarGenerating(true);
@@ -377,7 +407,7 @@ export function LessonPage() {
   const TABS: { id: LTab; Icon: typeof Monitor; label: string }[] = [
     { id: "video", Icon: Monitor, label: "Vidéo" }, { id: "transcript", Icon: AlignLeft, label: "Transcription" },
     { id: "mindmap", Icon: Network, label: "Mindmap" }, { id: "podcast", Icon: Headphones, label: "Podcast" },
-    { id: "avatar", Icon: Bot, label: "Vidéo IA" },
+    { id: "avatar", Icon: Bot, label: "Vidéo IA" }, { id: "html", Icon: Code, label: "HTML" },
   ];
 
   if (lessonLoading || access === "checking") {
@@ -434,6 +464,27 @@ export function LessonPage() {
             )}
           </div>
 
+          {tab === "html" ? (
+            <div className="relative rounded-2xl overflow-hidden" style={{ height: "calc(100vh - 15rem)", background: "#060410", border: `1px solid ${th.sep}` }}>
+              {lesson.customHtmlContent ? (
+                <iframe
+                  srcDoc={platformAccessToken ? injectPlatformAuth(lesson.customHtmlContent, platformAccessToken) : lesson.customHtmlContent}
+                  sandbox="allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"
+                  className="absolute inset-0 w-full h-full border-0 bg-white"
+                  title={`${lesson.title} — HTML`}
+                />
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6" style={{ background: "#101017" }}>
+                  <Code className="w-6 h-6 text-white/30" />
+                  <div className="text-center max-w-sm">
+                    <p className="text-sm text-white/60">Pas encore de page HTML configurée pour cette leçon.</p>
+                    {role !== "admin" && <p className="text-xs text-white/30 mt-1">Bientôt disponible.</p>}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+          <>
           <div className="relative rounded-2xl overflow-hidden mb-5" style={{ paddingBottom: "40%", background: "#060410", border: `1px solid ${th.sep}` }}>
             <div className="absolute inset-0 overflow-hidden">
               {tab === "video" && lesson.videoUrl && (
@@ -702,6 +753,8 @@ export function LessonPage() {
               )}
             </div></GCard>
           </div>
+          </>
+          )}
         </div>
 
         {/* Copilot */}
