@@ -1,0 +1,5 @@
+{
+  "name": "PILOTAGE APPEL D'OFFRE",
+  "description": "An assistant for tender management, allowing PDF uploads to generate a dynamic retro-planning based on contract regulations (DCE).",
+  "requestFramePermissions": []
+}

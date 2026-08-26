@@ -7,7 +7,7 @@ import {
   ChevronRight, ChevronLeft, Mic, Send,
   Sparkles, MessageSquare, CheckCircle, X,
   Lightbulb, Monitor, AlignLeft,
-  Network, RotateCcw, Play, Brain, Zap, Clock, PartyPopper, BookOpen, Headphones, Wand2, Bot,
+  Network, RotateCcw, Play, Brain, Zap, Clock, PartyPopper, BookOpen, Headphones, Wand2, Bot, Globe,
 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
@@ -69,7 +69,7 @@ export function LessonPage() {
   const { lessonId } = useParams<{ lessonId: string }>();
   const goBack = () => navigate("/lessons");
 
-  type LTab = "video" | "transcript" | "mindmap" | "podcast" | "avatar";
+  type LTab = "video" | "transcript" | "mindmap" | "podcast" | "avatar" | "html";
   const [tab, setTab] = useState<LTab>("video");
 
   type PodcastVariantState = { podcast: Podcast; audioUrl: string };
@@ -374,10 +374,14 @@ export function LessonPage() {
   const completedCount = course.lessonStates.filter((s) => s.state === "completed").length;
   const overallPct = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
 
+  const isFirstLesson = currentIndex === 0;
+  const HTML_EMBED_URL = "/embeds/pilotage-appel-doffre/index.html";
+
   const TABS: { id: LTab; Icon: typeof Monitor; label: string }[] = [
     { id: "video", Icon: Monitor, label: "Vidéo" }, { id: "transcript", Icon: AlignLeft, label: "Transcription" },
     { id: "mindmap", Icon: Network, label: "Mindmap" }, { id: "podcast", Icon: Headphones, label: "Podcast" },
     { id: "avatar", Icon: Bot, label: "Vidéo IA" },
+    ...(isFirstLesson ? [{ id: "html" as LTab, Icon: Globe, label: "Html" }] : []),
   ];
 
   if (lessonLoading || access === "checking") {
@@ -434,6 +438,12 @@ export function LessonPage() {
             )}
           </div>
 
+          {tab === "html" ? (
+            <div className="rounded-2xl overflow-hidden" style={{ height: "78vh", background: "#060410", border: `1px solid ${th.sep}` }}>
+              <iframe src={HTML_EMBED_URL} title="Pilotage appel d'offre" className="w-full h-full border-0 bg-white" />
+            </div>
+          ) : (
+          <>
           <div className="relative rounded-2xl overflow-hidden mb-5" style={{ paddingBottom: "40%", background: "#060410", border: `1px solid ${th.sep}` }}>
             <div className="absolute inset-0 overflow-hidden">
               {tab === "video" && lesson.videoUrl && (
@@ -702,6 +712,8 @@ export function LessonPage() {
               )}
             </div></GCard>
           </div>
+          </>
+          )}
         </div>
 
         {/* Copilot */}
