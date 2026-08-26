@@ -10,6 +10,7 @@ import {
   Network, RotateCcw, Play, Brain, Zap, Clock, PartyPopper, BookOpen, Headphones, Wand2, Bot, Code, Upload, Pencil,
 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
+import { supabase } from "@/app/lib/supabase/client";
 import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
 import { useCourseProgress } from "@/app/state/useCourseProgress";
@@ -72,6 +73,25 @@ function normalizeSmartQuotes(text: string): string {
     .replace(/–|—/g, "-");
 }
 
+// La page HTML personnalisée tourne dans une iframe sandboxée sans
+// allow-same-origin : elle ne peut donc pas lire la session Supabase de
+// l'élève depuis le localStorage du site principal (ni aucune autre donnée du
+// site). On la lui transmet explicitement via window.__PLATFORM_AUTH__ — son
+// propre jeton, déjà accessible à l'utilisateur qui la consulte, rien de plus
+// — pour qu'elle puisse appeler la fonction proxy `ai-proxy` (qui garde la
+// clé Gemini côté serveur) en son nom, sans jamais détenir de clé elle-même.
+function injectPlatformAuth(html: string, accessToken: string): string {
+  const payload = JSON.stringify({
+    supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+    supabaseAnonKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+    accessToken,
+  }).replace(/</g, "\\u003c");
+  const script = `<script>window.__PLATFORM_AUTH__=${payload};</script>`;
+  if (/<head[^>]*>/i.test(html)) return html.replace(/<head[^>]*>/i, (m) => `${m}\n${script}`);
+  if (/<html[^>]*>/i.test(html)) return html.replace(/<html[^>]*>/i, (m) => `${m}\n${script}`);
+  return script + html;
+}
+
 export function LessonPage() {
   const th = useTh();
   const { profile } = useProfile();
@@ -86,6 +106,7 @@ export function LessonPage() {
   const [htmlDraft, setHtmlDraft] = useState("");
   const [htmlSaving, setHtmlSaving] = useState(false);
   const [htmlFileError, setHtmlFileError] = useState<string | null>(null);
+  const [platformAccessToken, setPlatformAccessToken] = useState<string | null>(null);
 
   type PodcastVariantState = { podcast: Podcast; audioUrl: string };
   const [podcastByVariant, setPodcastByVariant] = useState<Partial<Record<PodcastVariantId, PodcastVariantState>>>({});
@@ -318,6 +339,16 @@ export function LessonPage() {
     }
   };
 
+  useEffect(() => {
+    if (tab !== "html" || !lesson?.customHtmlContent || htmlEditing) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!cancelled) setPlatformAccessToken(data.session?.access_token ?? null);
+    })();
+    return () => { cancelled = true; };
+  }, [tab, lesson?.customHtmlContent, htmlEditing]);
+
   const startEditHtml = () => {
     setHtmlDraft(lesson?.customHtmlContent ?? "");
     setHtmlFileError(null);
@@ -512,6 +543,9 @@ export function LessonPage() {
                     style={{ minHeight: 0 }}
                   />
                   {htmlFileError && <p className="text-xs text-[#fbc2ad]">{htmlFileError}</p>}
+                  <p className="text-[11px] leading-relaxed" style={{ color: th.fg3 }}>
+                    Pour appeler l'IA sans exposer de clé : dans ce HTML, lis <code>window.__PLATFORM_AUTH__</code> (<code>supabaseUrl</code>, <code>supabaseAnonKey</code>, <code>accessToken</code>) et fais un POST JSON vers <code>{"{supabaseUrl}"}/functions/v1/ai-proxy</code> avec les headers <code>apikey</code> (=supabaseAnonKey) et <code>Authorization: Bearer {"{accessToken}"}</code>, et un corps <code>{"{ contents: [...] }"}</code> (format Gemini). La clé Gemini reste côté serveur.
+                  </p>
                   <div className="flex items-center gap-3">
                     <label className="cursor-pointer">
                       <input type="file" accept=".txt,.docx" className="hidden" onChange={handleHtmlFileChange} />
@@ -529,7 +563,7 @@ export function LessonPage() {
               ) : lesson.customHtmlContent ? (
                 <>
                   <iframe
-                    srcDoc={lesson.customHtmlContent}
+                    srcDoc={platformAccessToken ? injectPlatformAuth(lesson.customHtmlContent, platformAccessToken) : lesson.customHtmlContent}
                     sandbox="allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"
                     title={`${lesson.title} — HTML`}
                     className="absolute inset-0 w-full h-full border-0 bg-white"
