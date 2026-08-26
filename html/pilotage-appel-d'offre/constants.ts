@@ -1,7 +1,12 @@
 
 import { TenderPlanningItem } from './types';
 
-export const GEMINI_MODEL = 'gemini-3-flash-preview';
+// URL + clé publique ("anon") du projet Supabase de la plateforme — non
+// secrètes par conception (protégées par RLS côté serveur), elles servent
+// uniquement à appeler la fonction proxy `tender-assistant` qui, elle, détient
+// la clé Gemini côté serveur et ne l'expose jamais au navigateur.
+export const SUPABASE_URL = 'https://urwroliwrzibvfxkttkv.supabase.co';
+export const SUPABASE_ANON_KEY = 'sb_publishable_JsiXGiqLLsske05KNYVILw_P79mZL9l';
 
 export const TENDER_TASK_DEFINITIONS: Omit<TenderPlanningItem, 'level' | 'isParent' | 'startDate' | 'endDate' | 'responsible' | 'comments'>[] = [
   { id: '1', name: 'Gérer le projet', estimatedDurationDays: 0 },

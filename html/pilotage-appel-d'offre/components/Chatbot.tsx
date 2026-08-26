@@ -1,8 +1,7 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { Chat, GenerateContentResponse } from '@google/genai';
 import { createChatSession, sendMessageToChat } from '../services/geminiService';
-import { ChatMessage } from '../types';
+import { ChatMessage, TenderChatSession } from '../types';
 import Spinner from './Spinner';
 
 interface ChatbotProps {
@@ -11,7 +10,7 @@ interface ChatbotProps {
 }
 
 const Chatbot: React.FC<ChatbotProps> = ({ combinedPdfText, globalIsLoading }) => {
-  const [chat, setChat] = useState<Chat | null>(null);
+  const [chat, setChat] = useState<TenderChatSession | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isSendingMessage, setIsSendingMessage] = useState(false);
@@ -55,22 +54,10 @@ const Chatbot: React.FC<ChatbotProps> = ({ combinedPdfText, globalIsLoading }) =
       const modelResponse: ChatMessage = { sender: 'model', text: '', isStreaming: true };
       setMessages((prevMessages) => [...prevMessages, modelResponse]);
 
-      const stream = await sendMessageToChat(chat, userMessage.text);
-      let fullText = '';
-      for await (const chunk of stream) {
-        const c = chunk as GenerateContentResponse;
-        if (c.text) {
-          fullText += c.text;
-          setMessages((prevMessages) =>
-            prevMessages.map((msg, index) =>
-              index === prevMessages.length - 1 ? { ...msg, text: fullText } : msg
-            )
-          );
-        }
-      }
+      const fullText = await sendMessageToChat(chat, userMessage.text);
       setMessages((prevMessages) =>
         prevMessages.map((msg, index) =>
-          index === prevMessages.length - 1 ? { ...msg, isStreaming: false } : msg
+          index === prevMessages.length - 1 ? { ...msg, text: fullText, isStreaming: false } : msg
         )
       );
     } catch (err: any) {

@@ -2,19 +2,25 @@
 <img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
 </div>
 
-# Run and deploy your AI Studio app
+# Pilotage appel d'offre
 
-This contains everything you need to run your app locally.
-
-View your app in AI Studio: https://ai.studio/apps/1965bd41-61d3-4343-9647-b6352a486054
+Mini-site embarqué (iframe) dans la première leçon de la plateforme. Les
+appels IA (extraction de dates, synthèses, chatbot) passent par la fonction
+Supabase Edge `tender-assistant`, qui détient la clé Gemini côté serveur —
+aucune clé n'est jamais exposée dans le navigateur. L'authentification est
+celle de la session Supabase de l'élève, partagée automatiquement car ce
+mini-site est chargé en iframe sur le même domaine que la plateforme.
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
-
+**Prerequisites:** Node.js
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
+2. Run the app:
    `npm run dev`
+
+## Build & déploiement
+
+`npm run build` génère `dist/`, dont le contenu doit être copié dans
+`public/embeds/pilotage-appel-doffre/` à la racine de la plateforme.

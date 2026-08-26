@@ -37,6 +37,11 @@ export interface ChatMessage {
   isStreaming?: boolean;
 }
 
+export interface TenderChatSession {
+  pdfContent: string;
+  history: { role: 'user' | 'model'; text: string }[];
+}
+
 export interface LaunchSummaryReport {
   objectifsCollectivite: string[];
   criteresNotationPonderes: string[];
