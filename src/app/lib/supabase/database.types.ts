@@ -2,7 +2,7 @@
 // À remplacer par `supabase gen types typescript` une fois le projet lié en CLI —
 // ça restera la source de vérité, ce fichier n'est qu'un point de départ fidèle au schéma.
 
-export type UserRole = "admin" | "student";
+export type UserRole = "admin" | "formateur" | "student";
 export type EnrollmentStatus = "active" | "completed" | "paused";
 export type LessonProgressStatus = "locked" | "in_progress" | "completed";
 export type AppointmentStatus = "requested" | "preparing" | "confirmed" | "completed" | "cancelled";

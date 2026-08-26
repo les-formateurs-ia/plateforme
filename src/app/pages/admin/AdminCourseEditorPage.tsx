@@ -39,7 +39,7 @@ const slugify = (s: string) => s.toLowerCase().trim()
 export function AdminCourseEditorPage() {
   const th = useTh();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const { courseId: routeCourseId } = useParams();
   const isNew = !routeCourseId;
 
@@ -327,29 +327,31 @@ export function AdminCourseEditorPage() {
             </div>
           </div></GCard>
 
-          <GCard><div className="p-6">
-            <h3 className="text-sm font-black mb-4" style={{ color: th.fg }}>Élèves inscrits</h3>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="flex-1">
-                <VSelect
-                  value={studentToEnroll}
-                  onValueChange={setStudentToEnroll}
-                  placeholder="Choisir un élève…"
-                  options={availableStudents.map((s) => ({ value: s.id, label: `${s.first_name || s.email} (${s.email})` }))}
-                />
-              </div>
-              <VBtn sm onClick={enrollStudent}><span className="flex items-center gap-1.5"><UserPlus className="w-3.5 h-3.5" />Inscrire</span></VBtn>
-            </div>
-            <div className="space-y-2">
-              {enrolled.map((s) => (
-                <div key={s.id} className="flex items-center gap-3 px-3 py-2.5 rounded-xl" style={{ background: th.isDark ? "rgba(255,255,255,0.03)" : "rgba(181,141,224,0.04)", border: `1px solid ${th.sep}` }}>
-                  <span className="flex-1 text-sm" style={{ color: th.fg2 }}>{s.first_name || s.email} <span style={{ color: th.fg3 }}>({s.email})</span></span>
-                  <button onClick={() => unenroll(s.id)}><X className="w-4 h-4" style={{ color: th.fg3 }} /></button>
+          {role === "admin" && (
+            <GCard><div className="p-6">
+              <h3 className="text-sm font-black mb-4" style={{ color: th.fg }}>Élèves inscrits</h3>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="flex-1">
+                  <VSelect
+                    value={studentToEnroll}
+                    onValueChange={setStudentToEnroll}
+                    placeholder="Choisir un élève…"
+                    options={availableStudents.map((s) => ({ value: s.id, label: `${s.first_name || s.email} (${s.email})` }))}
+                  />
                 </div>
-              ))}
-              {!enrolled.length && <p className="text-xs" style={{ color: th.fg3 }}>Aucun élève inscrit à ce cours.</p>}
-            </div>
-          </div></GCard>
+                <VBtn sm onClick={enrollStudent}><span className="flex items-center gap-1.5"><UserPlus className="w-3.5 h-3.5" />Inscrire</span></VBtn>
+              </div>
+              <div className="space-y-2">
+                {enrolled.map((s) => (
+                  <div key={s.id} className="flex items-center gap-3 px-3 py-2.5 rounded-xl" style={{ background: th.isDark ? "rgba(255,255,255,0.03)" : "rgba(181,141,224,0.04)", border: `1px solid ${th.sep}` }}>
+                    <span className="flex-1 text-sm" style={{ color: th.fg2 }}>{s.first_name || s.email} <span style={{ color: th.fg3 }}>({s.email})</span></span>
+                    <button onClick={() => unenroll(s.id)}><X className="w-4 h-4" style={{ color: th.fg3 }} /></button>
+                  </div>
+                ))}
+                {!enrolled.length && <p className="text-xs" style={{ color: th.fg3 }}>Aucun élève inscrit à ce cours.</p>}
+              </div>
+            </div></GCard>
+          )}
         </>
       )}
     </div>

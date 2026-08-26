@@ -3,7 +3,7 @@
 // combinées dépassent le budget d'exécution d'une seule invocation Edge
 // Function (~150s sur le plan gratuit) une fois la synthèse vocale ajoutée.
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
-import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
+import { CORS_HEADERS, jsonResponse, getCallerRole, isStaffRole } from "../_shared/podcast-utils.ts";
 import { resolvePodcastFormat, type PodcastFormatSpec } from "../_shared/podcast-formats.ts";
 
 const GEMINI_TEXT_MODEL = "gemini-3.6-flash";
@@ -74,6 +74,20 @@ Deno.serve(async (req) => {
     const { data: userData, error: userErr } = await supabase.auth.getUser();
     if (userErr || !userData?.user) return jsonResponse({ error: "Session invalide." }, 401);
     const userId = userData.user.id;
+
+    // admin/formateur peuvent régénérer librement ; un élève ne peut générer
+    // chaque format qu'une seule fois (pas de bouton "Régénérer" côté front,
+    // et on l'impose ici aussi pour ne pas dépendre uniquement de l'UI).
+    if (!isStaffRole(await getCallerRole(supabase, userId))) {
+      const { data: existing } = await supabase
+        .from("ai_generated_content")
+        .select("id")
+        .eq("user_id", userId).eq("lesson_id", lessonId).eq("content_type", "podcast").eq("variant", format.id)
+        .maybeSingle();
+      if (existing) {
+        return jsonResponse({ error: "Ce format de podcast a déjà été généré — seuls un admin ou un formateur peuvent le régénérer." }, 403);
+      }
+    }
 
     const { data: lesson, error: lessonErr } = await supabase
       .from("lessons")

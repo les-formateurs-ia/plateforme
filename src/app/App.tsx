@@ -2,6 +2,7 @@ import type { ReactElement } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 import { ThemeProvider, useTh } from "@/app/theme/theme";
 import { AuthProvider, useAuth } from "@/app/state/auth-context";
+import { isStaff } from "@/app/lib/permissions";
 import { ProfileProvider } from "@/app/state/profile-context";
 import { Toaster } from "@/app/components/ui/sonner";
 import { Background } from "@/app/components/common/Background";
@@ -62,13 +63,16 @@ function SignupGuard({ children }: { children: ReactElement }) {
   return children;
 }
 
-// Zone admin : le rôle n'est connu qu'une fois le profil chargé (juste après
-// RequireAuth), donc on affiche un loader tant qu'il vaut encore null plutôt
-// que de rediriger un admin par erreur pendant ce court instant.
-function RequireAdmin({ children }: { children: ReactElement }) {
+// Zone admin/formateur : le rôle n'est connu qu'une fois le profil chargé
+// (juste après RequireAuth), donc on affiche un loader tant qu'il vaut encore
+// null plutôt que de rediriger par erreur pendant ce court instant. Le
+// formateur a les mêmes droits que l'admin sur cette zone (gestion des
+// cours/leçons) — les deux exceptions (inscriptions élèves, édition du
+// Playground) sont gérées à l'intérieur des pages concernées.
+function RequireStaff({ children }: { children: ReactElement }) {
   const { role } = useAuth();
   if (role === null) return <LoadingScreen />;
-  if (role !== "admin") return <Navigate to="/" replace />;
+  if (!isStaff(role)) return <Navigate to="/" replace />;
   return children;
 }
 
@@ -84,12 +88,12 @@ function AppRoutes() {
         <Route path="calendar" element={<CalendarPage />} />
         <Route path="benefits" element={<BenefitsPage />} />
         <Route path="profile" element={<ProfilePage />} />
-        <Route path="admin/courses" element={<RequireAdmin><AdminCoursesPage /></RequireAdmin>} />
-        <Route path="admin/courses/new" element={<RequireAdmin><AdminCourseEditorPage /></RequireAdmin>} />
-        <Route path="admin/courses/:courseId" element={<RequireAdmin><AdminCourseEditorPage /></RequireAdmin>} />
-        <Route path="admin/courses/:courseId/lessons/new" element={<RequireAdmin><AdminLessonEditorPage /></RequireAdmin>} />
-        <Route path="admin/courses/:courseId/lessons/:lessonId" element={<RequireAdmin><AdminLessonEditorPage /></RequireAdmin>} />
-        <Route path="admin/appointments" element={<RequireAdmin><AdminAppointmentsPage /></RequireAdmin>} />
+        <Route path="admin/courses" element={<RequireStaff><AdminCoursesPage /></RequireStaff>} />
+        <Route path="admin/courses/new" element={<RequireStaff><AdminCourseEditorPage /></RequireStaff>} />
+        <Route path="admin/courses/:courseId" element={<RequireStaff><AdminCourseEditorPage /></RequireStaff>} />
+        <Route path="admin/courses/:courseId/lessons/new" element={<RequireStaff><AdminLessonEditorPage /></RequireStaff>} />
+        <Route path="admin/courses/:courseId/lessons/:lessonId" element={<RequireStaff><AdminLessonEditorPage /></RequireStaff>} />
+        <Route path="admin/appointments" element={<RequireStaff><AdminAppointmentsPage /></RequireStaff>} />
       </Route>
       <Route path="/lesson/:lessonId" element={<RequireAuth><LessonPage /></RequireAuth>} />
       <Route path="*" element={<Navigate to="/" replace />} />

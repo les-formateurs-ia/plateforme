@@ -10,6 +10,20 @@ export function jsonResponse(body: unknown, status = 200) {
   });
 }
 
+// admin & formateur ont les mêmes droits de génération IA — un étudiant ne
+// doit pas pouvoir déclencher la génération de mindmap/vidéo avatar en
+// appelant la fonction Edge directement (contourner un bouton masqué côté
+// front ne suffit pas : la vérification doit vivre ici aussi).
+export function isStaffRole(role: string | null | undefined): boolean {
+  return role === "admin" || role === "formateur";
+}
+
+// deno-lint-ignore no-explicit-any
+export async function getCallerRole(supabase: any, userId: string): Promise<string | null> {
+  const { data } = await supabase.from("profiles").select("role").eq("id", userId).maybeSingle();
+  return data?.role ?? null;
+}
+
 // atob() + Array.from(str, charCodeAt) est très lent en V8 pour de grandes
 // chaînes (des millions de caractères pour un podcast de plusieurs minutes) :
 // Array.from passe par le protocole itérateur + un appel de fonction par

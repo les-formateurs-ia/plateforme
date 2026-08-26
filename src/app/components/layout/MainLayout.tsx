@@ -3,6 +3,7 @@ import { Search, Bell, Plus, CalendarClock, ChevronDown } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
+import { isStaff } from "@/app/lib/permissions";
 import { Background } from "@/app/components/common/Background";
 import { Logo } from "@/app/components/common/Logo";
 import { NAV_ITEMS } from "@/app/data/mock";
@@ -26,7 +27,7 @@ export function MainLayout() {
             </NavLink>
           ))}
         </nav>
-        {role === "admin" && (
+        {isStaff(role) && (
           <div className="px-3 pb-3 space-y-1.5">
             <NavLink to="/admin/courses" className="w-full flex items-center gap-2.5 px-4 py-2.5 rounded-full text-sm font-semibold transition-all hover:opacity-90"
               style={{ background: "linear-gradient(135deg,#b58de0,#dbacf0)", color: "#fff" }}>

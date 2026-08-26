@@ -13,6 +13,7 @@ import {
 import { useTh } from "@/app/theme/theme";
 import { supabase } from "@/app/lib/supabase/client";
 import { useAuth } from "@/app/state/auth-context";
+import { isStaff } from "@/app/lib/permissions";
 import { useProfile } from "@/app/state/profile-context";
 import { useCourseProgress } from "@/app/state/useCourseProgress";
 import { Background } from "@/app/components/common/Background";
@@ -216,16 +217,17 @@ export function LessonPage() {
   }, [lessonId]);
 
   // Vérifie que la leçon est déverrouillée (élève arrivé dans l'ordre) une fois la progression connue.
-  // Un admin peut toujours prévisualiser n'importe quelle leçon (pas de verrouillage
-  // par ordre) — il a besoin de tester son contenu sans suivre le parcours élève.
+  // admin/formateur peuvent toujours prévisualiser n'importe quelle leçon (pas
+  // de verrouillage par ordre) — ils doivent pouvoir tester le contenu sans
+  // suivre le parcours élève.
   useEffect(() => {
     if (!lessonId || course.loading || !user) return;
     const state = course.lessonStates.find((s) => s.lesson.id === lessonId);
     if (!state) {
-      if (role === "admin") setAccess("granted");
+      if (isStaff(role)) setAccess("granted");
       return;
     }
-    if (state.state === "locked" && role !== "admin") {
+    if (state.state === "locked" && !isStaff(role)) {
       setAccess("denied");
       toast.error("Cette leçon n'est pas encore débloquée — termine les précédentes d'abord.");
       navigate("/lessons", { replace: true });
@@ -569,14 +571,14 @@ export function LessonPage() {
   const completedCount = course.lessonStates.filter((s) => s.state === "completed").length;
   const overallPct = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
 
-  // Onglet HTML réservé aux admins pour l'instant — pas encore de notion de
-  // tarif élève pour décider qui d'autre devrait y avoir accès.
+  // Playground et Agent sont visibles par tous les rôles/profils — seule
+  // l'édition du Playground reste réservée à l'admin (cf. plus bas).
   const TABS: { id: LTab; Icon: typeof Monitor; label: string }[] = [
     { id: "video", Icon: Monitor, label: "Vidéo" }, { id: "transcript", Icon: AlignLeft, label: "Transcription" },
     { id: "mindmap", Icon: Network, label: "Mindmap" }, { id: "podcast", Icon: Headphones, label: "Podcast" },
     { id: "avatar", Icon: Bot, label: "Vidéo IA" },
-    ...(role === "admin" ? [{ id: "html" as LTab, Icon: Code, label: "Playground" }] : []),
-    ...(role === "admin" ? [{ id: "agent" as LTab, Icon: AudioLines, label: "Agent" }] : []),
+    { id: "html", Icon: Code, label: "Playground" },
+    { id: "agent", Icon: AudioLines, label: "Agent" },
   ];
 
   if (lessonLoading || access === "checking") {
@@ -680,16 +682,22 @@ export function LessonPage() {
                       style={{ opacity: htmlIframeLoaded ? 1 : 0 }}
                     />
                   )}
-                  <button onClick={startEditHtml} className="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg"
-                    style={{ background: th.card, border: `1px solid ${th.sep}`, color: th.fg }}>
-                    <Pencil className="w-3 h-3" />Modifier
-                  </button>
+                  {role === "admin" && (
+                    <button onClick={startEditHtml} className="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg"
+                      style={{ background: th.card, border: `1px solid ${th.sep}`, color: th.fg }}>
+                      <Pencil className="w-3 h-3" />Modifier
+                    </button>
+                  )}
                 </>
               ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6">
                   <Code className="w-6 h-6" style={{ color: th.fg3 }} />
-                  <p className="text-sm" style={{ color: th.fg3 }}>Pas encore de page HTML pour cette leçon.</p>
-                  <ShimBtn sm onClick={startEditHtml}>Insérer HTML</ShimBtn>
+                  <p className="text-sm" style={{ color: th.fg3 }}>Pas encore de page Playground pour cette leçon.</p>
+                  {role === "admin" ? (
+                    <ShimBtn sm onClick={startEditHtml}>Insérer HTML</ShimBtn>
+                  ) : (
+                    <p className="text-xs" style={{ color: th.fg3, opacity: 0.7 }}>Bientôt disponible.</p>
+                  )}
                 </div>
               )}
             </div>
@@ -794,7 +802,7 @@ export function LessonPage() {
                   ) : mindmap ? (
                     <>
                       <MindmapView tree={mindmap} />
-                      {role === "admin" && (
+                      {isStaff(role) && (
                         <button onMouseDown={(e) => e.stopPropagation()} onClick={handleGenerateMindmap} disabled={mindmapGenerating}
                           className="absolute top-3 left-3 flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80 disabled:opacity-50 z-10"
                           style={{ background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff" }}>
@@ -807,8 +815,8 @@ export function LessonPage() {
                       <div className="text-center max-w-sm">
                         <Network className="w-6 h-6 mx-auto mb-2 text-white/30" />
                         <p className="text-sm text-white/60 mb-1">Pas encore de mindmap pour cette leçon.</p>
-                        {role !== "admin" && <p className="text-xs text-white/30">Bientôt disponible.</p>}
-                        {role === "admin" && (
+                        {!isStaff(role) && <p className="text-xs text-white/30">Bientôt disponible.</p>}
+                        {isStaff(role) && (
                           <button onClick={handleGenerateMindmap} disabled={mindmapGenerating}
                             className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80 disabled:opacity-50"
                             style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff" }}>
@@ -830,14 +838,6 @@ export function LessonPage() {
                         <div className="text-center pt-6"><Headphones className="w-6 h-6 mx-auto mb-2 text-white/30" /><p className="text-sm text-white/60">Chargement…</p></div>
                       )}
 
-                      {!podcastLoading && generatedVariants.length === 0 && role !== "admin" && (
-                        <div className="text-center pt-6">
-                          <Headphones className="w-6 h-6 mx-auto mb-2 text-white/30" />
-                          <p className="text-sm text-white/60">Pas encore de podcast personnalisé pour cette leçon.</p>
-                          <p className="text-xs text-white/30 mt-1">Bientôt disponible.</p>
-                        </div>
-                      )}
-
                       {!podcastLoading && generatedVariants.map((variantId) => {
                         const format = PODCAST_FORMATS.find((f) => f.id === variantId);
                         const entry = podcastByVariant[variantId];
@@ -848,7 +848,7 @@ export function LessonPage() {
                             <div className="flex items-center gap-2 mb-2">
                               <format.Icon className="w-4 h-4 text-white/50 shrink-0" />
                               <span className="text-sm font-semibold text-white">{format.label}</span>
-                              {role === "admin" && (
+                              {isStaff(role) && (
                                 <button onClick={() => handleGeneratePodcast(variantId)} disabled={podcastGeneratingVariant !== null}
                                   className="ml-auto flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all hover:opacity-80 disabled:opacity-50 shrink-0"
                                   style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff" }}>
@@ -861,7 +861,7 @@ export function LessonPage() {
                         );
                       })}
 
-                      {!podcastLoading && role === "admin" && remainingFormats.length > 0 && (
+                      {!podcastLoading && remainingFormats.length > 0 && (
                         <div>
                           <p className="text-sm text-white/60 mb-3 text-center">
                             {generatedVariants.length === 0 ? "Choisis un format de podcast pour cette leçon :" : "Générer un autre format :"}
@@ -904,10 +904,10 @@ export function LessonPage() {
                     ) : (
                       <>
                         <p className="text-sm text-white/60">Pas encore de vidéo personnalisée pour cette leçon.</p>
-                        {role !== "admin" && <p className="text-xs text-white/30 mt-1">Bientôt disponible.</p>}
+                        {!isStaff(role) && <p className="text-xs text-white/30 mt-1">Bientôt disponible.</p>}
                       </>
                     )}
-                    {role === "admin" && (
+                    {isStaff(role) && (
                       <button onClick={handleGenerateAvatarVideo} disabled={avatarGenerating}
                         className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80 disabled:opacity-50"
                         style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff" }}>

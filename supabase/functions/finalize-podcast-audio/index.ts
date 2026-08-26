@@ -4,7 +4,7 @@
 // l'E/S et des copies d'octets déjà binaires (pas de parse JSON/base64 d'un
 // gros payload), donc reste largement sous le quota CPU fixe de 2s.
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
-import { CORS_HEADERS, jsonResponse, pcmToWav, concatUint8Arrays } from "../_shared/podcast-utils.ts";
+import { CORS_HEADERS, jsonResponse, pcmToWav, concatUint8Arrays, getCallerRole, isStaffRole } from "../_shared/podcast-utils.ts";
 import { resolvePodcastFormat } from "../_shared/podcast-formats.ts";
 
 Deno.serve(async (req) => {
@@ -29,6 +29,21 @@ Deno.serve(async (req) => {
     const { data: userData, error: userErr } = await supabase.auth.getUser();
     if (userErr || !userData?.user) return jsonResponse({ error: "Session invalide." }, 401);
     const userId = userData.user.id;
+
+    // Barrière réelle (pas seulement côté generate-podcast-script) : c'est ici
+    // qu'est écrite la ligne finale ai_generated_content, donc c'est ici que
+    // la règle "un élève ne régénère pas" doit être appliquée pour de vrai.
+    const isStaff = isStaffRole(await getCallerRole(supabase, userId));
+    if (!isStaff) {
+      const { data: existing } = await supabase
+        .from("ai_generated_content")
+        .select("id")
+        .eq("user_id", userId).eq("lesson_id", lessonId).eq("content_type", "podcast").eq("variant", format.id)
+        .maybeSingle();
+      if (existing) {
+        return jsonResponse({ error: "Ce format de podcast a déjà été généré — seuls un admin ou un formateur peuvent le régénérer." }, 403);
+      }
+    }
 
     const tmpPaths: string[] = [];
     const pcmParts: Uint8Array[] = [];

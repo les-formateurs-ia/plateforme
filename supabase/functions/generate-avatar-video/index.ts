@@ -5,7 +5,7 @@
 // à check-avatar-video-status jusqu'à complétion (même leçon apprise que pour
 // les podcasts — éviter les invocations longues).
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
-import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
+import { CORS_HEADERS, jsonResponse, getCallerRole, isStaffRole } from "../_shared/podcast-utils.ts";
 
 const HEYGEN_AVATAR_ID = "f5f523196e7e4eaca6325972d36d266d"; // "Rafi Office 2" (look id, requis par POST /v3/videos — pas l'id de groupe renvoyé par GET /v3/avatars)
 const HEYGEN_VOICE_ID = "d0d17a7e281f42a9b67002b32f4156d8"; // voix par défaut de Rafi
@@ -32,6 +32,10 @@ Deno.serve(async (req) => {
     const { data: userData, error: userErr } = await supabase.auth.getUser();
     if (userErr || !userData?.user) return jsonResponse({ error: "Session invalide." }, 401);
     const userId = userData.user.id;
+
+    if (!isStaffRole(await getCallerRole(supabase, userId))) {
+      return jsonResponse({ error: "Seuls un admin ou un formateur peuvent générer une vidéo avatar." }, 403);
+    }
 
     const { data: lesson } = await supabase.from("lessons").select("title").eq("id", lessonId).maybeSingle();
 

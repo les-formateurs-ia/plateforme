@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/app/lib/supabase/client";
 
-type Role = "admin" | "student";
+export type Role = "admin" | "formateur" | "student";
 type AuthStatus = "loading" | "authenticated" | "unauthenticated";
 const AUTH_INIT_TIMEOUT_MS = 8000;
 

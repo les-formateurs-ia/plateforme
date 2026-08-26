@@ -3,7 +3,7 @@
 // seule personne. Même logique de personnalisation : cours + référentiel +
 // objectif professionnel de l'élève, contenu obligatoire jamais coupé.
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
-import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
+import { CORS_HEADERS, jsonResponse, getCallerRole, isStaffRole } from "../_shared/podcast-utils.ts";
 
 const GEMINI_TEXT_MODEL = "gemini-3.6-flash";
 
@@ -49,6 +49,10 @@ Deno.serve(async (req) => {
     const { data: userData, error: userErr } = await supabase.auth.getUser();
     if (userErr || !userData?.user) return jsonResponse({ error: "Session invalide." }, 401);
     const userId = userData.user.id;
+
+    if (!isStaffRole(await getCallerRole(supabase, userId))) {
+      return jsonResponse({ error: "Seuls un admin ou un formateur peuvent générer une vidéo avatar." }, 403);
+    }
 
     const { data: lesson, error: lessonErr } = await supabase
       .from("lessons").select("id, title, reference_content").eq("id", lessonId).maybeSingle();

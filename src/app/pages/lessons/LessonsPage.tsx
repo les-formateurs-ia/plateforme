@@ -10,6 +10,7 @@ import { cx } from "@/app/lib/cx";
 import { formatDuration, type LessonWithState } from "@/app/lib/learning";
 import { useCourseProgress } from "@/app/state/useCourseProgress";
 import { useAuth } from "@/app/state/auth-context";
+import { isStaff } from "@/app/lib/permissions";
 import { Checkbox } from "@/app/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/app/components/ui/dialog";
 import { requestAvatarVideoGeneration, pollAvatarVideoStatus } from "@/app/lib/avatarVideos";
@@ -151,14 +152,14 @@ export function LessonsPage() {
           <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>{outline.formationName} · {outline.sections.length} modules · {totalLessons} leçons</p>
         </div>
 
-        {role === "admin" && !editMode && (
+        {isStaff(role) && !editMode && (
           <button onClick={startEdit}
             className="shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-80"
             style={greenBtn}>
             <Pencil className="w-3.5 h-3.5" />Éditer
           </button>
         )}
-        {role === "admin" && editMode && (
+        {isStaff(role) && editMode && (
           <div className="shrink-0 flex items-center gap-3">
             <span className="text-xs font-semibold" style={{ color: th.fg3 }}>{selected.size} sélectionnée{selected.size > 1 ? "s" : ""}</span>
             <button onClick={cancelEdit} className="px-3.5 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-80" style={{ background: "transparent", border: `1px solid ${th.sep}`, color: th.fg3 }}>
