@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
@@ -7,7 +7,7 @@ import {
   ChevronRight, ChevronLeft, Mic, Send,
   Sparkles, MessageSquare, CheckCircle, X,
   Lightbulb, Monitor, AlignLeft,
-  Network, RotateCcw, Play, Brain, Zap, Clock, PartyPopper, BookOpen, Headphones, Wand2, Bot, Globe,
+  Network, RotateCcw, Play, Brain, Zap, Clock, PartyPopper, BookOpen, Headphones, Wand2, Bot, Code, Upload, Pencil,
 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
@@ -15,12 +15,12 @@ import { useProfile } from "@/app/state/profile-context";
 import { useCourseProgress } from "@/app/state/useCourseProgress";
 import { Background } from "@/app/components/common/Background";
 import { GCard } from "@/app/components/common/GCard";
-import { VBtn } from "@/app/components/common/Buttons";
+import { VBtn, ShimBtn } from "@/app/components/common/Buttons";
 import { cx } from "@/app/lib/cx";
 import type { ChatMsg } from "@/app/types";
 import {
   getLessonDetail, ensureLessonStarted, addTimeSpent, submitQuiz, flattenLessons, QUIZ_PASS_THRESHOLD,
-  type LessonDetail, type QuizAnswer,
+  updateLessonCustomHtml, type LessonDetail, type QuizAnswer,
 } from "@/app/lib/learning";
 import { getMyPodcasts, getPodcastSignedUrl, requestPodcastGeneration, pollForPodcast, type Podcast } from "@/app/lib/podcasts";
 import { PODCAST_FORMATS, type PodcastVariantId } from "@/app/lib/podcastFormats";
@@ -61,6 +61,17 @@ function stripCertificationMentions(markdown: string): string {
     .trim();
 }
 
+// Word (et donc l'autocorrection dans les .docx) remplace souvent les guillemets
+// droits par des guillemets typographiques et "--" par un tiret cadratin — ce qui
+// casse la syntaxe des attributs HTML (class="foo" devient class="foo" avec des
+// guillemets incompatibles). On les remet en droits par sécurité après extraction.
+function normalizeSmartQuotes(text: string): string {
+  return text
+    .replace(/[‘’]/g, "'")
+    .replace(/[“”]/g, '"')
+    .replace(/–|—/g, "-");
+}
+
 export function LessonPage() {
   const th = useTh();
   const { profile } = useProfile();
@@ -71,6 +82,10 @@ export function LessonPage() {
 
   type LTab = "video" | "transcript" | "mindmap" | "podcast" | "avatar" | "html";
   const [tab, setTab] = useState<LTab>("video");
+  const [htmlEditing, setHtmlEditing] = useState(false);
+  const [htmlDraft, setHtmlDraft] = useState("");
+  const [htmlSaving, setHtmlSaving] = useState(false);
+  const [htmlFileError, setHtmlFileError] = useState<string | null>(null);
 
   type PodcastVariantState = { podcast: Podcast; audioUrl: string };
   const [podcastByVariant, setPodcastByVariant] = useState<Partial<Record<PodcastVariantId, PodcastVariantState>>>({});
@@ -303,6 +318,54 @@ export function LessonPage() {
     }
   };
 
+  const startEditHtml = () => {
+    setHtmlDraft(lesson?.customHtmlContent ?? "");
+    setHtmlFileError(null);
+    setHtmlEditing(true);
+  };
+
+  const cancelEditHtml = () => {
+    setHtmlEditing(false);
+    setHtmlFileError(null);
+  };
+
+  const handleHtmlFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setHtmlFileError(null);
+    try {
+      if (file.name.toLowerCase().endsWith(".docx")) {
+        const mammoth = await import("mammoth");
+        const arrayBuffer = await file.arrayBuffer();
+        const { value } = await mammoth.extractRawText({ arrayBuffer });
+        setHtmlDraft(normalizeSmartQuotes(value));
+      } else {
+        setHtmlDraft(normalizeSmartQuotes(await file.text()));
+      }
+    } catch (err) {
+      console.error(err);
+      setHtmlFileError("Impossible de lire ce fichier — vérifie qu'il s'agit bien d'un .txt ou .docx.");
+    }
+  };
+
+  const saveHtml = async () => {
+    if (!lessonId) return;
+    setHtmlSaving(true);
+    try {
+      const html = htmlDraft.trim() || null;
+      await updateLessonCustomHtml(lessonId, html);
+      setLesson((prev) => (prev ? { ...prev, customHtmlContent: html } : prev));
+      setHtmlEditing(false);
+      toast.success("Page HTML enregistrée.");
+    } catch (err) {
+      console.error(err);
+      toast.error(err instanceof Error ? err.message : "Impossible d'enregistrer la page HTML.");
+    } finally {
+      setHtmlSaving(false);
+    }
+  };
+
   // Cumule le temps passé sur la leçon toutes les 30s + au démontage.
   const elapsedRef = useRef(0);
   const lastTickRef = useRef(Date.now());
@@ -374,14 +437,13 @@ export function LessonPage() {
   const completedCount = course.lessonStates.filter((s) => s.state === "completed").length;
   const overallPct = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
 
-  const isFirstLesson = currentIndex === 0;
-  const HTML_EMBED_URL = "/embeds/pilotage-appel-doffre/index.html";
-
+  // Onglet HTML réservé aux admins pour l'instant — pas encore de notion de
+  // tarif élève pour décider qui d'autre devrait y avoir accès.
   const TABS: { id: LTab; Icon: typeof Monitor; label: string }[] = [
     { id: "video", Icon: Monitor, label: "Vidéo" }, { id: "transcript", Icon: AlignLeft, label: "Transcription" },
     { id: "mindmap", Icon: Network, label: "Mindmap" }, { id: "podcast", Icon: Headphones, label: "Podcast" },
     { id: "avatar", Icon: Bot, label: "Vidéo IA" },
-    ...(isFirstLesson ? [{ id: "html" as LTab, Icon: Globe, label: "Html" }] : []),
+    ...(role === "admin" ? [{ id: "html" as LTab, Icon: Code, label: "HTML" }] : []),
   ];
 
   if (lessonLoading || access === "checking") {
@@ -439,8 +501,51 @@ export function LessonPage() {
           </div>
 
           {tab === "html" ? (
-            <div className="rounded-2xl overflow-hidden" style={{ height: "78vh", background: "#060410", border: `1px solid ${th.sep}` }}>
-              <iframe src={HTML_EMBED_URL} title="Pilotage appel d'offre" className="w-full h-full border-0 bg-white" />
+            <div className="relative rounded-2xl overflow-hidden" style={{ height: "78vh", background: "#060410", border: `1px solid ${th.sep}` }}>
+              {htmlEditing ? (
+                <div className="absolute inset-0 flex flex-col gap-3 p-5">
+                  <textarea
+                    value={htmlDraft}
+                    onChange={(e) => setHtmlDraft(e.target.value)}
+                    placeholder="Colle le HTML ici (Ctrl+V)…"
+                    className="flex-1 w-full rounded-xl px-4 py-3 text-xs g-input resize-none font-mono"
+                    style={{ minHeight: 0 }}
+                  />
+                  {htmlFileError && <p className="text-xs text-[#fbc2ad]">{htmlFileError}</p>}
+                  <div className="flex items-center gap-3">
+                    <label className="cursor-pointer">
+                      <input type="file" accept=".txt,.docx" className="hidden" onChange={handleHtmlFileChange} />
+                      <span className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 hover:opacity-80"
+                        style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(15,14,20,0.04)", border: `1px solid ${th.inputB}`, color: th.fg }}>
+                        <Upload className="w-3.5 h-3.5" />Charger un fichier (.txt / .docx)
+                      </span>
+                    </label>
+                    <div className="ml-auto flex items-center gap-2">
+                      <VBtn sm onClick={cancelEditHtml} disabled={htmlSaving}>Annuler</VBtn>
+                      <ShimBtn sm onClick={saveHtml} disabled={htmlSaving}>{htmlSaving ? "Enregistrement…" : "Enregistrer"}</ShimBtn>
+                    </div>
+                  </div>
+                </div>
+              ) : lesson.customHtmlContent ? (
+                <>
+                  <iframe
+                    srcDoc={lesson.customHtmlContent}
+                    sandbox="allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"
+                    title={`${lesson.title} — HTML`}
+                    className="absolute inset-0 w-full h-full border-0 bg-white"
+                  />
+                  <button onClick={startEditHtml} className="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg"
+                    style={{ background: th.card, border: `1px solid ${th.sep}`, color: th.fg }}>
+                    <Pencil className="w-3 h-3" />Modifier
+                  </button>
+                </>
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6">
+                  <Code className="w-6 h-6" style={{ color: th.fg3 }} />
+                  <p className="text-sm" style={{ color: th.fg3 }}>Pas encore de page HTML pour cette leçon.</p>
+                  <ShimBtn sm onClick={startEditHtml}>Insérer HTML</ShimBtn>
+                </div>
+              )}
             </div>
           ) : (
           <>

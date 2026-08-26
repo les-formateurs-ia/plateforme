@@ -194,6 +194,7 @@ export interface LessonDetail {
   aiContentPrompt: string | null;
   practicalExercisePrompt: string | null;
   referenceContent: string | null;
+  customHtmlContent: string | null;
   sectionTitle: string;
   formationId: string;
   formationName: string;
@@ -203,7 +204,7 @@ export interface LessonDetail {
 export async function getLessonDetail(lessonId: string): Promise<LessonDetail | null> {
   const { data: lesson, error: lessonError } = await supabase
     .from("lessons")
-    .select("id, section_id, slug, title, video_provider, video_url, duration_minutes, ai_content_prompt, practical_exercise_prompt, reference_content")
+    .select("id, section_id, slug, title, video_provider, video_url, duration_minutes, ai_content_prompt, practical_exercise_prompt, reference_content, custom_html_content")
     .eq("id", lessonId)
     .maybeSingle();
   if (lessonError) throw lessonError;
@@ -250,6 +251,7 @@ export async function getLessonDetail(lessonId: string): Promise<LessonDetail | 
     aiContentPrompt: lesson.ai_content_prompt,
     practicalExercisePrompt: lesson.practical_exercise_prompt,
     referenceContent: lesson.reference_content,
+    customHtmlContent: lesson.custom_html_content,
     sectionTitle: section?.title ?? "",
     formationId: section?.formation_id ?? "",
     formationName: formation?.name ?? "",
@@ -268,6 +270,11 @@ export async function getLessonDetail(lessonId: string): Promise<LessonDetail | 
         })),
     })),
   };
+}
+
+export async function updateLessonCustomHtml(lessonId: string, html: string | null): Promise<void> {
+  const { error } = await supabase.from("lessons").update({ custom_html_content: html }).eq("id", lessonId);
+  if (error) throw error;
 }
 
 export const QUIZ_PASS_THRESHOLD = 75;
