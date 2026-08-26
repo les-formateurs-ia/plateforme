@@ -107,6 +107,7 @@ export function LessonPage() {
   const [htmlSaving, setHtmlSaving] = useState(false);
   const [htmlFileError, setHtmlFileError] = useState<string | null>(null);
   const [platformAccessToken, setPlatformAccessToken] = useState<string | null>(null);
+  const [htmlIframeLoaded, setHtmlIframeLoaded] = useState(false);
 
   type PodcastVariantState = { podcast: Podcast; audioUrl: string };
   const [podcastByVariant, setPodcastByVariant] = useState<Partial<Record<PodcastVariantId, PodcastVariantState>>>({});
@@ -340,6 +341,10 @@ export function LessonPage() {
   };
 
   useEffect(() => {
+    setHtmlIframeLoaded(false);
+  }, [lesson?.customHtmlContent]);
+
+  useEffect(() => {
     if (tab !== "html" || !lesson?.customHtmlContent || htmlEditing) return;
     let cancelled = false;
     (async () => {
@@ -562,11 +567,19 @@ export function LessonPage() {
                 </div>
               ) : lesson.customHtmlContent ? (
                 <>
+                  {!htmlIframeLoaded && (
+                    <div className="absolute inset-0 flex items-center justify-center gap-2 text-sm bg-white" style={{ color: "#94a3b8" }}>
+                      Chargement de la page…
+                    </div>
+                  )}
                   <iframe
+                    key={lesson.customHtmlContent}
+                    onLoad={() => setHtmlIframeLoaded(true)}
                     srcDoc={platformAccessToken ? injectPlatformAuth(lesson.customHtmlContent, platformAccessToken) : lesson.customHtmlContent}
                     sandbox="allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"
                     title={`${lesson.title} — HTML`}
                     className="absolute inset-0 w-full h-full border-0 bg-white"
+                    style={{ opacity: htmlIframeLoaded ? 1 : 0 }}
                   />
                   <button onClick={startEditHtml} className="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg"
                     style={{ background: th.card, border: `1px solid ${th.sep}`, color: th.fg }}>
