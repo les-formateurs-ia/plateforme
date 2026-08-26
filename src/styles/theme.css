@@ -1,5 +1,20 @@
 @custom-variant dark (&:is(.dark *));
 
+/* Orb de l'onglet Agent (voix ElevenLabs) : respiration lente au repos,
+   pulsation plus marquée pendant que l'agent parle. */
+@keyframes agent-orb-idle {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.04); opacity: 1; }
+}
+@keyframes agent-orb-speaking {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
+@keyframes agent-orb-ring {
+  0% { transform: scale(0.85); opacity: 0.55; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
 :root {
   --font-size: 16px;
   --background: #08060F;

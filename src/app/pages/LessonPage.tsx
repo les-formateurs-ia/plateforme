@@ -8,6 +8,7 @@ import {
   Sparkles, MessageSquare, CheckCircle, X,
   Lightbulb, Monitor, AlignLeft,
   Network, RotateCcw, Play, Brain, Zap, Clock, PartyPopper, BookOpen, Headphones, Wand2, Bot, Code, Upload, Pencil, AudioLines,
+  Phone, PhoneOff, MessageCircle,
 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { supabase } from "@/app/lib/supabase/client";
@@ -110,9 +111,13 @@ export function LessonPage() {
   const [platformAccessToken, setPlatformAccessToken] = useState<string | null>(null);
   const [platformAuthChecked, setPlatformAuthChecked] = useState(false);
   const [htmlIframeLoaded, setHtmlIframeLoaded] = useState(false);
-  const [agentSignedUrl, setAgentSignedUrl] = useState<string | null>(null);
+  const [agentStatus, setAgentStatus] = useState<"idle" | "connecting" | "connected">("idle");
+  const [agentMode, setAgentMode] = useState<"listening" | "speaking">("listening");
   const [agentError, setAgentError] = useState<string | null>(null);
-  const agentContainerRef = useRef<HTMLDivElement>(null);
+  const [agentChatOpen, setAgentChatOpen] = useState(false);
+  const [agentMessages, setAgentMessages] = useState<{ role: "user" | "agent"; text: string }[]>([]);
+  const [agentInput, setAgentInput] = useState("");
+  const conversationRef = useRef<import("@elevenlabs/client").Conversation | null>(null);
 
   type PodcastVariantState = { podcast: Podcast; audioUrl: string };
   const [podcastByVariant, setPodcastByVariant] = useState<Partial<Record<PodcastVariantId, PodcastVariantState>>>({});
@@ -371,68 +376,79 @@ export function LessonPage() {
     return () => clearTimeout(timer);
   }, [tab, lesson?.customHtmlContent, htmlEditing, platformAuthChecked, htmlIframeLoaded]);
 
-  // Onglet Agent (widget vocal ElevenLabs) : on récupère une signed URL fraîche
-  // à chaque ouverture de l'onglet (valable 15 min) plutôt que de la garder en
-  // cache, pour ne pas tomber sur une URL expirée si l'élève revient plus tard.
-  useEffect(() => {
-    if (tab !== "agent" || !lessonId) return;
-    let cancelled = false;
-    setAgentSignedUrl(null);
+  // Onglet Agent (voix ElevenLabs) : UI custom au lieu du widget préfabriqué
+  // (celui-ci n'a pas de mode plein-conteneur — cf. commit précédent — et ne
+  // permet pas de contrôler la taille relative de l'orbe vs des boutons). On
+  // pilote directement le SDK @elevenlabs/client, chargé à la demande.
+  const startAgentCall = async () => {
+    if (agentStatus !== "idle") return;
     setAgentError(null);
-    (async () => {
-      try {
-        const url = await getAgentSignedUrl();
-        if (!cancelled) setAgentSignedUrl(url);
-      } catch (err) {
-        console.error(err);
-        if (!cancelled) setAgentError(err instanceof Error ? err.message : "Impossible de démarrer l'agent vocal.");
+    setAgentStatus("connecting");
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      const signedUrl = await getAgentSignedUrl();
+      const { Conversation } = await import("@elevenlabs/client");
+      const conversation = await Conversation.startSession({
+        signedUrl,
+        onConnect: () => setAgentStatus("connected"),
+        onDisconnect: () => {
+          setAgentStatus("idle");
+          setAgentChatOpen(false);
+          conversationRef.current = null;
+        },
+        onModeChange: ({ mode }) => setAgentMode(mode),
+        onMessage: ({ source, message }) => {
+          setAgentMessages((prev) => [...prev, { role: source === "user" ? "user" : "agent", text: message }]);
+        },
+        onError: (message) => {
+          console.error(message);
+          setAgentError(typeof message === "string" ? message : "Erreur de connexion à l'agent.");
+        },
+      });
+      conversationRef.current = conversation;
+    } catch (err) {
+      console.error(err);
+      setAgentStatus("idle");
+      if (err instanceof DOMException && err.name === "NotFoundError") {
+        setAgentError("Aucun microphone détecté sur cet appareil.");
+      } else if (err instanceof DOMException && err.name === "NotAllowedError") {
+        setAgentError("Accès au microphone refusé — autorise-le dans les paramètres du navigateur pour ce site.");
+      } else {
+        setAgentError(err instanceof Error ? err.message : "Impossible de démarrer l'agent vocal.");
       }
-    })();
-    return () => { cancelled = true; };
-  }, [tab, lessonId]);
-
-  // Le widget ElevenLabs est un web component (<elevenlabs-convai>) : on le
-  // crée impérativement via le DOM plutôt qu'en JSX pour éviter d'avoir à
-  // déclarer un élément custom dans les types JSX, et pour recréer proprement
-  // l'élément à chaque nouvelle signed URL (il ne réagit pas aux changements
-  // d'attribut après montage).
-  useEffect(() => {
-    if (!agentSignedUrl || !agentContainerRef.current) return;
-    const container = agentContainerRef.current;
-    container.innerHTML = "";
-
-    const mountWidget = () => {
-      const widget = document.createElement("elevenlabs-convai");
-      widget.setAttribute("signed-url", agentSignedUrl);
-      widget.setAttribute("variant", "expanded");
-      // Ce widget n'a pas de mode "plein conteneur" officiel (vérifié dans son
-      // propre bundle : seuls tiny/compact/expanded existent, tous en bulle
-      // flottante). Son panneau interne est positionné en absolute, dans un
-      // Shadow DOM ouvert mais sans point d'accroche (::part) exposé. En
-      // fixant le host lui-même en position:static, on l'empêche de devenir
-      // le bloc de référence de cet absolute — il remonte alors jusqu'au
-      // premier ancêtre positionné du DOM "normal", ici le conteneur relative
-      // de cet onglet, ce qui le garde dans son cadre au lieu de flotter
-      // par-dessus le panneau Copilote IA à droite.
-      widget.style.setProperty("display", "block", "important");
-      widget.style.setProperty("position", "static", "important");
-      container.appendChild(widget);
-    };
-
-    if (customElements.get("elevenlabs-convai")) {
-      mountWidget();
-    } else {
-      const existingScript = document.querySelector<HTMLScriptElement>('script[src="https://unpkg.com/@elevenlabs/convai-widget-embed"]');
-      const script = existingScript ?? document.createElement("script");
-      if (!existingScript) {
-        script.src = "https://unpkg.com/@elevenlabs/convai-widget-embed";
-        script.async = true;
-        document.body.appendChild(script);
-      }
-      script.addEventListener("load", mountWidget, { once: true });
-      return () => script.removeEventListener("load", mountWidget);
     }
-  }, [agentSignedUrl]);
+  };
+
+  const endAgentCall = async () => {
+    await conversationRef.current?.endSession();
+    conversationRef.current = null;
+    setAgentStatus("idle");
+    setAgentChatOpen(false);
+  };
+
+  const sendAgentChatMessage = () => {
+    const text = agentInput.trim();
+    if (!text || !conversationRef.current) return;
+    conversationRef.current.sendUserMessage(text);
+    setAgentMessages((prev) => [...prev, { role: "user", text }]);
+    setAgentInput("");
+  };
+
+  // Coupe l'appel si on quitte l'onglet ou la page — pas de micro qui reste
+  // ouvert en arrière-plan à l'insu de l'élève.
+  useEffect(() => {
+    if (tab !== "agent" && conversationRef.current) {
+      void conversationRef.current.endSession();
+      conversationRef.current = null;
+      setAgentStatus("idle");
+      setAgentMessages([]);
+      setAgentChatOpen(false);
+    }
+  }, [tab]);
+
+  useEffect(() => {
+    return () => { void conversationRef.current?.endSession(); };
+  }, []);
 
   const startEditHtml = () => {
     setHtmlDraft(lesson?.customHtmlContent ?? "");
@@ -678,19 +694,70 @@ export function LessonPage() {
               )}
             </div>
           ) : tab === "agent" ? (
-            <div className="relative rounded-2xl overflow-hidden flex items-center justify-center" style={{ height: "78vh", background: "#060410", border: `1px solid ${th.sep}` }}>
-              {agentError ? (
-                <div className="flex flex-col items-center gap-3 p-6 text-center">
-                  <AudioLines className="w-6 h-6" style={{ color: "#fbc2ad" }} />
-                  <p className="text-sm text-[#fbc2ad]">{agentError}</p>
+            <div className="relative rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-6 p-8" style={{ height: "78vh", background: "#060410", border: `1px solid ${th.sep}` }}>
+              <div className="relative flex items-center justify-center shrink-0" style={{ width: 180, height: 180 }}>
+                {agentStatus === "connected" && (
+                  <>
+                    <span className="absolute rounded-full" style={{ inset: 0, background: "linear-gradient(135deg,#2792dc,#9ce6e6)", animation: "agent-orb-ring 1.8s ease-out infinite" }} />
+                    <span className="absolute rounded-full" style={{ inset: 0, background: "linear-gradient(135deg,#2792dc,#9ce6e6)", animation: "agent-orb-ring 1.8s ease-out infinite", animationDelay: "0.6s" }} />
+                  </>
+                )}
+                <div className="relative rounded-full" style={{
+                  width: 140, height: 140,
+                  background: "linear-gradient(135deg,#2792dc,#9ce6e6)",
+                  boxShadow: "0 0 60px rgba(39,146,220,0.45)",
+                  animation: agentStatus === "connected"
+                    ? (agentMode === "speaking" ? "agent-orb-speaking 0.9s ease-in-out infinite" : "agent-orb-idle 2.4s ease-in-out infinite")
+                    : agentStatus === "connecting" ? "agent-orb-idle 1s ease-in-out infinite"
+                    : "agent-orb-idle 3.5s ease-in-out infinite",
+                }} />
+              </div>
+
+              <p className="text-sm -mt-2" style={{ color: th.fg3 }}>
+                {agentStatus === "connecting" ? "Connexion…" : agentStatus === "connected" ? (agentMode === "speaking" ? "L'agent parle…" : "À l'écoute…") : "Prêt à discuter"}
+              </p>
+
+              {agentError && <p className="text-xs text-[#fbc2ad] text-center max-w-sm">{agentError}</p>}
+
+              <div className="flex items-center gap-4 shrink-0">
+                <button
+                  onClick={agentStatus === "idle" ? startAgentCall : endAgentCall}
+                  disabled={agentStatus === "connecting"}
+                  className="flex items-center justify-center rounded-full transition-all duration-200 hover:opacity-90 active:scale-95 disabled:opacity-50"
+                  style={{ width: 48, height: 48, background: agentStatus === "idle" ? "linear-gradient(135deg,#b58de0,#dbacf0)" : "#e5484d" }}
+                  title={agentStatus === "idle" ? "Démarrer l'appel" : "Raccrocher"}
+                >
+                  {agentStatus === "idle" ? <Phone className="w-5 h-5 text-white" /> : <PhoneOff className="w-5 h-5 text-white" />}
+                </button>
+                <button
+                  onClick={() => setAgentChatOpen((v) => !v)}
+                  disabled={agentStatus !== "connected"}
+                  className="flex items-center justify-center rounded-full transition-all duration-200 hover:opacity-80 active:scale-95 disabled:opacity-30"
+                  style={{ width: 48, height: 48, background: th.isDark ? "rgba(255,255,255,0.08)" : "rgba(15,14,20,0.06)", border: `1px solid ${th.inputB}` }}
+                  title="Écrire un message"
+                >
+                  <MessageCircle className="w-5 h-5" style={{ color: th.fg }} />
+                </button>
+              </div>
+
+              {agentChatOpen && (
+                <div className="w-full max-w-md flex flex-col gap-2 rounded-xl p-3 shrink-0" style={{ background: th.card, border: `1px solid ${th.sep}`, maxHeight: 220 }}>
+                  <div className="flex-1 overflow-y-auto flex flex-col gap-1.5 text-xs" style={{ minHeight: 40, maxHeight: 140 }}>
+                    {agentMessages.map((m, i) => (
+                      <div key={i} className={cx("px-2.5 py-1.5 rounded-lg max-w-[85%]", m.role === "user" ? "self-end" : "self-start")}
+                        style={{ background: m.role === "user" ? "rgba(181,141,224,0.18)" : "rgba(255,255,255,0.06)", color: th.fg }}>
+                        {m.text}
+                      </div>
+                    ))}
+                  </div>
+                  <form onSubmit={(e) => { e.preventDefault(); sendAgentChatMessage(); }} className="flex items-center gap-2">
+                    <input value={agentInput} onChange={(e) => setAgentInput(e.target.value)} placeholder="Écris un message…"
+                      className="flex-1 rounded-lg px-3 py-2 text-xs g-input" />
+                    <button type="submit" className="rounded-lg px-3 flex items-center justify-center" style={{ background: "linear-gradient(135deg,#b58de0,#dbacf0)", color: "#fff" }}>
+                      <Send className="w-3.5 h-3.5" />
+                    </button>
+                  </form>
                 </div>
-              ) : !agentSignedUrl ? (
-                <div className="flex flex-col items-center gap-2 text-sm" style={{ color: th.fg3 }}>
-                  <AudioLines className="w-6 h-6" />
-                  Connexion à l'agent vocal…
-                </div>
-              ) : (
-                <div ref={agentContainerRef} className="w-full h-full flex items-center justify-center" />
               )}
             </div>
           ) : (
