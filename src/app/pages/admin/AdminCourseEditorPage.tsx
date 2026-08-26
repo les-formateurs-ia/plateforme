@@ -10,6 +10,7 @@ import { supabase } from "@/app/lib/supabase/client";
 import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
 import { VBtn, ShimBtn } from "@/app/components/common/Buttons";
+import { VSelect } from "@/app/components/common/Select";
 
 interface CourseForm {
   name: string;
@@ -238,11 +239,15 @@ export function AdminCourseEditorPage() {
           </div>
           <div>
             <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Statut</label>
-            <select value={course.status} onChange={(e) => setCourse((c) => ({ ...c, status: e.target.value as CourseForm["status"] }))} className="w-full rounded-xl px-4 py-3 text-sm g-input">
-              <option value="draft">Brouillon</option>
-              <option value="published">Publié</option>
-              <option value="archived">Archivé</option>
-            </select>
+            <VSelect
+              value={course.status}
+              onValueChange={(v) => setCourse((c) => ({ ...c, status: v as CourseForm["status"] }))}
+              options={[
+                { value: "draft", label: "Brouillon" },
+                { value: "published", label: "Publié" },
+                { value: "archived", label: "Archivé" },
+              ]}
+            />
           </div>
         </div>
 
@@ -325,10 +330,14 @@ export function AdminCourseEditorPage() {
           <GCard><div className="p-6">
             <h3 className="text-sm font-black mb-4" style={{ color: th.fg }}>Élèves inscrits</h3>
             <div className="flex items-center gap-2 mb-4">
-              <select value={studentToEnroll} onChange={(e) => setStudentToEnroll(e.target.value)} className="flex-1 rounded-xl px-4 py-2.5 text-sm g-input">
-                <option value="">Choisir un élève…</option>
-                {availableStudents.map((s) => <option key={s.id} value={s.id}>{s.first_name || s.email} ({s.email})</option>)}
-              </select>
+              <div className="flex-1">
+                <VSelect
+                  value={studentToEnroll}
+                  onValueChange={setStudentToEnroll}
+                  placeholder="Choisir un élève…"
+                  options={availableStudents.map((s) => ({ value: s.id, label: `${s.first_name || s.email} (${s.email})` }))}
+                />
+              </div>
               <VBtn sm onClick={enrollStudent}><span className="flex items-center gap-1.5"><UserPlus className="w-3.5 h-3.5" />Inscrire</span></VBtn>
             </div>
             <div className="space-y-2">

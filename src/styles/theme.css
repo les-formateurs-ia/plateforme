@@ -15,6 +15,18 @@
   100% { transform: scale(1.35); opacity: 0; }
 }
 
+/* VSelect (src/app/components/common/Select.tsx) : les états hover/checked de
+   Radix passent par des attributs data-* qu'on ne peut pas exprimer en style
+   inline React — accent violet de la marque, cohérent avec .g-input:focus. */
+.v-select-item[data-highlighted] {
+  background: rgba(181, 141, 224, 0.14);
+  outline: none;
+}
+.v-select-item[data-disabled] {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
 :root {
   --font-size: 16px;
   --background: #08060F;
