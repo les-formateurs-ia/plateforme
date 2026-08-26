@@ -1,0 +1,20 @@
+// Никакого import GoogleGenAI, никакого apiKey — их тут физически больше нет
+
+async function callProxy<T>(action: string, payload: Record<string, unknown>): Promise<T> {
+  const auth = window.__PLATFORM_AUTH__;   // ← сюда платформа положила токен ученика (не ключ Gemini!)
+
+  const resp = await fetch(`${auth.supabaseUrl}/functions/v1/tender-assistant-gemini`, {  // ← стучимся в СВОЙ сервер
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${auth.accessToken}`,  // "я такой-то ученик, залогинен"
+      'apikey': auth.supabaseAnonKey,
+    },
+    body: JSON.stringify({ action, ...payload }),      // просто передаём текст PDF
+  });
+
+  return await resp.json();  // получаем готовый результат
+}
+
+export const extractDatesFromDCE = async (textContent: string) => {
+  return callProxy('dates', { textContent });   // всё, один вызов
+};

@@ -1,0 +1,21 @@
+import { GoogleGenAI } from '@google/genai';
+
+export const getGeminiInstance = () => {
+  if (!process.env.API_KEY) {
+    throw new Error('API_KEY environment variable is not set.');
+  }
+  return new GoogleGenAI({ apiKey: process.env.API_KEY });  // ← ключ здесь, в коде браузера
+};
+
+export const extractDatesFromDCE = async (textContent: string) => {
+  const ai = getGeminiInstance();
+  const prompt = `Analyze the following "Règlement de Consultation"...`;
+
+  const response = await ai.models.generateContent({   // ← браузер САМ стучится в Gemini
+    model: GEMINI_MODEL,
+    contents: { parts: [{ text: prompt }] },
+    config: { responseMimeType: "application/json", responseSchema: {...} },
+  });
+
+  return JSON.parse(response.text.trim());
+};
