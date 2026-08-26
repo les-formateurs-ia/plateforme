@@ -7,7 +7,7 @@ import {
   ChevronRight, ChevronLeft, Mic, Send,
   Sparkles, MessageSquare, CheckCircle, X,
   Lightbulb, Monitor, AlignLeft,
-  Network, RotateCcw, Play, Brain, Zap, Clock, PartyPopper, BookOpen, Headphones, Wand2, Bot, Code, Upload, Pencil,
+  Network, RotateCcw, Play, Brain, Zap, Clock, PartyPopper, BookOpen, Headphones, Wand2, Bot, Code, Upload, Pencil, AudioLines,
 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { supabase } from "@/app/lib/supabase/client";
@@ -28,6 +28,7 @@ import { PODCAST_FORMATS, type PodcastVariantId } from "@/app/lib/podcastFormats
 import { getMyMindmap, requestMindmapGeneration, type MindmapTree } from "@/app/lib/mindmaps";
 import { getChatHistory, sendLessonChatMessage } from "@/app/lib/chat";
 import { getMyAvatarVideo, getAvatarVideoSignedUrl, requestAvatarVideoGeneration, pollAvatarVideoStatus, type AvatarVideo } from "@/app/lib/avatarVideos";
+import { getAgentSignedUrl } from "@/app/lib/agent";
 import { MindmapView } from "@/app/components/lesson/MindmapView";
 
 const DEFAULT_AI = "Je suis ton Copilote IA. Pose-moi n'importe quelle question sur cette leçon ou sur comment l'appliquer à ton métier 👋";
@@ -100,7 +101,7 @@ export function LessonPage() {
   const { lessonId } = useParams<{ lessonId: string }>();
   const goBack = () => navigate("/lessons");
 
-  type LTab = "video" | "transcript" | "mindmap" | "podcast" | "avatar" | "html";
+  type LTab = "video" | "transcript" | "mindmap" | "podcast" | "avatar" | "html" | "agent";
   const [tab, setTab] = useState<LTab>("video");
   const [htmlEditing, setHtmlEditing] = useState(false);
   const [htmlDraft, setHtmlDraft] = useState("");
@@ -109,6 +110,9 @@ export function LessonPage() {
   const [platformAccessToken, setPlatformAccessToken] = useState<string | null>(null);
   const [platformAuthChecked, setPlatformAuthChecked] = useState(false);
   const [htmlIframeLoaded, setHtmlIframeLoaded] = useState(false);
+  const [agentSignedUrl, setAgentSignedUrl] = useState<string | null>(null);
+  const [agentError, setAgentError] = useState<string | null>(null);
+  const agentContainerRef = useRef<HTMLDivElement>(null);
 
   type PodcastVariantState = { podcast: Podcast; audioUrl: string };
   const [podcastByVariant, setPodcastByVariant] = useState<Partial<Record<PodcastVariantId, PodcastVariantState>>>({});
@@ -367,6 +371,57 @@ export function LessonPage() {
     return () => clearTimeout(timer);
   }, [tab, lesson?.customHtmlContent, htmlEditing, platformAuthChecked, htmlIframeLoaded]);
 
+  // Onglet Agent (widget vocal ElevenLabs) : on récupère une signed URL fraîche
+  // à chaque ouverture de l'onglet (valable 15 min) plutôt que de la garder en
+  // cache, pour ne pas tomber sur une URL expirée si l'élève revient plus tard.
+  useEffect(() => {
+    if (tab !== "agent" || !lessonId) return;
+    let cancelled = false;
+    setAgentSignedUrl(null);
+    setAgentError(null);
+    (async () => {
+      try {
+        const url = await getAgentSignedUrl();
+        if (!cancelled) setAgentSignedUrl(url);
+      } catch (err) {
+        console.error(err);
+        if (!cancelled) setAgentError(err instanceof Error ? err.message : "Impossible de démarrer l'agent vocal.");
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [tab, lessonId]);
+
+  // Le widget ElevenLabs est un web component (<elevenlabs-convai>) : on le
+  // crée impérativement via le DOM plutôt qu'en JSX pour éviter d'avoir à
+  // déclarer un élément custom dans les types JSX, et pour recréer proprement
+  // l'élément à chaque nouvelle signed URL (il ne réagit pas aux changements
+  // d'attribut après montage).
+  useEffect(() => {
+    if (!agentSignedUrl || !agentContainerRef.current) return;
+    const container = agentContainerRef.current;
+    container.innerHTML = "";
+
+    const mountWidget = () => {
+      const widget = document.createElement("elevenlabs-convai");
+      widget.setAttribute("signed-url", agentSignedUrl);
+      container.appendChild(widget);
+    };
+
+    if (customElements.get("elevenlabs-convai")) {
+      mountWidget();
+    } else {
+      const existingScript = document.querySelector<HTMLScriptElement>('script[src="https://unpkg.com/@elevenlabs/convai-widget-embed"]');
+      const script = existingScript ?? document.createElement("script");
+      if (!existingScript) {
+        script.src = "https://unpkg.com/@elevenlabs/convai-widget-embed";
+        script.async = true;
+        document.body.appendChild(script);
+      }
+      script.addEventListener("load", mountWidget, { once: true });
+      return () => script.removeEventListener("load", mountWidget);
+    }
+  }, [agentSignedUrl]);
+
   const startEditHtml = () => {
     setHtmlDraft(lesson?.customHtmlContent ?? "");
     setHtmlFileError(null);
@@ -493,6 +548,7 @@ export function LessonPage() {
     { id: "mindmap", Icon: Network, label: "Mindmap" }, { id: "podcast", Icon: Headphones, label: "Podcast" },
     { id: "avatar", Icon: Bot, label: "Vidéo IA" },
     ...(role === "admin" ? [{ id: "html" as LTab, Icon: Code, label: "HTML" }] : []),
+    ...(role === "admin" ? [{ id: "agent" as LTab, Icon: AudioLines, label: "Agent" }] : []),
   ];
 
   if (lessonLoading || access === "checking") {
@@ -607,6 +663,22 @@ export function LessonPage() {
                   <p className="text-sm" style={{ color: th.fg3 }}>Pas encore de page HTML pour cette leçon.</p>
                   <ShimBtn sm onClick={startEditHtml}>Insérer HTML</ShimBtn>
                 </div>
+              )}
+            </div>
+          ) : tab === "agent" ? (
+            <div className="relative rounded-2xl overflow-hidden flex items-center justify-center" style={{ height: "78vh", background: "#060410", border: `1px solid ${th.sep}` }}>
+              {agentError ? (
+                <div className="flex flex-col items-center gap-3 p-6 text-center">
+                  <AudioLines className="w-6 h-6" style={{ color: "#fbc2ad" }} />
+                  <p className="text-sm text-[#fbc2ad]">{agentError}</p>
+                </div>
+              ) : !agentSignedUrl ? (
+                <div className="flex flex-col items-center gap-2 text-sm" style={{ color: th.fg3 }}>
+                  <AudioLines className="w-6 h-6" />
+                  Connexion à l'agent vocal…
+                </div>
+              ) : (
+                <div ref={agentContainerRef} className="w-full h-full flex items-center justify-center" />
               )}
             </div>
           ) : (
