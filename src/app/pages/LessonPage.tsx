@@ -107,6 +107,7 @@ export function LessonPage() {
   const [htmlSaving, setHtmlSaving] = useState(false);
   const [htmlFileError, setHtmlFileError] = useState<string | null>(null);
   const [platformAccessToken, setPlatformAccessToken] = useState<string | null>(null);
+  const [platformAuthChecked, setPlatformAuthChecked] = useState(false);
   const [htmlIframeLoaded, setHtmlIframeLoaded] = useState(false);
 
   type PodcastVariantState = { podcast: Podcast; audioUrl: string };
@@ -342,17 +343,29 @@ export function LessonPage() {
 
   useEffect(() => {
     setHtmlIframeLoaded(false);
+    setPlatformAuthChecked(false);
   }, [lesson?.customHtmlContent]);
 
   useEffect(() => {
-    if (tab !== "html" || !lesson?.customHtmlContent || htmlEditing) return;
+    if (tab !== "html" || !lesson?.customHtmlContent || htmlEditing || platformAuthChecked) return;
     let cancelled = false;
     (async () => {
       const { data } = await supabase.auth.getSession();
-      if (!cancelled) setPlatformAccessToken(data.session?.access_token ?? null);
+      if (cancelled) return;
+      setPlatformAccessToken(data.session?.access_token ?? null);
+      setPlatformAuthChecked(true);
     })();
     return () => { cancelled = true; };
-  }, [tab, lesson?.customHtmlContent, htmlEditing]);
+  }, [tab, lesson?.customHtmlContent, htmlEditing, platformAuthChecked]);
+
+  // Filet de sécurité : si l'iframe ne déclenche jamais onLoad (ressource
+  // externe bloquée, etc.), on ne veut jamais rester bloqué indéfiniment
+  // derrière l'overlay de chargement — on force son affichage après 4s.
+  useEffect(() => {
+    if (tab !== "html" || !lesson?.customHtmlContent || htmlEditing || !platformAuthChecked || htmlIframeLoaded) return;
+    const timer = setTimeout(() => setHtmlIframeLoaded(true), 4000);
+    return () => clearTimeout(timer);
+  }, [tab, lesson?.customHtmlContent, htmlEditing, platformAuthChecked, htmlIframeLoaded]);
 
   const startEditHtml = () => {
     setHtmlDraft(lesson?.customHtmlContent ?? "");
@@ -572,15 +585,17 @@ export function LessonPage() {
                       Chargement de la page…
                     </div>
                   )}
-                  <iframe
-                    key={lesson.customHtmlContent}
-                    onLoad={() => setHtmlIframeLoaded(true)}
-                    srcDoc={platformAccessToken ? injectPlatformAuth(lesson.customHtmlContent, platformAccessToken) : lesson.customHtmlContent}
-                    sandbox="allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"
-                    title={`${lesson.title} — HTML`}
-                    className="absolute inset-0 w-full h-full border-0 bg-white"
-                    style={{ opacity: htmlIframeLoaded ? 1 : 0 }}
-                  />
+                  {platformAuthChecked && (
+                    <iframe
+                      key={lesson.customHtmlContent}
+                      onLoad={() => setHtmlIframeLoaded(true)}
+                      srcDoc={platformAccessToken ? injectPlatformAuth(lesson.customHtmlContent, platformAccessToken) : lesson.customHtmlContent}
+                      sandbox="allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"
+                      title={`${lesson.title} — HTML`}
+                      className="absolute inset-0 w-full h-full border-0 bg-white"
+                      style={{ opacity: htmlIframeLoaded ? 1 : 0 }}
+                    />
+                  )}
                   <button onClick={startEditHtml} className="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg"
                     style={{ background: th.card, border: `1px solid ${th.sep}`, color: th.fg }}>
                     <Pencil className="w-3 h-3" />Modifier
