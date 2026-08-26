@@ -404,6 +404,16 @@ export function LessonPage() {
     const mountWidget = () => {
       const widget = document.createElement("elevenlabs-convai");
       widget.setAttribute("signed-url", agentSignedUrl);
+      widget.setAttribute("variant", "expanded");
+      // Par défaut le widget flotte en bulle fixe dans un coin de l'écran ; on
+      // le fait tenir dans son conteneur à la place (host stylable depuis
+      // l'extérieur malgré le Shadow DOM interne, cf. doc ElevenLabs).
+      widget.style.setProperty("display", "block", "important");
+      widget.style.setProperty("position", "static", "important");
+      widget.style.width = "100%";
+      widget.style.height = "100%";
+      widget.style.setProperty("--elevenlabs-convai-widget-width", "100%");
+      widget.style.setProperty("--elevenlabs-convai-widget-height", "100%");
       container.appendChild(widget);
     };
 
@@ -547,7 +557,7 @@ export function LessonPage() {
     { id: "video", Icon: Monitor, label: "Vidéo" }, { id: "transcript", Icon: AlignLeft, label: "Transcription" },
     { id: "mindmap", Icon: Network, label: "Mindmap" }, { id: "podcast", Icon: Headphones, label: "Podcast" },
     { id: "avatar", Icon: Bot, label: "Vidéo IA" },
-    ...(role === "admin" ? [{ id: "html" as LTab, Icon: Code, label: "HTML" }] : []),
+    ...(role === "admin" ? [{ id: "html" as LTab, Icon: Code, label: "Playground" }] : []),
     ...(role === "admin" ? [{ id: "agent" as LTab, Icon: AudioLines, label: "Agent" }] : []),
   ];
 
