@@ -405,15 +405,17 @@ export function LessonPage() {
       const widget = document.createElement("elevenlabs-convai");
       widget.setAttribute("signed-url", agentSignedUrl);
       widget.setAttribute("variant", "expanded");
-      // Par défaut le widget flotte en bulle fixe dans un coin de l'écran ; on
-      // le fait tenir dans son conteneur à la place (host stylable depuis
-      // l'extérieur malgré le Shadow DOM interne, cf. doc ElevenLabs).
+      // Ce widget n'a pas de mode "plein conteneur" officiel (vérifié dans son
+      // propre bundle : seuls tiny/compact/expanded existent, tous en bulle
+      // flottante). Son panneau interne est positionné en absolute, dans un
+      // Shadow DOM ouvert mais sans point d'accroche (::part) exposé. En
+      // fixant le host lui-même en position:static, on l'empêche de devenir
+      // le bloc de référence de cet absolute — il remonte alors jusqu'au
+      // premier ancêtre positionné du DOM "normal", ici le conteneur relative
+      // de cet onglet, ce qui le garde dans son cadre au lieu de flotter
+      // par-dessus le panneau Copilote IA à droite.
       widget.style.setProperty("display", "block", "important");
       widget.style.setProperty("position", "static", "important");
-      widget.style.width = "100%";
-      widget.style.height = "100%";
-      widget.style.setProperty("--elevenlabs-convai-widget-width", "100%");
-      widget.style.setProperty("--elevenlabs-convai-widget-height", "100%");
       container.appendChild(widget);
     };
 
