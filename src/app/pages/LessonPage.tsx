@@ -119,6 +119,17 @@ export function LessonPage() {
   const [agentMessages, setAgentMessages] = useState<{ role: "user" | "agent"; text: string }[]>([]);
   const [agentInput, setAgentInput] = useState("");
   const [agentConfiguring, setAgentConfiguring] = useState(false);
+  type AgentDepthMode = "default" | "expert";
+  const [agentDepthMode, setAgentDepthMode] = useState<AgentDepthMode>(() => {
+    try {
+      return localStorage.getItem("agentDepthMode") === "expert" ? "expert" : "default";
+    } catch {
+      return "default";
+    }
+  });
+  useEffect(() => {
+    try { localStorage.setItem("agentDepthMode", agentDepthMode); } catch { /* ignore */ }
+  }, [agentDepthMode]);
   const conversationRef = useRef<import("@elevenlabs/client").Conversation | null>(null);
 
   type PodcastVariantState = { podcast: Podcast; audioUrl: string };
@@ -399,6 +410,7 @@ export function LessonPage() {
           objectif_professionnel: profile.goalFinal || profile.goal || "non renseigné",
           lesson_title: lesson?.title || "cette leçon",
           lesson_content: lesson?.referenceContent || "(pas de contenu de référence pour cette leçon)",
+          depth_mode: agentDepthMode,
         },
         onConnect: () => setAgentStatus("connected"),
         onDisconnect: () => {
@@ -739,6 +751,24 @@ export function LessonPage() {
                   <Wand2 className="w-3.5 h-3.5" />{agentConfiguring ? "Configuration…" : "Configurer l'agent"}
                 </button>
               )}
+              <div className="absolute top-4 left-4 flex items-center rounded-lg p-0.5 text-xs" style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${th.sep}` }}>
+                {(["default", "expert"] as const).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setAgentDepthMode(m)}
+                    disabled={agentStatus !== "idle"}
+                    className="rounded-md px-2.5 py-1.5 transition-all disabled:opacity-50"
+                    style={{
+                      background: agentDepthMode === m ? "linear-gradient(135deg,#2792dc,#9ce6e6)" : "transparent",
+                      color: agentDepthMode === m ? "#06121c" : th.fg3,
+                      fontWeight: agentDepthMode === m ? 600 : 400,
+                    }}
+                    title={m === "expert" ? "Réponses maximalistes, techniques, sans se limiter strictement au périmètre de la leçon" : "Réponses accessibles, niveau introductif"}
+                  >
+                    {m === "expert" ? "Mode Expert" : "Standard"}
+                  </button>
+                ))}
+              </div>
               <div className="relative flex items-center justify-center shrink-0" style={{ width: 180, height: 180 }}>
                 {agentStatus === "connected" && (
                   <>
