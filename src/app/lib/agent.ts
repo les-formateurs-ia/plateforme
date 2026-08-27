@@ -24,3 +24,13 @@ export async function getAgentSignedUrl(): Promise<string> {
   if (!data?.signedUrl) throw new Error("Aucune signed URL reçue.");
   return data.signedUrl;
 }
+
+// Admin/formateur seulement : (ré)écrit le prompt système de base de l'agent
+// vocal ElevenLabs (persona + placeholders de variables dynamiques). Les
+// valeurs par leçon/élève sont fournies ensuite à chaque appel via
+// `dynamicVariables` dans startAgentCall.
+export async function configureVoiceAgent(): Promise<void> {
+  const { data, error } = await supabase.functions.invoke("configure-voice-agent", { body: {} });
+  if (error) throw new Error(await extractFunctionError(error));
+  if (data?.error) throw new Error(data.error);
+}

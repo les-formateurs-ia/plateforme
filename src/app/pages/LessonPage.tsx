@@ -30,7 +30,7 @@ import { PODCAST_FORMATS, type PodcastVariantId } from "@/app/lib/podcastFormats
 import { getMyMindmap, requestMindmapGeneration, type MindmapTree } from "@/app/lib/mindmaps";
 import { getChatHistory, sendLessonChatMessage } from "@/app/lib/chat";
 import { getMyAvatarVideo, getAvatarVideoSignedUrl, requestAvatarVideoGeneration, pollAvatarVideoStatus, type AvatarVideo } from "@/app/lib/avatarVideos";
-import { getAgentSignedUrl } from "@/app/lib/agent";
+import { getAgentSignedUrl, configureVoiceAgent } from "@/app/lib/agent";
 import { MindmapView } from "@/app/components/lesson/MindmapView";
 
 const DEFAULT_AI = "Je suis ton Copilote IA. Pose-moi n'importe quelle question sur cette leçon ou sur comment l'appliquer à ton métier 👋";
@@ -118,6 +118,7 @@ export function LessonPage() {
   const [agentChatOpen, setAgentChatOpen] = useState(false);
   const [agentMessages, setAgentMessages] = useState<{ role: "user" | "agent"; text: string }[]>([]);
   const [agentInput, setAgentInput] = useState("");
+  const [agentConfiguring, setAgentConfiguring] = useState(false);
   const conversationRef = useRef<import("@elevenlabs/client").Conversation | null>(null);
 
   type PodcastVariantState = { podcast: Podcast; audioUrl: string };
@@ -392,6 +393,13 @@ export function LessonPage() {
       const { Conversation } = await import("@elevenlabs/client");
       const conversation = await Conversation.startSession({
         signedUrl,
+        dynamicVariables: {
+          student_name: firstName,
+          profession: profile.profession || "non renseigné",
+          objectif_professionnel: profile.goalFinal || profile.goal || "non renseigné",
+          lesson_title: lesson?.title || "cette leçon",
+          lesson_content: lesson?.referenceContent || "(pas de contenu de référence pour cette leçon)",
+        },
         onConnect: () => setAgentStatus("connected"),
         onDisconnect: () => {
           setAgentStatus("idle");
@@ -434,6 +442,23 @@ export function LessonPage() {
     conversationRef.current.sendUserMessage(text);
     setAgentMessages((prev) => [...prev, { role: "user", text }]);
     setAgentInput("");
+  };
+
+  // Admin/formateur : (ré)écrit le prompt système de base de l'agent vocal
+  // sur ElevenLabs. Action globale (un seul agent pour toute la plateforme),
+  // pas besoin de la relancer par leçon — la personnalisation par leçon/élève
+  // passe par dynamicVariables à chaque appel (voir startAgentCall).
+  const handleConfigureVoiceAgent = async () => {
+    setAgentConfiguring(true);
+    try {
+      await configureVoiceAgent();
+      toast.success("Prompt de l'agent vocal mis à jour.");
+    } catch (err) {
+      console.error(err);
+      toast.error(err instanceof Error ? err.message : "Impossible de configurer l'agent vocal.");
+    } finally {
+      setAgentConfiguring(false);
+    }
   };
 
   // Coupe l'appel si on quitte l'onglet ou la page — pas de micro qui reste
@@ -703,6 +728,17 @@ export function LessonPage() {
             </div>
           ) : tab === "agent" ? (
             <div className="relative rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-6 p-8" style={{ height: "78vh", background: "#060410", border: `1px solid ${th.sep}` }}>
+              {isStaff(role) && (
+                <button
+                  onClick={handleConfigureVoiceAgent}
+                  disabled={agentConfiguring}
+                  className="absolute top-4 right-4 flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs transition-opacity hover:opacity-80 disabled:opacity-50"
+                  style={{ background: "rgba(255,255,255,0.08)", color: th.fg, border: `1px solid ${th.sep}` }}
+                  title="Réécrit le prompt système de l'agent vocal sur ElevenLabs (persona + personnalisation par leçon/élève)"
+                >
+                  <Wand2 className="w-3.5 h-3.5" />{agentConfiguring ? "Configuration…" : "Configurer l'agent"}
+                </button>
+              )}
               <div className="relative flex items-center justify-center shrink-0" style={{ width: 180, height: 180 }}>
                 {agentStatus === "connected" && (
                   <>
