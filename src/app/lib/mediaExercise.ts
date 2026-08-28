@@ -6,6 +6,7 @@
 // tant qu'il vaut "generating" (surtout pertinent pour la vidéo, Veo pouvant
 // prendre plusieurs minutes).
 import { supabase } from "@/app/lib/supabase/client";
+import { listExerciseSessions, deleteExerciseSession } from "@/app/lib/exerciseSessions";
 
 export type MediaMode = "image" | "video";
 export type MediaAttemptStatus = "generating" | "ready" | "failed";
@@ -36,12 +37,12 @@ export interface MediaExerciseAttempt {
 export interface MediaExerciseSession {
   sessionId: string;
   ordinal: number;
-  mode: MediaMode;
+  name: string | null;
+  mode: MediaMode | null;
   attemptCount: number;
-  startedAt: string;
-  lastAttemptAt: string;
-  lastScore: number;
-  preview: string;
+  createdAt: string;
+  lastAttemptAt: string | null;
+  lastScore: number | null;
 }
 
 interface Row {
@@ -104,32 +105,33 @@ export async function listMediaExerciseAttempts(userId: string, sessionId: strin
 }
 
 export async function listMediaExerciseSessions(userId: string): Promise<MediaExerciseSession[]> {
-  const { data, error } = await supabase
-    .from("media_exercise_attempts")
-    .select("session_id, mode, prompt_text, score, created_at")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: true });
-  if (error) throw error;
+  const [sessions, attemptsResp] = await Promise.all([
+    listExerciseSessions(userId, "media"),
+    supabase.from("media_exercise_attempts").select("session_id, mode, score, created_at").eq("user_id", userId).order("created_at", { ascending: true }),
+  ]);
+  if (attemptsResp.error) throw attemptsResp.error;
 
-  const bySession = new Map<string, { mode: MediaMode; promptText: string; score: number; createdAt: string }[]>();
-  for (const row of data ?? []) {
+  const bySession = new Map<string, { mode: MediaMode; score: number; createdAt: string }[]>();
+  for (const row of attemptsResp.data ?? []) {
     const list = bySession.get(row.session_id) ?? [];
-    list.push({ mode: row.mode, promptText: row.prompt_text, score: row.score, createdAt: row.created_at });
+    list.push({ mode: row.mode, score: row.score, createdAt: row.created_at });
     bySession.set(row.session_id, list);
   }
 
-  const sessions = Array.from(bySession.entries()).map(([sessionId, rows]) => ({
-    sessionId,
-    mode: rows[rows.length - 1].mode,
-    attemptCount: rows.length,
-    startedAt: rows[0].createdAt,
-    lastAttemptAt: rows[rows.length - 1].createdAt,
-    lastScore: rows[rows.length - 1].score,
-    preview: rows[0].promptText.slice(0, 90),
-  }));
-  sessions.sort((a, b) => a.startedAt.localeCompare(b.startedAt));
-  const withOrdinal: MediaExerciseSession[] = sessions.map((s, i) => ({ ...s, ordinal: i + 1 }));
-  withOrdinal.sort((a, b) => b.startedAt.localeCompare(a.startedAt));
+  const withOrdinal: MediaExerciseSession[] = sessions.map((s, i) => {
+    const rows = bySession.get(s.id) ?? [];
+    return {
+      sessionId: s.id,
+      ordinal: i + 1,
+      name: s.name,
+      mode: rows.length ? rows[rows.length - 1].mode : null,
+      attemptCount: rows.length,
+      createdAt: s.createdAt,
+      lastAttemptAt: rows.length ? rows[rows.length - 1].createdAt : null,
+      lastScore: rows.length ? rows[rows.length - 1].score : null,
+    };
+  });
+  withOrdinal.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   return withOrdinal;
 }
 
@@ -142,8 +144,7 @@ export async function deleteMediaExerciseSession(userId: string, sessionId: stri
   const paths = (rows ?? []).flatMap((r) => [r.original_media_path, r.corrected_media_path]).filter((p): p is string => !!p);
   if (paths.length > 0) await supabase.storage.from("media-exercise-outputs").remove(paths);
 
-  const { error } = await supabase.from("media_exercise_attempts").delete().eq("user_id", userId).eq("session_id", sessionId);
-  if (error) throw error;
+  await deleteExerciseSession(sessionId);
 }
 
 async function extractFunctionError(error: { message: string; context?: Response }): Promise<string> {

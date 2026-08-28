@@ -1,8 +1,9 @@
 // Exercice "Exercices pour vous" (Pratique IA) — bac à sable HTML/JS, même
 // fonctionnement que le Playground d'une leçon (voir platformHtml.ts), mais
 // pas d'évaluation IA : juste un historique de ce que l'élève a collé,
-// groupé en sessions/dossiers comme les deux autres exercices.
+// groupé en dossiers via exercise_sessions (voir exerciseSessions.ts).
 import { supabase } from "@/app/lib/supabase/client";
+import { listExerciseSessions } from "@/app/lib/exerciseSessions";
 
 export interface HtmlExerciseAttempt {
   id: string;
@@ -15,10 +16,14 @@ export interface HtmlExerciseAttempt {
 export interface HtmlExerciseSession {
   sessionId: string;
   ordinal: number;
+  name: string | null;
+  description: string | null;
   attemptCount: number;
-  startedAt: string;
-  lastAttemptAt: string;
-  preview: string;
+  createdAt: string;
+  lastAttemptAt: string | null;
+  // HTML de la dernière tentative, pour un aperçu miniature en vrai rendu
+  // (iframe statique côté front) plutôt qu'une capture générée côté serveur.
+  latestHtml: string | null;
 }
 
 interface Row {
@@ -51,30 +56,33 @@ export async function listHtmlExerciseAttempts(userId: string, sessionId: string
 }
 
 export async function listHtmlExerciseSessions(userId: string): Promise<HtmlExerciseSession[]> {
-  const { data, error } = await supabase
-    .from("html_exercise_attempts")
-    .select("session_id, html_content, created_at")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: true });
-  if (error) throw error;
+  const [sessions, attemptsResp] = await Promise.all([
+    listExerciseSessions(userId, "html"),
+    supabase.from("html_exercise_attempts").select("session_id, html_content, created_at").eq("user_id", userId).order("created_at", { ascending: true }),
+  ]);
+  if (attemptsResp.error) throw attemptsResp.error;
 
   const bySession = new Map<string, { htmlContent: string; createdAt: string }[]>();
-  for (const row of data ?? []) {
+  for (const row of attemptsResp.data ?? []) {
     const list = bySession.get(row.session_id) ?? [];
     list.push({ htmlContent: row.html_content, createdAt: row.created_at });
     bySession.set(row.session_id, list);
   }
 
-  const sessions = Array.from(bySession.entries()).map(([sessionId, rows]) => ({
-    sessionId,
-    attemptCount: rows.length,
-    startedAt: rows[0].createdAt,
-    lastAttemptAt: rows[rows.length - 1].createdAt,
-    preview: rows[0].htmlContent.replace(/\s+/g, " ").trim().slice(0, 90),
-  }));
-  sessions.sort((a, b) => a.startedAt.localeCompare(b.startedAt));
-  const withOrdinal: HtmlExerciseSession[] = sessions.map((s, i) => ({ ...s, ordinal: i + 1 }));
-  withOrdinal.sort((a, b) => b.startedAt.localeCompare(a.startedAt));
+  const withOrdinal: HtmlExerciseSession[] = sessions.map((s, i) => {
+    const rows = bySession.get(s.id) ?? [];
+    return {
+      sessionId: s.id,
+      ordinal: i + 1,
+      name: s.name,
+      description: s.description,
+      attemptCount: rows.length,
+      createdAt: s.createdAt,
+      lastAttemptAt: rows.length ? rows[rows.length - 1].createdAt : null,
+      latestHtml: rows.length ? rows[rows.length - 1].htmlContent : null,
+    };
+  });
+  withOrdinal.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   return withOrdinal;
 }
 
@@ -94,9 +102,4 @@ export async function saveHtmlExerciseAttempt(userId: string, sessionId: string,
     .single();
   if (error) throw error;
   return mapRow(data);
-}
-
-export async function deleteHtmlExerciseSession(userId: string, sessionId: string): Promise<void> {
-  const { error } = await supabase.from("html_exercise_attempts").delete().eq("user_id", userId).eq("session_id", sessionId);
-  if (error) throw error;
 }

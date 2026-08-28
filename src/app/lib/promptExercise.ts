@@ -1,9 +1,9 @@
 // Exercice "Exercices prompts" (Pratique IA) — voir supabase/functions/evaluate-prompt-exercise.
-// Les tentatives sont groupées en "sessions" (dossiers) : pas de table dédiée,
-// un dossier existe dès qu'au moins une tentative porte son session_id (voir
-// migration 0013). Le listing de dossiers est donc dérivé côté client à
-// partir de la liste plate des tentatives de l'élève.
+// Les tentatives sont groupées en dossiers via exercise_sessions (voir
+// exerciseSessions.ts) — ce module ne gère que les tentatives elles-mêmes et
+// la fusion avec les métadonnées de dossier pour le listing.
 import { supabase } from "@/app/lib/supabase/client";
+import { listExerciseSessions } from "@/app/lib/exerciseSessions";
 
 export interface PromptCorrection { excerpt: string; suggestion: string; explanation: string }
 export interface PromptMissingItem { title: string; explanation: string }
@@ -23,11 +23,12 @@ export interface PromptExerciseAttempt {
 export interface PromptExerciseSession {
   sessionId: string;
   ordinal: number;
+  name: string | null;
   attemptCount: number;
-  startedAt: string;
-  lastAttemptAt: string;
-  lastScore: number;
-  preview: string;
+  createdAt: string;
+  lastAttemptAt: string | null;
+  lastScore: number | null;
+  preview: string | null;
 }
 
 function mapRow(row: {
@@ -65,39 +66,34 @@ export async function listPromptExerciseAttempts(userId: string, sessionId: stri
 }
 
 export async function listPromptExerciseSessions(userId: string): Promise<PromptExerciseSession[]> {
-  const { data, error } = await supabase
-    .from("prompt_exercise_attempts")
-    .select("session_id, prompt_text, score, created_at")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: true });
-  if (error) throw error;
+  const [sessions, attemptsResp] = await Promise.all([
+    listExerciseSessions(userId, "prompt"),
+    supabase.from("prompt_exercise_attempts").select("session_id, prompt_text, score, created_at").eq("user_id", userId).order("created_at", { ascending: true }),
+  ]);
+  if (attemptsResp.error) throw attemptsResp.error;
 
   const bySession = new Map<string, { promptText: string; score: number; createdAt: string }[]>();
-  for (const row of data ?? []) {
+  for (const row of attemptsResp.data ?? []) {
     const list = bySession.get(row.session_id) ?? [];
     list.push({ promptText: row.prompt_text, score: row.score, createdAt: row.created_at });
     bySession.set(row.session_id, list);
   }
 
-  const sessions = Array.from(bySession.entries()).map(([sessionId, rows]) => ({
-    sessionId,
-    attemptCount: rows.length,
-    startedAt: rows[0].createdAt,
-    lastAttemptAt: rows[rows.length - 1].createdAt,
-    lastScore: rows[rows.length - 1].score,
-    preview: rows[0].promptText.slice(0, 90),
-  }));
-  // Ordinal chronologique (le tout premier dossier créé = n°1) avant de
-  // trier par le plus récent en premier pour l'affichage.
-  sessions.sort((a, b) => a.startedAt.localeCompare(b.startedAt));
-  const withOrdinal: PromptExerciseSession[] = sessions.map((s, i) => ({ ...s, ordinal: i + 1 }));
-  withOrdinal.sort((a, b) => b.startedAt.localeCompare(a.startedAt));
+  const withOrdinal: PromptExerciseSession[] = sessions.map((s, i) => {
+    const rows = bySession.get(s.id) ?? [];
+    return {
+      sessionId: s.id,
+      ordinal: i + 1,
+      name: s.name,
+      attemptCount: rows.length,
+      createdAt: s.createdAt,
+      lastAttemptAt: rows.length ? rows[rows.length - 1].createdAt : null,
+      lastScore: rows.length ? rows[rows.length - 1].score : null,
+      preview: rows.length ? rows[0].promptText.slice(0, 90) : null,
+    };
+  });
+  withOrdinal.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   return withOrdinal;
-}
-
-export async function deletePromptExerciseSession(userId: string, sessionId: string): Promise<void> {
-  const { error } = await supabase.from("prompt_exercise_attempts").delete().eq("user_id", userId).eq("session_id", sessionId);
-  if (error) throw error;
 }
 
 async function extractFunctionError(error: { message: string; context?: Response }): Promise<string> {

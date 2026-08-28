@@ -11,6 +11,7 @@ export type ChatRole = "user" | "ai";
 export type VideoProvider = "cloudflare_stream" | "youtube" | "vimeo" | "external_url";
 export type FormationStatus = "draft" | "published" | "archived";
 export type ThemePreference = "light" | "dark" | "system";
+export type ExerciseSessionType = "prompt" | "media" | "html";
 
 export interface Database {
   public: {
@@ -295,6 +296,27 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["html_exercise_attempts"]["Insert"]>;
+      };
+      exercise_sessions: {
+        Row: {
+          id: string;
+          user_id: string;
+          exercise_type: ExerciseSessionType;
+          name: string | null;
+          description: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          exercise_type: ExerciseSessionType;
+          name?: string | null;
+          description?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["exercise_sessions"]["Insert"]>;
       };
       chat_messages: {
         Row: {
