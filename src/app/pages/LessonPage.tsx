@@ -6,7 +6,7 @@ import remarkGfm from "remark-gfm";
 import {
   ChevronRight, ChevronLeft, Mic, Send,
   Sparkles, MessageSquare, CheckCircle, X,
-  Lightbulb, Monitor, AlignLeft,
+  Lightbulb, Monitor,
   Network, RotateCcw, Play, Brain, Zap, Clock, PartyPopper, BookOpen, Headphones, Wand2, Bot, Code, Upload, Pencil, AudioLines,
   Phone, PhoneOff, MessageCircle,
 } from "lucide-react";
@@ -103,7 +103,7 @@ export function LessonPage() {
   const { lessonId } = useParams<{ lessonId: string }>();
   const goBack = () => navigate("/lessons");
 
-  type LTab = "video" | "transcript" | "mindmap" | "podcast" | "avatar" | "html" | "agent";
+  type LTab = "video" | "mindmap" | "podcast" | "avatar" | "html" | "agent";
   const [tab, setTab] = useState<LTab>("video");
   const [htmlEditing, setHtmlEditing] = useState(false);
   const [htmlDraft, setHtmlDraft] = useState("");
@@ -154,6 +154,9 @@ export function LessonPage() {
   // sinon un admin/élève inscrit à plusieurs cours resterait bloqué sur une leçon
   // d'un cours différent de celui utilisé pour calculer sa progression "active".
   const course = useCourseProgress(lesson?.formationId);
+  useEffect(() => {
+    if (lesson && !lesson.videoUrl && tab === "video") setTab("mindmap");
+  }, [lesson, tab]);
 
   const [quizStep, setQuizStep] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
@@ -611,7 +614,7 @@ export function LessonPage() {
   // Playground et Agent sont visibles par tous les rôles/profils — seule
   // l'édition du Playground reste réservée à l'admin (cf. plus bas).
   const TABS: { id: LTab; Icon: typeof Monitor; label: string }[] = [
-    { id: "video", Icon: Monitor, label: "Vidéo" }, { id: "transcript", Icon: AlignLeft, label: "Transcription" },
+    ...(lesson?.videoUrl ? [{ id: "video" as const, Icon: Monitor, label: "Vidéo" }] : []),
     { id: "mindmap", Icon: Network, label: "Mindmap" }, { id: "podcast", Icon: Headphones, label: "Podcast" },
     { id: "avatar", Icon: Bot, label: "Vidéo IA" },
     { id: "html", Icon: Code, label: "Playground" },
@@ -852,15 +855,6 @@ export function LessonPage() {
                   </div>
                 </>
               )}
-              {tab === "transcript" && (
-                <div className="absolute inset-0 flex items-center justify-center p-6" style={{ background: "#101017" }}>
-                  <div className="text-center max-w-sm">
-                    <AlignLeft className="w-6 h-6 mx-auto mb-2 text-white/30" />
-                    <p className="text-sm text-white/60">Transcription générée par IA</p>
-                    <p className="text-xs text-white/30 mt-1">Bientôt disponible — en attente de l'activation du moteur IA.</p>
-                  </div>
-                </div>
-              )}
               {tab === "mindmap" && (
                 <div className="absolute inset-0" style={{ background: "#101017" }}>
                   {mindmapLoading ? (
@@ -953,35 +947,43 @@ export function LessonPage() {
                 );
               })()}
               {tab === "avatar" && (
-                <div className="absolute inset-0 flex items-center justify-center p-6" style={{ background: "#101017" }}>
-                  <div className="text-center max-w-md w-full">
-                    <Bot className="w-6 h-6 mx-auto mb-2 text-white/30" />
-                    {avatarLoading ? (
-                      <p className="text-sm text-white/60">Chargement…</p>
-                    ) : avatarVideoUrl ? (
-                      <>
-                        <p className="text-sm text-white/60 mb-3">Ta vidéo personnalisée pour cette leçon</p>
-                        <video src={avatarVideoUrl} controls className="w-full rounded-xl bg-black" style={{ aspectRatio: "16/9" }} />
-                      </>
-                    ) : avatarVideo?.status === "pending" ? (
-                      <p className="text-sm text-white/60">Génération en cours…</p>
-                    ) : avatarVideo?.status === "failed" ? (
-                      <p className="text-sm text-[#fbc2ad]">{avatarVideo.error ?? "Échec de la génération."}</p>
-                    ) : (
-                      <>
-                        <p className="text-sm text-white/60">Pas encore de vidéo personnalisée pour cette leçon.</p>
-                        {!isStaff(role) && <p className="text-xs text-white/30 mt-1">Bientôt disponible.</p>}
-                      </>
-                    )}
+                avatarVideoUrl ? (
+                  <div className="absolute inset-0">
+                    <video src={avatarVideoUrl} controls className="absolute inset-0 w-full h-full bg-black" />
                     {isStaff(role) && (
-                      <button onClick={handleGenerateAvatarVideo} disabled={avatarGenerating}
-                        className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80 disabled:opacity-50"
-                        style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff" }}>
-                        <Wand2 className="w-4 h-4" />{avatarGenerating ? "Génération en cours…" : avatarVideoUrl ? "Régénérer la vidéo" : "Générer la vidéo"}
+                      <button onMouseDown={(e) => e.stopPropagation()} onClick={handleGenerateAvatarVideo} disabled={avatarGenerating}
+                        className="absolute top-3 left-3 flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80 disabled:opacity-50 z-10"
+                        style={{ background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff" }}>
+                        <Wand2 className="w-3.5 h-3.5" />{avatarGenerating ? "Génération…" : "Régénérer"}
                       </button>
                     )}
                   </div>
-                </div>
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center p-6" style={{ background: "#101017" }}>
+                    <div className="text-center max-w-md w-full">
+                      <Bot className="w-6 h-6 mx-auto mb-2 text-white/30" />
+                      {avatarLoading ? (
+                        <p className="text-sm text-white/60">Chargement…</p>
+                      ) : avatarVideo?.status === "pending" ? (
+                        <p className="text-sm text-white/60">Génération en cours…</p>
+                      ) : avatarVideo?.status === "failed" ? (
+                        <p className="text-sm text-[#fbc2ad]">{avatarVideo.error ?? "Échec de la génération."}</p>
+                      ) : (
+                        <>
+                          <p className="text-sm text-white/60">Pas encore de vidéo personnalisée pour cette leçon.</p>
+                          {!isStaff(role) && <p className="text-xs text-white/30 mt-1">Bientôt disponible.</p>}
+                        </>
+                      )}
+                      {isStaff(role) && (
+                        <button onClick={handleGenerateAvatarVideo} disabled={avatarGenerating}
+                          className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80 disabled:opacity-50"
+                          style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff" }}>
+                          <Wand2 className="w-4 h-4" />{avatarGenerating ? "Génération en cours…" : "Générer la vidéo"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )
               )}
             </div>
           </div>
