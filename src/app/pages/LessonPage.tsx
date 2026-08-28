@@ -119,6 +119,7 @@ export function LessonPage() {
   const [agentMessages, setAgentMessages] = useState<{ role: "user" | "agent"; text: string }[]>([]);
   const [agentInput, setAgentInput] = useState("");
   const [agentConfiguring, setAgentConfiguring] = useState(false);
+  const [pttActive, setPttActive] = useState(false);
   type AgentDepthMode = "default" | "expert";
   const [agentDepthMode, setAgentDepthMode] = useState<AgentDepthMode>(() => {
     try {
@@ -419,6 +420,7 @@ export function LessonPage() {
         onDisconnect: () => {
           setAgentStatus("idle");
           setAgentChatOpen(false);
+          setPttActive(false);
           conversationRef.current = null;
         },
         onModeChange: ({ mode }) => setAgentMode(mode),
@@ -431,6 +433,10 @@ export function LessonPage() {
         },
       });
       conversationRef.current = conversation;
+      // Micro coupé par défaut : conversation en push-to-talk, on ne capte
+      // l'audio que pendant l'appui sur le bouton micro (cf. startPushToTalk).
+      conversation.setMicMuted(true);
+      setPttActive(false);
     } catch (err) {
       console.error(err);
       setAgentStatus("idle");
@@ -449,6 +455,24 @@ export function LessonPage() {
     conversationRef.current = null;
     setAgentStatus("idle");
     setAgentChatOpen(false);
+    setPttActive(false);
+  };
+
+  // Push-to-talk : le micro reste coupé tant qu'on ne maintient pas le
+  // bouton. sendUserActivity() prévient l'agent qu'on s'apprête à parler,
+  // ce qui l'aide à couper court à sa réponse en cours (barge-in) dès que
+  // le flux audio du micro arrive.
+  const startPushToTalk = () => {
+    if (agentStatus !== "connected" || !conversationRef.current) return;
+    conversationRef.current.sendUserActivity();
+    conversationRef.current.setMicMuted(false);
+    setPttActive(true);
+  };
+
+  const stopPushToTalk = () => {
+    if (!conversationRef.current) return;
+    conversationRef.current.setMicMuted(true);
+    setPttActive(false);
   };
 
   const sendAgentChatMessage = () => {
@@ -485,6 +509,7 @@ export function LessonPage() {
       setAgentStatus("idle");
       setAgentMessages([]);
       setAgentChatOpen(false);
+      setPttActive(false);
     }
   }, [tab]);
 
@@ -773,7 +798,7 @@ export function LessonPage() {
                 ))}
               </div>
               <div className="relative flex items-center justify-center shrink-0" style={{ width: 180, height: 180 }}>
-                {agentStatus === "connected" && (
+                {agentStatus === "connected" && agentMode === "speaking" && (
                   <>
                     <span className="absolute rounded-full" style={{ inset: 0, background: "linear-gradient(135deg,#2792dc,#9ce6e6)", animation: "agent-orb-ring 1.8s ease-out infinite" }} />
                     <span className="absolute rounded-full" style={{ inset: 0, background: "linear-gradient(135deg,#2792dc,#9ce6e6)", animation: "agent-orb-ring 1.8s ease-out infinite", animationDelay: "0.6s" }} />
@@ -783,15 +808,18 @@ export function LessonPage() {
                   width: 140, height: 140,
                   background: "linear-gradient(135deg,#2792dc,#9ce6e6)",
                   boxShadow: "0 0 60px rgba(39,146,220,0.45)",
-                  animation: agentStatus === "connected"
-                    ? (agentMode === "speaking" ? "agent-orb-speaking 0.9s ease-in-out infinite" : "agent-orb-idle 2.4s ease-in-out infinite")
-                    : agentStatus === "connecting" ? "agent-orb-idle 1s ease-in-out infinite"
-                    : "agent-orb-idle 3.5s ease-in-out infinite",
+                  transform: agentStatus === "connected" && agentMode === "speaking" ? "scale(1.16)" : "scale(1)",
+                  transition: "transform 450ms cubic-bezier(0.34,1.56,0.64,1)",
+                  animation: agentStatus === "connecting" ? "agent-orb-idle 1s ease-in-out infinite"
+                    : agentStatus === "idle" ? "agent-orb-idle 3.5s ease-in-out infinite"
+                    : "none",
                 }} />
               </div>
 
               <p className="text-sm -mt-2" style={{ color: th.fg3 }}>
-                {agentStatus === "connecting" ? "Connexion…" : agentStatus === "connected" ? (agentMode === "speaking" ? "L'agent parle…" : "À l'écoute…") : "Prêt à discuter"}
+                {agentStatus === "connecting" ? "Connexion…"
+                  : agentStatus === "connected" ? (agentMode === "speaking" ? "L'agent parle…" : pttActive ? "Je t'écoute…" : "Maintiens le micro pour parler")
+                  : "Prêt à discuter"}
               </p>
 
               {agentError && <p className="text-xs text-[#fbc2ad] text-center max-w-sm">{agentError}</p>}
@@ -805,6 +833,22 @@ export function LessonPage() {
                   title={agentStatus === "idle" ? "Démarrer l'appel" : "Raccrocher"}
                 >
                   {agentStatus === "idle" ? <Phone className="w-5 h-5 text-white" /> : <PhoneOff className="w-5 h-5 text-white" />}
+                </button>
+                <button
+                  onPointerDown={(e) => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); startPushToTalk(); }}
+                  onPointerUp={stopPushToTalk}
+                  onPointerCancel={stopPushToTalk}
+                  disabled={agentStatus !== "connected"}
+                  className="flex items-center justify-center rounded-full transition-all duration-150 active:scale-95 disabled:opacity-30 select-none touch-none"
+                  style={{
+                    width: 56, height: 56,
+                    background: pttActive ? "linear-gradient(135deg,#2792dc,#9ce6e6)" : (th.isDark ? "rgba(255,255,255,0.08)" : "rgba(15,14,20,0.06)"),
+                    border: `1px solid ${pttActive ? "transparent" : th.inputB}`,
+                    boxShadow: pttActive ? "0 0 24px rgba(39,146,220,0.5)" : "none",
+                  }}
+                  title="Maintenir appuyé pour parler (push-to-talk)"
+                >
+                  <Mic className="w-5 h-5" style={{ color: pttActive ? "#06121c" : th.fg }} />
                 </button>
                 <button
                   onClick={() => setAgentChatOpen((v) => !v)}
