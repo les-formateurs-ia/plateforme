@@ -10,6 +10,7 @@ export type AiContentType = "practical_exercise" | "mindmap" | "podcast" | "text
 export type ChatRole = "user" | "ai";
 export type VideoProvider = "cloudflare_stream" | "youtube" | "vimeo" | "external_url";
 export type FormationStatus = "draft" | "published" | "archived";
+export type ThemePreference = "light" | "dark" | "system";
 
 export interface Database {
   public: {
@@ -22,6 +23,7 @@ export interface Database {
           last_name: string | null;
           email: string;
           must_onboard: boolean;
+          theme_preference: ThemePreference;
           created_at: string;
         };
         Insert: {
@@ -31,6 +33,7 @@ export interface Database {
           last_name?: string | null;
           email: string;
           must_onboard?: boolean;
+          theme_preference?: ThemePreference;
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
@@ -207,6 +210,31 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["ai_generated_content"]["Insert"]>;
+      };
+      prompt_exercise_attempts: {
+        Row: {
+          id: string;
+          user_id: string;
+          session_id: string;
+          attempt_number: number;
+          prompt_text: string;
+          score: number;
+          feedback: Record<string, unknown>;
+          model: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          session_id: string;
+          attempt_number: number;
+          prompt_text: string;
+          score: number;
+          feedback: Record<string, unknown>;
+          model?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["prompt_exercise_attempts"]["Insert"]>;
       };
       chat_messages: {
         Row: {

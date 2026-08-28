@@ -3,6 +3,8 @@ import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/app/lib/supabase/client";
 
 export type Role = "admin" | "formateur" | "student";
+// 'system' = suit le thème du système d'exploitation de l'utilisateur.
+export type ThemeMode = "light" | "dark" | "system";
 type AuthStatus = "loading" | "authenticated" | "unauthenticated";
 const AUTH_INIT_TIMEOUT_MS = 8000;
 
@@ -15,6 +17,11 @@ interface AuthContextValue {
   // session courante — tant que c'est vrai, `mustOnboard` peut encore valoir sa
   // valeur par défaut et ne doit pas servir à décider d'une redirection.
   profileLoading: boolean;
+  // null tant que non chargé (avant connexion, ou pendant profileLoading) —
+  // le ThemeProvider s'appuie sur ce null pour ne pas écraser la préférence
+  // locale avant d'avoir la vraie valeur enregistrée en base.
+  themeMode: ThemeMode | null;
+  setThemeMode: (mode: ThemeMode) => Promise<void>;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signUp: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
@@ -27,6 +34,8 @@ const AuthContext = createContext<AuthContextValue>({
   role: null,
   mustOnboard: true,
   profileLoading: true,
+  themeMode: null,
+  setThemeMode: async () => {},
   signIn: async () => ({ error: "Auth non initialisée" }),
   signUp: async () => ({ error: "Auth non initialisée" }),
   signOut: async () => {},
@@ -50,22 +59,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [mustOnboard, setMustOnboard] = useState(true);
   const [profileLoading, setProfileLoading] = useState(true);
   const [status, setStatus] = useState<AuthStatus>("loading");
+  const [themeMode, setThemeModeState] = useState<ThemeMode | null>(null);
 
   const resetAuthState = () => {
     setSession(null);
     setRole(null);
     setMustOnboard(true);
     setProfileLoading(true);
+    setThemeModeState(null);
     setStatus("unauthenticated");
   };
 
   const loadProfile = async (userId: string) => {
-    const { data, error } = await supabase.from("profiles").select("role, must_onboard").eq("id", userId).maybeSingle();
+    const { data, error } = await supabase.from("profiles").select("role, must_onboard, theme_preference").eq("id", userId).maybeSingle();
     if (error) {
       console.warn("Unable to load profile", error);
     }
     setRole((data?.role as Role) ?? "student");
     setMustOnboard(data?.must_onboard ?? true);
+    setThemeModeState((data?.theme_preference as ThemeMode | null) ?? "system");
     setProfileLoading(false);
   };
 
@@ -122,8 +134,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const markOnboarded = () => setMustOnboard(false);
 
+  const setThemeMode = async (mode: ThemeMode) => {
+    setThemeModeState(mode);
+    const userId = session?.user.id;
+    if (!userId) return;
+    const { error } = await supabase.from("profiles").update({ theme_preference: mode }).eq("id", userId);
+    if (error) console.warn("Unable to persist theme preference", error);
+  };
+
   return (
-    <AuthContext.Provider value={{ status, user: session?.user ?? null, role, mustOnboard, profileLoading, signIn, signUp, signOut, markOnboarded }}>
+    <AuthContext.Provider value={{ status, user: session?.user ?? null, role, mustOnboard, profileLoading, themeMode, setThemeMode, signIn, signUp, signOut, markOnboarded }}>
       {children}
     </AuthContext.Provider>
   );

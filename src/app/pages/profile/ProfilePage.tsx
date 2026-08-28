@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { Trophy, CheckCircle, Lock, Award, Sparkles, Sun, Moon, LogOut } from "lucide-react";
+import { Trophy, CheckCircle, Lock, Award, Sparkles, Sun, Moon, Monitor, LogOut } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
@@ -232,15 +232,28 @@ export function ProfilePage() {
             )}
           </div>
 
-          <GCard><div className="p-5 flex items-center justify-between">
+          <GCard><div className="p-5 flex items-center justify-between gap-4 flex-wrap">
             <div>
               <div className="text-sm font-bold mb-0.5" style={{ color: th.fg }}>Thème de l'interface</div>
-              <div className="text-xs" style={{ color: th.fg3 }}>{th.isDark ? "Mode sombre activé — ambiance dark glass" : "Mode clair activé — interface lumineuse"}</div>
+              <div className="text-xs" style={{ color: th.fg3 }}>
+                {th.mode === "system" ? "Suit automatiquement le thème de ton appareil" : th.isDark ? "Mode sombre activé — ambiance dark glass" : "Mode clair activé — interface lumineuse"}
+              </div>
             </div>
-            <button onClick={th.toggleTheme} className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80"
-              style={{ background: th.isDark ? "rgba(255,255,255,0.08)" : "rgba(181,141,224,0.1)", border: `1px solid ${th.sep}`, color: th.fg }}>
-              {th.isDark ? <><Sun className="w-4 h-4 text-[#fbc2ad]" />Passer en mode clair</> : <><Moon className="w-4 h-4" style={{ color: th.navAC }} />Passer en mode sombre</>}
-            </button>
+            <div className="flex gap-1 p-1 rounded-xl shrink-0" style={{ background: th.isDark ? "rgba(255,255,255,0.04)" : "rgba(181,141,224,0.06)", border: `1px solid ${th.sep}` }}>
+              {([
+                { mode: "light" as const, label: "Clair", Icon: Sun },
+                { mode: "dark" as const, label: "Sombre", Icon: Moon },
+                { mode: "system" as const, label: "Système", Icon: Monitor },
+              ]).map(({ mode, label, Icon }) => (
+                <button key={mode} onClick={() => th.setThemeMode(mode)}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-90"
+                  style={th.mode === mode
+                    ? { background: th.isDark ? "rgba(181,141,224,0.14)" : "rgba(255,255,255,0.8)", color: th.navAC, border: "1px solid rgba(181,141,224,0.25)" }
+                    : { color: th.fg3, background: "transparent", border: "1px solid transparent" }}>
+                  <Icon className="w-3.5 h-3.5" />{label}
+                </button>
+              ))}
+            </div>
           </div></GCard>
 
           {/* Info fields */}

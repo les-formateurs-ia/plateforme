@@ -1,14 +1,13 @@
 @custom-variant dark (&:is(.dark *));
 
-/* Orb de l'onglet Agent (voix ElevenLabs) : respiration lente au repos,
-   pulsation plus marquée pendant que l'agent parle. */
+/* Orb de l'onglet Agent (voix ElevenLabs) : respiration lente avant/pendant
+   la connexion. Une fois connecté, la taille de l'orbe est pilotée par
+   transition CSS (scale inline dans LessonPage.tsx) plutôt que par ce
+   keyframe, pour un agrandissement/rétrécissement net au début/à la fin de
+   la parole de l'agent, au lieu d'une pulsation continue. */
 @keyframes agent-orb-idle {
   0%, 100% { transform: scale(1); opacity: 0.9; }
   50% { transform: scale(1.04); opacity: 1; }
-}
-@keyframes agent-orb-speaking {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.12); }
 }
 @keyframes agent-orb-ring {
   0% { transform: scale(0.85); opacity: 0.55; }

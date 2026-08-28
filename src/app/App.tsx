@@ -13,6 +13,8 @@ import { LessonPage } from "@/app/pages/LessonPage";
 import { DashboardPage } from "@/app/pages/dashboard/DashboardPage";
 import { LessonsPage } from "@/app/pages/lessons/LessonsPage";
 import { PracticePage } from "@/app/pages/practice/PracticePage";
+import { PromptSessionsPage } from "@/app/pages/practice/PromptSessionsPage";
+import { PromptExercisePage } from "@/app/pages/practice/PromptExercisePage";
 import { CalendarPage } from "@/app/pages/calendar/CalendarPage";
 import { BenefitsPage } from "@/app/pages/benefits/BenefitsPage";
 import { ProfilePage } from "@/app/pages/profile/ProfilePage";
@@ -85,6 +87,8 @@ function AppRoutes() {
         <Route index element={<DashboardPage />} />
         <Route path="lessons" element={<LessonsPage />} />
         <Route path="practice" element={<PracticePage />} />
+        <Route path="practice/prompts" element={<PromptSessionsPage />} />
+        <Route path="practice/prompts/:sessionId" element={<PromptExercisePage />} />
         <Route path="calendar" element={<CalendarPage />} />
         <Route path="benefits" element={<BenefitsPage />} />
         <Route path="profile" element={<ProfilePage />} />
@@ -103,15 +107,15 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
+    <AuthProvider>
+      <ThemeProvider>
         <ProfileProvider>
           <BrowserRouter>
             <AppRoutes />
           </BrowserRouter>
           <Toaster />
         </ProfileProvider>
-      </AuthProvider>
-    </ThemeProvider>
+      </ThemeProvider>
+    </AuthProvider>
   );
 }

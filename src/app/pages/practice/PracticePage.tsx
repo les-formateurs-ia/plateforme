@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router";
 import { Flame, Clock, Zap, ArrowRight } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useProfile } from "@/app/state/profile-context";
@@ -8,12 +9,13 @@ import { PROMPT_CATS } from "@/app/data/mock";
 
 export function PracticePage() {
   const th = useTh();
+  const navigate = useNavigate();
   const { profile } = useProfile();
   const BLOCKS = [
-    { emoji: "📚", title: "Exercices basiques", desc: "QCM sur les fondamentaux de l'IA générative. 3 niveaux de difficulté disponibles.", tag: "15 exercices", available: true, color: "#78d5e2", glow: "rgba(106,222,177,0.12)" },
-    { emoji: "✨", title: "Exercices pour vous", desc: `Exercices personnalisés selon ton profil${profile.profession ? " de " + profile.profession : ""}. QCM + exercices de prompts adaptés à tes objectifs.`, tag: "IA · Personnalisé", available: false, color: "#dbacf0", glow: "rgba(181,141,224,0.12)" },
-    { emoji: "🎨", title: "Génération images & vidéos", desc: "Maîtrise Midjourney, DALL-E 3, Sora et les outils de création visuelle IA. Prompts images avancés.", tag: "Bientôt disponible", available: false, color: "#fbc2ad", glow: "rgba(251,194,173,0.12)" },
-    { emoji: "⚡", title: "Exercices prompts", desc: "Entraînement exclusif à la rédaction de prompts professionnels. Aucun QCM — pratique pure.", tag: "20 exercices", available: true, color: "#6adeb1", glow: "rgba(106,222,177,0.12)" },
+    { emoji: "📚", title: "Exercices basiques", desc: "QCM sur les fondamentaux de l'IA générative. 3 niveaux de difficulté disponibles.", tag: "15 exercices", available: true, path: undefined, color: "#78d5e2", glow: "rgba(106,222,177,0.12)" },
+    { emoji: "✨", title: "Exercices pour vous", desc: `Exercices personnalisés selon ton profil${profile.profession ? " de " + profile.profession : ""}. QCM + exercices de prompts adaptés à tes objectifs.`, tag: "IA · Personnalisé", available: false, path: undefined, color: "#dbacf0", glow: "rgba(181,141,224,0.12)" },
+    { emoji: "🎨", title: "Génération images & vidéos", desc: "Maîtrise Midjourney, DALL-E 3, Sora et les outils de création visuelle IA. Prompts images avancés.", tag: "Bientôt disponible", available: false, path: undefined, color: "#fbc2ad", glow: "rgba(251,194,173,0.12)" },
+    { emoji: "⚡", title: "Exercices prompts", desc: "Entraînement exclusif à la rédaction de prompts professionnels. Aucun QCM — pratique pure.", tag: "20 exercices", available: true, path: "/practice/prompts", color: "#6adeb1", glow: "rgba(106,222,177,0.12)" },
   ];
 
   return (
@@ -42,8 +44,8 @@ export function PracticePage() {
       <div>
         <h3 className="text-sm font-bold mb-4" style={{ color: th.fg }}>Choisir un type d'exercice</h3>
         <div className="grid grid-cols-2 gap-4">
-          {BLOCKS.map(({ emoji, title, desc, tag, available, color, glow }) => (
-            <GCard key={title} className={available ? "hover:scale-[1.01] transition-transform" : ""} onClick={available ? () => {} : undefined}>
+          {BLOCKS.map(({ emoji, title, desc, tag, available, path, color, glow }) => (
+            <GCard key={title} className={available ? "hover:scale-[1.01] transition-transform" : ""} onClick={available ? (path ? () => navigate(path) : () => {}) : undefined}>
               <div className="p-6 flex flex-col" style={{ minHeight: 200 }}>
                 <div className="flex items-start justify-between mb-4">
                   <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl" style={{ background: glow, border: `1px solid ${color}22` }}>{emoji}</div>
