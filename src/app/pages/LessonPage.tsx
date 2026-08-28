@@ -31,6 +31,7 @@ import { getMyMindmap, requestMindmapGeneration, type MindmapTree } from "@/app/
 import { getChatHistory, sendLessonChatMessage } from "@/app/lib/chat";
 import { getMyAvatarVideo, getAvatarVideoSignedUrl, requestAvatarVideoGeneration, pollAvatarVideoStatus, type AvatarVideo } from "@/app/lib/avatarVideos";
 import { getAgentSignedUrl, configureVoiceAgent } from "@/app/lib/agent";
+import { injectPlatformAuth, normalizeSmartQuotes } from "@/app/lib/platformHtml";
 import { MindmapView } from "@/app/components/lesson/MindmapView";
 
 const DEFAULT_AI = "Je suis ton Copilote IA. Pose-moi n'importe quelle question sur cette leçon ou sur comment l'appliquer à ton métier 👋";
@@ -63,36 +64,6 @@ function stripCertificationMentions(markdown: string): string {
     .filter((block) => !/^[\s>*_-]*\**\s*lien avec la certification/i.test(block.trim()))
     .join("\n\n")
     .trim();
-}
-
-// Word (et donc l'autocorrection dans les .docx) remplace souvent les guillemets
-// droits par des guillemets typographiques et "--" par un tiret cadratin — ce qui
-// casse la syntaxe des attributs HTML (class="foo" devient class="foo" avec des
-// guillemets incompatibles). On les remet en droits par sécurité après extraction.
-function normalizeSmartQuotes(text: string): string {
-  return text
-    .replace(/[‘’]/g, "'")
-    .replace(/[“”]/g, '"')
-    .replace(/–|—/g, "-");
-}
-
-// La page HTML personnalisée tourne dans une iframe sandboxée sans
-// allow-same-origin : elle ne peut donc pas lire la session Supabase de
-// l'élève depuis le localStorage du site principal (ni aucune autre donnée du
-// site). On la lui transmet explicitement via window.__PLATFORM_AUTH__ — son
-// propre jeton, déjà accessible à l'utilisateur qui la consulte, rien de plus
-// — pour qu'elle puisse appeler la fonction proxy `ai-proxy` (qui garde la
-// clé Gemini côté serveur) en son nom, sans jamais détenir de clé elle-même.
-function injectPlatformAuth(html: string, accessToken: string): string {
-  const payload = JSON.stringify({
-    supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
-    supabaseAnonKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
-    accessToken,
-  }).replace(/</g, "\\u003c");
-  const script = `<script>window.__PLATFORM_AUTH__=${payload};</script>`;
-  if (/<head[^>]*>/i.test(html)) return html.replace(/<head[^>]*>/i, (m) => `${m}\n${script}`);
-  if (/<html[^>]*>/i.test(html)) return html.replace(/<html[^>]*>/i, (m) => `${m}\n${script}`);
-  return script + html;
 }
 
 export function LessonPage() {

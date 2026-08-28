@@ -277,6 +277,25 @@ export interface Database {
         };
         Update: Partial<Database["public"]["Tables"]["media_exercise_attempts"]["Insert"]>;
       };
+      html_exercise_attempts: {
+        Row: {
+          id: string;
+          user_id: string;
+          session_id: string;
+          attempt_number: number;
+          html_content: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          session_id: string;
+          attempt_number: number;
+          html_content: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["html_exercise_attempts"]["Insert"]>;
+      };
       chat_messages: {
         Row: {
           id: string;
