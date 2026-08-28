@@ -7,7 +7,9 @@ import { useCourseProgress } from "@/app/state/useCourseProgress";
 import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
 import { ShimBtn } from "@/app/components/common/Buttons";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/app/components/ui/dialog";
 import { getMyAppointments, requestAppointment, type Appointment } from "@/app/lib/appointments";
+import { getExpertBookingUrl } from "@/app/lib/platformSettings";
 
 const STATUS_LABEL: Record<Appointment["status"], { label: string; color: string; bg: string }> = {
   requested: { label: "Demande envoyée", color: "#fbc2ad", bg: "rgba(251,194,173,0.1)" },
@@ -28,6 +30,8 @@ export function CalendarPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [requesting, setRequesting] = useState<string | null>(null);
+  const [bookingUrl, setBookingUrl] = useState<string | null>(null);
+  const [bookingSection, setBookingSection] = useState<{ id: string; title: string } | null>(null);
 
   const load = async () => {
     if (!user) return;
@@ -43,14 +47,19 @@ export function CalendarPage() {
   };
 
   useEffect(() => { void load(); }, [user]);
+  useEffect(() => { void getExpertBookingUrl().then(setBookingUrl).catch((err) => console.error(err)); }, []);
 
-  const handleRequest = async (sectionId: string) => {
+  // La prise de créneau réelle se fait dans l'agenda Google de l'expert IA
+  // (widget ci-dessous) — on garde quand même la demande en base pour le
+  // suivi côté admin/formateur et pour ne pas proposer deux fois le même
+  // module tant qu'une demande active existe.
+  const handleRequest = async (section: { id: string; title: string }) => {
     if (!user || !course.outline) return;
-    setRequesting(sectionId);
+    setRequesting(section.id);
     try {
-      const appt = await requestAppointment(user.id, course.outline.formationId, sectionId);
+      const appt = await requestAppointment(user.id, course.outline.formationId, section.id);
       setAppointments((a) => [appt, ...a]);
-      toast.success("Ta demande a bien été envoyée à ton expert IA.");
+      setBookingSection(section);
     } catch (err) {
       console.error(err);
       toast.error("Impossible d'envoyer la demande.");
@@ -88,7 +97,7 @@ export function CalendarPage() {
               <div className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: th.navAC }}>Module terminé : {section.title}</div>
               <h4 className="text-sm font-black mb-2" style={{ color: th.fg }}>Planifie un échange 1:1 avec un expert IA</h4>
               <p className="text-xs leading-relaxed mb-4" style={{ color: th.fg3 }}>Pose tes questions, débloque tes situations et prépare ta certification.</p>
-              <ShimBtn sm onClick={() => handleRequest(section.id)} disabled={requesting === section.id}>
+              <ShimBtn sm onClick={() => handleRequest(section)} disabled={requesting === section.id}>
                 <span className="flex items-center justify-center gap-2"><CalendarIcon className="w-4 h-4" />{requesting === section.id ? "Envoi…" : "Réserver ma session"}</span>
               </ShimBtn>
             </div>
@@ -139,6 +148,30 @@ export function CalendarPage() {
           })}
         </div>
       </div></GCard>
+
+      <Dialog open={!!bookingSection} onOpenChange={(open) => !open && setBookingSection(null)}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Choisis ton créneau</DialogTitle>
+            <DialogDescription>
+              {bookingSection?.title} — sélectionne un horaire réellement disponible dans l'agenda de ton expert IA. La confirmation et le lien Google Meet arrivent directement par email.
+            </DialogDescription>
+          </DialogHeader>
+          {bookingUrl ? (
+            <iframe
+              src={`${bookingUrl}${bookingUrl.includes("?") ? "&" : "?"}gv=true`}
+              style={{ border: 0 }}
+              width="100%"
+              height={600}
+              title="Réservation Google Calendar"
+            />
+          ) : (
+            <p className="text-sm" style={{ color: th.fg3 }}>
+              La prise de rendez-vous en ligne n'est pas encore configurée — ta demande a bien été enregistrée, ton expert IA te recontactera directement pour fixer un horaire.
+            </p>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

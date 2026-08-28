@@ -445,6 +445,19 @@ export interface Database {
         };
         Update: Partial<Database["public"]["Tables"]["appointments"]["Insert"]>;
       };
+      platform_settings: {
+        Row: {
+          id: boolean;
+          expert_booking_url: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          id?: boolean;
+          expert_booking_url?: string | null;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["platform_settings"]["Insert"]>;
+      };
     };
   };
 }

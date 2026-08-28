@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ChevronRight, Calendar as CalendarIcon } from "lucide-react";
+import { ChevronRight, Calendar as CalendarIcon, Link2 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
-import { VBtn } from "@/app/components/common/Buttons";
+import { VBtn, ShimBtn } from "@/app/components/common/Buttons";
 import {
   getAllAppointmentsForAdmin, updateAppointmentAsAdmin,
   type AdminAppointmentRow, type AppointmentStatus,
 } from "@/app/lib/appointments";
+import { getExpertBookingUrl, setExpertBookingUrl } from "@/app/lib/platformSettings";
 
 const STATUS_LABEL: Record<AppointmentStatus, { label: string; color: string; bg: string }> = {
   requested: { label: "Demande envoyée", color: "#fbc2ad", bg: "rgba(251,194,173,0.1)" },
@@ -40,6 +41,10 @@ export function AdminAppointmentsPage() {
   const [draft, setDraft] = useState<{ scheduledAt: string; googleMeetLink: string; adminMessage: string }>({ scheduledAt: "", googleMeetLink: "", adminMessage: "" });
   const [saving, setSaving] = useState(false);
 
+  const [bookingUrlDraft, setBookingUrlDraft] = useState("");
+  const [bookingUrlSaving, setBookingUrlSaving] = useState(false);
+  const [bookingUrlLoading, setBookingUrlLoading] = useState(true);
+
   const load = async () => {
     setLoading(true);
     try {
@@ -52,7 +57,32 @@ export function AdminAppointmentsPage() {
     }
   };
 
-  useEffect(() => { void load(); }, []);
+  const loadBookingUrl = async () => {
+    setBookingUrlLoading(true);
+    try {
+      setBookingUrlDraft((await getExpertBookingUrl()) ?? "");
+    } catch (err) {
+      console.error(err);
+      toast.error("Impossible de charger le lien de réservation.");
+    } finally {
+      setBookingUrlLoading(false);
+    }
+  };
+
+  useEffect(() => { void load(); void loadBookingUrl(); }, []);
+
+  const saveBookingUrl = async () => {
+    setBookingUrlSaving(true);
+    try {
+      await setExpertBookingUrl(bookingUrlDraft.trim() || null);
+      toast.success("Lien de réservation enregistré.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Impossible d'enregistrer le lien.");
+    } finally {
+      setBookingUrlSaving(false);
+    }
+  };
 
   const openRow = (a: AdminAppointmentRow) => {
     if (openId === a.id) { setOpenId(null); return; }
@@ -91,6 +121,25 @@ export function AdminAppointmentsPage() {
         <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Rendez-vous élèves</GT></h2>
         <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Demandes de session avec un expert IA, en fin de module.</p>
       </div>
+
+      <GCard><div className="p-5">
+        <div className="flex items-center gap-2 mb-1">
+          <Link2 className="w-4 h-4" style={{ color: th.navAC }} />
+          <h3 className="text-sm font-black" style={{ color: th.fg }}>Lien de réservation Google Calendar</h3>
+        </div>
+        <p className="text-xs mb-3" style={{ color: th.fg3 }}>
+          Colle ici le lien public de ta page "Appointment schedule" Google Calendar (Google Agenda → Créer → Page de réservation). L'élève le voit intégré directement quand il demande un rendez-vous — il choisit un vrai créneau libre, Google gère la confirmation et le lien Meet automatiquement.
+        </p>
+        {bookingUrlLoading ? (
+          <p className="text-xs" style={{ color: th.fg3 }}>Chargement…</p>
+        ) : (
+          <div className="flex items-center gap-2">
+            <input value={bookingUrlDraft} onChange={(e) => setBookingUrlDraft(e.target.value)} placeholder="https://calendar.google.com/calendar/appointments/schedules/…"
+              className="flex-1 rounded-xl px-4 py-2.5 text-sm g-input" />
+            <ShimBtn sm onClick={saveBookingUrl} disabled={bookingUrlSaving}>{bookingUrlSaving ? "Enregistrement…" : "Enregistrer"}</ShimBtn>
+          </div>
+        )}
+      </div></GCard>
 
       {loading && <p className="text-sm" style={{ color: th.fg3 }}>Chargement…</p>}
 
