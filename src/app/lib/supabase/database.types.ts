@@ -236,6 +236,47 @@ export interface Database {
         };
         Update: Partial<Database["public"]["Tables"]["prompt_exercise_attempts"]["Insert"]>;
       };
+      media_exercise_attempts: {
+        Row: {
+          id: string;
+          user_id: string;
+          session_id: string;
+          attempt_number: number;
+          mode: "image" | "video";
+          prompt_text: string;
+          corrected_prompt_text: string;
+          score: number;
+          feedback: Record<string, unknown>;
+          status: "generating" | "ready" | "failed";
+          error: string | null;
+          original_media_path: string | null;
+          corrected_media_path: string | null;
+          original_operation_name: string | null;
+          corrected_operation_name: string | null;
+          model: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          session_id: string;
+          attempt_number: number;
+          mode: "image" | "video";
+          prompt_text: string;
+          corrected_prompt_text: string;
+          score: number;
+          feedback: Record<string, unknown>;
+          status?: "generating" | "ready" | "failed";
+          error?: string | null;
+          original_media_path?: string | null;
+          corrected_media_path?: string | null;
+          original_operation_name?: string | null;
+          corrected_operation_name?: string | null;
+          model?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["media_exercise_attempts"]["Insert"]>;
+      };
       chat_messages: {
         Row: {
           id: string;

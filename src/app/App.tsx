@@ -15,6 +15,8 @@ import { LessonsPage } from "@/app/pages/lessons/LessonsPage";
 import { PracticePage } from "@/app/pages/practice/PracticePage";
 import { PromptSessionsPage } from "@/app/pages/practice/PromptSessionsPage";
 import { PromptExercisePage } from "@/app/pages/practice/PromptExercisePage";
+import { MediaExerciseSessionsPage } from "@/app/pages/practice/MediaExerciseSessionsPage";
+import { MediaExercisePage } from "@/app/pages/practice/MediaExercisePage";
 import { CalendarPage } from "@/app/pages/calendar/CalendarPage";
 import { BenefitsPage } from "@/app/pages/benefits/BenefitsPage";
 import { ProfilePage } from "@/app/pages/profile/ProfilePage";
@@ -89,6 +91,8 @@ function AppRoutes() {
         <Route path="practice" element={<PracticePage />} />
         <Route path="practice/prompts" element={<PromptSessionsPage />} />
         <Route path="practice/prompts/:sessionId" element={<PromptExercisePage />} />
+        <Route path="practice/media" element={<MediaExerciseSessionsPage />} />
+        <Route path="practice/media/:sessionId" element={<MediaExercisePage />} />
         <Route path="calendar" element={<CalendarPage />} />
         <Route path="benefits" element={<BenefitsPage />} />
         <Route path="profile" element={<ProfilePage />} />

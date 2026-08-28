@@ -14,7 +14,7 @@ export function PracticePage() {
   const BLOCKS = [
     { emoji: "📚", title: "Exercices basiques", desc: "QCM sur les fondamentaux de l'IA générative. 3 niveaux de difficulté disponibles.", tag: "15 exercices", available: true, path: undefined, color: "#78d5e2", glow: "rgba(106,222,177,0.12)" },
     { emoji: "✨", title: "Exercices pour vous", desc: `Exercices personnalisés selon ton profil${profile.profession ? " de " + profile.profession : ""}. QCM + exercices de prompts adaptés à tes objectifs.`, tag: "IA · Personnalisé", available: false, path: undefined, color: "#dbacf0", glow: "rgba(181,141,224,0.12)" },
-    { emoji: "🎨", title: "Génération images & vidéos", desc: "Maîtrise Midjourney, DALL-E 3, Sora et les outils de création visuelle IA. Prompts images avancés.", tag: "Bientôt disponible", available: false, path: undefined, color: "#fbc2ad", glow: "rgba(251,194,173,0.12)" },
+    { emoji: "🎨", title: "Génération images & vidéos", desc: "Entraînement à la rédaction de prompts pour générateurs d'image et de vidéo IA — comparaison avant/après correction.", tag: "IA · Image & Vidéo", available: true, path: "/practice/media", color: "#fbc2ad", glow: "rgba(251,194,173,0.12)" },
     { emoji: "⚡", title: "Exercices prompts", desc: "Entraînement exclusif à la rédaction de prompts professionnels. Aucun QCM — pratique pure.", tag: "20 exercices", available: true, path: "/practice/prompts", color: "#6adeb1", glow: "rgba(106,222,177,0.12)" },
   ];
 

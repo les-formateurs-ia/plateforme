@@ -1,29 +1,43 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { ArrowLeft, ChevronLeft, ChevronRight, Send, Sparkles, AlertTriangle, RotateCcw } from "lucide-react";
+import {
+  ArrowLeft, ChevronLeft, ChevronRight, Send, Sparkles, AlertTriangle, RotateCcw,
+  Image as ImageIcon, Video,
+} from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
 import { VBtn, ShimBtn } from "@/app/components/common/Buttons";
 import {
-  listPromptExerciseAttempts, submitPromptExercise,
-  type PromptExerciseAttempt,
-} from "@/app/lib/promptExercise";
+  listMediaExerciseAttempts, submitMediaExercise, pollMediaExerciseAttempt,
+  type MediaExerciseAttempt, type MediaMode,
+} from "@/app/lib/mediaExercise";
 import { locateCorrections, renderAnnotatedText, scoreTone, ANNOTATION_RED as RED, ANNOTATION_GREEN as GREEN } from "@/app/lib/textAnnotation";
 
-export function PromptExercisePage() {
+// Le mode vidéo (Veo, coût réel, plusieurs minutes par tentative) est
+// désactivé jusqu'à validation manuelle côté serveur (cf. VIDEO_MODE_ENABLED
+// dans evaluate-media-exercise) — on le grise ici en cohérence, plutôt que
+// de laisser l'élève cliquer dessus pour rien.
+const VIDEO_MODE_ENABLED = false;
+const MODES: { id: MediaMode; label: string; Icon: typeof ImageIcon; disabled?: boolean }[] = [
+  { id: "image", label: "Image", Icon: ImageIcon },
+  { id: "video", label: "Vidéo", Icon: Video, disabled: !VIDEO_MODE_ENABLED },
+];
+
+export function MediaExercisePage() {
   const th = useTh();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { sessionId } = useParams<{ sessionId: string }>();
 
-  const [attempts, setAttempts] = useState<PromptExerciseAttempt[]>([]);
+  const [attempts, setAttempts] = useState<MediaExerciseAttempt[]>([]);
   const [viewIndex, setViewIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [composing, setComposing] = useState(false);
   const [draft, setDraft] = useState("");
+  const [mode, setMode] = useState<MediaMode>("image");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -33,7 +47,7 @@ export function PromptExercisePage() {
     setLoading(true);
     (async () => {
       try {
-        const rows = await listPromptExerciseAttempts(user.id, sessionId);
+        const rows = await listMediaExerciseAttempts(user.id, sessionId);
         if (cancelled) return;
         setAttempts(rows);
         if (rows.length === 0) setComposing(true);
@@ -54,13 +68,34 @@ export function PromptExercisePage() {
   );
   const allCorrections = [...anchored, ...unanchored];
 
+  // Tant que la tentative affichée est en cours de génération (surtout la
+  // vidéo, qui peut prendre plusieurs minutes), on rappelle le statut jusqu'à
+  // aboutissement puis on remplace l'entrée dans la liste locale.
+  useEffect(() => {
+    if (!current || current.status !== "generating") return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const updated = await pollMediaExerciseAttempt(current.id);
+        if (cancelled) return;
+        setAttempts((prev) => prev.map((a) => (a.id === updated.id ? updated : a)));
+      } catch (err) {
+        if (cancelled) return;
+        setAttempts((prev) => prev.map((a) => (a.id === current.id
+          ? { ...a, status: "failed", error: err instanceof Error ? err.message : "Erreur de génération." }
+          : a)));
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [current?.id, current?.status]);
+
   const handleVerify = async () => {
     if (!draft.trim() || submitting || !sessionId) return;
     setSubmitting(true);
     setSubmitError(null);
     const newIndex = attempts.length;
     try {
-      const attempt = await submitPromptExercise(draft.trim(), sessionId);
+      const attempt = await submitMediaExercise(draft.trim(), sessionId, mode);
       setAttempts((prev) => [...prev, attempt]);
       setViewIndex(newIndex);
       setComposing(false);
@@ -74,6 +109,7 @@ export function PromptExercisePage() {
 
   const startEdit = () => {
     setDraft(current?.promptText ?? "");
+    if (current) setMode(current.mode);
     setSubmitError(null);
     setComposing(true);
   };
@@ -88,20 +124,15 @@ export function PromptExercisePage() {
   return (
     <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
       <div>
-        <button onClick={() => navigate("/practice/prompts")} className="flex items-center gap-1.5 text-sm mb-2 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
+        <button onClick={() => navigate("/practice/media")} className="flex items-center gap-1.5 text-sm mb-2 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
           <ArrowLeft className="w-4 h-4" />Historique des tentatives
         </button>
-        <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Exercices prompts</GT></h2>
-        <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Écris un prompt, l'IA le note sur 20 et t'explique précisément quoi corriger.</p>
+        <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Génération images & vidéos</GT></h2>
+        <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Écris un prompt, l'IA le note sur 20, le corrige, et génère les deux versions pour comparer.</p>
       </div>
 
-      {loading && (
-        <GCard><div className="p-8 text-center text-sm" style={{ color: th.fg3 }}>Chargement…</div></GCard>
-      )}
-
-      {!loading && loadError && (
-        <GCard><div className="p-6 text-sm" style={{ color: RED }}>{loadError}</div></GCard>
-      )}
+      {loading && <GCard><div className="p-8 text-center text-sm" style={{ color: th.fg3 }}>Chargement…</div></GCard>}
+      {!loading && loadError && <GCard><div className="p-6 text-sm" style={{ color: RED }}>{loadError}</div></GCard>}
 
       {!loading && !loadError && composing && (
         <GCard><div className="p-6 space-y-4">
@@ -111,11 +142,26 @@ export function PromptExercisePage() {
           <textarea
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            rows={10}
-            placeholder="Écris ici le prompt que tu voudrais envoyer à une IA…"
+            rows={8}
+            placeholder="Décris l'image ou la vidéo que tu voudrais générer…"
             className="w-full rounded-xl px-4 py-3 text-sm g-input resize-y"
-            style={{ minHeight: 220 }}
+            style={{ minHeight: 160 }}
           />
+          <div>
+            <div className="text-xs font-bold mb-2" style={{ color: th.fg3 }}>Type de génération</div>
+            <div className="flex items-center gap-1 p-1 rounded-xl w-fit" style={{ background: th.isDark ? "rgba(255,255,255,0.04)" : "rgba(181,141,224,0.06)", border: `1px solid ${th.sep}` }}>
+              {MODES.map(({ id, label, Icon, disabled }) => (
+                <button key={id} type="button" onClick={() => setMode(id)} disabled={submitting || disabled}
+                  title={disabled ? "Bientôt disponible" : undefined}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all disabled:opacity-40"
+                  style={mode === id
+                    ? { background: th.isDark ? "rgba(181,141,224,0.14)" : "rgba(255,255,255,0.8)", color: th.navAC, border: "1px solid rgba(181,141,224,0.25)" }
+                    : { color: th.fg3, background: "transparent", border: "1px solid transparent" }}>
+                  <Icon className="w-3.5 h-3.5" />{label}{disabled && <span className="text-[9px] opacity-70">· bientôt</span>}
+                </button>
+              ))}
+            </div>
+          </div>
           {submitError && <p className="text-xs" style={{ color: RED }}>{submitError}</p>}
           <div className="flex items-center gap-3">
             <ShimBtn onClick={handleVerify} disabled={!draft.trim() || submitting}>
@@ -133,7 +179,10 @@ export function PromptExercisePage() {
           <GCard glow><div className="p-6 space-y-4">
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div>
-                <div className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: th.navAC }}>Tentative n°{current.attemptNumber}</div>
+                <div className="text-[10px] font-black uppercase tracking-widest mb-1 flex items-center gap-1.5" style={{ color: th.navAC }}>
+                  {current.mode === "image" ? <ImageIcon className="w-3 h-3" /> : <Video className="w-3 h-3" />}
+                  Tentative n°{current.attemptNumber} · {current.mode === "image" ? "Image" : "Vidéo"}
+                </div>
                 <h3 className="text-sm font-black" style={{ color: th.fg }}>Ton prompt, annoté</h3>
               </div>
               <div className="flex items-center px-4 py-2 rounded-xl text-sm font-black shrink-0" style={{ background: tone.bg, color: tone.color, border: `1px solid ${tone.color}40` }}>
@@ -143,6 +192,11 @@ export function PromptExercisePage() {
             <div className="rounded-xl p-4 text-sm leading-relaxed whitespace-pre-wrap" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg }}>
               {renderAnnotatedText(current.promptText, anchored, th)}
             </div>
+          </div></GCard>
+
+          <GCard><div className="p-5 space-y-2">
+            <h3 className="text-xs font-black uppercase tracking-widest" style={{ color: th.navAC }}>Prompt corrigé par l'IA</h3>
+            <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: th.fg }}>{current.correctedPromptText}</p>
           </div></GCard>
 
           {allCorrections.length > 0 && (
@@ -186,6 +240,40 @@ export function PromptExercisePage() {
           <GCard accent><div className="p-6 space-y-2">
             <h3 className="text-sm font-black" style={{ color: th.fg }}>Verdict</h3>
             <p className="text-sm leading-relaxed" style={{ color: th.fg2 }}>{current.verdict}</p>
+          </div></GCard>
+
+          <GCard><div className="p-6 space-y-4">
+            <h3 className="text-sm font-black" style={{ color: th.fg }}>Résultat généré</h3>
+
+            {current.status === "generating" && (
+              <div className="rounded-xl p-8 flex flex-col items-center justify-center gap-2 text-center" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, minHeight: 160 }}>
+                <Sparkles className="w-5 h-5 animate-pulse" style={{ color: th.navAC }} />
+                <p className="text-xs" style={{ color: th.fg3 }}>
+                  {current.mode === "video" ? "Génération de la vidéo en cours… ça peut prendre plusieurs minutes." : "Génération de l'image en cours…"}
+                </p>
+              </div>
+            )}
+
+            {current.status === "failed" && (
+              <p className="text-xs" style={{ color: RED }}>{current.error ?? "Échec de la génération."}</p>
+            )}
+
+            {current.status === "ready" && (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <div className="text-xs font-bold" style={{ color: th.fg3 }}>Avec ton prompt original</div>
+                  {current.mode === "image"
+                    ? <img src={current.originalUrl ?? undefined} className="w-full rounded-xl bg-black" style={{ aspectRatio: "1/1", objectFit: "cover" }} />
+                    : <video src={current.originalUrl ?? undefined} controls className="w-full rounded-xl bg-black" style={{ aspectRatio: "16/9" }} />}
+                </div>
+                <div className="space-y-2">
+                  <div className="text-xs font-bold" style={{ color: th.navAC }}>Avec le prompt corrigé</div>
+                  {current.mode === "image"
+                    ? <img src={current.correctedUrl ?? undefined} className="w-full rounded-xl bg-black" style={{ aspectRatio: "1/1", objectFit: "cover" }} />
+                    : <video src={current.correctedUrl ?? undefined} controls className="w-full rounded-xl bg-black" style={{ aspectRatio: "16/9" }} />}
+                </div>
+              </div>
+            )}
           </div></GCard>
 
           <div className="flex items-center justify-between">

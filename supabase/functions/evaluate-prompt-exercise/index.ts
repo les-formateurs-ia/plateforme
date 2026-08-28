@@ -8,28 +8,14 @@
 // précédente de CE même élève si elle existe.
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
+import { buildCourseContext } from "../_shared/course-context.ts";
 
 const GEMINI_TEXT_MODEL = "gemini-3.6-flash";
-const MAX_LESSON_CHARS = 6000;
-const MAX_COURSE_CONTEXT_CHARS = 120000;
 
 interface Correction { excerpt: string; suggestion: string; explanation: string }
 interface MissingItem { title: string; explanation: string }
 interface Feedback { score: number; corrections: Correction[]; missing: MissingItem[]; verdict: string }
 interface PreviousAttempt { promptText: string; score: number; verdict: string; corrections: Correction[]; missing: MissingItem[] }
-
-function truncate(text: string, max: number): string {
-  return text.length > max ? text.slice(0, max) + "\n[...contenu tronqué...]" : text;
-}
-
-function buildCourseContext(lessons: { title: string; reference_content: string | null }[]): string {
-  const withContent = lessons.filter((l) => l.reference_content?.trim());
-  if (withContent.length === 0) return "";
-  const joined = withContent
-    .map((l) => `--- Leçon : ${l.title} ---\n${truncate(l.reference_content!.trim(), MAX_LESSON_CHARS)}`)
-    .join("\n\n");
-  return truncate(joined, MAX_COURSE_CONTEXT_CHARS);
-}
 
 function buildEvaluationPrompt(
   studentPrompt: string,
