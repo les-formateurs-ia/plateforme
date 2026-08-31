@@ -12,6 +12,7 @@ export type VideoProvider = "cloudflare_stream" | "youtube" | "vimeo" | "externa
 export type FormationStatus = "draft" | "published" | "archived";
 export type ThemePreference = "light" | "dark" | "system";
 export type ExerciseSessionType = "prompt" | "media" | "html";
+export type ExerciseVisibility = "global" | "private";
 
 export interface Database {
   public: {
@@ -25,6 +26,7 @@ export interface Database {
           email: string;
           must_onboard: boolean;
           theme_preference: ThemePreference;
+          avatar_url: string | null;
           created_at: string;
         };
         Insert: {
@@ -35,6 +37,7 @@ export interface Database {
           email: string;
           must_onboard?: boolean;
           theme_preference?: ThemePreference;
+          avatar_url?: string | null;
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
@@ -304,6 +307,7 @@ export interface Database {
           exercise_type: ExerciseSessionType;
           name: string | null;
           description: string | null;
+          exercise_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -313,10 +317,49 @@ export interface Database {
           exercise_type: ExerciseSessionType;
           name?: string | null;
           description?: string | null;
+          exercise_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["exercise_sessions"]["Insert"]>;
+      };
+      html_exercises: {
+        Row: {
+          id: string;
+          name: string;
+          description: string | null;
+          visibility: ExerciseVisibility;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          description?: string | null;
+          visibility?: ExerciseVisibility;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["html_exercises"]["Insert"]>;
+      };
+      html_exercise_assignments: {
+        Row: {
+          id: string;
+          exercise_id: string;
+          student_id: string;
+          assigned_by: string | null;
+          assigned_at: string;
+        };
+        Insert: {
+          id?: string;
+          exercise_id: string;
+          student_id: string;
+          assigned_by?: string | null;
+          assigned_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["html_exercise_assignments"]["Insert"]>;
       };
       chat_messages: {
         Row: {
@@ -339,22 +382,132 @@ export interface Database {
         };
         Update: Partial<Database["public"]["Tables"]["chat_messages"]["Insert"]>;
       };
-      enrollments: {
+      formation_instances: {
         Row: {
           id: string;
+          template_id: string | null;
           user_id: string;
-          formation_id: string;
+          name: string;
+          description: string | null;
+          duration_minutes: number | null;
+          price_cents: number | null;
+          currency: string;
+          certification_enabled: boolean;
+          certification_prompt: string | null;
           status: EnrollmentStatus;
-          enrolled_at: string;
+          assigned_by: string | null;
+          assigned_at: string;
+          created_at: string;
+          updated_at: string;
         };
         Insert: {
           id?: string;
+          template_id?: string | null;
           user_id: string;
-          formation_id: string;
+          name: string;
+          description?: string | null;
+          duration_minutes?: number | null;
+          price_cents?: number | null;
+          currency?: string;
+          certification_enabled?: boolean;
+          certification_prompt?: string | null;
           status?: EnrollmentStatus;
-          enrolled_at?: string;
+          assigned_by?: string | null;
+          assigned_at?: string;
+          created_at?: string;
+          updated_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["enrollments"]["Insert"]>;
+        Update: Partial<Database["public"]["Tables"]["formation_instances"]["Insert"]>;
+      };
+      instance_sections: {
+        Row: {
+          id: string;
+          instance_id: string;
+          title: string;
+          order_index: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          instance_id: string;
+          title: string;
+          order_index: number;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["instance_sections"]["Insert"]>;
+      };
+      instance_lessons: {
+        Row: {
+          id: string;
+          section_id: string;
+          slug: string;
+          title: string;
+          video_provider: VideoProvider;
+          video_url: string | null;
+          video_asset_id: string | null;
+          duration_minutes: number | null;
+          ai_content_prompt: string | null;
+          practical_exercise_prompt: string | null;
+          reference_content: string | null;
+          custom_html_content: string | null;
+          order_index: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          section_id: string;
+          slug: string;
+          title: string;
+          video_provider?: VideoProvider;
+          video_url?: string | null;
+          video_asset_id?: string | null;
+          duration_minutes?: number | null;
+          ai_content_prompt?: string | null;
+          practical_exercise_prompt?: string | null;
+          reference_content?: string | null;
+          custom_html_content?: string | null;
+          order_index: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["instance_lessons"]["Insert"]>;
+      };
+      instance_quiz_questions: {
+        Row: {
+          id: string;
+          lesson_id: string;
+          question: string;
+          explanation: string | null;
+          order_index: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          lesson_id: string;
+          question: string;
+          explanation?: string | null;
+          order_index: number;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["instance_quiz_questions"]["Insert"]>;
+      };
+      instance_quiz_options: {
+        Row: {
+          id: string;
+          question_id: string;
+          label: string;
+          is_correct: boolean;
+          order_index: number;
+        };
+        Insert: {
+          id?: string;
+          question_id: string;
+          label: string;
+          is_correct?: boolean;
+          order_index: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["instance_quiz_options"]["Insert"]>;
       };
       lesson_progress: {
         Row: {
@@ -440,7 +593,7 @@ export interface Database {
         Row: {
           id: string;
           user_id: string;
-          formation_id: string;
+          instance_id: string;
           section_id: string | null;
           status: AppointmentStatus;
           requested_at: string;
@@ -454,7 +607,7 @@ export interface Database {
         Insert: {
           id?: string;
           user_id: string;
-          formation_id: string;
+          instance_id: string;
           section_id?: string | null;
           status?: AppointmentStatus;
           requested_at?: string;

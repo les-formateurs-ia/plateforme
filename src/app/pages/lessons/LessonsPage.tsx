@@ -9,6 +9,8 @@ import { VBtn } from "@/app/components/common/Buttons";
 import { cx } from "@/app/lib/cx";
 import { formatDuration, type LessonWithState } from "@/app/lib/learning";
 import { useCourseProgress } from "@/app/state/useCourseProgress";
+import { useMyInstances } from "@/app/state/useMyInstances";
+import { VSelect } from "@/app/components/common/Select";
 import { useAuth } from "@/app/state/auth-context";
 import { isStaff } from "@/app/lib/permissions";
 import { Checkbox } from "@/app/components/ui/checkbox";
@@ -32,7 +34,8 @@ export function LessonsPage() {
   const th = useTh();
   const navigate = useNavigate();
   const { user, role } = useAuth();
-  const { loading, error: errorMsg, outline, lessonStates } = useCourseProgress();
+  const { instances, selectedId, setSelectedId } = useMyInstances();
+  const { loading, error: errorMsg, outline, lessonStates } = useCourseProgress(selectedId ?? undefined);
   const [openSection, setOpenSection] = useState<string | null>(null);
 
   const [editMode, setEditMode] = useState(false);
@@ -133,7 +136,7 @@ export function LessonsPage() {
 
   if (!outline) {
     return (
-      <div className="flex-1 flex items-center justify-center px-8">
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-8">
         <GCard><div className="p-8 text-center max-w-sm">
           <p className="text-sm font-semibold mb-1" style={{ color: th.fg }}>Aucune formation en cours</p>
           <p className="text-xs" style={{ color: th.fg3 }}>Vous n'êtes inscrit·e à aucune formation pour le moment. Contactez votre administrateur.</p>
@@ -145,12 +148,23 @@ export function LessonsPage() {
   const greenBtn = { background: "rgba(106,222,177,0.12)", border: "1px solid rgba(106,222,177,0.35)", color: "#6adeb1" };
 
   return (
-    <div className="flex-1 overflow-y-auto px-8 py-6">
-      <div className="mb-6 flex items-start justify-between gap-4">
+    <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
+      <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Mes leçons</GT></h2>
-          <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>{outline.formationName} · {outline.sections.length} modules · {totalLessons} leçons</p>
+          <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>{outline.instanceName} · {outline.sections.length} modules · {totalLessons} leçons</p>
         </div>
+
+        {instances.length > 1 && (
+          <div className="w-56 shrink-0">
+            <VSelect
+              sm
+              value={selectedId ?? instances[0].id}
+              onValueChange={setSelectedId}
+              options={instances.map((i) => ({ value: i.id, label: i.name }))}
+            />
+          </div>
+        )}
 
         {isStaff(role) && !editMode && (
           <button onClick={startEdit}
@@ -180,7 +194,7 @@ export function LessonsPage() {
         </div>
       )}
 
-      <GCard className="mb-6"><div className="p-5 flex items-center gap-8">
+      <GCard className="mb-6"><div className="p-5 flex items-center gap-5 sm:gap-8 flex-wrap">
         {[
           { val: String(completedLessons), sub: "Leçons terminées" },
           { val: successRate != null ? `${successRate}%` : "—", sub: "Taux de réussite" },
@@ -191,7 +205,7 @@ export function LessonsPage() {
             <div className="text-xs" style={{ color: th.fg3 }}>{sub}</div>
           </div>
         ))}
-        <div className="flex-1 ml-4">
+        <div className="flex-1 min-w-[140px] sm:ml-4">
           <div className="flex justify-between text-xs mb-1.5" style={{ color: th.fg3 }}><span>Progression globale</span><span>{overallPct}%</span></div>
           <div className="h-2 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(181,141,224,0.1)" }}>
             <div className="h-full rounded-full" style={{ width: `${overallPct}%`, background: "linear-gradient(90deg,#b58de0,#dbacf0)" }} />

@@ -1,6 +1,9 @@
 // Couche d'accès aux données pour le parcours élève (leçons, quiz, progression, badges).
-// Remplace les données statiques de `data/mock.ts` pour tout ce qui touche à la progression réelle.
+// Lit exclusivement les tables "duplicata" (instance_*/formation_instances) : un
+// élève ne consulte jamais un template directement, seulement le duplicata qui
+// lui a été attribué (voir supabase/migrations/0019_formation_instances.sql).
 import { supabase } from "@/app/lib/supabase/client";
+import type { EnrollmentStatus } from "@/app/lib/supabase/database.types";
 
 export interface OutlineLesson {
   id: string;
@@ -19,37 +22,44 @@ export interface OutlineSection {
 }
 
 export interface CourseOutline {
-  formationId: string;
-  formationName: string;
+  instanceId: string;
+  instanceName: string;
   sections: OutlineSection[];
 }
 
-export async function getActiveFormationId(userId: string): Promise<string | null> {
-  const { data, error } = await supabase
-    .from("enrollments")
-    .select("formation_id")
-    .eq("user_id", userId)
-    .eq("status", "active")
-    .order("enrolled_at", { ascending: true })
-    .limit(1)
-    .maybeSingle();
-  if (error) throw error;
-  return data?.formation_id ?? null;
+export interface MyInstance {
+  id: string;
+  name: string;
+  status: EnrollmentStatus;
 }
 
-export async function getCourseOutline(formationId: string): Promise<CourseOutline | null> {
-  const { data: formation, error: formationError } = await supabase
-    .from("formations")
+// Un élève peut avoir plusieurs formations attribuées simultanément : la liste
+// est triée par date d'attribution décroissante (la plus récente en premier),
+// c'est ce que les pages utilisent comme choix par défaut.
+export async function getMyInstances(userId: string): Promise<MyInstance[]> {
+  const { data, error } = await supabase
+    .from("formation_instances")
+    .select("id, name, status")
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .order("assigned_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function getCourseOutline(instanceId: string): Promise<CourseOutline | null> {
+  const { data: instance, error: instanceError } = await supabase
+    .from("formation_instances")
     .select("id, name")
-    .eq("id", formationId)
+    .eq("id", instanceId)
     .maybeSingle();
-  if (formationError) throw formationError;
-  if (!formation) return null;
+  if (instanceError) throw instanceError;
+  if (!instance) return null;
 
   const { data: sectionRows, error: sectionsError } = await supabase
-    .from("sections")
+    .from("instance_sections")
     .select("id, title, order_index")
-    .eq("formation_id", formationId)
+    .eq("instance_id", instanceId)
     .order("order_index", { ascending: true });
   if (sectionsError) throw sectionsError;
 
@@ -57,7 +67,7 @@ export async function getCourseOutline(formationId: string): Promise<CourseOutli
   const { data: lessonRows, error: lessonsError } =
     sectionIds.length > 0
       ? await supabase
-          .from("lessons")
+          .from("instance_lessons")
           .select("id, section_id, slug, title, duration_minutes, order_index")
           .in("section_id", sectionIds)
           .order("order_index", { ascending: true })
@@ -65,8 +75,8 @@ export async function getCourseOutline(formationId: string): Promise<CourseOutli
   if (lessonsError) throw lessonsError;
 
   return {
-    formationId: formation.id,
-    formationName: formation.name,
+    instanceId: instance.id,
+    instanceName: instance.name,
     sections: (sectionRows ?? []).map((s) => ({
       id: s.id,
       title: s.title,
@@ -183,6 +193,64 @@ export interface QuizQuestion {
   options: QuizOption[];
 }
 
+export interface QuizQuestionWithLesson extends QuizQuestion {
+  sectionId: string;
+  sectionTitle: string;
+  lessonId: string;
+  lessonTitle: string;
+}
+
+// "Exercices basiques" (Pratique IA) : toutes les questions de quiz de toute
+// la formation, terminée ou non — pas de notion d'attempt/score ici, c'est un
+// espace de révision libre, indépendant du quiz "officiel" gaté par leçon
+// dans LessonPage (qui reste la seule source de vérité pour la progression).
+export async function getAllQuizQuestions(instanceId: string): Promise<QuizQuestionWithLesson[]> {
+  const outline = await getCourseOutline(instanceId);
+  if (!outline) return [];
+  const lessons = flattenLessons(outline);
+  const lessonIds = lessons.map((l) => l.id);
+  if (!lessonIds.length) return [];
+
+  const lessonById = new Map(lessons.map((l) => [l.id, l]));
+  const sectionByLessonId = new Map<string, { id: string; title: string }>();
+  for (const s of outline.sections) for (const l of s.lessons) sectionByLessonId.set(l.id, { id: s.id, title: s.title });
+
+  const { data: questionRows, error } = await supabase
+    .from("instance_quiz_questions")
+    .select("id, lesson_id, question, explanation, order_index")
+    .in("lesson_id", lessonIds)
+    .order("order_index", { ascending: true });
+  if (error) throw error;
+
+  const questionIds = (questionRows ?? []).map((q) => q.id);
+  const { data: optionRows, error: optionsError } =
+    questionIds.length > 0
+      ? await supabase
+          .from("instance_quiz_options")
+          .select("id, question_id, label, is_correct, order_index")
+          .in("question_id", questionIds)
+          .order("order_index", { ascending: true })
+      : { data: [], error: null };
+  if (optionsError) throw optionsError;
+
+  return (questionRows ?? []).map((q) => {
+    const section = sectionByLessonId.get(q.lesson_id);
+    return {
+      id: q.id,
+      question: q.question,
+      explanation: q.explanation,
+      orderIndex: q.order_index,
+      sectionId: section?.id ?? "",
+      sectionTitle: section?.title ?? "",
+      lessonId: q.lesson_id,
+      lessonTitle: lessonById.get(q.lesson_id)?.title ?? "",
+      options: (optionRows ?? [])
+        .filter((o) => o.question_id === q.id)
+        .map((o) => ({ id: o.id, label: o.label, isCorrect: o.is_correct, orderIndex: o.order_index })),
+    };
+  });
+}
+
 export interface LessonDetail {
   id: string;
   sectionId: string;
@@ -196,14 +264,14 @@ export interface LessonDetail {
   referenceContent: string | null;
   customHtmlContent: string | null;
   sectionTitle: string;
-  formationId: string;
-  formationName: string;
+  instanceId: string;
+  instanceName: string;
   questions: QuizQuestion[];
 }
 
 export async function getLessonDetail(lessonId: string): Promise<LessonDetail | null> {
   const { data: lesson, error: lessonError } = await supabase
-    .from("lessons")
+    .from("instance_lessons")
     .select("id, section_id, slug, title, video_provider, video_url, duration_minutes, ai_content_prompt, practical_exercise_prompt, reference_content, custom_html_content")
     .eq("id", lessonId)
     .maybeSingle();
@@ -211,19 +279,19 @@ export async function getLessonDetail(lessonId: string): Promise<LessonDetail | 
   if (!lesson) return null;
 
   const { data: section, error: sectionError } = await supabase
-    .from("sections")
-    .select("title, formation_id")
+    .from("instance_sections")
+    .select("title, instance_id")
     .eq("id", lesson.section_id)
     .maybeSingle();
   if (sectionError) throw sectionError;
 
-  const { data: formation, error: formationError } = section
-    ? await supabase.from("formations").select("name").eq("id", section.formation_id).maybeSingle()
+  const { data: instance, error: instanceError } = section
+    ? await supabase.from("formation_instances").select("name").eq("id", section.instance_id).maybeSingle()
     : { data: null, error: null };
-  if (formationError) throw formationError;
+  if (instanceError) throw instanceError;
 
   const { data: questionRows, error: questionsError } = await supabase
-    .from("quiz_questions")
+    .from("instance_quiz_questions")
     .select("id, question, explanation, order_index")
     .eq("lesson_id", lessonId)
     .order("order_index", { ascending: true });
@@ -233,7 +301,7 @@ export async function getLessonDetail(lessonId: string): Promise<LessonDetail | 
   const { data: optionRows, error: optionsError } =
     questionIds.length > 0
       ? await supabase
-          .from("quiz_options")
+          .from("instance_quiz_options")
           .select("id, question_id, label, is_correct, order_index")
           .in("question_id", questionIds)
           .order("order_index", { ascending: true })
@@ -253,8 +321,8 @@ export async function getLessonDetail(lessonId: string): Promise<LessonDetail | 
     referenceContent: lesson.reference_content,
     customHtmlContent: lesson.custom_html_content,
     sectionTitle: section?.title ?? "",
-    formationId: section?.formation_id ?? "",
-    formationName: formation?.name ?? "",
+    instanceId: section?.instance_id ?? "",
+    instanceName: instance?.name ?? "",
     questions: (questionRows ?? []).map((q) => ({
       id: q.id,
       question: q.question,
@@ -273,7 +341,7 @@ export async function getLessonDetail(lessonId: string): Promise<LessonDetail | 
 }
 
 export async function updateLessonCustomHtml(lessonId: string, html: string | null): Promise<void> {
-  const { error } = await supabase.from("lessons").update({ custom_html_content: html }).eq("id", lessonId);
+  const { error } = await supabase.from("instance_lessons").update({ custom_html_content: html }).eq("id", lessonId);
   if (error) throw error;
 }
 
@@ -374,10 +442,13 @@ export interface DashboardStats {
   sections: { title: string; total: number; done: number }[];
 }
 
+// Statistiques pour la formation active la plus récemment attribuée (l'élève
+// peut en avoir plusieurs — ce résumé porte sur la première de la liste).
 export async function getDashboardStats(userId: string): Promise<DashboardStats | null> {
-  const formationId = await getActiveFormationId(userId);
-  if (!formationId) return null;
-  const outline = await getCourseOutline(formationId);
+  const instances = await getMyInstances(userId);
+  const instanceId = instances[0]?.id;
+  if (!instanceId) return null;
+  const outline = await getCourseOutline(instanceId);
   if (!outline) return null;
   const lessons = flattenLessons(outline);
   const progress = await getLessonProgressMap(userId, lessons.map((l) => l.id));
@@ -403,14 +474,14 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats 
 
 export async function getEnrolledSince(userId: string): Promise<string | null> {
   const { data, error } = await supabase
-    .from("enrollments")
-    .select("enrolled_at")
+    .from("formation_instances")
+    .select("assigned_at")
     .eq("user_id", userId)
-    .order("enrolled_at", { ascending: true })
+    .order("assigned_at", { ascending: true })
     .limit(1)
     .maybeSingle();
   if (error) throw error;
-  return data?.enrolled_at ?? null;
+  return data?.assigned_at ?? null;
 }
 
 export async function getPromptsCount(userId: string): Promise<number> {

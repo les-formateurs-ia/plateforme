@@ -3,13 +3,14 @@ import { supabase } from "@/app/lib/supabase/client";
 import { useAuth } from "@/app/state/auth-context";
 import type { Profile } from "@/app/types";
 
-const EMPTY_PROFILE: Profile = { name: "", age: "", profession: "", goal: "", goalFinal: "", style: "", tutor: "" };
+const EMPTY_PROFILE: Profile = { name: "", age: "", profession: "", goal: "", goalFinal: "", style: "", tutor: "", avatarUrl: null };
 
 interface ProfileContextValue {
   profile: Profile;
   loading: boolean;
   saveOnboarding: (profile: Profile) => Promise<void>;
   updateProfile: (patch: Partial<Profile>) => Promise<{ error: string | null }>;
+  updateAvatar: (file: File) => Promise<{ error: string | null }>;
 }
 
 const ProfileContext = createContext<ProfileContextValue>({
@@ -17,6 +18,7 @@ const ProfileContext = createContext<ProfileContextValue>({
   loading: true,
   saveOnboarding: async () => {},
   updateProfile: async () => ({ error: "Profil non initialisé" }),
+  updateAvatar: async () => ({ error: "Profil non initialisé" }),
 });
 
 export const useProfile = () => useContext(ProfileContext);
@@ -37,7 +39,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     (async () => {
       try {
         const [{ data: p }, { data: o }] = await Promise.all([
-          supabase.from("profiles").select("first_name").eq("id", user.id).maybeSingle(),
+          supabase.from("profiles").select("first_name, avatar_url").eq("id", user.id).maybeSingle(),
           supabase.from("student_onboarding").select("*").eq("user_id", user.id).maybeSingle(),
         ]);
         if (cancelled) return;
@@ -49,6 +51,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
           goalFinal: o?.goal_detail ?? o?.goal ?? "",
           style: o?.learning_style ?? "",
           tutor: o?.ai_tutor_persona ?? "",
+          avatarUrl: p?.avatar_url ?? null,
         });
       } catch (error) {
         console.warn("Unable to load profile details", error);
@@ -111,8 +114,27 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     return { error };
   };
 
+  const updateAvatar = async (file: File) => {
+    if (!user) return { error: "Utilisateur non connecté" };
+
+    const path = `${user.id}/avatar`;
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(path, file, { upsert: true, contentType: file.type });
+    if (uploadError) return { error: uploadError.message };
+
+    const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+    const avatarUrl = `${data.publicUrl}?v=${Date.now()}`;
+
+    const { error: updateError } = await supabase.from("profiles").update({ avatar_url: avatarUrl }).eq("id", user.id);
+    if (updateError) return { error: updateError.message };
+
+    setProfile((current) => ({ ...current, avatarUrl }));
+    return { error: null };
+  };
+
   return (
-    <ProfileContext.Provider value={{ profile, loading, saveOnboarding, updateProfile }}>
+    <ProfileContext.Provider value={{ profile, loading, saveOnboarding, updateProfile, updateAvatar }}>
       {children}
     </ProfileContext.Provider>
   );

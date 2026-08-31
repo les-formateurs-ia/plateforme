@@ -8,7 +8,9 @@ import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
 import { ShimBtn } from "@/app/components/common/Buttons";
 import { CircleProgress } from "@/app/components/common/CircleProgress";
+import { VSelect } from "@/app/components/common/Select";
 import { useCourseProgress } from "@/app/state/useCourseProgress";
+import { useMyInstances } from "@/app/state/useMyInstances";
 import { getAllBadges, getEarnedBadgeIds, formatDuration, type BadgeRow } from "@/app/lib/learning";
 
 export function DashboardPage() {
@@ -16,7 +18,8 @@ export function DashboardPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { profile } = useProfile();
-  const course = useCourseProgress();
+  const { instances, selectedId, setSelectedId } = useMyInstances();
+  const course = useCourseProgress(selectedId ?? undefined);
   const firstName = profile.name.split(" ")[0] || "Alex";
 
   const [badges, setBadges] = useState<BadgeRow[]>([]);
@@ -61,10 +64,22 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
-      <div>
-        <h2 className="text-2xl font-black mb-0.5 capitalize" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Bienvenue {firstName} 👋</GT></h2>
-        <p className="text-sm" style={{ color: th.fg3 }}>Tes statistiques et ta progression en temps réel</p>
+    <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h2 className="text-2xl font-black mb-0.5 capitalize" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Bienvenue {firstName} 👋</GT></h2>
+          <p className="text-sm" style={{ color: th.fg3 }}>Tes statistiques et ta progression en temps réel</p>
+        </div>
+        {instances.length > 1 && (
+          <div className="w-56 shrink-0">
+            <VSelect
+              sm
+              value={selectedId ?? instances[0].id}
+              onValueChange={setSelectedId}
+              options={instances.map((i) => ({ value: i.id, label: i.name }))}
+            />
+          </div>
+        )}
       </div>
 
       {!course.outline ? (
@@ -74,7 +89,7 @@ export function DashboardPage() {
         </div></GCard>
       ) : (
         <>
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {KPIS.map(({ Icon, val, unit, sub, accent, glow }) => (
               <GCard key={sub}><div className="p-5">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style={{ background: glow, border: `1px solid ${accent}25` }}><Icon className="w-5 h-5" style={{ color: accent }} /></div>
@@ -84,10 +99,10 @@ export function DashboardPage() {
             ))}
           </div>
 
-          <div className="grid grid-cols-3 gap-5">
-            <div className="col-span-2 space-y-5">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            <div className="lg:col-span-2 space-y-5">
               <GCard glow><div className="p-6">
-                <div className="flex items-start gap-6">
+                <div className="flex items-start gap-6 flex-wrap sm:flex-nowrap">
                   <div className="relative shrink-0">
                     <CircleProgress pct={completionPct} size={92} />
                     <div className="absolute inset-0 flex items-center justify-center flex-col">
@@ -96,7 +111,7 @@ export function DashboardPage() {
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1"><Award className="w-4 h-4" style={{ color: th.navAC }} /><span className="text-sm font-black" style={{ color: th.fg }}>{nextLesson ? nextLesson.lesson.title : course.outline.formationName}</span></div>
+                    <div className="flex items-center gap-2 mb-1"><Award className="w-4 h-4" style={{ color: th.navAC }} /><span className="text-sm font-black" style={{ color: th.fg }}>{nextLesson ? nextLesson.lesson.title : course.outline.instanceName}</span></div>
                     <p className="text-xs mb-4" style={{ color: th.fg3 }}>
                       {nextSection ? `${nextSection.title} · ` : ""}
                       {nextLessonIndex >= 0 ? `Leçon ${nextLessonIndex + 1} sur ${nextSection?.lessons.length} · ` : ""}

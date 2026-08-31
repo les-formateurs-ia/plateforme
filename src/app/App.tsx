@@ -13,6 +13,7 @@ import { LessonPage } from "@/app/pages/LessonPage";
 import { DashboardPage } from "@/app/pages/dashboard/DashboardPage";
 import { LessonsPage } from "@/app/pages/lessons/LessonsPage";
 import { PracticePage } from "@/app/pages/practice/PracticePage";
+import { BasicExercisesPage } from "@/app/pages/practice/BasicExercisesPage";
 import { PromptSessionsPage } from "@/app/pages/practice/PromptSessionsPage";
 import { PromptExercisePage } from "@/app/pages/practice/PromptExercisePage";
 import { MediaExerciseSessionsPage } from "@/app/pages/practice/MediaExerciseSessionsPage";
@@ -25,7 +26,8 @@ import { ProfilePage } from "@/app/pages/profile/ProfilePage";
 import { AdminCoursesPage } from "@/app/pages/admin/AdminCoursesPage";
 import { AdminCourseEditorPage } from "@/app/pages/admin/AdminCourseEditorPage";
 import { AdminLessonEditorPage } from "@/app/pages/admin/AdminLessonEditorPage";
-import { AdminAppointmentsPage } from "@/app/pages/admin/AdminAppointmentsPage";
+import { AdminPlanningPage } from "@/app/pages/admin/AdminPlanningPage";
+import { AdminStudentDetailPage } from "@/app/pages/admin/AdminStudentDetailPage";
 
 function LoadingScreen() {
   const th = useTh();
@@ -82,6 +84,16 @@ function RequireStaff({ children }: { children: ReactElement }) {
   return children;
 }
 
+// Planning (gestion élèves/formateurs, attribution de formations) est une
+// fonctionnalité strictement admin — le formateur garde l'accès à l'édition
+// de contenu (RequireStaff ci-dessus) mais pas à cette zone.
+function RequireAdmin({ children }: { children: ReactElement }) {
+  const { role } = useAuth();
+  if (role === null) return <LoadingScreen />;
+  if (role !== "admin") return <Navigate to="/" replace />;
+  return children;
+}
+
 function AppRoutes() {
   return (
     <Routes>
@@ -91,6 +103,7 @@ function AppRoutes() {
         <Route index element={<DashboardPage />} />
         <Route path="lessons" element={<LessonsPage />} />
         <Route path="practice" element={<PracticePage />} />
+        <Route path="practice/basics" element={<BasicExercisesPage />} />
         <Route path="practice/prompts" element={<PromptSessionsPage />} />
         <Route path="practice/prompts/:sessionId" element={<PromptExercisePage />} />
         <Route path="practice/media" element={<MediaExerciseSessionsPage />} />
@@ -105,7 +118,11 @@ function AppRoutes() {
         <Route path="admin/courses/:courseId" element={<RequireStaff><AdminCourseEditorPage /></RequireStaff>} />
         <Route path="admin/courses/:courseId/lessons/new" element={<RequireStaff><AdminLessonEditorPage /></RequireStaff>} />
         <Route path="admin/courses/:courseId/lessons/:lessonId" element={<RequireStaff><AdminLessonEditorPage /></RequireStaff>} />
-        <Route path="admin/appointments" element={<RequireStaff><AdminAppointmentsPage /></RequireStaff>} />
+        <Route path="admin/instances/:instanceId" element={<RequireStaff><AdminCourseEditorPage /></RequireStaff>} />
+        <Route path="admin/instances/:instanceId/lessons/new" element={<RequireStaff><AdminLessonEditorPage /></RequireStaff>} />
+        <Route path="admin/instances/:instanceId/lessons/:lessonId" element={<RequireStaff><AdminLessonEditorPage /></RequireStaff>} />
+        <Route path="admin/planning" element={<RequireAdmin><AdminPlanningPage /></RequireAdmin>} />
+        <Route path="admin/planning/students/:studentId" element={<RequireAdmin><AdminStudentDetailPage /></RequireAdmin>} />
       </Route>
       <Route path="/lesson/:lessonId" element={<RequireAuth><LessonPage /></RequireAuth>} />
       <Route path="*" element={<Navigate to="/" replace />} />

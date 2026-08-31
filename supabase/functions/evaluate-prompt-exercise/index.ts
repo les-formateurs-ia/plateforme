@@ -9,6 +9,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
 import { buildCourseContext } from "../_shared/course-context.ts";
+import { parsePedagogyStyle, pedagogyFeedbackToneBlock } from "../_shared/pedagogy-style.ts";
 
 const GEMINI_TEXT_MODEL = "gemini-3.6-flash";
 
@@ -22,6 +23,7 @@ function buildEvaluationPrompt(
   attemptNumber: number,
   courseContext: string,
   previous: PreviousAttempt | null,
+  pedagogyStyle: string,
 ): string {
   const previousBlock = previous
     ? `
@@ -46,6 +48,8 @@ Dans ton verdict final, dis explicitement si les problèmes ci-dessus sont corri
 === RÈGLES DE RÉFÉRENCE DE LA FORMATION (à appliquer en plus des bonnes pratiques générales) ===
 ${courseContext || "Aucun contenu de cours disponible pour le moment — évalue uniquement selon les bonnes pratiques générales de prompt engineering à jour."}
 Si une méthode ou règle spécifique enseignée dans le cours ci-dessus est pertinente pour ce prompt et n'est pas respectée, signale-le comme une correction ou un élément manquant, au même titre qu'une règle générale de prompt engineering.
+
+${pedagogyStyle}
 ${previousBlock}
 === PROMPT DE L'ÉLÈVE À ÉVALUER (tentative n°${attemptNumber}) ===
 ---
@@ -122,13 +126,20 @@ Deno.serve(async (req) => {
     if (userErr || !userData?.user) return jsonResponse({ error: "Session invalide." }, 401);
     const userId = userData.user.id;
 
-    // RLS (lessons_read_enrolled) restreint déjà cette lecture aux leçons des
-    // formations où l'élève est inscrit — pas de filtre supplémentaire ici.
+    // RLS (instance_lessons_select) restreint déjà cette lecture aux leçons
+    // des duplicatas attribués à l'élève — pas de filtre supplémentaire ici.
     const { data: lessonRows } = await supabase
-      .from("lessons")
+      .from("instance_lessons")
       .select("title, reference_content")
       .order("order_index");
     const courseContext = buildCourseContext(lessonRows ?? []);
+
+    const { data: onboarding } = await supabase
+      .from("student_onboarding")
+      .select("ai_tutor_persona")
+      .eq("user_id", userId)
+      .maybeSingle();
+    const pedagogyStyle = pedagogyFeedbackToneBlock(parsePedagogyStyle(onboarding?.ai_tutor_persona));
 
     const { data: previousRows } = await supabase
       .from("prompt_exercise_attempts")
@@ -149,7 +160,7 @@ Deno.serve(async (req) => {
         }
       : null;
 
-    const evalPrompt = buildEvaluationPrompt(promptText.trim(), attemptNumber, courseContext, previous);
+    const evalPrompt = buildEvaluationPrompt(promptText.trim(), attemptNumber, courseContext, previous, pedagogyStyle);
     const geminiResp = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL}:generateContent`,
       {

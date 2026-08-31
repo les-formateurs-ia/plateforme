@@ -5,21 +5,26 @@
 // Functions ne s'applique qu'au traitement de gros payloads binaires.
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse, getCallerRole, isStaffRole } from "../_shared/podcast-utils.ts";
+import { parsePedagogyStyle, pedagogyStyleBlock } from "../_shared/pedagogy-style.ts";
 
 const GEMINI_TEXT_MODEL = "gemini-3.6-flash";
 
-function buildMindmapPrompt(lessonTitle: string, lessonContent: string, objectifProfessionnel: string | null): string {
+function buildMindmapPrompt(lessonTitle: string, lessonContent: string, objectifProfessionnel: string | null, pedagogyStyle: string): string {
   return `Tu es un ingénieur pédagogique. Crée une mindmap interactive et détaillée pour la leçon "${lessonTitle}", à partir EXCLUSIVEMENT du cours ci-dessous.
 
-RÈGLE ABSOLUE SUR LA STRUCTURE : les nœuds, titres et sous-titres de la mindmap doivent refléter fidèlement et intégralement le cours ci-dessous — n'invente aucun sujet qui n'y figure pas, n'en omets aucun point important. La structure est IDENTIQUE pour tous les élèves, elle ne doit jamais être adaptée au profil de l'élève.
+RÈGLE ABSOLUE SUR LA STRUCTURE : les nœuds, titres et sous-titres de la mindmap doivent refléter fidèlement et intégralement le cours ci-dessous — n'invente aucun sujet qui n'y figure pas, n'en omets aucun point important. La structure (nombre de nœuds, organisation, titres) est IDENTIQUE pour tous les élèves, elle ne doit JAMAIS être adaptée au profil ni au style pédagogique de l'élève.
 
 RÈGLE SUR LES EXEMPLES : dans chaque nœud pertinent, donne 1 à 2 exemples concrets et actuels illustrant le concept. Quand c'est pertinent, ces exemples peuvent être adaptés au contexte professionnel de l'élève ci-dessous (SEULS les exemples, jamais la structure ni le contenu théorique).
+
+RÈGLE SUR LA RÉDACTION DES "summary" : c'est le seul endroit où le style pédagogique ci-dessous s'applique — la longueur, la simplicité et la terminologie de chaque "summary" en tiennent compte (jamais la structure).
 
 === COURS ===
 ${lessonContent}
 
 === CONTEXTE PROFESSIONNEL DE L'ÉLÈVE (pour les exemples uniquement) ===
 ${objectifProfessionnel?.trim() ? objectifProfessionnel : "Non renseigné — utilise des exemples professionnels généralistes et variés."}
+
+${pedagogyStyle}
 
 === FORMAT DE SORTIE ===
 Réponds UNIQUEMENT avec un objet JSON strict, sans texte autour, de cette forme exacte :
@@ -65,16 +70,17 @@ Deno.serve(async (req) => {
     }
 
     const { data: lesson, error: lessonErr } = await supabase
-      .from("lessons").select("id, title, reference_content").eq("id", lessonId).maybeSingle();
+      .from("instance_lessons").select("id, title, reference_content").eq("id", lessonId).maybeSingle();
     if (lessonErr) return jsonResponse({ error: lessonErr.message }, 500);
     if (!lesson) return jsonResponse({ error: "Leçon introuvable ou accès refusé." }, 404);
     if (!lesson.reference_content) return jsonResponse({ error: "Cette leçon n'a pas encore de contenu de cours." }, 400);
 
     const { data: onboarding } = await supabase
-      .from("student_onboarding").select("goal, goal_detail").eq("user_id", userId).maybeSingle();
+      .from("student_onboarding").select("goal, goal_detail, ai_tutor_persona").eq("user_id", userId).maybeSingle();
     const objectifProfessionnel = onboarding?.goal_detail || onboarding?.goal || null;
+    const pedagogyStyle = pedagogyStyleBlock(parsePedagogyStyle(onboarding?.ai_tutor_persona));
 
-    const prompt = buildMindmapPrompt(lesson.title, lesson.reference_content, objectifProfessionnel);
+    const prompt = buildMindmapPrompt(lesson.title, lesson.reference_content, objectifProfessionnel, pedagogyStyle);
     const geminiResp = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL}:generateContent`,
       {

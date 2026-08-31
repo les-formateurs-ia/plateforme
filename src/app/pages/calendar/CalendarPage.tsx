@@ -57,7 +57,7 @@ export function CalendarPage() {
     if (!user || !course.outline) return;
     setRequesting(section.id);
     try {
-      const appt = await requestAppointment(user.id, course.outline.formationId, section.id);
+      const appt = await requestAppointment(user.id, course.outline.instanceId, section.id);
       setAppointments((a) => [appt, ...a]);
       setBookingSection(section);
     } catch (err) {
@@ -83,9 +83,9 @@ export function CalendarPage() {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto px-8 py-6 space-y-5">
+    <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-5">
       <div>
-        <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Planning</GT></h2>
+        <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Rendez-vous</GT></h2>
         <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Réserve un point avec ton expert IA à la fin de chaque module.</p>
       </div>
 

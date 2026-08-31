@@ -32,7 +32,7 @@ function formatDateTime(iso: string) {
   return new Date(iso).toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 }
 
-export function AdminAppointmentsPage() {
+export function AdminAppointmentsPage({ embedded = false }: { embedded?: boolean } = {}) {
   const th = useTh();
   const { user } = useAuth();
   const [appointments, setAppointments] = useState<AdminAppointmentRow[]>([]);
@@ -116,11 +116,13 @@ export function AdminAppointmentsPage() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
-      <div>
-        <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Rendez-vous élèves</GT></h2>
-        <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Demandes de session avec un expert IA, en fin de module.</p>
-      </div>
+    <div className={embedded ? "space-y-6" : "flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6"}>
+      {!embedded && (
+        <div>
+          <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Rendez-vous élèves</GT></h2>
+          <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Demandes de session avec un expert IA, en fin de module.</p>
+        </div>
+      )}
 
       <GCard><div className="p-5">
         <div className="flex items-center gap-2 mb-1">
@@ -169,7 +171,7 @@ export function AdminAppointmentsPage() {
 
               {isOpen && (
                 <div className="px-5 pb-5 space-y-3" style={{ borderTop: `1px solid ${th.sep}` }}>
-                  <div className="grid grid-cols-2 gap-3 pt-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4">
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Date & heure</label>
                       <input type="datetime-local" value={draft.scheduledAt} onChange={(e) => setDraft((d) => ({ ...d, scheduledAt: e.target.value }))}
@@ -186,7 +188,7 @@ export function AdminAppointmentsPage() {
                     <textarea value={draft.adminMessage} onChange={(e) => setDraft((d) => ({ ...d, adminMessage: e.target.value }))} rows={2}
                       className="w-full rounded-xl px-4 py-2.5 text-sm g-input resize-none" />
                   </div>
-                  <div className="flex items-center gap-2 pt-1">
+                  <div className="flex items-center gap-2 pt-1 flex-wrap">
                     <VBtn sm onClick={() => save(a, "confirmed")} disabled={saving}><span className="flex items-center gap-1.5"><CalendarIcon className="w-3.5 h-3.5" />Confirmer</span></VBtn>
                     <VBtn sm onClick={() => save(a)} disabled={saving}>Enregistrer</VBtn>
                     {a.status !== "completed" && <VBtn sm onClick={() => save(a, "completed")} disabled={saving}>Marquer terminé</VBtn>}

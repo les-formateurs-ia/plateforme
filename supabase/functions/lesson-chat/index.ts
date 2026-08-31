@@ -3,10 +3,11 @@
 // poliment (flag is_off_topic) plutôt que traitée comme une question générale.
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
+import { parsePedagogyStyle, pedagogyStyleBlock } from "../_shared/pedagogy-style.ts";
 
 const GEMINI_TEXT_MODEL = "gemini-3.6-flash";
 
-function buildSystemPrompt(lessonTitle: string, lessonContent: string, profession: string | null, objectifProfessionnel: string | null): string {
+function buildSystemPrompt(lessonTitle: string, lessonContent: string, profession: string | null, objectifProfessionnel: string | null, pedagogyStyle: string): string {
   return `Tu es le Copilote IA d'une plateforme de formation professionnelle à l'IA générative. Tu es UNIQUEMENT le formateur-mentor de l'élève pour la leçon en cours — pas un assistant généraliste.
 
 === PÉRIMÈTRE STRICT ===
@@ -22,6 +23,8 @@ ${lessonContent}
 === PROFIL DE L'ÉLÈVE ===
 Métier : ${profession || "non renseigné"}
 Objectif professionnel : ${objectifProfessionnel || "non renseigné"}
+
+${pedagogyStyle}
 
 === TON ===
 Pédagogue, concret, encourageant, tutoie l'élève. Réponses courtes (3-6 phrases sauf si la question demande plus de détail). Utilise des exemples liés à son métier quand c'est pertinent.
@@ -54,20 +57,21 @@ Deno.serve(async (req) => {
     const userId = userData.user.id;
 
     const { data: lesson, error: lessonErr } = await supabase
-      .from("lessons").select("id, title, reference_content").eq("id", lessonId).maybeSingle();
+      .from("instance_lessons").select("id, title, reference_content").eq("id", lessonId).maybeSingle();
     if (lessonErr) return jsonResponse({ error: lessonErr.message }, 500);
     if (!lesson) return jsonResponse({ error: "Leçon introuvable." }, 404);
 
     const { data: onboarding } = await supabase
-      .from("student_onboarding").select("profession, goal, goal_detail").eq("user_id", userId).maybeSingle();
+      .from("student_onboarding").select("profession, goal, goal_detail, ai_tutor_persona").eq("user_id", userId).maybeSingle();
     const objectifProfessionnel = onboarding?.goal_detail || onboarding?.goal || null;
+    const pedagogyStyle = pedagogyStyleBlock(parsePedagogyStyle(onboarding?.ai_tutor_persona));
 
     const { data: historyRows } = await supabase
       .from("chat_messages").select("role, content").eq("user_id", userId).eq("lesson_id", lessonId)
       .order("created_at", { ascending: false }).limit(10);
     const history = (historyRows ?? []).reverse();
 
-    const systemPrompt = buildSystemPrompt(lesson.title, lesson.reference_content ?? "(pas de contenu de référence pour cette leçon)", onboarding?.profession ?? null, objectifProfessionnel);
+    const systemPrompt = buildSystemPrompt(lesson.title, lesson.reference_content ?? "(pas de contenu de référence pour cette leçon)", onboarding?.profession ?? null, objectifProfessionnel, pedagogyStyle);
 
     const contents = [
       { role: "user", parts: [{ text: systemPrompt }] },

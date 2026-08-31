@@ -17,6 +17,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse, runInBackground, base64ToUint8Array } from "../_shared/podcast-utils.ts";
 import { buildCourseContext } from "../_shared/course-context.ts";
+import { parsePedagogyStyle, pedagogyFeedbackToneBlock } from "../_shared/pedagogy-style.ts";
 
 const GEMINI_TEXT_MODEL = "gemini-3.6-flash";
 const GEMINI_IMAGE_MODEL = "gemini-3.1-flash-image";
@@ -62,7 +63,7 @@ function sanitizeFeedback(raw: unknown): Feedback | null {
   return { score: Math.max(0, Math.min(20, Math.round(r.score))), corrections, missing, verdict: r.verdict.trim(), correctedPrompt: r.correctedPrompt.trim() };
 }
 
-function buildEvaluationPrompt(mode: Mode, studentPrompt: string, attemptNumber: number, courseContext: string, previous: PreviousAttempt | null): string {
+function buildEvaluationPrompt(mode: Mode, studentPrompt: string, attemptNumber: number, courseContext: string, previous: PreviousAttempt | null, pedagogyStyle: string): string {
   const previousBlock = previous
     ? `
 === TENTATIVE PRÉCÉDENTE DE CET ÉLÈVE DANS CE MÊME MODE (comparaison obligatoire) ===
@@ -92,6 +93,8 @@ ${MODE_GUIDANCE[mode]}
 === RÈGLES DE RÉFÉRENCE DE LA FORMATION (à appliquer en plus des bonnes pratiques ci-dessus) ===
 ${courseContext || "Aucun contenu de cours disponible pour le moment — évalue uniquement selon les bonnes pratiques générales."}
 Si une méthode ou règle spécifique enseignée dans le cours ci-dessus est pertinente pour ce prompt et n'est pas respectée, signale-le comme une correction ou un élément manquant, au même titre qu'une règle générale.
+
+${pedagogyStyle}
 ${previousBlock}
 === PROMPT DE L'ÉLÈVE À ÉVALUER (mode: ${mode}, tentative n°${attemptNumber}) ===
 ---
@@ -181,8 +184,15 @@ Deno.serve(async (req) => {
     if (userErr || !userData?.user) return jsonResponse({ error: "Session invalide." }, 401);
     const userId = userData.user.id;
 
-    const { data: lessonRows } = await supabase.from("lessons").select("title, reference_content").order("order_index");
+    const { data: lessonRows } = await supabase.from("instance_lessons").select("title, reference_content").order("order_index");
     const courseContext = buildCourseContext(lessonRows ?? []);
+
+    const { data: onboarding } = await supabase
+      .from("student_onboarding")
+      .select("ai_tutor_persona")
+      .eq("user_id", userId)
+      .maybeSingle();
+    const pedagogyStyle = pedagogyFeedbackToneBlock(parsePedagogyStyle(onboarding?.ai_tutor_persona));
 
     const { data: previousRows } = await supabase
       .from("media_exercise_attempts")
@@ -214,7 +224,7 @@ Deno.serve(async (req) => {
       .limit(1);
     const attemptNumber = (allSessionRows?.[0]?.attempt_number ?? 0) + 1;
 
-    const evalPrompt = buildEvaluationPrompt(mode as Mode, promptText.trim(), attemptNumber, courseContext, previous);
+    const evalPrompt = buildEvaluationPrompt(mode as Mode, promptText.trim(), attemptNumber, courseContext, previous, pedagogyStyle);
     const geminiResp = await fetch(`${GEMINI_API_BASE}/models/${GEMINI_TEXT_MODEL}:generateContent`, {
       method: "POST",
       headers: { "x-goog-api-key": geminiApiKey, "Content-Type": "application/json" },

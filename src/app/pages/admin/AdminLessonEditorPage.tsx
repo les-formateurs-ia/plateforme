@@ -17,11 +17,18 @@ const slugify = (s: string) => s.toLowerCase().trim()
   .normalize("NFD").replace(/[̀-ͯ]/g, "")
   .replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
+// Édite soit une leçon TEMPLATE (/admin/courses/:courseId/lessons/…, tables
+// lessons/quiz_questions/quiz_options) soit une leçon d'un DUPLICATA élève
+// (/admin/instances/:instanceId/lessons/…, tables instance_lessons/
+// instance_quiz_questions/instance_quiz_options) — même formulaire, tables
+// différentes selon la route.
 export function AdminLessonEditorPage() {
   const th = useTh();
   const navigate = useNavigate();
   const location = useLocation();
-  const { courseId, lessonId: routeLessonId } = useParams();
+  const { courseId: routeCourseId, instanceId: routeInstanceId, lessonId: routeLessonId } = useParams();
+  const isInstance = !!routeInstanceId;
+  const courseId = routeInstanceId ?? routeCourseId;
   const isNew = !routeLessonId;
   const sectionIdFromState = (location.state as { sectionId?: string } | null)?.sectionId;
 
@@ -42,12 +49,16 @@ export function AdminLessonEditorPage() {
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const coursesBase = isInstance ? `/admin/instances/${courseId}` : `/admin/courses/${courseId}`;
+
   useEffect(() => {
     if (isNew) return;
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const { data: lesson } = await supabase.from("lessons").select("*").eq("id", routeLessonId).single();
+      const lesson = isInstance
+        ? (await supabase.from("instance_lessons").select("*").eq("id", routeLessonId).single()).data
+        : (await supabase.from("lessons").select("*").eq("id", routeLessonId).single()).data;
       if (cancelled || !lesson) { setLoading(false); return; }
       setSectionId(lesson.section_id);
       setTitle(lesson.title);
@@ -59,21 +70,34 @@ export function AdminLessonEditorPage() {
       setAiContentPrompt(lesson.ai_content_prompt ?? "");
       setPracticalExercisePrompt(lesson.practical_exercise_prompt ?? "");
 
-      const { data: questionRows } = await supabase.from("quiz_questions").select("id, question, explanation, order_index").eq("lesson_id", routeLessonId).order("order_index");
-      if (questionRows?.length) {
-        const { data: optionRows } = await supabase.from("quiz_options").select("id, question_id, label, is_correct, order_index").in("question_id", questionRows.map((q) => q.id)).order("order_index");
-        setQuestions(questionRows.map((q) => ({
-          id: q.id,
-          question: q.question,
-          explanation: q.explanation ?? "",
-          options: (optionRows ?? []).filter((o) => o.question_id === q.id).map((o) => ({ id: o.id, label: o.label, is_correct: o.is_correct })),
-        })));
+      if (isInstance) {
+        const { data: questionRows } = await supabase.from("instance_quiz_questions").select("id, question, explanation, order_index").eq("lesson_id", routeLessonId).order("order_index");
+        if (questionRows?.length) {
+          const { data: optionRows } = await supabase.from("instance_quiz_options").select("id, question_id, label, is_correct, order_index").in("question_id", questionRows.map((q) => q.id)).order("order_index");
+          setQuestions(questionRows.map((q) => ({
+            id: q.id,
+            question: q.question,
+            explanation: q.explanation ?? "",
+            options: (optionRows ?? []).filter((o) => o.question_id === q.id).map((o) => ({ id: o.id, label: o.label, is_correct: o.is_correct })),
+          })));
+        }
+      } else {
+        const { data: questionRows } = await supabase.from("quiz_questions").select("id, question, explanation, order_index").eq("lesson_id", routeLessonId).order("order_index");
+        if (questionRows?.length) {
+          const { data: optionRows } = await supabase.from("quiz_options").select("id, question_id, label, is_correct, order_index").in("question_id", questionRows.map((q) => q.id)).order("order_index");
+          setQuestions(questionRows.map((q) => ({
+            id: q.id,
+            question: q.question,
+            explanation: q.explanation ?? "",
+            options: (optionRows ?? []).filter((o) => o.question_id === q.id).map((o) => ({ id: o.id, label: o.label, is_correct: o.is_correct })),
+          })));
+        }
       }
       if (!cancelled) setLoading(false);
     })();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [routeLessonId]);
+  }, [routeLessonId, isInstance]);
 
   const handleTitleChange = (value: string) => {
     setTitle(value);
@@ -131,33 +155,56 @@ export function AdminLessonEditorPage() {
     };
 
     let lessonId = routeLessonId;
-    if (lessonId) {
-      const { error: updateError } = await supabase.from("lessons").update(payload).eq("id", lessonId);
-      if (updateError) { setError(updateError.message); setSaving(false); return; }
+    if (isInstance) {
+      if (lessonId) {
+        const { error: updateError } = await supabase.from("instance_lessons").update(payload).eq("id", lessonId);
+        if (updateError) { setError(updateError.message); setSaving(false); return; }
+      } else {
+        const { count } = await supabase.from("instance_lessons").select("id", { count: "exact", head: true }).eq("section_id", sectionId);
+        const { data, error: insertError } = await supabase.from("instance_lessons").insert({ ...payload, order_index: count ?? 0 }).select("id").single();
+        if (insertError || !data) { setError(insertError?.message ?? "Erreur inconnue"); setSaving(false); return; }
+        lessonId = data.id;
+      }
+      // Quiz : on repart d'une base propre à chaque sauvegarde (supprime puis
+      // réinsère) — plus simple et fiable qu'un diff fin vu le faible volume.
+      await supabase.from("instance_quiz_questions").delete().eq("lesson_id", lessonId);
+      for (let qIndex = 0; qIndex < questions.length; qIndex++) {
+        const q = questions[qIndex];
+        const { data: questionRow, error: questionError } = await supabase
+          .from("instance_quiz_questions").insert({ lesson_id: lessonId, question: q.question.trim(), explanation: q.explanation || null, order_index: qIndex })
+          .select("id").single();
+        if (questionError || !questionRow) { setError(questionError?.message ?? "Erreur quiz"); setSaving(false); return; }
+        const options = q.options.filter((o) => o.label.trim()).map((o, oIndex) => ({
+          question_id: questionRow.id, label: o.label.trim(), is_correct: o.is_correct, order_index: oIndex,
+        }));
+        if (options.length) await supabase.from("instance_quiz_options").insert(options);
+      }
     } else {
-      const { count } = await supabase.from("lessons").select("id", { count: "exact", head: true }).eq("section_id", sectionId);
-      const { data, error: insertError } = await supabase.from("lessons").insert({ ...payload, order_index: count ?? 0 }).select("id").single();
-      if (insertError || !data) { setError(insertError?.message ?? "Erreur inconnue"); setSaving(false); return; }
-      lessonId = data.id;
-    }
-
-    // Quiz : on repart d'une base propre à chaque sauvegarde (supprime puis
-    // réinsère) — plus simple et fiable qu'un diff fin vu le faible volume.
-    await supabase.from("quiz_questions").delete().eq("lesson_id", lessonId);
-    for (let qIndex = 0; qIndex < questions.length; qIndex++) {
-      const q = questions[qIndex];
-      const { data: questionRow, error: questionError } = await supabase
-        .from("quiz_questions").insert({ lesson_id: lessonId, question: q.question.trim(), explanation: q.explanation || null, order_index: qIndex })
-        .select("id").single();
-      if (questionError || !questionRow) { setError(questionError?.message ?? "Erreur quiz"); setSaving(false); return; }
-      const options = q.options.filter((o) => o.label.trim()).map((o, oIndex) => ({
-        question_id: questionRow.id, label: o.label.trim(), is_correct: o.is_correct, order_index: oIndex,
-      }));
-      if (options.length) await supabase.from("quiz_options").insert(options);
+      if (lessonId) {
+        const { error: updateError } = await supabase.from("lessons").update(payload).eq("id", lessonId);
+        if (updateError) { setError(updateError.message); setSaving(false); return; }
+      } else {
+        const { count } = await supabase.from("lessons").select("id", { count: "exact", head: true }).eq("section_id", sectionId);
+        const { data, error: insertError } = await supabase.from("lessons").insert({ ...payload, order_index: count ?? 0 }).select("id").single();
+        if (insertError || !data) { setError(insertError?.message ?? "Erreur inconnue"); setSaving(false); return; }
+        lessonId = data.id;
+      }
+      await supabase.from("quiz_questions").delete().eq("lesson_id", lessonId);
+      for (let qIndex = 0; qIndex < questions.length; qIndex++) {
+        const q = questions[qIndex];
+        const { data: questionRow, error: questionError } = await supabase
+          .from("quiz_questions").insert({ lesson_id: lessonId, question: q.question.trim(), explanation: q.explanation || null, order_index: qIndex })
+          .select("id").single();
+        if (questionError || !questionRow) { setError(questionError?.message ?? "Erreur quiz"); setSaving(false); return; }
+        const options = q.options.filter((o) => o.label.trim()).map((o, oIndex) => ({
+          question_id: questionRow.id, label: o.label.trim(), is_correct: o.is_correct, order_index: oIndex,
+        }));
+        if (options.length) await supabase.from("quiz_options").insert(options);
+      }
     }
 
     setSaving(false);
-    navigate(`/admin/courses/${courseId}`);
+    navigate(coursesBase);
   };
 
   if (loading) return <div className="flex-1 flex items-center justify-center"><p className="text-sm" style={{ color: th.fg3 }}>Chargement…</p></div>;
@@ -165,16 +212,16 @@ export function AdminLessonEditorPage() {
   if (isNew && !sectionId) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <p className="text-sm" style={{ color: th.fg3 }}>Section inconnue. <Link to={`/admin/courses/${courseId}`} style={{ color: th.navAC }}>Retourne à la fiche du cours</Link> et clique "Ajouter une leçon" depuis un module.</p>
+        <p className="text-sm" style={{ color: th.fg3 }}>Section inconnue. <Link to={coursesBase} style={{ color: th.navAC }}>Retourne à la fiche du cours</Link> et clique "Ajouter une leçon" depuis un module.</p>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <Link to={`/admin/courses/${courseId}`} className="flex items-center gap-1.5 text-sm w-fit transition-colors hover:opacity-70" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />Cours</Link>
-        {!isNew && (
+    <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <Link to={coursesBase} className="flex items-center gap-1.5 text-sm w-fit transition-colors hover:opacity-70" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />Cours</Link>
+        {!isNew && isInstance && (
           <a href={`/lesson/${routeLessonId}`} target="_blank" rel="noreferrer" title="Voir la leçon comme un élève"
             className="flex items-center gap-1.5 text-sm font-semibold hover:opacity-70" style={{ color: th.navAC }}>
             <ExternalLink className="w-4 h-4" />Aperçu élève
@@ -185,8 +232,8 @@ export function AdminLessonEditorPage() {
       <GCard glow><div className="p-6 space-y-4">
         <h2 className="text-lg font-black" style={{ color: th.fg }}><GT>{isNew ? "Nouvelle leçon" : "Éditer la leçon"}</GT></h2>
 
-        <div className="grid grid-cols-3 gap-4">
-          <div className="col-span-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="sm:col-span-2">
             <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Titre</label>
             <input value={title} onChange={(e) => handleTitleChange(e.target.value)} placeholder="Les bases du prompting" className="w-full rounded-xl px-4 py-3 text-sm g-input" />
             {!slugEditing ? (

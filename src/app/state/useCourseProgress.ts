@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/app/state/auth-context";
 import {
-  getActiveFormationId, getCourseOutline, getLessonProgressMap, computeLessonStates, flattenLessons,
+  getMyInstances, getCourseOutline, getLessonProgressMap, computeLessonStates, flattenLessons,
   type CourseOutline, type LessonWithState,
 } from "@/app/lib/learning";
 
@@ -13,13 +13,13 @@ export interface CourseProgress {
   refresh: () => void;
 }
 
-// Charge une formation + la progression de l'élève leçon par leçon.
-// Sans argument : la formation "active" (première inscription) — utilisé par
-// LessonsPage et le dashboard. Avec `formationId` : cette formation précise,
-// peu importe laquelle est "active" — utilisé par LessonPage, pour que
-// l'accès à une leçon dépende du cours auquel ELLE appartient, pas d'une
-// autre formation dans laquelle l'utilisateur serait par ailleurs inscrit.
-export function useCourseProgress(formationId?: string): CourseProgress {
+// Charge une formation (duplicata attribué à l'élève) + sa progression leçon
+// par leçon. Sans argument : la formation active la plus récemment attribuée
+// (un élève peut en avoir plusieurs en parallèle) — utilisé par LessonsPage et
+// le dashboard. Avec `instanceId` : cette formation précise, peu importe
+// laquelle est la plus récente — utilisé par LessonPage, pour que l'accès à
+// une leçon dépende du duplicata auquel ELLE appartient.
+export function useCourseProgress(instanceId?: string): CourseProgress {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,12 +34,12 @@ export function useCourseProgress(formationId?: string): CourseProgress {
       setLoading(true);
       setError(null);
       try {
-        const resolvedFormationId = formationId ?? (await getActiveFormationId(user.id));
-        if (!resolvedFormationId) {
+        const resolvedInstanceId = instanceId ?? (await getMyInstances(user.id))[0]?.id ?? null;
+        if (!resolvedInstanceId) {
           if (!cancelled) { setOutline(null); setLessonStates([]); }
           return;
         }
-        const outlineData = await getCourseOutline(resolvedFormationId);
+        const outlineData = await getCourseOutline(resolvedInstanceId);
         if (!outlineData) {
           if (!cancelled) { setOutline(null); setLessonStates([]); }
           return;
@@ -57,7 +57,7 @@ export function useCourseProgress(formationId?: string): CourseProgress {
       }
     })();
     return () => { cancelled = true; };
-  }, [user, formationId, refreshToken]);
+  }, [user, instanceId, refreshToken]);
 
   const refresh = useCallback(() => setRefreshToken((t) => t + 1), []);
 

@@ -13,7 +13,7 @@ interface FormationRow {
   description: string | null;
   status: string;
   section_count: number;
-  enrollment_count: number;
+  instance_count: number;
 }
 
 const STATUS_LABEL: Record<string, { label: string; color: string; bg: string }> = {
@@ -39,16 +39,16 @@ export function AdminCoursesPage() {
 
       if (!formations) { if (!cancelled) { setCourses([]); setLoading(false); } return; }
 
-      const [{ data: sections }, { data: enrollments }] = await Promise.all([
+      const [{ data: sections }, { data: instances }] = await Promise.all([
         supabase.from("sections").select("id, formation_id"),
-        supabase.from("enrollments").select("id, formation_id"),
+        supabase.from("formation_instances").select("id, template_id"),
       ]);
 
       if (cancelled) return;
       setCourses(formations.map((f) => ({
         ...f,
         section_count: sections?.filter((s) => s.formation_id === f.id).length ?? 0,
-        enrollment_count: enrollments?.filter((e) => e.formation_id === f.id).length ?? 0,
+        instance_count: instances?.filter((i) => i.template_id === f.id).length ?? 0,
       })));
       setLoading(false);
     })();
@@ -56,11 +56,11 @@ export function AdminCoursesPage() {
   }, []);
 
   return (
-    <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Gestion des cours</GT></h2>
-          <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Crée et personnalise les formations depuis le template.</p>
+          <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Modèles de formation — à attribuer aux élèves depuis Planning.</p>
         </div>
         <ShimBtn onClick={() => navigate("/admin/courses/new")}>
           <span className="flex items-center gap-2"><Plus className="w-4 h-4" />Nouveau cours</span>
@@ -75,7 +75,7 @@ export function AdminCoursesPage() {
         </div></GCard>
       )}
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {courses.map((c) => {
           const sc = STATUS_LABEL[c.status] ?? STATUS_LABEL.draft;
           return (
@@ -88,7 +88,7 @@ export function AdminCoursesPage() {
                 <p className="text-xs leading-relaxed mb-4 line-clamp-2" style={{ color: th.fg3 }}>{c.description || "Pas de description."}</p>
                 <div className="flex items-center gap-4 text-xs" style={{ color: th.fg3 }}>
                   <span className="flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5" />{c.section_count} module{c.section_count > 1 ? "s" : ""}</span>
-                  <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5" />{c.enrollment_count} élève{c.enrollment_count > 1 ? "s" : ""}</span>
+                  <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5" />{c.instance_count} attribution{c.instance_count > 1 ? "s" : ""}</span>
                   <ChevronRight className="w-4 h-4 ml-auto" style={{ color: th.navAC }} />
                 </div>
               </div>

@@ -6,7 +6,7 @@ export type AppointmentStatus = "requested" | "preparing" | "confirmed" | "compl
 export interface Appointment {
   id: string;
   userId: string;
-  formationId: string;
+  instanceId: string;
   sectionId: string | null;
   status: AppointmentStatus;
   requestedAt: string;
@@ -17,13 +17,13 @@ export interface Appointment {
 }
 
 function mapAppointment(row: {
-  id: string; user_id: string; formation_id: string; section_id: string | null; status: AppointmentStatus;
+  id: string; user_id: string; instance_id: string; section_id: string | null; status: AppointmentStatus;
   requested_at: string; scheduled_at: string | null; google_meet_link: string | null; admin_message: string | null; handled_by: string | null;
 }): Appointment {
   return {
     id: row.id,
     userId: row.user_id,
-    formationId: row.formation_id,
+    instanceId: row.instance_id,
     sectionId: row.section_id,
     status: row.status,
     requestedAt: row.requested_at,
@@ -44,10 +44,10 @@ export async function getMyAppointments(userId: string): Promise<Appointment[]> 
   return (data ?? []).map(mapAppointment);
 }
 
-export async function requestAppointment(userId: string, formationId: string, sectionId: string | null): Promise<Appointment> {
+export async function requestAppointment(userId: string, instanceId: string, sectionId: string | null): Promise<Appointment> {
   const { data, error } = await supabase
     .from("appointments")
-    .insert({ user_id: userId, formation_id: formationId, section_id: sectionId, status: "requested" })
+    .insert({ user_id: userId, instance_id: instanceId, section_id: sectionId, status: "requested" })
     .select("*")
     .single();
   if (error) throw error;
@@ -67,28 +67,28 @@ export async function getAllAppointmentsForAdmin(): Promise<AdminAppointmentRow[
   if (!appts?.length) return [];
 
   const userIds = [...new Set(appts.map((a) => a.user_id))];
-  const formationIds = [...new Set(appts.map((a) => a.formation_id))];
+  const instanceIds = [...new Set(appts.map((a) => a.instance_id))];
   const sectionIds = [...new Set(appts.map((a) => a.section_id).filter((id): id is string => !!id))];
 
-  const [{ data: profiles }, { data: formations }, { data: sections }] = await Promise.all([
+  const [{ data: profiles }, { data: instances }, { data: sections }] = await Promise.all([
     supabase.from("profiles").select("id, first_name, email").in("id", userIds),
-    supabase.from("formations").select("id, name").in("id", formationIds),
-    sectionIds.length ? supabase.from("sections").select("id, title").in("id", sectionIds) : Promise.resolve({ data: [] as { id: string; title: string }[] }),
+    supabase.from("formation_instances").select("id, name").in("id", instanceIds),
+    sectionIds.length ? supabase.from("instance_sections").select("id, title").in("id", sectionIds) : Promise.resolve({ data: [] as { id: string; title: string }[] }),
   ]);
 
   const profileMap = new Map((profiles ?? []).map((p) => [p.id, p]));
-  const formationMap = new Map((formations ?? []).map((f) => [f.id, f]));
+  const instanceMap = new Map((instances ?? []).map((f) => [f.id, f]));
   const sectionMap = new Map((sections ?? []).map((s) => [s.id, s]));
 
   return appts.map((a) => {
     const profile = profileMap.get(a.user_id);
-    const formation = formationMap.get(a.formation_id);
+    const instance = instanceMap.get(a.instance_id);
     const section = a.section_id ? sectionMap.get(a.section_id) : undefined;
     return {
       ...mapAppointment(a),
       studentName: profile?.first_name || profile?.email || "?",
       studentEmail: profile?.email ?? "",
-      formationName: formation?.name ?? "?",
+      formationName: instance?.name ?? "?",
       sectionTitle: section?.title ?? null,
     };
   });

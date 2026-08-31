@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: "Seuls un admin ou un formateur peuvent générer une vidéo avatar." }, 403);
     }
 
-    const { data: lesson } = await supabase.from("lessons").select("title").eq("id", lessonId).maybeSingle();
+    const { data: lesson } = await supabase.from("instance_lessons").select("title").eq("id", lessonId).maybeSingle();
 
     const heygenResp = await fetch("https://api.heygen.com/v3/videos", {
       method: "POST",

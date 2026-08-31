@@ -8,10 +8,10 @@ import { AI_TOOLS, PROMPT_CATS } from "@/app/data/mock";
 export function BenefitsPage() {
   const th = useTh();
   return (
-    <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
+    <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div><h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Mes avantages</GT></h2><p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Inclus dans ta formation — ressources exclusives pour aller plus loin</p></div>
 
-      <div className="grid grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <GCard glow>
           <div className="p-6 flex flex-col">
             <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl mb-5" style={{ background: "rgba(181,141,224,0.12)", border: "1px solid rgba(181,141,224,0.25)" }}>🎓</div>
@@ -65,7 +65,7 @@ export function BenefitsPage() {
 
       <div>
         <h3 className="text-xs font-black uppercase tracking-widest mb-4" style={{ color: th.fg3 }}>Autres avantages inclus</h3>
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[{ emoji: "🏆", title: "Certification reconnue", desc: "Diplôme IA Pro reconnu par 150+ entreprises" }, { emoji: "💼", title: "Réseau Alumni", desc: "Communauté privée de 2 400 diplômés" }, { emoji: "📈", title: "Mises à jour gratuites", desc: "Nouveaux modules IA intégrés sans surcoût" }, { emoji: "🎯", title: "Coaching carrière", desc: "1 session RH pour ton positionnement IA" }].map(({ emoji, title, desc }) => (
             <GCard key={title}><div className="p-4"><span className="text-2xl block mb-2">{emoji}</span><div className="text-sm font-bold mb-1" style={{ color: th.fg }}>{title}</div><div className="text-xs leading-relaxed" style={{ color: th.fg3 }}>{desc}</div></div></GCard>
           ))}

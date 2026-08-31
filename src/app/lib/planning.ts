@@ -1,0 +1,49 @@
+// Données pour la page admin Planning (onglets étudiants/formateurs).
+import { supabase } from "@/app/lib/supabase/client";
+
+export interface PersonCard {
+  id: string;
+  firstName: string | null;
+  lastName: string | null;
+  email: string;
+  avatarUrl: string | null;
+}
+
+export interface StudentCard extends PersonCard {
+  activeFormationName: string | null;
+}
+
+export async function listStudentCards(): Promise<StudentCard[]> {
+  const [{ data: students, error: studentsError }, { data: instances, error: instancesError }] = await Promise.all([
+    supabase.from("profiles").select("id, first_name, last_name, email, avatar_url").eq("role", "student").order("first_name"),
+    supabase.from("formation_instances").select("user_id, name, assigned_at").eq("status", "active").order("assigned_at", { ascending: false }),
+  ]);
+  if (studentsError) throw studentsError;
+  if (instancesError) throw instancesError;
+
+  // La liste est déjà triée par assigned_at desc : la première rencontrée
+  // par élève est donc la formation active la plus récemment attribuée.
+  const latestByStudent = new Map<string, string>();
+  for (const inst of instances ?? []) {
+    if (!latestByStudent.has(inst.user_id)) latestByStudent.set(inst.user_id, inst.name);
+  }
+
+  return (students ?? []).map((s) => ({
+    id: s.id,
+    firstName: s.first_name,
+    lastName: s.last_name,
+    email: s.email,
+    avatarUrl: s.avatar_url,
+    activeFormationName: latestByStudent.get(s.id) ?? null,
+  }));
+}
+
+export async function listFormateurCards(): Promise<PersonCard[]> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, first_name, last_name, email, avatar_url")
+    .eq("role", "formateur")
+    .order("first_name");
+  if (error) throw error;
+  return (data ?? []).map((p) => ({ id: p.id, firstName: p.first_name, lastName: p.last_name, email: p.email, avatarUrl: p.avatar_url }));
+}

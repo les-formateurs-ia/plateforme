@@ -33,7 +33,7 @@ export function SignupPage() {
   const [accountError, setAccountError] = useState<string | null>(null);
   const [accountLoading, setAccountLoading] = useState(false);
 
-  const [p, setP] = useState<Profile>({ name: "", age: "", profession: "", goal: "", goalFinal: "", style: "", tutor: "" });
+  const [p, setP] = useState<Profile>({ name: "", age: "", profession: "", goal: "", goalFinal: "", style: "", tutor: "", avatarUrl: null });
   const [aiState, setAiState] = useState<"idle" | "loading" | "proposal">("idle");
   const [aiProposal, setAiProposal] = useState("");
   const [finishing, setFinishing] = useState(false);
@@ -81,8 +81,8 @@ export function SignupPage() {
       <div className="relative z-10 w-full max-w-[620px] fade-up">
         <div className="flex justify-center mb-10"><Logo h={30} /></div>
         <GCard glow>
-          <div className="p-8 sm:p-10">
-            <div className="flex items-center justify-between mb-6">
+          <div className="p-6 sm:p-8 lg:p-10">
+            <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
               <div className="flex items-center gap-2">
                 {[1, 2, 3, 4].map(i => (
                   <div key={i} className="flex items-center gap-2">
@@ -118,7 +118,7 @@ export function SignupPage() {
                   <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Email</label>
                   <input type="email" required autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="toi@exemple.com" className="w-full rounded-xl px-4 py-3 text-sm g-input" />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Mot de passe</label>
                     <input type="password" required minLength={6} autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="w-full rounded-xl px-4 py-3 text-sm g-input" />
@@ -142,7 +142,7 @@ export function SignupPage() {
 
             {step === 2 && (
               <div className="space-y-4 fade-up">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div><label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Prénom</label><input value={p.name} onChange={e => setP(x => ({ ...x, name: e.target.value }))} placeholder="Alex" className="w-full rounded-xl px-4 py-3 text-sm g-input" /></div>
                   <div><label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Âge</label><input value={p.age} type="number" onChange={e => setP(x => ({ ...x, age: e.target.value }))} placeholder="28" className="w-full rounded-xl px-4 py-3 text-sm g-input" /></div>
                 </div>
@@ -181,7 +181,7 @@ export function SignupPage() {
             )}
 
             {step === 3 && (
-              <div className="grid grid-cols-2 gap-3 fade-up">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 fade-up">
                 {LEARN_STYLES.map(({ id, Icon, label, desc }) => {
                   const sel = p.style === id;
                   return (

@@ -1,13 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { Trophy, CheckCircle, Lock, Award, Sparkles, Sun, Moon, Monitor, LogOut } from "lucide-react";
+import { Trophy, CheckCircle, Lock, Award, Sparkles, Sun, Moon, Monitor, LogOut, Camera } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
 import { GCard } from "@/app/components/common/GCard";
+import { Avatar } from "@/app/components/common/Avatar";
+import { SparkleGlow } from "@/app/components/common/SparkleGlow";
 import { CircleProgress } from "@/app/components/common/CircleProgress";
 import { ShimBtn } from "@/app/components/common/Buttons";
 import { cx } from "@/app/lib/cx";
+import { TUTOR_STYLES } from "@/app/data/mock";
 import {
   getDashboardStats, getPromptsCount, getRecentActivity, getAllBadges, getEarnedBadgeIds, getEnrolledSince, formatDuration,
   type DashboardStats, type DailyActivity, type BadgeRow,
@@ -22,8 +25,8 @@ const formatEnrolledSince = (iso: string) => {
 export function ProfilePage() {
   const th = useTh();
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
-  const { profile, updateProfile } = useProfile();
+  const { user, role, signOut } = useAuth();
+  const { profile, updateProfile, updateAvatar } = useProfile();
   const name = profile.name || "Alex Dubois";
   const [tab, setTab] = useState<"overview" | "badges" | "settings">("overview");
   const [objectiveDraft, setObjectiveDraft] = useState(profile.goalFinal || profile.goal || "");
@@ -31,6 +34,19 @@ export function ProfilePage() {
   const [objectiveSaving, setObjectiveSaving] = useState(false);
   const [objectiveError, setObjectiveError] = useState<string | null>(null);
   const currentObjective = profile.goalFinal || profile.goal || "";
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+
+  const handleAvatarSelect = async (file: File) => {
+    if (!file.type.startsWith("image/")) { setAvatarError("Le fichier doit être une image."); return; }
+    if (file.size > 5 * 1024 * 1024) { setAvatarError("L'image ne doit pas dépasser 5 Mo."); return; }
+    setAvatarError(null);
+    setAvatarUploading(true);
+    const { error } = await updateAvatar(file);
+    setAvatarUploading(false);
+    if (error) setAvatarError(error);
+  };
 
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [promptsCount, setPromptsCount] = useState(0);
@@ -96,17 +112,18 @@ export function ProfilePage() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto px-8 py-6 space-y-5">
+    <div className="relative flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-5">
+      <SparkleGlow />
       <GCard glow>
-        <div className="p-6 flex items-center gap-6">
-          <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-black shrink-0" style={{ background: "linear-gradient(135deg,#b58de0,#dbacf0)", color: "#08060F" }}>{name[0]}</div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 mb-1">
+        <div className="p-6 flex flex-col sm:flex-row items-center sm:items-center gap-6 text-center sm:text-left">
+          <Avatar url={profile.avatarUrl} size={80} square />
+          <div className="flex-1 min-w-0 w-full">
+            <div className="flex items-center justify-center sm:justify-start gap-3 mb-1 flex-wrap">
               <h2 className="text-xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif", color: th.fg }}>{name}</h2>
               <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: "rgba(181,141,224,0.1)", color: th.navAC, border: "1px solid rgba(181,141,224,0.25)" }}>Apprenant IA Pro</span>
             </div>
             <p className="text-sm mb-3" style={{ color: th.fg3 }}>{profile.profession || "Chef de projet digital"}{enrolledSince && ` · En formation depuis ${formatEnrolledSince(enrolledSince)}`}</p>
-            <div className="flex items-center gap-6">
+            <div className="flex items-center justify-center sm:justify-start gap-6 flex-wrap">
               {[
                 { val: stats ? `${stats.completedLessons}/${stats.totalLessons}` : "—", sub: "Leçons" },
                 { val: String(promptsCount), sub: "Prompts" },
@@ -137,7 +154,7 @@ export function ProfilePage() {
       </div>
 
       {tab === "overview" && (
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <GCard><div className="p-5">
             <div className="flex items-center gap-2 mb-4"><Trophy className="w-4 h-4 text-[#fbc2ad]" /><span className="text-sm font-black" style={{ color: th.fg }}>Progression certification</span></div>
             <div className="space-y-3">
@@ -177,7 +194,7 @@ export function ProfilePage() {
       )}
 
       {tab === "badges" && (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {allBadges.map(({ id, icon, name: label, description }) => {
             const done = earnedBadgeIds.has(id);
             return (
@@ -194,6 +211,35 @@ export function ProfilePage() {
 
       {tab === "settings" && (
         <div className="space-y-5 max-w-xl">
+          {/* Photo de profil */}
+          <GCard><div className="p-5 flex items-center gap-5">
+            <div className="relative shrink-0">
+              <Avatar url={profile.avatarUrl} size={72} square />
+              <button
+                onClick={() => avatarInputRef.current?.click()}
+                disabled={avatarUploading}
+                className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-full flex items-center justify-center transition-opacity hover:opacity-80 disabled:opacity-50"
+                style={{ background: "linear-gradient(135deg,#fbc2ad,#fceccd)", border: `2px solid ${th.card}` }}
+              >
+                <Camera className="w-3.5 h-3.5 text-white" />
+              </button>
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => { const file = e.target.files?.[0]; if (file) handleAvatarSelect(file); e.target.value = ""; }}
+              />
+            </div>
+            <div className="min-w-0">
+              <div className="text-sm font-bold mb-0.5" style={{ color: th.fg }}>Photo de profil</div>
+              <div className="text-xs" style={{ color: th.fg3 }}>
+                {avatarUploading ? "Envoi en cours…" : "JPG, PNG ou GIF — 5 Mo maximum."}
+              </div>
+              {avatarError && <p className="text-xs mt-1" style={{ color: "#fbc2ad" }}>{avatarError}</p>}
+            </div>
+          </div></GCard>
+
           {/* Theme toggle */}
           <div>
             <div className="flex items-center justify-between mb-2">
@@ -257,7 +303,7 @@ export function ProfilePage() {
           </div></GCard>
 
           {/* Info fields */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[["Prénom", profile.name || "Alex"], ["Âge", profile.age ? `${profile.age} ans` : "Non renseigné"], ["Profession", profile.profession || "Chef de projet"], ["Email", user?.email || "—"]].map(([label, val]) => (
               <div key={label}>
                 <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>{label}</label>
@@ -268,6 +314,31 @@ export function ProfilePage() {
               </div>
             ))}
           </div>
+
+          {/* Style de tuteur IA — verrouillé après l'onboarding, modifiable uniquement par un formateur */}
+          {role === "student" && (
+            <GCard><div className="p-5">
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-xs font-bold uppercase tracking-widest" style={{ color: th.fg3 }}>Style de tuteur IA</label>
+                <Lock className="w-3.5 h-3.5" style={{ color: th.fg3 }} />
+              </div>
+              {(() => {
+                const tutorStyle = TUTOR_STYLES.find((t) => t.id === profile.tutor);
+                return (
+                  <div className="flex items-center gap-3 mb-2">
+                    {tutorStyle && <span className="text-xl shrink-0">{tutorStyle.emoji}</span>}
+                    <div className="min-w-0">
+                      <div className="text-sm font-bold" style={{ color: th.fg }}>{tutorStyle?.label ?? "Non renseigné"}</div>
+                      {tutorStyle && <div className="text-xs" style={{ color: th.fg3 }}>{tutorStyle.desc}</div>}
+                    </div>
+                  </div>
+                );
+              })()}
+              <p className="text-xs leading-relaxed" style={{ color: th.fg3 }}>
+                Ce réglage détermine la manière dont l'IA t'explique les choses (leçons, copilote, quiz…). Il ne peut être modifié que par ton formateur — contacte-le si tu souhaites en changer.
+              </p>
+            </div></GCard>
+          )}
 
           {/* Objectif professionnel */}
           <div className="hidden">

@@ -34,7 +34,7 @@ export function LoginPage() {
       <div className="relative z-10 w-full max-w-[440px] fade-up">
         <div className="flex justify-center mb-10"><Logo h={30} /></div>
         <GCard glow>
-          <form onSubmit={handleSubmit} className="p-8 sm:p-10">
+          <form onSubmit={handleSubmit} className="p-6 sm:p-8 lg:p-10">
             <h1 className="text-2xl font-black leading-tight mb-2" style={{ fontFamily: "'Funnel Display',sans-serif" }}>
               <GT from={th.isDark ? "#FFFFFF" : "#b58de0"} to={th.isDark ? "#dbacf0" : "#dbacf0"}>Content de te revoir</GT>
             </h1>

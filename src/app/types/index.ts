@@ -6,6 +6,7 @@ export interface Profile {
   goalFinal: string;
   style: string;
   tutor: string;
+  avatarUrl: string | null;
 }
 
 export interface ChatMsg {

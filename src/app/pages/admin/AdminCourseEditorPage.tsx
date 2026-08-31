@@ -2,15 +2,16 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router";
 import {
   ChevronLeft, Plus, Trash2, ChevronUp, ChevronDown,
-  ChevronRight as ChevronRightIcon, GripVertical, UserPlus, X, ExternalLink,
+  ChevronRight as ChevronRightIcon, GripVertical, ExternalLink,
 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
-import { useAuth } from "@/app/state/auth-context";
 import { supabase } from "@/app/lib/supabase/client";
 import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
 import { VBtn, ShimBtn } from "@/app/components/common/Buttons";
 import { VSelect } from "@/app/components/common/Select";
+import { HtmlExerciseEditDialog } from "@/app/components/practice/HtmlExerciseEditDialog";
+import { listExercisesForStudent, type HtmlExerciseRow } from "@/app/lib/htmlExercises";
 
 interface CourseForm {
   name: string;
@@ -25,7 +26,6 @@ interface CourseForm {
 
 interface SectionRow { id: string; title: string; order_index: number; }
 interface LessonRow { id: string; section_id: string; title: string; duration_minutes: number | null; order_index: number; }
-interface StudentRow { id: string; email: string; first_name: string | null; }
 
 const EMPTY_COURSE: CourseForm = {
   name: "", slug: "", description: "", duration_minutes: "", price: "",
@@ -36,54 +36,56 @@ const slugify = (s: string) => s.toLowerCase().trim()
   .normalize("NFD").replace(/[̀-ͯ]/g, "")
   .replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
+// Cette page édite soit un TEMPLATE (/admin/courses/:courseId, tables
+// formations/sections/lessons) soit un DUPLICATA personnalisé pour un élève
+// (/admin/instances/:instanceId, tables formation_instances/instance_sections/
+// instance_lessons) — même formulaire, tables différentes selon la route. Un
+// duplicata n'a ni slug ni statut de publication (ça se gère depuis la fiche
+// élève), donc ces champs sont masqués en mode instance.
 export function AdminCourseEditorPage() {
   const th = useTh();
   const navigate = useNavigate();
-  const { user, role } = useAuth();
-  const { courseId: routeCourseId } = useParams();
-  const isNew = !routeCourseId;
+  const { courseId: routeCourseId, instanceId: routeInstanceId } = useParams();
+  const isInstance = !!routeInstanceId;
+  const routeId = routeInstanceId ?? routeCourseId;
+  const isNew = !routeId;
 
-  const [courseId, setCourseId] = useState<string | undefined>(routeCourseId);
+  const [courseId, setCourseId] = useState<string | undefined>(routeId);
   const [course, setCourse] = useState<CourseForm>(EMPTY_COURSE);
+  const [studentId, setStudentId] = useState<string | undefined>();
   const [slugTouched, setSlugTouched] = useState(false);
   const [slugEditing, setSlugEditing] = useState(false);
   const [sections, setSections] = useState<SectionRow[]>([]);
   const [lessonsBySection, setLessonsBySection] = useState<Record<string, LessonRow[]>>({});
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
-  const [enrolled, setEnrolled] = useState<StudentRow[]>([]);
-  const [allStudents, setAllStudents] = useState<StudentRow[]>([]);
-  const [studentToEnroll, setStudentToEnroll] = useState("");
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [studentExercises, setStudentExercises] = useState<HtmlExerciseRow[]>([]);
+  const [exerciseDialogOpen, setExerciseDialogOpen] = useState(false);
+  const [editingExercise, setEditingExercise] = useState<HtmlExerciseRow | undefined>(undefined);
+
+  const loadStudentExercises = async (id: string) => {
+    setStudentExercises(await listExercisesForStudent(id));
+  };
 
   useEffect(() => {
-    if (isNew) return;
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      const { data: formation } = await supabase.from("formations").select("*").eq("id", routeCourseId).single();
-      if (cancelled || !formation) { setLoading(false); return; }
-      setCourse({
-        name: formation.name,
-        slug: formation.slug,
-        description: formation.description ?? "",
-        duration_minutes: formation.duration_minutes?.toString() ?? "",
-        price: formation.price_cents ? (formation.price_cents / 100).toString() : "",
-        certification_enabled: formation.certification_enabled,
-        certification_prompt: formation.certification_prompt ?? "",
-        status: formation.status,
-      });
-      setSlugTouched(true);
-      await Promise.all([loadSections(routeCourseId!), loadStudents(routeCourseId!)]);
-      if (!cancelled) setLoading(false);
-    })();
-    return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [routeCourseId]);
+    if (isInstance && studentId) void loadStudentExercises(studentId);
+  }, [isInstance, studentId]);
 
-  const loadSections = async (fid: string) => {
-    const { data: sectionRows } = await supabase.from("sections").select("id, title, order_index").eq("formation_id", fid).order("order_index");
+  const loadSections = async (id: string) => {
+    if (isInstance) {
+      const { data: sectionRows } = await supabase.from("instance_sections").select("id, title, order_index").eq("instance_id", id).order("order_index");
+      setSections(sectionRows ?? []);
+      if (!sectionRows?.length) { setLessonsBySection({}); return; }
+      const { data: lessonRows } = await supabase.from("instance_lessons").select("id, section_id, title, duration_minutes, order_index")
+        .in("section_id", sectionRows.map((s) => s.id)).order("order_index");
+      const grouped: Record<string, LessonRow[]> = {};
+      for (const l of lessonRows ?? []) (grouped[l.section_id] ??= []).push(l);
+      setLessonsBySection(grouped);
+      return;
+    }
+    const { data: sectionRows } = await supabase.from("sections").select("id, title, order_index").eq("formation_id", id).order("order_index");
     setSections(sectionRows ?? []);
     if (!sectionRows?.length) { setLessonsBySection({}); return; }
     const { data: lessonRows } = await supabase.from("lessons").select("id, section_id, title, duration_minutes, order_index")
@@ -93,24 +95,74 @@ export function AdminCourseEditorPage() {
     setLessonsBySection(grouped);
   };
 
-  const loadStudents = async (fid: string) => {
-    const [{ data: enrollments }, { data: students }] = await Promise.all([
-      supabase.from("enrollments").select("user_id").eq("formation_id", fid),
-      supabase.from("profiles").select("id, email, first_name").eq("role", "student"),
-    ]);
-    const enrolledIds = new Set((enrollments ?? []).map((e) => e.user_id));
-    setAllStudents(students ?? []);
-    setEnrolled((students ?? []).filter((s) => enrolledIds.has(s.id)));
-  };
+  useEffect(() => {
+    if (isNew) return;
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      if (isInstance) {
+        const { data: instance } = await supabase.from("formation_instances").select("*").eq("id", routeId).single();
+        if (cancelled || !instance) { setLoading(false); return; }
+        setCourse({
+          name: instance.name,
+          slug: "",
+          description: instance.description ?? "",
+          duration_minutes: instance.duration_minutes?.toString() ?? "",
+          price: instance.price_cents ? (instance.price_cents / 100).toString() : "",
+          certification_enabled: instance.certification_enabled,
+          certification_prompt: instance.certification_prompt ?? "",
+          status: "draft",
+        });
+        setStudentId(instance.user_id);
+      } else {
+        const { data: formation } = await supabase.from("formations").select("*").eq("id", routeId).single();
+        if (cancelled || !formation) { setLoading(false); return; }
+        setCourse({
+          name: formation.name,
+          slug: formation.slug,
+          description: formation.description ?? "",
+          duration_minutes: formation.duration_minutes?.toString() ?? "",
+          price: formation.price_cents ? (formation.price_cents / 100).toString() : "",
+          certification_enabled: formation.certification_enabled,
+          certification_prompt: formation.certification_prompt ?? "",
+          status: formation.status,
+        });
+        setSlugTouched(true);
+      }
+      await loadSections(routeId!);
+      if (!cancelled) setLoading(false);
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [routeId, isInstance]);
 
   const handleNameChange = (name: string) => {
     setCourse((c) => ({ ...c, name, slug: slugTouched ? c.slug : slugify(name) }));
   };
 
   const saveCourse = async () => {
-    if (!course.name.trim() || !course.slug.trim()) { setError("Nom et slug sont obligatoires."); return; }
+    if (!course.name.trim() || (!isInstance && !course.slug.trim())) {
+      setError(isInstance ? "Le nom est obligatoire." : "Nom et slug sont obligatoires.");
+      return;
+    }
     setSaving(true);
     setError(null);
+
+    if (isInstance) {
+      const payload = {
+        name: course.name.trim(),
+        description: course.description || null,
+        duration_minutes: course.duration_minutes ? parseInt(course.duration_minutes, 10) : null,
+        price_cents: course.price ? Math.round(parseFloat(course.price) * 100) : null,
+        certification_enabled: course.certification_enabled,
+        certification_prompt: course.certification_prompt || null,
+      };
+      const { error: updateError } = await supabase.from("formation_instances").update(payload).eq("id", courseId);
+      if (updateError) { setError(updateError.message); setSaving(false); return; }
+      setSaving(false);
+      return;
+    }
+
     const payload = {
       name: course.name.trim(),
       slug: course.slug.trim(),
@@ -129,9 +181,6 @@ export function AdminCourseEditorPage() {
       const { data, error: insertError } = await supabase.from("formations").insert(payload).select("id").single();
       if (insertError || !data) { setError(insertError?.message ?? "Erreur inconnue"); setSaving(false); return; }
       setCourseId(data.id);
-      // Le créateur du cours s'y inscrit automatiquement, comme un élève,
-      // pour pouvoir tester le parcours réel sans compte séparé.
-      if (user) await supabase.from("enrollments").insert({ user_id: user.id, formation_id: data.id });
       navigate(`/admin/courses/${data.id}`, { replace: true });
     }
     setSaving(false);
@@ -139,6 +188,14 @@ export function AdminCourseEditorPage() {
 
   const addSection = async () => {
     if (!courseId) return;
+    if (isInstance) {
+      const { data, error: insertError } = await supabase
+        .from("instance_sections").insert({ instance_id: courseId, title: "Nouveau module", order_index: sections.length })
+        .select("id, title, order_index").single();
+      if (insertError || !data) { setError(insertError?.message ?? "Erreur inconnue"); return; }
+      setSections((s) => [...s, data]);
+      return;
+    }
     const { data, error: insertError } = await supabase
       .from("sections").insert({ formation_id: courseId, title: "Nouveau module", order_index: sections.length })
       .select("id, title, order_index").single();
@@ -151,7 +208,7 @@ export function AdminCourseEditorPage() {
   };
 
   const persistSectionTitle = async (id: string, title: string) => {
-    await supabase.from("sections").update({ title }).eq("id", id);
+    await supabase.from(isInstance ? "instance_sections" : "sections").update({ title }).eq("id", id);
   };
 
   const moveSection = async (index: number, direction: -1 | 1) => {
@@ -163,56 +220,47 @@ export function AdminCourseEditorPage() {
     next[target] = { ...a, order_index: b.order_index };
     next.sort((x, y) => x.order_index - y.order_index);
     setSections(next);
+    const table = isInstance ? "instance_sections" : "sections";
     await Promise.all([
-      supabase.from("sections").update({ order_index: a.order_index }).eq("id", b.id),
-      supabase.from("sections").update({ order_index: b.order_index }).eq("id", a.id),
+      supabase.from(table).update({ order_index: a.order_index }).eq("id", b.id),
+      supabase.from(table).update({ order_index: b.order_index }).eq("id", a.id),
     ]);
   };
 
   const deleteSection = async (id: string) => {
     if (!confirm("Supprimer ce module et toutes ses leçons ?")) return;
-    await supabase.from("sections").delete().eq("id", id);
+    await supabase.from(isInstance ? "instance_sections" : "sections").delete().eq("id", id);
     setSections((s) => s.filter((sec) => sec.id !== id));
   };
 
   const deleteLesson = async (sectionId: string, lessonId: string) => {
     if (!confirm("Supprimer cette leçon ?")) return;
-    await supabase.from("lessons").delete().eq("id", lessonId);
+    await supabase.from(isInstance ? "instance_lessons" : "lessons").delete().eq("id", lessonId);
     setLessonsBySection((m) => ({ ...m, [sectionId]: (m[sectionId] ?? []).filter((l) => l.id !== lessonId) }));
   };
 
-  const enrollStudent = async () => {
-    if (!courseId || !studentToEnroll) return;
-    const { error: enrollError } = await supabase.from("enrollments").insert({ user_id: studentToEnroll, formation_id: courseId });
-    if (enrollError) { setError(enrollError.message); return; }
-    const student = allStudents.find((s) => s.id === studentToEnroll);
-    if (student) setEnrolled((e) => [...e, student]);
-    setStudentToEnroll("");
-  };
+  const lessonsBase = isInstance ? `/admin/instances/${courseId}/lessons` : `/admin/courses/${courseId}/lessons`;
 
-  const unenroll = async (userId: string) => {
-    if (!courseId) return;
-    await supabase.from("enrollments").delete().eq("formation_id", courseId).eq("user_id", userId);
-    setEnrolled((e) => e.filter((s) => s.id !== userId));
-  };
-
-  const availableStudents = allStudents.filter((s) => !enrolled.some((e) => e.id === s.id));
+  const backHref = isInstance ? (studentId ? `/admin/planning/students/${studentId}` : "/admin/planning") : "/admin/courses";
+  const backLabel = isInstance ? "Élève" : "Cours";
 
   if (loading) return <div className="flex-1 flex items-center justify-center"><p className="text-sm" style={{ color: th.fg3 }}>Chargement…</p></div>;
 
   return (
-    <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
+    <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div className="flex items-center gap-3">
-        <Link to="/admin/courses" className="flex items-center gap-1.5 text-sm transition-colors hover:opacity-70" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />Cours</Link>
+        <Link to={backHref} className="flex items-center gap-1.5 text-sm transition-colors hover:opacity-70" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />{backLabel}</Link>
       </div>
 
       <GCard glow><div className="p-6 space-y-4">
-        <h2 className="text-lg font-black" style={{ color: th.fg }}><GT>{isNew ? "Nouveau cours" : "Informations du cours"}</GT></h2>
+        <h2 className="text-lg font-black" style={{ color: th.fg }}>
+          <GT>{isNew ? "Nouveau cours" : isInstance ? "Personnaliser la formation" : "Informations du cours"}</GT>
+        </h2>
 
         <div>
           <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Nom</label>
           <input value={course.name} onChange={(e) => handleNameChange(e.target.value)} placeholder="Maîtriser l'IA Générative" className="w-full rounded-xl px-4 py-3 text-sm g-input" />
-          {!slugEditing ? (
+          {!isInstance && (!slugEditing ? (
             <p className="text-xs mt-1.5" style={{ color: th.fg3 }}>
               URL : <span className="font-mono">{course.slug || "…"}</span>{" "}
               <button type="button" onClick={() => setSlugEditing(true)} className="underline hover:opacity-70">modifier</button>
@@ -220,7 +268,7 @@ export function AdminCourseEditorPage() {
           ) : (
             <input value={course.slug} onChange={(e) => { setSlugTouched(true); setCourse((c) => ({ ...c, slug: e.target.value })); }} placeholder="maitriser-ia-generative"
               className="w-full mt-2 rounded-xl px-4 py-2 text-xs g-input font-mono" />
-          )}
+          ))}
         </div>
 
         <div>
@@ -228,7 +276,7 @@ export function AdminCourseEditorPage() {
           <textarea value={course.description} onChange={(e) => setCourse((c) => ({ ...c, description: e.target.value }))} rows={3} className="w-full rounded-xl px-4 py-3 text-sm g-input resize-none" />
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className={isInstance ? "grid grid-cols-1 sm:grid-cols-2 gap-4" : "grid grid-cols-1 sm:grid-cols-3 gap-4"}>
           <div>
             <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Durée (min)</label>
             <input type="number" value={course.duration_minutes} onChange={(e) => setCourse((c) => ({ ...c, duration_minutes: e.target.value }))} className="w-full rounded-xl px-4 py-3 text-sm g-input" />
@@ -237,18 +285,20 @@ export function AdminCourseEditorPage() {
             <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Prix (€)</label>
             <input type="number" value={course.price} onChange={(e) => setCourse((c) => ({ ...c, price: e.target.value }))} className="w-full rounded-xl px-4 py-3 text-sm g-input" />
           </div>
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Statut</label>
-            <VSelect
-              value={course.status}
-              onValueChange={(v) => setCourse((c) => ({ ...c, status: v as CourseForm["status"] }))}
-              options={[
-                { value: "draft", label: "Brouillon" },
-                { value: "published", label: "Publié" },
-                { value: "archived", label: "Archivé" },
-              ]}
-            />
-          </div>
+          {!isInstance && (
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Statut</label>
+              <VSelect
+                value={course.status}
+                onValueChange={(v) => setCourse((c) => ({ ...c, status: v as CourseForm["status"] }))}
+                options={[
+                  { value: "draft", label: "Brouillon" },
+                  { value: "published", label: "Publié" },
+                  { value: "archived", label: "Archivé" },
+                ]}
+              />
+            </div>
+          )}
         </div>
 
         <label className="flex items-center gap-2 text-sm" style={{ color: th.fg2 }}>
@@ -269,90 +319,99 @@ export function AdminCourseEditorPage() {
       </div></GCard>
 
       {!courseId && (
-        <p className="text-xs" style={{ color: th.fg3 }}>Enregistre d'abord le cours pour pouvoir ajouter des modules et inscrire des élèves.</p>
+        <p className="text-xs" style={{ color: th.fg3 }}>Enregistre d'abord le cours pour pouvoir ajouter des modules.</p>
       )}
 
       {courseId && (
-        <>
-          <GCard><div className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-black" style={{ color: th.fg }}>Modules</h3>
-              <VBtn sm onClick={addSection}><span className="flex items-center gap-1.5"><Plus className="w-3.5 h-3.5" />Ajouter un module</span></VBtn>
-            </div>
+        <GCard><div className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-black" style={{ color: th.fg }}>Modules</h3>
+            <VBtn sm onClick={addSection}><span className="flex items-center gap-1.5"><Plus className="w-3.5 h-3.5" />Ajouter un module</span></VBtn>
+          </div>
 
-            <div className="space-y-2">
-              {sections.map((section, index) => {
-                const lessons = lessonsBySection[section.id] ?? [];
-                const isOpen = !!expanded[section.id];
-                return (
-                  <div key={section.id} className="rounded-xl" style={{ border: `1px solid ${th.sep}` }}>
-                    <div className="flex items-center gap-2 px-3 py-2.5">
-                      <GripVertical className="w-4 h-4 shrink-0" style={{ color: th.fg3 }} />
-                      <input value={section.title} onChange={(e) => renameSection(section.id, e.target.value)} onBlur={(e) => persistSectionTitle(section.id, e.target.value)}
-                        className="flex-1 bg-transparent text-sm font-semibold outline-none" style={{ color: th.fg }} />
-                      <span className="text-xs shrink-0" style={{ color: th.fg3 }}>{lessons.length} leçon{lessons.length !== 1 ? "s" : ""}</span>
-                      <button onClick={() => moveSection(index, -1)} disabled={index === 0} className="disabled:opacity-20"><ChevronUp className="w-4 h-4" style={{ color: th.fg3 }} /></button>
-                      <button onClick={() => moveSection(index, 1)} disabled={index === sections.length - 1} className="disabled:opacity-20"><ChevronDown className="w-4 h-4" style={{ color: th.fg3 }} /></button>
-                      <button onClick={() => deleteSection(section.id)}><Trash2 className="w-4 h-4" style={{ color: "#fbc2ad" }} /></button>
-                      <button onClick={() => setExpanded((m) => ({ ...m, [section.id]: !isOpen }))}>
-                        <ChevronRightIcon className="w-4 h-4 transition-transform" style={{ color: th.fg3, transform: isOpen ? "rotate(90deg)" : "none" }} />
-                      </button>
-                    </div>
+          <div className="space-y-2">
+            {sections.map((section, index) => {
+              const lessons = lessonsBySection[section.id] ?? [];
+              const isOpen = !!expanded[section.id];
+              return (
+                <div key={section.id} className="rounded-xl" style={{ border: `1px solid ${th.sep}` }}>
+                  <div className="flex items-center gap-2 px-3 py-2.5">
+                    <GripVertical className="w-4 h-4 shrink-0" style={{ color: th.fg3 }} />
+                    <input value={section.title} onChange={(e) => renameSection(section.id, e.target.value)} onBlur={(e) => persistSectionTitle(section.id, e.target.value)}
+                      className="flex-1 min-w-0 bg-transparent text-sm font-semibold outline-none" style={{ color: th.fg }} />
+                    <span className="text-xs shrink-0" style={{ color: th.fg3 }}>{lessons.length} leçon{lessons.length !== 1 ? "s" : ""}</span>
+                    <button onClick={() => moveSection(index, -1)} disabled={index === 0} className="disabled:opacity-20"><ChevronUp className="w-4 h-4" style={{ color: th.fg3 }} /></button>
+                    <button onClick={() => moveSection(index, 1)} disabled={index === sections.length - 1} className="disabled:opacity-20"><ChevronDown className="w-4 h-4" style={{ color: th.fg3 }} /></button>
+                    <button onClick={() => deleteSection(section.id)}><Trash2 className="w-4 h-4" style={{ color: "#fbc2ad" }} /></button>
+                    <button onClick={() => setExpanded((m) => ({ ...m, [section.id]: !isOpen }))}>
+                      <ChevronRightIcon className="w-4 h-4 transition-transform" style={{ color: th.fg3, transform: isOpen ? "rotate(90deg)" : "none" }} />
+                    </button>
+                  </div>
 
-                    {isOpen && (
-                      <div style={{ borderTop: `1px solid ${th.sep}` }}>
-                        {lessons.map((lesson) => (
-                          <div key={lesson.id} className="flex items-center gap-3 px-4 py-2.5" style={{ borderBottom: `1px solid ${th.sep}` }}>
-                            <button onClick={() => navigate(`/admin/courses/${courseId}/lessons/${lesson.id}`)} className="flex-1 text-left text-sm hover:opacity-70" style={{ color: th.fg2 }}>{lesson.title}</button>
-                            <span className="text-xs font-mono" style={{ color: th.fg3 }}>{lesson.duration_minutes ? `${lesson.duration_minutes} min` : "—"}</span>
+                  {isOpen && (
+                    <div style={{ borderTop: `1px solid ${th.sep}` }}>
+                      {lessons.map((lesson) => (
+                        <div key={lesson.id} className="flex items-center gap-3 px-4 py-2.5" style={{ borderBottom: `1px solid ${th.sep}` }}>
+                          <button onClick={() => navigate(`${lessonsBase}/${lesson.id}`)} className="flex-1 min-w-0 truncate text-left text-sm hover:opacity-70" style={{ color: th.fg2 }}>{lesson.title}</button>
+                          <span className="text-xs font-mono" style={{ color: th.fg3 }}>{lesson.duration_minutes ? `${lesson.duration_minutes} min` : "—"}</span>
+                          {isInstance && (
                             <a href={`/lesson/${lesson.id}`} target="_blank" rel="noreferrer" title="Voir la leçon comme un élève" onClick={(e) => e.stopPropagation()}
                               className="flex items-center gap-1 text-xs font-semibold hover:opacity-70" style={{ color: th.navAC }}>
                               <ExternalLink className="w-3.5 h-3.5" />Aperçu
                             </a>
-                            <button onClick={() => deleteLesson(section.id, lesson.id)}><Trash2 className="w-3.5 h-3.5" style={{ color: "#fbc2ad" }} /></button>
-                          </div>
-                        ))}
-                        <div className="px-4 py-2.5">
-                          <button onClick={() => navigate(`/admin/courses/${courseId}/lessons/new`, { state: { sectionId: section.id } })}
-                            className="flex items-center gap-1.5 text-xs font-semibold hover:opacity-70" style={{ color: th.navAC }}>
-                            <Plus className="w-3.5 h-3.5" />Ajouter une leçon
-                          </button>
+                          )}
+                          <button onClick={() => deleteLesson(section.id, lesson.id)}><Trash2 className="w-3.5 h-3.5" style={{ color: "#fbc2ad" }} /></button>
                         </div>
+                      ))}
+                      <div className="px-4 py-2.5">
+                        <button onClick={() => navigate(`${lessonsBase}/new`, { state: { sectionId: section.id } })}
+                          className="flex items-center gap-1.5 text-xs font-semibold hover:opacity-70" style={{ color: th.navAC }}>
+                          <Plus className="w-3.5 h-3.5" />Ajouter une leçon
+                        </button>
                       </div>
-                    )}
-                  </div>
-                );
-              })}
-              {!sections.length && <p className="text-xs py-4 text-center" style={{ color: th.fg3 }}>Aucun module. Commence par en ajouter un.</p>}
-            </div>
-          </div></GCard>
-
-          {role === "admin" && (
-            <GCard><div className="p-6">
-              <h3 className="text-sm font-black mb-4" style={{ color: th.fg }}>Élèves inscrits</h3>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="flex-1">
-                  <VSelect
-                    value={studentToEnroll}
-                    onValueChange={setStudentToEnroll}
-                    placeholder="Choisir un élève…"
-                    options={availableStudents.map((s) => ({ value: s.id, label: `${s.first_name || s.email} (${s.email})` }))}
-                  />
+                    </div>
+                  )}
                 </div>
-                <VBtn sm onClick={enrollStudent}><span className="flex items-center gap-1.5"><UserPlus className="w-3.5 h-3.5" />Inscrire</span></VBtn>
+              );
+            })}
+            {!sections.length && <p className="text-xs py-4 text-center" style={{ color: th.fg3 }}>Aucun module. Commence par en ajouter un.</p>}
+          </div>
+        </div></GCard>
+      )}
+
+      {courseId && isInstance && studentId && (
+        <GCard><div className="p-6">
+          <h3 className="text-sm font-black mb-4" style={{ color: th.fg }}>Exercices pour vous</h3>
+          <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))" }}>
+            <button onClick={() => { setEditingExercise(undefined); setExerciseDialogOpen(true); }}
+              className="group relative overflow-hidden rounded-2xl flex flex-col items-center justify-center gap-2 text-center transition-all duration-300 hover:scale-[1.02]"
+              style={{ aspectRatio: "1/1", background: th.isDark ? "rgba(181,141,224,0.06)" : "rgba(181,141,224,0.05)", border: "1.5px dashed rgba(181,141,224,0.4)" }}>
+              <div className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110" style={{ background: "linear-gradient(135deg,#b58de0,#dbacf0)", boxShadow: "0 6px 20px rgba(181,141,224,0.4)" }}>
+                <Plus className="w-4 h-4 text-white" />
               </div>
-              <div className="space-y-2">
-                {enrolled.map((s) => (
-                  <div key={s.id} className="flex items-center gap-3 px-3 py-2.5 rounded-xl" style={{ background: th.isDark ? "rgba(255,255,255,0.03)" : "rgba(181,141,224,0.04)", border: `1px solid ${th.sep}` }}>
-                    <span className="flex-1 text-sm" style={{ color: th.fg2 }}>{s.first_name || s.email} <span style={{ color: th.fg3 }}>({s.email})</span></span>
-                    <button onClick={() => unenroll(s.id)}><X className="w-4 h-4" style={{ color: th.fg3 }} /></button>
-                  </div>
-                ))}
-                {!enrolled.length && <p className="text-xs" style={{ color: th.fg3 }}>Aucun élève inscrit à ce cours.</p>}
+              <div className="text-xs font-black" style={{ color: th.fg }}>Nouvel exercice</div>
+            </button>
+            {studentExercises.map((ex) => (
+              <div key={ex.id} onClick={() => { setEditingExercise(ex); setExerciseDialogOpen(true); }}
+                className="cursor-pointer rounded-2xl p-3 flex flex-col transition-all duration-300 hover:scale-[1.02]"
+                style={{ aspectRatio: "1/1", background: th.card, border: `1px solid ${th.sep}` }}>
+                <div className="text-xs font-black mb-1" style={{ color: th.fg }}>{ex.name}</div>
+                <div className="text-[11px] leading-relaxed flex-1 overflow-hidden" style={{ color: th.fg3 }}>{ex.description || "Pas de consigne."}</div>
               </div>
-            </div></GCard>
-          )}
-        </>
+            ))}
+          </div>
+          {!studentExercises.length && <p className="text-xs mt-3" style={{ color: th.fg3 }}>Aucun exercice privé attribué à cet élève pour l'instant.</p>}
+        </div></GCard>
+      )}
+
+      {isInstance && studentId && (
+        <HtmlExerciseEditDialog
+          open={exerciseDialogOpen}
+          onOpenChange={setExerciseDialogOpen}
+          exercise={editingExercise}
+          defaultCheckedStudentId={studentId}
+          onSaved={() => void loadStudentExercises(studentId)}
+        />
       )}
     </div>
   );

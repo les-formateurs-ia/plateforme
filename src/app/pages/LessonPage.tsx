@@ -91,17 +91,6 @@ export function LessonPage() {
   const [agentInput, setAgentInput] = useState("");
   const [agentConfiguring, setAgentConfiguring] = useState(false);
   const [pttActive, setPttActive] = useState(false);
-  type AgentDepthMode = "default" | "expert";
-  const [agentDepthMode, setAgentDepthMode] = useState<AgentDepthMode>(() => {
-    try {
-      return localStorage.getItem("agentDepthMode") === "expert" ? "expert" : "default";
-    } catch {
-      return "default";
-    }
-  });
-  useEffect(() => {
-    try { localStorage.setItem("agentDepthMode", agentDepthMode); } catch { /* ignore */ }
-  }, [agentDepthMode]);
   const conversationRef = useRef<import("@elevenlabs/client").Conversation | null>(null);
 
   type PodcastVariantState = { podcast: Podcast; audioUrl: string };
@@ -125,7 +114,7 @@ export function LessonPage() {
   // Scopé à la formation de CETTE leçon (pas "la formation active" de l'utilisateur) —
   // sinon un admin/élève inscrit à plusieurs cours resterait bloqué sur une leçon
   // d'un cours différent de celui utilisé pour calculer sa progression "active".
-  const course = useCourseProgress(lesson?.formationId);
+  const course = useCourseProgress(lesson?.instanceId);
   useEffect(() => {
     if (lesson && !lesson.videoUrl && tab === "video") setTab("mindmap");
   }, [lesson, tab]);
@@ -385,7 +374,8 @@ export function LessonPage() {
           objectif_professionnel: profile.goalFinal || profile.goal || "non renseigné",
           lesson_title: lesson?.title || "cette leçon",
           lesson_content: lesson?.referenceContent || "(pas de contenu de référence pour cette leçon)",
-          depth_mode: agentDepthMode,
+          depth_mode: "expert",
+          pedagogy_style: profile.tutor || "soft",
         },
         onConnect: () => setAgentStatus("connected"),
         onDisconnect: () => {
@@ -637,14 +627,16 @@ export function LessonPage() {
   return (
     <div className="flex flex-col h-screen overflow-hidden" style={{ background: th.bg, fontFamily: "'Funnel Display',sans-serif" }}>
       <Background />
-      <div className="relative z-10 shrink-0 flex items-center justify-between px-6 py-3" style={{ borderBottom: `1px solid ${th.sep}`, background: th.topbar, backdropFilter: "blur(24px)" }}>
-        <div className="flex items-center gap-4">
-          <button onClick={goBack} className="flex items-center gap-1.5 text-sm transition-colors hover:opacity-70" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />Mes leçons</button>
-          <div className="w-px h-4" style={{ background: th.sep }} />
-          <span className="text-xs" style={{ color: th.fg3 }}>{lesson.sectionTitle}</span><span className="text-xs mx-1" style={{ color: th.fg3 }}>›</span><span className="text-xs font-medium" style={{ color: th.fg }}>{lesson.title}</span>
+      <div className="relative z-10 shrink-0 flex items-center justify-between gap-3 px-4 sm:px-6 py-3" style={{ borderBottom: `1px solid ${th.sep}`, background: th.topbar, backdropFilter: "blur(24px)" }}>
+        <div className="flex items-center gap-4 min-w-0">
+          <button onClick={goBack} className="flex items-center gap-1.5 text-sm shrink-0 transition-colors hover:opacity-70" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />Mes leçons</button>
+          <div className="w-px h-4 shrink-0 hidden sm:block" style={{ background: th.sep }} />
+          <div className="hidden sm:flex items-center min-w-0">
+            <span className="text-xs shrink-0" style={{ color: th.fg3 }}>{lesson.sectionTitle}</span><span className="text-xs mx-1 shrink-0" style={{ color: th.fg3 }}>›</span><span className="text-xs font-medium truncate" style={{ color: th.fg }}>{lesson.title}</span>
+          </div>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="hidden sm:flex items-center gap-2 text-xs" style={{ color: th.fg3 }}>
+        <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+          <div className="hidden lg:flex items-center gap-2 text-xs" style={{ color: th.fg3 }}>
             Progression
             <div className="w-28 h-1.5 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.07)" : "rgba(181,141,224,0.1)" }}>
               <div className="h-full rounded-full" style={{ width: `${overallPct}%`, background: "linear-gradient(90deg,#b58de0,#dbacf0)" }} />
@@ -656,18 +648,18 @@ export function LessonPage() {
       </div>
 
       <div className="flex-1 flex overflow-hidden relative z-10">
-        <div className="flex-1 min-w-0 overflow-y-auto px-16 py-6">
-          <h1 className="text-2xl font-black mb-4" style={{ color: th.fg }}>{lesson.title}</h1>
+        <div className="flex-1 min-w-0 overflow-y-auto px-4 sm:px-8 lg:px-16 py-5 sm:py-6">
+          <h1 className="text-xl sm:text-2xl font-black mb-4" style={{ color: th.fg }}>{lesson.title}</h1>
 
-          <div className="flex shrink-0 mb-4 rounded-2xl overflow-hidden" style={{ background: th.card, border: `1px solid ${th.sep}` }}>
+          <div className="flex shrink-0 mb-4 rounded-2xl overflow-x-auto" style={{ background: th.card, border: `1px solid ${th.sep}` }}>
             {TABS.map(({ id, Icon, label }) => (
-              <button key={id} onClick={() => setTab(id)} className="flex items-center gap-2 px-5 py-3.5 text-sm font-semibold transition-all border-b-2 -mb-px"
+              <button key={id} onClick={() => setTab(id)} className="flex items-center gap-2 px-3.5 sm:px-5 py-3.5 text-sm font-semibold transition-all border-b-2 -mb-px shrink-0 whitespace-nowrap"
                 style={{ borderColor: tab === id ? th.navAC : "transparent", color: tab === id ? th.navAC : th.fg3 }}>
                 <Icon className="w-3.5 h-3.5" />{label}
               </button>
             ))}
             {lesson.durationMinutes && (
-              <span className="ml-auto flex items-center gap-1.5 px-5 text-xs" style={{ color: th.fg3 }}><Clock className="w-3.5 h-3.5" />{lesson.durationMinutes} min</span>
+              <span className="ml-auto hidden sm:flex items-center gap-1.5 px-5 text-xs shrink-0 whitespace-nowrap" style={{ color: th.fg3 }}><Clock className="w-3.5 h-3.5" />{lesson.durationMinutes} min</span>
             )}
           </div>
 
@@ -686,7 +678,7 @@ export function LessonPage() {
                   <p className="text-[11px] leading-relaxed" style={{ color: th.fg3 }}>
                     Pour appeler l'IA sans exposer de clé : dans ce HTML, lis <code>window.__PLATFORM_AUTH__</code> (<code>supabaseUrl</code>, <code>supabaseAnonKey</code>, <code>accessToken</code>) et fais un POST JSON vers <code>{"{supabaseUrl}"}/functions/v1/ai-proxy</code> avec les headers <code>apikey</code> (=supabaseAnonKey) et <code>Authorization: Bearer {"{accessToken}"}</code>, et un corps <code>{"{ contents: [...] }"}</code> (format Gemini). La clé Gemini reste côté serveur.
                   </p>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-wrap gap-y-2">
                     <label className="cursor-pointer">
                       <input type="file" accept=".txt,.docx" className="hidden" onChange={handleHtmlFileChange} />
                       <span className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 hover:opacity-80"
@@ -720,7 +712,7 @@ export function LessonPage() {
                   )}
                   {role === "admin" && (
                     <button onClick={startEditHtml} className="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg"
-                      style={{ background: th.card, border: `1px solid ${th.sep}`, color: th.fg }}>
+                      style={{ background: "#fff", border: "1px solid rgba(15,14,20,0.12)", color: "#0f0e14" }}>
                       <Pencil className="w-3 h-3" />Modifier
                     </button>
                   )}
@@ -744,30 +736,12 @@ export function LessonPage() {
                   onClick={handleConfigureVoiceAgent}
                   disabled={agentConfiguring}
                   className="absolute top-4 right-4 flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs transition-opacity hover:opacity-80 disabled:opacity-50"
-                  style={{ background: "rgba(255,255,255,0.08)", color: th.fg, border: `1px solid ${th.sep}` }}
+                  style={{ background: "rgba(255,255,255,0.08)", color: "#fff", border: "1px solid rgba(255,255,255,0.15)" }}
                   title="Réécrit le prompt système de l'agent vocal sur ElevenLabs (persona + personnalisation par leçon/élève)"
                 >
                   <Wand2 className="w-3.5 h-3.5" />{agentConfiguring ? "Configuration…" : "Configurer l'agent"}
                 </button>
               )}
-              <div className="absolute top-4 left-4 flex items-center rounded-lg p-0.5 text-xs" style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${th.sep}` }}>
-                {(["default", "expert"] as const).map((m) => (
-                  <button
-                    key={m}
-                    onClick={() => setAgentDepthMode(m)}
-                    disabled={agentStatus !== "idle"}
-                    className="rounded-md px-2.5 py-1.5 transition-all disabled:opacity-50"
-                    style={{
-                      background: agentDepthMode === m ? "linear-gradient(135deg,#2792dc,#9ce6e6)" : "transparent",
-                      color: agentDepthMode === m ? "#06121c" : th.fg3,
-                      fontWeight: agentDepthMode === m ? 600 : 400,
-                    }}
-                    title={m === "expert" ? "Réponses maximalistes, techniques, sans se limiter strictement au périmètre de la leçon" : "Réponses accessibles, niveau introductif"}
-                  >
-                    {m === "expert" ? "Mode Expert" : "Standard"}
-                  </button>
-                ))}
-              </div>
               <div className="relative flex items-center justify-center shrink-0" style={{ width: 180, height: 180 }}>
                 {agentStatus === "connected" && agentMode === "speaking" && (
                   <>
@@ -813,22 +787,22 @@ export function LessonPage() {
                   className="flex items-center justify-center rounded-full transition-all duration-150 active:scale-95 disabled:opacity-30 select-none touch-none"
                   style={{
                     width: 56, height: 56,
-                    background: pttActive ? "linear-gradient(135deg,#2792dc,#9ce6e6)" : (th.isDark ? "rgba(255,255,255,0.08)" : "rgba(15,14,20,0.06)"),
-                    border: `1px solid ${pttActive ? "transparent" : th.inputB}`,
+                    background: pttActive ? "linear-gradient(135deg,#2792dc,#9ce6e6)" : "rgba(255,255,255,0.08)",
+                    border: `1px solid ${pttActive ? "transparent" : "rgba(255,255,255,0.15)"}`,
                     boxShadow: pttActive ? "0 0 24px rgba(39,146,220,0.5)" : "none",
                   }}
                   title="Maintenir appuyé pour parler (push-to-talk)"
                 >
-                  <Mic className="w-5 h-5" style={{ color: pttActive ? "#06121c" : th.fg }} />
+                  <Mic className="w-5 h-5" style={{ color: pttActive ? "#06121c" : "#fff" }} />
                 </button>
                 <button
                   onClick={() => setAgentChatOpen((v) => !v)}
                   disabled={agentStatus !== "connected"}
                   className="flex items-center justify-center rounded-full transition-all duration-200 hover:opacity-80 active:scale-95 disabled:opacity-30"
-                  style={{ width: 48, height: 48, background: th.isDark ? "rgba(255,255,255,0.08)" : "rgba(15,14,20,0.06)", border: `1px solid ${th.inputB}` }}
+                  style={{ width: 48, height: 48, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)" }}
                   title="Écrire un message"
                 >
-                  <MessageCircle className="w-5 h-5" style={{ color: th.fg }} />
+                  <MessageCircle className="w-5 h-5" style={{ color: "#fff" }} />
                 </button>
               </div>
 
@@ -1119,7 +1093,7 @@ export function LessonPage() {
 
         {/* Copilot */}
         {assistantOpen ? (
-        <div className="w-[27rem] shrink-0 py-6 pr-6">
+        <div className="fixed inset-0 z-30 bg-black/50 lg:bg-transparent p-4 lg:static lg:z-auto lg:p-0 lg:w-[27rem] lg:shrink-0 lg:py-6 lg:pr-6" onClick={(e) => { if (e.target === e.currentTarget) setAssistantOpen(false); }}>
         <div className="h-full flex flex-col rounded-2xl overflow-hidden" style={{ background: "linear-gradient(165deg,#b58de0,#dbacf0)", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 12px 32px rgba(0,0,0,0.35)" }}>
           <div className="shrink-0 px-5 py-4">
             <div className="flex items-center gap-2.5 mb-3">

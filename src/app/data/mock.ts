@@ -13,7 +13,7 @@ export const NAV_ITEMS: { id: NavId; Icon: LucideIcon; label: string; path: stri
   { id: "dashboard", Icon: BarChart3, label: "Tableau de bord", path: "/" },
   { id: "lessons",   Icon: BookOpen,  label: "Mes leçons",      path: "/lessons" },
   { id: "practice",  Icon: Code2,     label: "Pratique IA",     path: "/practice" },
-  { id: "calendar",  Icon: Calendar,  label: "Planning",        path: "/calendar" },
+  { id: "calendar",  Icon: Calendar,  label: "Rendez-vous",     path: "/calendar" },
   { id: "benefits",  Icon: Star,      label: "Mes avantages",   path: "/benefits" },
   { id: "profile",   Icon: User,      label: "Mon profil",      path: "/profile" },
 ];

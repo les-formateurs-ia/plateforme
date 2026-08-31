@@ -5,6 +5,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse, getCallerRole, isStaffRole } from "../_shared/podcast-utils.ts";
 import { resolvePodcastFormat, type PodcastFormatSpec } from "../_shared/podcast-formats.ts";
+import { parsePedagogyStyle, pedagogyStyleBlock } from "../_shared/pedagogy-style.ts";
 
 const GEMINI_TEXT_MODEL = "gemini-3.6-flash";
 export const SPEAKER_A = "Alex";
@@ -17,6 +18,7 @@ function buildScriptPrompt(
   formateurPrompt: string | null,
   prenom: string | null,
   format: PodcastFormatSpec,
+  pedagogyStyle: string,
 ): string {
   const coverageRule = format.relaxCoverageRule
     ? `RÈGLE ABSOLUE : sélectionne uniquement les points, méthodes et définitions les plus importants du contenu pédagogique ci-dessous (Source 1) — il est normal et souhaité, dans ce format condensé, de ne pas tout couvrir. En revanche, ne déforme et n'invente jamais une information absente du cours.`
@@ -42,6 +44,9 @@ ${objectifProfessionnel?.trim() ? objectifProfessionnel : "Aucun profil renseign
 
 === FORMAT CHOISI PAR L'ÉLÈVE : ${format.label} ===
 ${format.directive}
+
+${pedagogyStyle}
+Ce style influence le ton et la manière d'expliquer du dialogue, jamais la contrainte de longueur ni le format ci-dessus (toujours prioritaires).
 
 === FORMAT DE SORTIE ===
 Un dialogue entre deux animateurs nommés "${SPEAKER_A}" et "${SPEAKER_B}", naturel et dynamique, ENTRE ${format.wordRange.min} ET ${format.wordRange.max} MOTS (impératif technique, ne pas dépasser la borne haute), qui applique le format ci-dessus à l'essentiel du cours sans en trahir le sens. Une ligne par réplique, format strict :
@@ -90,7 +95,7 @@ Deno.serve(async (req) => {
     }
 
     const { data: lesson, error: lessonErr } = await supabase
-      .from("lessons")
+      .from("instance_lessons")
       .select("id, title, reference_content, ai_content_prompt")
       .eq("id", lessonId)
       .maybeSingle();
@@ -100,10 +105,11 @@ Deno.serve(async (req) => {
 
     const { data: onboarding } = await supabase
       .from("student_onboarding")
-      .select("goal, goal_detail")
+      .select("goal, goal_detail, ai_tutor_persona")
       .eq("user_id", userId)
       .maybeSingle();
     const objectifProfessionnel = onboarding?.goal_detail || onboarding?.goal || null;
+    const pedagogyStyle = pedagogyStyleBlock(parsePedagogyStyle(onboarding?.ai_tutor_persona));
 
     const { data: profileRow } = await supabase
       .from("profiles")
@@ -112,7 +118,7 @@ Deno.serve(async (req) => {
       .maybeSingle();
     const prenom = profileRow?.first_name || null;
 
-    const scriptPrompt = buildScriptPrompt(lesson.title, lesson.reference_content, objectifProfessionnel, lesson.ai_content_prompt, prenom, format);
+    const scriptPrompt = buildScriptPrompt(lesson.title, lesson.reference_content, objectifProfessionnel, lesson.ai_content_prompt, prenom, format, pedagogyStyle);
     const textResp = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL}:generateContent`,
       {

@@ -9,8 +9,8 @@ import { GT } from "@/app/components/common/GT";
 import { VBtn, ShimBtn } from "@/app/components/common/Buttons";
 import { injectPlatformAuth, normalizeSmartQuotes } from "@/app/lib/platformHtml";
 import {
-  listHtmlExerciseAttempts, saveHtmlExerciseAttempt,
-  type HtmlExerciseAttempt,
+  listHtmlExerciseAttempts, saveHtmlExerciseAttempt, getExerciseBriefForSession,
+  type HtmlExerciseAttempt, type HtmlExerciseBrief,
 } from "@/app/lib/htmlExercise";
 
 const RED = "#e5484d";
@@ -22,6 +22,7 @@ export function HtmlExercisePage() {
   const { sessionId } = useParams<{ sessionId: string }>();
 
   const [attempts, setAttempts] = useState<HtmlExerciseAttempt[]>([]);
+  const [brief, setBrief] = useState<HtmlExerciseBrief | null>(null);
   const [viewIndex, setViewIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -39,9 +40,13 @@ export function HtmlExercisePage() {
     setLoading(true);
     (async () => {
       try {
-        const rows = await listHtmlExerciseAttempts(user.id, sessionId);
+        const [rows, exerciseBrief] = await Promise.all([
+          listHtmlExerciseAttempts(user.id, sessionId),
+          getExerciseBriefForSession(sessionId),
+        ]);
         if (cancelled) return;
         setAttempts(rows);
+        setBrief(exerciseBrief);
         if (rows.length === 0) setComposing(true);
         else setViewIndex(rows.length - 1);
       } catch (err) {
@@ -128,13 +133,13 @@ export function HtmlExercisePage() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
+    <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div>
         <button onClick={() => navigate("/practice/html")} className="flex items-center gap-1.5 text-sm mb-2 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
           <ArrowLeft className="w-4 h-4" />Historique des tentatives
         </button>
-        <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Exercices pour vous</GT></h2>
-        <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Colle du HTML — il tourne exactement comme dans le Playground d'une leçon.</p>
+        <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>{brief?.name ?? "Exercices pour vous"}</GT></h2>
+        <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>{brief?.description || "Colle du HTML — il tourne exactement comme dans le Playground d'une leçon."}</p>
       </div>
 
       {loading && <GCard><div className="p-8 text-center text-sm" style={{ color: th.fg3 }}>Chargement…</div></GCard>}
@@ -156,7 +161,7 @@ export function HtmlExercisePage() {
               <p className="text-[11px] leading-relaxed" style={{ color: th.fg3 }}>
                 Pour appeler l'IA sans exposer de clé : dans ce HTML, lis <code>window.__PLATFORM_AUTH__</code> (<code>supabaseUrl</code>, <code>supabaseAnonKey</code>, <code>accessToken</code>) et fais un POST JSON vers <code>{"{supabaseUrl}"}/functions/v1/ai-proxy</code> avec les headers <code>apikey</code> (=supabaseAnonKey) et <code>Authorization: Bearer {"{accessToken}"}</code>, et un corps <code>{"{ contents: [...] }"}</code> (format Gemini). La clé Gemini reste côté serveur.
               </p>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap gap-y-2">
                 <label className="cursor-pointer">
                   <input type="file" accept=".txt,.docx" className="hidden" onChange={handleFileChange} />
                   <span className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 hover:opacity-80"

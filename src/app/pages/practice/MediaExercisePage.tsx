@@ -122,7 +122,7 @@ export function MediaExercisePage() {
   const tone = current ? scoreTone(current.score) : null;
 
   return (
-    <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
+    <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div>
         <button onClick={() => navigate("/practice/media")} className="flex items-center gap-1.5 text-sm mb-2 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
           <ArrowLeft className="w-4 h-4" />Historique des tentatives
@@ -259,7 +259,7 @@ export function MediaExercisePage() {
             )}
 
             {current.status === "ready" && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <div className="text-xs font-bold" style={{ color: th.fg3 }}>Avec ton prompt original</div>
                   {current.mode === "image"
