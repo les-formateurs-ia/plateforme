@@ -328,6 +328,7 @@ export interface Database {
           id: string;
           name: string;
           description: string | null;
+          html_content: string;
           visibility: ExerciseVisibility;
           created_by: string | null;
           created_at: string;
@@ -337,6 +338,7 @@ export interface Database {
           id?: string;
           name: string;
           description?: string | null;
+          html_content?: string;
           visibility?: ExerciseVisibility;
           created_by?: string | null;
           created_at?: string;

@@ -66,10 +66,11 @@ export interface VisibleHtmlExercise {
   sessionId: string | null;
   name: string;
   description: string | null;
+  htmlContent: string;
   attemptCount: number;
   lastAttemptAt: string | null;
   // HTML de la dernière tentative, pour un aperçu miniature en vrai rendu.
-  latestHtml: string | null;
+  previewHtml: string;
 }
 
 // Liste les exercices visibles par l'élève (globaux + privés qui lui sont
@@ -78,7 +79,7 @@ export interface VisibleHtmlExercise {
 export async function listVisibleHtmlExercises(userId: string): Promise<VisibleHtmlExercise[]> {
   const { data: exercises, error } = await supabase
     .from("html_exercises")
-    .select("id, name, description, created_at")
+    .select("id, name, description, html_content, created_at")
     .order("created_at", { ascending: false });
   if (error) throw error;
   if (!exercises?.length) return [];
@@ -120,9 +121,10 @@ export async function listVisibleHtmlExercises(userId: string): Promise<VisibleH
       sessionId,
       name: ex.name,
       description: ex.description,
+      htmlContent: ex.html_content,
       attemptCount: rows.length,
       lastAttemptAt: rows.length ? rows[rows.length - 1].createdAt : null,
-      latestHtml: rows.length ? rows[rows.length - 1].htmlContent : null,
+      previewHtml: rows.length ? rows[rows.length - 1].htmlContent : ex.html_content,
     };
   });
 }
@@ -149,8 +151,10 @@ export async function ensureHtmlExerciseSession(userId: string, exerciseId: stri
 }
 
 export interface HtmlExerciseBrief {
+  exerciseId: string;
   name: string;
   description: string | null;
+  htmlContent: string;
 }
 
 // Consigne de l'exercice lié à un dossier de travail, pour l'afficher en
@@ -162,9 +166,11 @@ export async function getExerciseBriefForSession(sessionId: string): Promise<Htm
   if (!session?.exercise_id) return null;
   const { data: exercise, error: exerciseError } = await supabase
     .from("html_exercises")
-    .select("name, description")
+    .select("id, name, description, html_content")
     .eq("id", session.exercise_id)
     .maybeSingle();
   if (exerciseError) throw exerciseError;
-  return exercise ? { name: exercise.name, description: exercise.description } : null;
+  return exercise
+    ? { exerciseId: exercise.id, name: exercise.name, description: exercise.description, htmlContent: exercise.html_content }
+    : null;
 }

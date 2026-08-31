@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { ArrowLeft, Plus, Code } from "lucide-react";
+import { ArrowLeft, Plus, Code, Pencil } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { isStaff } from "@/app/lib/permissions";
@@ -23,7 +23,7 @@ function HtmlPreview({ html }: { html: string | null }) {
       <iframe
         srcDoc={html}
         sandbox=""
-        title="Aperçu"
+        title="Apercu"
         tabIndex={-1}
         style={{ width: "300%", height: "300%", border: 0, transform: "scale(0.3333)", transformOrigin: "top left", background: "#fff" }}
       />
@@ -46,13 +46,14 @@ function CreateTile({ onClick }: { onClick: () => void }) {
   );
 }
 
-// Vue admin/formateur : deux onglets (globales/privées), création + édition
-// via HtmlExerciseEditDialog.
 function AdminHtmlExercisesView() {
   const th = useTh();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [tab, setTab] = useState<"global" | "private">("global");
   const [exercises, setExercises] = useState<HtmlExerciseRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [opening, setOpening] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingExercise, setEditingExercise] = useState<HtmlExerciseRow | undefined>(undefined);
 
@@ -66,12 +67,23 @@ function AdminHtmlExercisesView() {
 
   const openCreate = () => { setEditingExercise(undefined); setDialogOpen(true); };
   const openEdit = (ex: HtmlExerciseRow) => { setEditingExercise(ex); setDialogOpen(true); };
+  const openExercise = async (ex: HtmlExerciseRow) => {
+    if (!user || opening) return;
+    setOpening(ex.id);
+    try {
+      const sessionId = await ensureHtmlExerciseSession(user.id, ex.id);
+      navigate(`/practice/html/${sessionId}`);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Impossible d'ouvrir cet exercice.");
+      setOpening(null);
+    }
+  };
 
   return (
     <>
       <div className="flex justify-center">
         <div className="inline-flex items-center gap-1.5 p-1.5 rounded-full" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
-          {([["global", "Globales"], ["private", "Privées"]] as const).map(([id, label]) => {
+          {([["global", "Globales"], ["private", "Privees"]] as const).map(([id, label]) => {
             const active = tab === id;
             return (
               <button key={id} onClick={() => setTab(id)} className="px-7 py-3 rounded-full text-sm font-bold transition-all"
@@ -86,24 +98,35 @@ function AdminHtmlExercisesView() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-center py-6" style={{ color: th.fg3 }}>Chargement…</p>
+        <p className="text-sm text-center py-6" style={{ color: th.fg3 }}>Chargement...</p>
       ) : (
         <div className="grid gap-4 mt-2" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(190px, 1fr))" }}>
           <CreateTile onClick={openCreate} />
           {exercises.map((ex) => (
-            <div key={ex.id} onClick={() => openEdit(ex)}
-              className="group relative overflow-hidden rounded-2xl cursor-pointer flex flex-col transition-all duration-300 hover:scale-[1.02] p-4"
-              style={{ aspectRatio: "1/1", background: th.card, border: `1px solid ${th.sep}`, boxShadow: "0 4px 18px rgba(0,0,0,0.16)" }}>
-              <div className="text-sm font-black mb-1" style={{ color: th.fg }}>{ex.name}</div>
-              <div className="text-xs leading-relaxed flex-1 overflow-hidden" style={{ color: th.fg3 }}>{ex.description || "Pas de consigne."}</div>
-              {ex.visibility === "private" && (
-                <div className="text-[10px] font-bold mt-2" style={{ color: th.navAC }}>{ex.assigneeCount} élève{ex.assigneeCount > 1 ? "s" : ""}</div>
-              )}
+            <div key={ex.id} onClick={() => openExercise(ex)}
+              className="group relative overflow-hidden rounded-2xl cursor-pointer flex flex-col transition-all duration-300 hover:scale-[1.02]"
+              style={{ aspectRatio: "1/1", background: th.card, border: `1px solid ${th.sep}`, boxShadow: "0 4px 18px rgba(0,0,0,0.16)", opacity: opening && opening !== ex.id ? 0.5 : 1 }}>
+              <div className="relative flex-1 overflow-hidden" style={{ background: "#0c0c13" }}>
+                <HtmlPreview html={ex.htmlContent} />
+                <button type="button" onClick={(event) => { event.stopPropagation(); openEdit(ex); }}
+                  className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center shadow-lg transition-opacity hover:opacity-85"
+                  style={{ background: th.card, border: `1px solid ${th.sep}`, color: th.fg }}
+                  title="Modifier">
+                  <Pencil className="w-3.5 h-3.5" />
+                </button>
+                <div className="absolute inset-x-0 bottom-0 h-10" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.45), transparent)" }} />
+              </div>
+              <div className="p-3 shrink-0">
+                <div className="text-xs font-black truncate" style={{ color: th.fg }}>{ex.name}</div>
+                <div className="text-[10px] truncate mt-0.5" style={{ color: th.fg3 }}>
+                  {ex.visibility === "private" ? `${ex.assigneeCount} eleve${ex.assigneeCount > 1 ? "s" : ""}` : "Global"}
+                </div>
+              </div>
             </div>
           ))}
           {!exercises.length && (
             <div className="col-span-full">
-              <GCard><div className="p-8 text-center"><p className="text-sm" style={{ color: th.fg3 }}>Aucun exercice {tab === "global" ? "global" : "privé"} pour l'instant.</p></div></GCard>
+              <GCard><div className="p-8 text-center"><p className="text-sm" style={{ color: th.fg3 }}>Aucun exercice {tab === "global" ? "global" : "prive"} pour l'instant.</p></div></GCard>
             </div>
           )}
         </div>
@@ -114,8 +137,6 @@ function AdminHtmlExercisesView() {
   );
 }
 
-// Vue élève : grille des exercices visibles (globaux + privés assignés),
-// définis par admin/formateur — plus de création libre côté élève.
 function StudentHtmlExercisesView() {
   const th = useTh();
   const navigate = useNavigate();
@@ -154,13 +175,13 @@ function StudentHtmlExercisesView() {
     }
   };
 
-  if (loading) return <p className="text-sm text-center py-6" style={{ color: th.fg3 }}>Chargement…</p>;
+  if (loading) return <p className="text-sm text-center py-6" style={{ color: th.fg3 }}>Chargement...</p>;
   if (loadError) return <p className="text-sm" style={{ color: "#e5484d" }}>{loadError}</p>;
   if (!exercises.length) {
     return (
       <GCard><div className="p-8 text-center">
         <p className="text-sm font-semibold mb-1" style={{ color: th.fg }}>Aucun exercice pour l'instant</p>
-        <p className="text-xs" style={{ color: th.fg3 }}>Ton formateur ne t'a pas encore attribué d'exercice HTML.</p>
+        <p className="text-xs" style={{ color: th.fg3 }}>Ton formateur ne t'a pas encore attribue d'exercice HTML.</p>
       </div></GCard>
     );
   }
@@ -172,12 +193,12 @@ function StudentHtmlExercisesView() {
           className="group relative overflow-hidden rounded-2xl cursor-pointer flex flex-col transition-all duration-300 hover:scale-[1.02]"
           style={{ aspectRatio: "1/1", background: th.card, border: `1px solid ${th.sep}`, boxShadow: "0 4px 18px rgba(0,0,0,0.16)", opacity: opening && opening !== ex.exerciseId ? 0.5 : 1 }}>
           <div className="relative flex-1 overflow-hidden" style={{ background: "#0c0c13" }}>
-            <HtmlPreview html={ex.latestHtml} />
+            <HtmlPreview html={ex.previewHtml} />
             <div className="absolute inset-0" style={{ boxShadow: "inset 0 -24px 20px -20px rgba(0,0,0,0.35)" }} />
           </div>
           <div className="p-3 shrink-0">
             <div className="text-xs font-black truncate" style={{ color: th.fg }}>{ex.name}</div>
-            <div className="text-[10px] truncate mt-0.5" style={{ color: th.fg3 }}>{ex.attemptCount > 0 ? `${ex.attemptCount} tentative${ex.attemptCount > 1 ? "s" : ""}` : "Pas encore commencé"}</div>
+            <div className="text-[10px] truncate mt-0.5" style={{ color: th.fg3 }}>{ex.attemptCount > 0 ? `${ex.attemptCount} tentative${ex.attemptCount > 1 ? "s" : ""}` : "Pret a ouvrir"}</div>
           </div>
         </div>
       ))}
@@ -199,7 +220,7 @@ export function HtmlExerciseSessionsPage() {
         </button>
         <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Exercices pour vous</GT></h2>
         <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>
-          {staff ? "Crée et gère les exercices HTML/JS proposés aux élèves." : "Colle du HTML pour l'exercice attribué — il tourne exactement comme dans le Playground d'une leçon."}
+          {staff ? "Cree, modifie et ouvre les exercices HTML proposes aux eleves." : "Ouvre les exercices HTML attribues par ton formateur."}
         </p>
       </div>
 

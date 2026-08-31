@@ -8,6 +8,7 @@ export interface HtmlExerciseRow {
   id: string;
   name: string;
   description: string | null;
+  htmlContent: string;
   visibility: ExerciseVisibility;
   createdAt: string;
   updatedAt: string;
@@ -17,7 +18,7 @@ export interface HtmlExerciseRow {
 export async function listHtmlExercises(visibility: ExerciseVisibility): Promise<HtmlExerciseRow[]> {
   const { data: exercises, error } = await supabase
     .from("html_exercises")
-    .select("id, name, description, visibility, created_at, updated_at")
+    .select("id, name, description, html_content, visibility, created_at, updated_at")
     .eq("visibility", visibility)
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -36,6 +37,7 @@ export async function listHtmlExercises(visibility: ExerciseVisibility): Promise
     id: e.id,
     name: e.name,
     description: e.description,
+    htmlContent: e.html_content,
     visibility: e.visibility,
     createdAt: e.created_at,
     updatedAt: e.updated_at,
@@ -54,13 +56,13 @@ export async function listExercisesForStudent(studentId: string): Promise<HtmlEx
 
   const { data: exercises, error: exercisesError } = await supabase
     .from("html_exercises")
-    .select("id, name, description, visibility, created_at, updated_at")
+    .select("id, name, description, html_content, visibility, created_at, updated_at")
     .in("id", exerciseIds)
     .eq("visibility", "private")
     .order("created_at", { ascending: false });
   if (exercisesError) throw exercisesError;
   return (exercises ?? []).map((e) => ({
-    id: e.id, name: e.name, description: e.description, visibility: e.visibility,
+    id: e.id, name: e.name, description: e.description, htmlContent: e.html_content, visibility: e.visibility,
     createdAt: e.created_at, updatedAt: e.updated_at, assigneeCount: 0,
   }));
 }
@@ -74,6 +76,7 @@ export async function getExerciseAssignees(exerciseId: string): Promise<string[]
 export interface HtmlExercisePayload {
   name: string;
   description: string | null;
+  htmlContent: string;
   visibility: ExerciseVisibility;
   studentIds: string[];
   createdBy: string;
@@ -82,8 +85,8 @@ export interface HtmlExercisePayload {
 export async function createHtmlExercise(payload: HtmlExercisePayload): Promise<HtmlExerciseRow> {
   const { data, error } = await supabase
     .from("html_exercises")
-    .insert({ name: payload.name, description: payload.description, visibility: payload.visibility, created_by: payload.createdBy })
-    .select("id, name, description, visibility, created_at, updated_at")
+    .insert({ name: payload.name, description: payload.description, html_content: payload.htmlContent, visibility: payload.visibility, created_by: payload.createdBy })
+    .select("id, name, description, html_content, visibility, created_at, updated_at")
     .single();
   if (error || !data) throw error ?? new Error("Erreur inconnue");
 
@@ -94,12 +97,22 @@ export async function createHtmlExercise(payload: HtmlExercisePayload): Promise<
     if (assignError) throw assignError;
   }
 
-  return { id: data.id, name: data.name, description: data.description, visibility: data.visibility, createdAt: data.created_at, updatedAt: data.updated_at, assigneeCount: payload.studentIds.length };
+  return {
+    id: data.id,
+    name: data.name,
+    description: data.description,
+    htmlContent: data.html_content,
+    visibility: data.visibility,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+    assigneeCount: payload.studentIds.length,
+  };
 }
 
 export interface HtmlExerciseUpdate {
   name: string;
   description: string | null;
+  htmlContent: string;
   visibility: ExerciseVisibility;
   studentIds: string[];
   updatedBy: string;
@@ -108,7 +121,7 @@ export interface HtmlExerciseUpdate {
 export async function updateHtmlExercise(id: string, patch: HtmlExerciseUpdate): Promise<void> {
   const { error } = await supabase
     .from("html_exercises")
-    .update({ name: patch.name, description: patch.description, visibility: patch.visibility })
+    .update({ name: patch.name, description: patch.description, html_content: patch.htmlContent, visibility: patch.visibility })
     .eq("id", id);
   if (error) throw error;
 
@@ -126,5 +139,10 @@ export async function updateHtmlExercise(id: string, patch: HtmlExerciseUpdate):
 
 export async function deleteHtmlExercise(id: string): Promise<void> {
   const { error } = await supabase.from("html_exercises").delete().eq("id", id);
+  if (error) throw error;
+}
+
+export async function updateHtmlExerciseContent(id: string, htmlContent: string): Promise<void> {
+  const { error } = await supabase.from("html_exercises").update({ html_content: htmlContent }).eq("id", id);
   if (error) throw error;
 }
