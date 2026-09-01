@@ -204,36 +204,42 @@ export interface QuizQuestion {
   options: QuizOption[];
 }
 
-export interface QuizQuestionWithLesson extends QuizQuestion {
-  sectionId: string;
-  sectionTitle: string;
+export interface BasicExerciseTheme {
   lessonId: string;
   lessonTitle: string;
+  sectionTitle: string;
+  completed: boolean;
+  questions: QuizQuestion[];
 }
 
-// "Exercices basiques" (Pratique IA) : toutes les questions de quiz de toute
-// la formation, terminée ou non — pas de notion d'attempt/score ici, c'est un
-// espace de révision libre, indépendant du quiz "officiel" gaté par leçon
-// dans LessonPage (qui reste la seule source de vérité pour la progression).
-export async function getAllQuizQuestions(instanceId: string): Promise<QuizQuestionWithLesson[]> {
+// "Exercices basiques" (Pratique IA) : un thème = une leçon. Pas de notion
+// d'attempt/score ici, c'est un espace de révision libre — mais un thème
+// n'est déverrouillé (QCM jouable) que si la leçon correspondante est
+// terminée (lesson_progress.status === "completed", la même source de
+// vérité que le quiz "officiel" gaté par leçon dans LessonPage) ; sinon le
+// thème reste visible mais ses questions sont floutées côté UI.
+export async function getBasicExerciseThemes(instanceId: string, userId: string): Promise<BasicExerciseTheme[]> {
   const outline = await getCourseOutline(instanceId);
   if (!outline) return [];
   const lessons = flattenLessons(outline);
   const lessonIds = lessons.map((l) => l.id);
   if (!lessonIds.length) return [];
 
-  const lessonById = new Map(lessons.map((l) => [l.id, l]));
-  const sectionByLessonId = new Map<string, { id: string; title: string }>();
-  for (const s of outline.sections) for (const l of s.lessons) sectionByLessonId.set(l.id, { id: s.id, title: s.title });
+  const sectionTitleByLessonId = new Map<string, string>();
+  for (const s of outline.sections) for (const l of s.lessons) sectionTitleByLessonId.set(l.id, s.title);
 
-  const { data: questionRows, error } = await supabase
-    .from("instance_quiz_questions")
-    .select("id, lesson_id, question, explanation, order_index")
-    .in("lesson_id", lessonIds)
-    .order("order_index", { ascending: true });
-  if (error) throw error;
+  const [questionRowsRes, progress] = await Promise.all([
+    supabase
+      .from("instance_quiz_questions")
+      .select("id, lesson_id, question, explanation, order_index")
+      .in("lesson_id", lessonIds)
+      .order("order_index", { ascending: true }),
+    getLessonProgressMap(userId, lessonIds),
+  ]);
+  if (questionRowsRes.error) throw questionRowsRes.error;
+  const questionRows = questionRowsRes.data ?? [];
 
-  const questionIds = (questionRows ?? []).map((q) => q.id);
+  const questionIds = questionRows.map((q) => q.id);
   const { data: optionRows, error: optionsError } =
     questionIds.length > 0
       ? await supabase
@@ -244,22 +250,30 @@ export async function getAllQuizQuestions(instanceId: string): Promise<QuizQuest
       : { data: [], error: null };
   if (optionsError) throw optionsError;
 
-  return (questionRows ?? []).map((q) => {
-    const section = sectionByLessonId.get(q.lesson_id);
-    return {
+  const questionsByLesson = new Map<string, QuizQuestion[]>();
+  for (const q of questionRows) {
+    const list = questionsByLesson.get(q.lesson_id) ?? [];
+    list.push({
       id: q.id,
       question: q.question,
       explanation: q.explanation,
       orderIndex: q.order_index,
-      sectionId: section?.id ?? "",
-      sectionTitle: section?.title ?? "",
-      lessonId: q.lesson_id,
-      lessonTitle: lessonById.get(q.lesson_id)?.title ?? "",
       options: (optionRows ?? [])
         .filter((o) => o.question_id === q.id)
         .map((o) => ({ id: o.id, label: o.label, isCorrect: o.is_correct, orderIndex: o.order_index })),
-    };
-  });
+    });
+    questionsByLesson.set(q.lesson_id, list);
+  }
+
+  return lessons
+    .map((l) => ({
+      lessonId: l.id,
+      lessonTitle: l.title,
+      sectionTitle: sectionTitleByLessonId.get(l.id) ?? "",
+      completed: progress.get(l.id)?.status === "completed",
+      questions: questionsByLesson.get(l.id) ?? [],
+    }))
+    .filter((t) => t.questions.length > 0);
 }
 
 export interface LessonDetail {
