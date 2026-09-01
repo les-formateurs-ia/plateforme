@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router";
-import { toast } from "sonner";
 import {
   ChevronLeft, Plus, Trash2, ChevronUp, ChevronDown,
   ChevronRight as ChevronRightIcon, GripVertical, Eye,
@@ -14,7 +13,6 @@ import { SaveButton, type SaveButtonState } from "@/app/components/common/SaveBu
 import { VSelect } from "@/app/components/common/Select";
 import { HtmlExerciseEditDialog } from "@/app/components/practice/HtmlExerciseEditDialog";
 import { listExercisesForStudent, type HtmlExerciseRow } from "@/app/lib/htmlExercises";
-import { previewFormationAsStaff } from "@/app/lib/learning";
 
 interface CourseForm {
   name: string;
@@ -68,30 +66,17 @@ export function AdminCourseEditorPage() {
   const [studentExercises, setStudentExercises] = useState<HtmlExerciseRow[]>([]);
   const [exerciseDialogOpen, setExerciseDialogOpen] = useState(false);
   const [editingExercise, setEditingExercise] = useState<HtmlExerciseRow | undefined>(undefined);
-  const [previewing, setPreviewing] = useState(false);
 
   const loadStudentExercises = async (id: string) => {
     setStudentExercises(await listExercisesForStudent(id));
   };
 
   // Un duplicata élève est déjà une vraie instance : on l'ouvre directement.
-  // Un template n'a pas d'instance_lessons (mindmap/podcast/vidéo IA/agent/quiz
-  // en dépendent) — on en génère donc une prévisualisation dédiée côté
-  // serveur avant d'ouvrir l'aperçu, pour que tout fonctionne comme pour un
-  // élève (cf. migration 0026).
-  const openPreview = async () => {
-    if (!courseId || previewing) return;
-    if (isInstance) { window.open(`/admin/instances/${courseId}/preview`, "_blank", "noopener"); return; }
-    setPreviewing(true);
-    try {
-      const previewInstanceId = await previewFormationAsStaff(courseId);
-      window.open(`/admin/instances/${previewInstanceId}/preview`, "_blank", "noopener");
-    } catch (err) {
-      console.error(err);
-      toast.error(err instanceof Error ? err.message : "Impossible de générer la prévisualisation.");
-    } finally {
-      setPreviewing(false);
-    }
+  // (Pour un template, le bouton "œil" équivalent vit désormais dans la
+  // liste Gestion des formations — cf. AdminCoursesPage.)
+  const openPreview = () => {
+    if (!courseId) return;
+    window.open(`/admin/instances/${courseId}/preview`, "_blank", "noopener");
   };
 
   useEffect(() => {
@@ -282,17 +267,16 @@ export function AdminCourseEditorPage() {
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div className="flex items-center justify-between gap-3">
         <Link to={backHref} className="flex items-center gap-1.5 text-sm transition-colors hover:opacity-70" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />{backLabel}</Link>
-        {courseId && (
-          <button type="button" onClick={() => void openPreview()} disabled={previewing}
-            title="Visualiser le cours comme un élève" className="flex items-center gap-1.5 text-sm font-semibold hover:opacity-70 disabled:opacity-50" style={{ color: th.navAC }}>
-            <Eye className="w-4 h-4" />{previewing ? "Préparation…" : "Visualiser le cours"}
+        {courseId && isInstance && (
+          <button type="button" onClick={openPreview} title="Visualiser comme un élève" className="flex items-center hover:opacity-70" style={{ color: th.navAC }}>
+            <Eye className="w-4 h-4" />
           </button>
         )}
       </div>
 
       <GCard glow><div className="p-6 space-y-4">
         <h2 className="text-lg font-black" style={{ color: th.fg }}>
-          <GT>{isNew ? "Nouveau cours" : isInstance ? "Personnaliser la formation" : "Informations du cours"}</GT>
+          <GT>{isNew ? "Nouvelle formation" : isInstance ? "Personnaliser la formation" : "Informations du cours"}</GT>
         </h2>
 
         <div>

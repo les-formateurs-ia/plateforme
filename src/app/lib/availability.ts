@@ -155,7 +155,7 @@ export async function cancelRdvAsFormateur(rdvId: string, formateurId: string, s
     studentId,
     "rdv_cancelled",
     "Rendez-vous annulé",
-    `Votre formateur a annulé votre rendez-vous du ${formatFR(slotDate, startTime)}. Réservez un nouveau créneau dans l'onglet Planning.`,
+    `Votre formateur a annulé votre rendez-vous du ${formatFR(slotDate, startTime)}. Réservez un nouveau créneau dans l'onglet Rendez-vous.`,
     rdvId,
   );
 }
@@ -173,7 +173,7 @@ export async function proposeReschedule(rdvId: string, formateurId: string, stud
     studentId,
     "rdv_reschedule_proposed",
     "Nouveau créneau proposé",
-    `Votre formateur propose de déplacer votre rendez-vous au ${formatFR(proposedDate, proposedStartTime)}. Rendez-vous dans l'onglet Planning pour accepter ou refuser.`,
+    `Votre formateur propose de déplacer votre rendez-vous au ${formatFR(proposedDate, proposedStartTime)}. Réponds depuis l'onglet Rendez-vous.`,
     rdvId,
   );
 }

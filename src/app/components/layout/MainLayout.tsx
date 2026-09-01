@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router";
-import { Search, Plus, CalendarClock, ChevronDown, Menu, X } from "lucide-react";
+import { Search, Plus, CalendarClock, Menu, X } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
@@ -47,17 +47,21 @@ export function MainLayout() {
             // admin/formateur pour l'instant, donc masqués pour le staff
             // plutôt que d'afficher une page vide/hors-sujet.
             if ((id === "dashboard" || id === "lessons" || id === "benefits") && isStaff(role)) return null;
-            // Pour l'admin/formateur, "Rendez-vous" (calendrier perso élève)
-            // cède sa place à "Planning" — un admin/formateur n'a pas de
-            // formation à soi, donc pas de RDV perso à réserver, alors que
-            // Planning (déclarer ses disponibilités) est sa vraie fonction.
+            // Pour l'admin/formateur, "Élèves (& formateurs)" (gestion, même
+            // page pour les deux rôles — le formateur n'y voit que ses
+            // propres élèves, pas d'onglet Formateurs) s'ajoute juste avant
+            // "Rendez-vous", leur calendrier de RDV perso.
             if (id === "calendar" && isStaff(role)) {
-              return (
-                <NavLink key="planning" to={role === "admin" ? "/admin/planning" : "/planning"} onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
+              return [
+                <NavLink key="planning" to="/admin/planning" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
                   style={({ isActive }) => isActive ? { background: "linear-gradient(135deg,#b58de0,#dbacf0)", color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
-                  <CalendarClock className="w-4 h-4 shrink-0" />Planning
-                </NavLink>
-              );
+                  <CalendarClock className="w-4 h-4 shrink-0" />{role === "admin" ? "Élèves & formateurs" : "Élèves"}
+                </NavLink>,
+                <NavLink key={id} to="/planning" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
+                  style={({ isActive }) => isActive ? { background: "linear-gradient(135deg,#b58de0,#dbacf0)", color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
+                  <Icon className="w-4 h-4 shrink-0" />{label}
+                </NavLink>,
+              ];
             }
             return (
               <NavLink key={id} to={path} end={path === "/"} onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
@@ -72,16 +76,15 @@ export function MainLayout() {
             <NavLink to="/admin/courses" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-2.5 px-4 py-2.5 rounded-full text-sm font-semibold transition-all hover:opacity-90"
               style={{ background: "linear-gradient(135deg,#b58de0,#dbacf0)", color: "#fff" }}>
               <Plus className="w-4 h-4 shrink-0" />
-              Créer un cours
+              Modifier les formations
             </NavLink>
           </div>
         )}
         <div className="p-4" style={{ borderTop: `1px solid ${th.sidebarB}` }}>
-          <button className="w-full flex items-center gap-3 px-2 py-1 rounded-xl transition-opacity hover:opacity-80">
+          <div className="w-full flex items-center gap-3 px-2 py-1 rounded-xl">
             <Avatar url={profile.avatarUrl} size={36} />
             <div className="min-w-0 flex-1 text-left"><div className="text-sm font-semibold truncate" style={{ color: th.fg }}>{name}</div><div className="text-xs truncate" style={{ color: th.fg3 }}>{profile.profession || "Apprenant IA"}</div></div>
-            <ChevronDown className="w-4 h-4 shrink-0" style={{ color: th.fg3 }} />
-          </button>
+          </div>
         </div>
       </aside>
 

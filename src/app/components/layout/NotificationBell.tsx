@@ -3,6 +3,7 @@ import { Bell, Calendar as CalendarIcon, XCircle, RefreshCw } from "lucide-react
 import { useNavigate } from "react-router";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
+import { isStaff } from "@/app/lib/permissions";
 import { Popover, PopoverContent, PopoverTrigger } from "@/app/components/ui/popover";
 import { listMyNotifications, markNotificationRead, markAllNotificationsRead, type NotificationRow } from "@/app/lib/notifications";
 
@@ -49,9 +50,13 @@ export function NotificationBell() {
 
   const unread = items.filter((n) => !n.read).length;
 
-  const goToPlanning = () => {
+  // Ces notifications concernent toutes un rendez-vous (annulation,
+  // proposition de nouveau créneau…) — on ouvre donc l'onglet Rendez-vous de
+  // chacun : /planning (disponibilités + RDV à venir) pour le staff, /calendar
+  // (réservation) pour l'élève.
+  const goToRendezVous = () => {
     setOpen(false);
-    navigate(role === "admin" ? "/admin/planning" : role === "formateur" ? "/planning" : "/calendar");
+    navigate(isStaff(role) ? "/planning" : "/calendar");
   };
 
   const handleOpenChange = async (next: boolean) => {
@@ -86,7 +91,7 @@ export function NotificationBell() {
           {items.map((n) => {
             const Icon = ICONS[n.type];
             return (
-              <button key={n.id} onClick={() => { void markNotificationRead(n.id); goToPlanning(); }} className="w-full text-left px-4 py-3 flex items-start gap-2.5 transition-colors hover:opacity-80" style={{ borderBottom: `1px solid ${th.sep}` }}>
+              <button key={n.id} onClick={() => { void markNotificationRead(n.id); goToRendezVous(); }} className="w-full text-left px-4 py-3 flex items-start gap-2.5 transition-colors hover:opacity-80" style={{ borderBottom: `1px solid ${th.sep}` }}>
                 <Icon className="w-4 h-4 mt-0.5 shrink-0" style={{ color: th.navAC }} />
                 <div className="min-w-0">
                   <div className="text-xs font-bold" style={{ color: th.fg }}>{n.title}</div>

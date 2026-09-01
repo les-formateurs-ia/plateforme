@@ -13,9 +13,16 @@ export interface StudentCard extends PersonCard {
   activeFormationName: string | null;
 }
 
-export async function listStudentCards(): Promise<StudentCard[]> {
+// `formateurId` restreint aux élèves dont ce formateur est le coach attitré
+// (profiles.formateur_id) — utilisé par la page Planning pour qu'un
+// formateur ne voie que SES élèves, contrairement à l'admin qui les voit
+// tous (cf. 0024_student_formateur.sql).
+export async function listStudentCards(formateurId?: string): Promise<StudentCard[]> {
+  let studentsQuery = supabase.from("profiles").select("id, first_name, last_name, email, avatar_url").eq("role", "student").order("first_name");
+  if (formateurId) studentsQuery = studentsQuery.eq("formateur_id", formateurId);
+
   const [{ data: students, error: studentsError }, { data: instances, error: instancesError }] = await Promise.all([
-    supabase.from("profiles").select("id, first_name, last_name, email, avatar_url").eq("role", "student").order("first_name"),
+    studentsQuery,
     supabase.from("formation_instances").select("user_id, name, assigned_at").eq("status", "active").order("assigned_at", { ascending: false }),
   ]);
   if (studentsError) throw studentsError;

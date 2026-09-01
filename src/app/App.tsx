@@ -86,16 +86,6 @@ function RequireStaff({ children }: { children: ReactElement }) {
   return children;
 }
 
-// Planning (gestion élèves/formateurs, attribution de formations) est une
-// fonctionnalité strictement admin — le formateur garde l'accès à l'édition
-// de contenu (RequireStaff ci-dessus) mais pas à cette zone.
-function RequireAdmin({ children }: { children: ReactElement }) {
-  const { role } = useAuth();
-  if (role === null) return <LoadingScreen />;
-  if (role !== "admin") return <Navigate to="/" replace />;
-  return children;
-}
-
 function AppRoutes() {
   return (
     <Routes>
@@ -124,8 +114,8 @@ function AppRoutes() {
         <Route path="admin/instances/:instanceId/preview" element={<RequireStaff><AdminFormationPreviewPage /></RequireStaff>} />
         <Route path="admin/instances/:instanceId/lessons/new" element={<RequireStaff><AdminLessonEditorPage /></RequireStaff>} />
         <Route path="admin/instances/:instanceId/lessons/:lessonId" element={<RequireStaff><AdminLessonEditorPage /></RequireStaff>} />
-        <Route path="admin/planning" element={<RequireAdmin><AdminPlanningPage /></RequireAdmin>} />
-        <Route path="admin/planning/students/:studentId" element={<RequireAdmin><AdminStudentDetailPage /></RequireAdmin>} />
+        <Route path="admin/planning" element={<RequireStaff><AdminPlanningPage /></RequireStaff>} />
+        <Route path="admin/planning/students/:studentId" element={<RequireStaff><AdminStudentDetailPage /></RequireStaff>} />
         <Route path="planning" element={<RequireStaff><AdminAvailabilityPage /></RequireStaff>} />
       </Route>
       <Route path="/lesson/:lessonId" element={<RequireAuth><LessonPage /></RequireAuth>} />
