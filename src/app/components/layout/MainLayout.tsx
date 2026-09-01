@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router";
-import { Search, Bell, Plus, CalendarClock, ChevronDown, Menu, X } from "lucide-react";
+import { Search, Plus, CalendarClock, ChevronDown, Menu, X } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
@@ -8,6 +8,7 @@ import { isStaff } from "@/app/lib/permissions";
 import { Background } from "@/app/components/common/Background";
 import { Logo } from "@/app/components/common/Logo";
 import { Avatar } from "@/app/components/common/Avatar";
+import { NotificationBell } from "@/app/components/layout/NotificationBell";
 import { cx } from "@/app/lib/cx";
 import { NAV_ITEMS } from "@/app/data/mock";
 
@@ -41,13 +42,18 @@ export function MainLayout() {
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {NAV_ITEMS.map(({ id, Icon, label, path }) => {
-            // Pour l'admin, "Rendez-vous" (calendrier perso élève) cède sa
-            // place à "Planning" ici et redescend dans le bloc staff — un
-            // admin/formateur n'a pas de formation à soi, donc pas de RDV
-            // perso à réserver, alors que Planning est sa vraie fonction.
-            if (id === "calendar" && role === "admin") {
+            // "Tableau de bord" et "Mes avantages" sont pensés pour un
+            // parcours élève (progression, gains) — pas de version admin/
+            // formateur pour l'instant, donc masqués pour le staff plutôt
+            // que d'afficher une page vide/hors-sujet.
+            if ((id === "dashboard" || id === "benefits") && isStaff(role)) return null;
+            // Pour l'admin/formateur, "Rendez-vous" (calendrier perso élève)
+            // cède sa place à "Planning" — un admin/formateur n'a pas de
+            // formation à soi, donc pas de RDV perso à réserver, alors que
+            // Planning (déclarer ses disponibilités) est sa vraie fonction.
+            if (id === "calendar" && isStaff(role)) {
               return (
-                <NavLink key="planning" to="/admin/planning" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
+                <NavLink key="planning" to={role === "admin" ? "/admin/planning" : "/planning"} onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
                   style={({ isActive }) => isActive ? { background: "linear-gradient(135deg,#b58de0,#dbacf0)", color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
                   <CalendarClock className="w-4 h-4 shrink-0" />Planning
                 </NavLink>
@@ -68,12 +74,6 @@ export function MainLayout() {
               <Plus className="w-4 h-4 shrink-0" />
               Créer un cours
             </NavLink>
-            {role === "admin" && (
-              <NavLink to="/calendar" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium transition-all"
-                style={({ isActive }) => isActive ? { background: "linear-gradient(135deg,#b58de0,#dbacf0)", color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
-                <CalendarClock className="w-4 h-4 shrink-0" />Rendez-vous
-              </NavLink>
-            )}
           </div>
         )}
         <div className="p-4" style={{ borderTop: `1px solid ${th.sidebarB}` }}>
@@ -101,9 +101,7 @@ export function MainLayout() {
             <button className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 sm:hidden" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
               <Search className="w-4 h-4" style={{ color: th.fg3 }} />
             </button>
-            <button className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
-              <Bell className="w-4 h-4" style={{ color: th.fg3 }} />
-            </button>
+            <NotificationBell />
           </div>
         </div>
 

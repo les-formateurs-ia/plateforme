@@ -71,7 +71,7 @@ export function DashboardPage() {
           <p className="text-sm" style={{ color: th.fg3 }}>Tes statistiques et ta progression en temps réel</p>
         </div>
         {instances.length > 1 && (
-          <div className="w-56 shrink-0">
+          <div className="w-full sm:w-96 max-w-full shrink-0">
             <VSelect
               sm
               value={selectedId ?? instances[0].id}

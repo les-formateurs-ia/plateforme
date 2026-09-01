@@ -13,9 +13,10 @@ import {
   listInstancesForStudent, listPublishedTemplates, assignFormationToStudent,
   updateInstanceStatus, deleteInstance, type FormationInstanceRow, type PublishedTemplate,
 } from "@/app/lib/formationInstances";
+import { listCoachAssignableCards, assignFormateurToStudent, type PersonCard } from "@/app/lib/planning";
 import type { EnrollmentStatus } from "@/app/lib/supabase/database.types";
 
-interface StudentProfile { id: string; first_name: string | null; last_name: string | null; email: string; avatar_url: string | null; }
+interface StudentProfile { id: string; first_name: string | null; last_name: string | null; email: string; avatar_url: string | null; formateur_id: string | null; }
 
 const STATUS_LABEL: Record<EnrollmentStatus, { label: string; color: string; bg: string }> = {
   active: { label: "Active", color: "#6adeb1", bg: "rgba(106,222,177,0.1)" },
@@ -30,21 +31,27 @@ export function AdminStudentDetailPage() {
   const [profile, setProfile] = useState<StudentProfile | null>(null);
   const [instances, setInstances] = useState<FormationInstanceRow[]>([]);
   const [templates, setTemplates] = useState<PublishedTemplate[]>([]);
+  const [formateurs, setFormateurs] = useState<PersonCard[]>([]);
   const [templateToAssign, setTemplateToAssign] = useState("");
+  const [formateurToAssign, setFormateurToAssign] = useState("");
   const [loading, setLoading] = useState(true);
   const [assigning, setAssigning] = useState(false);
+  const [assigningFormateur, setAssigningFormateur] = useState(false);
 
   const load = async () => {
     if (!studentId) return;
     setLoading(true);
-    const [{ data: p }, instanceRows, templateRows] = await Promise.all([
-      supabase.from("profiles").select("id, first_name, last_name, email, avatar_url").eq("id", studentId).single(),
+    const [{ data: p }, instanceRows, templateRows, formateurRows] = await Promise.all([
+      supabase.from("profiles").select("id, first_name, last_name, email, avatar_url, formateur_id").eq("id", studentId).single(),
       listInstancesForStudent(studentId),
       listPublishedTemplates(),
+      listCoachAssignableCards(),
     ]);
     setProfile(p ?? null);
     setInstances(instanceRows);
     setTemplates(templateRows);
+    setFormateurs(formateurRows);
+    setFormateurToAssign(p?.formateur_id ?? "");
     setLoading(false);
   };
 
@@ -63,6 +70,21 @@ export function AdminStudentDetailPage() {
       toast.error("Impossible d'attribuer cette formation.");
     } finally {
       setAssigning(false);
+    }
+  };
+
+  const assignFormateur = async (formateurId: string) => {
+    if (!studentId) return;
+    setAssigningFormateur(true);
+    try {
+      await assignFormateurToStudent(studentId, formateurId || null);
+      setFormateurToAssign(formateurId);
+      toast.success("Formateur attribué.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Impossible d'attribuer ce formateur.");
+    } finally {
+      setAssigningFormateur(false);
     }
   };
 
@@ -103,6 +125,22 @@ export function AdminStudentDetailPage() {
           <p className="text-sm truncate" style={{ color: th.fg3 }}>{profile.email}</p>
         </div>
       </div>
+
+      <GCard><div className="p-6">
+        <h3 className="text-sm font-black mb-4" style={{ color: th.fg }}>Formateur</h3>
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex-1 min-w-[220px]">
+            <VSelect
+              value={formateurToAssign}
+              onValueChange={assignFormateur}
+              placeholder="Choisir un formateur…"
+              options={formateurs.map((f) => ({ value: f.id, label: [f.firstName, f.lastName].filter(Boolean).join(" ").trim() || f.email }))}
+              disabled={assigningFormateur}
+            />
+          </div>
+        </div>
+        {!formateurs.length && <p className="text-xs mt-3" style={{ color: th.fg3 }}>Aucun formateur pour l'instant.</p>}
+      </div></GCard>
 
       <GCard><div className="p-6">
         <h3 className="text-sm font-black mb-4" style={{ color: th.fg }}>Formations attribuées</h3>

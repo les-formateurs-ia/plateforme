@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { ArrowLeft, Plus, Code, Pencil } from "lucide-react";
+import { ArrowLeft, Plus, Code, Pencil, Sparkles } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { isStaff } from "@/app/lib/permissions";
@@ -137,6 +137,28 @@ function AdminHtmlExercisesView() {
   );
 }
 
+function StudentExerciseGrid({ exercises, opening, onOpen }: { exercises: VisibleHtmlExercise[]; opening: string | null; onOpen: (ex: VisibleHtmlExercise) => void }) {
+  const th = useTh();
+  return (
+    <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(190px, 1fr))" }}>
+      {exercises.map((ex) => (
+        <div key={ex.exerciseId} onClick={() => onOpen(ex)}
+          className="group relative overflow-hidden rounded-2xl cursor-pointer flex flex-col transition-all duration-300 hover:scale-[1.02]"
+          style={{ aspectRatio: "1/1", background: th.card, border: `1px solid ${th.sep}`, boxShadow: "0 4px 18px rgba(0,0,0,0.16)", opacity: opening && opening !== ex.exerciseId ? 0.5 : 1 }}>
+          <div className="relative flex-1 overflow-hidden" style={{ background: "#0c0c13" }}>
+            <HtmlPreview html={ex.previewHtml} />
+            <div className="absolute inset-0" style={{ boxShadow: "inset 0 -24px 20px -20px rgba(0,0,0,0.35)" }} />
+          </div>
+          <div className="p-3 shrink-0">
+            <div className="text-xs font-black truncate" style={{ color: th.fg }}>{ex.name}</div>
+            <div className="text-[10px] truncate mt-0.5" style={{ color: th.fg3 }}>{ex.attemptCount > 0 ? `${ex.attemptCount} tentative${ex.attemptCount > 1 ? "s" : ""}` : "Pret a ouvrir"}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function StudentHtmlExercisesView() {
   const th = useTh();
   const navigate = useNavigate();
@@ -186,22 +208,38 @@ function StudentHtmlExercisesView() {
     );
   }
 
+  // "Personnalisés" = attribués à cet élève précisément (visibility privée) —
+  // le travail de son expert pour lui. "Autres" = le pool global commun à
+  // tous les élèves. Les personnalisés passent en premier et bien mis en
+  // avant : c'est le contenu qui a le plus de valeur pour lui.
+  const personalized = exercises.filter((ex) => ex.visibility === "private");
+  const others = exercises.filter((ex) => ex.visibility === "global");
+
   return (
-    <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(190px, 1fr))" }}>
-      {exercises.map((ex) => (
-        <div key={ex.exerciseId} onClick={() => open(ex)}
-          className="group relative overflow-hidden rounded-2xl cursor-pointer flex flex-col transition-all duration-300 hover:scale-[1.02]"
-          style={{ aspectRatio: "1/1", background: th.card, border: `1px solid ${th.sep}`, boxShadow: "0 4px 18px rgba(0,0,0,0.16)", opacity: opening && opening !== ex.exerciseId ? 0.5 : 1 }}>
-          <div className="relative flex-1 overflow-hidden" style={{ background: "#0c0c13" }}>
-            <HtmlPreview html={ex.previewHtml} />
-            <div className="absolute inset-0" style={{ boxShadow: "inset 0 -24px 20px -20px rgba(0,0,0,0.35)" }} />
+    <div className="space-y-8">
+      {personalized.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <Sparkles className="w-4 h-4" style={{ color: th.navAC }} />
+            <h3 className="text-sm font-black" style={{ color: th.fg }}>Vos exercices personnalisés</h3>
           </div>
-          <div className="p-3 shrink-0">
-            <div className="text-xs font-black truncate" style={{ color: th.fg }}>{ex.name}</div>
-            <div className="text-[10px] truncate mt-0.5" style={{ color: th.fg3 }}>{ex.attemptCount > 0 ? `${ex.attemptCount} tentative${ex.attemptCount > 1 ? "s" : ""}` : "Pret a ouvrir"}</div>
-          </div>
+          <p className="text-xs mb-4" style={{ color: th.fg3 }}>Développés par votre expert spécialement pour vous.</p>
+          <StudentExerciseGrid exercises={personalized} opening={opening} onOpen={open} />
         </div>
-      ))}
+      )}
+
+      {others.length > 0 && (
+        <div>
+          {personalized.length > 0 && (
+            <div className="flex items-center gap-3 mb-5">
+              <div className="flex-1 h-px" style={{ background: th.sep, opacity: 0.5 }} />
+              <span className="text-[11px] font-bold uppercase tracking-widest shrink-0" style={{ color: th.fg3 }}>Autres exercices</span>
+              <div className="flex-1 h-px" style={{ background: th.sep, opacity: 0.5 }} />
+            </div>
+          )}
+          <StudentExerciseGrid exercises={others} opening={opening} onOpen={open} />
+        </div>
+      )}
     </div>
   );
 }

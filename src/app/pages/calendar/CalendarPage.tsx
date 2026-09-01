@@ -1,84 +1,138 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Video, CheckCircle, Clock, Calendar as CalendarIcon, ExternalLink, XCircle } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, XCircle, RefreshCw, Check, X as XIcon } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
-import { useCourseProgress } from "@/app/state/useCourseProgress";
 import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
-import { ShimBtn } from "@/app/components/common/Buttons";
+import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
+import { SuccessCheck } from "@/app/components/common/SuccessCheck";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/app/components/ui/dialog";
-import { getMyAppointments, requestAppointment, type Appointment } from "@/app/lib/appointments";
-import { getExpertBookingUrl } from "@/app/lib/platformSettings";
+import {
+  listAvailableSlotsForBooking, listMyBookingsAsStudent, bookSlot, changeBooking, cancelBooking,
+  acceptReschedule, declineReschedule, getAssignedFormateurId, getFormateurName,
+  toISODate, addDays, firstBookableDate, type ExpertAvailableSlot, type StudentBooking,
+} from "@/app/lib/availability";
 
-const STATUS_LABEL: Record<Appointment["status"], { label: string; color: string; bg: string }> = {
-  requested: { label: "Demande envoyée", color: "#fbc2ad", bg: "rgba(251,194,173,0.1)" },
-  preparing: { label: "En préparation", color: "#fbc2ad", bg: "rgba(251,194,173,0.1)" },
-  confirmed: { label: "Confirmé", color: "#6adeb1", bg: "rgba(106,222,177,0.1)" },
-  completed: { label: "Terminé", color: "#94A3B8", bg: "rgba(148,163,184,0.1)" },
-  cancelled: { label: "Annulé", color: "#fbc2ad", bg: "rgba(251,194,173,0.1)" },
-};
+const BOOKING_WINDOW_DAYS = 21;
 
-function formatDateTime(iso: string) {
-  return new Date(iso).toLocaleString("fr-FR", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
+function formatDay(iso: string) {
+  return new Date(`${iso}T00:00:00`).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
 }
 
 export function CalendarPage() {
   const th = useTh();
   const { user } = useAuth();
-  const course = useCourseProgress();
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [assignedFormateurId, setAssignedFormateurId] = useState<string | null>(null);
+  const [formateurName, setFormateurName] = useState("");
+  const [checkedAssignment, setCheckedAssignment] = useState(false);
+  const [slots, setSlots] = useState<ExpertAvailableSlot[]>([]);
+  const [bookings, setBookings] = useState<StudentBooking[]>([]);
   const [loading, setLoading] = useState(true);
-  const [requesting, setRequesting] = useState<string | null>(null);
-  const [bookingUrl, setBookingUrl] = useState<string | null>(null);
-  const [bookingSection, setBookingSection] = useState<{ id: string; title: string } | null>(null);
+  const [pending, setPending] = useState<ExpertAvailableSlot | null>(null);
+  const [booking, setBooking] = useState(false);
+  const [justBooked, setJustBooked] = useState<{ date: string; start: string; end: string } | null>(null);
+  const [respondingToProposal, setRespondingToProposal] = useState(false);
 
   const load = async () => {
     if (!user) return;
     setLoading(true);
     try {
-      setAppointments(await getMyAppointments(user.id));
+      const formateurId = await getAssignedFormateurId(user.id);
+      setAssignedFormateurId(formateurId);
+      setCheckedAssignment(true);
+
+      const myBookings = await listMyBookingsAsStudent(user.id);
+      setBookings(myBookings);
+
+      if (formateurId) {
+        const from = firstBookableDate();
+        const to = addDays(from, BOOKING_WINDOW_DAYS);
+        const [availableSlots, name] = await Promise.all([
+          listAvailableSlotsForBooking(formateurId, toISODate(from), toISODate(to)),
+          getFormateurName(formateurId),
+        ]);
+        setSlots(availableSlots);
+        setFormateurName(name);
+      } else {
+        setSlots([]);
+      }
     } catch (err) {
       console.error(err);
-      toast.error("Impossible de charger vos rendez-vous.");
+      toast.error("Impossible de charger le planning.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => { void load(); }, [user]);
-  useEffect(() => { void getExpertBookingUrl().then(setBookingUrl).catch((err) => console.error(err)); }, []);
 
-  // La prise de créneau réelle se fait dans l'agenda Google de l'expert IA
-  // (widget ci-dessous) — on garde quand même la demande en base pour le
-  // suivi côté admin/formateur et pour ne pas proposer deux fois le même
-  // module tant qu'une demande active existe.
-  const handleRequest = async (section: { id: string; title: string }) => {
-    if (!user || !course.outline) return;
-    setRequesting(section.id);
+  const today = toISODate(new Date());
+  const activeBooking = bookings.find((b) => b.status === "confirmed" && b.slotDate >= today) ?? null;
+
+  const byDay = useMemo(() => {
+    const map = new Map<string, ExpertAvailableSlot[]>();
+    for (const s of slots) {
+      if (!map.has(s.slotDate)) map.set(s.slotDate, []);
+      map.get(s.slotDate)!.push(s);
+    }
+    return map;
+  }, [slots]);
+
+  const confirmBooking = async () => {
+    if (!user || !pending) return;
+    setBooking(true);
     try {
-      const appt = await requestAppointment(user.id, course.outline.instanceId, section.id);
-      setAppointments((a) => [appt, ...a]);
-      setBookingSection(section);
+      if (activeBooking) {
+        await changeBooking(activeBooking.id, pending.formateurId, pending.slotDate, pending.startTime);
+      } else {
+        await bookSlot(user.id, pending.formateurId, pending.slotDate, pending.startTime);
+      }
+      setJustBooked({ date: pending.slotDate, start: pending.startTime, end: pending.endTime });
+      setPending(null);
+      void load();
     } catch (err) {
       console.error(err);
-      toast.error("Impossible d'envoyer la demande.");
+      toast.error("Ce créneau vient d'être pris ou n'est plus disponible, choisis-en un autre.");
+      setPending(null);
+      void load();
     } finally {
-      setRequesting(null);
+      setBooking(false);
     }
   };
 
-  const completedSections = (course.outline?.sections ?? []).filter((section) => {
-    if (!section.lessons.length) return false;
-    return section.lessons.every((l) => course.lessonStates.find((s) => s.lesson.id === l.id)?.state === "completed");
-  });
+  const handleCancel = async (id: string) => {
+    try {
+      await cancelBooking(id);
+      toast.success("Rendez-vous annulé.");
+      void load();
+    } catch (err) {
+      console.error(err);
+      toast.error("Impossible d'annuler.");
+    }
+  };
 
-  const activeAppointmentSectionIds = new Set(
-    appointments.filter((a) => a.status !== "cancelled").map((a) => a.sectionId).filter((id): id is string => !!id),
-  );
-  const bookableSections = completedSections.filter((s) => !activeAppointmentSectionIds.has(s.id));
+  const respondToProposal = async (accept: boolean) => {
+    if (!activeBooking || !activeBooking.proposedDate || !activeBooking.proposedStartTime || !activeBooking.proposedEndTime) return;
+    setRespondingToProposal(true);
+    try {
+      if (accept) {
+        await acceptReschedule(activeBooking.id, activeBooking.formateurId, activeBooking.proposedDate, activeBooking.proposedStartTime, activeBooking.proposedEndTime);
+        toast.success("Nouveau créneau confirmé !");
+      } else {
+        await declineReschedule(activeBooking.id, activeBooking.formateurId);
+        toast.success("Proposition refusée, votre rendez-vous initial est conservé.");
+      }
+      void load();
+    } catch (err) {
+      console.error(err);
+      toast.error("Impossible d'enregistrer votre réponse.");
+    } finally {
+      setRespondingToProposal(false);
+    }
+  };
 
-  if (loading || course.loading) {
+  if (loading) {
     return <div className="flex-1 flex items-center justify-center"><span className="text-sm" style={{ color: th.fg3 }}>Chargement…</span></div>;
   }
 
@@ -86,90 +140,119 @@ export function CalendarPage() {
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-5">
       <div>
         <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Rendez-vous</GT></h2>
-        <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Réserve un point avec ton expert IA à la fin de chaque module.</p>
+        <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Réserve un échange 1h avec ton expert — à partir de demain.</p>
       </div>
 
-      {bookableSections.length > 0 && (
-        <div className="space-y-3">
-          {bookableSections.map((section) => (
-            <div key={section.id} className="rounded-2xl p-5" style={{ background: th.isDark ? "linear-gradient(135deg,rgba(181,141,224,0.18),rgba(219,172,240,0.08))" : "linear-gradient(135deg,rgba(181,141,224,0.1),rgba(219,172,240,0.04))", border: "1px solid rgba(181,141,224,0.28)" }}>
-              <Video className="w-5 h-5 mb-3" style={{ color: th.navAC }} />
-              <div className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: th.navAC }}>Module terminé : {section.title}</div>
-              <h4 className="text-sm font-black mb-2" style={{ color: th.fg }}>Planifie un échange 1:1 avec un expert IA</h4>
-              <p className="text-xs leading-relaxed mb-4" style={{ color: th.fg3 }}>Pose tes questions, débloque tes situations et prépare ta certification.</p>
-              <ShimBtn sm onClick={() => handleRequest(section)} disabled={requesting === section.id}>
-                <span className="flex items-center justify-center gap-2"><CalendarIcon className="w-4 h-4" />{requesting === section.id ? "Envoi…" : "Réserver ma session"}</span>
-              </ShimBtn>
+      {checkedAssignment && !assignedFormateurId && (
+        <GCard><div className="p-8 text-center"><p className="text-sm" style={{ color: th.fg3 }}>Aucun formateur ne vous a encore été attribué — revenez un peu plus tard.</p></div></GCard>
+      )}
+
+      {activeBooking?.proposedDate && (
+        <GCard accent>
+          <div className="p-5">
+            <div className="flex items-center gap-2 mb-2">
+              <RefreshCw className="w-4 h-4" style={{ color: th.navAC }} />
+              <h3 className="text-sm font-black" style={{ color: th.fg }}>Votre formateur propose un nouveau créneau</h3>
             </div>
-          ))}
-        </div>
+            <p className="text-xs mb-4" style={{ color: th.fg3 }}>
+              Déplacer votre rendez-vous du {formatDay(activeBooking.slotDate)} ({activeBooking.startTime}–{activeBooking.endTime}) au{" "}
+              <strong style={{ color: th.fg }}>{formatDay(activeBooking.proposedDate)} de {activeBooking.proposedStartTime} à {activeBooking.proposedEndTime}</strong> ?
+            </p>
+            <div className="flex items-center gap-2">
+              <ShimBtn sm onClick={() => respondToProposal(true)} disabled={respondingToProposal}><span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5" />Accepter</span></ShimBtn>
+              <VBtn sm onClick={() => respondToProposal(false)} disabled={respondingToProposal}><span className="flex items-center gap-1.5"><XIcon className="w-3.5 h-3.5" />Refuser</span></VBtn>
+            </div>
+          </div>
+        </GCard>
+      )}
+
+      {assignedFormateurId && (
+        <GCard>
+          <div className="p-5">
+            <h3 className="text-sm font-black mb-1" style={{ color: th.fg }}>
+              Disponibilités de votre expert {formateurName}
+            </h3>
+            {activeBooking && (
+              <p className="text-xs mb-4" style={{ color: th.fg3 }}>
+                Vous avez déjà un rendez-vous confirmé — choisissez un créneau ci-dessous pour le déplacer (vous ne pouvez en avoir qu'un seul à la fois).
+              </p>
+            )}
+            {byDay.size === 0 && (
+              <p className="text-xs mt-2" style={{ color: th.fg3 }}>Aucun créneau disponible pour l'instant.</p>
+            )}
+            <div className="space-y-4 mt-3">
+              {[...byDay.entries()].map(([date, daySlots]) => (
+                <div key={date}>
+                  <div className="text-xs font-bold capitalize mb-2" style={{ color: th.fg2 }}>{formatDay(date)}</div>
+                  <div className="flex flex-wrap gap-2">
+                    {daySlots.map((s) => (
+                      <button
+                        key={s.startTime}
+                        onClick={() => setPending(s)}
+                        className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all hover:opacity-80"
+                        style={{ border: `1px solid ${th.navAC}`, color: th.navAC }}
+                      >
+                        {s.startTime}–{s.endTime}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </GCard>
       )}
 
       <GCard><div className="p-5">
         <h3 className="text-sm font-black mb-4" style={{ color: th.fg }}>Mes rendez-vous</h3>
-        {appointments.length === 0 && (
-          <p className="text-xs" style={{ color: th.fg3 }}>Aucune demande pour l'instant — termine un module pour débloquer une session avec ton expert IA.</p>
+        {!activeBooking && (
+          <p className="text-xs" style={{ color: th.fg3 }}>Aucun rendez-vous prévu pour l'instant.</p>
         )}
-        <div className="space-y-3">
-          {appointments.map((a) => {
-            const sc = STATUS_LABEL[a.status];
-            const section = course.outline?.sections.find((s) => s.id === a.sectionId);
-            return (
-              <div key={a.id} className="rounded-xl p-4" style={{ border: `1px solid ${th.sep}` }}>
-                <div className="flex items-start justify-between mb-2 gap-3">
-                  <div>
-                    <div className="text-sm font-semibold" style={{ color: th.fg }}>{section?.title ?? "Point avec l'expert"}</div>
-                    <div className="text-xs mt-0.5" style={{ color: th.fg3 }}>Demandé le {formatDateTime(a.requestedAt)}</div>
-                  </div>
-                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0" style={{ background: sc.bg, color: sc.color, border: `1px solid ${sc.color}30` }}>{sc.label}</span>
-                </div>
-
-                {(a.status === "requested" || a.status === "preparing") && (
-                  <p className="text-xs mt-2 flex items-center gap-1.5" style={{ color: th.navAC }}><Clock className="w-3.5 h-3.5" />Votre expert IA prépare votre rendez-vous.</p>
-                )}
-
-                {a.status === "confirmed" && (
-                  <div className="mt-2 space-y-2">
-                    {a.scheduledAt && <p className="text-xs flex items-center gap-1.5" style={{ color: th.fg2 }}><CalendarIcon className="w-3.5 h-3.5" style={{ color: th.navAC }} />{formatDateTime(a.scheduledAt)}</p>}
-                    {a.adminMessage && <p className="text-xs rounded-lg px-3 py-2" style={{ background: "rgba(181,141,224,0.06)", color: th.fg2, border: `1px solid ${th.sep}` }}>{a.adminMessage}</p>}
-                    {a.googleMeetLink && (
-                      <a href={a.googleMeetLink} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold hover:opacity-80" style={{ color: th.navAC }}>
-                        <ExternalLink className="w-3.5 h-3.5" />Rejoindre sur Google Meet
-                      </a>
-                    )}
-                  </div>
-                )}
-
-                {a.status === "cancelled" && (
-                  <p className="text-xs mt-2 flex items-center gap-1.5" style={{ color: "#fbc2ad" }}><XCircle className="w-3.5 h-3.5" />Ce rendez-vous a été annulé.</p>
-                )}
+        {activeBooking && (
+          <div className="rounded-xl p-4 flex items-center justify-between gap-3" style={{ border: `1px solid ${th.sep}` }}>
+            <div>
+              <div className="text-sm font-semibold" style={{ color: th.fg }}>{activeBooking.formateurName}</div>
+              <div className="text-xs mt-0.5 flex items-center gap-1.5" style={{ color: th.fg3 }}>
+                <CalendarIcon className="w-3.5 h-3.5" style={{ color: th.navAC }} />
+                {formatDay(activeBooking.slotDate)} · {activeBooking.startTime}–{activeBooking.endTime}
               </div>
-            );
-          })}
-        </div>
+            </div>
+            <VBtn sm onClick={() => handleCancel(activeBooking.id)}>
+              <span className="flex items-center gap-1.5"><XCircle className="w-3.5 h-3.5" />Annuler</span>
+            </VBtn>
+          </div>
+        )}
       </div></GCard>
 
-      <Dialog open={!!bookingSection} onOpenChange={(open) => !open && setBookingSection(null)}>
-        <DialogContent className="sm:max-w-2xl">
+      <Dialog open={!!pending} onOpenChange={(open) => !open && setPending(null)}>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Choisis ton créneau</DialogTitle>
+            <DialogTitle>{activeBooking ? "Modifier votre rendez-vous" : "Confirmer le rendez-vous"}</DialogTitle>
             <DialogDescription>
-              {bookingSection?.title} — sélectionne un horaire réellement disponible dans l'agenda de ton expert IA. La confirmation et le lien Google Meet arrivent directement par email.
+              {pending && (
+                <span className="flex items-center gap-1.5 mt-1" style={{ color: th.fg2 }}>
+                  <Clock className="w-3.5 h-3.5" />
+                  Avec {pending.formateurName}, le {formatDay(pending.slotDate)} de {pending.startTime} à {pending.endTime}.
+                </span>
+              )}
             </DialogDescription>
           </DialogHeader>
-          {bookingUrl ? (
-            <iframe
-              src={`${bookingUrl}${bookingUrl.includes("?") ? "&" : "?"}gv=true`}
-              style={{ border: 0 }}
-              width="100%"
-              height={600}
-              title="Réservation Google Calendar"
-            />
-          ) : (
-            <p className="text-sm" style={{ color: th.fg3 }}>
-              La prise de rendez-vous en ligne n'est pas encore configurée — ta demande a bien été enregistrée, ton expert IA te recontactera directement pour fixer un horaire.
-            </p>
-          )}
+          <ShimBtn full onClick={confirmBooking} disabled={booking}>{booking ? "Confirmation…" : activeBooking ? "Confirmer le changement" : "Confirmer le rendez-vous"}</ShimBtn>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!justBooked} onOpenChange={(open) => !open && setJustBooked(null)}>
+        <DialogContent className="sm:max-w-sm">
+          <div className="flex flex-col items-center text-center py-4 gap-3">
+            <SuccessCheck />
+            <DialogTitle>Rendez-vous confirmé !</DialogTitle>
+            {justBooked && (
+              <DialogDescription className="text-center">
+                Votre rendez-vous est pris le <strong style={{ color: th.fg }}>{formatDay(justBooked.date)}</strong> de <strong style={{ color: th.fg }}>{justBooked.start} à {justBooked.end}</strong>.
+              </DialogDescription>
+            )}
+            <ShimBtn sm onClick={() => setJustBooked(null)}>Parfait</ShimBtn>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

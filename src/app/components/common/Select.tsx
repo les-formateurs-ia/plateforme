@@ -32,7 +32,9 @@ export function VSelect({ value, onValueChange, options, placeholder, disabled, 
         )}
         style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg }}
       >
-        <SelectPrimitive.Value placeholder={placeholder} />
+        <span className="truncate min-w-0">
+          <SelectPrimitive.Value placeholder={placeholder} />
+        </span>
         <SelectPrimitive.Icon asChild>
           <ChevronDown className="w-4 h-4 shrink-0" style={{ color: th.fg3 }} />
         </SelectPrimitive.Icon>

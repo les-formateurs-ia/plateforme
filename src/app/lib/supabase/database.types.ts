@@ -5,7 +5,8 @@
 export type UserRole = "admin" | "formateur" | "student";
 export type EnrollmentStatus = "active" | "completed" | "paused";
 export type LessonProgressStatus = "locked" | "in_progress" | "completed";
-export type AppointmentStatus = "requested" | "preparing" | "confirmed" | "completed" | "cancelled";
+export type RdvStatus = "confirmed" | "cancelled";
+export type NotificationType = "rdv_cancelled" | "rdv_reschedule_proposed" | "rdv_reschedule_accepted" | "rdv_reschedule_declined";
 export type AiContentType = "practical_exercise" | "mindmap" | "podcast" | "text_summary" | "remedial_explanation" | "remedial_quiz";
 export type ChatRole = "user" | "ai";
 export type VideoProvider = "cloudflare_stream" | "youtube" | "vimeo" | "external_url";
@@ -27,6 +28,7 @@ export interface Database {
           must_onboard: boolean;
           theme_preference: ThemePreference;
           avatar_url: string | null;
+          formateur_id: string | null;
           created_at: string;
         };
         Insert: {
@@ -38,6 +40,7 @@ export interface Database {
           must_onboard?: boolean;
           theme_preference?: ThemePreference;
           avatar_url?: string | null;
+          formateur_id?: string | null;
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
@@ -401,6 +404,7 @@ export interface Database {
           assigned_at: string;
           created_at: string;
           updated_at: string;
+          is_preview: boolean;
         };
         Insert: {
           id?: string;
@@ -418,6 +422,7 @@ export interface Database {
           assigned_at?: string;
           created_at?: string;
           updated_at?: string;
+          is_preview?: boolean;
         };
         Update: Partial<Database["public"]["Tables"]["formation_instances"]["Insert"]>;
       };
@@ -591,49 +596,84 @@ export interface Database {
         };
         Update: Partial<Database["public"]["Tables"]["user_badges"]["Insert"]>;
       };
-      appointments: {
+      availability_slots: {
         Row: {
           id: string;
-          user_id: string;
-          instance_id: string;
-          section_id: string | null;
-          status: AppointmentStatus;
-          requested_at: string;
-          scheduled_at: string | null;
-          google_meet_link: string | null;
-          admin_message: string | null;
-          handled_by: string | null;
+          formateur_id: string;
+          slot_date: string;
+          start_time: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          formateur_id: string;
+          slot_date: string;
+          start_time: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["availability_slots"]["Insert"]>;
+      };
+      rendez_vous: {
+        Row: {
+          id: string;
+          student_id: string;
+          formateur_id: string;
+          slot_date: string;
+          start_time: string;
+          end_time: string;
+          status: RdvStatus;
+          message: string | null;
+          cancelled_by: string | null;
+          proposed_date: string | null;
+          proposed_start_time: string | null;
+          proposed_end_time: string | null;
+          proposed_by: string | null;
+          proposed_at: string | null;
           created_at: string;
           updated_at: string;
         };
         Insert: {
           id?: string;
-          user_id: string;
-          instance_id: string;
-          section_id?: string | null;
-          status?: AppointmentStatus;
-          requested_at?: string;
-          scheduled_at?: string | null;
-          google_meet_link?: string | null;
-          admin_message?: string | null;
-          handled_by?: string | null;
+          student_id: string;
+          formateur_id: string;
+          slot_date: string;
+          start_time: string;
+          end_time: string;
+          status?: RdvStatus;
+          message?: string | null;
+          cancelled_by?: string | null;
+          proposed_date?: string | null;
+          proposed_start_time?: string | null;
+          proposed_end_time?: string | null;
+          proposed_by?: string | null;
+          proposed_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["appointments"]["Insert"]>;
+        Update: Partial<Database["public"]["Tables"]["rendez_vous"]["Insert"]>;
       };
-      platform_settings: {
+      notifications: {
         Row: {
-          id: boolean;
-          expert_booking_url: string | null;
-          updated_at: string;
+          id: string;
+          user_id: string;
+          type: NotificationType;
+          title: string;
+          body: string | null;
+          rdv_id: string | null;
+          read_at: string | null;
+          created_at: string;
         };
         Insert: {
-          id?: boolean;
-          expert_booking_url?: string | null;
-          updated_at?: string;
+          id?: string;
+          user_id: string;
+          type: NotificationType;
+          title: string;
+          body?: string | null;
+          rdv_id?: string | null;
+          read_at?: string | null;
+          created_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["platform_settings"]["Insert"]>;
+        Update: Partial<Database["public"]["Tables"]["notifications"]["Insert"]>;
       };
     };
   };

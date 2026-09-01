@@ -4,6 +4,7 @@
 // exercice défini par admin/formateur (voir lib/htmlExercises.ts côté admin),
 // groupé en dossiers via exercise_sessions (voir exerciseSessions.ts).
 import { supabase } from "@/app/lib/supabase/client";
+import type { ExerciseVisibility } from "@/app/lib/supabase/database.types";
 
 export interface HtmlExerciseAttempt {
   id: string;
@@ -67,6 +68,7 @@ export interface VisibleHtmlExercise {
   name: string;
   description: string | null;
   htmlContent: string;
+  visibility: ExerciseVisibility;
   attemptCount: number;
   lastAttemptAt: string | null;
   // HTML de la dernière tentative, pour un aperçu miniature en vrai rendu.
@@ -75,11 +77,13 @@ export interface VisibleHtmlExercise {
 
 // Liste les exercices visibles par l'élève (globaux + privés qui lui sont
 // assignés — filtré côté base par RLS sur html_exercises), avec son propre
-// état d'avancement s'il a déjà commencé.
+// état d'avancement s'il a déjà commencé. `visibility` permet à la page de
+// séparer "tes exercices personnalisés" (private) des exercices communs
+// (global) plutôt que de tout mélanger.
 export async function listVisibleHtmlExercises(userId: string): Promise<VisibleHtmlExercise[]> {
   const { data: exercises, error } = await supabase
     .from("html_exercises")
-    .select("id, name, description, html_content, created_at")
+    .select("id, name, description, html_content, visibility, created_at")
     .order("created_at", { ascending: false });
   if (error) throw error;
   if (!exercises?.length) return [];
@@ -122,6 +126,7 @@ export async function listVisibleHtmlExercises(userId: string): Promise<VisibleH
       name: ex.name,
       description: ex.description,
       htmlContent: ex.html_content,
+      visibility: ex.visibility,
       attemptCount: rows.length,
       lastAttemptAt: rows.length ? rows[rows.length - 1].createdAt : null,
       previewHtml: rows.length ? rows[rows.length - 1].htmlContent : ex.html_content,

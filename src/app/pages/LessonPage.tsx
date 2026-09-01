@@ -514,7 +514,7 @@ export function LessonPage() {
     setHtmlSaving(true);
     try {
       const html = htmlDraft.trim() || null;
-      await updateLessonCustomHtml(lessonId, html);
+      await updateLessonCustomHtml(lessonId, html, lesson?.isTemplate ?? false);
       setLesson((prev) => (prev ? { ...prev, customHtmlContent: html } : prev));
       setHtmlEditing(false);
       toast.success("Page HTML enregistrée.");

@@ -5,7 +5,7 @@ import { GT } from "@/app/components/common/GT";
 import { GCard } from "@/app/components/common/GCard";
 import { Avatar } from "@/app/components/common/Avatar";
 import { listStudentCards, listFormateurCards, type StudentCard, type PersonCard } from "@/app/lib/planning";
-import { AdminAppointmentsPage } from "@/app/pages/admin/AdminAppointmentsPage";
+import { AdminAvailabilityPage } from "@/app/pages/admin/AdminAvailabilityPage";
 
 type PlanningTab = "etudiants" | "formateurs" | "rendez-vous";
 const TABS: { id: PlanningTab; label: string }[] = [
@@ -108,7 +108,7 @@ export function AdminPlanningPage() {
           />
         )}
         {tab === "formateurs" && <PersonGrid people={formateurs} loading={loadingFormateurs} />}
-        {tab === "rendez-vous" && <AdminAppointmentsPage embedded />}
+        {tab === "rendez-vous" && <AdminAvailabilityPage embedded />}
       </div>
     </div>
   );

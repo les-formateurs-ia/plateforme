@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useLocation, Link } from "react-router";
-import { ChevronLeft, Upload, Plus, Trash2, CheckCircle, ExternalLink } from "lucide-react";
+import { ChevronLeft, Upload, Plus, Trash2, CheckCircle, Eye, Code } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { supabase } from "@/app/lib/supabase/client";
 import { GCard } from "@/app/components/common/GCard";
@@ -42,6 +42,8 @@ export function AdminLessonEditorPage() {
   const [referenceContent, setReferenceContent] = useState("");
   const [aiContentPrompt, setAiContentPrompt] = useState("");
   const [practicalExercisePrompt, setPracticalExercisePrompt] = useState("");
+  const [customHtml, setCustomHtml] = useState("");
+  const [htmlPreviewOpen, setHtmlPreviewOpen] = useState(false);
   const [questions, setQuestions] = useState<QuizQuestionDraft[]>([]);
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
@@ -69,6 +71,7 @@ export function AdminLessonEditorPage() {
       setReferenceContent(lesson.reference_content ?? "");
       setAiContentPrompt(lesson.ai_content_prompt ?? "");
       setPracticalExercisePrompt(lesson.practical_exercise_prompt ?? "");
+      setCustomHtml(lesson.custom_html_content ?? "");
 
       if (isInstance) {
         const { data: questionRows } = await supabase.from("instance_quiz_questions").select("id, question, explanation, order_index").eq("lesson_id", routeLessonId).order("order_index");
@@ -152,6 +155,7 @@ export function AdminLessonEditorPage() {
       reference_content: referenceContent || null,
       ai_content_prompt: aiContentPrompt || null,
       practical_exercise_prompt: practicalExercisePrompt || null,
+      custom_html_content: customHtml.trim() || null,
     };
 
     let lessonId = routeLessonId;
@@ -219,14 +223,8 @@ export function AdminLessonEditorPage() {
 
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
+      <div className="flex items-center gap-3">
         <Link to={coursesBase} className="flex items-center gap-1.5 text-sm w-fit transition-colors hover:opacity-70" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />Cours</Link>
-        {!isNew && isInstance && (
-          <a href={`/lesson/${routeLessonId}`} target="_blank" rel="noreferrer" title="Voir la leçon comme un élève"
-            className="flex items-center gap-1.5 text-sm font-semibold hover:opacity-70" style={{ color: th.navAC }}>
-            <ExternalLink className="w-4 h-4" />Aperçu élève
-          </a>
-        )}
       </div>
 
       <GCard glow><div className="p-6 space-y-4">
@@ -270,6 +268,25 @@ export function AdminLessonEditorPage() {
             style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg }}>
             <Upload className="w-4 h-4" />{uploading ? "Envoi…" : videoUrl ? "Remplacer la vidéo" : "Choisir un fichier vidéo"}
           </button>
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-xs font-bold uppercase tracking-widest" style={{ color: th.fg3 }}>Playground (page HTML)</label>
+            {customHtml.trim() && (
+              <button type="button" onClick={() => setHtmlPreviewOpen((v) => !v)}
+                className="flex items-center gap-1.5 text-xs font-semibold hover:opacity-70" style={{ color: th.navAC }}>
+                <Eye className="w-3.5 h-3.5" />{htmlPreviewOpen ? "Masquer l'aperçu" : "Aperçu"}
+              </button>
+            )}
+          </div>
+          <textarea value={customHtml} onChange={(e) => setCustomHtml(e.target.value)} rows={10} placeholder="Colle ici le HTML du template (identique pour tous les élèves — la personnalisation se fait sur un duplicata)."
+            className="w-full rounded-xl px-4 py-3 text-xs g-input resize-y font-mono" />
+          {htmlPreviewOpen && customHtml.trim() && (
+            <iframe srcDoc={customHtml} sandbox="allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox" title="Aperçu du Playground"
+              className="w-full rounded-xl mt-2 bg-white" style={{ height: 420, border: `1px solid ${th.sep}` }} />
+          )}
+          <p className="text-xs mt-1.5 flex items-center gap-1.5" style={{ color: th.fg3 }}><Code className="w-3 h-3" />Affiché aux élèves dans l'onglet "Playground" de la leçon.</p>
         </div>
 
         <div>

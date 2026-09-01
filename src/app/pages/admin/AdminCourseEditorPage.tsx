@@ -1,17 +1,20 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router";
+import { toast } from "sonner";
 import {
   ChevronLeft, Plus, Trash2, ChevronUp, ChevronDown,
-  ChevronRight as ChevronRightIcon, GripVertical, ExternalLink,
+  ChevronRight as ChevronRightIcon, GripVertical, Eye,
 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { supabase } from "@/app/lib/supabase/client";
 import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
-import { VBtn, ShimBtn } from "@/app/components/common/Buttons";
+import { VBtn } from "@/app/components/common/Buttons";
+import { SaveButton, type SaveButtonState } from "@/app/components/common/SaveButton";
 import { VSelect } from "@/app/components/common/Select";
 import { HtmlExerciseEditDialog } from "@/app/components/practice/HtmlExerciseEditDialog";
 import { listExercisesForStudent, type HtmlExerciseRow } from "@/app/lib/htmlExercises";
+import { previewFormationAsStaff } from "@/app/lib/learning";
 
 interface CourseForm {
   name: string;
@@ -60,13 +63,35 @@ export function AdminCourseEditorPage() {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [studentExercises, setStudentExercises] = useState<HtmlExerciseRow[]>([]);
   const [exerciseDialogOpen, setExerciseDialogOpen] = useState(false);
   const [editingExercise, setEditingExercise] = useState<HtmlExerciseRow | undefined>(undefined);
+  const [previewing, setPreviewing] = useState(false);
 
   const loadStudentExercises = async (id: string) => {
     setStudentExercises(await listExercisesForStudent(id));
+  };
+
+  // Un duplicata élève est déjà une vraie instance : on l'ouvre directement.
+  // Un template n'a pas d'instance_lessons (mindmap/podcast/vidéo IA/agent/quiz
+  // en dépendent) — on en génère donc une prévisualisation dédiée côté
+  // serveur avant d'ouvrir l'aperçu, pour que tout fonctionne comme pour un
+  // élève (cf. migration 0026).
+  const openPreview = async () => {
+    if (!courseId || previewing) return;
+    if (isInstance) { window.open(`/admin/instances/${courseId}/preview`, "_blank", "noopener"); return; }
+    setPreviewing(true);
+    try {
+      const previewInstanceId = await previewFormationAsStaff(courseId);
+      window.open(`/admin/instances/${previewInstanceId}/preview`, "_blank", "noopener");
+    } catch (err) {
+      console.error(err);
+      toast.error(err instanceof Error ? err.message : "Impossible de générer la prévisualisation.");
+    } finally {
+      setPreviewing(false);
+    }
   };
 
   useEffect(() => {
@@ -140,11 +165,16 @@ export function AdminCourseEditorPage() {
     setCourse((c) => ({ ...c, name, slug: slugTouched ? c.slug : slugify(name) }));
   };
 
+  const canSave = !!course.name.trim() && (isInstance || !!course.slug.trim());
+
+  const flashSaved = (after?: () => void) => {
+    setSaving(false);
+    setJustSaved(true);
+    setTimeout(() => { setJustSaved(false); after?.(); }, 900);
+  };
+
   const saveCourse = async () => {
-    if (!course.name.trim() || (!isInstance && !course.slug.trim())) {
-      setError(isInstance ? "Le nom est obligatoire." : "Nom et slug sont obligatoires.");
-      return;
-    }
+    if (!canSave || saving) return;
     setSaving(true);
     setError(null);
 
@@ -159,7 +189,7 @@ export function AdminCourseEditorPage() {
       };
       const { error: updateError } = await supabase.from("formation_instances").update(payload).eq("id", courseId);
       if (updateError) { setError(updateError.message); setSaving(false); return; }
-      setSaving(false);
+      flashSaved();
       return;
     }
 
@@ -177,14 +207,16 @@ export function AdminCourseEditorPage() {
     if (courseId) {
       const { error: updateError } = await supabase.from("formations").update(payload).eq("id", courseId);
       if (updateError) { setError(updateError.message); setSaving(false); return; }
+      flashSaved();
     } else {
       const { data, error: insertError } = await supabase.from("formations").insert(payload).select("id").single();
       if (insertError || !data) { setError(insertError?.message ?? "Erreur inconnue"); setSaving(false); return; }
       setCourseId(data.id);
-      navigate(`/admin/courses/${data.id}`, { replace: true });
+      flashSaved(() => navigate(`/admin/courses/${data.id}`, { replace: true }));
     }
-    setSaving(false);
   };
+
+  const saveButtonState: SaveButtonState = saving ? "saving" : justSaved ? "saved" : canSave ? "active" : "disabled";
 
   const addSection = async () => {
     if (!courseId) return;
@@ -248,8 +280,14 @@ export function AdminCourseEditorPage() {
 
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
-      <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between gap-3">
         <Link to={backHref} className="flex items-center gap-1.5 text-sm transition-colors hover:opacity-70" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />{backLabel}</Link>
+        {courseId && (
+          <button type="button" onClick={() => void openPreview()} disabled={previewing}
+            title="Visualiser le cours comme un élève" className="flex items-center gap-1.5 text-sm font-semibold hover:opacity-70 disabled:opacity-50" style={{ color: th.navAC }}>
+            <Eye className="w-4 h-4" />{previewing ? "Préparation…" : "Visualiser le cours"}
+          </button>
+        )}
       </div>
 
       <GCard glow><div className="p-6 space-y-4">
@@ -314,8 +352,6 @@ export function AdminCourseEditorPage() {
         )}
 
         {error && <p className="text-xs" style={{ color: "#fbc2ad" }}>{error}</p>}
-
-        <ShimBtn onClick={saveCourse} disabled={saving}>{saving ? "Enregistrement…" : "Enregistrer"}</ShimBtn>
       </div></GCard>
 
       {!courseId && (
@@ -354,12 +390,6 @@ export function AdminCourseEditorPage() {
                         <div key={lesson.id} className="flex items-center gap-3 px-4 py-2.5" style={{ borderBottom: `1px solid ${th.sep}` }}>
                           <button onClick={() => navigate(`${lessonsBase}/${lesson.id}`)} className="flex-1 min-w-0 truncate text-left text-sm hover:opacity-70" style={{ color: th.fg2 }}>{lesson.title}</button>
                           <span className="text-xs font-mono" style={{ color: th.fg3 }}>{lesson.duration_minutes ? `${lesson.duration_minutes} min` : "—"}</span>
-                          {isInstance && (
-                            <a href={`/lesson/${lesson.id}`} target="_blank" rel="noreferrer" title="Voir la leçon comme un élève" onClick={(e) => e.stopPropagation()}
-                              className="flex items-center gap-1 text-xs font-semibold hover:opacity-70" style={{ color: th.navAC }}>
-                              <ExternalLink className="w-3.5 h-3.5" />Aperçu
-                            </a>
-                          )}
                           <button onClick={() => deleteLesson(section.id, lesson.id)}><Trash2 className="w-3.5 h-3.5" style={{ color: "#fbc2ad" }} /></button>
                         </div>
                       ))}
@@ -403,6 +433,10 @@ export function AdminCourseEditorPage() {
           {!studentExercises.length && <p className="text-xs mt-3" style={{ color: th.fg3 }}>Aucun exercice privé attribué à cet élève pour l'instant.</p>}
         </div></GCard>
       )}
+
+      <div className="flex justify-end">
+        <SaveButton state={saveButtonState} onClick={saveCourse} />
+      </div>
 
       {isInstance && studentId && (
         <HtmlExerciseEditDialog

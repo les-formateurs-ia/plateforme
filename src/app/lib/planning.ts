@@ -47,3 +47,24 @@ export async function listFormateurCards(): Promise<PersonCard[]> {
   if (error) throw error;
   return (data ?? []).map((p) => ({ id: p.id, firstName: p.first_name, lastName: p.last_name, email: p.email, avatarUrl: p.avatar_url }));
 }
+
+// Pour l'attribution "coach" d'un élève : un admin peut lui aussi être
+// désigné comme référent, en plus des formateurs (contrairement à l'onglet
+// Planning/Formateurs ci-dessus qui ne liste que le rôle "formateur").
+export async function listCoachAssignableCards(): Promise<PersonCard[]> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, first_name, last_name, email, avatar_url")
+    .in("role", ["formateur", "admin"])
+    .order("first_name");
+  if (error) throw error;
+  return (data ?? []).map((p) => ({ id: p.id, firstName: p.first_name, lastName: p.last_name, email: p.email, avatarUrl: p.avatar_url }));
+}
+
+// Un formateur (ou admin) peut suivre plusieurs élèves, un élève n'a qu'un
+// seul coach à la fois (cf. 0024_student_formateur.sql) — simple update de
+// la colonne formateur_id sur le profil de l'élève.
+export async function assignFormateurToStudent(studentId: string, formateurId: string | null): Promise<void> {
+  const { error } = await supabase.from("profiles").update({ formateur_id: formateurId }).eq("id", studentId);
+  if (error) throw error;
+}

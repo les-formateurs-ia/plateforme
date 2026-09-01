@@ -95,6 +95,17 @@ export async function getCourseOutline(instanceId: string): Promise<CourseOutlin
   };
 }
 
+// Duplique un cours TEMPLATE dans une instance de prévisualisation possédée
+// par le staff (regénérée à chaque appel côté serveur, cf. migration 0026) —
+// nécessaire pour que la vidéo IA/mindmap/podcast/agent/quiz fonctionnent en
+// prévisualisation : ces fonctionnalités sont toutes rattachées à un
+// instance_lessons, jamais au template lui-même.
+export async function previewFormationAsStaff(templateId: string): Promise<string> {
+  const { data, error } = await supabase.rpc("preview_formation_as_staff", { p_template_id: templateId });
+  if (error) throw error;
+  return data as string;
+}
+
 export function flattenLessons(outline: CourseOutline): OutlineLesson[] {
   return outline.sections.flatMap((s) => s.lessons);
 }
@@ -267,11 +278,90 @@ export interface LessonDetail {
   instanceId: string;
   instanceName: string;
   questions: QuizQuestion[];
+  // true si cette leçon vient d'un cours TEMPLATE (tables lessons/sections/
+  // formations) plutôt que du duplicata d'un élève (instance_*) — permet à
+  // LessonPage de prévisualiser un template sans les fonctionnalités
+  // per-élève (podcast/avatar/quiz) qui n'ont pas de sens hors instance.
+  isTemplate: boolean;
 }
 
 export async function getLessonDetail(lessonId: string): Promise<LessonDetail | null> {
-  const { data: lesson, error: lessonError } = await supabase
+  const { data: instanceLesson, error: instanceLessonError } = await supabase
     .from("instance_lessons")
+    .select("id, section_id, slug, title, video_provider, video_url, duration_minutes, ai_content_prompt, practical_exercise_prompt, reference_content, custom_html_content")
+    .eq("id", lessonId)
+    .maybeSingle();
+  if (instanceLessonError) throw instanceLessonError;
+
+  if (instanceLesson) {
+    const { data: section, error: sectionError } = await supabase
+      .from("instance_sections")
+      .select("title, instance_id")
+      .eq("id", instanceLesson.section_id)
+      .maybeSingle();
+    if (sectionError) throw sectionError;
+
+    const { data: instance, error: instanceError } = section
+      ? await supabase.from("formation_instances").select("name").eq("id", section.instance_id).maybeSingle()
+      : { data: null, error: null };
+    if (instanceError) throw instanceError;
+
+    const { data: questionRows, error: questionsError } = await supabase
+      .from("instance_quiz_questions")
+      .select("id, question, explanation, order_index")
+      .eq("lesson_id", lessonId)
+      .order("order_index", { ascending: true });
+    if (questionsError) throw questionsError;
+
+    const questionIds = (questionRows ?? []).map((q) => q.id);
+    const { data: optionRows, error: optionsError } =
+      questionIds.length > 0
+        ? await supabase
+            .from("instance_quiz_options")
+            .select("id, question_id, label, is_correct, order_index")
+            .in("question_id", questionIds)
+            .order("order_index", { ascending: true })
+        : { data: [], error: null };
+    if (optionsError) throw optionsError;
+
+    return {
+      id: instanceLesson.id,
+      sectionId: instanceLesson.section_id,
+      slug: instanceLesson.slug,
+      title: instanceLesson.title,
+      durationMinutes: instanceLesson.duration_minutes,
+      videoProvider: instanceLesson.video_provider,
+      videoUrl: instanceLesson.video_url,
+      aiContentPrompt: instanceLesson.ai_content_prompt,
+      practicalExercisePrompt: instanceLesson.practical_exercise_prompt,
+      referenceContent: instanceLesson.reference_content,
+      customHtmlContent: instanceLesson.custom_html_content,
+      sectionTitle: section?.title ?? "",
+      instanceId: section?.instance_id ?? "",
+      instanceName: instance?.name ?? "",
+      questions: (questionRows ?? []).map((q) => ({
+        id: q.id,
+        question: q.question,
+        explanation: q.explanation,
+        orderIndex: q.order_index,
+        options: (optionRows ?? [])
+          .filter((o) => o.question_id === q.id)
+          .map((o) => ({
+            id: o.id,
+            label: o.label,
+            isCorrect: o.is_correct,
+            orderIndex: o.order_index,
+          })),
+      })),
+      isTemplate: false,
+    };
+  }
+
+  // Pas trouvé côté duplicata : c'est peut-être une leçon TEMPLATE (permet à
+  // l'admin de prévisualiser un cours modèle avant qu'il soit dupliqué pour
+  // un élève, via /lesson/:id — cf. bouton "œil" de AdminCourseEditorPage).
+  const { data: lesson, error: lessonError } = await supabase
+    .from("lessons")
     .select("id, section_id, slug, title, video_provider, video_url, duration_minutes, ai_content_prompt, practical_exercise_prompt, reference_content, custom_html_content")
     .eq("id", lessonId)
     .maybeSingle();
@@ -279,19 +369,19 @@ export async function getLessonDetail(lessonId: string): Promise<LessonDetail | 
   if (!lesson) return null;
 
   const { data: section, error: sectionError } = await supabase
-    .from("instance_sections")
-    .select("title, instance_id")
+    .from("sections")
+    .select("title, formation_id")
     .eq("id", lesson.section_id)
     .maybeSingle();
   if (sectionError) throw sectionError;
 
-  const { data: instance, error: instanceError } = section
-    ? await supabase.from("formation_instances").select("name").eq("id", section.instance_id).maybeSingle()
+  const { data: formation, error: formationError } = section
+    ? await supabase.from("formations").select("name").eq("id", section.formation_id).maybeSingle()
     : { data: null, error: null };
-  if (instanceError) throw instanceError;
+  if (formationError) throw formationError;
 
   const { data: questionRows, error: questionsError } = await supabase
-    .from("instance_quiz_questions")
+    .from("quiz_questions")
     .select("id, question, explanation, order_index")
     .eq("lesson_id", lessonId)
     .order("order_index", { ascending: true });
@@ -301,7 +391,7 @@ export async function getLessonDetail(lessonId: string): Promise<LessonDetail | 
   const { data: optionRows, error: optionsError } =
     questionIds.length > 0
       ? await supabase
-          .from("instance_quiz_options")
+          .from("quiz_options")
           .select("id, question_id, label, is_correct, order_index")
           .in("question_id", questionIds)
           .order("order_index", { ascending: true })
@@ -321,8 +411,8 @@ export async function getLessonDetail(lessonId: string): Promise<LessonDetail | 
     referenceContent: lesson.reference_content,
     customHtmlContent: lesson.custom_html_content,
     sectionTitle: section?.title ?? "",
-    instanceId: section?.instance_id ?? "",
-    instanceName: instance?.name ?? "",
+    instanceId: "",
+    instanceName: formation?.name ?? "",
     questions: (questionRows ?? []).map((q) => ({
       id: q.id,
       question: q.question,
@@ -337,11 +427,12 @@ export async function getLessonDetail(lessonId: string): Promise<LessonDetail | 
           orderIndex: o.order_index,
         })),
     })),
+    isTemplate: true,
   };
 }
 
-export async function updateLessonCustomHtml(lessonId: string, html: string | null): Promise<void> {
-  const { error } = await supabase.from("instance_lessons").update({ custom_html_content: html }).eq("id", lessonId);
+export async function updateLessonCustomHtml(lessonId: string, html: string | null, isTemplate: boolean): Promise<void> {
+  const { error } = await supabase.from(isTemplate ? "lessons" : "instance_lessons").update({ custom_html_content: html }).eq("id", lessonId);
   if (error) throw error;
 }
 

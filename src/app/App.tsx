@@ -26,8 +26,10 @@ import { ProfilePage } from "@/app/pages/profile/ProfilePage";
 import { AdminCoursesPage } from "@/app/pages/admin/AdminCoursesPage";
 import { AdminCourseEditorPage } from "@/app/pages/admin/AdminCourseEditorPage";
 import { AdminLessonEditorPage } from "@/app/pages/admin/AdminLessonEditorPage";
+import { AdminFormationPreviewPage } from "@/app/pages/admin/AdminFormationPreviewPage";
 import { AdminPlanningPage } from "@/app/pages/admin/AdminPlanningPage";
 import { AdminStudentDetailPage } from "@/app/pages/admin/AdminStudentDetailPage";
+import { AdminAvailabilityPage } from "@/app/pages/admin/AdminAvailabilityPage";
 
 function LoadingScreen() {
   const th = useTh();
@@ -119,10 +121,12 @@ function AppRoutes() {
         <Route path="admin/courses/:courseId/lessons/new" element={<RequireStaff><AdminLessonEditorPage /></RequireStaff>} />
         <Route path="admin/courses/:courseId/lessons/:lessonId" element={<RequireStaff><AdminLessonEditorPage /></RequireStaff>} />
         <Route path="admin/instances/:instanceId" element={<RequireStaff><AdminCourseEditorPage /></RequireStaff>} />
+        <Route path="admin/instances/:instanceId/preview" element={<RequireStaff><AdminFormationPreviewPage /></RequireStaff>} />
         <Route path="admin/instances/:instanceId/lessons/new" element={<RequireStaff><AdminLessonEditorPage /></RequireStaff>} />
         <Route path="admin/instances/:instanceId/lessons/:lessonId" element={<RequireStaff><AdminLessonEditorPage /></RequireStaff>} />
         <Route path="admin/planning" element={<RequireAdmin><AdminPlanningPage /></RequireAdmin>} />
         <Route path="admin/planning/students/:studentId" element={<RequireAdmin><AdminStudentDetailPage /></RequireAdmin>} />
+        <Route path="planning" element={<RequireStaff><AdminAvailabilityPage /></RequireStaff>} />
       </Route>
       <Route path="/lesson/:lessonId" element={<RequireAuth><LessonPage /></RequireAuth>} />
       <Route path="*" element={<Navigate to="/" replace />} />
