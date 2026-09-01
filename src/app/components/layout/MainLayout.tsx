@@ -42,11 +42,11 @@ export function MainLayout() {
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {NAV_ITEMS.map(({ id, Icon, label, path }) => {
-            // "Tableau de bord" et "Mes avantages" sont pensés pour un
-            // parcours élève (progression, gains) — pas de version admin/
-            // formateur pour l'instant, donc masqués pour le staff plutôt
-            // que d'afficher une page vide/hors-sujet.
-            if ((id === "dashboard" || id === "benefits") && isStaff(role)) return null;
+            // "Tableau de bord", "Mes leçons" et "Mes avantages" sont pensés
+            // pour un parcours élève (progression, gains) — pas de version
+            // admin/formateur pour l'instant, donc masqués pour le staff
+            // plutôt que d'afficher une page vide/hors-sujet.
+            if ((id === "dashboard" || id === "lessons" || id === "benefits") && isStaff(role)) return null;
             // Pour l'admin/formateur, "Rendez-vous" (calendrier perso élève)
             // cède sa place à "Planning" — un admin/formateur n'a pas de
             // formation à soi, donc pas de RDV perso à réserver, alors que
