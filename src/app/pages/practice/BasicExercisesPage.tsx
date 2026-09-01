@@ -81,7 +81,7 @@ export function BasicExercisesPage() {
           <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Un thème = une leçon. Termine une leçon pour débloquer son QCM et réviser à volonté.</p>
         </div>
         {instances.length > 1 && (
-          <div className="w-56 shrink-0">
+          <div className="w-full sm:w-96 max-w-full shrink-0">
             <VSelect sm value={selectedId ?? instances[0].id} onValueChange={setSelectedId} options={instances.map((i) => ({ value: i.id, label: i.name }))} />
           </div>
         )}

@@ -42,6 +42,10 @@ export async function getMyInstances(userId: string): Promise<MyInstance[]> {
     .select("id, name, status")
     .eq("user_id", userId)
     .eq("status", "active")
+    // Exclut les instances de prévisualisation staff (is_preview) : elles
+    // servent uniquement à /admin/instances/:id/preview, pas au parcours
+    // élève (Dashboard, Mes leçons, Pratique IA...).
+    .eq("is_preview", false)
     .order("assigned_at", { ascending: false });
   if (error) throw error;
   return data ?? [];
