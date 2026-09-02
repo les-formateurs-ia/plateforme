@@ -8,6 +8,7 @@ import { VBtn } from "@/app/components/common/Buttons";
 import { cx } from "@/app/lib/cx";
 import { formatDuration, type LessonWithState } from "@/app/lib/learning";
 import { useCourseProgress } from "@/app/state/useCourseProgress";
+import { useStaffBasePath } from "@/app/lib/staffBase";
 
 type SectionStatus = "complete" | "active" | "locked";
 
@@ -25,6 +26,7 @@ type SectionStatus = "complete" | "active" | "locked";
 export function AdminFormationPreviewPage() {
   const th = useTh();
   const navigate = useNavigate();
+  const base = useStaffBasePath();
   const { instanceId: routeId } = useParams();
   const { loading, outline, lessonStates: rawLessonStates } = useCourseProgress(routeId);
   // Le staff doit pouvoir sauter à n'importe quelle leçon pour la tester,
@@ -38,7 +40,7 @@ export function AdminFormationPreviewPage() {
     setOpenSection(outline.sections[0]?.id ?? null);
   }, [outline, openSection]);
 
-  const backHref = `/admin/instances/${routeId}`;
+  const backHref = `${base}/instances/${routeId}`;
   const stateFor = (lessonId: string) => lessonStates.find((s) => s.lesson.id === lessonId);
   const totalLessons = lessonStates.length;
   const completedLessons = lessonStates.filter((s) => s.state === "completed").length;

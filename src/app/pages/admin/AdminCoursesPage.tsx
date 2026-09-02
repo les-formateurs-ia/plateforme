@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
-import { Plus, BookOpen, Users, Eye } from "lucide-react";
+import { Plus, BookOpen, Users, Eye, Trash2 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { supabase } from "@/app/lib/supabase/client";
 import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
-import { ShimBtn } from "@/app/components/common/Buttons";
+import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
 import { previewFormationAsStaff } from "@/app/lib/learning";
+import { softDeleteFormation } from "@/app/lib/formations";
+import { useAuth } from "@/app/state/auth-context";
+import { isAdmin } from "@/app/lib/permissions";
+import { useStaffBasePath } from "@/app/lib/staffBase";
 
 interface FormationRow {
   id: string;
@@ -27,9 +31,28 @@ const STATUS_LABEL: Record<string, { label: string; color: string; bg: string }>
 export function AdminCoursesPage() {
   const th = useTh();
   const navigate = useNavigate();
+  const { role } = useAuth();
+  const admin = isAdmin(role);
+  const base = useStaffBasePath();
   const [courses, setCourses] = useState<FormationRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [previewingId, setPreviewingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const removeCourse = async (formationId: string) => {
+    if (!confirm("Mettre cette formation à la corbeille ? Elle ne sera plus visible ni attribuable tant qu'elle n'est pas restaurée.")) return;
+    setDeletingId(formationId);
+    try {
+      await softDeleteFormation(formationId);
+      setCourses((rows) => rows.filter((r) => r.id !== formationId));
+      toast.success("Formation déplacée dans la corbeille.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Impossible de supprimer cette formation.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   // Un template n'a pas d'instance_lessons (mindmap/podcast/vidéo IA/agent/
   // quiz en dépendent) — on génère donc une prévisualisation dédiée côté
@@ -40,7 +63,7 @@ export function AdminCoursesPage() {
     setPreviewingId(formationId);
     try {
       const previewInstanceId = await previewFormationAsStaff(formationId);
-      window.open(`/admin/instances/${previewInstanceId}/preview`, "_blank", "noopener");
+      window.open(`${base}/instances/${previewInstanceId}/preview`, "_blank", "noopener");
     } catch (err) {
       console.error(err);
       toast.error(err instanceof Error ? err.message : "Impossible de générer la prévisualisation.");
@@ -56,6 +79,7 @@ export function AdminCoursesPage() {
       const { data: formations } = await supabase
         .from("formations")
         .select("id, name, description, status")
+        .is("deleted_at", null)
         .order("created_at", { ascending: false });
 
       if (!formations) { if (!cancelled) { setCourses([]); setLoading(false); } return; }
@@ -83,9 +107,16 @@ export function AdminCoursesPage() {
           <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Gestion des formations</GT></h2>
           <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Modèles de formation — à attribuer aux élèves depuis la fiche élève.</p>
         </div>
-        <ShimBtn onClick={() => navigate("/admin/courses/new")}>
-          <span className="flex items-center gap-2"><Plus className="w-4 h-4" />Nouvelle formation</span>
-        </ShimBtn>
+        <div className="flex items-center gap-2">
+          {admin && (
+            <VBtn onClick={() => navigate("/admin/courses/trash")}>
+              <span className="flex items-center gap-2"><Trash2 className="w-4 h-4" />Corbeille</span>
+            </VBtn>
+          )}
+          <ShimBtn onClick={() => navigate(`${base}/courses/new`)}>
+            <span className="flex items-center gap-2"><Plus className="w-4 h-4" />Nouvelle formation</span>
+          </ShimBtn>
+        </div>
       </div>
 
       {loading && <p className="text-sm" style={{ color: th.fg3 }}>Chargement…</p>}
@@ -100,7 +131,7 @@ export function AdminCoursesPage() {
         {courses.map((c) => {
           const sc = STATUS_LABEL[c.status] ?? STATUS_LABEL.draft;
           return (
-            <GCard key={c.id} onClick={() => navigate(`/admin/courses/${c.id}`)} className="hover:scale-[1.01] transition-transform">
+            <GCard key={c.id} onClick={() => navigate(`${base}/courses/${c.id}`)} className="hover:scale-[1.01] transition-transform">
               <div className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <h3 className="text-sm font-black" style={{ color: th.fg }}>{c.name}</h3>
@@ -115,6 +146,13 @@ export function AdminCoursesPage() {
                     style={{ color: th.navAC }} title="Visualiser comme un élève">
                     <Eye className="w-12 h-12" />
                   </button>
+                  {admin && (
+                    <button type="button" onClick={(e) => { e.stopPropagation(); void removeCourse(c.id); }} disabled={deletingId === c.id}
+                      className="flex items-center justify-center shrink-0 transition-opacity hover:opacity-70 disabled:opacity-40 disabled:pointer-events-none"
+                      style={{ color: th.fg3 }} title="Supprimer">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
               </div>
             </GCard>

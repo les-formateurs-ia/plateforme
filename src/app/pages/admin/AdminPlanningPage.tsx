@@ -6,6 +6,7 @@ import { GT } from "@/app/components/common/GT";
 import { GCard } from "@/app/components/common/GCard";
 import { Avatar } from "@/app/components/common/Avatar";
 import { listStudentCards, listFormateurCards, type StudentCard, type PersonCard } from "@/app/lib/planning";
+import { useStaffBasePath } from "@/app/lib/staffBase";
 
 type PlanningTab = "etudiants" | "formateurs";
 const TABS: { id: PlanningTab; label: string }[] = [
@@ -50,6 +51,7 @@ export function AdminPlanningPage() {
   const th = useTh();
   const navigate = useNavigate();
   const { user, role } = useAuth();
+  const base = useStaffBasePath();
   // Un formateur ne voit que SES élèves (coach attitré, profiles.formateur_id)
   // et n'a pas d'onglet Formateurs — la gestion de l'ensemble du staff reste
   // réservée à l'admin.
@@ -112,7 +114,7 @@ export function AdminPlanningPage() {
           <PersonGrid
             people={students}
             loading={loadingStudents}
-            onClick={(id) => navigate(`/admin/planning/students/${id}`)}
+            onClick={(id) => navigate(`${base}/planning/students/${id}`)}
             subtitle={(p) => (p as StudentCard).activeFormationName || "—"}
           />
         )}

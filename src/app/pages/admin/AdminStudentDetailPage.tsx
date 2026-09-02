@@ -15,6 +15,9 @@ import {
 } from "@/app/lib/formationInstances";
 import { listCoachAssignableCards, assignFormateurToStudent, type PersonCard } from "@/app/lib/planning";
 import type { EnrollmentStatus } from "@/app/lib/supabase/database.types";
+import { useAuth } from "@/app/state/auth-context";
+import { isAdmin } from "@/app/lib/permissions";
+import { useStaffBasePath } from "@/app/lib/staffBase";
 
 interface StudentProfile { id: string; first_name: string | null; last_name: string | null; email: string; avatar_url: string | null; formateur_id: string | null; }
 
@@ -27,6 +30,9 @@ const STATUS_LABEL: Record<EnrollmentStatus, { label: string; color: string; bg:
 export function AdminStudentDetailPage() {
   const th = useTh();
   const navigate = useNavigate();
+  const { role } = useAuth();
+  const admin = isAdmin(role);
+  const base = useStaffBasePath();
   const { studentId } = useParams();
   const [profile, setProfile] = useState<StudentProfile | null>(null);
   const [instances, setInstances] = useState<FormationInstanceRow[]>([]);
@@ -41,18 +47,26 @@ export function AdminStudentDetailPage() {
   const load = async () => {
     if (!studentId) return;
     setLoading(true);
-    const [{ data: p }, instanceRows, templateRows, formateurRows] = await Promise.all([
-      supabase.from("profiles").select("id, first_name, last_name, email, avatar_url, formateur_id").eq("id", studentId).single(),
-      listInstancesForStudent(studentId),
-      listPublishedTemplates(),
-      listCoachAssignableCards(),
-    ]);
-    setProfile(p ?? null);
-    setInstances(instanceRows);
-    setTemplates(templateRows);
-    setFormateurs(formateurRows);
-    setFormateurToAssign(p?.formateur_id ?? "");
-    setLoading(false);
+    try {
+      const [{ data: p, error: profileError }, instanceRows, templateRows, formateurRows] = await Promise.all([
+        supabase.from("profiles").select("id, first_name, last_name, email, avatar_url, formateur_id").eq("id", studentId).single(),
+        listInstancesForStudent(studentId),
+        listPublishedTemplates(),
+        listCoachAssignableCards(),
+      ]);
+      if (profileError) throw profileError;
+      setProfile(p ?? null);
+      setInstances(instanceRows);
+      setTemplates(templateRows);
+      setFormateurs(formateurRows);
+      setFormateurToAssign(p?.formateur_id ?? "");
+    } catch (err) {
+      console.error(err);
+      toast.error("Impossible de charger la fiche de cet élève.");
+      setProfile(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { void load(); }, [studentId]);
@@ -64,7 +78,7 @@ export function AdminStudentDetailPage() {
       const instanceId = await assignFormationToStudent(templateToAssign, studentId);
       toast.success("Formation attribuée.");
       setTemplateToAssign("");
-      navigate(`/admin/instances/${instanceId}`);
+      navigate(`${base}/instances/${instanceId}`);
     } catch (err) {
       console.error(err);
       toast.error("Impossible d'attribuer cette formation.");
@@ -116,7 +130,7 @@ export function AdminStudentDetailPage() {
 
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
-      <Link to="/admin/planning" className="flex items-center gap-1.5 text-sm w-fit transition-colors hover:opacity-70" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />Élèves</Link>
+      <Link to={`${base}/planning`} className="flex items-center gap-1.5 text-sm w-fit transition-colors hover:opacity-70" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />Élèves</Link>
 
       <div className="flex items-center gap-4">
         <Avatar url={profile.avatar_url} size={64} square />
@@ -135,11 +149,12 @@ export function AdminStudentDetailPage() {
               onValueChange={assignFormateur}
               placeholder="Choisir un formateur…"
               options={formateurs.map((f) => ({ value: f.id, label: [f.firstName, f.lastName].filter(Boolean).join(" ").trim() || f.email }))}
-              disabled={assigningFormateur}
+              disabled={assigningFormateur || !admin}
             />
           </div>
         </div>
-        {!formateurs.length && <p className="text-xs mt-3" style={{ color: th.fg3 }}>Aucun formateur pour l'instant.</p>}
+        {!admin && <p className="text-xs mt-3" style={{ color: th.fg3 }}>Seul un administrateur peut attribuer un formateur.</p>}
+        {admin && !formateurs.length && <p className="text-xs mt-3" style={{ color: th.fg3 }}>Aucun formateur pour l'instant.</p>}
       </div></GCard>
 
       <GCard><div className="p-6">
@@ -156,6 +171,7 @@ export function AdminStudentDetailPage() {
                     sm
                     value={inst.status}
                     onValueChange={(v) => changeStatus(inst.id, v as EnrollmentStatus)}
+                    disabled={!admin}
                     options={[
                       { value: "active", label: "Active" },
                       { value: "paused", label: "En pause" },
@@ -163,8 +179,8 @@ export function AdminStudentDetailPage() {
                     ]}
                   />
                 </div>
-                <VBtn sm onClick={() => navigate(`/admin/instances/${inst.id}`)}>Personnaliser</VBtn>
-                <button onClick={() => remove(inst.id)} title="Retirer"><X className="w-4 h-4" style={{ color: th.fg3 }} /></button>
+                <VBtn sm onClick={() => navigate(`${base}/instances/${inst.id}`)}>Personnaliser</VBtn>
+                {admin && <button onClick={() => remove(inst.id)} title="Retirer"><X className="w-4 h-4" style={{ color: th.fg3 }} /></button>}
               </div>
             );
           })}
@@ -172,23 +188,25 @@ export function AdminStudentDetailPage() {
         </div>
       </div></GCard>
 
-      <GCard><div className="p-6">
-        <h3 className="text-sm font-black mb-4" style={{ color: th.fg }}>Attribuer une formation</h3>
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex-1 min-w-[220px]">
-            <VSelect
-              value={templateToAssign}
-              onValueChange={setTemplateToAssign}
-              placeholder="Choisir une formation publiée…"
-              options={templates.map((t) => ({ value: t.id, label: t.name }))}
-            />
+      {admin && (
+        <GCard><div className="p-6">
+          <h3 className="text-sm font-black mb-4" style={{ color: th.fg }}>Attribuer une formation</h3>
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex-1 min-w-[220px]">
+              <VSelect
+                value={templateToAssign}
+                onValueChange={setTemplateToAssign}
+                placeholder="Choisir une formation publiée…"
+                options={templates.map((t) => ({ value: t.id, label: t.name }))}
+              />
+            </div>
+            <ShimBtn sm onClick={assign} disabled={assigning || !templateToAssign}>
+              <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5" />{assigning ? "Attribution…" : "Attribuer"}</span>
+            </ShimBtn>
           </div>
-          <ShimBtn sm onClick={assign} disabled={assigning || !templateToAssign}>
-            <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5" />{assigning ? "Attribution…" : "Attribuer"}</span>
-          </ShimBtn>
-        </div>
-        {!templates.length && <p className="text-xs mt-3" style={{ color: th.fg3 }}>Aucune formation publiée pour l'instant.</p>}
-      </div></GCard>
+          {!templates.length && <p className="text-xs mt-3" style={{ color: th.fg3 }}>Aucune formation publiée pour l'instant.</p>}
+        </div></GCard>
+      )}
     </div>
   );
 }

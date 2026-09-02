@@ -6,7 +6,7 @@ export type UserRole = "admin" | "formateur" | "student";
 export type EnrollmentStatus = "active" | "completed" | "paused";
 export type LessonProgressStatus = "locked" | "in_progress" | "completed";
 export type RdvStatus = "confirmed" | "cancelled";
-export type NotificationType = "rdv_cancelled" | "rdv_reschedule_proposed" | "rdv_reschedule_accepted" | "rdv_reschedule_declined";
+export type NotificationType = "rdv_cancelled" | "rdv_reschedule_proposed" | "rdv_reschedule_accepted" | "rdv_reschedule_declined" | "rdv_booked";
 export type AiContentType = "practical_exercise" | "mindmap" | "podcast" | "text_summary" | "remedial_explanation" | "remedial_quiz";
 export type ChatRole = "user" | "ai";
 export type VideoProvider = "cloudflare_stream" | "youtube" | "vimeo" | "external_url";
@@ -82,6 +82,7 @@ export interface Database {
           certification_enabled: boolean;
           certification_prompt: string | null;
           status: FormationStatus;
+          deleted_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -96,6 +97,7 @@ export interface Database {
           certification_enabled?: boolean;
           certification_prompt?: string | null;
           status?: FormationStatus;
+          deleted_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };

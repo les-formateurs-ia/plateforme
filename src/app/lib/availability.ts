@@ -301,24 +301,35 @@ export async function listMyBookingsAsStudent(studentId: string): Promise<Studen
   });
 }
 
+async function getStudentName(studentId: string): Promise<string> {
+  const { data, error } = await supabase.from("profiles").select("first_name, last_name, email").eq("id", studentId).maybeSingle();
+  if (error) throw error;
+  return [data?.first_name, data?.last_name].filter(Boolean).join(" ").trim() || data?.email || "Votre élève";
+}
+
+// L'élève choisit un créneau parmi les disponibilités proposées — le
+// formateur/admin attribué doit être notifié immédiatement.
 export async function bookSlot(studentId: string, formateurId: string, slotDate: string, startTime: string): Promise<void> {
   const endTime = addMinutes(startTime, SESSION_MINUTES);
-  const { error } = await supabase.from("rendez_vous").insert({
-    student_id: studentId,
-    formateur_id: formateurId,
-    slot_date: slotDate,
-    start_time: startTime,
-    end_time: endTime,
-  });
+  const { data, error } = await supabase
+    .from("rendez_vous")
+    .insert({ student_id: studentId, formateur_id: formateurId, slot_date: slotDate, start_time: startTime, end_time: endTime })
+    .select("id")
+    .single();
   if (error) throw error;
+  const studentName = await getStudentName(studentId).catch(() => "Votre élève");
+  await createNotification(formateurId, "rdv_booked", "Nouveau rendez-vous réservé", `${studentName} a réservé un rendez-vous le ${formatFR(slotDate, startTime)}.`, data.id);
 }
 
 // Modifie un rendez-vous existant (au lieu d'en créer un second — un élève
-// ne peut en avoir qu'un seul actif à la fois).
-export async function changeBooking(rdvId: string, formateurId: string, slotDate: string, startTime: string): Promise<void> {
+// ne peut en avoir qu'un seul actif à la fois) — le formateur est notifié
+// comme pour une nouvelle réservation.
+export async function changeBooking(rdvId: string, studentId: string, formateurId: string, slotDate: string, startTime: string): Promise<void> {
   const endTime = addMinutes(startTime, SESSION_MINUTES);
   const { error } = await supabase.from("rendez_vous").update({ formateur_id: formateurId, slot_date: slotDate, start_time: startTime, end_time: endTime }).eq("id", rdvId);
   if (error) throw error;
+  const studentName = await getStudentName(studentId).catch(() => "Votre élève");
+  await createNotification(formateurId, "rdv_booked", "Rendez-vous modifié", `${studentName} a déplacé son rendez-vous au ${formatFR(slotDate, startTime)}.`, rdvId);
 }
 
 export async function cancelBooking(id: string): Promise<void> {

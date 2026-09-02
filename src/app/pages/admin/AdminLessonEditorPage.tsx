@@ -6,6 +6,7 @@ import { supabase } from "@/app/lib/supabase/client";
 import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
 import { ShimBtn } from "@/app/components/common/Buttons";
+import { useStaffBasePath } from "@/app/lib/staffBase";
 
 interface QuizOptionDraft { id?: string; label: string; is_correct: boolean; }
 interface QuizQuestionDraft { id?: string; question: string; explanation: string; options: QuizOptionDraft[]; }
@@ -25,6 +26,7 @@ const slugify = (s: string) => s.toLowerCase().trim()
 export function AdminLessonEditorPage() {
   const th = useTh();
   const navigate = useNavigate();
+  const base = useStaffBasePath();
   const location = useLocation();
   const { courseId: routeCourseId, instanceId: routeInstanceId, lessonId: routeLessonId } = useParams();
   const isInstance = !!routeInstanceId;
@@ -51,7 +53,7 @@ export function AdminLessonEditorPage() {
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const coursesBase = isInstance ? `/admin/instances/${courseId}` : `/admin/courses/${courseId}`;
+  const coursesBase = isInstance ? `${base}/instances/${courseId}` : `${base}/courses/${courseId}`;
 
   useEffect(() => {
     if (isNew) return;

@@ -1,19 +1,26 @@
 import { useEffect, useState } from "react";
-import { Bell, Calendar as CalendarIcon, XCircle, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
+import { Bell, Calendar as CalendarIcon, XCircle, RefreshCw, CalendarPlus } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { isStaff } from "@/app/lib/permissions";
+import { supabase } from "@/app/lib/supabase/client";
 import { Popover, PopoverContent, PopoverTrigger } from "@/app/components/ui/popover";
 import { listMyNotifications, markNotificationRead, markAllNotificationsRead, type NotificationRow } from "@/app/lib/notifications";
+import type { Database } from "@/app/lib/supabase/database.types";
 
-const POLL_MS = 30000;
+// Filet de sécurité si le WebSocket temps réel se coupe (veille, réseau) —
+// la diffusion Realtime (voir handleOpenChange plus bas) reste le canal
+// principal pour un affichage instantané, sans recharger la page.
+const FALLBACK_POLL_MS = 60000;
 
 const ICONS: Record<NotificationRow["type"], typeof Bell> = {
   rdv_cancelled: XCircle,
   rdv_reschedule_proposed: RefreshCw,
   rdv_reschedule_accepted: CalendarIcon,
   rdv_reschedule_declined: XCircle,
+  rdv_booked: CalendarPlus,
 };
 
 function timeAgo(iso: string): string {
@@ -24,6 +31,12 @@ function timeAgo(iso: string): string {
   const hours = Math.round(mins / 60);
   if (hours < 24) return `il y a ${hours} h`;
   return `il y a ${Math.round(hours / 24)} j`;
+}
+
+type NotificationTableRow = Database["public"]["Tables"]["notifications"]["Row"];
+
+function mapRow(row: NotificationTableRow): NotificationRow {
+  return { id: row.id, type: row.type, title: row.title, body: row.body, rdvId: row.rdv_id, read: !!row.read_at, createdAt: row.created_at };
 }
 
 export function NotificationBell() {
@@ -44,16 +57,36 @@ export function NotificationBell() {
 
   useEffect(() => {
     void load();
-    const interval = setInterval(() => void load(), POLL_MS);
+    const interval = setInterval(() => void load(), FALLBACK_POLL_MS);
     return () => clearInterval(interval);
+  }, [user]);
+
+  // Diffusion en temps réel : une notification créée pendant que la session
+  // est ouverte (annulation, proposition, réservation…) apparaît tout de
+  // suite, sans attendre un rechargement ni le polling de secours ci-dessus.
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(`notifications:${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          const row = mapRow(payload.new as NotificationTableRow);
+          setItems((prev) => (prev.some((n) => n.id === row.id) ? prev : [row, ...prev]));
+          toast(row.title, { description: row.body ?? undefined });
+        },
+      )
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
   }, [user]);
 
   const unread = items.filter((n) => !n.read).length;
 
   // Ces notifications concernent toutes un rendez-vous (annulation,
-  // proposition de nouveau créneau…) — on ouvre donc l'onglet Rendez-vous de
-  // chacun : /planning (disponibilités + RDV à venir) pour le staff, /calendar
-  // (réservation) pour l'élève.
+  // proposition de nouveau créneau, réservation…) — on ouvre donc l'onglet
+  // Rendez-vous de chacun : /planning (disponibilités + RDV à venir) pour le
+  // staff, /calendar (réservation) pour l'élève.
   const goToRendezVous = () => {
     setOpen(false);
     navigate(isStaff(role) ? "/planning" : "/calendar");

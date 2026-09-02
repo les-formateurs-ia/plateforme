@@ -36,7 +36,7 @@ export interface PublishedTemplate {
 }
 
 export async function listPublishedTemplates(): Promise<PublishedTemplate[]> {
-  const { data, error } = await supabase.from("formations").select("id, name").eq("status", "published").order("name");
+  const { data, error } = await supabase.from("formations").select("id, name").eq("status", "published").is("deleted_at", null).order("name");
   if (error) throw error;
   return data ?? [];
 }

@@ -84,7 +84,7 @@ export function CalendarPage() {
     setBooking(true);
     try {
       if (activeBooking) {
-        await changeBooking(activeBooking.id, pending.formateurId, pending.slotDate, pending.startTime);
+        await changeBooking(activeBooking.id, user.id, pending.formateurId, pending.slotDate, pending.startTime);
       } else {
         await bookSlot(user.id, pending.formateurId, pending.slotDate, pending.startTime);
       }

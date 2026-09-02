@@ -30,7 +30,7 @@ import { PODCAST_FORMATS, type PodcastVariantId } from "@/app/lib/podcastFormats
 import { getMyMindmap, requestMindmapGeneration, type MindmapTree } from "@/app/lib/mindmaps";
 import { getChatHistory, sendLessonChatMessage } from "@/app/lib/chat";
 import { getMyAvatarVideo, getAvatarVideoSignedUrl, requestAvatarVideoGeneration, pollAvatarVideoStatus, type AvatarVideo } from "@/app/lib/avatarVideos";
-import { getAgentSignedUrl, configureVoiceAgent } from "@/app/lib/agent";
+import { startGeminiVoiceSession, type GeminiVoiceSession } from "@/app/lib/geminiVoice";
 import { injectPlatformAuth, normalizeSmartQuotes } from "@/app/lib/platformHtml";
 import { MindmapView } from "@/app/components/lesson/MindmapView";
 
@@ -89,9 +89,8 @@ export function LessonPage() {
   const [agentChatOpen, setAgentChatOpen] = useState(false);
   const [agentMessages, setAgentMessages] = useState<{ role: "user" | "agent"; text: string }[]>([]);
   const [agentInput, setAgentInput] = useState("");
-  const [agentConfiguring, setAgentConfiguring] = useState(false);
   const [pttActive, setPttActive] = useState(false);
-  const conversationRef = useRef<import("@elevenlabs/client").Conversation | null>(null);
+  const conversationRef = useRef<GeminiVoiceSession | null>(null);
 
   type PodcastVariantState = { podcast: Podcast; audioUrl: string };
   const [podcastByVariant, setPodcastByVariant] = useState<Partial<Record<PodcastVariantId, PodcastVariantState>>>({});
@@ -354,29 +353,22 @@ export function LessonPage() {
     return () => clearTimeout(timer);
   }, [tab, lesson?.customHtmlContent, htmlEditing, platformAuthChecked, htmlIframeLoaded]);
 
-  // Onglet Agent (voix ElevenLabs) : UI custom au lieu du widget préfabriqué
-  // (celui-ci n'a pas de mode plein-conteneur — cf. commit précédent — et ne
-  // permet pas de contrôler la taille relative de l'orbe vs des boutons). On
-  // pilote directement le SDK @elevenlabs/client, chargé à la demande.
+  // Onglet Agent (voix Gemini Live) : UI custom au lieu d'un widget
+  // préfabriqué, pour contrôler la taille relative de l'orbe vs des boutons.
+  // startGeminiVoiceSession gère elle-même la permission micro (getUserMedia).
   const startAgentCall = async () => {
     if (agentStatus !== "idle") return;
     setAgentError(null);
     setAgentStatus("connecting");
     try {
-      await navigator.mediaDevices.getUserMedia({ audio: true });
-      const signedUrl = await getAgentSignedUrl();
-      const { Conversation } = await import("@elevenlabs/client");
-      const conversation = await Conversation.startSession({
-        signedUrl,
-        dynamicVariables: {
-          student_name: firstName,
-          profession: profile.profession || "non renseigné",
-          objectif_professionnel: profile.goalFinal || profile.goal || "non renseigné",
-          lesson_title: lesson?.title || "cette leçon",
-          lesson_content: lesson?.referenceContent || "(pas de contenu de référence pour cette leçon)",
-          depth_mode: "expert",
-          pedagogy_style: profile.tutor || "soft",
-        },
+      const conversation = await startGeminiVoiceSession({
+        student_name: firstName,
+        profession: profile.profession || "non renseigné",
+        objectif_professionnel: profile.goalFinal || profile.goal || "non renseigné",
+        lesson_title: lesson?.title || "cette leçon",
+        lesson_content: lesson?.referenceContent || "(pas de contenu de référence pour cette leçon)",
+        depth_mode: "expert",
+        pedagogy_style: profile.tutor || "soft",
         onConnect: () => setAgentStatus("connected"),
         onDisconnect: () => {
           setAgentStatus("idle");
@@ -442,23 +434,6 @@ export function LessonPage() {
     conversationRef.current.sendUserMessage(text);
     setAgentMessages((prev) => [...prev, { role: "user", text }]);
     setAgentInput("");
-  };
-
-  // Admin/formateur : (ré)écrit le prompt système de base de l'agent vocal
-  // sur ElevenLabs. Action globale (un seul agent pour toute la plateforme),
-  // pas besoin de la relancer par leçon — la personnalisation par leçon/élève
-  // passe par dynamicVariables à chaque appel (voir startAgentCall).
-  const handleConfigureVoiceAgent = async () => {
-    setAgentConfiguring(true);
-    try {
-      await configureVoiceAgent();
-      toast.success("Prompt de l'agent vocal mis à jour.");
-    } catch (err) {
-      console.error(err);
-      toast.error(err instanceof Error ? err.message : "Impossible de configurer l'agent vocal.");
-    } finally {
-      setAgentConfiguring(false);
-    }
   };
 
   // Coupe l'appel si on quitte l'onglet ou la page — pas de micro qui reste
@@ -731,17 +706,6 @@ export function LessonPage() {
             </div>
           ) : tab === "agent" ? (
             <div className="relative rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-6 p-8" style={{ height: "78vh", background: "#060410", border: `1px solid ${th.sep}` }}>
-              {isStaff(role) && (
-                <button
-                  onClick={handleConfigureVoiceAgent}
-                  disabled={agentConfiguring}
-                  className="absolute top-4 right-4 flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs transition-opacity hover:opacity-80 disabled:opacity-50"
-                  style={{ background: "rgba(255,255,255,0.08)", color: "#fff", border: "1px solid rgba(255,255,255,0.15)" }}
-                  title="Réécrit le prompt système de l'agent vocal sur ElevenLabs (persona + personnalisation par leçon/élève)"
-                >
-                  <Wand2 className="w-3.5 h-3.5" />{agentConfiguring ? "Configuration…" : "Configurer l'agent"}
-                </button>
-              )}
               <div className="relative flex items-center justify-center shrink-0" style={{ width: 180, height: 180 }}>
                 {agentStatus === "connected" && agentMode === "speaking" && (
                   <>

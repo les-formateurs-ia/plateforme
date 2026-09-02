@@ -13,15 +13,13 @@ import { SaveButton, type SaveButtonState } from "@/app/components/common/SaveBu
 import { VSelect } from "@/app/components/common/Select";
 import { HtmlExerciseEditDialog } from "@/app/components/practice/HtmlExerciseEditDialog";
 import { listExercisesForStudent, type HtmlExerciseRow } from "@/app/lib/htmlExercises";
+import { useStaffBasePath } from "@/app/lib/staffBase";
 
 interface CourseForm {
   name: string;
   slug: string;
   description: string;
   duration_minutes: string;
-  price: string;
-  certification_enabled: boolean;
-  certification_prompt: string;
   status: "draft" | "published" | "archived";
 }
 
@@ -29,8 +27,7 @@ interface SectionRow { id: string; title: string; order_index: number; }
 interface LessonRow { id: string; section_id: string; title: string; duration_minutes: number | null; order_index: number; }
 
 const EMPTY_COURSE: CourseForm = {
-  name: "", slug: "", description: "", duration_minutes: "", price: "",
-  certification_enabled: false, certification_prompt: "", status: "draft",
+  name: "", slug: "", description: "", duration_minutes: "", status: "draft",
 };
 
 const slugify = (s: string) => s.toLowerCase().trim()
@@ -46,6 +43,7 @@ const slugify = (s: string) => s.toLowerCase().trim()
 export function AdminCourseEditorPage() {
   const th = useTh();
   const navigate = useNavigate();
+  const base = useStaffBasePath();
   const { courseId: routeCourseId, instanceId: routeInstanceId } = useParams();
   const isInstance = !!routeInstanceId;
   const routeId = routeInstanceId ?? routeCourseId;
@@ -76,7 +74,7 @@ export function AdminCourseEditorPage() {
   // liste Gestion des formations — cf. AdminCoursesPage.)
   const openPreview = () => {
     if (!courseId) return;
-    window.open(`/admin/instances/${courseId}/preview`, "_blank", "noopener");
+    window.open(`${base}/instances/${courseId}/preview`, "_blank", "noopener");
   };
 
   useEffect(() => {
@@ -118,9 +116,6 @@ export function AdminCourseEditorPage() {
           slug: "",
           description: instance.description ?? "",
           duration_minutes: instance.duration_minutes?.toString() ?? "",
-          price: instance.price_cents ? (instance.price_cents / 100).toString() : "",
-          certification_enabled: instance.certification_enabled,
-          certification_prompt: instance.certification_prompt ?? "",
           status: "draft",
         });
         setStudentId(instance.user_id);
@@ -132,9 +127,6 @@ export function AdminCourseEditorPage() {
           slug: formation.slug,
           description: formation.description ?? "",
           duration_minutes: formation.duration_minutes?.toString() ?? "",
-          price: formation.price_cents ? (formation.price_cents / 100).toString() : "",
-          certification_enabled: formation.certification_enabled,
-          certification_prompt: formation.certification_prompt ?? "",
           status: formation.status,
         });
         setSlugTouched(true);
@@ -168,9 +160,6 @@ export function AdminCourseEditorPage() {
         name: course.name.trim(),
         description: course.description || null,
         duration_minutes: course.duration_minutes ? parseInt(course.duration_minutes, 10) : null,
-        price_cents: course.price ? Math.round(parseFloat(course.price) * 100) : null,
-        certification_enabled: course.certification_enabled,
-        certification_prompt: course.certification_prompt || null,
       };
       const { error: updateError } = await supabase.from("formation_instances").update(payload).eq("id", courseId);
       if (updateError) { setError(updateError.message); setSaving(false); return; }
@@ -183,9 +172,6 @@ export function AdminCourseEditorPage() {
       slug: course.slug.trim(),
       description: course.description || null,
       duration_minutes: course.duration_minutes ? parseInt(course.duration_minutes, 10) : null,
-      price_cents: course.price ? Math.round(parseFloat(course.price) * 100) : null,
-      certification_enabled: course.certification_enabled,
-      certification_prompt: course.certification_prompt || null,
       status: course.status,
     };
 
@@ -197,7 +183,7 @@ export function AdminCourseEditorPage() {
       const { data, error: insertError } = await supabase.from("formations").insert(payload).select("id").single();
       if (insertError || !data) { setError(insertError?.message ?? "Erreur inconnue"); setSaving(false); return; }
       setCourseId(data.id);
-      flashSaved(() => navigate(`/admin/courses/${data.id}`, { replace: true }));
+      flashSaved(() => navigate(`${base}/courses/${data.id}`, { replace: true }));
     }
   };
 
@@ -256,9 +242,9 @@ export function AdminCourseEditorPage() {
     setLessonsBySection((m) => ({ ...m, [sectionId]: (m[sectionId] ?? []).filter((l) => l.id !== lessonId) }));
   };
 
-  const lessonsBase = isInstance ? `/admin/instances/${courseId}/lessons` : `/admin/courses/${courseId}/lessons`;
+  const lessonsBase = isInstance ? `${base}/instances/${courseId}/lessons` : `${base}/courses/${courseId}/lessons`;
 
-  const backHref = isInstance ? (studentId ? `/admin/planning/students/${studentId}` : "/admin/planning") : "/admin/courses";
+  const backHref = isInstance ? (studentId ? `${base}/planning/students/${studentId}` : `${base}/planning`) : `${base}/courses`;
   const backLabel = isInstance ? "Élève" : "Cours";
 
   if (loading) return <div className="flex-1 flex items-center justify-center"><p className="text-sm" style={{ color: th.fg3 }}>Chargement…</p></div>;
@@ -298,14 +284,10 @@ export function AdminCourseEditorPage() {
           <textarea value={course.description} onChange={(e) => setCourse((c) => ({ ...c, description: e.target.value }))} rows={3} className="w-full rounded-xl px-4 py-3 text-sm g-input resize-none" />
         </div>
 
-        <div className={isInstance ? "grid grid-cols-1 sm:grid-cols-2 gap-4" : "grid grid-cols-1 sm:grid-cols-3 gap-4"}>
+        <div className={isInstance ? "grid grid-cols-1 gap-4" : "grid grid-cols-1 sm:grid-cols-2 gap-4"}>
           <div>
             <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Durée (min)</label>
             <input type="number" value={course.duration_minutes} onChange={(e) => setCourse((c) => ({ ...c, duration_minutes: e.target.value }))} className="w-full rounded-xl px-4 py-3 text-sm g-input" />
-          </div>
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Prix (€)</label>
-            <input type="number" value={course.price} onChange={(e) => setCourse((c) => ({ ...c, price: e.target.value }))} className="w-full rounded-xl px-4 py-3 text-sm g-input" />
           </div>
           {!isInstance && (
             <div>
@@ -322,18 +304,6 @@ export function AdminCourseEditorPage() {
             </div>
           )}
         </div>
-
-        <label className="flex items-center gap-2 text-sm" style={{ color: th.fg2 }}>
-          <input type="checkbox" checked={course.certification_enabled} onChange={(e) => setCourse((c) => ({ ...c, certification_enabled: e.target.checked }))} />
-          Préparation à la certification activée
-        </label>
-
-        {course.certification_enabled && (
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Prompt de référence pour la certification</label>
-            <textarea value={course.certification_prompt} onChange={(e) => setCourse((c) => ({ ...c, certification_prompt: e.target.value }))} rows={2} className="w-full rounded-xl px-4 py-3 text-sm g-input resize-none" />
-          </div>
-        )}
 
         {error && <p className="text-xs" style={{ color: "#fbc2ad" }}>{error}</p>}
       </div></GCard>
