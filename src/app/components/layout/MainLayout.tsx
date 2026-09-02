@@ -44,11 +44,12 @@ export function MainLayout() {
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {NAV_ITEMS.map(({ id, Icon, label, path }) => {
-            // "Tableau de bord", "Mes leçons" et "Mes avantages" sont pensés
-            // pour un parcours élève (progression, gains) — pas de version
-            // admin/formateur pour l'instant, donc masqués pour le staff
-            // plutôt que d'afficher une page vide/hors-sujet.
-            if ((id === "dashboard" || id === "lessons" || id === "benefits") && isStaff(role)) return null;
+            // "Tableau de bord", "Mes leçons", "Mon Agent IA" et "Mes
+            // avantages" sont pensés pour un parcours élève (progression,
+            // agent personnel, gains) — pas de version admin/formateur pour
+            // l'instant, donc masqués pour le staff plutôt que d'afficher
+            // une page vide/hors-sujet.
+            if ((id === "dashboard" || id === "lessons" || id === "agent" || id === "benefits") && isStaff(role)) return null;
             // Pour l'admin/formateur, "Élèves (& formateurs)" (gestion, même
             // page pour les deux rôles — le formateur n'y voit que ses
             // propres élèves, pas d'onglet Formateurs) s'ajoute juste avant

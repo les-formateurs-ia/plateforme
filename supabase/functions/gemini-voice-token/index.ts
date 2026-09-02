@@ -18,6 +18,23 @@
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
 import { buildLockedSystemInstruction, type VoiceAgentVars } from "../_shared/voice-agent-prompt.ts";
+import { buildStudentOverview } from "../_shared/student-overview.ts";
+
+const HISTORY_WINDOW = 10;
+
+async function buildRecentHistoryText(
+  // deno-lint-ignore no-explicit-any
+  supabase: any,
+  conversationId: string | undefined,
+): Promise<string> {
+  if (!conversationId) return "Aucun échange précédent dans cette conversation.";
+  const { data } = await supabase
+    .from("agent_messages").select("role, content").eq("conversation_id", conversationId)
+    .order("created_at", { ascending: false }).limit(HISTORY_WINDOW);
+  const rows = (data ?? []).reverse() as { role: string; content: string }[];
+  if (rows.length === 0) return "Aucun échange précédent dans cette conversation.";
+  return rows.map((m) => `${m.role === "ai" ? "Toi" : "Élève"} : ${m.content}`).join("\n");
+}
 
 // Modèle Live en env var (pas hardcodé) : Gemini Live est une surface API en
 // évolution rapide, le nom exact du modèle preview peut changer sans lien
@@ -44,6 +61,11 @@ Deno.serve(async (req) => {
     if (userErr || !userData?.user) return jsonResponse({ error: "Session invalide." }, 401);
 
     const body = await req.json().catch(() => ({}));
+    const userId = userData.user.id;
+    const [{ text: overviewText }, recentHistory] = await Promise.all([
+      buildStudentOverview(supabase, userId),
+      buildRecentHistoryText(supabase, body.conversation_id),
+    ]);
     const vars: VoiceAgentVars = {
       student_name: body.student_name || "l'élève",
       profession: body.profession || "non renseigné",
@@ -52,6 +74,8 @@ Deno.serve(async (req) => {
       lesson_content: body.lesson_content || "(pas de contenu de référence pour cette leçon)",
       depth_mode: body.depth_mode || "default",
       pedagogy_style: body.pedagogy_style || "soft",
+      student_overview: overviewText,
+      recent_history: recentHistory,
     };
 
     const model = Deno.env.get("GEMINI_LIVE_MODEL") || DEFAULT_LIVE_MODEL;

@@ -13,6 +13,7 @@ import { LessonPage } from "@/app/pages/LessonPage";
 import { DashboardPage } from "@/app/pages/dashboard/DashboardPage";
 import { LessonsPage } from "@/app/pages/lessons/LessonsPage";
 import { PracticePage } from "@/app/pages/practice/PracticePage";
+import { AgentPage } from "@/app/pages/agent/AgentPage";
 import { BasicExercisesPage } from "@/app/pages/practice/BasicExercisesPage";
 import { PromptSessionsPage } from "@/app/pages/practice/PromptSessionsPage";
 import { PromptExercisePage } from "@/app/pages/practice/PromptExercisePage";
@@ -120,6 +121,8 @@ function AppRoutes() {
         <Route path="practice/media/:sessionId" element={<MediaExercisePage />} />
         <Route path="practice/html" element={<HtmlExerciseSessionsPage />} />
         <Route path="practice/html/:sessionId" element={<HtmlExercisePage />} />
+        <Route path="agent" element={<AgentPage />} />
+        <Route path="agent/:conversationId" element={<AgentPage />} />
         <Route path="calendar" element={<CalendarPage />} />
         <Route path="benefits" element={<BenefitsPage />} />
         <Route path="profile" element={<ProfilePage />} />

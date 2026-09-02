@@ -28,7 +28,7 @@ import {
 import { getMyPodcasts, getPodcastSignedUrl, requestPodcastGeneration, pollForPodcast, type Podcast } from "@/app/lib/podcasts";
 import { PODCAST_FORMATS, type PodcastVariantId } from "@/app/lib/podcastFormats";
 import { getMyMindmap, requestMindmapGeneration, type MindmapTree } from "@/app/lib/mindmaps";
-import { getChatHistory, sendLessonChatMessage } from "@/app/lib/chat";
+import { findLatestConversationForInstance, getAgentMessages, sendAgentMessage, ensureConversation, insertAgentVoiceMessage } from "@/app/lib/agentChat";
 import { getMyAvatarVideo, getAvatarVideoSignedUrl, requestAvatarVideoGeneration, pollAvatarVideoStatus, type AvatarVideo } from "@/app/lib/avatarVideos";
 import { startGeminiVoiceSession, type GeminiVoiceSession } from "@/app/lib/geminiVoice";
 import { injectPlatformAuth, normalizeSmartQuotes } from "@/app/lib/platformHtml";
@@ -126,6 +126,7 @@ export function LessonPage() {
   const [retaking, setRetaking] = useState(false);
 
   const [msgs, setMsgs] = useState<ChatMsg[]>([{ role: "ai", text: DEFAULT_AI }]);
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const [chatIn, setChatIn] = useState("");
   const [typing, setTyping] = useState(false);
   const [voice, setVoice] = useState(false);
@@ -135,12 +136,20 @@ export function LessonPage() {
 
   useEffect(() => { chatEnd.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs, typing]);
 
+  // Le copilote de la leçon pointe vers la conversation Agent de SA formation
+  // (pas un fil isolé par leçon) : mémoire continue sur tout le cours,
+  // consultable/poursuivie depuis /agent. Rien à charger pour une leçon
+  // TEMPLATE (prévisualisation staff, pas de formation_instance réelle).
   useEffect(() => {
-    if (!user || !lessonId) return;
+    if (!user || !lesson || lesson.isTemplate || !lesson.instanceId) return;
     let cancelled = false;
     (async () => {
       try {
-        const history = await getChatHistory(user.id, lessonId);
+        const conv = await findLatestConversationForInstance(user.id, lesson.instanceId);
+        if (cancelled) return;
+        setConversationId(conv?.id ?? null);
+        if (!conv) { setMsgs([{ role: "ai", text: DEFAULT_AI }]); return; }
+        const history = await getAgentMessages(conv.id);
         if (cancelled) return;
         setMsgs(history.length ? history.map((h) => ({ role: h.role, text: h.content })) : [{ role: "ai", text: DEFAULT_AI }]);
       } catch (err) {
@@ -148,15 +157,16 @@ export function LessonPage() {
       }
     })();
     return () => { cancelled = true; };
-  }, [user, lessonId]);
+  }, [user, lesson?.instanceId, lesson?.isTemplate]);
 
   const sendMsg = async (text: string) => {
-    if (!text.trim() || !lessonId) return;
+    if (!text.trim() || !lesson || lesson.isTemplate) return;
     const question = text.trim();
     setMsgs((m) => [...m, { role: "user", text: question }]);
     setChatIn(""); setTyping(true);
     try {
-      const { reply } = await sendLessonChatMessage(lessonId, question);
+      const { conversationId: newId, reply } = await sendAgentMessage(conversationId, lesson.instanceId || null, question);
+      setConversationId(newId);
       setMsgs((m) => [...m, { role: "ai", text: reply }]);
     } catch (err) {
       console.error(err);
@@ -357,10 +367,19 @@ export function LessonPage() {
   // préfabriqué, pour contrôler la taille relative de l'orbe vs des boutons.
   // startGeminiVoiceSession gère elle-même la permission micro (getUserMedia).
   const startAgentCall = async () => {
-    if (agentStatus !== "idle") return;
+    if (agentStatus !== "idle" || !user) return;
     setAgentError(null);
     setAgentStatus("connecting");
     try {
+      // Rattache la session vocale à la même conversation Agent que le
+      // copilote texte de la leçon (mémoire continue, transcripts persistés
+      // au lieu d'être perdus au changement d'onglet).
+      let convId = conversationId;
+      if (!convId && lesson && !lesson.isTemplate && lesson.instanceId) {
+        const conv = await ensureConversation(user.id, lesson.instanceId);
+        convId = conv.id;
+        setConversationId(convId);
+      }
       const conversation = await startGeminiVoiceSession({
         student_name: firstName,
         profession: profile.profession || "non renseigné",
@@ -369,6 +388,7 @@ export function LessonPage() {
         lesson_content: lesson?.referenceContent || "(pas de contenu de référence pour cette leçon)",
         depth_mode: "expert",
         pedagogy_style: profile.tutor || "soft",
+        conversation_id: convId ?? undefined,
         onConnect: () => setAgentStatus("connected"),
         onDisconnect: () => {
           setAgentStatus("idle");
@@ -379,6 +399,7 @@ export function LessonPage() {
         onModeChange: ({ mode }) => setAgentMode(mode),
         onMessage: ({ source, message }) => {
           setAgentMessages((prev) => [...prev, { role: source === "user" ? "user" : "agent", text: message }]);
+          if (convId) void insertAgentVoiceMessage(convId, source === "user" ? "user" : "ai", message).catch(console.error);
         },
         onError: (message) => {
           console.error(message);

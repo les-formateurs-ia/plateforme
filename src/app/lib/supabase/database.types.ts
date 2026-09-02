@@ -14,6 +14,7 @@ export type FormationStatus = "draft" | "published" | "archived";
 export type ThemePreference = "light" | "dark" | "system";
 export type ExerciseSessionType = "prompt" | "media" | "html";
 export type ExerciseVisibility = "global" | "private";
+export type AgentMessageModality = "text" | "voice";
 
 export interface Database {
   public: {
@@ -388,6 +389,46 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["chat_messages"]["Insert"]>;
+      };
+      agent_conversations: {
+        Row: {
+          id: string;
+          user_id: string;
+          formation_instance_id: string | null;
+          title: string | null;
+          created_at: string;
+          last_message_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          formation_instance_id?: string | null;
+          title?: string | null;
+          created_at?: string;
+          last_message_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["agent_conversations"]["Insert"]>;
+      };
+      agent_messages: {
+        Row: {
+          id: string;
+          conversation_id: string;
+          role: ChatRole;
+          content: string;
+          modality: AgentMessageModality;
+          is_off_topic: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          conversation_id: string;
+          role: ChatRole;
+          content: string;
+          modality?: AgentMessageModality;
+          is_off_topic?: boolean;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["agent_messages"]["Insert"]>;
       };
       formation_instances: {
         Row: {

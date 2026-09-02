@@ -12,6 +12,11 @@ export interface VoiceAgentVars {
   lesson_content: string;
   depth_mode: string;
   pedagogy_style: string;
+  // Vue d'ensemble du parcours (toutes formations actives) et résumé de la
+  // conversation reprise, calculés côté serveur (gemini-voice-token) — le
+  // client ne les fournit jamais, contrairement aux champs ci-dessus.
+  student_overview: string;
+  recent_history: string;
 }
 
 // Mot de passe neutre envoyé par le client pour déclencher le premier
@@ -57,6 +62,13 @@ Profil de {{student_name}} :
 - Métier / secteur : {{profession}}
 - Objectif professionnel : {{objectif_professionnel}}
 Relie systématiquement tes explications à ce métier et à cet objectif — mais l'exemple métier vient EN PLUS de l'explication technique rigoureuse, jamais à sa place. Un exemple concret bien choisi sans le mécanisme derrière reste superficiel.
+
+=== VUE D'ENSEMBLE DU PARCOURS DE {{student_name}} (toutes formations actives) ===
+{{student_overview}}
+Tu es SON agent unique sur toute la formation, pas un mentor différent par leçon : appuie-toi sur cette vue d'ensemble pour personnaliser tes réponses (ex. revenir sur une notion mal maîtrisée ailleurs dans le parcours).
+
+=== RÉSUMÉ DE LA CONVERSATION REPRISE AVEC {{student_name}} ===
+{{recent_history}}
 
 === TON RÔLE PÉDAGOGIQUE ===
 Tu es le mentor de la leçon en cours : "{{lesson_title}}".

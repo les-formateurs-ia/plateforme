@@ -593,14 +593,27 @@ export async function getEnrolledSince(userId: string): Promise<string | null> {
   return data?.assigned_at ?? null;
 }
 
+// Compte les messages élève envoyés au copilote/agent — additionne l'ancien
+// historique par leçon (chat_messages, plus alimenté) et les conversations
+// de l'Agent unifié (agent_messages, cf. migration 0031) pour ne pas faire
+// chuter ce chiffre au moment de la bascule.
 export async function getPromptsCount(userId: string): Promise<number> {
-  const { count, error } = await supabase
-    .from("chat_messages")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", userId)
-    .eq("role", "user");
-  if (error) throw error;
-  return count ?? 0;
+  const [{ count: legacyCount, error: legacyError }, { data: conversations, error: convError }] = await Promise.all([
+    supabase.from("chat_messages").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("role", "user"),
+    supabase.from("agent_conversations").select("id").eq("user_id", userId),
+  ]);
+  if (legacyError) throw legacyError;
+  if (convError) throw convError;
+
+  const conversationIds = (conversations ?? []).map((c) => c.id);
+  let agentCount = 0;
+  if (conversationIds.length > 0) {
+    const { count, error } = await supabase
+      .from("agent_messages").select("id", { count: "exact", head: true }).eq("role", "user").in("conversation_id", conversationIds);
+    if (error) throw error;
+    agentCount = count ?? 0;
+  }
+  return (legacyCount ?? 0) + agentCount;
 }
 
 export interface DailyActivity {
@@ -617,10 +630,11 @@ export async function getRecentActivity(userId: string, days = 28): Promise<Dail
   since.setDate(since.getDate() - (days - 1));
   const sinceIso = since.toISOString();
 
-  const [{ data: chats }, { data: quizzes }, { data: progress }] = await Promise.all([
+  const [{ data: chats }, { data: quizzes }, { data: progress }, { data: conversations }] = await Promise.all([
     supabase.from("chat_messages").select("created_at").eq("user_id", userId).gte("created_at", sinceIso),
     supabase.from("quiz_attempts").select("created_at").eq("user_id", userId).gte("created_at", sinceIso),
     supabase.from("lesson_progress").select("started_at, completed_at").eq("user_id", userId),
+    supabase.from("agent_conversations").select("id").eq("user_id", userId),
   ]);
 
   const counts = new Map<string, number>();
@@ -634,6 +648,13 @@ export async function getRecentActivity(userId: string, days = 28): Promise<Dail
   (chats ?? []).forEach((r) => bump(r.created_at));
   (quizzes ?? []).forEach((r) => bump(r.created_at));
   (progress ?? []).forEach((r) => { bump(r.started_at); bump(r.completed_at); });
+
+  const conversationIds = (conversations ?? []).map((c) => c.id);
+  if (conversationIds.length > 0) {
+    const { data: agentMsgs } = await supabase
+      .from("agent_messages").select("created_at").in("conversation_id", conversationIds).gte("created_at", sinceIso);
+    (agentMsgs ?? []).forEach((r) => bump(r.created_at));
+  }
 
   const result: DailyActivity[] = [];
   for (let i = 0; i < days; i++) {

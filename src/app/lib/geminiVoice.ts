@@ -40,6 +40,11 @@ interface VoiceAgentVars {
   lesson_content: string;
   depth_mode: string;
   pedagogy_style: string;
+  // Conversation Agent à laquelle rattacher cette session — permet au prompt
+  // verrouillé côté serveur d'inclure un résumé de la reprise (cf.
+  // gemini-voice-token). Les transcripts eux-mêmes sont persistés côté
+  // client dans cette même conversation, via onMessage (voir appelants).
+  conversation_id?: string;
 }
 
 interface StartGeminiVoiceOptions extends VoiceAgentVars {
