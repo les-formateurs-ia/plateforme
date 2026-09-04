@@ -587,10 +587,11 @@ export function LessonPage() {
 
   // Playground et Agent sont visibles par tous les rôles/profils — seule
   // l'édition du Playground reste réservée à l'admin (cf. plus bas).
+  // Onglet "Vidéo IA" masqué partout pour le moment (cf. LessonsPage GEN_TYPES) —
+  // le code de génération/lecture reste en place, seul l'onglet est retiré.
   const TABS: { id: LTab; Icon: typeof Monitor; label: string }[] = [
     ...(lesson?.videoUrl ? [{ id: "video" as const, Icon: Monitor, label: "Vidéo" }] : []),
     { id: "mindmap", Icon: Network, label: "Mindmap" }, { id: "podcast", Icon: Headphones, label: "Podcast" },
-    { id: "avatar", Icon: Bot, label: "Vidéo IA" },
     { id: "html", Icon: Code, label: "Playground" },
     { id: "agent", Icon: AudioLines, label: "Agent" },
   ];

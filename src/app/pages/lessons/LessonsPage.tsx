@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
-import { Lock, ChevronDown, CheckCircle, Play, Clock, Pencil, Loader2, XCircle, Network, Headphones, Bot, GraduationCap } from "lucide-react";
+import { Lock, ChevronDown, CheckCircle, Play, Clock, Pencil, Loader2, XCircle, Network, Headphones, GraduationCap } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
@@ -22,10 +22,11 @@ type SectionStatus = "complete" | "active" | "locked";
 type GenType = "mindmap" | "podcast" | "avatar_video";
 type GenStatus = "pending" | "running" | "done" | "error";
 
+// Vidéo IA masquée partout pour le moment (cf. LessonPage TABS) — la génération
+// et le code associé restent en place, seule l'entrée de la liste est retirée.
 const GEN_TYPES: { id: GenType; label: string; hint: string; Icon: typeof Network }[] = [
   { id: "mindmap", label: "Mindmap", hint: "Carte mentale interactive de la leçon", Icon: Network },
   { id: "podcast", label: "Podcast", hint: "Dialogue audio à deux voix", Icon: Headphones },
-  { id: "avatar_video", label: "Vidéo IA", hint: "Avatar vidéo qui explique la leçon", Icon: Bot },
 ];
 
 const greenBtn = { background: "rgba(106,222,177,0.12)", border: "1px solid rgba(106,222,177,0.35)", color: "#6adeb1" };
