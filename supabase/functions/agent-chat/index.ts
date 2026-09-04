@@ -8,6 +8,7 @@ import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
 import { parsePedagogyStyle, pedagogyStyleBlock } from "../_shared/pedagogy-style.ts";
 import { buildCourseContext } from "../_shared/course-context.ts";
 import { buildStudentOverview } from "../_shared/student-overview.ts";
+import { getStudentMemoryText, scheduleStudentMemoryUpdate } from "../_shared/student-memory.ts";
 
 const GEMINI_TEXT_MODEL = "gemini-3.6-flash";
 const HISTORY_WINDOW = 40;
@@ -19,11 +20,15 @@ function buildSystemPrompt(opts: {
   objectifProfessionnel: string | null;
   pedagogyStyle: string;
   overviewText: string;
+  memoryText: string;
 }): string {
   return `Tu es l'Agent IA d'une plateforme de formation professionnelle à l'IA générative. Tu es LE mentor unique de l'élève : un seul agent qui le suit sur toute sa formation, avec une mémoire continue de toutes ses conversations passées avec toi (pas seulement celle-ci) — pas un chatbot différent par leçon.
 
 === PÉRIMÈTRE ===
 Tu réponds sur : (1) le contenu de${opts.courseTitle ? ` la formation "${opts.courseTitle}"` : " ses formations"}, (2) l'application de ce contenu à son métier, (3) sa progression et ses résultats. Toute autre question (actualité, autre matière, vie privée, opinions générales, etc.) est HORS PÉRIMÈTRE : décline poliment en une phrase, rappelle ton rôle, propose de reformuler — ne réponds JAMAIS au fond d'une question hors périmètre.
+
+=== CE QUE TU SAIS DÉJÀ DE CET ÉLÈVE (mémoire long terme, issue de vos échanges passés) ===
+${opts.memoryText}
 
 === VUE D'ENSEMBLE DE L'ÉLÈVE (toutes formations actives) ===
 ${opts.overviewText}
@@ -87,7 +92,10 @@ Deno.serve(async (req) => {
     const objectifProfessionnel = onboarding?.goal_detail || onboarding?.goal || null;
     const pedagogyStyle = pedagogyStyleBlock(parsePedagogyStyle(onboarding?.ai_tutor_persona));
 
-    const { text: overviewText } = await buildStudentOverview(supabase, userId);
+    const [{ text: overviewText }, memoryText] = await Promise.all([
+      buildStudentOverview(supabase, userId),
+      getStudentMemoryText(supabase, userId),
+    ]);
 
     let courseTitle: string | null = null;
     let courseContent = "";
@@ -111,7 +119,7 @@ Deno.serve(async (req) => {
       .order("created_at", { ascending: false }).limit(HISTORY_WINDOW);
     const history = (historyRows ?? []).reverse();
 
-    const systemPrompt = buildSystemPrompt({ courseTitle, courseContent, profession: onboarding?.profession ?? null, objectifProfessionnel, pedagogyStyle, overviewText });
+    const systemPrompt = buildSystemPrompt({ courseTitle, courseContent, profession: onboarding?.profession ?? null, objectifProfessionnel, pedagogyStyle, overviewText, memoryText });
 
     const contents = [
       { role: "user", parts: [{ text: systemPrompt }] },
@@ -146,6 +154,7 @@ Deno.serve(async (req) => {
 
     await supabase.from("agent_messages").insert({ conversation_id: resolvedConversationId, role: "user", content: message.trim(), modality: "text", is_off_topic: false });
     await supabase.from("agent_messages").insert({ conversation_id: resolvedConversationId, role: "ai", content: reply, modality: "text", is_off_topic: offTopic });
+    scheduleStudentMemoryUpdate(supabase, userId);
 
     return jsonResponse({ conversationId: resolvedConversationId, reply, offTopic });
   } catch (err) {

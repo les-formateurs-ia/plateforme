@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router";
-import { Search, Plus, CalendarClock, Menu, X } from "lucide-react";
+import { Search, Plus, CalendarClock, Menu, X, Bug } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
-import { isStaff } from "@/app/lib/permissions";
+import { isStaff, isAdmin } from "@/app/lib/permissions";
 import { useStaffBasePath } from "@/app/lib/staffBase";
 import { Background } from "@/app/components/common/Background";
 import { Logo } from "@/app/components/common/Logo";
 import { Avatar } from "@/app/components/common/Avatar";
 import { NotificationBell } from "@/app/components/layout/NotificationBell";
+import { ReportIncidentDialog } from "@/app/components/layout/ReportIncidentDialog";
 import { cx } from "@/app/lib/cx";
 import { NAV_ITEMS } from "@/app/data/mock";
 
@@ -73,6 +74,12 @@ export function MainLayout() {
               </NavLink>
             );
           })}
+          {isAdmin(role) && (
+            <NavLink to="/admin/incidents" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
+              style={({ isActive }) => isActive ? { background: "linear-gradient(135deg,#b58de0,#dbacf0)", color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
+              <Bug className="w-4 h-4 shrink-0" />Incidents
+            </NavLink>
+          )}
         </nav>
         {isStaff(role) && (
           <div className="px-3 pb-3 space-y-1.5">
@@ -107,6 +114,7 @@ export function MainLayout() {
             <button className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 sm:hidden" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
               <Search className="w-4 h-4" style={{ color: th.fg3 }} />
             </button>
+            <ReportIncidentDialog />
             <NotificationBell />
           </div>
         </div>

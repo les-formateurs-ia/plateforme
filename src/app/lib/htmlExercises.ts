@@ -3,6 +3,7 @@
 // dans lib/htmlExercise.ts (côté élève), inchangé dans sa mécanique.
 import { supabase } from "@/app/lib/supabase/client";
 import type { ExerciseVisibility } from "@/app/lib/supabase/database.types";
+import { listExerciseTagsForExercises, type ExerciseTag } from "@/app/lib/exerciseTags";
 
 export interface HtmlExerciseRow {
   id: string;
@@ -13,6 +14,7 @@ export interface HtmlExerciseRow {
   createdAt: string;
   updatedAt: string;
   assigneeCount: number;
+  tags: ExerciseTag[];
 }
 
 export async function listHtmlExercises(visibility: ExerciseVisibility): Promise<HtmlExerciseRow[]> {
@@ -33,6 +35,8 @@ export async function listHtmlExercises(visibility: ExerciseVisibility): Promise
   const counts = new Map<string, number>();
   for (const a of assignments ?? []) counts.set(a.exercise_id, (counts.get(a.exercise_id) ?? 0) + 1);
 
+  const tagsByExercise = await listExerciseTagsForExercises(exercises.map((e) => e.id));
+
   return exercises.map((e) => ({
     id: e.id,
     name: e.name,
@@ -42,6 +46,7 @@ export async function listHtmlExercises(visibility: ExerciseVisibility): Promise
     createdAt: e.created_at,
     updatedAt: e.updated_at,
     assigneeCount: counts.get(e.id) ?? 0,
+    tags: tagsByExercise.get(e.id) ?? [],
   }));
 }
 
@@ -61,9 +66,11 @@ export async function listExercisesForStudent(studentId: string): Promise<HtmlEx
     .eq("visibility", "private")
     .order("created_at", { ascending: false });
   if (exercisesError) throw exercisesError;
+  const tagsByExercise = await listExerciseTagsForExercises((exercises ?? []).map((e) => e.id));
   return (exercises ?? []).map((e) => ({
     id: e.id, name: e.name, description: e.description, htmlContent: e.html_content, visibility: e.visibility,
     createdAt: e.created_at, updatedAt: e.updated_at, assigneeCount: 0,
+    tags: tagsByExercise.get(e.id) ?? [],
   }));
 }
 
@@ -106,6 +113,7 @@ export async function createHtmlExercise(payload: HtmlExercisePayload): Promise<
     createdAt: data.created_at,
     updatedAt: data.updated_at,
     assigneeCount: payload.studentIds.length,
+    tags: [],
   };
 }
 

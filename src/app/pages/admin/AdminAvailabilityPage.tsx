@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { ChevronLeft, ChevronRight, CalendarClock, User, CalendarCog } from "lucide-react";
+import { ChevronLeft, ChevronRight, CalendarClock, User, CalendarCog, Video, ClipboardList, ClipboardCheck } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
 import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/app/components/ui/dialog";
 import {
   listMyAvailability, saveAvailability, listMyBookingsAsFormateur, cancelRdvAsFormateur, proposeReschedule,
+  syncMeetEvent, submitBilan,
   toISODate, addDays, addMinutes, SESSION_MINUTES, type FormateurBooking,
 } from "@/app/lib/availability";
 
@@ -40,6 +42,18 @@ function tomorrowISO(): string {
   return toISODate(addDays(new Date(), 1));
 }
 
+const ROW_H = 16; // px, doit correspondre à h-4 (les créneaux + le libellé d'heure)
+
+function useNow(enabled: boolean): Date {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    if (!enabled) return;
+    const id = setInterval(() => setNow(new Date()), 30_000);
+    return () => clearInterval(id);
+  }, [enabled]);
+  return now;
+}
+
 export function AdminAvailabilityPage() {
   const th = useTh();
   const { user } = useAuth();
@@ -55,8 +69,19 @@ export function AdminAvailabilityPage() {
   const [proposalDraft, setProposalDraft] = useState({ date: tomorrowISO(), time: "09:00" });
   const [sendingProposal, setSendingProposal] = useState(false);
 
+  const [bilanTarget, setBilanTarget] = useState<FormateurBooking | null>(null);
+  const [bilanDraft, setBilanDraft] = useState({ sujet: "", nextStep: "", pointFort: "" });
+  const [submittingBilan, setSubmittingBilan] = useState(false);
+
   const days = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart]);
   const weekEnd = days[6];
+
+  const isCurrentWeek = toISODate(weekStart) === toISODate(startOfWeek(new Date()));
+  const now = useNow(isCurrentWeek);
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const showNowLine = isCurrentWeek && nowMinutes >= START_HOUR * 60 && nowMinutes < END_HOUR * 60;
+  const nowTopPx = ((nowMinutes - START_HOUR * 60) / SLOT_MINUTES) * ROW_H;
+  const todayDayIndex = now.getDay() === 0 ? 6 : now.getDay() - 1; // 0=Lun … 6=Dim
 
   const load = async () => {
     if (!user) return;
@@ -162,6 +187,41 @@ export function AdminAvailabilityPage() {
   };
 
   const upcomingBookings = bookings.filter((b) => b.status === "confirmed" && b.slotDate >= toISODate(new Date()));
+  const pastBookings = useMemo(
+    () => bookings.filter((b) => b.status === "confirmed" && b.slotDate < toISODate(new Date())).sort((a, b) => (b.slotDate + b.startTime).localeCompare(a.slotDate + a.startTime)),
+    [bookings],
+  );
+
+  // Retry silencieux : rejoue la synchro Meet pour toute réservation à venir
+  // encore sans lien (Google pas connecté au moment de la réservation,
+  // erreur passagère…).
+  useEffect(() => {
+    for (const b of upcomingBookings) {
+      if (!b.meetLink) void syncMeetEvent(b.id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bookings]);
+
+  const openBilan = (b: FormateurBooking) => {
+    setBilanTarget(b);
+    setBilanDraft({ sujet: b.bilanSujet ?? "", nextStep: b.bilanNextStep ?? "", pointFort: b.bilanPointFort ?? "" });
+  };
+
+  const saveBilan = async () => {
+    if (!bilanTarget) return;
+    setSubmittingBilan(true);
+    try {
+      await submitBilan(bilanTarget.id, bilanDraft);
+      toast.success("Bilan enregistré.");
+      setBilanTarget(null);
+      void loadBookings();
+    } catch (err) {
+      console.error(err);
+      toast.error("Impossible d'enregistrer le bilan.");
+    } finally {
+      setSubmittingBilan(false);
+    }
+  };
 
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
@@ -208,10 +268,21 @@ export function AdminAvailabilityPage() {
                     </div>
                   ))}
                 </div>
-                <div className="max-h-[420px] overflow-y-auto">
+                <div className="max-h-[420px] overflow-y-auto relative">
+                  {showNowLine && (
+                    <div
+                      className="absolute left-0 right-0 grid pointer-events-none z-20"
+                      style={{ top: `${nowTopPx}px`, gridTemplateColumns: "64px repeat(7, 1fr)" }}
+                    >
+                      <div style={{ gridColumn: todayDayIndex + 2 }} className="relative h-0">
+                        <div className="absolute left-0 right-0" style={{ top: -1, height: 2, background: "#ef4444", boxShadow: "0 0 4px rgba(239,68,68,0.5)" }} />
+                        <div className="absolute rounded-full" style={{ left: -4, top: -4, width: 8, height: 8, background: "#ef4444", boxShadow: "0 0 0 2px rgba(255,255,255,0.7)" }} />
+                      </div>
+                    </div>
+                  )}
                   {TIME_SLOTS.map((time) => (
                     <div key={time} className="grid" style={{ gridTemplateColumns: "64px repeat(7, 1fr)" }}>
-                      <div className="text-[10px] font-semibold pr-2 text-right py-1" style={{ color: th.fg3 }}>{time.endsWith(":00") ? time : ""}</div>
+                      <div className="h-4 flex items-center justify-end text-[10px] font-semibold pr-2" style={{ color: th.fg3 }}>{time.endsWith(":00") ? time : ""}</div>
                       {days.map((d) => {
                         const key = `${toISODate(d)}_${time}`;
                         const isBooked = bookedKeys.has(key);
@@ -266,6 +337,11 @@ export function AdminAvailabilityPage() {
                           Proposition envoyée : {b.proposedDate} à {b.proposedStartTime} (en attente de réponse)
                         </div>
                       )}
+                      {b.meetLink && (
+                        <a href={b.meetLink} target="_blank" rel="noreferrer" className="text-xs mt-1 flex items-center gap-1.5 font-semibold hover:opacity-80" style={{ color: th.navAC }}>
+                          <Video className="w-3.5 h-3.5" />Rejoindre le Meet
+                        </a>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
@@ -292,6 +368,64 @@ export function AdminAvailabilityPage() {
           </div>
         </div>
       </GCard>
+
+      {pastBookings.length > 0 && (
+        <GCard>
+          <div className="p-5">
+            <h3 className="text-sm font-black mb-4 flex items-center gap-2" style={{ color: th.fg }}>
+              <ClipboardList className="w-4 h-4" style={{ color: th.navAC }} />Bilans à rédiger
+            </h3>
+            <div className="space-y-2">
+              {pastBookings.map((b) => (
+                <div key={b.id} className="rounded-xl px-4 py-3 flex items-center justify-between gap-3 flex-wrap" style={{ border: `1px solid ${th.sep}` }}>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <User className="w-4 h-4 shrink-0" style={{ color: th.navAC }} />
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold truncate" style={{ color: th.fg }}>{b.studentName}</div>
+                      <div className="text-xs truncate" style={{ color: th.fg3 }}>
+                        {new Date(`${b.slotDate}T00:00:00`).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} · {b.startTime}–{b.endTime}
+                      </div>
+                    </div>
+                  </div>
+                  {b.bilanFilledAt ? (
+                    <span className="text-xs font-semibold flex items-center gap-1.5 shrink-0" style={{ color: "#6adeb1" }}>
+                      <ClipboardCheck className="w-3.5 h-3.5" />Bilan envoyé
+                    </span>
+                  ) : (
+                    <VBtn sm onClick={() => openBilan(b)}><span className="flex items-center gap-1.5"><ClipboardList className="w-3.5 h-3.5" />Ajouter un bilan</span></VBtn>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </GCard>
+      )}
+
+      <Dialog open={!!bilanTarget} onOpenChange={(open) => !open && setBilanTarget(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Bilan du rendez-vous</DialogTitle>
+            <DialogDescription>
+              {bilanTarget && `Avec ${bilanTarget.studentName}, le ${new Date(`${bilanTarget.slotDate}T00:00:00`).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}.`}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Sujet du rendez-vous</label>
+              <textarea value={bilanDraft.sujet} onChange={(e) => setBilanDraft((d) => ({ ...d, sujet: e.target.value }))} rows={2} className="w-full rounded-xl px-3 py-2 text-sm g-input resize-none" />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Point fort</label>
+              <textarea value={bilanDraft.pointFort} onChange={(e) => setBilanDraft((d) => ({ ...d, pointFort: e.target.value }))} rows={2} className="w-full rounded-xl px-3 py-2 text-sm g-input resize-none" />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Next step</label>
+              <textarea value={bilanDraft.nextStep} onChange={(e) => setBilanDraft((d) => ({ ...d, nextStep: e.target.value }))} rows={2} className="w-full rounded-xl px-3 py-2 text-sm g-input resize-none" />
+            </div>
+          </div>
+          <ShimBtn full onClick={saveBilan} disabled={submittingBilan}>{submittingBilan ? "Enregistrement…" : "Enregistrer le bilan"}</ShimBtn>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

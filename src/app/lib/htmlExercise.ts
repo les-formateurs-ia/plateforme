@@ -5,6 +5,7 @@
 // groupé en dossiers via exercise_sessions (voir exerciseSessions.ts).
 import { supabase } from "@/app/lib/supabase/client";
 import type { ExerciseVisibility } from "@/app/lib/supabase/database.types";
+import { listExerciseTagsForExercises, type ExerciseTag } from "@/app/lib/exerciseTags";
 
 export interface HtmlExerciseAttempt {
   id: string;
@@ -73,6 +74,7 @@ export interface VisibleHtmlExercise {
   lastAttemptAt: string | null;
   // HTML de la dernière tentative, pour un aperçu miniature en vrai rendu.
   previewHtml: string;
+  tags: ExerciseTag[];
 }
 
 // Liste les exercices visibles par l'élève (globaux + privés qui lui sont
@@ -117,6 +119,8 @@ export async function listVisibleHtmlExercises(userId: string): Promise<VisibleH
     bySession.set(row.session_id, list);
   }
 
+  const tagsByExercise = await listExerciseTagsForExercises(exercises.map((e) => e.id));
+
   return exercises.map((ex) => {
     const sessionId = sessionByExercise.get(ex.id) ?? null;
     const rows = sessionId ? (bySession.get(sessionId) ?? []) : [];
@@ -130,6 +134,7 @@ export async function listVisibleHtmlExercises(userId: string): Promise<VisibleH
       attemptCount: rows.length,
       lastAttemptAt: rows.length ? rows[rows.length - 1].createdAt : null,
       previewHtml: rows.length ? rows[rows.length - 1].htmlContent : ex.html_content,
+      tags: tagsByExercise.get(ex.id) ?? [],
     };
   });
 }

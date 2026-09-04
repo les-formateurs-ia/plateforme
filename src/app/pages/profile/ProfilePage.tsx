@@ -1,14 +1,18 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router";
-import { Trophy, CheckCircle, Lock, Award, Sparkles, Sun, Moon, Monitor, LogOut, Camera } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router";
+import { toast } from "sonner";
+import { Trophy, CheckCircle, Lock, Award, Sparkles, Sun, Moon, Monitor, LogOut, Camera, CalendarClock, CalendarCheck2 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
+import { isStaff } from "@/app/lib/permissions";
+import { supabase } from "@/app/lib/supabase/client";
+import { connectGoogleCalendar, disconnectGoogleCalendar } from "@/app/lib/availability";
 import { GCard } from "@/app/components/common/GCard";
 import { Avatar } from "@/app/components/common/Avatar";
 import { SparkleGlow } from "@/app/components/common/SparkleGlow";
 import { CircleProgress } from "@/app/components/common/CircleProgress";
-import { ShimBtn } from "@/app/components/common/Buttons";
+import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
 import { cx } from "@/app/lib/cx";
 import { TUTOR_STYLES } from "@/app/data/mock";
 import {
@@ -28,7 +32,10 @@ export function ProfilePage() {
   const { user, role, signOut } = useAuth();
   const { profile, updateProfile, updateAvatar } = useProfile();
   const name = profile.name || "Alex Dubois";
+  const [searchParams, setSearchParams] = useSearchParams();
   const [tab, setTab] = useState<"overview" | "badges" | "settings">("overview");
+  const [googleCalendarEmail, setGoogleCalendarEmail] = useState<string | null>(null);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [objectiveDraft, setObjectiveDraft] = useState(profile.goalFinal || profile.goal || "");
   const [objectiveEditing, setObjectiveEditing] = useState(false);
   const [objectiveSaving, setObjectiveSaving] = useState(false);
@@ -46,6 +53,49 @@ export function ProfilePage() {
     const { error } = await updateAvatar(file);
     setAvatarUploading(false);
     if (error) setAvatarError(error);
+  };
+
+  const loadGoogleCalendarStatus = async () => {
+    if (!user || !isStaff(role)) return;
+    const { data } = await supabase.from("profiles").select("google_calendar_email").eq("id", user.id).maybeSingle();
+    setGoogleCalendarEmail(data?.google_calendar_email ?? null);
+  };
+
+  useEffect(() => { void loadGoogleCalendarStatus(); }, [user, role]);
+
+  useEffect(() => {
+    const googleStatus = searchParams.get("google");
+    if (!googleStatus) return;
+    if (googleStatus === "connected") { toast.success("Google Calendar connecté."); void loadGoogleCalendarStatus(); }
+    else if (googleStatus === "error") toast.error("Impossible de connecter Google Calendar — réessayez.");
+    searchParams.delete("google");
+    setSearchParams(searchParams, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  const handleConnectGoogle = async () => {
+    setGoogleLoading(true);
+    try {
+      window.location.href = await connectGoogleCalendar();
+    } catch (err) {
+      console.error(err);
+      toast.error("Impossible de démarrer la connexion Google.");
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleDisconnectGoogle = async () => {
+    setGoogleLoading(true);
+    try {
+      await disconnectGoogleCalendar();
+      setGoogleCalendarEmail(null);
+      toast.success("Google Calendar déconnecté.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Impossible de déconnecter Google Calendar.");
+    } finally {
+      setGoogleLoading(false);
+    }
   };
 
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -301,6 +351,27 @@ export function ProfilePage() {
               ))}
             </div>
           </div></GCard>
+
+          {/* Google Calendar — connexion par formateur, sert à créer les
+              évènements Meet des rendez-vous (voir availability.ts). */}
+          {isStaff(role) && (
+            <GCard><div className="p-5 flex items-center justify-between gap-4 flex-wrap">
+              <div className="flex items-center gap-3 min-w-0">
+                {googleCalendarEmail ? <CalendarCheck2 className="w-5 h-5 shrink-0" style={{ color: "#6adeb1" }} /> : <CalendarClock className="w-5 h-5 shrink-0" style={{ color: th.fg3 }} />}
+                <div className="min-w-0">
+                  <div className="text-sm font-bold mb-0.5" style={{ color: th.fg }}>Google Calendar</div>
+                  <div className="text-xs truncate" style={{ color: th.fg3 }}>
+                    {googleCalendarEmail ? `Connecté en tant que ${googleCalendarEmail}` : "Connectez votre compte pour créer automatiquement un lien Google Meet à chaque rendez-vous."}
+                  </div>
+                </div>
+              </div>
+              {googleCalendarEmail ? (
+                <VBtn sm onClick={handleDisconnectGoogle} disabled={googleLoading}>{googleLoading ? "…" : "Déconnecter"}</VBtn>
+              ) : (
+                <ShimBtn sm onClick={handleConnectGoogle} disabled={googleLoading}>{googleLoading ? "Redirection…" : "Connecter Google Calendar"}</ShimBtn>
+              )}
+            </div></GCard>
+          )}
 
           {/* Info fields */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

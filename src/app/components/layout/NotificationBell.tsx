@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Bell, Calendar as CalendarIcon, XCircle, RefreshCw, CalendarPlus } from "lucide-react";
+import { Bell, Calendar as CalendarIcon, XCircle, RefreshCw, CalendarPlus, ClipboardList } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
@@ -21,6 +21,7 @@ const ICONS: Record<NotificationRow["type"], typeof Bell> = {
   rdv_reschedule_accepted: CalendarIcon,
   rdv_reschedule_declined: XCircle,
   rdv_booked: CalendarPlus,
+  bilan_reminder: ClipboardList,
 };
 
 function timeAgo(iso: string): string {

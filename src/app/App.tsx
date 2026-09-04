@@ -32,6 +32,7 @@ import { AdminPlanningPage } from "@/app/pages/admin/AdminPlanningPage";
 import { AdminStudentDetailPage } from "@/app/pages/admin/AdminStudentDetailPage";
 import { AdminAvailabilityPage } from "@/app/pages/admin/AdminAvailabilityPage";
 import { AdminTrashPage } from "@/app/pages/admin/AdminTrashPage";
+import { AdminIncidentsPage } from "@/app/pages/admin/AdminIncidentsPage";
 
 function LoadingScreen() {
   const th = useTh();
@@ -138,6 +139,7 @@ function AppRoutes() {
         <Route path="admin/instances/:instanceId/lessons/:lessonId" element={<RequireAdmin><AdminLessonEditorPage /></RequireAdmin>} />
         <Route path="admin/planning" element={<RequireAdmin><AdminPlanningPage /></RequireAdmin>} />
         <Route path="admin/planning/students/:studentId" element={<RequireAdmin><AdminStudentDetailPage /></RequireAdmin>} />
+        <Route path="admin/incidents" element={<RequireAdmin><AdminIncidentsPage /></RequireAdmin>} />
 
         <Route path="formateur/courses" element={<RequireFormateur><AdminCoursesPage /></RequireFormateur>} />
         <Route path="formateur/courses/new" element={<RequireFormateur><AdminCourseEditorPage /></RequireFormateur>} />

@@ -1,14 +1,37 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { ArrowLeft, Plus, Code, Pencil, Sparkles } from "lucide-react";
+import { ArrowLeft, Plus, Code, Pencil, Sparkles, Tags } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
-import { isStaff } from "@/app/lib/permissions";
+import { isStaff, isAdmin } from "@/app/lib/permissions";
 import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
+import { VBtn } from "@/app/components/common/Buttons";
 import { HtmlExerciseEditDialog } from "@/app/components/practice/HtmlExerciseEditDialog";
+import { TagManagerDialog } from "@/app/components/practice/TagManagerDialog";
+import { ExerciseTagPill } from "@/app/components/practice/ExerciseTagPill";
 import { listVisibleHtmlExercises, ensureHtmlExerciseSession, type VisibleHtmlExercise } from "@/app/lib/htmlExercise";
 import { listHtmlExercises, type HtmlExerciseRow } from "@/app/lib/htmlExercises";
+import type { ExerciseTag } from "@/app/lib/exerciseTags";
+
+// Tags présents dans une liste d'exercices, dédupliqués et triés — sert de
+// filtre plutôt que le référentiel complet (pas de tag vide sans exercice).
+function collectTags(items: { tags: ExerciseTag[] }[]): ExerciseTag[] {
+  const map = new Map<string, ExerciseTag>();
+  for (const item of items) for (const tag of item.tags) map.set(tag.id, tag);
+  return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function TagFilterBar({ tags, selected, onToggle }: { tags: ExerciseTag[]; selected: Set<string>; onToggle: (id: string) => void }) {
+  if (!tags.length) return null;
+  return (
+    <div className="flex flex-wrap gap-2">
+      {tags.map((t) => (
+        <ExerciseTagPill key={t.id} label={t.name} active={selected.has(t.id)} onClick={() => onToggle(t.id)} />
+      ))}
+    </div>
+  );
+}
 
 function HtmlPreview({ html }: { html: string | null }) {
   if (!html) {
@@ -49,13 +72,15 @@ function CreateTile({ onClick }: { onClick: () => void }) {
 function AdminHtmlExercisesView() {
   const th = useTh();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const [tab, setTab] = useState<"global" | "private">("global");
   const [exercises, setExercises] = useState<HtmlExerciseRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [opening, setOpening] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingExercise, setEditingExercise] = useState<HtmlExerciseRow | undefined>(undefined);
+  const [tagManagerOpen, setTagManagerOpen] = useState(false);
+  const [tagFilter, setTagFilter] = useState<Set<string>>(new Set());
 
   const load = async () => {
     setLoading(true);
@@ -64,6 +89,7 @@ function AdminHtmlExercisesView() {
   };
 
   useEffect(() => { void load(); }, [tab]);
+  useEffect(() => { setTagFilter(new Set()); }, [tab]);
 
   const openCreate = () => { setEditingExercise(undefined); setDialogOpen(true); };
   const openEdit = (ex: HtmlExerciseRow) => { setEditingExercise(ex); setDialogOpen(true); };
@@ -79,9 +105,21 @@ function AdminHtmlExercisesView() {
     }
   };
 
+  const toggleTagFilter = (id: string) => {
+    setTagFilter((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const availableTags = useMemo(() => collectTags(exercises), [exercises]);
+  const filteredExercises = tagFilter.size ? exercises.filter((ex) => ex.tags.some((t) => tagFilter.has(t.id))) : exercises;
+
   return (
     <>
-      <div className="flex justify-center">
+      <div className="flex items-center justify-center gap-3 flex-wrap relative">
         <div className="inline-flex items-center gap-1.5 p-1.5 rounded-full" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
           {([["global", "Globales"], ["private", "Privees"]] as const).map(([id, label]) => {
             const active = tab === id;
@@ -95,14 +133,27 @@ function AdminHtmlExercisesView() {
             );
           })}
         </div>
+        {isAdmin(role) && (
+          <div className="sm:absolute sm:right-0">
+            <VBtn sm onClick={() => setTagManagerOpen(true)}>
+              <span className="flex items-center gap-1.5"><Tags className="w-3.5 h-3.5" />Gerer les tags</span>
+            </VBtn>
+          </div>
+        )}
       </div>
+
+      {!loading && availableTags.length > 0 && (
+        <div className="flex justify-center">
+          <TagFilterBar tags={availableTags} selected={tagFilter} onToggle={toggleTagFilter} />
+        </div>
+      )}
 
       {loading ? (
         <p className="text-sm text-center py-6" style={{ color: th.fg3 }}>Chargement...</p>
       ) : (
         <div className="grid gap-4 mt-2" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(190px, 1fr))" }}>
           <CreateTile onClick={openCreate} />
-          {exercises.map((ex) => (
+          {filteredExercises.map((ex) => (
             <div key={ex.id} onClick={() => openExercise(ex)}
               className="group relative overflow-hidden rounded-2xl cursor-pointer flex flex-col transition-all duration-300 hover:scale-[1.02]"
               style={{ aspectRatio: "1/1", background: th.card, border: `1px solid ${th.sep}`, boxShadow: "0 4px 18px rgba(0,0,0,0.16)", opacity: opening && opening !== ex.id ? 0.5 : 1 }}>
@@ -121,10 +172,15 @@ function AdminHtmlExercisesView() {
                 <div className="text-[10px] truncate mt-0.5" style={{ color: th.fg3 }}>
                   {ex.visibility === "private" ? `${ex.assigneeCount} eleve${ex.assigneeCount > 1 ? "s" : ""}` : "Global"}
                 </div>
+                {ex.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-1.5">
+                    {ex.tags.map((t) => <ExerciseTagPill key={t.id} label={t.name} />)}
+                  </div>
+                )}
               </div>
             </div>
           ))}
-          {!exercises.length && (
+          {!filteredExercises.length && (
             <div className="col-span-full">
               <GCard><div className="p-8 text-center"><p className="text-sm" style={{ color: th.fg3 }}>Aucun exercice {tab === "global" ? "global" : "prive"} pour l'instant.</p></div></GCard>
             </div>
@@ -133,6 +189,7 @@ function AdminHtmlExercisesView() {
       )}
 
       <HtmlExerciseEditDialog open={dialogOpen} onOpenChange={setDialogOpen} exercise={editingExercise} onSaved={load} />
+      <TagManagerDialog open={tagManagerOpen} onOpenChange={setTagManagerOpen} onChanged={load} />
     </>
   );
 }
@@ -152,6 +209,11 @@ function StudentExerciseGrid({ exercises, opening, onOpen }: { exercises: Visibl
           <div className="p-3 shrink-0">
             <div className="text-xs font-black truncate" style={{ color: th.fg }}>{ex.name}</div>
             <div className="text-[10px] truncate mt-0.5" style={{ color: th.fg3 }}>{ex.attemptCount > 0 ? `${ex.attemptCount} tentative${ex.attemptCount > 1 ? "s" : ""}` : "Pret a ouvrir"}</div>
+            {ex.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-1.5">
+                {ex.tags.map((t) => <ExerciseTagPill key={t.id} label={t.name} />)}
+              </div>
+            )}
           </div>
         </div>
       ))}
@@ -168,6 +230,7 @@ function StudentHtmlExercisesView() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [opening, setOpening] = useState<string | null>(null);
+  const [tagFilter, setTagFilter] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!user) return;
@@ -208,15 +271,35 @@ function StudentHtmlExercisesView() {
     );
   }
 
+  const toggleTagFilter = (id: string) => {
+    setTagFilter((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const availableTags = collectTags(exercises);
+  const filtered = tagFilter.size ? exercises.filter((ex) => ex.tags.some((t) => tagFilter.has(t.id))) : exercises;
+
   // "Personnalisés" = attribués à cet élève précisément (visibility privée) —
   // le travail de son expert pour lui. "Autres" = le pool global commun à
   // tous les élèves. Les personnalisés passent en premier et bien mis en
   // avant : c'est le contenu qui a le plus de valeur pour lui.
-  const personalized = exercises.filter((ex) => ex.visibility === "private");
-  const others = exercises.filter((ex) => ex.visibility === "global");
+  const personalized = filtered.filter((ex) => ex.visibility === "private");
+  const others = filtered.filter((ex) => ex.visibility === "global");
 
   return (
     <div className="space-y-8">
+      {availableTags.length > 0 && (
+        <TagFilterBar tags={availableTags} selected={tagFilter} onToggle={toggleTagFilter} />
+      )}
+
+      {!filtered.length && (
+        <GCard><div className="p-8 text-center"><p className="text-sm" style={{ color: th.fg3 }}>Aucun exercice avec ce tag.</p></div></GCard>
+      )}
+
       {personalized.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-1">

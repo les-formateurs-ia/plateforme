@@ -19,6 +19,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
 import { buildLockedSystemInstruction, type VoiceAgentVars } from "../_shared/voice-agent-prompt.ts";
 import { buildStudentOverview } from "../_shared/student-overview.ts";
+import { getStudentMemoryText, scheduleStudentMemoryUpdate } from "../_shared/student-memory.ts";
 
 const HISTORY_WINDOW = 10;
 
@@ -62,10 +63,12 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const userId = userData.user.id;
-    const [{ text: overviewText }, recentHistory] = await Promise.all([
+    const [{ text: overviewText }, memoryText, recentHistory] = await Promise.all([
       buildStudentOverview(supabase, userId),
+      getStudentMemoryText(supabase, userId),
       buildRecentHistoryText(supabase, body.conversation_id),
     ]);
+    scheduleStudentMemoryUpdate(supabase, userId);
     const vars: VoiceAgentVars = {
       student_name: body.student_name || "l'élève",
       profession: body.profession || "non renseigné",
@@ -75,6 +78,7 @@ Deno.serve(async (req) => {
       depth_mode: body.depth_mode || "default",
       pedagogy_style: body.pedagogy_style || "soft",
       student_overview: overviewText,
+      student_memory: memoryText,
       recent_history: recentHistory,
     };
 

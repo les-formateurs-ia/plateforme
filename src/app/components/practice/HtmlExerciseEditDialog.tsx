@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Checkbox } from "@/app/components/ui/checkbox";
 import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
 import { SaveButton, type SaveButtonState } from "@/app/components/common/SaveButton";
+import { ExerciseTagPill } from "@/app/components/practice/ExerciseTagPill";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { listStudentCards, type PersonCard } from "@/app/lib/planning";
@@ -12,6 +13,7 @@ import {
   createHtmlExercise, updateHtmlExercise, deleteHtmlExercise, getExerciseAssignees,
   type HtmlExerciseRow,
 } from "@/app/lib/htmlExercises";
+import { listExerciseTags, getTagIdsForExercise, setExerciseTags, type ExerciseTag } from "@/app/lib/exerciseTags";
 import type { ExerciseVisibility } from "@/app/lib/supabase/database.types";
 
 function personName(p: PersonCard): string {
@@ -45,8 +47,10 @@ export function HtmlExerciseEditDialog({
   const [visibility, setVisibility] = useState<ExerciseVisibility>("private");
   const [students, setStudents] = useState<PersonCard[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [availableTags, setAvailableTags] = useState<ExerciseTag[]>([]);
+  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
   const [original, setOriginal] = useState<{
-    name: string; description: string; htmlDraft: string; visibility: ExerciseVisibility; selected: Set<string>;
+    name: string; description: string; htmlDraft: string; visibility: ExerciseVisibility; selected: Set<string>; selectedTags: Set<string>;
   } | null>(null);
   const [loading, setLoading] = useState(false);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
@@ -68,19 +72,25 @@ export function HtmlExerciseEditDialog({
     setSaveState("idle");
     setLoading(true);
     (async () => {
-      const [studentRows, assigneeIds] = await Promise.all([
+      const [studentRows, assigneeIds, tags, tagIds] = await Promise.all([
         listStudentCards(),
         exercise ? getExerciseAssignees(exercise.id) : Promise.resolve<string[]>([]),
+        listExerciseTags(),
+        exercise ? getTagIdsForExercise(exercise.id) : Promise.resolve<string[]>([]),
       ]);
       const initialSelected = new Set(exercise ? assigneeIds : defaultCheckedStudentId ? [defaultCheckedStudentId] : []);
+      const initialSelectedTags = new Set(tagIds);
       setStudents(studentRows);
       setSelected(initialSelected);
+      setAvailableTags(tags);
+      setSelectedTags(initialSelectedTags);
       setOriginal({
         name: exercise?.name ?? "",
         description: exercise?.description ?? "",
         htmlDraft: sourceHtml,
         visibility: exercise?.visibility ?? "private",
         selected: initialSelected,
+        selectedTags: initialSelectedTags,
       });
       setLoading(false);
     })();
@@ -88,6 +98,15 @@ export function HtmlExerciseEditDialog({
 
   const toggleStudent = (id: string) => {
     setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleTag = (id: string) => {
+    setSelectedTags((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -130,7 +149,8 @@ export function HtmlExerciseEditDialog({
       || description !== original.description
       || htmlDraft !== original.htmlDraft
       || visibility !== original.visibility
-      || !setsEqual(selected, original.selected);
+      || !setsEqual(selected, original.selected)
+      || !setsEqual(selectedTags, original.selectedTags);
 
   const buttonState: SaveButtonState =
     saveState === "saving" ? "saving"
@@ -143,6 +163,7 @@ export function HtmlExerciseEditDialog({
     setSaveState("saving");
     setError(null);
     try {
+      const tagIds = Array.from(selectedTags);
       if (isEditing) {
         await updateHtmlExercise(exercise.id, {
           name: name.trim(),
@@ -152,8 +173,9 @@ export function HtmlExerciseEditDialog({
           studentIds: Array.from(selected),
           updatedBy: user.id,
         });
+        await setExerciseTags(exercise.id, tagIds, user.id);
       } else {
-        await createHtmlExercise({
+        const created = await createHtmlExercise({
           name: name.trim(),
           description: description.trim() || null,
           htmlContent: htmlDraft.trim(),
@@ -161,6 +183,7 @@ export function HtmlExerciseEditDialog({
           studentIds: Array.from(selected),
           createdBy: user.id,
         });
+        await setExerciseTags(created.id, tagIds, user.id);
       }
       onSaved();
       setSaveState("saved");
@@ -179,6 +202,7 @@ export function HtmlExerciseEditDialog({
     setPreviewHtml(original.htmlDraft);
     setVisibility(original.visibility);
     setSelected(new Set(original.selected));
+    setSelectedTags(new Set(original.selectedTags));
     setError(null);
     if (isEditing) setMode("view"); else onOpenChange(false);
   };
@@ -229,6 +253,16 @@ export function HtmlExerciseEditDialog({
                 <div>
                   <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: th.fg3 }}>Visibilite</div>
                   <p className="text-sm" style={{ color: th.fg2 }}>{visibility === "global" ? "Globale" : "Privee"}</p>
+                </div>
+                <div>
+                  <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Tags</div>
+                  {selectedTags.size ? (
+                    <div className="flex flex-wrap gap-1.5">
+                      {availableTags.filter((t) => selectedTags.has(t.id)).map((t) => <ExerciseTagPill key={t.id} label={t.name} />)}
+                    </div>
+                  ) : (
+                    <p className="text-sm" style={{ color: th.fg3 }}>Aucun tag.</p>
+                  )}
                 </div>
                 <div>
                   <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Eleves ayant acces</div>
@@ -299,6 +333,21 @@ export function HtmlExerciseEditDialog({
                       );
                     })}
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Tags</label>
+                  {loading ? (
+                    <p className="text-xs" style={{ color: th.fg3 }}>Chargement...</p>
+                  ) : availableTags.length ? (
+                    <div className="flex flex-wrap gap-1.5">
+                      {availableTags.map((t) => (
+                        <ExerciseTagPill key={t.id} label={t.name} active={selectedTags.has(t.id)} onClick={() => toggleTag(t.id)} />
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs" style={{ color: th.fg3 }}>Aucun tag pour l'instant — un admin peut en creer.</p>
+                  )}
                 </div>
 
                 {visibility === "private" && (

@@ -6,7 +6,7 @@ export type UserRole = "admin" | "formateur" | "student";
 export type EnrollmentStatus = "active" | "completed" | "paused";
 export type LessonProgressStatus = "locked" | "in_progress" | "completed";
 export type RdvStatus = "confirmed" | "cancelled";
-export type NotificationType = "rdv_cancelled" | "rdv_reschedule_proposed" | "rdv_reschedule_accepted" | "rdv_reschedule_declined" | "rdv_booked";
+export type NotificationType = "rdv_cancelled" | "rdv_reschedule_proposed" | "rdv_reschedule_accepted" | "rdv_reschedule_declined" | "rdv_booked" | "bilan_reminder";
 export type AiContentType = "practical_exercise" | "mindmap" | "podcast" | "text_summary" | "remedial_explanation" | "remedial_quiz";
 export type ChatRole = "user" | "ai";
 export type VideoProvider = "cloudflare_stream" | "youtube" | "vimeo" | "external_url";
@@ -15,6 +15,8 @@ export type ThemePreference = "light" | "dark" | "system";
 export type ExerciseSessionType = "prompt" | "media" | "html";
 export type ExerciseVisibility = "global" | "private";
 export type AgentMessageModality = "text" | "voice";
+export type IncidentPage = "lecon" | "tableau_de_bord" | "outil_ia" | "exercice" | "autre";
+export type IncidentStatus = "a_traiter" | "corrige";
 
 export interface Database {
   public: {
@@ -30,6 +32,7 @@ export interface Database {
           theme_preference: ThemePreference;
           avatar_url: string | null;
           formateur_id: string | null;
+          google_calendar_email: string | null;
           created_at: string;
         };
         Insert: {
@@ -42,6 +45,7 @@ export interface Database {
           theme_preference?: ThemePreference;
           avatar_url?: string | null;
           formateur_id?: string | null;
+          google_calendar_email?: string | null;
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
@@ -369,6 +373,38 @@ export interface Database {
         };
         Update: Partial<Database["public"]["Tables"]["html_exercise_assignments"]["Insert"]>;
       };
+      exercise_tags: {
+        Row: {
+          id: string;
+          name: string;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["exercise_tags"]["Insert"]>;
+      };
+      html_exercise_tag_assignments: {
+        Row: {
+          id: string;
+          exercise_id: string;
+          tag_id: string;
+          assigned_by: string | null;
+          assigned_at: string;
+        };
+        Insert: {
+          id?: string;
+          exercise_id: string;
+          tag_id: string;
+          assigned_by?: string | null;
+          assigned_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["html_exercise_tag_assignments"]["Insert"]>;
+      };
       chat_messages: {
         Row: {
           id: string;
@@ -672,6 +708,12 @@ export interface Database {
           proposed_end_time: string | null;
           proposed_by: string | null;
           proposed_at: string | null;
+          google_event_id: string | null;
+          meet_link: string | null;
+          bilan_sujet: string | null;
+          bilan_next_step: string | null;
+          bilan_point_fort: string | null;
+          bilan_filled_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -690,10 +732,48 @@ export interface Database {
           proposed_end_time?: string | null;
           proposed_by?: string | null;
           proposed_at?: string | null;
+          google_event_id?: string | null;
+          meet_link?: string | null;
+          bilan_sujet?: string | null;
+          bilan_next_step?: string | null;
+          bilan_point_fort?: string | null;
+          bilan_filled_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["rendez_vous"]["Insert"]>;
+      };
+      google_oauth_tokens: {
+        Row: {
+          formateur_id: string;
+          refresh_token: string;
+          access_token: string | null;
+          access_token_expires_at: string | null;
+          google_email: string | null;
+          connected_at: string;
+        };
+        Insert: {
+          formateur_id: string;
+          refresh_token: string;
+          access_token?: string | null;
+          access_token_expires_at?: string | null;
+          google_email?: string | null;
+          connected_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["google_oauth_tokens"]["Insert"]>;
+      };
+      google_oauth_states: {
+        Row: {
+          state: string;
+          formateur_id: string;
+          created_at: string;
+        };
+        Insert: {
+          state?: string;
+          formateur_id: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["google_oauth_states"]["Insert"]>;
       };
       notifications: {
         Row: {
@@ -717,6 +797,42 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["notifications"]["Insert"]>;
+      };
+      student_ai_memory: {
+        Row: {
+          user_id: string;
+          summary: string;
+          last_summarized_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          summary?: string;
+          last_summarized_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["student_ai_memory"]["Insert"]>;
+      };
+      reported_incidents: {
+        Row: {
+          id: string;
+          user_id: string;
+          page: IncidentPage;
+          description: string;
+          status: IncidentStatus;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          page: IncidentPage;
+          description: string;
+          status?: IncidentStatus;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["reported_incidents"]["Insert"]>;
       };
     };
   };

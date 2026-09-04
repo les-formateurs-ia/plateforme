@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Calendar as CalendarIcon, Clock, XCircle, RefreshCw, Check, X as XIcon } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, XCircle, RefreshCw, Check, X as XIcon, Video, ClipboardList } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { GCard } from "@/app/components/common/GCard";
@@ -9,7 +9,7 @@ import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
 import { SuccessCheck } from "@/app/components/common/SuccessCheck";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/app/components/ui/dialog";
 import {
-  listAvailableSlotsForBooking, listMyBookingsAsStudent, bookSlot, changeBooking, cancelBooking,
+  listAvailableSlotsForBooking, listMyBookingsAsStudent, bookSlot, changeBooking, cancelBooking, syncMeetEvent,
   acceptReschedule, declineReschedule, getAssignedFormateurId, getFormateurName,
   toISODate, addDays, firstBookableDate, type ExpertAvailableSlot, type StudentBooking,
 } from "@/app/lib/availability";
@@ -69,6 +69,17 @@ export function CalendarPage() {
 
   const today = toISODate(new Date());
   const activeBooking = bookings.find((b) => b.status === "confirmed" && b.slotDate >= today) ?? null;
+  const pastBookings = useMemo(
+    () => bookings.filter((b) => b.status === "confirmed" && b.slotDate < today).sort((a, b) => (b.slotDate + b.startTime).localeCompare(a.slotDate + a.startTime)),
+    [bookings, today],
+  );
+
+  // Retry silencieux : si la réservation active n'a pas encore de lien Meet
+  // (formateur pas encore connecté à Google au moment de la réservation,
+  // erreur passagère…), on retente à chaque chargement de la page.
+  useEffect(() => {
+    if (activeBooking && !activeBooking.meetLink) void syncMeetEvent(activeBooking.id);
+  }, [activeBooking?.id, activeBooking?.meetLink]);
 
   const byDay = useMemo(() => {
     const map = new Map<string, ExpertAvailableSlot[]>();
@@ -101,9 +112,10 @@ export function CalendarPage() {
     }
   };
 
-  const handleCancel = async (id: string) => {
+  const handleCancel = async (booking: StudentBooking) => {
+    if (!user) return;
     try {
-      await cancelBooking(id);
+      await cancelBooking(booking.id, booking.formateurId, user.id, booking.slotDate, booking.startTime);
       toast.success("Rendez-vous annulé.");
       void load();
     } catch (err) {
@@ -209,20 +221,50 @@ export function CalendarPage() {
           <p className="text-xs" style={{ color: th.fg3 }}>Aucun rendez-vous prévu pour l'instant.</p>
         )}
         {activeBooking && (
-          <div className="rounded-xl p-4 flex items-center justify-between gap-3" style={{ border: `1px solid ${th.sep}` }}>
+          <div className="rounded-xl p-4 flex items-center justify-between gap-3 flex-wrap" style={{ border: `1px solid ${th.sep}` }}>
             <div>
               <div className="text-sm font-semibold" style={{ color: th.fg }}>{activeBooking.formateurName}</div>
               <div className="text-xs mt-0.5 flex items-center gap-1.5" style={{ color: th.fg3 }}>
                 <CalendarIcon className="w-3.5 h-3.5" style={{ color: th.navAC }} />
                 {formatDay(activeBooking.slotDate)} · {activeBooking.startTime}–{activeBooking.endTime}
               </div>
+              {activeBooking.meetLink && (
+                <a href={activeBooking.meetLink} target="_blank" rel="noreferrer" className="text-xs mt-1.5 flex items-center gap-1.5 font-semibold hover:opacity-80" style={{ color: th.navAC }}>
+                  <Video className="w-3.5 h-3.5" />Rejoindre le Meet
+                </a>
+              )}
             </div>
-            <VBtn sm onClick={() => handleCancel(activeBooking.id)}>
+            <VBtn sm onClick={() => handleCancel(activeBooking)}>
               <span className="flex items-center gap-1.5"><XCircle className="w-3.5 h-3.5" />Annuler</span>
             </VBtn>
           </div>
         )}
       </div></GCard>
+
+      {pastBookings.length > 0 && (
+        <GCard><div className="p-5">
+          <h3 className="text-sm font-black mb-4 flex items-center gap-2" style={{ color: th.fg }}>
+            <ClipboardList className="w-4 h-4" style={{ color: th.navAC }} />Bilans de vos rendez-vous
+          </h3>
+          <div className="space-y-3">
+            {pastBookings.map((b) => (
+              <div key={b.id} className="rounded-xl p-4" style={{ border: `1px solid ${th.sep}` }}>
+                <div className="text-sm font-semibold" style={{ color: th.fg }}>{b.formateurName}</div>
+                <div className="text-xs mt-0.5" style={{ color: th.fg3 }}>{formatDay(b.slotDate)} · {b.startTime}–{b.endTime}</div>
+                {b.bilanFilledAt ? (
+                  <div className="mt-3 space-y-2">
+                    <div><span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: th.fg3 }}>Sujet</span><p className="text-xs mt-0.5" style={{ color: th.fg2 }}>{b.bilanSujet}</p></div>
+                    <div><span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: th.fg3 }}>Point fort</span><p className="text-xs mt-0.5" style={{ color: th.fg2 }}>{b.bilanPointFort}</p></div>
+                    <div><span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: th.fg3 }}>Next step</span><p className="text-xs mt-0.5" style={{ color: th.fg2 }}>{b.bilanNextStep}</p></div>
+                  </div>
+                ) : (
+                  <p className="text-xs mt-2 italic" style={{ color: th.fg3 }}>En attente du bilan de votre formateur.</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div></GCard>
+      )}
 
       <Dialog open={!!pending} onOpenChange={(open) => !open && setPending(null)}>
         <DialogContent className="sm:max-w-md">

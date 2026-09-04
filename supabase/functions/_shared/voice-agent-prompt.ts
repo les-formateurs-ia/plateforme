@@ -12,10 +12,12 @@ export interface VoiceAgentVars {
   lesson_content: string;
   depth_mode: string;
   pedagogy_style: string;
-  // Vue d'ensemble du parcours (toutes formations actives) et résumé de la
-  // conversation reprise, calculés côté serveur (gemini-voice-token) — le
-  // client ne les fournit jamais, contrairement aux champs ci-dessus.
+  // Vue d'ensemble du parcours (toutes formations actives), fiche mémoire
+  // long terme et résumé de la conversation reprise, calculés côté serveur
+  // (gemini-voice-token) — le client ne les fournit jamais, contrairement
+  // aux champs ci-dessus.
   student_overview: string;
+  student_memory: string;
   recent_history: string;
 }
 
@@ -62,6 +64,9 @@ Profil de {{student_name}} :
 - Métier / secteur : {{profession}}
 - Objectif professionnel : {{objectif_professionnel}}
 Relie systématiquement tes explications à ce métier et à cet objectif — mais l'exemple métier vient EN PLUS de l'explication technique rigoureuse, jamais à sa place. Un exemple concret bien choisi sans le mécanisme derrière reste superficiel.
+
+=== CE QUE TU SAIS DÉJÀ DE {{student_name}} (mémoire long terme, issue de vos échanges passés) ===
+{{student_memory}}
 
 === VUE D'ENSEMBLE DU PARCOURS DE {{student_name}} (toutes formations actives) ===
 {{student_overview}}
