@@ -100,7 +100,7 @@ export function SignupPage() {
             <div className="relative mb-6">
               <div className="absolute -top-2 -left-1 text-7xl font-black leading-none pointer-events-none select-none" style={{ color: th.isDark ? "rgba(181,141,224,0.04)" : "rgba(181,141,224,0.06)", fontFamily: "'Funnel Display',sans-serif" }}>0{step}</div>
               <h1 className="relative text-2xl font-black leading-tight mb-2" style={{ fontFamily: "'Funnel Display',sans-serif" }}>
-                <GT from={th.isDark ? "#FFFFFF" : "#b58de0"} to={th.isDark ? "#dbacf0" : "#dbacf0"}>
+                <GT>
                   {step === 1 && "Crée ton compte"}{step === 2 && "L'IA configure ton académie personnalisée"}{step === 3 && "Comment apprends-tu le mieux ?"}{step === 4 && "Choisis ton style de Tuteur IA"}
                 </GT>
               </h1>

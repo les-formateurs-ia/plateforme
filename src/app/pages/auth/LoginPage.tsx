@@ -36,7 +36,7 @@ export function LoginPage() {
         <GCard glow>
           <form onSubmit={handleSubmit} className="p-6 sm:p-8 lg:p-10">
             <h1 className="text-2xl font-black leading-tight mb-2" style={{ fontFamily: "'Funnel Display',sans-serif" }}>
-              <GT from={th.isDark ? "#FFFFFF" : "#b58de0"} to={th.isDark ? "#dbacf0" : "#dbacf0"}>Content de te revoir</GT>
+              <GT>Content de te revoir</GT>
             </h1>
             <p className="text-sm mb-6" style={{ color: th.fg3 }}>Connecte-toi pour reprendre ton parcours.</p>
 
