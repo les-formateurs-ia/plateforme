@@ -7,7 +7,7 @@ import {
   ChevronRight, ChevronLeft, Mic, Send,
   Sparkles, MessageSquare, CheckCircle, X,
   Lightbulb, Monitor,
-  Network, RotateCcw, Play, Brain, Zap, Clock, PartyPopper, BookOpen, Headphones, Wand2, Bot, Code, Upload, Pencil,
+  Network, RotateCcw, Play, Brain, Zap, Clock, PartyPopper, BookOpen, Headphones, Wand2, Bot, Code, Upload, Pencil, AudioLines,
   Phone, PhoneOff,
 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
@@ -74,7 +74,7 @@ export function LessonPage() {
   const { lessonId } = useParams<{ lessonId: string }>();
   const goBack = () => navigate("/lessons");
 
-  type LTab = "video" | "mindmap" | "podcast" | "avatar" | "html";
+  type LTab = "video" | "mindmap" | "podcast" | "avatar" | "html" | "agent";
   const [tab, setTab] = useState<LTab>("video");
   const [htmlEditing, setHtmlEditing] = useState(false);
   const [htmlDraft, setHtmlDraft] = useState("");
@@ -451,16 +451,16 @@ export function LessonPage() {
     setPttActive(false);
   };
 
-  // Coupe l'appel si on ferme le panneau Copilote ou si on quitte la page —
-  // pas de micro qui reste ouvert en arrière-plan à l'insu de l'élève.
+  // Coupe l'appel si on quitte l'onglet Agent ou la page — pas de micro qui
+  // reste ouvert en arrière-plan à l'insu de l'élève.
   useEffect(() => {
-    if (!assistantOpen && conversationRef.current) {
+    if (tab !== "agent" && conversationRef.current) {
       void conversationRef.current.endSession();
       conversationRef.current = null;
       setAgentStatus("idle");
       setPttActive(false);
     }
-  }, [assistantOpen]);
+  }, [tab]);
 
   useEffect(() => {
     return () => { void conversationRef.current?.endSession(); };
@@ -592,6 +592,7 @@ export function LessonPage() {
     { id: "mindmap", Icon: Network, label: "Mindmap" }, { id: "podcast", Icon: Headphones, label: "Podcast" },
     { id: "avatar", Icon: Bot, label: "Vidéo IA" },
     { id: "html", Icon: Code, label: "Playground" },
+    { id: "agent", Icon: AudioLines, label: "Agent" },
   ];
 
   if (lessonLoading || access === "checking") {
@@ -715,6 +716,63 @@ export function LessonPage() {
                   )}
                 </div>
               )}
+            </div>
+          ) : tab === "agent" ? (
+            <div className="relative rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-6 p-8" style={{ height: "78vh", background: "#060410", border: `1px solid ${th.sep}` }}>
+              <div className="relative flex items-center justify-center shrink-0" style={{ width: 180, height: 180 }}>
+                {agentStatus === "connected" && agentMode === "speaking" && (
+                  <>
+                    <span className="absolute rounded-full" style={{ inset: 0, background: "linear-gradient(135deg,#2792dc,#9ce6e6)", animation: "agent-orb-ring 1.8s ease-out infinite" }} />
+                    <span className="absolute rounded-full" style={{ inset: 0, background: "linear-gradient(135deg,#2792dc,#9ce6e6)", animation: "agent-orb-ring 1.8s ease-out infinite", animationDelay: "0.6s" }} />
+                  </>
+                )}
+                <div className="relative rounded-full" style={{
+                  width: 140, height: 140,
+                  background: "linear-gradient(135deg,#2792dc,#9ce6e6)",
+                  boxShadow: "0 0 60px rgba(39,146,220,0.45)",
+                  transform: agentStatus === "connected" && agentMode === "speaking" ? "scale(1.16)" : "scale(1)",
+                  transition: "transform 450ms cubic-bezier(0.34,1.56,0.64,1)",
+                  animation: agentStatus === "connecting" ? "agent-orb-idle 1s ease-in-out infinite"
+                    : agentStatus === "idle" ? "agent-orb-idle 3.5s ease-in-out infinite"
+                    : "none",
+                }} />
+              </div>
+
+              <p className="text-sm -mt-2" style={{ color: th.fg3 }}>
+                {agentStatus === "connecting" ? "Connexion…"
+                  : agentStatus === "connected" ? (agentMode === "speaking" ? "L'agent parle…" : pttActive ? "Je t'écoute…" : "Maintiens le micro pour parler")
+                  : "Prêt à discuter"}
+              </p>
+
+              {agentError && <p className="text-xs text-[#fbc2ad] text-center max-w-sm">{agentError}</p>}
+
+              <div className="flex items-center gap-4 shrink-0">
+                <button
+                  onClick={agentStatus === "idle" ? startAgentCall : endAgentCall}
+                  disabled={agentStatus === "connecting"}
+                  className="flex items-center justify-center rounded-full transition-all duration-200 hover:opacity-90 active:scale-95 disabled:opacity-50"
+                  style={{ width: 48, height: 48, background: agentStatus === "idle" ? "linear-gradient(135deg,#b58de0,#dbacf0)" : "#e5484d" }}
+                  title={agentStatus === "idle" ? "Démarrer l'appel" : "Raccrocher"}
+                >
+                  {agentStatus === "idle" ? <Phone className="w-5 h-5 text-white" /> : <PhoneOff className="w-5 h-5 text-white" />}
+                </button>
+                <button
+                  onPointerDown={(e) => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); startPushToTalk(); }}
+                  onPointerUp={stopPushToTalk}
+                  onPointerCancel={stopPushToTalk}
+                  disabled={agentStatus !== "connected"}
+                  className="flex items-center justify-center rounded-full transition-all duration-150 active:scale-95 disabled:opacity-30 select-none touch-none"
+                  style={{
+                    width: 56, height: 56,
+                    background: pttActive ? "linear-gradient(135deg,#2792dc,#9ce6e6)" : "rgba(255,255,255,0.08)",
+                    border: `1px solid ${pttActive ? "transparent" : "rgba(255,255,255,0.15)"}`,
+                    boxShadow: pttActive ? "0 0 24px rgba(39,146,220,0.5)" : "none",
+                  }}
+                  title="Maintenir appuyé pour parler (push-to-talk)"
+                >
+                  <Mic className="w-5 h-5" style={{ color: pttActive ? "#06121c" : "#fff" }} />
+                </button>
+              </div>
             </div>
           ) : (
           <>
@@ -994,37 +1052,6 @@ export function LessonPage() {
                 <X className="w-4 h-4 text-white/70" />
               </button>
             </div>
-            <div className="flex items-center gap-2 rounded-xl px-3.5 py-2.5 mb-2" style={{ background: "rgba(255,255,255,0.1)" }}>
-              <span className="w-2 h-2 rounded-full shrink-0" style={{
-                background: agentStatus === "connected" ? (agentMode === "speaking" ? "#2792dc" : "#6adeb1") : agentStatus === "connecting" ? "#f5a623" : "rgba(255,255,255,0.3)",
-              }} />
-              <span className="flex-1 text-xs text-white/80 truncate">
-                {agentStatus === "connecting" ? "Connexion…"
-                  : agentStatus === "connected" ? (agentMode === "speaking" ? "L'agent parle…" : pttActive ? "Je t'écoute…" : "Maintiens le micro pour parler")
-                  : "Discute aussi à la voix"}
-              </span>
-              <button
-                onClick={agentStatus === "idle" ? startAgentCall : endAgentCall}
-                disabled={agentStatus === "connecting"}
-                className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all hover:opacity-90 active:scale-95 disabled:opacity-50"
-                style={{ background: agentStatus === "idle" ? "rgba(255,255,255,0.2)" : "#e5484d" }}
-                title={agentStatus === "idle" ? "Démarrer l'appel vocal" : "Raccrocher"}
-              >
-                {agentStatus === "idle" ? <Phone className="w-3.5 h-3.5 text-white" /> : <PhoneOff className="w-3.5 h-3.5 text-white" />}
-              </button>
-              <button
-                onPointerDown={(e) => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); startPushToTalk(); }}
-                onPointerUp={stopPushToTalk}
-                onPointerCancel={stopPushToTalk}
-                disabled={agentStatus !== "connected"}
-                className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95 disabled:opacity-30 select-none touch-none"
-                style={{ background: pttActive ? "#fff" : "rgba(255,255,255,0.2)" }}
-                title="Maintenir appuyé pour parler (push-to-talk)"
-              >
-                <Mic className="w-3.5 h-3.5" style={{ color: pttActive ? `${th.grad1}` : "#fff" }} />
-              </button>
-            </div>
-            {agentError && <p className="text-[11px] leading-relaxed mb-2" style={{ color: "#fbc2ad" }}>{agentError}</p>}
             <div className="rounded-xl px-3.5 py-3" style={{ background: "rgba(255,255,255,0.1)" }}>
               <p className="text-xs leading-relaxed text-white/85">💡 <strong>Pour {firstName} :</strong> Chaque concept → applique-le immédiatement en pratique.</p>
             </div>
