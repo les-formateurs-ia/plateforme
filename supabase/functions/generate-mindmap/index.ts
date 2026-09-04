@@ -49,8 +49,14 @@ Deno.serve(async (req) => {
     const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
     if (!geminiApiKey) return jsonResponse({ error: "GEMINI_API_KEY non configurée côté serveur." }, 500);
 
-    const { lessonId } = await req.json();
-    if (!lessonId) return jsonResponse({ error: "lessonId manquant." }, 400);
+    // templateLessonId : génère la mindmap de RÉFÉRENCE (niveau template,
+    // lessons) au lieu de la mindmap personnalisée d'un duplicata élève
+    // (lessonId, instance_lessons) — utilisé par la génération groupée à la
+    // publication d'un cours (cf. 0042_lesson_reference_mindmaps.sql).
+    const { lessonId, templateLessonId } = await req.json();
+    if (!lessonId && !templateLessonId) return jsonResponse({ error: "lessonId manquant." }, 400);
+    const isTemplate = !!templateLessonId;
+    const targetId = isTemplate ? templateLessonId : lessonId;
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) return jsonResponse({ error: "Non authentifié." }, 401);
@@ -70,15 +76,21 @@ Deno.serve(async (req) => {
     }
 
     const { data: lesson, error: lessonErr } = await supabase
-      .from("instance_lessons").select("id, title, reference_content").eq("id", lessonId).maybeSingle();
+      .from(isTemplate ? "lessons" : "instance_lessons").select("id, title, reference_content").eq("id", targetId).maybeSingle();
     if (lessonErr) return jsonResponse({ error: lessonErr.message }, 500);
     if (!lesson) return jsonResponse({ error: "Leçon introuvable ou accès refusé." }, 404);
     if (!lesson.reference_content) return jsonResponse({ error: "Cette leçon n'a pas encore de contenu de cours." }, 400);
 
-    const { data: onboarding } = await supabase
-      .from("student_onboarding").select("goal, goal_detail, ai_tutor_persona").eq("user_id", userId).maybeSingle();
-    const objectifProfessionnel = onboarding?.goal_detail || onboarding?.goal || null;
-    const pedagogyStyle = pedagogyStyleBlock(parsePedagogyStyle(onboarding?.ai_tutor_persona));
+    // Une mindmap de référence n'a pas d'élève précis derrière elle — pas de
+    // personnalisation possible, on reste sur les exemples génériques.
+    let objectifProfessionnel: string | null = null;
+    let pedagogyStyle = pedagogyStyleBlock(parsePedagogyStyle(null));
+    if (!isTemplate) {
+      const { data: onboarding } = await supabase
+        .from("student_onboarding").select("goal, goal_detail, ai_tutor_persona").eq("user_id", userId).maybeSingle();
+      objectifProfessionnel = onboarding?.goal_detail || onboarding?.goal || null;
+      pedagogyStyle = pedagogyStyleBlock(parsePedagogyStyle(onboarding?.ai_tutor_persona));
+    }
 
     const prompt = buildMindmapPrompt(lesson.title, lesson.reference_content, objectifProfessionnel, pedagogyStyle);
     const geminiResp = await fetch(
@@ -101,17 +113,28 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: "Réponse Gemini invalide (JSON non parsable)." }, 502);
     }
 
-    await supabase.from("ai_generated_content").delete()
-      .eq("user_id", userId).eq("lesson_id", lessonId).eq("content_type", "mindmap");
-    const { error: insertErr } = await supabase.from("ai_generated_content").insert({
-      user_id: userId,
-      lesson_id: lessonId,
-      content_type: "mindmap",
-      source_prompt: "Structure fidèle au cours, exemples personnalisés (voir generate-mindmap).",
-      content: { tree },
-      model: GEMINI_TEXT_MODEL,
-    });
-    if (insertErr) return jsonResponse({ error: `Échec de l'enregistrement : ${insertErr.message}` }, 500);
+    if (isTemplate) {
+      await supabase.from("lesson_reference_mindmaps").delete().eq("lesson_id", targetId);
+      const { error: insertErr } = await supabase.from("lesson_reference_mindmaps").insert({
+        lesson_id: targetId,
+        content: { tree },
+        model: GEMINI_TEXT_MODEL,
+        generated_by: userId,
+      });
+      if (insertErr) return jsonResponse({ error: `Échec de l'enregistrement : ${insertErr.message}` }, 500);
+    } else {
+      await supabase.from("ai_generated_content").delete()
+        .eq("user_id", userId).eq("lesson_id", targetId).eq("content_type", "mindmap");
+      const { error: insertErr } = await supabase.from("ai_generated_content").insert({
+        user_id: userId,
+        lesson_id: targetId,
+        content_type: "mindmap",
+        source_prompt: "Structure fidèle au cours, exemples personnalisés (voir generate-mindmap).",
+        content: { tree },
+        model: GEMINI_TEXT_MODEL,
+      });
+      if (insertErr) return jsonResponse({ error: `Échec de l'enregistrement : ${insertErr.message}` }, 500);
+    }
 
     return jsonResponse({ tree });
   } catch (err) {

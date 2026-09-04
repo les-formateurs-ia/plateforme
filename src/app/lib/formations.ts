@@ -3,6 +3,16 @@
 // cf. migration 0030). Un formateur qui appellerait ces fonctions recevrait
 // une erreur Postgres, ces garde-fous côté client ne sont qu'un confort UX.
 import { supabase } from "@/app/lib/supabase/client";
+import type { FormationStatus } from "@/app/lib/supabase/database.types";
+
+// Utilisé par le contexte de génération groupée (bulk-generation-context) une
+// fois la génération des mindmaps de référence terminée, et pour repasser en
+// 'generating' au lancement — un update ciblé plutôt que via saveCourse, qui
+// réécrirait aussi tous les autres champs du formulaire.
+export async function updateFormationStatus(formationId: string, status: FormationStatus): Promise<void> {
+  const { error } = await supabase.from("formations").update({ status }).eq("id", formationId);
+  if (error) throw error;
+}
 
 export interface TrashedFormationRow {
   id: string;

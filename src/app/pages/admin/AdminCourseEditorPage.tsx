@@ -8,19 +8,22 @@ import { useTh } from "@/app/theme/theme";
 import { supabase } from "@/app/lib/supabase/client";
 import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
-import { VBtn } from "@/app/components/common/Buttons";
+import { VBtn, ShimBtn } from "@/app/components/common/Buttons";
 import { SaveButton, type SaveButtonState } from "@/app/components/common/SaveButton";
 import { VSelect } from "@/app/components/common/Select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/app/components/ui/dialog";
 import { HtmlExerciseEditDialog } from "@/app/components/practice/HtmlExerciseEditDialog";
 import { listExercisesForStudent, type HtmlExerciseRow } from "@/app/lib/htmlExercises";
 import { useStaffBasePath } from "@/app/lib/staffBase";
+import { useBulkGeneration } from "@/app/state/bulk-generation-context";
+import type { FormationStatus } from "@/app/lib/supabase/database.types";
 
 interface CourseForm {
   name: string;
   slug: string;
   description: string;
   duration_minutes: string;
-  status: "draft" | "published" | "archived";
+  status: FormationStatus;
 }
 
 interface SectionRow { id: string; title: string; order_index: number; }
@@ -49,8 +52,14 @@ export function AdminCourseEditorPage() {
   const routeId = routeInstanceId ?? routeCourseId;
   const isNew = !routeId;
 
+  const gen = useBulkGeneration();
   const [courseId, setCourseId] = useState<string | undefined>(routeId);
   const [course, setCourse] = useState<CourseForm>(EMPTY_COURSE);
+  // Statut tel que chargé depuis la base — sert à détecter une transition
+  // vers "publié" (saveCourse) sans jamais changer au fil des simples
+  // modifications du formulaire (cf. règle "modifier ne change pas le statut").
+  const [initialStatus, setInitialStatus] = useState<FormationStatus>("draft");
+  const [publishDialogOpen, setPublishDialogOpen] = useState(false);
   const [studentId, setStudentId] = useState<string | undefined>();
   const [slugTouched, setSlugTouched] = useState(false);
   const [slugEditing, setSlugEditing] = useState(false);
@@ -129,6 +138,7 @@ export function AdminCourseEditorPage() {
           duration_minutes: formation.duration_minutes?.toString() ?? "",
           status: formation.status,
         });
+        setInitialStatus(formation.status);
         setSlugTouched(true);
       }
       await loadSections(routeId!);
@@ -150,8 +160,10 @@ export function AdminCourseEditorPage() {
     setTimeout(() => { setJustSaved(false); after?.(); }, 900);
   };
 
-  const saveCourse = async () => {
-    if (!canSave || saving) return;
+  // Persiste vraiment le cours — statusOverride permet à
+  // handlePublishAndGenerate d'enregistrer avec un statut ('generating')
+  // différent de celui affiché dans le formulaire ('published').
+  const persistCourse = async (statusOverride?: FormationStatus) => {
     setSaving(true);
     setError(null);
 
@@ -167,24 +179,59 @@ export function AdminCourseEditorPage() {
       return;
     }
 
+    const status = statusOverride ?? course.status;
     const payload = {
       name: course.name.trim(),
       slug: course.slug.trim(),
       description: course.description || null,
       duration_minutes: course.duration_minutes ? parseInt(course.duration_minutes, 10) : null,
-      status: course.status,
+      status,
     };
 
     if (courseId) {
       const { error: updateError } = await supabase.from("formations").update(payload).eq("id", courseId);
       if (updateError) { setError(updateError.message); setSaving(false); return; }
+      setCourse((c) => ({ ...c, status }));
+      setInitialStatus(status);
       flashSaved();
     } else {
       const { data, error: insertError } = await supabase.from("formations").insert(payload).select("id").single();
       if (insertError || !data) { setError(insertError?.message ?? "Erreur inconnue"); setSaving(false); return; }
       setCourseId(data.id);
+      setInitialStatus(status);
       flashSaved(() => navigate(`${base}/courses/${data.id}`, { replace: true }));
     }
+  };
+
+  // Transition vers "publié" (depuis n'importe quel autre statut) : on
+  // suspend l'enregistrement pour demander si la génération groupée des
+  // mindmaps doit être lancée, plutôt que de publier silencieusement.
+  const saveCourse = async () => {
+    if (!canSave || saving) return;
+    if (!isInstance && initialStatus !== "published" && initialStatus !== "generating" && course.status === "published") {
+      setPublishDialogOpen(true);
+      return;
+    }
+    await persistCourse();
+  };
+
+  const cancelPublish = () => {
+    setCourse((c) => ({ ...c, status: initialStatus }));
+    setPublishDialogOpen(false);
+  };
+
+  const publishWithoutGeneration = async () => {
+    setPublishDialogOpen(false);
+    await persistCourse("published");
+  };
+
+  const publishAndGenerate = async () => {
+    setPublishDialogOpen(false);
+    if (!courseId) return;
+    const allLessonIds = Object.values(lessonsBySection).flat().map((l) => l.id);
+    if (!allLessonIds.length) { await persistCourse("published"); return; }
+    await persistCourse("generating");
+    gen.startCourseMindmapGeneration(courseId, course.name.trim() || "Formation", allLessonIds);
   };
 
   const saveButtonState: SaveButtonState = saving ? "saving" : justSaved ? "saved" : canSave ? "active" : "disabled";
@@ -295,10 +342,20 @@ export function AdminCourseEditorPage() {
               <VSelect
                 value={course.status}
                 onValueChange={(v) => setCourse((c) => ({ ...c, status: v as CourseForm["status"] }))}
+                // Verrouillé seulement pendant une génération réellement en
+                // cours DANS CETTE SESSION (gen.courseId) — pas simplement
+                // parce que le statut chargé vaut "generating" : sinon un
+                // job mort (onglet fermé, page rechargée pendant la
+                // génération) laisserait le select bloqué à jamais, sans
+                // aucun moyen de repasser la formation à "Publié" à la main.
+                disabled={gen.running && gen.courseId === courseId}
                 options={[
                   { value: "draft", label: "Brouillon" },
                   { value: "published", label: "Publié" },
                   { value: "archived", label: "Archivé" },
+                  // Jamais choisi manuellement — n'apparaît que le temps de la
+                  // génération groupée, pour que le select ne semble pas vide.
+                  ...(course.status === "generating" ? [{ value: "generating", label: "Génération en cours…" }] : []),
                 ]}
               />
             </div>
@@ -391,6 +448,24 @@ export function AdminCourseEditorPage() {
       <div className="flex justify-end">
         <SaveButton state={saveButtonState} onClick={saveCourse} />
       </div>
+
+      <Dialog open={publishDialogOpen} onOpenChange={(v) => !v && cancelPublish()}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Publier la formation ?</DialogTitle>
+            <DialogDescription>
+              La publication peut lancer la génération de la mindmap sur toutes les leçons déjà créées de cette formation.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-2 pt-2">
+            <ShimBtn full onClick={publishAndGenerate}>Publier et générer</ShimBtn>
+            <VBtn full onClick={publishWithoutGeneration}>Publier sans génération</VBtn>
+            <button type="button" onClick={cancelPublish} className="w-full px-4 py-2.5 rounded-full text-sm font-semibold transition-opacity hover:opacity-70" style={{ color: th.fg3 }}>
+              Annuler
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {isInstance && studentId && (
         <HtmlExerciseEditDialog

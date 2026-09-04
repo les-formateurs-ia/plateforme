@@ -47,3 +47,14 @@ export async function requestMindmapGeneration(lessonId: string): Promise<Mindma
   if (data?.error) throw new Error(data.error);
   return data.tree;
 }
+
+// Mindmap de RÉFÉRENCE au niveau du template (lessons, pas instance_lessons)
+// — copiée automatiquement dans ai_generated_content à chaque duplication
+// (attribution élève / prévisualisation staff), cf. 0042_lesson_reference_mindmaps.sql.
+// Utilisée par la génération groupée à la publication d'un cours.
+export async function requestTemplateMindmapGeneration(templateLessonId: string): Promise<MindmapTree> {
+  const { data, error } = await supabase.functions.invoke("generate-mindmap", { body: { templateLessonId } });
+  if (error) throw new Error(await extractFunctionError(error));
+  if (data?.error) throw new Error(data.error);
+  return data.tree;
+}

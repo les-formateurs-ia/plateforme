@@ -10,6 +10,7 @@ import { Background } from "@/app/components/common/Background";
 import { Logo } from "@/app/components/common/Logo";
 import { Avatar } from "@/app/components/common/Avatar";
 import { NotificationBell } from "@/app/components/layout/NotificationBell";
+import { useBulkGeneration } from "@/app/state/bulk-generation-context";
 import { ReportIncidentDialog } from "@/app/components/layout/ReportIncidentDialog";
 import { cx } from "@/app/lib/cx";
 import { NAV_ITEMS } from "@/app/data/mock";
@@ -22,6 +23,8 @@ export function MainLayout() {
   const name = profile.name.split(" ")[0] || "Alex";
   const [navOpen, setNavOpen] = useState(false);
   const location = useLocation();
+  const gen = useBulkGeneration();
+  const genPct = gen.total > 0 ? Math.round((gen.done / gen.total) * 100) : 0;
 
   useEffect(() => { setNavOpen(false); }, [location.pathname]);
 
@@ -83,6 +86,18 @@ export function MainLayout() {
         </nav>
         {isStaff(role) && (
           <div className="px-3 pb-3 space-y-1.5">
+            {gen.running && (
+              <div className="rounded-xl px-3 py-2.5" style={{ background: th.isDark ? "rgba(255,255,255,0.05)" : "rgba(15,14,20,0.03)", border: `1px solid ${th.inputB}` }}>
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <span className="text-[11px] font-semibold truncate" style={{ color: th.fg2 }}>Génération : {gen.courseName}</span>
+                  <span className="text-[11px] font-bold shrink-0" style={{ color: th.navAC }}>{genPct}%</span>
+                </div>
+                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.08)" : "rgba(15,14,20,0.06)" }}>
+                  <div className="h-full rounded-full transition-all duration-300" style={{ width: `${genPct}%`, background: `linear-gradient(90deg,${th.grad1},${th.grad2})` }} />
+                </div>
+                <div className="text-[10px] mt-1" style={{ color: th.fg3 }}>{gen.done}/{gen.total} leçon{gen.total > 1 ? "s" : ""}</div>
+              </div>
+            )}
             <NavLink to={`${staffBase}/courses`} onClick={() => setNavOpen(false)} className="w-full flex items-center gap-2.5 px-4 py-2.5 rounded-full text-sm font-semibold transition-all hover:opacity-90"
               style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff" }}>
               <Plus className="w-4 h-4 shrink-0" />
