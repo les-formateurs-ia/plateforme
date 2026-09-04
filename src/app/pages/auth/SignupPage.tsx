@@ -87,7 +87,7 @@ export function SignupPage() {
                 {[1, 2, 3, 4].map(i => (
                   <div key={i} className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300"
-                      style={{ background: i < step ? "linear-gradient(135deg,#b58de0,#dbacf0)" : i === step ? "rgba(181,141,224,0.12)" : "transparent", border: i === step ? "1px solid rgba(181,141,224,0.4)" : "1px solid " + th.sep, color: i < step ? "#08060F" : i === step ? "#dbacf0" : th.fg3, boxShadow: i === step ? "0 0 16px rgba(181,141,224,0.25)" : "none" }}>
+                      style={{ background: i < step ? "linear-gradient(135deg,#b58de0,#dbacf0)" : i === step ? "rgba(181,141,224,0.12)" : "transparent", border: i === step ? "1px solid rgba(181,141,224,0.4)" : "1px solid " + th.sep, color: i < step ? "#08060F" : i === step ? th.navAC : th.fg3, boxShadow: i === step ? "0 0 16px rgba(181,141,224,0.25)" : "none" }}>
                       {i < step ? <CheckCircle className="w-3.5 h-3.5" /> : i}
                     </div>
                     {i < 4 && <div className="w-8 h-px" style={{ background: i < step ? "rgba(181,141,224,0.5)" : th.sep }} />}
@@ -160,7 +160,7 @@ export function SignupPage() {
                   <div className="mt-2">
                     <button onClick={formulateWithAI} disabled={!p.goal.trim() || aiState === "loading"}
                       className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-80 disabled:opacity-40"
-                      style={{ background: "rgba(181,141,224,0.1)", border: "1px solid rgba(181,141,224,0.25)", color: "#dbacf0" }}>
+                      style={{ background: "rgba(181,141,224,0.1)", border: "1px solid rgba(181,141,224,0.25)", color: th.navAC }}>
                       {aiState === "loading"
                         ? <><RefreshCw className="w-3.5 h-3.5 animate-spin" />L'IA formule…</>
                         : <><Wand2 className="w-3.5 h-3.5" />Formuler mon objectif avec l'IA</>}
@@ -168,7 +168,7 @@ export function SignupPage() {
                   </div>
                   {aiState === "proposal" && (
                     <div className="mt-3 rounded-xl p-4" style={{ background: "rgba(181,141,224,0.07)", border: "1px solid rgba(181,141,224,0.2)" }}>
-                      <div className="flex items-center gap-2 mb-2 text-xs font-bold" style={{ color: "#dbacf0" }}><Sparkles className="w-3.5 h-3.5" />Proposition de l'IA — tu peux modifier ci-dessous</div>
+                      <div className="flex items-center gap-2 mb-2 text-xs font-bold" style={{ color: th.navAC }}><Sparkles className="w-3.5 h-3.5" />Proposition de l'IA — tu peux modifier ci-dessous</div>
                       <textarea value={aiProposal} onChange={e => setAiProposal(e.target.value)} rows={4} className="w-full rounded-xl px-3 py-2.5 text-sm g-input resize-none mb-3" />
                       <div className="flex items-center gap-2">
                         <VBtn onClick={acceptProposal} sm><span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5" />Valider cet objectif</span></VBtn>
@@ -189,9 +189,9 @@ export function SignupPage() {
                       style={{ background: sel ? "rgba(181,141,224,0.1)" : "transparent", border: sel ? `1px solid rgba(181,141,224,0.4)` : `1px solid ${th.sep}`, boxShadow: sel ? "0 0 24px rgba(181,141,224,0.15)" : "none" }}>
                       <div className="p-5 h-full rounded-2xl">
                         <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ background: sel ? "rgba(181,141,224,0.15)" : "rgba(181,141,224,0.05)" }}>
-                          <Icon className="w-5 h-5" style={{ color: sel ? "#dbacf0" : th.fg3 }} />
+                          <Icon className="w-5 h-5" style={{ color: sel ? th.navAC : th.fg3 }} />
                         </div>
-                        <div className="text-sm font-bold mb-1" style={{ color: sel ? "#dbacf0" : th.fg }}>{label}</div>
+                        <div className="text-sm font-bold mb-1" style={{ color: sel ? th.navAC : th.fg }}>{label}</div>
                         <div className="text-xs leading-relaxed" style={{ color: th.fg3 }}>{desc}</div>
                       </div>
                     </button>
@@ -210,10 +210,10 @@ export function SignupPage() {
                       <div className="px-5 py-4 flex items-center gap-4">
                         <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0" style={{ background: sel ? "rgba(181,141,224,0.1)" : "rgba(181,141,224,0.04)" }}>{emoji}</div>
                         <div className="flex-1 min-w-0">
-                          <div className="text-sm font-bold mb-0.5" style={{ color: sel ? "#dbacf0" : th.fg }}>{label}</div>
+                          <div className="text-sm font-bold mb-0.5" style={{ color: sel ? th.navAC : th.fg }}>{label}</div>
                           <div className="text-xs" style={{ color: th.fg3 }}>{desc}</div>
                         </div>
-                        {sel && <CheckCircle className="w-4 h-4 shrink-0" style={{ color: "#dbacf0" }} />}
+                        {sel && <CheckCircle className="w-4 h-4 shrink-0" style={{ color: th.navAC }} />}
                       </div>
                     </button>
                   );

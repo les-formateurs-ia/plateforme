@@ -352,7 +352,7 @@ function FormationAccordion({ entry, open, onToggle }: { entry: CourseProgressEn
                 {GEN_TYPES.map(({ id, label, hint, Icon }) => (
                   <button key={id} onClick={() => setGenType(id)}
                     className="flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all"
-                    style={{ background: genType === id ? "rgba(181,141,224,0.1)" : "transparent", border: `1px solid ${genType === id ? "#dbacf0" : th.sep}` }}>
+                    style={{ background: genType === id ? "rgba(181,141,224,0.1)" : "transparent", border: `1px solid ${genType === id ? th.navAC : th.sep}` }}>
                     <Icon className="w-4 h-4 shrink-0" style={{ color: genType === id ? th.navAC : th.fg3 }} />
                     <div className="min-w-0">
                       <div className="text-sm font-semibold" style={{ color: th.fg }}>{label}</div>
