@@ -1,1 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300;400;500;600;700;800&family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,300;1,14..32,400&display=swap');
+/* Chargée depuis index.html <head> (préconnect + <link>), pas ici : un
+   @import distant niché dans le bundle CSS n'est découvert par le
+   navigateur qu'après téléchargement + parsing de tout ce bundle, donc trop
+   tard pour éviter un repaint de bascule de police au premier chargement —
+   voir le commentaire dans index.html. */

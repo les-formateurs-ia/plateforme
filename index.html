@@ -8,6 +8,20 @@
       <title>Site web e-learning IA</title>
       <meta name="description" content="Personalized AI-powered e-learning platform offering tailored lessons, interactive content, and dynamic dashboards to enhance user learning experiences." />
       <meta name="robots" content="noindex, nofollow" />
+      <!--
+        Chargée ici (et pas via @import dans fonts.css) pour que le scanner de
+        préchargement du navigateur la découvre dès le parsing du HTML, en
+        parallèle du JS/CSS de l'app — un @import niché dans le bundle CSS
+        n'est découvert qu'après le téléchargement + parsing de tout ce
+        bundle, donc la police arrive tard sur un chargement à froid. Ce
+        retard provoquait un repaint de bascule de police pendant lequel les
+        titres en dégradé (GT, background-clip:text) pouvaient s'afficher en
+        bloc plein non découpé — jamais vu en navigation interne (police déjà
+        en cache), seulement au rechargement complet de la page.
+      -->
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300;400;500;600;700;800;900&family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,300;1,14..32,400&display=swap" />
       <style>html, body { height: 100%; margin: 0; } #root { height: 100%; }</style>
       
     </head>
