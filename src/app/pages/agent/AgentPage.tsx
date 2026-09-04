@@ -56,6 +56,13 @@ export function AgentPage() {
   const currentConversation = conversations.find((c) => c.id === conversationId) ?? null;
   const activeProjectId = currentConversation ? currentConversation.formationInstanceId : draftProjectId;
 
+  // Pas de "discussion générale" pour l'instant : une seule formation ->
+  // l'élève discute dessus par défaut, sans avoir à choisir. Plusieurs ->
+  // on lui laisse choisir laquelle (jamais de conversation non rattachée).
+  useEffect(() => {
+    if (draftProjectId === null && instances.length > 0) setDraftProjectId(instances[0].id);
+  }, [instances, draftProjectId]);
+
   const refreshConversations = async () => {
     if (!user) return;
     try {
@@ -242,12 +249,14 @@ export function AgentPage() {
 
       {/* Fil de conversation */}
       <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
-        {!conversationId && (
+        {/* Une seule formation -> pas de choix à faire, l'élève discute
+            dessus directement. Plusieurs -> il choisit laquelle. Jamais de
+            "discussion générale" non rattachée à une formation. */}
+        {!conversationId && instances.length > 1 && (
           <div className="shrink-0 px-4 sm:px-6 py-3 flex items-center gap-2 flex-wrap" style={{ borderBottom: `1px solid ${th.sep}` }}>
             <span className="text-xs shrink-0" style={{ color: th.fg3 }}>Nouvelle conversation à propos de :</span>
-            <select value={draftProjectId ?? ""} onChange={(e) => setDraftProjectId(e.target.value || null)}
+            <select value={draftProjectId ?? instances[0]?.id ?? ""} onChange={(e) => setDraftProjectId(e.target.value || null)}
               className="text-sm rounded-lg px-2.5 py-1.5 g-input" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg }}>
-              <option value="">Discussion générale</option>
               {instances.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
             </select>
           </div>
