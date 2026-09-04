@@ -80,6 +80,14 @@ export async function getExerciseAssignees(exerciseId: string): Promise<string[]
   return (data ?? []).map((a) => a.student_id);
 }
 
+// Retrait ciblé d'un seul élève, sans repasser par le patch complet de
+// l'exercice (updateHtmlExercise recrée tout l'ensemble des assignations) —
+// utilisé par le bouton "retirer l'accès" sur la fiche de consultation.
+export async function removeExerciseAssignee(exerciseId: string, studentId: string): Promise<void> {
+  const { error } = await supabase.from("html_exercise_assignments").delete().eq("exercise_id", exerciseId).eq("student_id", studentId);
+  if (error) throw error;
+}
+
 export interface HtmlExercisePayload {
   name: string;
   description: string | null;

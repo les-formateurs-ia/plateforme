@@ -1,16 +1,21 @@
 import { useEffect, useState, type ChangeEvent } from "react";
-import { Eye, Trash2, Upload } from "lucide-react";
+import { useNavigate } from "react-router";
+import { Eye, Trash2, Upload, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/app/components/ui/dialog";
+import { Popover, PopoverTrigger, PopoverContent } from "@/app/components/ui/popover";
 import { Checkbox } from "@/app/components/ui/checkbox";
+import { Avatar } from "@/app/components/common/Avatar";
 import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
 import { SaveButton, type SaveButtonState } from "@/app/components/common/SaveButton";
 import { ExerciseTagPill } from "@/app/components/practice/ExerciseTagPill";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
-import { listStudentCards, type PersonCard } from "@/app/lib/planning";
+import { isAdmin } from "@/app/lib/permissions";
+import { useStaffBasePath } from "@/app/lib/staffBase";
+import { listStudentCards, type PersonCard, type StudentCard } from "@/app/lib/planning";
 import { normalizeSmartQuotes } from "@/app/lib/platformHtml";
 import {
-  createHtmlExercise, updateHtmlExercise, deleteHtmlExercise, getExerciseAssignees,
+  createHtmlExercise, updateHtmlExercise, deleteHtmlExercise, getExerciseAssignees, removeExerciseAssignee,
   type HtmlExerciseRow,
 } from "@/app/lib/htmlExercises";
 import { listExerciseTags, getTagIdsForExercise, setExerciseTags, type ExerciseTag } from "@/app/lib/exerciseTags";
@@ -36,7 +41,9 @@ export function HtmlExerciseEditDialog({
   onSaved: () => void;
 }) {
   const th = useTh();
-  const { user } = useAuth();
+  const navigate = useNavigate();
+  const staffBase = useStaffBasePath();
+  const { user, role } = useAuth();
   const isEditing = !!exercise;
 
   const [mode, setMode] = useState<"view" | "edit">("view");
@@ -45,7 +52,8 @@ export function HtmlExerciseEditDialog({
   const [htmlDraft, setHtmlDraft] = useState("");
   const [previewHtml, setPreviewHtml] = useState("");
   const [visibility, setVisibility] = useState<ExerciseVisibility>("private");
-  const [students, setStudents] = useState<PersonCard[]>([]);
+  const [students, setStudents] = useState<StudentCard[]>([]);
+  const [removingId, setRemovingId] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [availableTags, setAvailableTags] = useState<ExerciseTag[]>([]);
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
@@ -222,6 +230,24 @@ export function HtmlExerciseEditDialog({
     }
   };
 
+  // Retrait ciblé depuis la fiche de consultation (avatar cliquable) — ne
+  // touche pas au reste de l'exercice, contrairement à handleSave qui repart
+  // du Set `selected` complet en mode édition.
+  const handleRemoveAssignee = async (studentId: string) => {
+    if (!exercise || removingId) return;
+    setRemovingId(studentId);
+    try {
+      await removeExerciseAssignee(exercise.id, studentId);
+      setSelected((prev) => { const next = new Set(prev); next.delete(studentId); return next; });
+      setOriginal((prev) => (prev ? { ...prev, selected: new Set([...prev.selected].filter((id) => id !== studentId)) } : prev));
+      onSaved();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Impossible de retirer l'accès.");
+    } finally {
+      setRemovingId(null);
+    }
+  };
+
   const busy = saveState === "saving" || deleting;
   const assignedStudents = students.filter((s) => selected.has(s.id));
   const viewing = mode === "view" && isEditing;
@@ -241,21 +267,21 @@ export function HtmlExerciseEditDialog({
             {viewing ? (
               <>
                 <div>
-                  <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: th.fg3 }}>Nom</div>
+                  <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: th.navAC }}>Nom</div>
                   <div className="text-sm font-semibold" style={{ color: th.fg }}>{name}</div>
                 </div>
                 {description && (
                   <div>
-                    <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: th.fg3 }}>Consigne affichee a l'eleve</div>
+                    <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: th.navAC }}>Consigne affichee a l'eleve</div>
                     <p className="text-sm whitespace-pre-wrap" style={{ color: th.fg2 }}>{description}</p>
                   </div>
                 )}
                 <div>
-                  <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: th.fg3 }}>Visibilite</div>
+                  <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: th.navAC }}>Visibilite</div>
                   <p className="text-sm" style={{ color: th.fg2 }}>{visibility === "global" ? "Globale" : "Privee"}</p>
                 </div>
                 <div>
-                  <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Tags</div>
+                  <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.navAC }}>Tags</div>
                   {selectedTags.size ? (
                     <div className="flex flex-wrap gap-1.5">
                       {availableTags.filter((t) => selectedTags.has(t.id)).map((t) => <ExerciseTagPill key={t.id} label={t.name} />)}
@@ -265,7 +291,7 @@ export function HtmlExerciseEditDialog({
                   )}
                 </div>
                 <div>
-                  <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Eleves ayant acces</div>
+                  <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.navAC }}>Eleves ayant acces</div>
                   {loading ? (
                     <p className="text-xs" style={{ color: th.fg3 }}>Chargement...</p>
                   ) : visibility === "global" ? (
@@ -285,16 +311,16 @@ export function HtmlExerciseEditDialog({
             ) : (
               <>
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Nom</label>
+                  <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.navAC }}>Nom</label>
                   <input value={name} onChange={(e) => setName(e.target.value)} autoFocus placeholder="Ex. Landing page SaaS" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Consigne affichee a l'eleve</label>
+                  <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.navAC }}>Consigne affichee a l'eleve</label>
                   <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} placeholder="Ce que l'eleve doit faire dans cet exercice..." className="w-full rounded-xl px-4 py-2.5 text-sm g-input resize-none" />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Code HTML de l'exercice</label>
+                  <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.navAC }}>Code HTML de l'exercice</label>
                   <textarea
                     value={htmlDraft}
                     onChange={(e) => setHtmlDraft(e.target.value)}
@@ -318,7 +344,7 @@ export function HtmlExerciseEditDialog({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Visibilite</label>
+                  <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.navAC }}>Visibilite</label>
                   <div className="inline-flex items-center gap-1.5 p-1.5 rounded-full" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
                     {([["global", "Globale"], ["private", "Privee"]] as const).map(([v, label]) => {
                       const active = visibility === v;
@@ -336,7 +362,7 @@ export function HtmlExerciseEditDialog({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Tags</label>
+                  <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.navAC }}>Tags</label>
                   {loading ? (
                     <p className="text-xs" style={{ color: th.fg3 }}>Chargement...</p>
                   ) : availableTags.length ? (
@@ -352,7 +378,7 @@ export function HtmlExerciseEditDialog({
 
                 {visibility === "private" && (
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Eleves concernes</label>
+                    <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.navAC }}>Eleves concernes</label>
                     {loading ? (
                       <p className="text-xs" style={{ color: th.fg3 }}>Chargement...</p>
                     ) : (
@@ -374,17 +400,64 @@ export function HtmlExerciseEditDialog({
             )}
           </div>
 
-          <div className="min-h-[360px] rounded-xl overflow-hidden relative" style={{ background: "#fff", border: `1px solid ${th.sep}` }}>
-            {previewHtml ? (
-              <iframe
-                key={previewHtml}
-                srcDoc={previewHtml}
-                sandbox="allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"
-                title="Apercu HTML"
-                className="absolute inset-0 w-full h-full border-0 bg-white"
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-sm" style={{ color: "#64748b" }}>Apercu</div>
+          <div className="min-w-0 space-y-3">
+            <div className="min-h-[360px] rounded-xl overflow-hidden relative" style={{ background: "#fff", border: `1px solid ${th.sep}` }}>
+              {previewHtml ? (
+                <iframe
+                  key={previewHtml}
+                  srcDoc={previewHtml}
+                  sandbox="allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"
+                  title="Apercu HTML"
+                  className="absolute inset-0 w-full h-full border-0 bg-white"
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center text-sm" style={{ color: "#64748b" }}>Apercu</div>
+              )}
+            </div>
+
+            {viewing && visibility === "private" && !loading && assignedStudents.length > 0 && (
+              <div>
+                <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.navAC }}>Élèves ayant accès</div>
+                <div className="flex flex-wrap gap-3">
+                  {assignedStudents.map((s) => {
+                    const mine = isAdmin(role) || (role === "formateur" && s.formateurId === user?.id);
+                    return (
+                      <div key={s.id} className="relative">
+                        {mine ? (
+                          <button type="button" onClick={() => navigate(`${staffBase}/planning/students/${s.id}`)}
+                            className="flex flex-col items-center gap-1 w-16 transition-opacity hover:opacity-80">
+                            <Avatar url={s.avatarUrl} size={48} square />
+                            <span className="text-[11px] truncate w-full text-center" style={{ color: th.fg2 }}>{personName(s)}</span>
+                          </button>
+                        ) : (
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <button type="button" className="flex flex-col items-center gap-1 w-16">
+                                <Avatar url={s.avatarUrl} size={48} square />
+                                <span className="text-[11px] truncate w-full text-center" style={{ color: th.fg2 }}>{personName(s)}</span>
+                              </button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-3" style={{ background: th.card, borderColor: th.sep }}>
+                              <div className="flex items-center gap-2.5">
+                                <Avatar url={s.avatarUrl} size={40} square />
+                                <div className="text-sm font-semibold" style={{ color: th.fg }}>{personName(s)}</div>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                        )}
+                        {mine && (
+                          <button type="button" onClick={() => void handleRemoveAssignee(s.id)} disabled={removingId === s.id}
+                            title="Retirer l'accès à cet exercice"
+                            className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center shadow disabled:opacity-50"
+                            style={{ background: "#e5484d", color: "#fff" }}>
+                            <X className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             )}
           </div>
         </div>
