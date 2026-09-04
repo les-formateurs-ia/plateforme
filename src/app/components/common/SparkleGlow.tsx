@@ -8,7 +8,7 @@ const SPARKLE_PATH =
 
 export function SparkleGlow({ size = 760, top = 40 }: { size?: number; top?: number }) {
   const th = useTh();
-  const shadow = th.isDark ? "rgba(181,141,224,0.55)" : "rgba(15,14,20,0.16)";
+  const shadow = th.isDark ? `${th.gradShadow(0.55)}` : "rgba(15,14,20,0.16)";
   return (
     <div
       aria-hidden

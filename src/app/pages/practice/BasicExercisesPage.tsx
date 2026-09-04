@@ -26,7 +26,7 @@ function QuestionCard({ q, selected, onSelect }: { q: QuizQuestion; selected: st
             <button key={opt.id} onClick={() => onSelect(opt.id)}
               className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-left transition-all"
               style={{ background: bg, border: `1px solid ${border}`, color }}>
-              <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(181,141,224,0.06)" }}>
+              <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : `${th.gradShadow(0.06)}` }}>
                 {selected !== null && opt.isCorrect ? <CheckCircle className="w-4 h-4 text-[#6adeb1]" /> : selected !== null && opt.id === selected ? <X className="w-4 h-4 text-[#fbc2ad]" /> : String.fromCharCode(65 + i)}
               </span>{opt.label}
             </button>

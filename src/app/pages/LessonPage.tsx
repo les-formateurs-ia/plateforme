@@ -625,8 +625,8 @@ export function LessonPage() {
         <div className="flex items-center gap-3 sm:gap-4 shrink-0">
           <div className="hidden lg:flex items-center gap-2 text-xs" style={{ color: th.fg3 }}>
             Progression
-            <div className="w-28 h-1.5 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.07)" : "rgba(181,141,224,0.1)" }}>
-              <div className="h-full rounded-full" style={{ width: `${overallPct}%`, background: "linear-gradient(90deg,#b58de0,#dbacf0)" }} />
+            <div className="w-28 h-1.5 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.07)" : `${th.gradShadow(0.1)}` }}>
+              <div className="h-full rounded-full" style={{ width: `${overallPct}%`, background: `linear-gradient(90deg,${th.grad1},${th.grad2})` }} />
             </div>
             <span className="font-bold" style={{ color: th.navAC }}>{overallPct}%</span>
           </div>
@@ -871,7 +871,7 @@ export function LessonPage() {
             {lesson.referenceContent && stripCertificationMentions(lesson.referenceContent) && (
               <GCard><div className="p-6">
                 <div className="flex items-center gap-2.5 mb-4">
-                  <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "rgba(181,141,224,0.1)", border: "1px solid rgba(181,141,224,0.2)" }}><BookOpen className="w-4 h-4" style={{ color: th.navAC }} /></div>
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: `${th.gradShadow(0.1)}`, border: `1px solid ${th.gradShadow(0.2)}` }}><BookOpen className="w-4 h-4" style={{ color: th.navAC }} /></div>
                   <span className="text-sm font-black" style={{ color: th.fg }}>Cours</span>
                 </div>
                 <div style={{ color: th.fg2, fontSize: "0.9rem", lineHeight: 1.7 }}>
@@ -886,7 +886,7 @@ export function LessonPage() {
                       ol: (p) => <ol className="list-decimal pl-5 mb-3 space-y-1" {...p} />,
                       strong: (p) => <strong style={{ color: th.fg }} {...p} />,
                       blockquote: (p) => <blockquote className="pl-4 my-3 italic" style={{ borderLeft: `3px solid ${th.navAC}`, color: th.fg3 }} {...p} />,
-                      code: (p) => <code className="px-1.5 py-0.5 rounded text-xs font-mono" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(181,141,224,0.08)" }} {...p} />,
+                      code: (p) => <code className="px-1.5 py-0.5 rounded text-xs font-mono" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : `${th.gradShadow(0.08)}` }} {...p} />,
                       hr: () => <hr className="my-5" style={{ borderColor: th.sep }} />,
                       table: (p) => <div className="overflow-x-auto mb-3"><table className="w-full text-xs border-collapse" {...p} /></div>,
                       th: (p) => <th className="text-left px-3 py-2 font-bold" style={{ color: th.fg, borderBottom: `1px solid ${th.sep}` }} {...p} />,
@@ -901,10 +901,10 @@ export function LessonPage() {
 
             <GCard><div className="p-5">
               <div className="flex items-center gap-2.5 mb-4">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "rgba(181,141,224,0.1)", border: "1px solid rgba(181,141,224,0.2)" }}><Brain className="w-4 h-4" style={{ color: th.navAC }} /></div>
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: `${th.gradShadow(0.1)}`, border: `1px solid ${th.gradShadow(0.2)}` }}><Brain className="w-4 h-4" style={{ color: th.navAC }} /></div>
                 <span className="text-sm font-black" style={{ color: th.fg }}>Quiz de la leçon</span>
                 {lesson.questions.length > 0 && !quizResult && (retaking || currentLessonState?.state !== "completed") && (
-                  <span className="ml-auto text-[10px] font-bold px-2.5 py-1 rounded-full" style={{ background: "rgba(181,141,224,0.06)", color: th.navAC, border: "1px solid rgba(181,141,224,0.15)" }}>
+                  <span className="ml-auto text-[10px] font-bold px-2.5 py-1 rounded-full" style={{ background: `${th.gradShadow(0.06)}`, color: th.navAC, border: `1px solid ${th.gradShadow(0.15)}` }}>
                     Question {quizStep + 1}/{lesson.questions.length}
                   </span>
                 )}
@@ -953,7 +953,7 @@ export function LessonPage() {
                         <button key={opt.id} onClick={() => selectOption(opt.id)}
                           className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-left transition-all"
                           style={{ background: bg, border: `1px solid ${border}`, color }}>
-                          <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(181,141,224,0.06)" }}>
+                          <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : `${th.gradShadow(0.06)}` }}>
                             {selected !== null && opt.isCorrect ? <CheckCircle className="w-4 h-4 text-[#6adeb1]" /> : selected !== null && opt.id === selected ? <X className="w-4 h-4 text-[#fbc2ad]" /> : String.fromCharCode(65 + i)}
                           </span>{opt.label}
                         </button>
@@ -984,7 +984,7 @@ export function LessonPage() {
         {/* Copilot */}
         {assistantOpen ? (
         <div className="fixed inset-0 z-30 bg-black/50 lg:bg-transparent p-4 lg:static lg:z-auto lg:p-0 lg:w-[27rem] lg:shrink-0 lg:py-6 lg:pr-6" onClick={(e) => { if (e.target === e.currentTarget) setAssistantOpen(false); }}>
-        <div className="h-full flex flex-col rounded-2xl overflow-hidden" style={{ background: "linear-gradient(165deg,#b58de0,#dbacf0)", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 12px 32px rgba(0,0,0,0.35)" }}>
+        <div className="h-full flex flex-col rounded-2xl overflow-hidden" style={{ background: `linear-gradient(165deg,${th.grad1},${th.grad2})`, border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 12px 32px rgba(0,0,0,0.35)" }}>
           <div className="shrink-0 px-5 py-4">
             <div className="flex items-center gap-2.5 mb-3">
               <Sparkles className="w-5 h-5 text-white shrink-0" />
@@ -1021,7 +1021,7 @@ export function LessonPage() {
                 style={{ background: pttActive ? "#fff" : "rgba(255,255,255,0.2)" }}
                 title="Maintenir appuyé pour parler (push-to-talk)"
               >
-                <Mic className="w-3.5 h-3.5" style={{ color: pttActive ? "#b58de0" : "#fff" }} />
+                <Mic className="w-3.5 h-3.5" style={{ color: pttActive ? `${th.grad1}` : "#fff" }} />
               </button>
             </div>
             {agentError && <p className="text-[11px] leading-relaxed mb-2" style={{ color: "#fbc2ad" }}>{agentError}</p>}
@@ -1034,7 +1034,7 @@ export function LessonPage() {
               <div key={i} className={cx("flex", m.role === "user" ? "justify-end" : "justify-start")}>
                 {m.role === "ai" && <div className="w-6 h-6 rounded-full flex items-center justify-center mr-2 mt-0.5 shrink-0" style={{ background: "rgba(255,255,255,0.15)" }}><Sparkles className="w-3 h-3 text-white" /></div>}
                 <div className="max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-line"
-                  style={m.role === "user" ? { background: "rgba(255,255,255,0.92)", color: "#b58de0", fontWeight: 600, borderRadius: "16px 16px 4px 16px" } : { background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.9)", borderRadius: "16px 16px 16px 4px" }}>
+                  style={m.role === "user" ? { background: "rgba(255,255,255,0.92)", color: `${th.grad1}`, fontWeight: 600, borderRadius: "16px 16px 4px 16px" } : { background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.9)", borderRadius: "16px 16px 16px 4px" }}>
                   {m.text}
                 </div>
               </div>
@@ -1058,7 +1058,7 @@ export function LessonPage() {
               <input value={chatIn} onChange={e => setChatIn(e.target.value)} onKeyDown={e => e.key === "Enter" && !typing && sendMsg(chatIn)} placeholder="Pose ta question…"
                 className="flex-1 rounded-full px-4 py-2.5 text-sm text-white placeholder-white/40 outline-none" style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.15)" }} />
               <button onClick={() => sendMsg(chatIn)} disabled={!chatIn.trim() || typing} className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 disabled:opacity-30" style={{ background: "#fff" }}>
-                <Send className="w-4 h-4" style={{ color: "#b58de0" }} />
+                <Send className="w-4 h-4" style={{ color: `${th.grad1}` }} />
               </button>
             </div>
           </div>
@@ -1067,7 +1067,7 @@ export function LessonPage() {
         ) : (
           <button onClick={() => setAssistantOpen(true)}
             className="absolute right-6 top-20 z-20 w-11 h-11 rounded-full flex items-center justify-center shrink-0"
-            style={{ background: "linear-gradient(135deg,#b58de0,#dbacf0)", boxShadow: "0 4px 16px rgba(181,141,224,0.4)" }}>
+            style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, boxShadow: `0 4px 16px ${th.gradShadow(0.4)}` }}>
             <Sparkles className="w-5 h-5 text-white" />
           </button>
         )}

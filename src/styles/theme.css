@@ -14,11 +14,26 @@
   100% { transform: scale(1.35); opacity: 0; }
 }
 
+/* Orb "l'agent parle" : ondulation organique du contour (border-radius
+   asymétrique animé) plutôt qu'un simple cercle qui pulse — lu comme une
+   forme vivante plutôt qu'un chargement. */
+@keyframes agent-orb-wobble {
+  0%, 100% { border-radius: 42% 58% 55% 45% / 45% 42% 58% 55%; }
+  25%      { border-radius: 58% 42% 45% 55% / 55% 58% 42% 45%; }
+  50%      { border-radius: 45% 55% 58% 42% / 60% 40% 55% 45%; }
+  75%      { border-radius: 55% 45% 42% 58% / 42% 55% 45% 58%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-agent-orb], [data-agent-orb] * { animation: none !important; }
+}
+
 /* VSelect (src/app/components/common/Select.tsx) : les états hover/checked de
    Radix passent par des attributs data-* qu'on ne peut pas exprimer en style
-   inline React — accent violet de la marque, cohérent avec .g-input:focus. */
+   inline React — suit l'accent du rôle courant (--select-highlight posée par
+   ThemeProvider), cohérent avec .g-input:focus. */
 .v-select-item[data-highlighted] {
-  background: rgba(181, 141, 224, 0.14);
+  background: var(--select-highlight, rgba(181, 141, 224, 0.14));
   outline: none;
 }
 .v-select-item[data-disabled] {

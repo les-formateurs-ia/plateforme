@@ -87,9 +87,9 @@ export function PromptSessionsPage() {
 
       <button onClick={startNewSession} disabled={creating}
         className="w-full group relative overflow-hidden rounded-2xl p-5 flex items-center gap-4 text-left transition-all duration-300 hover:scale-[1.005] disabled:opacity-60"
-        style={{ background: "linear-gradient(120deg,rgba(181,141,224,0.16),rgba(219,172,240,0.06) 60%)", border: "1px solid rgba(181,141,224,0.3)" }}>
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: "linear-gradient(120deg,rgba(181,141,224,0.1),transparent 70%)" }} />
-        <div className="relative w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 shadow-lg" style={{ background: "linear-gradient(135deg,#b58de0,#dbacf0)", boxShadow: "0 4px 16px rgba(181,141,224,0.4)" }}>
+        style={{ background: `linear-gradient(120deg,${th.gradShadow(0.16)},rgba(219,172,240,0.06) 60%)`, border: `1px solid ${th.gradShadow(0.3)}` }}>
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `linear-gradient(120deg,${th.gradShadow(0.1)},transparent 70%)` }} />
+        <div className="relative w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 shadow-lg" style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, boxShadow: `0 4px 16px ${th.gradShadow(0.4)}` }}>
           <Plus className="w-5 h-5 text-white" />
         </div>
         <div className="relative min-w-0 flex-1">

@@ -59,9 +59,9 @@ function CreateTile({ onClick }: { onClick: () => void }) {
   return (
     <button onClick={onClick}
       className="group relative overflow-hidden rounded-2xl flex flex-col items-center justify-center gap-3 text-center transition-all duration-300 hover:scale-[1.02]"
-      style={{ aspectRatio: "1/1", background: th.isDark ? "rgba(181,141,224,0.06)" : "rgba(181,141,224,0.05)", border: "1.5px dashed rgba(181,141,224,0.4)" }}>
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: "radial-gradient(circle at 50% 30%, rgba(181,141,224,0.18), transparent 70%)" }} />
-      <div className="relative w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110" style={{ background: "linear-gradient(135deg,#b58de0,#dbacf0)", boxShadow: "0 6px 20px rgba(181,141,224,0.4)" }}>
+      style={{ aspectRatio: "1/1", background: th.isDark ? `${th.gradShadow(0.06)}` : `${th.gradShadow(0.05)}`, border: `1.5px dashed ${th.gradShadow(0.4)}` }}>
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `radial-gradient(circle at 50% 30%, ${th.gradShadow(0.18)}, transparent 70%)` }} />
+      <div className="relative w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110" style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, boxShadow: `0 6px 20px ${th.gradShadow(0.4)}` }}>
         <Plus className="w-5 h-5 text-white" />
       </div>
       <div className="relative text-sm font-black" style={{ color: th.fg }}>Nouvel exercice</div>
@@ -126,7 +126,7 @@ function AdminHtmlExercisesView() {
             return (
               <button key={id} onClick={() => setTab(id)} className="px-7 py-3 rounded-full text-sm font-bold transition-all"
                 style={active
-                  ? { background: "linear-gradient(135deg,#b58de0,#dbacf0)", color: "#fff", boxShadow: "0 2px 12px rgba(181,141,224,0.35)" }
+                  ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", boxShadow: `0 2px 12px ${th.gradShadow(0.35)}` }
                   : { color: th.fg2, background: "transparent" }}>
                 {label}
               </button>

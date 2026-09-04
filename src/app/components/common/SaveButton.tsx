@@ -24,8 +24,8 @@ export function SaveButton({
       className="rounded-full font-semibold transition-all duration-300 flex items-center justify-center gap-1.5 active:scale-[0.98]"
       style={{
         ...(saved ? { width: 40, height: 40, padding: 0 } : { padding: "10px 20px" }),
-        background: purple || saved ? "linear-gradient(135deg,#b58de0,#dbacf0)" : th.isDark ? "rgba(255,255,255,0.06)" : "rgba(15,14,20,0.05)",
-        boxShadow: purple || saved ? "0 2px 12px rgba(181,141,224,0.35)" : "none",
+        background: purple || saved ? `linear-gradient(135deg,${th.grad1},${th.grad2})` : th.isDark ? "rgba(255,255,255,0.06)" : "rgba(15,14,20,0.05)",
+        boxShadow: purple || saved ? `0 2px 12px ${th.gradShadow(0.35)}` : "none",
         color: purple || saved ? "#fff" : th.fg3,
         cursor: state === "active" ? "pointer" : "default",
       }}

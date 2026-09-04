@@ -14,7 +14,7 @@ export function BenefitsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <GCard glow>
           <div className="p-6 flex flex-col">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl mb-5" style={{ background: "rgba(181,141,224,0.12)", border: "1px solid rgba(181,141,224,0.25)" }}>🎓</div>
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl mb-5" style={{ background: `${th.gradShadow(0.12)}`, border: `1px solid ${th.gradShadow(0.25)}` }}>🎓</div>
             <h3 className="text-base font-black mb-2" style={{ color: th.fg }}>Session Expert IA</h3>
             <p className="text-sm leading-relaxed mb-4" style={{ color: th.fg2 }}>Échange 1:1 en visio avec un expert IA certifié. Pose tes questions et prépare ta certification.</p>
             <div className="space-y-2 mb-5 flex-1">
@@ -34,7 +34,7 @@ export function BenefitsPage() {
             <p className="text-sm leading-relaxed mb-4" style={{ color: th.fg2 }}>Accès gratuit aux modèles IA premium les plus puissants — inclus sans frais supplémentaires.</p>
             <div className="space-y-2 mb-5 flex-1">
               {AI_TOOLS.map(({ name, sub, color, letter }) => (
-                <div key={name} className="flex items-center gap-3 px-3 py-2 rounded-xl" style={{ background: th.isDark ? "rgba(255,255,255,0.03)" : "rgba(181,141,224,0.04)", border: `1px solid ${th.sep}` }}>
+                <div key={name} className="flex items-center gap-3 px-3 py-2 rounded-xl" style={{ background: th.isDark ? "rgba(255,255,255,0.03)" : `${th.gradShadow(0.04)}`, border: `1px solid ${th.sep}` }}>
                   <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black shrink-0" style={{ background: `${color}18`, color, border: `1px solid ${color}30` }}>{letter}</div>
                   <div className="flex-1 min-w-0"><div className="text-xs font-bold" style={{ color: th.fg }}>{name}</div><div className="text-[10px]" style={{ color: th.fg3 }}>{sub}</div></div>
                   <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ color: "#6adeb1", background: "rgba(106,222,177,0.1)" }}>Gratuit</span>
@@ -52,7 +52,7 @@ export function BenefitsPage() {
             <p className="text-sm leading-relaxed mb-4" style={{ color: th.fg2 }}>200+ prompts professionnels testés, organisés par métier et par cas d'usage.</p>
             <div className="grid grid-cols-2 gap-1.5 mb-5 flex-1">
               {PROMPT_CATS.map(({ emoji, label, count }) => (
-                <button key={label} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-left hover:opacity-80 transition-opacity" style={{ background: th.isDark ? "rgba(255,255,255,0.03)" : "rgba(181,141,224,0.04)", border: `1px solid ${th.sep}` }}>
+                <button key={label} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-left hover:opacity-80 transition-opacity" style={{ background: th.isDark ? "rgba(255,255,255,0.03)" : `${th.gradShadow(0.04)}`, border: `1px solid ${th.sep}` }}>
                   <span className="text-sm">{emoji}</span>
                   <div className="min-w-0"><div className="text-[10px] font-medium truncate" style={{ color: th.fg2 }}>{label}</div><div className="text-[9px]" style={{ color: th.fg3 }}>{count}</div></div>
                 </button>

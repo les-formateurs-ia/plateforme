@@ -1,4 +1,8 @@
-export const mkCSS = (isDark: boolean) => `
+import { hexToRgb } from "@/app/theme/theme";
+
+export const mkCSS = (isDark: boolean, accentHex: string) => {
+  const accent = hexToRgb(accentHex);
+  return `
   @keyframes shimmer {
     0%   { background-position: 200% center; }
     100% { background-position: -200% center; }
@@ -35,10 +39,11 @@ export const mkCSS = (isDark: boolean) => `
   .g-input::placeholder { color: ${isDark ? "rgba(255,255,255,0.3)" : "rgba(15,14,20,0.3)"}; }
   .g-input:focus {
     outline: none;
-    border-color: rgba(181,141,224,0.5);
-    box-shadow: 0 0 0 3px rgba(181,141,224,0.12);
+    border-color: rgba(${accent},0.5);
+    box-shadow: 0 0 0 3px rgba(${accent},0.12);
   }
   ::-webkit-scrollbar { width:4px; height:4px; }
   ::-webkit-scrollbar-track { background:transparent; }
-  ::-webkit-scrollbar-thumb { background:rgba(181,141,224,0.2); border-radius:4px; }
+  ::-webkit-scrollbar-thumb { background:rgba(${accent},0.2); border-radius:4px; }
 `;
+};

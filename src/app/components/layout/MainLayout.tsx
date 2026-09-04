@@ -58,25 +58,25 @@ export function MainLayout() {
             if (id === "calendar" && isStaff(role)) {
               return [
                 <NavLink key="planning" to={`${staffBase}/planning`} onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
-                  style={({ isActive }) => isActive ? { background: "linear-gradient(135deg,#b58de0,#dbacf0)", color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
+                  style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
                   <CalendarClock className="w-4 h-4 shrink-0" />{role === "admin" ? "Élèves & formateurs" : "Élèves"}
                 </NavLink>,
                 <NavLink key={id} to="/planning" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
-                  style={({ isActive }) => isActive ? { background: "linear-gradient(135deg,#b58de0,#dbacf0)", color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
+                  style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
                   <Icon className="w-4 h-4 shrink-0" />{label}
                 </NavLink>,
               ];
             }
             return (
               <NavLink key={id} to={path} end={path === "/"} onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
-                style={({ isActive }) => isActive ? { background: "linear-gradient(135deg,#b58de0,#dbacf0)", color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
+                style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
                 <Icon className="w-4 h-4 shrink-0" />{label}
               </NavLink>
             );
           })}
           {isAdmin(role) && (
             <NavLink to="/admin/incidents" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
-              style={({ isActive }) => isActive ? { background: "linear-gradient(135deg,#b58de0,#dbacf0)", color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
+              style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
               <Bug className="w-4 h-4 shrink-0" />Incidents
             </NavLink>
           )}
@@ -84,7 +84,7 @@ export function MainLayout() {
         {isStaff(role) && (
           <div className="px-3 pb-3 space-y-1.5">
             <NavLink to={`${staffBase}/courses`} onClick={() => setNavOpen(false)} className="w-full flex items-center gap-2.5 px-4 py-2.5 rounded-full text-sm font-semibold transition-all hover:opacity-90"
-              style={{ background: "linear-gradient(135deg,#b58de0,#dbacf0)", color: "#fff" }}>
+              style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff" }}>
               <Plus className="w-4 h-4 shrink-0" />
               Modifier les formations
             </NavLink>

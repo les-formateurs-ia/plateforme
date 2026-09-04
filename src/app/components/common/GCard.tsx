@@ -10,7 +10,7 @@ export function GCard({ children, className = "", glow = false, accent = false, 
     <div onClick={onClick} className={cx("rounded-2xl overflow-hidden", className, onClick && "cursor-pointer")}
       style={{
         background: th.card,
-        border: `1px solid ${accent ? "rgba(181,141,224,0.35)" : th.sep}`,
+        border: `1px solid ${accent ? `${th.gradShadow(0.35)}` : th.sep}`,
         boxShadow: glow ? "0 12px 32px rgba(0,0,0,0.35)" : "0 2px 10px rgba(0,0,0,0.18)",
       }}>
       {children}

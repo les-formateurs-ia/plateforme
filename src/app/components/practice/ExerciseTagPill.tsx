@@ -1,4 +1,5 @@
 import { X } from "lucide-react";
+import { useTh } from "@/app/theme/theme";
 
 // Petite pastille pour un tag d'exercice HTML — cartes, filtre, éditeur.
 export function ExerciseTagPill({ label, onRemove, active, onClick }: {
@@ -7,6 +8,7 @@ export function ExerciseTagPill({ label, onRemove, active, onClick }: {
   active?: boolean;
   onClick?: () => void;
 }) {
+  const th = useTh();
   const clickable = !!onClick;
   return (
     <span
@@ -15,9 +17,9 @@ export function ExerciseTagPill({ label, onRemove, active, onClick }: {
       style={{
         display: "inline-flex", alignItems: "center", gap: 4,
         fontSize: 10, fontWeight: 700, padding: "3px 9px", borderRadius: 999,
-        background: active ? "linear-gradient(135deg,#b58de0,#dbacf0)" : "rgba(181,141,224,0.12)",
-        color: active ? "#fff" : "#b58de0",
-        border: active ? "1px solid transparent" : "1px solid rgba(181,141,224,0.3)",
+        background: active ? `linear-gradient(135deg,${th.grad1},${th.grad2})` : `${th.gradShadow(0.12)}`,
+        color: active ? "#fff" : `${th.grad1}`,
+        border: active ? "1px solid transparent" : `1px solid ${th.gradShadow(0.3)}`,
       }}
     >
       {label}

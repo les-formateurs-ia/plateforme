@@ -170,7 +170,7 @@ export function ProfilePage() {
           <div className="flex-1 min-w-0 w-full">
             <div className="flex items-center justify-center sm:justify-start gap-3 mb-1 flex-wrap">
               <h2 className="text-xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif", color: th.fg }}>{name}</h2>
-              <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: "rgba(181,141,224,0.1)", color: th.navAC, border: "1px solid rgba(181,141,224,0.25)" }}>Apprenant IA Pro</span>
+              <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: `${th.gradShadow(0.1)}`, color: th.navAC, border: `1px solid ${th.gradShadow(0.25)}` }}>Apprenant IA Pro</span>
             </div>
             <p className="text-sm mb-3" style={{ color: th.fg3 }}>{profile.profession || "Chef de projet digital"}{enrolledSince && ` · En formation depuis ${formatEnrolledSince(enrolledSince)}`}</p>
             <div className="flex items-center justify-center sm:justify-start gap-6 flex-wrap">
@@ -194,10 +194,10 @@ export function ProfilePage() {
         </div>
       </GCard>
 
-      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background: th.isDark ? "rgba(255,255,255,0.04)" : "rgba(181,141,224,0.06)", border: `1px solid ${th.sep}` }}>
+      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background: th.isDark ? "rgba(255,255,255,0.04)" : `${th.gradShadow(0.06)}`, border: `1px solid ${th.sep}` }}>
         {(["overview", "badges", "settings"] as const).map(t => (
           <button key={t} onClick={() => setTab(t)} className="px-5 py-2 rounded-lg text-sm font-semibold transition-all"
-            style={tab === t ? { background: th.isDark ? "rgba(181,141,224,0.14)" : "rgba(255,255,255,0.8)", color: th.navAC, border: `1px solid rgba(181,141,224,0.25)` } : { color: th.fg3, background: "transparent", border: "1px solid transparent" }}>
+            style={tab === t ? { background: th.isDark ? `${th.gradShadow(0.14)}` : "rgba(255,255,255,0.8)", color: th.navAC, border: `1px solid ${th.gradShadow(0.25)}` } : { color: th.fg3, background: "transparent", border: "1px solid transparent" }}>
             {t === "overview" ? "Vue d'ensemble" : t === "badges" ? "Badges" : "Préférences"}
           </button>
         ))}
@@ -215,14 +215,14 @@ export function ProfilePage() {
                 <div key={title}>
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0" style={{ background: done ? "rgba(106,222,177,0.15)" : active ? "rgba(181,141,224,0.12)" : "transparent", border: `1px solid ${done ? "rgba(106,222,177,0.4)" : active ? "rgba(181,141,224,0.3)" : th.sep}` }}>
+                      <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0" style={{ background: done ? "rgba(106,222,177,0.15)" : active ? `${th.gradShadow(0.12)}` : "transparent", border: `1px solid ${done ? "rgba(106,222,177,0.4)" : active ? `${th.gradShadow(0.3)}` : th.sep}` }}>
                         {done ? <CheckCircle className="w-2.5 h-2.5 text-[#6adeb1]" /> : active ? <div className="w-1.5 h-1.5 rounded-full" style={{ background: th.navAC }} /> : <Lock className="w-2 h-2" style={{ color: th.fg3 }} />}
                       </div>
                       <span className="text-xs" style={{ color: done ? "rgba(106,222,177,0.8)" : active ? th.navAC : th.fg3 }}>{title}</span>
                     </div>
                     <span className="text-xs font-bold" style={{ color: done ? "#6adeb1" : active ? th.navAC : th.fg3 }}>{pct}%</span>
                   </div>
-                  <div className="h-1 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.05)" : "rgba(181,141,224,0.08)" }}><div className="h-full rounded-full" style={{ width: `${pct}%`, background: done ? "linear-gradient(90deg,#78d5e2,#6adeb1)" : active ? "linear-gradient(90deg,#b58de0,#dbacf0)" : "transparent" }} /></div>
+                  <div className="h-1 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.05)" : `${th.gradShadow(0.08)}` }}><div className="h-full rounded-full" style={{ width: `${pct}%`, background: done ? "linear-gradient(90deg,#78d5e2,#6adeb1)" : active ? `linear-gradient(90deg,${th.grad1},${th.grad2})` : "transparent" }} /></div>
                 </div>
                 );
               })}
@@ -236,7 +236,7 @@ export function ProfilePage() {
             <div className="text-[10px] font-black uppercase tracking-widest mb-3" style={{ color: th.fg3 }}>Activité — 4 semaines</div>
             <div className="flex items-end gap-1 h-16">
               {activity.map(({ date, count }, i) => (
-                <div key={date} title={`${date} : ${count}`} className="flex-1 rounded-sm" style={{ height: `${Math.max(4, (count / maxActivity) * 100)}%`, background: i === activity.length - 1 ? "linear-gradient(to top,#b58de0,#dbacf0)" : "rgba(181,141,224,0.25)", opacity: count > 0 ? 1 : 0.25 }} />
+                <div key={date} title={`${date} : ${count}`} className="flex-1 rounded-sm" style={{ height: `${Math.max(4, (count / maxActivity) * 100)}%`, background: i === activity.length - 1 ? `linear-gradient(to top,${th.grad1},${th.grad2})` : `${th.gradShadow(0.25)}`, opacity: count > 0 ? 1 : 0.25 }} />
               ))}
             </div>
           </div></GCard>
@@ -312,7 +312,7 @@ export function ProfilePage() {
                 {objectiveError && <p className="text-xs" style={{ color: "#fbc2ad" }}>{objectiveError}</p>}
                 <div className="flex items-center gap-2">
                   <button onClick={saveObjective} disabled={objectiveSaving} className="px-4 py-2 rounded-lg text-xs font-bold transition-all hover:opacity-80 disabled:opacity-50"
-                    style={{ background: "rgba(181,141,224,0.12)", border: "1px solid rgba(181,141,224,0.25)", color: th.navAC }}>
+                    style={{ background: `${th.gradShadow(0.12)}`, border: `1px solid ${th.gradShadow(0.25)}`, color: th.navAC }}>
                     {objectiveSaving ? "Enregistrement..." : "Enregistrer"}
                   </button>
                   <button onClick={() => { setObjectiveDraft(currentObjective); setObjectiveEditing(false); setObjectiveError(null); }} disabled={objectiveSaving}
@@ -335,7 +335,7 @@ export function ProfilePage() {
                 {th.mode === "system" ? "Suit automatiquement le thème de ton appareil" : th.isDark ? "Mode sombre activé — ambiance dark glass" : "Mode clair activé — interface lumineuse"}
               </div>
             </div>
-            <div className="flex gap-1 p-1 rounded-xl shrink-0" style={{ background: th.isDark ? "rgba(255,255,255,0.04)" : "rgba(181,141,224,0.06)", border: `1px solid ${th.sep}` }}>
+            <div className="flex gap-1 p-1 rounded-xl shrink-0" style={{ background: th.isDark ? "rgba(255,255,255,0.04)" : `${th.gradShadow(0.06)}`, border: `1px solid ${th.sep}` }}>
               {([
                 { mode: "light" as const, label: "Clair", Icon: Sun },
                 { mode: "dark" as const, label: "Sombre", Icon: Moon },
@@ -344,7 +344,7 @@ export function ProfilePage() {
                 <button key={mode} onClick={() => th.setThemeMode(mode)}
                   className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-90"
                   style={th.mode === mode
-                    ? { background: th.isDark ? "rgba(181,141,224,0.14)" : "rgba(255,255,255,0.8)", color: th.navAC, border: "1px solid rgba(181,141,224,0.25)" }
+                    ? { background: th.isDark ? `${th.gradShadow(0.14)}` : "rgba(255,255,255,0.8)", color: th.navAC, border: `1px solid ${th.gradShadow(0.25)}` }
                     : { color: th.fg3, background: "transparent", border: "1px solid transparent" }}>
                   <Icon className="w-3.5 h-3.5" />{label}
                 </button>

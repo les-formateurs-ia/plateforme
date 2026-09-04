@@ -87,10 +87,10 @@ export function SignupPage() {
                 {[1, 2, 3, 4].map(i => (
                   <div key={i} className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300"
-                      style={{ background: i < step ? "linear-gradient(135deg,#b58de0,#dbacf0)" : i === step ? "rgba(181,141,224,0.12)" : "transparent", border: i === step ? "1px solid rgba(181,141,224,0.4)" : "1px solid " + th.sep, color: i < step ? "#08060F" : i === step ? th.navAC : th.fg3, boxShadow: i === step ? "0 0 16px rgba(181,141,224,0.25)" : "none" }}>
+                      style={{ background: i < step ? `linear-gradient(135deg,${th.grad1},${th.grad2})` : i === step ? `${th.gradShadow(0.12)}` : "transparent", border: i === step ? `1px solid ${th.gradShadow(0.4)}` : "1px solid " + th.sep, color: i < step ? "#08060F" : i === step ? th.navAC : th.fg3, boxShadow: i === step ? `0 0 16px ${th.gradShadow(0.25)}` : "none" }}>
                       {i < step ? <CheckCircle className="w-3.5 h-3.5" /> : i}
                     </div>
-                    {i < 4 && <div className="w-8 h-px" style={{ background: i < step ? "rgba(181,141,224,0.5)" : th.sep }} />}
+                    {i < 4 && <div className="w-8 h-px" style={{ background: i < step ? `${th.gradShadow(0.5)}` : th.sep }} />}
                   </div>
                 ))}
               </div>
@@ -98,7 +98,7 @@ export function SignupPage() {
             </div>
 
             <div className="relative mb-6">
-              <div className="absolute -top-2 -left-1 text-7xl font-black leading-none pointer-events-none select-none" style={{ color: th.isDark ? "rgba(181,141,224,0.04)" : "rgba(181,141,224,0.06)", fontFamily: "'Funnel Display',sans-serif" }}>0{step}</div>
+              <div className="absolute -top-2 -left-1 text-7xl font-black leading-none pointer-events-none select-none" style={{ color: th.isDark ? `${th.gradShadow(0.04)}` : `${th.gradShadow(0.06)}`, fontFamily: "'Funnel Display',sans-serif" }}>0{step}</div>
               <h1 className="relative text-2xl font-black leading-tight mb-2" style={{ fontFamily: "'Funnel Display',sans-serif" }}>
                 <GT>
                   {step === 1 && "Crée ton compte"}{step === 2 && "L'IA configure ton académie personnalisée"}{step === 3 && "Comment apprends-tu le mieux ?"}{step === 4 && "Choisis ton style de Tuteur IA"}
@@ -160,14 +160,14 @@ export function SignupPage() {
                   <div className="mt-2">
                     <button onClick={formulateWithAI} disabled={!p.goal.trim() || aiState === "loading"}
                       className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-80 disabled:opacity-40"
-                      style={{ background: "rgba(181,141,224,0.1)", border: "1px solid rgba(181,141,224,0.25)", color: th.navAC }}>
+                      style={{ background: `${th.gradShadow(0.1)}`, border: `1px solid ${th.gradShadow(0.25)}`, color: th.navAC }}>
                       {aiState === "loading"
                         ? <><RefreshCw className="w-3.5 h-3.5 animate-spin" />L'IA formule…</>
                         : <><Wand2 className="w-3.5 h-3.5" />Formuler mon objectif avec l'IA</>}
                     </button>
                   </div>
                   {aiState === "proposal" && (
-                    <div className="mt-3 rounded-xl p-4" style={{ background: "rgba(181,141,224,0.07)", border: "1px solid rgba(181,141,224,0.2)" }}>
+                    <div className="mt-3 rounded-xl p-4" style={{ background: `${th.gradShadow(0.07)}`, border: `1px solid ${th.gradShadow(0.2)}` }}>
                       <div className="flex items-center gap-2 mb-2 text-xs font-bold" style={{ color: th.navAC }}><Sparkles className="w-3.5 h-3.5" />Proposition de l'IA — tu peux modifier ci-dessous</div>
                       <textarea value={aiProposal} onChange={e => setAiProposal(e.target.value)} rows={4} className="w-full rounded-xl px-3 py-2.5 text-sm g-input resize-none mb-3" />
                       <div className="flex items-center gap-2">
@@ -186,9 +186,9 @@ export function SignupPage() {
                   const sel = p.style === id;
                   return (
                     <button key={id} onClick={() => setP(x => ({ ...x, style: id }))} className="rounded-2xl text-left transition-all duration-200 hover:scale-[1.02]"
-                      style={{ background: sel ? "rgba(181,141,224,0.1)" : "transparent", border: sel ? `1px solid rgba(181,141,224,0.4)` : `1px solid ${th.sep}`, boxShadow: sel ? "0 0 24px rgba(181,141,224,0.15)" : "none" }}>
+                      style={{ background: sel ? `${th.gradShadow(0.1)}` : "transparent", border: sel ? `1px solid ${th.gradShadow(0.4)}` : `1px solid ${th.sep}`, boxShadow: sel ? `0 0 24px ${th.gradShadow(0.15)}` : "none" }}>
                       <div className="p-5 h-full rounded-2xl">
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ background: sel ? "rgba(181,141,224,0.15)" : "rgba(181,141,224,0.05)" }}>
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ background: sel ? `${th.gradShadow(0.15)}` : `${th.gradShadow(0.05)}` }}>
                           <Icon className="w-5 h-5" style={{ color: sel ? th.navAC : th.fg3 }} />
                         </div>
                         <div className="text-sm font-bold mb-1" style={{ color: sel ? th.navAC : th.fg }}>{label}</div>
@@ -206,9 +206,9 @@ export function SignupPage() {
                   const sel = p.tutor === id;
                   return (
                     <button key={id} onClick={() => setP(x => ({ ...x, tutor: id }))} className="w-full rounded-2xl text-left transition-all hover:scale-[1.01]"
-                      style={{ background: sel ? "rgba(181,141,224,0.08)" : "transparent", border: `1px solid ${sel ? "rgba(181,141,224,0.35)" : th.sep}`, boxShadow: sel ? "0 0 20px rgba(181,141,224,0.12)" : "none" }}>
+                      style={{ background: sel ? `${th.gradShadow(0.08)}` : "transparent", border: `1px solid ${sel ? `${th.gradShadow(0.35)}` : th.sep}`, boxShadow: sel ? `0 0 20px ${th.gradShadow(0.12)}` : "none" }}>
                       <div className="px-5 py-4 flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0" style={{ background: sel ? "rgba(181,141,224,0.1)" : "rgba(181,141,224,0.04)" }}>{emoji}</div>
+                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0" style={{ background: sel ? `${th.gradShadow(0.1)}` : `${th.gradShadow(0.04)}` }}>{emoji}</div>
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-bold mb-0.5" style={{ color: sel ? th.navAC : th.fg }}>{label}</div>
                           <div className="text-xs" style={{ color: th.fg3 }}>{desc}</div>

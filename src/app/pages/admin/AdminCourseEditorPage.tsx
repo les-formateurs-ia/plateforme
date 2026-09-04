@@ -369,8 +369,8 @@ export function AdminCourseEditorPage() {
           <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))" }}>
             <button onClick={() => { setEditingExercise(undefined); setExerciseDialogOpen(true); }}
               className="group relative overflow-hidden rounded-2xl flex flex-col items-center justify-center gap-2 text-center transition-all duration-300 hover:scale-[1.02]"
-              style={{ aspectRatio: "1/1", background: th.isDark ? "rgba(181,141,224,0.06)" : "rgba(181,141,224,0.05)", border: "1.5px dashed rgba(181,141,224,0.4)" }}>
-              <div className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110" style={{ background: "linear-gradient(135deg,#b58de0,#dbacf0)", boxShadow: "0 6px 20px rgba(181,141,224,0.4)" }}>
+              style={{ aspectRatio: "1/1", background: th.isDark ? `${th.gradShadow(0.06)}` : `${th.gradShadow(0.05)}`, border: `1.5px dashed ${th.gradShadow(0.4)}` }}>
+              <div className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110" style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, boxShadow: `0 6px 20px ${th.gradShadow(0.4)}` }}>
                 <Plus className="w-4 h-4 text-white" />
               </div>
               <div className="text-xs font-black" style={{ color: th.fg }}>Nouvel exercice</div>

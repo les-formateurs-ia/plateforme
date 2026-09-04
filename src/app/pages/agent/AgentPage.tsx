@@ -8,6 +8,7 @@ import { useProfile } from "@/app/state/profile-context";
 import { useMyInstances } from "@/app/state/useMyInstances";
 import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
+import { AgentOrb } from "@/app/components/agent/AgentOrb";
 import { cx } from "@/app/lib/cx";
 import {
   listAgentConversations, getAgentMessages, sendAgentMessage, ensureConversation, insertAgentVoiceMessage,
@@ -212,7 +213,7 @@ export function AgentPage() {
         <div className="p-4 shrink-0 space-y-3">
           <h2 className="text-lg font-black flex items-center gap-2" style={{ color: th.fg }}><Bot className="w-5 h-5" style={{ color: th.navAC }} /><GT>Mon Agent IA</GT></h2>
           <button onClick={startNewConversation} className="w-full flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-opacity hover:opacity-90"
-            style={{ background: "linear-gradient(135deg,#b58de0,#dbacf0)", color: "#fff" }}>
+            style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff" }}>
             <Plus className="w-4 h-4" />Nouvelle conversation
           </button>
         </div>
@@ -228,7 +229,7 @@ export function AgentPage() {
                 {g.list.map((c) => (
                   <button key={c.id} onClick={() => navigate(`/agent/${c.id}`)}
                     className="w-full text-left px-3 py-2.5 rounded-xl transition-colors"
-                    style={{ background: c.id === conversationId ? (th.isDark ? "rgba(181,141,224,0.15)" : "rgba(181,141,224,0.1)") : "transparent" }}>
+                    style={{ background: c.id === conversationId ? (th.isDark ? `${th.gradShadow(0.15)}` : `${th.gradShadow(0.1)}`) : "transparent" }}>
                     <div className="text-sm font-medium truncate" style={{ color: c.id === conversationId ? th.navAC : th.fg }}>{c.title || "Nouvelle conversation"}</div>
                     <div className="text-[11px] mt-0.5" style={{ color: th.fg3 }}>{formatRelative(c.lastMessageAt)}</div>
                   </button>
@@ -255,8 +256,12 @@ export function AgentPage() {
         <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-5 space-y-3">
           {messagesLoading && <p className="text-sm text-center" style={{ color: th.fg3 }}>Chargement…</p>}
           {!messagesLoading && messages.length === 0 && (
-            <div className="h-full flex flex-col items-center justify-center gap-3 text-center py-10">
-              <Sparkles className="w-8 h-8" style={{ color: th.navAC, opacity: 0.6 }} />
+            <div className="h-full flex flex-col items-center justify-center gap-4 text-center py-10">
+              {agentStatus === "idle" ? (
+                <AgentOrb status="idle" size={64}><Sparkles className="w-6 h-6 text-white" style={{ opacity: 0.9 }} /></AgentOrb>
+              ) : (
+                <AgentOrb status={agentStatus} mode={agentMode} active={pttActive} size={96} />
+              )}
               <p className="text-sm max-w-sm" style={{ color: th.fg3 }}>
                 Pose une question par écrit ou lance un appel vocal — ton agent connaît ta progression sur toutes tes formations et se souvient de vos échanges précédents.
               </p>
@@ -266,7 +271,7 @@ export function AgentPage() {
             <div key={m.id} className={cx("flex", m.role === "user" ? "justify-end" : "justify-start")}>
               <div className="max-w-[85%] sm:max-w-[70%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-line flex items-start gap-2"
                 style={m.role === "user"
-                  ? { background: "linear-gradient(135deg,#b58de0,#dbacf0)", color: "#fff", borderRadius: "16px 16px 4px 16px" }
+                  ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", borderRadius: "16px 16px 4px 16px" }
                   : { background: th.card, border: `1px solid ${th.sep}`, color: th.fg, borderRadius: "16px 16px 16px 4px" }}>
                 {m.modality === "voice" && <AudioLines className="w-3.5 h-3.5 shrink-0 mt-0.5 opacity-60" />}
                 <span>{m.content}</span>
@@ -281,6 +286,7 @@ export function AgentPage() {
         <div className="shrink-0 px-4 sm:px-6 pb-5 pt-2 space-y-2.5">
           {(agentStatus !== "idle") && (
             <GCard className="px-4 py-2.5 flex items-center gap-3">
+              <AgentOrb status={agentStatus} mode={agentMode} active={pttActive} size={40} />
               <span className="text-xs flex-1" style={{ color: th.fg3 }}>
                 {agentStatus === "connecting" ? "Connexion à l'agent vocal…" : agentMode === "speaking" ? "L'agent parle…" : pttActive ? "Je t'écoute…" : "Maintiens le micro pour parler"}
               </span>
@@ -306,7 +312,7 @@ export function AgentPage() {
             <input value={textInput} onChange={(e) => setTextInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && !sending && sendText()}
               placeholder="Écris à ton agent…" className="flex-1 rounded-full px-4 py-3 text-sm g-input" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg }} />
             <button onClick={sendText} disabled={!textInput.trim() || sending} className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 disabled:opacity-30"
-              style={{ background: "linear-gradient(135deg,#b58de0,#dbacf0)" }}>
+              style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})` }}>
               <Send className="w-4 h-4 text-white" />
             </button>
           </div>

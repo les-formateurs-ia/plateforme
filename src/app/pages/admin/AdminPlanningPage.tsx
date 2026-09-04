@@ -98,7 +98,7 @@ export function AdminPlanningPage() {
                   onClick={() => setTab(t.id)}
                   className="px-7 py-3 rounded-full text-sm font-bold transition-all"
                   style={active
-                    ? { background: "linear-gradient(135deg,#b58de0,#dbacf0)", color: "#fff", boxShadow: "0 2px 12px rgba(181,141,224,0.35)" }
+                    ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", boxShadow: `0 2px 12px ${th.gradShadow(0.35)}` }
                     : { color: th.fg2, background: "transparent" }}
                 >
                   {t.label}

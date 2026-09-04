@@ -163,7 +163,7 @@ export function AdminStudentDetailPage() {
           {instances.map((inst) => {
             const sc = STATUS_LABEL[inst.status];
             return (
-              <div key={inst.id} className="flex items-center gap-3 px-3 py-2.5 rounded-xl flex-wrap" style={{ background: th.isDark ? "rgba(255,255,255,0.03)" : "rgba(181,141,224,0.04)", border: `1px solid ${th.sep}` }}>
+              <div key={inst.id} className="flex items-center gap-3 px-3 py-2.5 rounded-xl flex-wrap" style={{ background: th.isDark ? "rgba(255,255,255,0.03)" : `${th.gradShadow(0.04)}`, border: `1px solid ${th.sep}` }}>
                 <span className="flex-1 min-w-0 text-sm font-semibold truncate" style={{ color: th.fg }}>{inst.name}</span>
                 <span className="text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0" style={{ background: sc.bg, color: sc.color, border: `1px solid ${sc.color}30` }}>{sc.label}</span>
                 <div className="w-36 shrink-0">

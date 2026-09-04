@@ -149,13 +149,13 @@ export function MediaExercisePage() {
           />
           <div>
             <div className="text-xs font-bold mb-2" style={{ color: th.fg3 }}>Type de génération</div>
-            <div className="flex items-center gap-1 p-1 rounded-xl w-fit" style={{ background: th.isDark ? "rgba(255,255,255,0.04)" : "rgba(181,141,224,0.06)", border: `1px solid ${th.sep}` }}>
+            <div className="flex items-center gap-1 p-1 rounded-xl w-fit" style={{ background: th.isDark ? "rgba(255,255,255,0.04)" : `${th.gradShadow(0.06)}`, border: `1px solid ${th.sep}` }}>
               {MODES.map(({ id, label, Icon, disabled }) => (
                 <button key={id} type="button" onClick={() => setMode(id)} disabled={submitting || disabled}
                   title={disabled ? "Bientôt disponible" : undefined}
                   className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all disabled:opacity-40"
                   style={mode === id
-                    ? { background: th.isDark ? "rgba(181,141,224,0.14)" : "rgba(255,255,255,0.8)", color: th.navAC, border: "1px solid rgba(181,141,224,0.25)" }
+                    ? { background: th.isDark ? `${th.gradShadow(0.14)}` : "rgba(255,255,255,0.8)", color: th.navAC, border: `1px solid ${th.gradShadow(0.25)}` }
                     : { color: th.fg3, background: "transparent", border: "1px solid transparent" }}>
                   <Icon className="w-3.5 h-3.5" />{label}{disabled && <span className="text-[9px] opacity-70">· bientôt</span>}
                 </button>

@@ -9,6 +9,8 @@ import { createExerciseSession, renameExerciseSession, deleteExerciseSession } f
 import { listMediaExerciseSessions, type MediaExerciseSession } from "@/app/lib/mediaExercise";
 import { ANNOTATION_RED as RED, scoreTone } from "@/app/lib/textAnnotation";
 
+// Distingue les deux modes d'exercice (image/vidéo) par une couleur fixe,
+// pas l'accent de rôle — même logique que la palette du mindmap.
 const MODE_GRADIENT: Record<"image" | "video", string> = {
   image: "linear-gradient(150deg,#dbacf0,#b58de0 65%)",
   video: "linear-gradient(150deg,#9ce6e6,#2792dc 65%)",
@@ -96,9 +98,9 @@ export function MediaExerciseSessionsPage() {
         <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(190px, 1fr))" }}>
           <button onClick={startNewSession} disabled={creating}
             className="group relative overflow-hidden rounded-2xl flex flex-col items-center justify-center gap-3 text-center transition-all duration-300 hover:scale-[1.02] disabled:opacity-60"
-            style={{ aspectRatio: "1/1", background: th.isDark ? "rgba(181,141,224,0.06)" : "rgba(181,141,224,0.05)", border: "1.5px dashed rgba(181,141,224,0.4)" }}>
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: "radial-gradient(circle at 50% 30%, rgba(181,141,224,0.18), transparent 70%)" }} />
-            <div className="relative w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110" style={{ background: "linear-gradient(135deg,#b58de0,#dbacf0)", boxShadow: "0 6px 20px rgba(181,141,224,0.4)" }}>
+            style={{ aspectRatio: "1/1", background: th.isDark ? `${th.gradShadow(0.06)}` : `${th.gradShadow(0.05)}`, border: `1.5px dashed ${th.gradShadow(0.4)}` }}>
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `radial-gradient(circle at 50% 30%, ${th.gradShadow(0.18)}, transparent 70%)` }} />
+            <div className="relative w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110" style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, boxShadow: `0 6px 20px ${th.gradShadow(0.4)}` }}>
               <Plus className="w-5 h-5 text-white" />
             </div>
             <div className="relative">

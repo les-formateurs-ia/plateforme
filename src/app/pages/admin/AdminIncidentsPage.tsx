@@ -73,7 +73,7 @@ export function AdminIncidentsPage() {
             <GCard key={incident.id}><div className="p-5">
               <div className="flex items-start justify-between gap-3 mb-2 flex-wrap">
                 <div className="flex items-center gap-2.5 flex-wrap">
-                  <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(181,141,224,0.06)", color: th.navAC, border: `1px solid ${th.navAC}30` }}>
+                  <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : `${th.gradShadow(0.06)}`, color: th.navAC, border: `1px solid ${th.navAC}30` }}>
                     {INCIDENT_PAGE_LABEL[incident.page]}
                   </span>
                   <span className="text-[10px] font-bold px-2.5 py-1 rounded-full" style={{ background: sc.bg, color: sc.color, border: `1px solid ${sc.color}30` }}>

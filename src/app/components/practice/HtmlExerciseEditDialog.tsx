@@ -326,7 +326,7 @@ export function HtmlExerciseEditDialog({
                         <button key={v} type="button" onClick={() => setVisibility(v)}
                           className="px-4 py-1.5 rounded-full text-xs font-bold transition-all"
                           style={active
-                            ? { background: "linear-gradient(135deg,#b58de0,#dbacf0)", color: "#fff" }
+                            ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff" }
                             : { color: th.fg2, background: "transparent" }}>
                           {label}
                         </button>

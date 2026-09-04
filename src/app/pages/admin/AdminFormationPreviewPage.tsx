@@ -90,8 +90,8 @@ export function AdminFormationPreviewPage() {
         ))}
         <div className="flex-1 min-w-[140px] sm:ml-4">
           <div className="flex justify-between text-xs mb-1.5" style={{ color: th.fg3 }}><span>Progression globale</span><span>{overallPct}%</span></div>
-          <div className="h-2 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(181,141,224,0.1)" }}>
-            <div className="h-full rounded-full" style={{ width: `${overallPct}%`, background: "linear-gradient(90deg,#b58de0,#dbacf0)" }} />
+          <div className="h-2 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : `${th.gradShadow(0.1)}` }}>
+            <div className="h-full rounded-full" style={{ width: `${overallPct}%`, background: `linear-gradient(90deg,${th.grad1},${th.grad2})` }} />
           </div>
         </div>
       </div></GCard>
@@ -106,7 +106,7 @@ export function AdminFormationPreviewPage() {
           const open = openSection === mod.id;
           const SC = {
             complete: { bg: "rgba(106,222,177,0.1)", text: "#6adeb1", border: "rgba(106,222,177,0.25)", label: "Validé ✓" },
-            active: { bg: "rgba(181,141,224,0.1)", text: "#dbacf0", border: "rgba(181,141,224,0.3)", label: "En cours" },
+            active: { bg: `${th.gradShadow(0.1)}`, text: `${th.grad2}`, border: `${th.gradShadow(0.3)}`, label: "En cours" },
             locked: { bg: "transparent", text: th.fg3, border: th.sep, label: "Verrouillé" },
           };
           const sc = SC[status];
@@ -127,8 +127,8 @@ export function AdminFormationPreviewPage() {
                       <span className="text-xs" style={{ color: th.fg3 }}>{done}/{total} leçons</span>
                       {status !== "locked" && total > 0 && (
                         <div className="flex items-center gap-2">
-                          <div className="w-20 h-1 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(181,141,224,0.1)" }}>
-                            <div className="h-full rounded-full" style={{ width: `${pct}%`, background: status === "complete" ? "linear-gradient(90deg,#78d5e2,#6adeb1)" : "linear-gradient(90deg,#b58de0,#dbacf0)" }} />
+                          <div className="w-20 h-1 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : `${th.gradShadow(0.1)}` }}>
+                            <div className="h-full rounded-full" style={{ width: `${pct}%`, background: status === "complete" ? "linear-gradient(90deg,#78d5e2,#6adeb1)" : `linear-gradient(90deg,${th.grad1},${th.grad2})` }} />
                           </div>
                           <span className="text-[10px] font-bold" style={{ color: sc.text }}>{pct}%</span>
                         </div>
@@ -151,11 +151,11 @@ export function AdminFormationPreviewPage() {
                       <div key={lesson.id} className={cx("flex items-center gap-4 px-5 py-3 transition-colors", clickable && "cursor-pointer hover:opacity-80")}
                         onClick={() => { if (clickable) goLesson(lesson.id); }}
                         style={i < mod.lessons.length - 1 ? { borderBottom: `1px solid ${th.sep}` } : {}}>
-                        <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: state === "completed" ? "rgba(106,222,177,0.12)" : state === "available" ? "rgba(181,141,224,0.12)" : "transparent", border: `1px solid ${state === "completed" ? "rgba(106,222,177,0.3)" : state === "available" ? "rgba(181,141,224,0.35)" : th.sep}` }}>
+                        <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: state === "completed" ? "rgba(106,222,177,0.12)" : state === "available" ? `${th.gradShadow(0.12)}` : "transparent", border: `1px solid ${state === "completed" ? "rgba(106,222,177,0.3)" : state === "available" ? `${th.gradShadow(0.35)}` : th.sep}` }}>
                           {state === "completed" ? <CheckCircle className="w-3.5 h-3.5 text-[#6adeb1]" /> : state === "available" ? <Play className="w-3 h-3 ml-0.5" style={{ color: th.navAC }} /> : <Lock className="w-3 h-3" style={{ color: th.fg3 }} />}
                         </div>
                         <span className="flex-1 text-sm truncate" style={{ color: state === "completed" ? "rgba(106,222,177,0.7)" : state === "available" ? th.navAC : th.fg3 }}>{lesson.title}</span>
-                        {state === "available" && <span className="text-[10px] px-2 py-0.5 rounded-full font-bold shrink-0" style={{ background: "rgba(181,141,224,0.1)", color: th.navAC, border: "1px solid rgba(181,141,224,0.25)" }}>En cours</span>}
+                        {state === "available" && <span className="text-[10px] px-2 py-0.5 rounded-full font-bold shrink-0" style={{ background: `${th.gradShadow(0.1)}`, color: th.navAC, border: `1px solid ${th.gradShadow(0.25)}` }}>En cours</span>}
                         <span className="text-xs font-mono shrink-0 flex items-center gap-1" style={{ color: th.fg3 }}>
                           {lesson.durationMinutes ? <><Clock className="w-3 h-3" />{lesson.durationMinutes}min</> : "—"}
                         </span>

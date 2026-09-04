@@ -115,7 +115,7 @@ function FormationAccordion({ entry, open, onToggle }: { entry: CourseProgressEn
   const formationStatus: SectionStatus = totalLessons === 0 ? "locked" : completedLessons === totalLessons ? "complete" : "active";
   const FSC = {
     complete: { bg: "rgba(106,222,177,0.1)", text: "#6adeb1", border: "rgba(106,222,177,0.25)" },
-    active: { bg: "rgba(181,141,224,0.1)", text: "#dbacf0", border: "rgba(181,141,224,0.3)" },
+    active: { bg: `${th.gradShadow(0.1)}`, text: `${th.grad2}`, border: `${th.gradShadow(0.3)}` },
     locked: { bg: "transparent", text: th.fg3, border: th.sep },
   };
   const fsc = FSC[formationStatus];
@@ -198,8 +198,8 @@ function FormationAccordion({ entry, open, onToggle }: { entry: CourseProgressEn
             <div className="flex items-center gap-3 flex-wrap">
               <span className="text-xs" style={{ color: th.fg3 }}>{outline.sections.length} module{outline.sections.length !== 1 ? "s" : ""} · {completedLessons}/{totalLessons} leçons</span>
               <div className="flex items-center gap-2">
-                <div className="w-20 h-1 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(181,141,224,0.1)" }}>
-                  <div className="h-full rounded-full" style={{ width: `${overallPct}%`, background: formationStatus === "complete" ? "linear-gradient(90deg,#78d5e2,#6adeb1)" : "linear-gradient(90deg,#b58de0,#dbacf0)" }} />
+                <div className="w-20 h-1 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : `${th.gradShadow(0.1)}` }}>
+                  <div className="h-full rounded-full" style={{ width: `${overallPct}%`, background: formationStatus === "complete" ? "linear-gradient(90deg,#78d5e2,#6adeb1)" : `linear-gradient(90deg,${th.grad1},${th.grad2})` }} />
                 </div>
                 <span className="text-[10px] font-bold" style={{ color: fsc.text }}>{overallPct}%</span>
               </div>
@@ -241,7 +241,7 @@ function FormationAccordion({ entry, open, onToggle }: { entry: CourseProgressEn
               </div>
             )}
 
-            <div className="flex items-center gap-5 sm:gap-8 flex-wrap rounded-xl p-4" style={{ background: th.isDark ? "rgba(255,255,255,0.02)" : "rgba(181,141,224,0.03)", border: `1px solid ${th.sep}` }}>
+            <div className="flex items-center gap-5 sm:gap-8 flex-wrap rounded-xl p-4" style={{ background: th.isDark ? "rgba(255,255,255,0.02)" : `${th.gradShadow(0.03)}`, border: `1px solid ${th.sep}` }}>
               {[
                 { val: String(completedLessons), sub: "Leçons terminées" },
                 { val: successRate != null ? `${successRate}%` : "—", sub: "Taux de réussite" },
@@ -264,7 +264,7 @@ function FormationAccordion({ entry, open, onToggle }: { entry: CourseProgressEn
                 const modOpen = editMode || openSection === mod.id;
                 const SC = {
                   complete: { bg: "rgba(106,222,177,0.1)", text: "#6adeb1", border: "rgba(106,222,177,0.25)", label: "Validé ✓" },
-                  active: { bg: "rgba(181,141,224,0.1)", text: "#dbacf0", border: "rgba(181,141,224,0.3)", label: "En cours" },
+                  active: { bg: `${th.gradShadow(0.1)}`, text: `${th.grad2}`, border: `${th.gradShadow(0.3)}`, label: "En cours" },
                   locked: { bg: "transparent", text: th.fg3, border: th.sep, label: "Verrouillé" },
                 };
                 const sc = SC[status];
@@ -285,8 +285,8 @@ function FormationAccordion({ entry, open, onToggle }: { entry: CourseProgressEn
                             <span className="text-xs" style={{ color: th.fg3 }}>{done}/{total} leçons</span>
                             {status !== "locked" && total > 0 && (
                               <div className="flex items-center gap-2">
-                                <div className="w-20 h-1 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(181,141,224,0.1)" }}>
-                                  <div className="h-full rounded-full" style={{ width: `${pct}%`, background: status === "complete" ? "linear-gradient(90deg,#78d5e2,#6adeb1)" : "linear-gradient(90deg,#b58de0,#dbacf0)" }} />
+                                <div className="w-20 h-1 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : `${th.gradShadow(0.1)}` }}>
+                                  <div className="h-full rounded-full" style={{ width: `${pct}%`, background: status === "complete" ? "linear-gradient(90deg,#78d5e2,#6adeb1)" : `linear-gradient(90deg,${th.grad1},${th.grad2})` }} />
                                 </div>
                                 <span className="text-[10px] font-bold" style={{ color: sc.text }}>{pct}%</span>
                               </div>
@@ -312,11 +312,11 @@ function FormationAccordion({ entry, open, onToggle }: { entry: CourseProgressEn
                               {editMode && (
                                 <Checkbox checked={selected.has(lesson.id)} onCheckedChange={() => toggleLesson(lesson.id)} onClick={(e) => e.stopPropagation()} className="shrink-0" />
                               )}
-                              <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: state === "completed" ? "rgba(106,222,177,0.12)" : state === "available" ? "rgba(181,141,224,0.12)" : "transparent", border: `1px solid ${state === "completed" ? "rgba(106,222,177,0.3)" : state === "available" ? "rgba(181,141,224,0.35)" : th.sep}` }}>
+                              <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: state === "completed" ? "rgba(106,222,177,0.12)" : state === "available" ? `${th.gradShadow(0.12)}` : "transparent", border: `1px solid ${state === "completed" ? "rgba(106,222,177,0.3)" : state === "available" ? `${th.gradShadow(0.35)}` : th.sep}` }}>
                                 {state === "completed" ? <CheckCircle className="w-3.5 h-3.5 text-[#6adeb1]" /> : state === "available" ? <Play className="w-3 h-3 ml-0.5" style={{ color: th.navAC }} /> : <Lock className="w-3 h-3" style={{ color: th.fg3 }} />}
                               </div>
                               <span className="flex-1 text-sm truncate" style={{ color: state === "completed" ? "rgba(106,222,177,0.7)" : state === "available" ? th.navAC : th.fg3 }}>{lesson.title}</span>
-                              {state === "available" && !editMode && <span className="text-[10px] px-2 py-0.5 rounded-full font-bold shrink-0" style={{ background: "rgba(181,141,224,0.1)", color: th.navAC, border: "1px solid rgba(181,141,224,0.25)" }}>En cours</span>}
+                              {state === "available" && !editMode && <span className="text-[10px] px-2 py-0.5 rounded-full font-bold shrink-0" style={{ background: `${th.gradShadow(0.1)}`, color: th.navAC, border: `1px solid ${th.gradShadow(0.25)}` }}>En cours</span>}
                               <span className="text-xs font-mono shrink-0 flex items-center gap-1" style={{ color: th.fg3 }}>
                                 {lesson.durationMinutes ? <><Clock className="w-3 h-3" />{lesson.durationMinutes}min</> : "—"}
                               </span>
@@ -352,7 +352,7 @@ function FormationAccordion({ entry, open, onToggle }: { entry: CourseProgressEn
                 {GEN_TYPES.map(({ id, label, hint, Icon }) => (
                   <button key={id} onClick={() => setGenType(id)}
                     className="flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all"
-                    style={{ background: genType === id ? "rgba(181,141,224,0.1)" : "transparent", border: `1px solid ${genType === id ? th.navAC : th.sep}` }}>
+                    style={{ background: genType === id ? `${th.gradShadow(0.1)}` : "transparent", border: `1px solid ${genType === id ? th.navAC : th.sep}` }}>
                     <Icon className="w-4 h-4 shrink-0" style={{ color: genType === id ? th.navAC : th.fg3 }} />
                     <div className="min-w-0">
                       <div className="text-sm font-semibold" style={{ color: th.fg }}>{label}</div>

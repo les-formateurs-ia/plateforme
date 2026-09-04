@@ -295,7 +295,7 @@ export function AdminAvailabilityPage() {
                             className="h-4 border transition-colors"
                             style={{
                               borderColor: th.isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
-                              background: isBooked ? "rgba(148,163,184,0.35)" : isSelected ? "linear-gradient(135deg,#b58de0,#dbacf0)" : "transparent",
+                              background: isBooked ? "rgba(148,163,184,0.35)" : isSelected ? `linear-gradient(135deg,${th.grad1},${th.grad2})` : "transparent",
                               cursor: isBooked ? "not-allowed" : "pointer",
                             }}
                           />
