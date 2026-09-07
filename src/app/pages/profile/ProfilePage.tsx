@@ -26,6 +26,17 @@ const formatEnrolledSince = (iso: string) => {
   return `${MONTHS_FR[d.getMonth()]} ${d.getFullYear()}`;
 };
 
+function GoogleLogo({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z" />
+      <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.09C3.26 21.3 7.31 24 12 24z" />
+      <path fill="#FBBC05" d="M5.27 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62H1.29A11.96 11.96 0 000 12c0 1.94.46 3.77 1.29 5.38l3.98-3.09z" />
+      <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.98 3.09c.95-2.85 3.6-4.96 6.73-4.96z" />
+    </svg>
+  );
+}
+
 export function ProfilePage() {
   const th = useTh();
   const navigate = useNavigate();
@@ -40,10 +51,6 @@ export function ProfilePage() {
   const [objectiveEditing, setObjectiveEditing] = useState(false);
   const [objectiveSaving, setObjectiveSaving] = useState(false);
   const [objectiveError, setObjectiveError] = useState<string | null>(null);
-  const [nameDraft, setNameDraft] = useState(profile.name);
-  const [nameEditing, setNameEditing] = useState(false);
-  const [nameSaving, setNameSaving] = useState(false);
-  const [nameError, setNameError] = useState<string | null>(null);
   const currentObjective = profile.goalFinal || profile.goal || "";
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
@@ -114,10 +121,6 @@ export function ProfilePage() {
   }, [currentObjective, objectiveEditing]);
 
   useEffect(() => {
-    if (!nameEditing) setNameDraft(profile.name);
-  }, [profile.name, nameEditing]);
-
-  useEffect(() => {
     if (!user) return;
     let cancelled = false;
     (async () => {
@@ -167,19 +170,6 @@ export function ProfilePage() {
       return;
     }
     setObjectiveEditing(false);
-  };
-
-  const saveName = async () => {
-    setNameSaving(true);
-    setNameError(null);
-    const cleanedName = nameDraft.trim();
-    const { error } = await updateProfile({ name: cleanedName });
-    setNameSaving(false);
-    if (error) {
-      setNameError(error);
-      return;
-    }
-    setNameEditing(false);
   };
 
   return (
@@ -389,44 +379,18 @@ export function ProfilePage() {
               {googleCalendarEmail ? (
                 <VBtn sm onClick={handleDisconnectGoogle} disabled={googleLoading}>{googleLoading ? "…" : "Déconnecter"}</VBtn>
               ) : (
-                <ShimBtn sm onClick={handleConnectGoogle} disabled={googleLoading}>{googleLoading ? "Redirection…" : "Connecter Google Calendar"}</ShimBtn>
+                <ShimBtn sm onClick={handleConnectGoogle} disabled={googleLoading}>
+                  <span className="flex items-center gap-2">
+                    <GoogleLogo className="w-4 h-4 shrink-0" />{googleLoading ? "Redirection…" : "Connecter Google Calendar"}
+                  </span>
+                </ShimBtn>
               )}
             </div></GCard>
           )}
 
           {/* Info fields */}
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Prénom</label>
-            {nameEditing ? (
-              <div className="space-y-2">
-                <input
-                  value={nameDraft}
-                  onChange={(e) => setNameDraft(e.target.value)}
-                  placeholder="Ton prénom"
-                  className="w-full rounded-xl px-4 py-3 text-sm g-input"
-                />
-                {nameError && <p className="text-xs" style={{ color: "#fbc2ad" }}>{nameError}</p>}
-                <div className="flex items-center gap-2">
-                  <button onClick={saveName} disabled={nameSaving || !nameDraft.trim()} className="px-4 py-2 rounded-lg text-xs font-bold transition-all hover:opacity-80 disabled:opacity-50"
-                    style={{ background: `${th.gradShadow(0.12)}`, border: `1px solid ${th.gradShadow(0.25)}`, color: th.navAC }}>
-                    {nameSaving ? "Enregistrement..." : "Enregistrer"}
-                  </button>
-                  <button onClick={() => { setNameDraft(profile.name); setNameEditing(false); setNameError(null); }} disabled={nameSaving}
-                    className="px-4 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-70 disabled:opacity-50" style={{ color: th.fg3 }}>
-                    Annuler
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="w-full rounded-xl px-4 py-3 text-sm flex items-center justify-between" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
-                <span style={{ color: profile.name ? th.fg2 : th.fg3 }}>{profile.name || "Non renseigné"}</span>
-                <button onClick={() => setNameEditing(true)} className="text-xs transition-colors hover:opacity-70" style={{ color: th.navAC }}>Modifier</button>
-              </div>
-            )}
-          </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {[["Âge", profile.age ? `${profile.age} ans` : "Non renseigné"], ["Profession", profile.profession || "Chef de projet"], ["Email", user?.email || "—"]].map(([label, val]) => (
+            {[["Prénom", profile.name || "Alex"], ["Âge", profile.age ? `${profile.age} ans` : "Non renseigné"], ["Profession", profile.profession || "Chef de projet"], ["Email", user?.email || "—"]].map(([label, val]) => (
               <div key={label}>
                 <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>{label}</label>
                 <div className="w-full rounded-xl px-4 py-3 text-sm flex items-center justify-between" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
