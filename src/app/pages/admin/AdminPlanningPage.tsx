@@ -118,7 +118,9 @@ export function AdminPlanningPage() {
             subtitle={(p) => (p as StudentCard).activeFormationName || "—"}
           />
         )}
-        {isAdmin && tab === "formateurs" && <PersonGrid people={formateurs} loading={loadingFormateurs} />}
+        {isAdmin && tab === "formateurs" && (
+          <PersonGrid people={formateurs} loading={loadingFormateurs} onClick={(id) => navigate(`${base}/planning/formateurs/${id}`)} />
+        )}
       </div>
     </div>
   );

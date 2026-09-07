@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { ChevronLeft, ChevronRight, CalendarClock, User, CalendarCog, Video, ClipboardList, ClipboardCheck, Check, Paperclip } from "lucide-react";
+import { ChevronLeft, ChevronRight, CalendarClock, User, CalendarCog, Video, ClipboardList, ClipboardCheck, Check, Paperclip, Eye, Trash2 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { GCard } from "@/app/components/common/GCard";
@@ -9,7 +9,7 @@ import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/app/components/ui/dialog";
 import {
   listMyAvailability, saveAvailability, listMyBookingsAsFormateur, cancelRdvAsFormateur, proposeReschedule, confirmRdv,
-  syncMeetEvent, submitBilan, uploadBilanAttachment,
+  syncMeetEvent, submitBilan, uploadBilanAttachment, deleteBilan,
   toISODate, addDays, addMinutes, SESSION_MINUTES, type FormateurBooking,
 } from "@/app/lib/availability";
 
@@ -74,6 +74,7 @@ export function AdminAvailabilityPage() {
   const [bilanFile, setBilanFile] = useState<File | null>(null);
   const [submittingBilan, setSubmittingBilan] = useState(false);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const [deletingBilan, setDeletingBilan] = useState(false);
 
   const days = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart]);
   const weekEnd = days[6];
@@ -240,6 +241,23 @@ export function AdminAvailabilityPage() {
       toast.error("Impossible d'enregistrer le bilan.");
     } finally {
       setSubmittingBilan(false);
+    }
+  };
+
+  const handleDeleteBilan = async () => {
+    if (!bilanTarget) return;
+    if (!window.confirm("Supprimer ce bilan ? Cette action est définitive.")) return;
+    setDeletingBilan(true);
+    try {
+      await deleteBilan(bilanTarget.id, bilanTarget.bilanAttachmentPath);
+      toast.success("Bilan supprimé.");
+      setBilanTarget(null);
+      void loadBookings();
+    } catch (err) {
+      console.error(err);
+      toast.error("Impossible de supprimer le bilan.");
+    } finally {
+      setDeletingBilan(false);
     }
   };
 
@@ -416,9 +434,10 @@ export function AdminAvailabilityPage() {
                     </div>
                   </div>
                   {b.bilanFilledAt ? (
-                    <span className="text-xs font-semibold flex items-center gap-1.5 shrink-0" style={{ color: "#6adeb1" }}>
+                    <button onClick={() => openBilan(b)} className="text-xs font-semibold flex items-center gap-1.5 shrink-0 hover:opacity-80" style={{ color: "#6adeb1" }}>
                       <ClipboardCheck className="w-3.5 h-3.5" />Bilan envoyé
-                    </span>
+                      <Eye className="w-3.5 h-3.5 ml-1" />
+                    </button>
                   ) : (
                     <VBtn sm onClick={() => openBilan(b)}><span className="flex items-center gap-1.5"><ClipboardList className="w-3.5 h-3.5" />Ajouter un bilan</span></VBtn>
                   )}
@@ -465,7 +484,22 @@ export function AdminAvailabilityPage() {
               )}
             </div>
           </div>
-          <ShimBtn full onClick={saveBilan} disabled={submittingBilan}>{submittingBilan ? "Enregistrement…" : "Enregistrer le bilan"}</ShimBtn>
+          <div className="flex items-center gap-2">
+            <ShimBtn full onClick={saveBilan} disabled={submittingBilan || deletingBilan}>
+              {submittingBilan ? "Enregistrement…" : bilanTarget?.bilanFilledAt ? "Mettre à jour le bilan" : "Enregistrer le bilan"}
+            </ShimBtn>
+            {bilanTarget?.bilanFilledAt && (
+              <button
+                onClick={handleDeleteBilan}
+                disabled={submittingBilan || deletingBilan}
+                title="Supprimer le bilan"
+                className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-colors hover:opacity-80 disabled:opacity-50"
+                style={{ background: "rgba(251,194,173,0.1)", border: "1px solid rgba(251,194,173,0.25)", color: "#fbc2ad" }}
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>

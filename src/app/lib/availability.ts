@@ -486,3 +486,32 @@ export async function getBilanAttachmentUrl(path: string): Promise<string> {
   if (error) throw error;
   return data.signedUrl;
 }
+
+// Supprime le bilan (et sa pièce jointe éventuelle) d'un rendez-vous —
+// formateur du rdv ou admin uniquement (cf. garde dans check_rendez_vous_constraints).
+export async function deleteBilan(rdvId: string, attachmentPath: string | null): Promise<void> {
+  if (attachmentPath) {
+    await supabase.storage.from("rdv-bilan-attachments").remove([attachmentPath]);
+  }
+  const { error } = await supabase
+    .from("rendez_vous")
+    .update({
+      bilan_sujet: null,
+      bilan_next_step: null,
+      bilan_point_fort: null,
+      bilan_filled_at: null,
+      bilan_attachment_path: null,
+      bilan_attachment_name: null,
+    })
+    .eq("id", rdvId);
+  if (error) throw error;
+}
+
+// Tous les bilans déjà rédigés par ce formateur, tous élèves confondus —
+// utilisé par la fiche formateur de l'admin (lecture seule, cf. AdminFormateurDetailPage).
+export async function listFormateurBilans(formateurId: string): Promise<FormateurBooking[]> {
+  const all = await listMyBookingsAsFormateur(formateurId);
+  return all
+    .filter((b) => b.bilanFilledAt)
+    .sort((a, b) => (b.slotDate + b.startTime).localeCompare(a.slotDate + a.startTime));
+}

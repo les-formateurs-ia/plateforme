@@ -31,6 +31,7 @@ import { AdminLessonEditorPage } from "@/app/pages/admin/AdminLessonEditorPage";
 import { AdminFormationPreviewPage } from "@/app/pages/admin/AdminFormationPreviewPage";
 import { AdminPlanningPage } from "@/app/pages/admin/AdminPlanningPage";
 import { AdminStudentDetailPage } from "@/app/pages/admin/AdminStudentDetailPage";
+import { AdminFormateurDetailPage } from "@/app/pages/admin/AdminFormateurDetailPage";
 import { AdminAvailabilityPage } from "@/app/pages/admin/AdminAvailabilityPage";
 import { AdminTrashPage } from "@/app/pages/admin/AdminTrashPage";
 import { AdminIncidentsPage } from "@/app/pages/admin/AdminIncidentsPage";
@@ -140,6 +141,7 @@ function AppRoutes() {
         <Route path="admin/instances/:instanceId/lessons/:lessonId" element={<RequireAdmin><AdminLessonEditorPage /></RequireAdmin>} />
         <Route path="admin/planning" element={<RequireAdmin><AdminPlanningPage /></RequireAdmin>} />
         <Route path="admin/planning/students/:studentId" element={<RequireAdmin><AdminStudentDetailPage /></RequireAdmin>} />
+        <Route path="admin/planning/formateurs/:formateurId" element={<RequireAdmin><AdminFormateurDetailPage /></RequireAdmin>} />
         <Route path="admin/incidents" element={<RequireAdmin><AdminIncidentsPage /></RequireAdmin>} />
 
         <Route path="formateur/courses" element={<RequireFormateur><AdminCoursesPage /></RequireFormateur>} />

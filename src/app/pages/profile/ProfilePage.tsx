@@ -40,6 +40,10 @@ export function ProfilePage() {
   const [objectiveEditing, setObjectiveEditing] = useState(false);
   const [objectiveSaving, setObjectiveSaving] = useState(false);
   const [objectiveError, setObjectiveError] = useState<string | null>(null);
+  const [nameDraft, setNameDraft] = useState(profile.name);
+  const [nameEditing, setNameEditing] = useState(false);
+  const [nameSaving, setNameSaving] = useState(false);
+  const [nameError, setNameError] = useState<string | null>(null);
   const currentObjective = profile.goalFinal || profile.goal || "";
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
@@ -110,6 +114,10 @@ export function ProfilePage() {
   }, [currentObjective, objectiveEditing]);
 
   useEffect(() => {
+    if (!nameEditing) setNameDraft(profile.name);
+  }, [profile.name, nameEditing]);
+
+  useEffect(() => {
     if (!user) return;
     let cancelled = false;
     (async () => {
@@ -159,6 +167,19 @@ export function ProfilePage() {
       return;
     }
     setObjectiveEditing(false);
+  };
+
+  const saveName = async () => {
+    setNameSaving(true);
+    setNameError(null);
+    const cleanedName = nameDraft.trim();
+    const { error } = await updateProfile({ name: cleanedName });
+    setNameSaving(false);
+    if (error) {
+      setNameError(error);
+      return;
+    }
+    setNameEditing(false);
   };
 
   return (
@@ -374,8 +395,38 @@ export function ProfilePage() {
           )}
 
           {/* Info fields */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Prénom</label>
+            {nameEditing ? (
+              <div className="space-y-2">
+                <input
+                  value={nameDraft}
+                  onChange={(e) => setNameDraft(e.target.value)}
+                  placeholder="Ton prénom"
+                  className="w-full rounded-xl px-4 py-3 text-sm g-input"
+                />
+                {nameError && <p className="text-xs" style={{ color: "#fbc2ad" }}>{nameError}</p>}
+                <div className="flex items-center gap-2">
+                  <button onClick={saveName} disabled={nameSaving || !nameDraft.trim()} className="px-4 py-2 rounded-lg text-xs font-bold transition-all hover:opacity-80 disabled:opacity-50"
+                    style={{ background: `${th.gradShadow(0.12)}`, border: `1px solid ${th.gradShadow(0.25)}`, color: th.navAC }}>
+                    {nameSaving ? "Enregistrement..." : "Enregistrer"}
+                  </button>
+                  <button onClick={() => { setNameDraft(profile.name); setNameEditing(false); setNameError(null); }} disabled={nameSaving}
+                    className="px-4 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-70 disabled:opacity-50" style={{ color: th.fg3 }}>
+                    Annuler
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="w-full rounded-xl px-4 py-3 text-sm flex items-center justify-between" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
+                <span style={{ color: profile.name ? th.fg2 : th.fg3 }}>{profile.name || "Non renseigné"}</span>
+                <button onClick={() => setNameEditing(true)} className="text-xs transition-colors hover:opacity-70" style={{ color: th.navAC }}>Modifier</button>
+              </div>
+            )}
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {[["Prénom", profile.name || "Alex"], ["Âge", profile.age ? `${profile.age} ans` : "Non renseigné"], ["Profession", profile.profession || "Chef de projet"], ["Email", user?.email || "—"]].map(([label, val]) => (
+            {[["Âge", profile.age ? `${profile.age} ans` : "Non renseigné"], ["Profession", profile.profession || "Chef de projet"], ["Email", user?.email || "—"]].map(([label, val]) => (
               <div key={label}>
                 <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>{label}</label>
                 <div className="w-full rounded-xl px-4 py-3 text-sm flex items-center justify-between" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
