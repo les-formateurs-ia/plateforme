@@ -42,3 +42,27 @@ export async function createNotification(userId: string, type: NotificationType,
   const { error } = await supabase.from("notifications").insert({ user_id: userId, type, title, body, rdv_id: rdvId });
   if (error) console.warn("Impossible d'envoyer la notification", error);
 }
+
+// Badge de l'onglet Incidents (staff/layout) — un incident signalé notifie
+// tous les admins côté DB (trigger notify_admins_of_incident), ces deux
+// helpers pilotent juste le pastille "non lu" associée.
+export async function countUnreadIncidentNotifications(userId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from("notifications")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("type", "incident_reported")
+    .is("read_at", null);
+  if (error) throw error;
+  return count ?? 0;
+}
+
+export async function markIncidentNotificationsRead(userId: string): Promise<void> {
+  const { error } = await supabase
+    .from("notifications")
+    .update({ read_at: new Date().toISOString() })
+    .eq("user_id", userId)
+    .eq("type", "incident_reported")
+    .is("read_at", null);
+  if (error) throw error;
+}

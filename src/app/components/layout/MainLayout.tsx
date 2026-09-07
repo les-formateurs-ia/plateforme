@@ -14,19 +14,45 @@ import { useBulkGeneration } from "@/app/state/bulk-generation-context";
 import { ReportIncidentDialog } from "@/app/components/layout/ReportIncidentDialog";
 import { cx } from "@/app/lib/cx";
 import { NAV_ITEMS } from "@/app/data/mock";
+import { supabase } from "@/app/lib/supabase/client";
+import { countUnreadIncidentNotifications } from "@/app/lib/notifications";
 
 export function MainLayout() {
   const th = useTh();
-  const { role } = useAuth();
+  const { role, user } = useAuth();
   const staffBase = useStaffBasePath();
   const { profile } = useProfile();
   const name = profile.name.split(" ")[0] || "Alex";
   const [navOpen, setNavOpen] = useState(false);
+  const [unreadIncidents, setUnreadIncidents] = useState(0);
   const location = useLocation();
   const gen = useBulkGeneration();
   const genPct = gen.total > 0 ? Math.round((gen.done / gen.total) * 100) : 0;
 
   useEffect(() => { setNavOpen(false); }, [location.pathname]);
+
+  // Pastille "nouveau signalement" à côté de l'onglet Incidents — se recharge
+  // en temps réel (un incident notifie tous les admins, cf. trigger
+  // notify_admins_of_incident) et se vide dès qu'on ouvre l'onglet
+  // (AdminIncidentsPage marque ces notifications comme lues à son montage).
+  useEffect(() => {
+    if (!isAdmin(role) || !user) { setUnreadIncidents(0); return; }
+    let cancelled = false;
+    countUnreadIncidentNotifications(user.id).then((n) => { if (!cancelled) setUnreadIncidents(n); }).catch(console.error);
+    const channel = supabase
+      .channel(`incident-notifications:${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
+        (payload) => { if ((payload.new as { type: string }).type === "incident_reported") setUnreadIncidents((n) => n + 1); },
+      )
+      .subscribe();
+    return () => { cancelled = true; void supabase.removeChannel(channel); };
+  }, [role, user]);
+
+  useEffect(() => {
+    if (location.pathname === "/admin/incidents") setUnreadIncidents(0);
+  }, [location.pathname]);
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: th.bg, fontFamily: "'Funnel Display',sans-serif" }}>
@@ -80,7 +106,13 @@ export function MainLayout() {
           {isAdmin(role) && (
             <NavLink to="/admin/incidents" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
               style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
-              <Bug className="w-4 h-4 shrink-0" />Incidents
+              <span className="relative shrink-0">
+                <Bug className="w-4 h-4" />
+                {unreadIncidents > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full" style={{ background: "#fb7185" }} />
+                )}
+              </span>
+              Incidents
             </NavLink>
           )}
           {(() => {

@@ -14,10 +14,15 @@ import {
   updateInstanceStatus, deleteInstance, type FormationInstanceRow, type PublishedTemplate,
 } from "@/app/lib/formationInstances";
 import { listCoachAssignableCards, assignFormateurToStudent, type PersonCard } from "@/app/lib/planning";
+import {
+  getStudentOnboarding, updateStudentObjective, updateStudentTutorPersona,
+  type StudentOnboardingInfo, type PedagogyStyle,
+} from "@/app/lib/studentOnboarding";
 import type { EnrollmentStatus } from "@/app/lib/supabase/database.types";
 import { useAuth } from "@/app/state/auth-context";
 import { isAdmin, isStaff } from "@/app/lib/permissions";
 import { useStaffBasePath } from "@/app/lib/staffBase";
+import { TUTOR_STYLES } from "@/app/data/mock";
 
 interface StudentProfile { id: string; first_name: string | null; last_name: string | null; email: string; avatar_url: string | null; formateur_id: string | null; }
 
@@ -41,6 +46,11 @@ export function AdminStudentDetailPage() {
   const [formateurs, setFormateurs] = useState<PersonCard[]>([]);
   const [templateToAssign, setTemplateToAssign] = useState("");
   const [formateurToAssign, setFormateurToAssign] = useState("");
+  const [onboarding, setOnboarding] = useState<StudentOnboardingInfo | null>(null);
+  const [objectiveDraft, setObjectiveDraft] = useState("");
+  const [objectiveEditing, setObjectiveEditing] = useState(false);
+  const [objectiveSaving, setObjectiveSaving] = useState(false);
+  const [tutorSaving, setTutorSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [assigning, setAssigning] = useState(false);
   const [assigningFormateur, setAssigningFormateur] = useState(false);
@@ -49,11 +59,12 @@ export function AdminStudentDetailPage() {
     if (!studentId) return;
     setLoading(true);
     try {
-      const [{ data: p, error: profileError }, instanceRows, templateRows, formateurRows] = await Promise.all([
+      const [{ data: p, error: profileError }, instanceRows, templateRows, formateurRows, onboardingInfo] = await Promise.all([
         supabase.from("profiles").select("id, first_name, last_name, email, avatar_url, formateur_id").eq("id", studentId).single(),
         listInstancesForStudent(studentId),
         listPublishedTemplates(),
         listCoachAssignableCards(),
+        getStudentOnboarding(studentId),
       ]);
       if (profileError) throw profileError;
       setProfile(p ?? null);
@@ -61,6 +72,9 @@ export function AdminStudentDetailPage() {
       setTemplates(templateRows);
       setFormateurs(formateurRows);
       setFormateurToAssign(p?.formateur_id ?? "");
+      setOnboarding(onboardingInfo);
+      setObjectiveDraft(onboardingInfo?.objective ?? "");
+      setObjectiveEditing(false);
     } catch (err) {
       console.error(err);
       toast.error("Impossible de charger la fiche de cet élève.");
@@ -71,6 +85,37 @@ export function AdminStudentDetailPage() {
   };
 
   useEffect(() => { void load(); }, [studentId]);
+
+  const saveObjective = async () => {
+    if (!studentId) return;
+    setObjectiveSaving(true);
+    try {
+      const cleaned = objectiveDraft.trim();
+      await updateStudentObjective(studentId, cleaned);
+      setOnboarding((o) => (o ? { ...o, objective: cleaned } : o));
+      setObjectiveEditing(false);
+    } catch (err) {
+      console.error(err);
+      toast.error("Impossible d'enregistrer l'objectif professionnel.");
+    } finally {
+      setObjectiveSaving(false);
+    }
+  };
+
+  const changeTutorPersona = async (style: string) => {
+    if (!studentId) return;
+    setTutorSaving(true);
+    try {
+      await updateStudentTutorPersona(studentId, style as PedagogyStyle);
+      setOnboarding((o) => (o ? { ...o, tutorPersona: style as PedagogyStyle } : { age: null, profession: null, objective: null, tutorPersona: style as PedagogyStyle }));
+      toast.success("Style pédagogique mis à jour.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Impossible de mettre à jour le style pédagogique.");
+    } finally {
+      setTutorSaving(false);
+    }
+  };
 
   const assign = async () => {
     if (!studentId || !templateToAssign) return;
@@ -140,6 +185,59 @@ export function AdminStudentDetailPage() {
           <p className="text-sm truncate" style={{ color: th.fg3 }}>{profile.email}</p>
         </div>
       </div>
+
+      {staff && (
+        <GCard><div className="p-6">
+          <h3 className="text-sm font-black mb-4" style={{ color: th.fg }}>Informations</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+            {[["Âge", onboarding?.age ? `${onboarding.age} ans` : "Non renseigné"], ["Email", profile.email], ["Profession", onboarding?.profession || "Non renseignée"]].map(([label, val]) => (
+              <div key={label}>
+                <label className="block text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>{label}</label>
+                <p className="text-sm" style={{ color: th.fg2 }}>{val}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mb-5">
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-widest" style={{ color: th.fg3 }}>Objectif professionnel</label>
+              {!objectiveEditing && (
+                <button onClick={() => setObjectiveEditing(true)} className="text-xs font-semibold transition-colors hover:opacity-70" style={{ color: th.navAC }}>Modifier</button>
+              )}
+            </div>
+            {objectiveEditing ? (
+              <div className="space-y-2">
+                <textarea
+                  value={objectiveDraft}
+                  onChange={(e) => setObjectiveDraft(e.target.value)}
+                  rows={4}
+                  placeholder="Décris l'objectif professionnel de l'élève…"
+                  className="w-full rounded-xl px-3.5 py-2.5 text-sm g-input resize-none"
+                />
+                <div className="flex items-center gap-2">
+                  <ShimBtn sm onClick={saveObjective} disabled={objectiveSaving}>{objectiveSaving ? "Enregistrement…" : "Enregistrer"}</ShimBtn>
+                  <VBtn sm onClick={() => { setObjectiveDraft(onboarding?.objective ?? ""); setObjectiveEditing(false); }} disabled={objectiveSaving}>Annuler</VBtn>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm" style={{ color: th.fg2 }}>{onboarding?.objective || "Non renseigné."}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Mode de pédagogie de l'IA</label>
+            <div className="max-w-xs">
+              <VSelect
+                value={onboarding?.tutorPersona ?? ""}
+                onValueChange={changeTutorPersona}
+                placeholder="Choisir un style…"
+                disabled={tutorSaving}
+                options={TUTOR_STYLES.map((t) => ({ value: t.id, label: `${t.emoji} ${t.label}` }))}
+              />
+            </div>
+          </div>
+        </div></GCard>
+      )}
 
       <GCard><div className="p-6">
         <h3 className="text-sm font-black mb-4" style={{ color: th.fg }}>Formateur</h3>

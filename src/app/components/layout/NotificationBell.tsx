@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Bell, Calendar as CalendarIcon, XCircle, RefreshCw, CalendarPlus, ClipboardList, CheckCircle2 } from "lucide-react";
+import { Bell, Calendar as CalendarIcon, XCircle, RefreshCw, CalendarPlus, ClipboardList, CheckCircle2, Flag } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
@@ -23,6 +23,7 @@ const ICONS: Record<NotificationRow["type"], typeof Bell> = {
   rdv_booked: CalendarPlus,
   bilan_reminder: ClipboardList,
   rdv_confirmed: CheckCircle2,
+  incident_reported: Flag,
 };
 
 function timeAgo(iso: string): string {
@@ -85,13 +86,14 @@ export function NotificationBell() {
 
   const unread = items.filter((n) => !n.read).length;
 
-  // Ces notifications concernent toutes un rendez-vous (annulation,
+  // La plupart de ces notifications concernent un rendez-vous (annulation,
   // proposition de nouveau créneau, réservation…) — on ouvre donc l'onglet
   // Rendez-vous de chacun : /planning (disponibilités + RDV à venir) pour le
-  // staff, /calendar (réservation) pour l'élève.
-  const goToRendezVous = () => {
+  // staff, /calendar (réservation) pour l'élève. Un signalement d'incident
+  // (admin uniquement) ouvre plutôt le suivi des incidents.
+  const goTo = (n: NotificationRow) => {
     setOpen(false);
-    navigate(isStaff(role) ? "/planning" : "/calendar");
+    navigate(n.type === "incident_reported" ? "/admin/incidents" : isStaff(role) ? "/planning" : "/calendar");
   };
 
   const handleOpenChange = async (next: boolean) => {
@@ -126,7 +128,7 @@ export function NotificationBell() {
           {items.map((n) => {
             const Icon = ICONS[n.type];
             return (
-              <button key={n.id} onClick={() => { void markNotificationRead(n.id); goToRendezVous(); }} className="w-full text-left px-4 py-3 flex items-start gap-2.5 transition-colors hover:opacity-80" style={{ borderBottom: `1px solid ${th.sep}` }}>
+              <button key={n.id} onClick={() => { void markNotificationRead(n.id); goTo(n); }} className="w-full text-left px-4 py-3 flex items-start gap-2.5 transition-colors hover:opacity-80" style={{ borderBottom: `1px solid ${th.sep}` }}>
                 <Icon className="w-4 h-4 mt-0.5 shrink-0" style={{ color: th.navAC }} />
                 <div className="min-w-0">
                   <div className="text-xs font-bold" style={{ color: th.fg }}>{n.title}</div>

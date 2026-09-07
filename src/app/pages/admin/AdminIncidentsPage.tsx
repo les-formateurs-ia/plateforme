@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Bug } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
+import { useAuth } from "@/app/state/auth-context";
 import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
 import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
 import { listIncidents, updateIncidentStatus, INCIDENT_PAGE_LABEL, INCIDENT_STATUS_LABEL, type ReportedIncident } from "@/app/lib/incidents";
+import { markIncidentNotificationsRead } from "@/app/lib/notifications";
 
 const STATUS_STYLE: Record<ReportedIncident["status"], { color: string; bg: string }> = {
   a_traiter: { color: "#fbc2ad", bg: "rgba(251,194,173,0.1)" },
@@ -18,6 +20,7 @@ function formatDate(iso: string): string {
 
 export function AdminIncidentsPage() {
   const th = useTh();
+  const { user } = useAuth();
   const [incidents, setIncidents] = useState<ReportedIncident[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -35,6 +38,13 @@ export function AdminIncidentsPage() {
   };
 
   useEffect(() => { void load(); }, []);
+
+  // Consulter la liste vaut lecture : le badge de l'onglet Incidents (sidebar)
+  // s'appuie sur ces notifications non lues.
+  useEffect(() => {
+    if (!user) return;
+    void markIncidentNotificationsRead(user.id);
+  }, [user]);
 
   const toggleStatus = async (incident: ReportedIncident) => {
     const nextStatus = incident.status === "a_traiter" ? "corrige" : "a_traiter";
