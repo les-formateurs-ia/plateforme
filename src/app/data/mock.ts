@@ -10,7 +10,7 @@ import {
 import type { NavId } from "@/app/types";
 
 export const NAV_ITEMS: { id: NavId; Icon: LucideIcon; label: string; path: string }[] = [
-  { id: "dashboard", Icon: BarChart3, label: "Tableau de bord", path: "/" },
+  { id: "dashboard", Icon: BarChart3, label: "Tableau de bord", path: "/dashboard" },
   { id: "lessons",   Icon: BookOpen,  label: "Mes leçons",      path: "/lessons" },
   { id: "practice",  Icon: Code2,     label: "Pratique IA",     path: "/practice" },
   { id: "agent",     Icon: Bot,       label: "Mon Agent IA",    path: "/agent" },

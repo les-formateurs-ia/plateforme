@@ -139,15 +139,22 @@ function RequireFormateur({ children }: { children: ReactElement }) {
   return children;
 }
 
-// Page d'accueil ("/") : point d'aiguillage entre les trois parcours —
-// staff (choix CPF/Entreprise), collaborateur entreprise (son espace),
-// élève CPF (tableau de bord existant, inchangé).
-function HomeRoute() {
-  const { role, companyId } = useAuth();
+// "/" : porte d'entrée, rendue HORS MainLayout (comme /login) — le staff n'a
+// donc accès à AUCUNE barre latérale tant qu'il n'a pas choisi CPF ou
+// Entreprise. Un élève (CPF ou entreprise) n'a rien à choisir : renvoyé
+// directement vers son tableau de bord, qui lui affiche la barre complète.
+function RootGate() {
+  const { role } = useAuth();
   if (role === null) return <LoadingScreen />;
   if (isStaff(role)) return <EntrepriseChoicePage />;
-  if (companyId) return <CompanyStudentHomePage />;
-  return <DashboardPage />;
+  return <Navigate to="/dashboard" replace />;
+}
+
+// "/dashboard" (sous MainLayout) : tableau de bord élève — entreprise ou CPF
+// selon le profil. Jamais atteint par le staff (RootGate l'intercepte avant).
+function DashboardRoute() {
+  const { companyId } = useAuth();
+  return companyId ? <CompanyStudentHomePage /> : <DashboardPage />;
 }
 
 function AppRoutes() {
@@ -156,8 +163,9 @@ function AppRoutes() {
       <Route path="/login" element={<RedirectIfAuthenticated><LoginPage /></RedirectIfAuthenticated>} />
       <Route path="/signup" element={<SignupGuard><SignupPage /></SignupGuard>} />
       <Route path="/entreprise/welcome" element={<CompanyWelcomeGuard><CompanyWelcomePage /></CompanyWelcomeGuard>} />
+      <Route path="/" element={<RequireAuth><RootGate /></RequireAuth>} />
       <Route element={<RequireAuth><MainLayout /></RequireAuth>}>
-        <Route index element={<HomeRoute />} />
+        <Route path="dashboard" element={<DashboardRoute />} />
         <Route path="lessons" element={<LessonsPage />} />
         <Route path="practice" element={<PracticePage />} />
         <Route path="practice/basics" element={<BasicExercisesPage />} />
