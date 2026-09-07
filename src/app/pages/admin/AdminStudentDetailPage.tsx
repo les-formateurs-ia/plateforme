@@ -16,7 +16,7 @@ import {
 import { listCoachAssignableCards, assignFormateurToStudent, type PersonCard } from "@/app/lib/planning";
 import type { EnrollmentStatus } from "@/app/lib/supabase/database.types";
 import { useAuth } from "@/app/state/auth-context";
-import { isAdmin } from "@/app/lib/permissions";
+import { isAdmin, isStaff } from "@/app/lib/permissions";
 import { useStaffBasePath } from "@/app/lib/staffBase";
 
 interface StudentProfile { id: string; first_name: string | null; last_name: string | null; email: string; avatar_url: string | null; formateur_id: string | null; }
@@ -32,6 +32,7 @@ export function AdminStudentDetailPage() {
   const navigate = useNavigate();
   const { role } = useAuth();
   const admin = isAdmin(role);
+  const staff = isStaff(role);
   const base = useStaffBasePath();
   const { studentId } = useParams();
   const [profile, setProfile] = useState<StudentProfile | null>(null);
@@ -188,7 +189,7 @@ export function AdminStudentDetailPage() {
         </div>
       </div></GCard>
 
-      {admin && (
+      {staff && (
         <GCard><div className="p-6">
           <h3 className="text-sm font-black mb-4" style={{ color: th.fg }}>Attribuer une formation</h3>
           <div className="flex items-center gap-2 flex-wrap">
