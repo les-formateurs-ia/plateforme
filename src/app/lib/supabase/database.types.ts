@@ -5,8 +5,8 @@
 export type UserRole = "admin" | "formateur" | "student";
 export type EnrollmentStatus = "active" | "completed" | "paused";
 export type LessonProgressStatus = "locked" | "in_progress" | "completed";
-export type RdvStatus = "confirmed" | "cancelled";
-export type NotificationType = "rdv_cancelled" | "rdv_reschedule_proposed" | "rdv_reschedule_accepted" | "rdv_reschedule_declined" | "rdv_booked" | "bilan_reminder";
+export type RdvStatus = "pending" | "confirmed" | "cancelled";
+export type NotificationType = "rdv_cancelled" | "rdv_reschedule_proposed" | "rdv_reschedule_accepted" | "rdv_reschedule_declined" | "rdv_booked" | "bilan_reminder" | "rdv_confirmed";
 export type AiContentType = "practical_exercise" | "mindmap" | "podcast" | "text_summary" | "remedial_explanation" | "remedial_quiz";
 export type ChatRole = "user" | "ai";
 export type VideoProvider = "cloudflare_stream" | "youtube" | "vimeo" | "external_url";
@@ -714,6 +714,8 @@ export interface Database {
           bilan_next_step: string | null;
           bilan_point_fort: string | null;
           bilan_filled_at: string | null;
+          bilan_attachment_path: string | null;
+          bilan_attachment_name: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -738,6 +740,8 @@ export interface Database {
           bilan_next_step?: string | null;
           bilan_point_fort?: string | null;
           bilan_filled_at?: string | null;
+          bilan_attachment_path?: string | null;
+          bilan_attachment_name?: string | null;
           created_at?: string;
           updated_at?: string;
         };

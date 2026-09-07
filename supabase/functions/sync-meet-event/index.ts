@@ -91,6 +91,13 @@ Deno.serve(async (req) => {
       return jsonResponse({ ok: true, meetLink: null });
     }
 
+    // Pas encore confirmé par le formateur → pas de Meet, quel que soit
+    // l'appelant (garde-fou côté serveur en plus du front qui n'appelle déjà
+    // plus cette fonction tant que le rendez-vous est en attente).
+    if (rdv.status !== "confirmed") {
+      return jsonResponse({ ok: true, meetLink: null });
+    }
+
     const { data: profiles } = await supabase.from("profiles").select("id, email").in("id", [rdv.formateur_id, rdv.student_id]);
     const formateurEmail = profiles?.find((p) => p.id === rdv.formateur_id)?.email;
     const studentEmail = profiles?.find((p) => p.id === rdv.student_id)?.email;

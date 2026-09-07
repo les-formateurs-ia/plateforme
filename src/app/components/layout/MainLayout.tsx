@@ -47,7 +47,7 @@ export function MainLayout() {
           </button>
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {NAV_ITEMS.map(({ id, Icon, label, path }) => {
+          {NAV_ITEMS.filter(({ id }) => id !== "profile").map(({ id, Icon, label, path }) => {
             // "Tableau de bord", "Mes leçons", "Mon Agent IA" et "Mes
             // avantages" sont pensés pour un parcours élève (progression,
             // agent personnel, gains) — pas de version admin/formateur pour
@@ -83,6 +83,17 @@ export function MainLayout() {
               <Bug className="w-4 h-4 shrink-0" />Incidents
             </NavLink>
           )}
+          {(() => {
+            const profileItem = NAV_ITEMS.find(({ id }) => id === "profile");
+            if (!profileItem) return null;
+            const { id, Icon, label, path } = profileItem;
+            return (
+              <NavLink key={id} to={path} onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
+                style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
+                <Icon className="w-4 h-4 shrink-0" />{label}
+              </NavLink>
+            );
+          })()}
         </nav>
         {isStaff(role) && (
           <div className="px-3 pb-3 space-y-1.5">
