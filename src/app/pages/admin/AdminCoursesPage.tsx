@@ -143,9 +143,9 @@ export function AdminCoursesPage() {
                   <span className="flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5" />{c.section_count} module{c.section_count > 1 ? "s" : ""}</span>
                   <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5" />{c.instance_count} attribution{c.instance_count > 1 ? "s" : ""}</span>
                   <button type="button" onClick={(e) => { e.stopPropagation(); void openPreview(c.id); }} disabled={previewingId === c.id}
-                    className="ml-auto flex items-center justify-center shrink-0 transition-opacity hover:opacity-70 disabled:opacity-40 disabled:pointer-events-none"
-                    style={{ color: th.navAC }} title="Visualiser comme un élève">
-                    <Eye className="w-12 h-12" />
+                    className="ml-auto flex items-center gap-1.5 shrink-0 transition-opacity hover:opacity-70 disabled:opacity-40 disabled:pointer-events-none"
+                    style={{ color: th.navAC }}>
+                    <Eye className="w-3.5 h-3.5" />Voir en tant qu'élève
                   </button>
                   {admin && (
                     <button type="button" onClick={(e) => { e.stopPropagation(); void removeCourse(c.id); }} disabled={deletingId === c.id}

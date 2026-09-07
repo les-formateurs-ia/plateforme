@@ -2,9 +2,9 @@ import type { Role } from "@/app/state/auth-context";
 
 // admin & formateur ont les mêmes droits sur le contenu pédagogique — sauf
 // quelques exceptions gérées au cas par cas là où elles s'appliquent :
-// désinscription des élèves (admin uniquement) et édition du Playground HTML
-// d'une leçon (admin uniquement, appliqué aussi côté DB). L'attribution d'une
-// formation à un élève est désormais ouverte au formateur (is_staff() côté DB).
+// désinscription des élèves (admin uniquement). L'édition du Playground HTML
+// d'une leçon et l'attribution d'une formation à un élève sont désormais
+// ouvertes au formateur (is_staff() côté DB, voir 0056).
 export function isStaff(role: Role | null): boolean {
   return role === "admin" || role === "formateur";
 }
