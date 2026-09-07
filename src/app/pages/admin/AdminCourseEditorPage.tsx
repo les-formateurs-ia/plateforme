@@ -301,8 +301,8 @@ export function AdminCourseEditorPage() {
       <div className="flex items-center justify-between gap-3">
         <Link to={backHref} className="flex items-center gap-1.5 text-sm transition-colors hover:opacity-70" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />{backLabel}</Link>
         {courseId && isInstance && (
-          <button type="button" onClick={openPreview} title="Visualiser comme un élève" className="flex items-center hover:opacity-70" style={{ color: th.navAC }}>
-            <Eye className="w-4 h-4" />
+          <button type="button" onClick={openPreview} className="flex items-center gap-1.5 text-sm font-semibold hover:opacity-70" style={{ color: th.navAC }}>
+            <Eye className="w-4 h-4" />Voir en tant qu'élève
           </button>
         )}
       </div>
