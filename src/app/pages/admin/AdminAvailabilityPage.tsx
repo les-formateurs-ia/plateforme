@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { ChevronLeft, ChevronRight, CalendarClock, User, CalendarCog, Video, ClipboardList, ClipboardCheck } from "lucide-react";
+import { ChevronLeft, ChevronRight, CalendarClock, User, CalendarCog, Video, ClipboardList, ClipboardCheck, Check, Paperclip } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { GCard } from "@/app/components/common/GCard";
@@ -8,8 +8,8 @@ import { GT } from "@/app/components/common/GT";
 import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/app/components/ui/dialog";
 import {
-  listMyAvailability, saveAvailability, listMyBookingsAsFormateur, cancelRdvAsFormateur, proposeReschedule,
-  syncMeetEvent, submitBilan,
+  listMyAvailability, saveAvailability, listMyBookingsAsFormateur, cancelRdvAsFormateur, proposeReschedule, confirmRdv,
+  syncMeetEvent, submitBilan, uploadBilanAttachment,
   toISODate, addDays, addMinutes, SESSION_MINUTES, type FormateurBooking,
 } from "@/app/lib/availability";
 
@@ -71,7 +71,9 @@ export function AdminAvailabilityPage() {
 
   const [bilanTarget, setBilanTarget] = useState<FormateurBooking | null>(null);
   const [bilanDraft, setBilanDraft] = useState({ sujet: "", nextStep: "", pointFort: "" });
+  const [bilanFile, setBilanFile] = useState<File | null>(null);
   const [submittingBilan, setSubmittingBilan] = useState(false);
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
   const days = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart]);
   const weekEnd = days[6];
@@ -119,7 +121,7 @@ export function AdminAvailabilityPage() {
   const bookedKeys = useMemo(() => {
     const set = new Set<string>();
     for (const b of bookings) {
-      if (b.status !== "confirmed") continue;
+      if (b.status === "cancelled") continue;
       for (let m = 0; m < SESSION_MINUTES; m += SLOT_MINUTES) {
         set.add(`${b.slotDate}_${addMinutes(b.startTime, m)}`);
       }
@@ -149,6 +151,21 @@ export function AdminAvailabilityPage() {
       toast.error("Impossible d'enregistrer.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleConfirm = async (b: FormateurBooking) => {
+    if (!user) return;
+    setConfirmingId(b.id);
+    try {
+      await confirmRdv(b.id, user.id, b.studentId, b.slotDate, b.startTime);
+      toast.success("Rendez-vous confirmé, l'élève a été prévenu.");
+      void loadBookings();
+    } catch (err) {
+      console.error(err);
+      toast.error("Impossible de confirmer.");
+    } finally {
+      setConfirmingId(null);
     }
   };
 
@@ -186,7 +203,7 @@ export function AdminAvailabilityPage() {
     }
   };
 
-  const upcomingBookings = bookings.filter((b) => b.status === "confirmed" && b.slotDate >= toISODate(new Date()));
+  const upcomingBookings = bookings.filter((b) => b.status !== "cancelled" && b.slotDate >= toISODate(new Date()));
   const pastBookings = useMemo(
     () => bookings.filter((b) => b.status === "confirmed" && b.slotDate < toISODate(new Date())).sort((a, b) => (b.slotDate + b.startTime).localeCompare(a.slotDate + a.startTime)),
     [bookings],
@@ -197,7 +214,7 @@ export function AdminAvailabilityPage() {
   // erreur passagère…).
   useEffect(() => {
     for (const b of upcomingBookings) {
-      if (!b.meetLink) void syncMeetEvent(b.id);
+      if (b.status === "confirmed" && !b.meetLink) void syncMeetEvent(b.id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookings]);
@@ -205,6 +222,7 @@ export function AdminAvailabilityPage() {
   const openBilan = (b: FormateurBooking) => {
     setBilanTarget(b);
     setBilanDraft({ sujet: b.bilanSujet ?? "", nextStep: b.bilanNextStep ?? "", pointFort: b.bilanPointFort ?? "" });
+    setBilanFile(null);
   };
 
   const saveBilan = async () => {
@@ -212,8 +230,10 @@ export function AdminAvailabilityPage() {
     setSubmittingBilan(true);
     try {
       await submitBilan(bilanTarget.id, bilanDraft);
+      if (bilanFile) await uploadBilanAttachment(bilanTarget.id, bilanFile);
       toast.success("Bilan enregistré.");
       setBilanTarget(null);
+      setBilanFile(null);
       void loadBookings();
     } catch (err) {
       console.error(err);
@@ -332,6 +352,9 @@ export function AdminAvailabilityPage() {
                       <div className="text-xs truncate" style={{ color: th.fg3 }}>
                         {new Date(`${b.slotDate}T00:00:00`).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} · {b.startTime}–{b.endTime}
                       </div>
+                      {b.status === "pending" && (
+                        <div className="text-[11px] mt-1 font-semibold" style={{ color: "#fbc2ad" }}>En attente de confirmation</div>
+                      )}
                       {b.proposedDate && (
                         <div className="text-[11px] mt-1 font-semibold" style={{ color: "#fbc2ad" }}>
                           Proposition envoyée : {b.proposedDate} à {b.proposedStartTime} (en attente de réponse)
@@ -345,6 +368,11 @@ export function AdminAvailabilityPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
+                    {b.status === "pending" && (
+                      <ShimBtn sm onClick={() => handleConfirm(b)} disabled={confirmingId === b.id}>
+                        <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5" />{confirmingId === b.id ? "Confirmation…" : "Confirmer"}</span>
+                      </ShimBtn>
+                    )}
                     <VBtn sm onClick={() => openProposal(b)}><span className="flex items-center gap-1.5"><CalendarCog className="w-3.5 h-3.5" />Proposer un autre créneau</span></VBtn>
                     <VBtn sm onClick={() => handleCancel(b)}>Annuler</VBtn>
                   </div>
@@ -421,6 +449,20 @@ export function AdminAvailabilityPage() {
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Next step</label>
               <textarea value={bilanDraft.nextStep} onChange={(e) => setBilanDraft((d) => ({ ...d, nextStep: e.target.value }))} rows={2} className="w-full rounded-xl px-3 py-2 text-sm g-input resize-none" />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Pièce jointe (PDF)</label>
+              <input
+                type="file"
+                accept="application/pdf"
+                onChange={(e) => setBilanFile(e.target.files?.[0] ?? null)}
+                className="w-full text-xs g-input rounded-xl px-3 py-2"
+              />
+              {(bilanFile ?? bilanTarget?.bilanAttachmentName) && (
+                <p className="text-xs mt-1.5 flex items-center gap-1.5" style={{ color: th.fg3 }}>
+                  <Paperclip className="w-3.5 h-3.5" />{bilanFile?.name ?? bilanTarget?.bilanAttachmentName}
+                </p>
+              )}
             </div>
           </div>
           <ShimBtn full onClick={saveBilan} disabled={submittingBilan}>{submittingBilan ? "Enregistrement…" : "Enregistrer le bilan"}</ShimBtn>

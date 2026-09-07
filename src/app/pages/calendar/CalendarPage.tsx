@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Calendar as CalendarIcon, Clock, XCircle, RefreshCw, Check, X as XIcon, Video, ClipboardList } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, XCircle, RefreshCw, Check, X as XIcon, Video, ClipboardList, Paperclip } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { GCard } from "@/app/components/common/GCard";
@@ -10,7 +10,7 @@ import { SuccessCheck } from "@/app/components/common/SuccessCheck";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/app/components/ui/dialog";
 import {
   listAvailableSlotsForBooking, listMyBookingsAsStudent, bookSlot, changeBooking, cancelBooking, syncMeetEvent,
-  acceptReschedule, declineReschedule, getAssignedFormateurId, getFormateurName,
+  acceptReschedule, declineReschedule, getAssignedFormateurId, getFormateurName, getBilanAttachmentUrl,
   toISODate, addDays, firstBookableDate, type ExpertAvailableSlot, type StudentBooking,
 } from "@/app/lib/availability";
 
@@ -68,7 +68,7 @@ export function CalendarPage() {
   useEffect(() => { void load(); }, [user]);
 
   const today = toISODate(new Date());
-  const activeBooking = bookings.find((b) => b.status === "confirmed" && b.slotDate >= today) ?? null;
+  const activeBooking = bookings.find((b) => b.status !== "cancelled" && b.slotDate >= today) ?? null;
   const pastBookings = useMemo(
     () => bookings.filter((b) => b.status === "confirmed" && b.slotDate < today).sort((a, b) => (b.slotDate + b.startTime).localeCompare(a.slotDate + a.startTime)),
     [bookings, today],
@@ -78,8 +78,8 @@ export function CalendarPage() {
   // (formateur pas encore connecté à Google au moment de la réservation,
   // erreur passagère…), on retente à chaque chargement de la page.
   useEffect(() => {
-    if (activeBooking && !activeBooking.meetLink) void syncMeetEvent(activeBooking.id);
-  }, [activeBooking?.id, activeBooking?.meetLink]);
+    if (activeBooking?.status === "confirmed" && !activeBooking.meetLink) void syncMeetEvent(activeBooking.id);
+  }, [activeBooking?.id, activeBooking?.status, activeBooking?.meetLink]);
 
   const byDay = useMemo(() => {
     const map = new Map<string, ExpertAvailableSlot[]>();
@@ -186,7 +186,7 @@ export function CalendarPage() {
             </h3>
             {activeBooking && (
               <p className="text-xs mb-4" style={{ color: th.fg3 }}>
-                Vous avez déjà un rendez-vous confirmé — choisissez un créneau ci-dessous pour le déplacer (vous ne pouvez en avoir qu'un seul à la fois).
+                Vous avez déjà un rendez-vous en cours — choisissez un créneau ci-dessous pour le déplacer (vous ne pouvez en avoir qu'un seul à la fois).
               </p>
             )}
             {byDay.size === 0 && (
@@ -228,6 +228,9 @@ export function CalendarPage() {
                 <CalendarIcon className="w-3.5 h-3.5" style={{ color: th.navAC }} />
                 {formatDay(activeBooking.slotDate)} · {activeBooking.startTime}–{activeBooking.endTime}
               </div>
+              {activeBooking.status === "pending" && (
+                <div className="text-xs mt-1.5 italic" style={{ color: th.fg3 }}>En attente de confirmation du formateur.</div>
+              )}
               {activeBooking.meetLink && (
                 <a href={activeBooking.meetLink} target="_blank" rel="noreferrer" className="text-xs mt-1.5 flex items-center gap-1.5 font-semibold hover:opacity-80" style={{ color: th.navAC }}>
                   <Video className="w-3.5 h-3.5" />Rejoindre le Meet
@@ -256,6 +259,22 @@ export function CalendarPage() {
                     <div><span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: th.fg3 }}>Sujet</span><p className="text-xs mt-0.5" style={{ color: th.fg2 }}>{b.bilanSujet}</p></div>
                     <div><span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: th.fg3 }}>Point fort</span><p className="text-xs mt-0.5" style={{ color: th.fg2 }}>{b.bilanPointFort}</p></div>
                     <div><span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: th.fg3 }}>Next step</span><p className="text-xs mt-0.5" style={{ color: th.fg2 }}>{b.bilanNextStep}</p></div>
+                    {b.bilanAttachmentPath && (
+                      <button
+                        onClick={async () => {
+                          try {
+                            const url = await getBilanAttachmentUrl(b.bilanAttachmentPath!);
+                            window.open(url, "_blank", "noreferrer");
+                          } catch {
+                            toast.error("Impossible d'ouvrir la pièce jointe.");
+                          }
+                        }}
+                        className="text-xs font-semibold flex items-center gap-1.5 hover:opacity-80"
+                        style={{ color: th.navAC }}
+                      >
+                        <Paperclip className="w-3.5 h-3.5" />{b.bilanAttachmentName ?? "Télécharger le PDF"}
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <p className="text-xs mt-2 italic" style={{ color: th.fg3 }}>En attente du bilan de votre formateur.</p>
@@ -269,7 +288,7 @@ export function CalendarPage() {
       <Dialog open={!!pending} onOpenChange={(open) => !open && setPending(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{activeBooking ? "Modifier votre rendez-vous" : "Confirmer le rendez-vous"}</DialogTitle>
+            <DialogTitle>{activeBooking ? "Modifier votre rendez-vous" : "Demander ce rendez-vous"}</DialogTitle>
             <DialogDescription>
               {pending && (
                 <span className="flex items-center gap-1.5 mt-1" style={{ color: th.fg2 }}>
@@ -279,7 +298,7 @@ export function CalendarPage() {
               )}
             </DialogDescription>
           </DialogHeader>
-          <ShimBtn full onClick={confirmBooking} disabled={booking}>{booking ? "Confirmation…" : activeBooking ? "Confirmer le changement" : "Confirmer le rendez-vous"}</ShimBtn>
+          <ShimBtn full onClick={confirmBooking} disabled={booking}>{booking ? "Envoi…" : "Envoyer la demande"}</ShimBtn>
         </DialogContent>
       </Dialog>
 
@@ -287,10 +306,10 @@ export function CalendarPage() {
         <DialogContent className="sm:max-w-sm">
           <div className="flex flex-col items-center text-center py-4 gap-3">
             <SuccessCheck />
-            <DialogTitle>Rendez-vous confirmé !</DialogTitle>
+            <DialogTitle>Demande envoyée !</DialogTitle>
             {justBooked && (
               <DialogDescription className="text-center">
-                Votre rendez-vous est pris le <strong style={{ color: th.fg }}>{formatDay(justBooked.date)}</strong> de <strong style={{ color: th.fg }}>{justBooked.start} à {justBooked.end}</strong>.
+                Votre demande pour le <strong style={{ color: th.fg }}>{formatDay(justBooked.date)}</strong> de <strong style={{ color: th.fg }}>{justBooked.start} à {justBooked.end}</strong> a bien été envoyée. Votre formateur va la confirmer sous peu.
               </DialogDescription>
             )}
             <ShimBtn sm onClick={() => setJustBooked(null)}>Parfait</ShimBtn>

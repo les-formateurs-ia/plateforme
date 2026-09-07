@@ -117,7 +117,7 @@ export interface FormateurBooking {
   slotDate: string;
   startTime: string;
   endTime: string;
-  status: "confirmed" | "cancelled";
+  status: "pending" | "confirmed" | "cancelled";
   message: string | null;
   proposedDate: string | null;
   proposedStartTime: string | null;
@@ -127,14 +127,17 @@ export interface FormateurBooking {
   bilanNextStep: string | null;
   bilanPointFort: string | null;
   bilanFilledAt: string | null;
+  bilanAttachmentPath: string | null;
+  bilanAttachmentName: string | null;
 }
 
 function mapFormateurBooking(r: {
   id: string; student_id: string; slot_date: string; start_time: string; end_time: string;
-  status: "confirmed" | "cancelled"; message: string | null;
+  status: "pending" | "confirmed" | "cancelled"; message: string | null;
   proposed_date: string | null; proposed_start_time: string | null; proposed_end_time: string | null;
   meet_link: string | null;
   bilan_sujet: string | null; bilan_next_step: string | null; bilan_point_fort: string | null; bilan_filled_at: string | null;
+  bilan_attachment_path: string | null; bilan_attachment_name: string | null;
 }, name: string, email: string): FormateurBooking {
   return {
     id: r.id,
@@ -154,6 +157,8 @@ function mapFormateurBooking(r: {
     bilanNextStep: r.bilan_next_step,
     bilanPointFort: r.bilan_point_fort,
     bilanFilledAt: r.bilan_filled_at,
+    bilanAttachmentPath: r.bilan_attachment_path,
+    bilanAttachmentName: r.bilan_attachment_name,
   };
 }
 
@@ -216,6 +221,22 @@ export async function proposeReschedule(rdvId: string, formateurId: string, stud
   );
 }
 
+// Confirmation explicite du formateur — seul ce moment (ou l'acceptation
+// d'une proposition de nouveau créneau, cf. acceptReschedule) déclenche la
+// création du Google Meet.
+export async function confirmRdv(rdvId: string, formateurId: string, studentId: string, slotDate: string, startTime: string): Promise<void> {
+  const { error } = await supabase.from("rendez_vous").update({ status: "confirmed" }).eq("id", rdvId);
+  if (error) throw error;
+  await createNotification(
+    studentId,
+    "rdv_confirmed",
+    "Rendez-vous confirmé",
+    `Votre formateur a confirmé votre rendez-vous du ${formatFR(slotDate, startTime)}. Le lien de la visio vous sera envoyé par email.`,
+    rdvId,
+  );
+  void syncMeetEvent(rdvId);
+}
+
 // ── Vue élève : disponibilités du formateur/admin qui lui est attribué ────
 
 export interface ExpertAvailableSlot {
@@ -266,7 +287,7 @@ function computeHourlyStarts(
 export async function listAvailableSlotsForBooking(assignedFormateurId: string, fromDate: string, toDate: string): Promise<ExpertAvailableSlot[]> {
   const [{ data: slots, error: slotsError }, { data: booked, error: bookedError }] = await Promise.all([
     supabase.from("availability_slots").select("slot_date, start_time").eq("formateur_id", assignedFormateurId).gte("slot_date", fromDate).lte("slot_date", toDate),
-    supabase.from("rendez_vous").select("slot_date, start_time, end_time").eq("formateur_id", assignedFormateurId).eq("status", "confirmed").gte("slot_date", fromDate).lte("slot_date", toDate),
+    supabase.from("rendez_vous").select("slot_date, start_time, end_time").eq("formateur_id", assignedFormateurId).in("status", ["pending", "confirmed"]).gte("slot_date", fromDate).lte("slot_date", toDate),
   ]);
   if (slotsError) throw slotsError;
   if (bookedError) throw bookedError;
@@ -296,7 +317,7 @@ export interface StudentBooking {
   slotDate: string;
   startTime: string;
   endTime: string;
-  status: "confirmed" | "cancelled";
+  status: "pending" | "confirmed" | "cancelled";
   proposedDate: string | null;
   proposedStartTime: string | null;
   proposedEndTime: string | null;
@@ -305,6 +326,8 @@ export interface StudentBooking {
   bilanNextStep: string | null;
   bilanPointFort: string | null;
   bilanFilledAt: string | null;
+  bilanAttachmentPath: string | null;
+  bilanAttachmentName: string | null;
 }
 
 export async function listMyBookingsAsStudent(studentId: string): Promise<StudentBooking[]> {
@@ -345,6 +368,8 @@ export async function listMyBookingsAsStudent(studentId: string): Promise<Studen
       bilanNextStep: r.bilan_next_step,
       bilanPointFort: r.bilan_point_fort,
       bilanFilledAt: r.bilan_filled_at,
+      bilanAttachmentPath: r.bilan_attachment_path,
+      bilanAttachmentName: r.bilan_attachment_name,
     };
   });
 }
@@ -356,7 +381,9 @@ async function getStudentName(studentId: string): Promise<string> {
 }
 
 // L'élève choisit un créneau parmi les disponibilités proposées — le
-// formateur/admin attribué doit être notifié immédiatement.
+// formateur/admin attribué doit être notifié immédiatement. Le rendez-vous
+// part "en attente" : pas de Meet tant que le formateur n'a pas confirmé
+// (cf. confirmRdv).
 export async function bookSlot(studentId: string, formateurId: string, slotDate: string, startTime: string): Promise<void> {
   const endTime = addMinutes(startTime, SESSION_MINUTES);
   const { data, error } = await supabase
@@ -366,20 +393,22 @@ export async function bookSlot(studentId: string, formateurId: string, slotDate:
     .single();
   if (error) throw error;
   const studentName = await getStudentName(studentId).catch(() => "Votre élève");
-  await createNotification(formateurId, "rdv_booked", "Nouveau rendez-vous réservé", `${studentName} a réservé un rendez-vous le ${formatFR(slotDate, startTime)}.`, data.id);
-  void syncMeetEvent(data.id);
+  await createNotification(formateurId, "rdv_booked", "Nouvelle demande de rendez-vous", `${studentName} a demandé un rendez-vous le ${formatFR(slotDate, startTime)} — à confirmer.`, data.id);
 }
 
 // Modifie un rendez-vous existant (au lieu d'en créer un second — un élève
-// ne peut en avoir qu'un seul actif à la fois) — le formateur est notifié
-// comme pour une nouvelle réservation.
+// ne peut en avoir qu'un seul actif à la fois) — repasse "en attente" (même
+// s'il était déjà confirmé) : un changement d'horaire redemande une
+// confirmation du formateur avant tout nouveau Meet.
 export async function changeBooking(rdvId: string, studentId: string, formateurId: string, slotDate: string, startTime: string): Promise<void> {
   const endTime = addMinutes(startTime, SESSION_MINUTES);
-  const { error } = await supabase.from("rendez_vous").update({ formateur_id: formateurId, slot_date: slotDate, start_time: startTime, end_time: endTime }).eq("id", rdvId);
+  const { error } = await supabase
+    .from("rendez_vous")
+    .update({ formateur_id: formateurId, slot_date: slotDate, start_time: startTime, end_time: endTime, status: "pending", meet_link: null })
+    .eq("id", rdvId);
   if (error) throw error;
   const studentName = await getStudentName(studentId).catch(() => "Votre élève");
-  await createNotification(formateurId, "rdv_booked", "Rendez-vous modifié", `${studentName} a déplacé son rendez-vous au ${formatFR(slotDate, startTime)}.`, rdvId);
-  void syncMeetEvent(rdvId);
+  await createNotification(formateurId, "rdv_booked", "Rendez-vous modifié", `${studentName} a déplacé son rendez-vous au ${formatFR(slotDate, startTime)} — à confirmer.`, rdvId);
 }
 
 // Annulation par l'élève lui-même — contrairement aux autres mutations, le
@@ -397,7 +426,7 @@ export async function cancelBooking(id: string, formateurId: string, studentId: 
 export async function acceptReschedule(rdvId: string, formateurId: string, proposedDate: string, proposedStartTime: string, proposedEndTime: string): Promise<void> {
   const { error } = await supabase
     .from("rendez_vous")
-    .update({ slot_date: proposedDate, start_time: proposedStartTime, end_time: proposedEndTime, proposed_date: null, proposed_start_time: null, proposed_end_time: null, proposed_by: null, proposed_at: null })
+    .update({ slot_date: proposedDate, start_time: proposedStartTime, end_time: proposedEndTime, status: "confirmed", proposed_date: null, proposed_start_time: null, proposed_end_time: null, proposed_by: null, proposed_at: null })
     .eq("id", rdvId);
   if (error) throw error;
   await createNotification(formateurId, "rdv_reschedule_accepted", "Proposition acceptée", `Votre élève a accepté le nouveau créneau du ${formatFR(proposedDate, proposedStartTime)}.`, rdvId);
@@ -433,4 +462,27 @@ export async function submitBilan(
   // Le rappel automatique (queue_bilan_reminders, cron) n'a plus lieu d'être
   // une fois le bilan rempli.
   await supabase.from("notifications").update({ read_at: new Date().toISOString() }).eq("rdv_id", rdvId).eq("type", "bilan_reminder").is("read_at", null);
+}
+
+// Pièce jointe PDF du bilan — bucket privé, chemin {rdv_id}/{filename}
+// (cf. 0045_bilan_attachment.sql). upsert:true permet de remplacer un fichier
+// déjà joint sans devoir le supprimer d'abord.
+export async function uploadBilanAttachment(rdvId: string, file: File): Promise<void> {
+  const path = `${rdvId}/${file.name}`;
+  const { error: uploadError } = await supabase.storage
+    .from("rdv-bilan-attachments")
+    .upload(path, file, { upsert: true, contentType: file.type });
+  if (uploadError) throw uploadError;
+
+  const { error } = await supabase
+    .from("rendez_vous")
+    .update({ bilan_attachment_path: path, bilan_attachment_name: file.name })
+    .eq("id", rdvId);
+  if (error) throw error;
+}
+
+export async function getBilanAttachmentUrl(path: string): Promise<string> {
+  const { data, error } = await supabase.storage.from("rdv-bilan-attachments").createSignedUrl(path, 3600);
+  if (error) throw error;
+  return data.signedUrl;
 }
