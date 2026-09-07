@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Bug } from "lucide-react";
+import { Bug, Trash2 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
 import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
-import { listIncidents, updateIncidentStatus, INCIDENT_PAGE_LABEL, INCIDENT_STATUS_LABEL, type ReportedIncident } from "@/app/lib/incidents";
+import { listIncidents, updateIncidentStatus, deleteIncident, INCIDENT_PAGE_LABEL, INCIDENT_STATUS_LABEL, type ReportedIncident } from "@/app/lib/incidents";
 import { markIncidentNotificationsRead } from "@/app/lib/notifications";
 
 const STATUS_STYLE: Record<ReportedIncident["status"], { color: string; bg: string }> = {
@@ -24,6 +24,7 @@ export function AdminIncidentsPage() {
   const [incidents, setIncidents] = useState<ReportedIncident[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -60,6 +61,20 @@ export function AdminIncidentsPage() {
     }
   };
 
+  const handleDelete = async (incident: ReportedIncident) => {
+    if (!window.confirm("Supprimer cet incident ? Cette action est définitive.")) return;
+    setDeletingId(incident.id);
+    try {
+      await deleteIncident(incident.id);
+      setIncidents((rows) => rows.filter((r) => r.id !== incident.id));
+    } catch (err) {
+      console.error(err);
+      toast.error("Impossible de supprimer l'incident.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div>
@@ -90,15 +105,26 @@ export function AdminIncidentsPage() {
                     {INCIDENT_STATUS_LABEL[incident.status]}
                   </span>
                 </div>
-                {incident.status === "a_traiter" ? (
-                  <ShimBtn sm onClick={() => toggleStatus(incident)} disabled={updatingId === incident.id}>
-                    {updatingId === incident.id ? "…" : "Marquer corrigé"}
-                  </ShimBtn>
-                ) : (
-                  <VBtn sm onClick={() => toggleStatus(incident)} disabled={updatingId === incident.id}>
-                    {updatingId === incident.id ? "…" : "Rouvrir"}
-                  </VBtn>
-                )}
+                <div className="flex items-center gap-2">
+                  {incident.status === "a_traiter" ? (
+                    <ShimBtn sm onClick={() => toggleStatus(incident)} disabled={updatingId === incident.id || deletingId === incident.id}>
+                      {updatingId === incident.id ? "…" : "Marquer corrigé"}
+                    </ShimBtn>
+                  ) : (
+                    <VBtn sm onClick={() => toggleStatus(incident)} disabled={updatingId === incident.id || deletingId === incident.id}>
+                      {updatingId === incident.id ? "…" : "Rouvrir"}
+                    </VBtn>
+                  )}
+                  <button
+                    onClick={() => handleDelete(incident)}
+                    disabled={deletingId === incident.id || updatingId === incident.id}
+                    title="Supprimer l'incident"
+                    className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:opacity-80 disabled:opacity-50 shrink-0"
+                    style={{ background: "rgba(251,194,173,0.1)", border: "1px solid rgba(251,194,173,0.25)", color: "#fbc2ad" }}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
               <p className="text-sm leading-relaxed mb-3" style={{ color: th.fg }}>{incident.description}</p>
               <p className="text-xs" style={{ color: th.fg3 }}>{incident.reporterName}{incident.reporterEmail ? ` · ${incident.reporterEmail}` : ""} · {formatDate(incident.createdAt)}</p>

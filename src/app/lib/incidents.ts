@@ -73,3 +73,10 @@ export async function updateIncidentStatus(id: string, status: IncidentStatus): 
   const { error } = await supabase.from("reported_incidents").update({ status }).eq("id", id);
   if (error) throw error;
 }
+
+// Admin uniquement (RLS : reported_incidents_admin_delete) — suppression
+// définitive, pas un simple archivage.
+export async function deleteIncident(id: string): Promise<void> {
+  const { error } = await supabase.from("reported_incidents").delete().eq("id", id);
+  if (error) throw error;
+}
