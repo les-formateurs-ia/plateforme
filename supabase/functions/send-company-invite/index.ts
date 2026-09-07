@@ -7,6 +7,18 @@
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse, isStaffRole, getCallerRole } from "../_shared/podcast-utils.ts";
 
+// Messages Supabase Auth bruts (anglais, peu actionnables) → texte FR clair,
+// même esprit que translateAuthError() côté client (auth-context.tsx).
+function translateInviteError(message: string): string {
+  if (message.includes("already been registered")) {
+    return "Un compte existe déjà avec cet email sur la plateforme (élève CPF ou autre) — impossible d'envoyer une invitation. Ce collaborateur doit être rattaché manuellement par un administrateur.";
+  }
+  if (message.toLowerCase().includes("rate limit") || message.toLowerCase().includes("is invalid")) {
+    return "L'envoi d'email a échoué (limite d'envoi de la messagerie atteinte) — réessaie dans quelques minutes.";
+  }
+  return message;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
 
@@ -49,7 +61,7 @@ Deno.serve(async (req) => {
         data: { company_id: employee.company_id, first_name: employee.first_name, last_name: employee.last_name },
       });
       if (inviteError || !invited?.user) {
-        errors.push({ employeeId: employee.id, message: inviteError?.message ?? "Échec de l'invitation." });
+        errors.push({ employeeId: employee.id, message: translateInviteError(inviteError?.message ?? "Échec de l'invitation.") });
         continue;
       }
 

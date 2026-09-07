@@ -97,6 +97,7 @@ export function CompanyEmployeesTab({ companyId }: { companyId: string }) {
     try {
       const result = await sendCompanyInvites([row.id]);
       if (result.sent.length) toast.success(`Accès envoyé à ${row.email}.`);
+      else if (result.errors.length) toast.error(result.errors[0].message);
       else toast.info("Cet accès a déjà été envoyé.");
       await load();
     } catch (err) {
@@ -114,7 +115,14 @@ export function CompanyEmployeesTab({ companyId }: { companyId: string }) {
     setSendingAll(true);
     try {
       const result = await sendCompanyInvites(pending.map((e) => e.id));
-      toast.success(`Accès envoyé à ${result.sent.length} collaborateur${result.sent.length > 1 ? "s" : ""}.`);
+      if (result.sent.length) toast.success(`Accès envoyé à ${result.sent.length} collaborateur${result.sent.length > 1 ? "s" : ""}.`);
+      // errors montre la vraie cause (ex. email déjà utilisé, limite d'envoi) —
+      // sans ça un échec silencieux affichait juste "envoyé à 0 collaborateurs".
+      if (result.errors.length) {
+        const messages = [...new Set(result.errors.map((e) => e.message))];
+        messages.forEach((m) => toast.error(m));
+      }
+      if (!result.sent.length && !result.errors.length) toast.info("Tous les accès ont déjà été envoyés.");
       await load();
     } catch (err) {
       console.error(err);
