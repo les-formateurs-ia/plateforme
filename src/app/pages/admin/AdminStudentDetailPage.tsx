@@ -196,15 +196,15 @@ export function AdminStudentDetailPage() {
               <VSelect
                 value={templateToAssign}
                 onValueChange={setTemplateToAssign}
-                placeholder="Choisir une formation publiée…"
-                options={templates.map((t) => ({ value: t.id, label: t.name }))}
+                placeholder="Choisir une formation…"
+                options={templates.map((t) => ({ value: t.id, label: t.status === "draft" ? `${t.name} (brouillon)` : t.name }))}
               />
             </div>
             <ShimBtn sm onClick={assign} disabled={assigning || !templateToAssign}>
               <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5" />{assigning ? "Attribution…" : "Attribuer"}</span>
             </ShimBtn>
           </div>
-          {!templates.length && <p className="text-xs mt-3" style={{ color: th.fg3 }}>Aucune formation publiée pour l'instant.</p>}
+          {!templates.length && <p className="text-xs mt-3" style={{ color: th.fg3 }}>Aucune formation disponible pour l'instant.</p>}
         </div></GCard>
       )}
     </div>

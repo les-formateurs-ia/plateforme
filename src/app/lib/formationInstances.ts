@@ -2,7 +2,7 @@
 // personnalisation elle-même passe par AdminCourseEditorPage/AdminLessonEditorPage
 // (mode instance), ce module couvre juste le cycle de vie de l'attribution.
 import { supabase } from "@/app/lib/supabase/client";
-import type { EnrollmentStatus } from "@/app/lib/supabase/database.types";
+import type { EnrollmentStatus, FormationStatus } from "@/app/lib/supabase/database.types";
 
 export interface FormationInstanceRow {
   id: string;
@@ -33,10 +33,18 @@ export async function listInstancesForStudent(studentId: string): Promise<Format
 export interface PublishedTemplate {
   id: string;
   name: string;
+  status: FormationStatus;
 }
 
+// Brouillon ou publiée : les deux sont attribuables. Seules "archived" (retirée
+// du catalogue) et "generating" (contenu IA pas encore prêt) sont exclues.
 export async function listPublishedTemplates(): Promise<PublishedTemplate[]> {
-  const { data, error } = await supabase.from("formations").select("id, name").eq("status", "published").is("deleted_at", null).order("name");
+  const { data, error } = await supabase
+    .from("formations")
+    .select("id, name, status")
+    .in("status", ["draft", "published"])
+    .is("deleted_at", null)
+    .order("name");
   if (error) throw error;
   return data ?? [];
 }
