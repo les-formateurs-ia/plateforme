@@ -17,6 +17,7 @@ export type ExerciseVisibility = "global" | "private";
 export type AgentMessageModality = "text" | "voice";
 export type IncidentPage = "lecon" | "tableau_de_bord" | "outil_ia" | "exercice" | "autre";
 export type IncidentStatus = "a_traiter" | "corrige";
+export type SatisfactionQuestionType = "qcm" | "rating" | "text";
 
 export interface Database {
   public: {
@@ -33,6 +34,7 @@ export interface Database {
           avatar_url: string | null;
           formateur_id: string | null;
           google_calendar_email: string | null;
+          company_id: string | null;
           created_at: string;
         };
         Insert: {
@@ -46,6 +48,7 @@ export interface Database {
           avatar_url?: string | null;
           formateur_id?: string | null;
           google_calendar_email?: string | null;
+          company_id?: string | null;
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
@@ -839,6 +842,290 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["reported_incidents"]["Insert"]>;
+      };
+      companies: {
+        Row: {
+          id: string;
+          name: string;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["companies"]["Insert"]>;
+      };
+      company_employees: {
+        Row: {
+          id: string;
+          company_id: string;
+          first_name: string;
+          last_name: string;
+          email: string;
+          profile_id: string | null;
+          invite_sent_at: string | null;
+          invite_accepted_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          first_name: string;
+          last_name: string;
+          email: string;
+          profile_id?: string | null;
+          invite_sent_at?: string | null;
+          invite_accepted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["company_employees"]["Insert"]>;
+      };
+      company_positioning_tests: {
+        Row: {
+          id: string;
+          company_id: string;
+          title: string;
+          is_visible: boolean;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          title: string;
+          is_visible?: boolean;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["company_positioning_tests"]["Insert"]>;
+      };
+      company_positioning_questions: {
+        Row: {
+          id: string;
+          test_id: string;
+          question: string;
+          explanation: string | null;
+          order_index: number;
+        };
+        Insert: {
+          id?: string;
+          test_id: string;
+          question: string;
+          explanation?: string | null;
+          order_index: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["company_positioning_questions"]["Insert"]>;
+      };
+      company_positioning_options: {
+        Row: {
+          id: string;
+          question_id: string;
+          label: string;
+          is_correct: boolean;
+          order_index: number;
+        };
+        Insert: {
+          id?: string;
+          question_id: string;
+          label: string;
+          is_correct?: boolean;
+          order_index: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["company_positioning_options"]["Insert"]>;
+      };
+      company_positioning_attempts: {
+        Row: {
+          id: string;
+          test_id: string;
+          company_id: string;
+          student_id: string;
+          score: number;
+          answers: unknown[];
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          test_id: string;
+          company_id: string;
+          student_id: string;
+          score: number;
+          answers: unknown[];
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["company_positioning_attempts"]["Insert"]>;
+      };
+      company_files: {
+        Row: {
+          id: string;
+          company_id: string;
+          name: string;
+          description: string | null;
+          storage_path: string;
+          mime_type: string | null;
+          file_size: number | null;
+          is_visible: boolean;
+          uploaded_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          name: string;
+          description?: string | null;
+          storage_path: string;
+          mime_type?: string | null;
+          file_size?: number | null;
+          is_visible?: boolean;
+          uploaded_by?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["company_files"]["Insert"]>;
+      };
+      company_html_exercises: {
+        Row: {
+          id: string;
+          company_id: string;
+          name: string;
+          description: string | null;
+          html_content: string;
+          is_visible: boolean;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          name: string;
+          description?: string | null;
+          html_content?: string;
+          is_visible?: boolean;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["company_html_exercises"]["Insert"]>;
+      };
+      company_satisfaction_tests: {
+        Row: {
+          id: string;
+          company_id: string;
+          title: string;
+          is_visible: boolean;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          title: string;
+          is_visible?: boolean;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["company_satisfaction_tests"]["Insert"]>;
+      };
+      company_satisfaction_questions: {
+        Row: {
+          id: string;
+          test_id: string;
+          question: string;
+          question_type: SatisfactionQuestionType;
+          order_index: number;
+        };
+        Insert: {
+          id?: string;
+          test_id: string;
+          question: string;
+          question_type: SatisfactionQuestionType;
+          order_index: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["company_satisfaction_questions"]["Insert"]>;
+      };
+      company_satisfaction_options: {
+        Row: {
+          id: string;
+          question_id: string;
+          label: string;
+          order_index: number;
+        };
+        Insert: {
+          id?: string;
+          question_id: string;
+          label: string;
+          order_index: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["company_satisfaction_options"]["Insert"]>;
+      };
+      company_satisfaction_responses: {
+        Row: {
+          id: string;
+          test_id: string;
+          company_id: string;
+          student_id: string;
+          answers: unknown[];
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          test_id: string;
+          company_id: string;
+          student_id: string;
+          answers: unknown[];
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["company_satisfaction_responses"]["Insert"]>;
+      };
+      company_file_categories: {
+        Row: {
+          id: string;
+          company_id: string;
+          name: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          name: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["company_file_categories"]["Insert"]>;
+      };
+      company_student_uploads: {
+        Row: {
+          id: string;
+          company_id: string;
+          student_id: string;
+          category_id: string | null;
+          storage_path: string;
+          file_name: string;
+          mime_type: string | null;
+          file_size: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          student_id: string;
+          category_id?: string | null;
+          storage_path: string;
+          file_name: string;
+          mime_type?: string | null;
+          file_size?: number | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["company_student_uploads"]["Insert"]>;
       };
     };
   };

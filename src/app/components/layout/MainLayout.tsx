@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router";
-import { Search, Plus, CalendarClock, Menu, X, Bug } from "lucide-react";
+import { Search, Plus, CalendarClock, Menu, X, Bug, Building2 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
@@ -19,7 +19,7 @@ import { countUnreadIncidentNotifications } from "@/app/lib/notifications";
 
 export function MainLayout() {
   const th = useTh();
-  const { role, user } = useAuth();
+  const { role, user, companyId } = useAuth();
   const staffBase = useStaffBasePath();
   const { profile } = useProfile();
   const name = profile.name.split(" ")[0] || "Alex";
@@ -80,6 +80,10 @@ export function MainLayout() {
             // l'instant, donc masqués pour le staff plutôt que d'afficher
             // une page vide/hors-sujet.
             if ((id === "dashboard" || id === "lessons" || id === "agent" || id === "benefits") && isStaff(role)) return null;
+            // Collaborateur entreprise : parcours CPF (leçons, pratique,
+            // agent, RDV, avantages) hors-sujet, seul "Tableau de bord" (son
+            // espace entreprise) et "Mon profil" restent pertinents.
+            if ((id === "lessons" || id === "practice" || id === "agent" || id === "calendar" || id === "benefits") && companyId) return null;
             // Pour l'admin/formateur, "Élèves (& formateurs)" (gestion, même
             // page pour les deux rôles — le formateur n'y voit que ses
             // propres élèves, pas d'onglet Formateurs) s'ajoute juste avant
@@ -103,6 +107,12 @@ export function MainLayout() {
               </NavLink>
             );
           })}
+          {isStaff(role) && (
+            <NavLink to="/entreprise" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
+              style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
+              <Building2 className="w-4 h-4 shrink-0" />Entreprise
+            </NavLink>
+          )}
           {isAdmin(role) && (
             <NavLink to="/admin/incidents" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
               style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>

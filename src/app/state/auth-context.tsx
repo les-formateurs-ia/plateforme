@@ -12,6 +12,9 @@ interface AuthContextValue {
   status: AuthStatus;
   user: User | null;
   role: Role | null;
+  // Non-null pour un collaborateur entreprise (module Entreprise) — jamais
+  // renseigné pour un compte CPF classique.
+  companyId: string | null;
   mustOnboard: boolean;
   // true tant que le profil (role/must_onboard) n'a pas encore été chargé pour la
   // session courante — tant que c'est vrai, `mustOnboard` peut encore valoir sa
@@ -32,6 +35,7 @@ const AuthContext = createContext<AuthContextValue>({
   status: "loading",
   user: null,
   role: null,
+  companyId: null,
   mustOnboard: true,
   profileLoading: true,
   themeMode: null,
@@ -56,6 +60,7 @@ function translateAuthError(message: string) {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<Role | null>(null);
+  const [companyId, setCompanyId] = useState<string | null>(null);
   const [mustOnboard, setMustOnboard] = useState(true);
   const [profileLoading, setProfileLoading] = useState(true);
   const [status, setStatus] = useState<AuthStatus>("loading");
@@ -64,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const resetAuthState = () => {
     setSession(null);
     setRole(null);
+    setCompanyId(null);
     setMustOnboard(true);
     setProfileLoading(true);
     setThemeModeState(null);
@@ -71,11 +77,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const loadProfile = async (userId: string) => {
-    const { data, error } = await supabase.from("profiles").select("role, must_onboard, theme_preference").eq("id", userId).maybeSingle();
+    const { data, error } = await supabase.from("profiles").select("role, must_onboard, theme_preference, company_id").eq("id", userId).maybeSingle();
     if (error) {
       console.warn("Unable to load profile", error);
     }
     setRole((data?.role as Role) ?? "student");
+    setCompanyId(data?.company_id ?? null);
     setMustOnboard(data?.must_onboard ?? true);
     setThemeModeState((data?.theme_preference as ThemeMode | null) ?? "system");
     setProfileLoading(false);
@@ -143,7 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ status, user: session?.user ?? null, role, mustOnboard, profileLoading, themeMode, setThemeMode, signIn, signUp, signOut, markOnboarded }}>
+    <AuthContext.Provider value={{ status, user: session?.user ?? null, role, companyId, mustOnboard, profileLoading, themeMode, setThemeMode, signIn, signUp, signOut, markOnboarded }}>
       {children}
     </AuthContext.Provider>
   );

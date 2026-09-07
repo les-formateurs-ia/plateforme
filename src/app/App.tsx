@@ -35,6 +35,14 @@ import { AdminFormateurDetailPage } from "@/app/pages/admin/AdminFormateurDetail
 import { AdminAvailabilityPage } from "@/app/pages/admin/AdminAvailabilityPage";
 import { AdminTrashPage } from "@/app/pages/admin/AdminTrashPage";
 import { AdminIncidentsPage } from "@/app/pages/admin/AdminIncidentsPage";
+import { EntrepriseChoicePage } from "@/app/pages/entreprise/EntrepriseChoicePage";
+import { CompaniesListPage } from "@/app/pages/entreprise/CompaniesListPage";
+import { CompanyDetailPage } from "@/app/pages/entreprise/CompanyDetailPage";
+import { CompanyStudentHomePage } from "@/app/pages/entreprise/CompanyStudentHomePage";
+import { CompanyPositioningTestPage } from "@/app/pages/entreprise/CompanyPositioningTestPage";
+import { CompanyHtmlExercisePage } from "@/app/pages/entreprise/CompanyHtmlExercisePage";
+import { CompanySatisfactionTestPage } from "@/app/pages/entreprise/CompanySatisfactionTestPage";
+import { CompanyWelcomePage } from "@/app/pages/entreprise/CompanyWelcomePage";
 
 function LoadingScreen() {
   const th = useTh();
@@ -51,11 +59,13 @@ function LoadingScreen() {
 // sinon sa valeur par défaut (true) provoque un aller-retour visible vers /signup au
 // rechargement d'une page profonde (ex: /lessons, /lesson/:id).
 function RequireAuth({ children }: { children: ReactElement }) {
-  const { status, mustOnboard, profileLoading } = useAuth();
+  const { status, companyId, mustOnboard, profileLoading } = useAuth();
   if (status === "loading") return <LoadingScreen />;
   if (status === "unauthenticated") return <Navigate to="/login" replace />;
   if (profileLoading) return <LoadingScreen />;
-  if (mustOnboard) return <Navigate to="/signup" replace />;
+  // Un collaborateur entreprise (invité par send-company-invite) définit son
+  // mot de passe sur /entreprise/welcome, pas l'onboarding CPF de /signup.
+  if (mustOnboard) return <Navigate to={companyId ? "/entreprise/welcome" : "/signup"} replace />;
   return children;
 }
 
@@ -75,6 +85,27 @@ function SignupGuard({ children }: { children: ReactElement }) {
   if (status === "loading") return <LoadingScreen />;
   if (status === "authenticated" && profileLoading) return <LoadingScreen />;
   if (status === "authenticated" && !mustOnboard) return <Navigate to="/" replace />;
+  return children;
+}
+
+// /entreprise/welcome : suite du lien d'invitation entreprise — reste
+// accessible tant que le mot de passe n'a pas été défini (must_onboard),
+// inutile sinon. Miroir de SignupGuard, côté entreprise.
+function CompanyWelcomeGuard({ children }: { children: ReactElement }) {
+  const { status, mustOnboard, profileLoading } = useAuth();
+  if (status === "loading") return <LoadingScreen />;
+  if (status === "unauthenticated") return <Navigate to="/login" replace />;
+  if (profileLoading) return <LoadingScreen />;
+  if (!mustOnboard) return <Navigate to="/" replace />;
+  return children;
+}
+
+// Pages élève entreprise (test de positionnement, exercice HTML, test de
+// satisfaction) : réservées à un profil rattaché à une entreprise.
+function RequireCompanyStudent({ children }: { children: ReactElement }) {
+  const { role, companyId } = useAuth();
+  if (role === null) return <LoadingScreen />;
+  if (!companyId) return <Navigate to="/" replace />;
   return children;
 }
 
@@ -108,13 +139,25 @@ function RequireFormateur({ children }: { children: ReactElement }) {
   return children;
 }
 
+// Page d'accueil ("/") : point d'aiguillage entre les trois parcours —
+// staff (choix CPF/Entreprise), collaborateur entreprise (son espace),
+// élève CPF (tableau de bord existant, inchangé).
+function HomeRoute() {
+  const { role, companyId } = useAuth();
+  if (role === null) return <LoadingScreen />;
+  if (isStaff(role)) return <EntrepriseChoicePage />;
+  if (companyId) return <CompanyStudentHomePage />;
+  return <DashboardPage />;
+}
+
 function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<RedirectIfAuthenticated><LoginPage /></RedirectIfAuthenticated>} />
       <Route path="/signup" element={<SignupGuard><SignupPage /></SignupGuard>} />
+      <Route path="/entreprise/welcome" element={<CompanyWelcomeGuard><CompanyWelcomePage /></CompanyWelcomeGuard>} />
       <Route element={<RequireAuth><MainLayout /></RequireAuth>}>
-        <Route index element={<DashboardPage />} />
+        <Route index element={<HomeRoute />} />
         <Route path="lessons" element={<LessonsPage />} />
         <Route path="practice" element={<PracticePage />} />
         <Route path="practice/basics" element={<BasicExercisesPage />} />
@@ -157,6 +200,12 @@ function AppRoutes() {
         <Route path="formateur/planning/students/:studentId" element={<RequireFormateur><AdminStudentDetailPage /></RequireFormateur>} />
 
         <Route path="planning" element={<RequireStaff><AdminAvailabilityPage /></RequireStaff>} />
+
+        <Route path="entreprise" element={<RequireStaff><CompaniesListPage /></RequireStaff>} />
+        <Route path="entreprise/:companyId" element={<RequireStaff><CompanyDetailPage /></RequireStaff>} />
+        <Route path="entreprise/positioning/:testId" element={<RequireCompanyStudent><CompanyPositioningTestPage /></RequireCompanyStudent>} />
+        <Route path="entreprise/html/:exerciseId" element={<RequireCompanyStudent><CompanyHtmlExercisePage /></RequireCompanyStudent>} />
+        <Route path="entreprise/satisfaction/:testId" element={<RequireCompanyStudent><CompanySatisfactionTestPage /></RequireCompanyStudent>} />
       </Route>
       <Route path="/lesson/:lessonId" element={<RequireAuth><LessonPage /></RequireAuth>} />
       <Route path="*" element={<Navigate to="/" replace />} />
