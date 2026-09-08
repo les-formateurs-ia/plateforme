@@ -3,7 +3,7 @@ import { supabase } from "@/app/lib/supabase/client";
 import { useAuth } from "@/app/state/auth-context";
 import type { Profile } from "@/app/types";
 
-const EMPTY_PROFILE: Profile = { name: "", age: "", profession: "", phone: "", goal: "", goalFinal: "", style: "", tutor: "", avatarUrl: null };
+const EMPTY_PROFILE: Profile = { name: "", age: "", profession: "", goal: "", goalFinal: "", style: "", tutor: "", avatarUrl: null };
 
 interface ProfileContextValue {
   profile: Profile;
@@ -39,7 +39,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     (async () => {
       try {
         const [{ data: p }, { data: o }] = await Promise.all([
-          supabase.from("profiles").select("first_name, avatar_url, phone").eq("id", user.id).maybeSingle(),
+          supabase.from("profiles").select("first_name, avatar_url").eq("id", user.id).maybeSingle(),
           supabase.from("student_onboarding").select("*").eq("user_id", user.id).maybeSingle(),
         ]);
         if (cancelled) return;
@@ -47,7 +47,6 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
           name: p?.first_name ?? "",
           age: o?.age ?? "",
           profession: o?.profession ?? "",
-          phone: p?.phone ?? "",
           goal: o?.goal ?? "",
           goalFinal: o?.goal_detail ?? o?.goal ?? "",
           style: o?.learning_style ?? "",
@@ -85,12 +84,9 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 
     const nextProfile = { ...profile, ...patch };
 
-    const profileFields: Record<string, string> = {};
-    if (patch.name !== undefined) profileFields.first_name = patch.name;
-    if (patch.phone !== undefined) profileFields.phone = patch.phone;
     const profileUpdate =
-      Object.keys(profileFields).length > 0
-        ? supabase.from("profiles").update(profileFields).eq("id", user.id)
+      patch.name !== undefined
+        ? supabase.from("profiles").update({ first_name: patch.name }).eq("id", user.id)
         : Promise.resolve({ error: null });
 
     const onboardingUpdate =

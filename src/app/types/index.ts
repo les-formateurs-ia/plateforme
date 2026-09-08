@@ -2,7 +2,6 @@ export interface Profile {
   name: string;
   age: string;
   profession: string;
-  phone: string;
   goal: string;
   goalFinal: string;
   style: string;
