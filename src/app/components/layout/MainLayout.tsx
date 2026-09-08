@@ -17,6 +17,16 @@ import { NAV_ITEMS } from "@/app/data/mock";
 import { supabase } from "@/app/lib/supabase/client";
 import { countUnreadIncidentNotifications } from "@/app/lib/notifications";
 
+const STAFF_SPACE_KEY = "staffSpace";
+
+function readStoredStaffSpace(): "cpf" | "entreprise" {
+  try {
+    return localStorage.getItem(STAFF_SPACE_KEY) === "entreprise" ? "entreprise" : "cpf";
+  } catch {
+    return "cpf";
+  }
+}
+
 export function MainLayout() {
   const th = useTh();
   const { role, user, companyId } = useAuth();
@@ -32,8 +42,20 @@ export function MainLayout() {
   // qu'il navigue sous /entreprise, la barre latérale ne montre plus que ce
   // qui concerne l'entreprise — le reste (Pratique IA, Élèves, RDV, Modifier
   // les formations) appartient au CPF et redeviendra visible en y retournant
-  // (logo cliquable → "/", qui renvoie vers le choix).
-  const entrepriseMode = isStaff(role) && location.pathname.startsWith("/entreprise");
+  // (logo cliquable → "/", qui renvoie vers le choix). "/profile" est
+  // partagé entre les deux espaces (même page pour tout le monde) : on ne
+  // le laisse pas faire basculer l'espace mémorisé, sinon "Mon profil"
+  // depuis Entreprise renvoyait visuellement vers la nav CPF complète.
+  const [space, setSpace] = useState<"cpf" | "entreprise">(
+    () => (location.pathname.startsWith("/entreprise") ? "entreprise" : readStoredStaffSpace()),
+  );
+  useEffect(() => {
+    if (location.pathname === "/profile") return;
+    const next = location.pathname.startsWith("/entreprise") ? "entreprise" : "cpf";
+    setSpace(next);
+    try { localStorage.setItem(STAFF_SPACE_KEY, next); } catch { /* ignore */ }
+  }, [location.pathname]);
+  const entrepriseMode = isStaff(role) && space === "entreprise";
 
   useEffect(() => { setNavOpen(false); }, [location.pathname]);
 
