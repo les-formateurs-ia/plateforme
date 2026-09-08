@@ -51,6 +51,10 @@ export function ProfilePage() {
   const [objectiveSaving, setObjectiveSaving] = useState(false);
   const [objectiveError, setObjectiveError] = useState<string | null>(null);
   const currentObjective = profile.goalFinal || profile.goal || "";
+  const [phoneDraft, setPhoneDraft] = useState(profile.phone || "");
+  const [phoneEditing, setPhoneEditing] = useState(false);
+  const [phoneSaving, setPhoneSaving] = useState(false);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarError, setAvatarError] = useState<string | null>(null);
@@ -126,6 +130,10 @@ export function ProfilePage() {
   }, [currentObjective, objectiveEditing]);
 
   useEffect(() => {
+    if (!phoneEditing) setPhoneDraft(profile.phone || "");
+  }, [profile.phone, phoneEditing]);
+
+  useEffect(() => {
     if (!user) return;
     let cancelled = false;
     (async () => {
@@ -175,6 +183,18 @@ export function ProfilePage() {
       return;
     }
     setObjectiveEditing(false);
+  };
+
+  const savePhone = async () => {
+    setPhoneSaving(true);
+    setPhoneError(null);
+    const { error } = await updateProfile({ phone: phoneDraft.trim() });
+    setPhoneSaving(false);
+    if (error) {
+      setPhoneError(error);
+      return;
+    }
+    setPhoneEditing(false);
   };
 
   return (
@@ -340,6 +360,45 @@ export function ProfilePage() {
             ) : (
               <div className="w-full rounded-xl px-4 py-3 text-sm flex items-center justify-between" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
                 <span style={{ color: currentObjective ? th.fg2 : th.fg3 }}>{currentObjective || "Non renseigne - complete ton objectif ici."}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Téléphone — optionnel, saisi à l'inscription ou modifiable ici */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-xs font-bold uppercase tracking-widest" style={{ color: th.fg3 }}>Téléphone</label>
+              {!phoneEditing && (
+                <button onClick={() => setPhoneEditing(true)} className="text-xs font-semibold transition-colors hover:opacity-70" style={{ color: th.navAC }}>
+                  Modifier
+                </button>
+              )}
+            </div>
+            {phoneEditing ? (
+              <div className="space-y-2">
+                <input
+                  type="tel"
+                  autoComplete="tel"
+                  value={phoneDraft}
+                  onChange={e => setPhoneDraft(e.target.value)}
+                  placeholder="06 12 34 56 78"
+                  className="w-full rounded-xl px-4 py-3 text-sm g-input"
+                />
+                {phoneError && <p className="text-xs" style={{ color: "#fbc2ad" }}>{phoneError}</p>}
+                <div className="flex items-center gap-2">
+                  <button onClick={savePhone} disabled={phoneSaving} className="px-4 py-2 rounded-lg text-xs font-bold transition-all hover:opacity-80 disabled:opacity-50"
+                    style={{ background: `${th.gradShadow(0.12)}`, border: `1px solid ${th.gradShadow(0.25)}`, color: th.navAC }}>
+                    {phoneSaving ? "Enregistrement..." : "Enregistrer"}
+                  </button>
+                  <button onClick={() => { setPhoneDraft(profile.phone || ""); setPhoneEditing(false); setPhoneError(null); }} disabled={phoneSaving}
+                    className="px-4 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-70 disabled:opacity-50" style={{ color: th.fg3 }}>
+                    Annuler
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="w-full rounded-xl px-4 py-3 text-sm flex items-center justify-between" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
+                <span style={{ color: profile.phone ? th.fg2 : th.fg3 }}>{profile.phone || "Non renseigné"}</span>
               </div>
             )}
           </div>

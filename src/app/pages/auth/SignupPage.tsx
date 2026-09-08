@@ -28,12 +28,13 @@ export function SignupPage() {
   const [step, setStep] = useState(firstStep);
 
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [accountError, setAccountError] = useState<string | null>(null);
   const [accountLoading, setAccountLoading] = useState(false);
 
-  const [p, setP] = useState<Profile>({ name: "", age: "", profession: "", goal: "", goalFinal: "", style: "", tutor: "", avatarUrl: null });
+  const [p, setP] = useState<Profile>({ name: "", age: "", profession: "", phone: "", goal: "", goalFinal: "", style: "", tutor: "", avatarUrl: null });
   const [aiState, setAiState] = useState<"idle" | "loading" | "proposal">("idle");
   const [aiProposal, setAiProposal] = useState("");
   const [finishing, setFinishing] = useState(false);
@@ -49,7 +50,7 @@ export function SignupPage() {
     if (password !== passwordConfirm) { setAccountError("Les mots de passe ne correspondent pas."); return; }
     setAccountError(null);
     setAccountLoading(true);
-    const { error } = await signUp(email, password);
+    const { error } = await signUp(email, password, phone);
     setAccountLoading(false);
     if (error) { setAccountError(error); return; }
     setStep(2);
@@ -117,6 +118,10 @@ export function SignupPage() {
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Email</label>
                   <input type="email" required autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="toi@exemple.com" className="w-full rounded-xl px-4 py-3 text-sm g-input" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Téléphone <span className="normal-case font-normal" style={{ color: th.fg3 }}>(optionnel)</span></label>
+                  <input type="tel" autoComplete="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="06 12 34 56 78" className="w-full rounded-xl px-4 py-3 text-sm g-input" />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>

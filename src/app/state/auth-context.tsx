@@ -23,7 +23,7 @@ interface AuthContextValue {
   themeMode: ThemeMode | null;
   setThemeMode: (mode: ThemeMode) => Promise<void>;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
-  signUp: (email: string, password: string) => Promise<{ error: string | null }>;
+  signUp: (email: string, password: string, phone?: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   markOnboarded: () => void;
 }
@@ -120,11 +120,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error ? translateAuthError(error.message) : null };
   };
 
-  const signUp: AuthContextValue["signUp"] = async (email, password) => {
+  const signUp: AuthContextValue["signUp"] = async (email, password, phone) => {
     const { error } = await supabase.auth.signUp({ email, password });
     if (error) return { error: translateAuthError(error.message) };
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
     if (signInError) return { error: translateAuthError(signInError.message) };
+    const trimmedPhone = phone?.trim();
+    if (trimmedPhone && signInData.user) {
+      await supabase.from("profiles").update({ phone: trimmedPhone }).eq("id", signInData.user.id);
+    }
     return { error: null };
   };
 
