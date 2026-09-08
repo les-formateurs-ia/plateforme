@@ -126,6 +126,7 @@ Deno.serve(async (req) => {
       });
 
     let eventResp: Response;
+    let claimedForCreate = false;
     if (rdv.google_event_id) {
       eventResp = await fetch(
         `https://www.googleapis.com/calendar/v3/calendars/primary/events/${rdv.google_event_id}?conferenceDataVersion=1&sendUpdates=all`,
@@ -134,11 +135,33 @@ Deno.serve(async (req) => {
       // L'évènement a pu être supprimé côté Google (à la main) — on retente une création.
       if (eventResp.status === 404) eventResp = await createEvent();
     } else {
+      // Verrou optimiste : cette fonction est appelée à la fois explicitement
+      // après chaque réservation ET par un retry silencieux côté front (tant
+      // qu'un rendez-vous confirmé n'a pas de lien) — sans garde, deux appels
+      // concurrents (même onglet, ou formateur et élève connectés en même
+      // temps) créeraient chacun un évènement Google Meet distinct et
+      // enverraient un double email d'invitation. On ne réserve la création
+      // que si google_event_id est encore vide ; le perdant de la course
+      // renvoie simplement le lien déjà posé par le gagnant (ou null s'il
+      // n'a pas encore fini).
+      const { data: claimed } = await supabase
+        .from("rendez_vous")
+        .update({ google_event_id: "pending" })
+        .eq("id", rdv.id)
+        .is("google_event_id", null)
+        .select("id");
+      if (!claimed || claimed.length === 0) {
+        const { data: current } = await supabase.from("rendez_vous").select("meet_link").eq("id", rdv.id).maybeSingle();
+        return jsonResponse({ ok: true, meetLink: current?.meet_link ?? null });
+      }
+      claimedForCreate = true;
       eventResp = await createEvent();
     }
 
     if (!eventResp.ok) {
       console.error("sync-meet-event: Google Calendar error", await eventResp.text());
+      // Libère le verrou pour qu'un prochain appel puisse retenter la création.
+      if (claimedForCreate) await supabase.from("rendez_vous").update({ google_event_id: null }).eq("id", rdv.id);
       return jsonResponse({ ok: true, meetLink: null });
     }
 
