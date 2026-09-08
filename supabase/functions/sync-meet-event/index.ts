@@ -113,23 +113,30 @@ Deno.serve(async (req) => {
       start: { dateTime: `${rdv.slot_date}T${rdv.start_time}`, timeZone: "Europe/Paris" },
       end: { dateTime: `${rdv.slot_date}T${rdv.end_time}`, timeZone: "Europe/Paris" },
       attendees: [formateurEmail, studentEmail].filter((e): e is string => !!e).map((email) => ({ email })),
-      conferenceData: {
-        createRequest: { requestId: `${rdv.id}-${crypto.randomUUID()}`, conferenceSolutionKey: { type: "hangoutsMeet" } },
-      },
     };
 
+    // conferenceData.createRequest ne doit être envoyé QUE lors de la
+    // création : Google y génère un nouveau lien Meet ET un nouveau numéro
+    // de dial-in/code à chaque requestId différent. En l'incluant aussi sur
+    // les PATCH (rappelées à chaque retry/reconnexion de page), chaque appel
+    // remplaçait le lien et le numéro de téléphone déjà envoyés par email —
+    // d'où un numéro différent à chaque fois. Un PATCH sans conferenceData
+    // laisse la conférence existante intacte, seule la date bouge.
     const createEvent = () =>
       fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events?conferenceDataVersion=1&sendUpdates=all`, {
         method: "POST",
         headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-        body: JSON.stringify(eventBody),
+        body: JSON.stringify({
+          ...eventBody,
+          conferenceData: { createRequest: { requestId: `${rdv.id}-${crypto.randomUUID()}`, conferenceSolutionKey: { type: "hangoutsMeet" } } },
+        }),
       });
 
     let eventResp: Response;
     let claimedForCreate = false;
     if (rdv.google_event_id) {
       eventResp = await fetch(
-        `https://www.googleapis.com/calendar/v3/calendars/primary/events/${rdv.google_event_id}?conferenceDataVersion=1&sendUpdates=all`,
+        `https://www.googleapis.com/calendar/v3/calendars/primary/events/${rdv.google_event_id}?sendUpdates=all`,
         { method: "PATCH", headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" }, body: JSON.stringify(eventBody) },
       );
       // L'évènement a pu être supprimé côté Google (à la main) — on retente une création.
