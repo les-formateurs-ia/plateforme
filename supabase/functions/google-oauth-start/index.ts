@@ -1,9 +1,13 @@
-// Étape 1 du flux OAuth Google Calendar (formateur) : construit l'URL de
-// consentement Google et enregistre un état CSRF-safe (google_oauth_states)
-// lié au formateur appelant. Le front redirige ensuite le navigateur vers
-// cette URL ; google-oauth-callback récupère cet état au retour.
+// Étape 1 du flux OAuth Google Calendar : construit l'URL de consentement
+// Google et enregistre un état CSRF-safe (google_oauth_states) lié à
+// l'admin appelant. Le front redirige ensuite le navigateur vers cette URL ;
+// google-oauth-callback récupère cet état au retour et marque le compte
+// connecté comme LE compte plateforme (is_platform_default, cf. 0059) — un
+// seul compte Google organise tous les Meet, réservé aux admins pour éviter
+// qu'un formateur ne devienne accidentellement l'organisateur de toute la
+// plateforme.
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
-import { CORS_HEADERS, jsonResponse, isStaffRole, getCallerRole } from "../_shared/podcast-utils.ts";
+import { CORS_HEADERS, jsonResponse, getCallerRole } from "../_shared/podcast-utils.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
@@ -25,7 +29,7 @@ Deno.serve(async (req) => {
     if (userErr || !userData?.user) return jsonResponse({ error: "Session invalide." }, 401);
 
     const role = await getCallerRole(supabase, userData.user.id);
-    if (!isStaffRole(role)) return jsonResponse({ error: "Réservé au staff." }, 403);
+    if (role !== "admin") return jsonResponse({ error: "Réservé aux admins." }, 403);
 
     // google_oauth_states n'a aucune policy RLS pour anon/authenticated —
     // seul un client service-role peut y écrire (voir 0037_google_oauth.sql).

@@ -50,6 +50,9 @@ export async function syncMeetEvent(rdvId: string): Promise<void> {
   }
 }
 
+// Connexion/déconnexion du compte Google UNIQUE de la plateforme (organise
+// tous les Meet, cf. 0059_google_oauth_platform_account.sql) — réservées aux
+// admins côté edge function.
 export async function connectGoogleCalendar(): Promise<string> {
   const { data, error } = await supabase.functions.invoke("google-oauth-start");
   if (error) throw error;
@@ -60,6 +63,14 @@ export async function connectGoogleCalendar(): Promise<string> {
 export async function disconnectGoogleCalendar(): Promise<void> {
   const { error } = await supabase.functions.invoke("google-oauth-disconnect");
   if (error) throw error;
+}
+
+export interface GoogleCalendarStatus { connected: boolean; email: string | null }
+
+export async function getGoogleCalendarStatus(): Promise<GoogleCalendarStatus> {
+  const { data, error } = await supabase.functions.invoke("google-oauth-status");
+  if (error) throw error;
+  return { connected: !!data?.connected, email: data?.email ?? null };
 }
 
 // Formateur/admin attribué à l'élève (profiles.formateur_id, cf.

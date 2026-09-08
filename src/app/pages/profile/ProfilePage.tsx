@@ -5,9 +5,7 @@ import { Trophy, CheckCircle, Lock, Award, Sparkles, Sun, Moon, Monitor, LogOut,
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
-import { isStaff } from "@/app/lib/permissions";
-import { supabase } from "@/app/lib/supabase/client";
-import { connectGoogleCalendar, disconnectGoogleCalendar } from "@/app/lib/availability";
+import { connectGoogleCalendar, disconnectGoogleCalendar, getGoogleCalendarStatus } from "@/app/lib/availability";
 import { GCard } from "@/app/components/common/GCard";
 import { Avatar } from "@/app/components/common/Avatar";
 import { SparkleGlow } from "@/app/components/common/SparkleGlow";
@@ -45,6 +43,7 @@ export function ProfilePage() {
   const name = profile.name || "Alex Dubois";
   const [searchParams, setSearchParams] = useSearchParams();
   const [tab, setTab] = useState<"overview" | "badges" | "settings">("overview");
+  const [googleConnected, setGoogleConnected] = useState(false);
   const [googleCalendarEmail, setGoogleCalendarEmail] = useState<string | null>(null);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [objectiveDraft, setObjectiveDraft] = useState(profile.goalFinal || profile.goal || "");
@@ -67,9 +66,14 @@ export function ProfilePage() {
   };
 
   const loadGoogleCalendarStatus = async () => {
-    if (!user || !isStaff(role)) return;
-    const { data } = await supabase.from("profiles").select("google_calendar_email").eq("id", user.id).maybeSingle();
-    setGoogleCalendarEmail(data?.google_calendar_email ?? null);
+    if (!user || role !== "admin") return;
+    try {
+      const status = await getGoogleCalendarStatus();
+      setGoogleConnected(status.connected);
+      setGoogleCalendarEmail(status.email);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   useEffect(() => { void loadGoogleCalendarStatus(); }, [user, role]);
@@ -99,6 +103,7 @@ export function ProfilePage() {
     setGoogleLoading(true);
     try {
       await disconnectGoogleCalendar();
+      setGoogleConnected(false);
       setGoogleCalendarEmail(null);
       toast.success("Google Calendar déconnecté.");
     } catch (err) {
@@ -363,20 +368,24 @@ export function ProfilePage() {
             </div>
           </div></GCard>
 
-          {/* Google Calendar — connexion par formateur, sert à créer les
-              évènements Meet des rendez-vous (voir availability.ts). */}
-          {isStaff(role) && (
+          {/* Google Calendar — compte UNIQUE de la plateforme (pas un compte
+              par formateur), sert à créer les évènements Meet de tous les
+              rendez-vous (voir availability.ts, sync-meet-event). Réservé aux
+              admins. */}
+          {role === "admin" && (
             <GCard><div className="p-5 flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-3 min-w-0">
-                {googleCalendarEmail ? <CalendarCheck2 className="w-5 h-5 shrink-0" style={{ color: "#6adeb1" }} /> : <CalendarClock className="w-5 h-5 shrink-0" style={{ color: th.fg3 }} />}
+                {googleConnected ? <CalendarCheck2 className="w-5 h-5 shrink-0" style={{ color: "#6adeb1" }} /> : <CalendarClock className="w-5 h-5 shrink-0" style={{ color: th.fg3 }} />}
                 <div className="min-w-0">
-                  <div className="text-sm font-bold mb-0.5" style={{ color: th.fg }}>Google Calendar</div>
+                  <div className="text-sm font-bold mb-0.5" style={{ color: th.fg }}>Google Calendar de la plateforme</div>
                   <div className="text-xs truncate" style={{ color: th.fg3 }}>
-                    {googleCalendarEmail ? `Connecté en tant que ${googleCalendarEmail}` : "Connectez votre compte pour créer automatiquement un lien Google Meet à chaque rendez-vous."}
+                    {googleConnected
+                      ? `Compte plateforme connecté${googleCalendarEmail ? ` : ${googleCalendarEmail}` : ""} — organise tous les Meet`
+                      : "Connectez le compte Google de la plateforme pour créer automatiquement un lien Meet à chaque rendez-vous (tous formateurs confondus)."}
                   </div>
                 </div>
               </div>
-              {googleCalendarEmail ? (
+              {googleConnected ? (
                 <VBtn sm onClick={handleDisconnectGoogle} disabled={googleLoading}>{googleLoading ? "…" : "Déconnecter"}</VBtn>
               ) : (
                 <ShimBtn sm onClick={handleConnectGoogle} disabled={googleLoading}>

@@ -1,9 +1,12 @@
 // Crée/met à jour/supprime l'évènement Google Meet d'un rendez-vous, sur le
-// calendrier du formateur (compte connecté via google-oauth-*). Appelée en
-// best-effort depuis availability.ts après chaque mutation de rendez_vous —
-// ne doit jamais faire échouer la réservation elle-même : si le formateur
-// n'a pas connecté Google, ou si l'appel Google échoue, on répond quand même
-// ok:true avec meetLink:null (le front retente au prochain chargement).
+// calendrier du compte Google UNIQUE de la plateforme (google_oauth_tokens,
+// is_platform_default = true — connecté par un admin via google-oauth-*,
+// cf. 0059) — jamais celui du formateur assigné au rendez-vous : formateur
+// et élève ne sont que des invités. Appelée en best-effort depuis
+// availability.ts après chaque mutation de rendez_vous — ne doit jamais
+// faire échouer la réservation elle-même : si aucun admin n'a connecté de
+// compte, ou si l'appel Google échoue, on répond quand même ok:true avec
+// meetLink:null (le front retente au prochain chargement).
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
 
@@ -56,11 +59,13 @@ Deno.serve(async (req) => {
 
     // google_oauth_tokens n'est accessible qu'en service-role (voir
     // 0037_google_oauth.sql) — jamais via le client JWT-forwardé ci-dessus.
+    // is_platform_default = true identifie LE compte plateforme (0059),
+    // indépendamment du formateur assigné à ce rendez-vous.
     const serviceClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
     const { data: tokenRow } = await serviceClient
       .from("google_oauth_tokens")
       .select("*")
-      .eq("formateur_id", rdv.formateur_id)
+      .eq("is_platform_default", true)
       .maybeSingle();
     if (!tokenRow) return jsonResponse({ ok: true, meetLink: null });
 
@@ -76,7 +81,7 @@ Deno.serve(async (req) => {
       await serviceClient
         .from("google_oauth_tokens")
         .update({ access_token: refreshed.accessToken, access_token_expires_at: refreshed.expiresAt })
-        .eq("formateur_id", rdv.formateur_id);
+        .eq("formateur_id", tokenRow.formateur_id);
     }
 
     // Annulé → on supprime l'évènement Google s'il existe, rien d'autre à faire.
@@ -91,9 +96,8 @@ Deno.serve(async (req) => {
       return jsonResponse({ ok: true, meetLink: null });
     }
 
-    // Pas encore confirmé par le formateur → pas de Meet, quel que soit
-    // l'appelant (garde-fou côté serveur en plus du front qui n'appelle déjà
-    // plus cette fonction tant que le rendez-vous est en attente).
+    // Pas confirmé → pas de Meet (garde-fou côté serveur, même si le front
+    // n'appelle cette fonction que pour des rendez-vous confirmés).
     if (rdv.status !== "confirmed") {
       return jsonResponse({ ok: true, meetLink: null });
     }

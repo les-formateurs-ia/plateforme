@@ -755,6 +755,7 @@ export interface Database {
           access_token_expires_at: string | null;
           google_email: string | null;
           connected_at: string;
+          is_platform_default: boolean;
         };
         Insert: {
           formateur_id: string;
@@ -763,6 +764,7 @@ export interface Database {
           access_token_expires_at?: string | null;
           google_email?: string | null;
           connected_at?: string;
+          is_platform_default?: boolean;
         };
         Update: Partial<Database["public"]["Tables"]["google_oauth_tokens"]["Insert"]>;
       };

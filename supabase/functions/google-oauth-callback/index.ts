@@ -70,6 +70,13 @@ Deno.serve(async (req) => {
     });
     if (upsertErr) return fail(`token_store_failed: ${upsertErr.message}`);
 
+    // Un seul compte organise les Meet de toute la plateforme (cf. 0059) :
+    // celui qui vient de se connecter le devient, tout autre ancien compte
+    // plateforme perd ce statut (l'index unique partiel n'autorise qu'une
+    // seule ligne is_platform_default = true à la fois).
+    await serviceClient.from("google_oauth_tokens").update({ is_platform_default: false }).neq("formateur_id", stateRow.formateur_id);
+    await serviceClient.from("google_oauth_tokens").update({ is_platform_default: true }).eq("formateur_id", stateRow.formateur_id);
+
     await serviceClient.from("profiles").update({ google_calendar_email: googleEmail }).eq("id", stateRow.formateur_id);
 
     return Response.redirect(`${frontendUrl}/profile?google=connected`, 302);
