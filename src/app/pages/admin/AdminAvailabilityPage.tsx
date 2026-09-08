@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { ChevronLeft, ChevronRight, CalendarClock, User, CalendarCog, Video, ClipboardList, ClipboardCheck, Check, Paperclip, Eye, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, CalendarClock, User, CalendarCog, Video, ClipboardList, ClipboardCheck, Paperclip, Eye, Trash2 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { GCard } from "@/app/components/common/GCard";
@@ -8,7 +8,7 @@ import { GT } from "@/app/components/common/GT";
 import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/app/components/ui/dialog";
 import {
-  listMyAvailability, saveAvailability, listMyBookingsAsFormateur, cancelRdvAsFormateur, proposeReschedule, confirmRdv,
+  listMyAvailability, saveAvailability, listMyBookingsAsFormateur, cancelRdvAsFormateur, proposeReschedule,
   syncMeetEvent, submitBilan, uploadBilanAttachment, deleteBilan,
   toISODate, addDays, addMinutes, SESSION_MINUTES, type FormateurBooking,
 } from "@/app/lib/availability";
@@ -73,7 +73,6 @@ export function AdminAvailabilityPage() {
   const [bilanDraft, setBilanDraft] = useState({ sujet: "", nextStep: "", pointFort: "" });
   const [bilanFile, setBilanFile] = useState<File | null>(null);
   const [submittingBilan, setSubmittingBilan] = useState(false);
-  const [confirmingId, setConfirmingId] = useState<string | null>(null);
   const [deletingBilan, setDeletingBilan] = useState(false);
 
   const days = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart]);
@@ -152,21 +151,6 @@ export function AdminAvailabilityPage() {
       toast.error("Impossible d'enregistrer.");
     } finally {
       setSaving(false);
-    }
-  };
-
-  const handleConfirm = async (b: FormateurBooking) => {
-    if (!user) return;
-    setConfirmingId(b.id);
-    try {
-      await confirmRdv(b.id, user.id, b.studentId, b.slotDate, b.startTime);
-      toast.success("Rendez-vous confirmé, l'élève a été prévenu.");
-      void loadBookings();
-    } catch (err) {
-      console.error(err);
-      toast.error("Impossible de confirmer.");
-    } finally {
-      setConfirmingId(null);
     }
   };
 
@@ -370,9 +354,6 @@ export function AdminAvailabilityPage() {
                       <div className="text-xs truncate" style={{ color: th.fg3 }}>
                         {new Date(`${b.slotDate}T00:00:00`).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} · {b.startTime}–{b.endTime}
                       </div>
-                      {b.status === "pending" && (
-                        <div className="text-[11px] mt-1 font-semibold" style={{ color: "#fbc2ad" }}>En attente de confirmation</div>
-                      )}
                       {b.proposedDate && (
                         <div className="text-[11px] mt-1 font-semibold" style={{ color: "#fbc2ad" }}>
                           Proposition envoyée : {b.proposedDate} à {b.proposedStartTime} (en attente de réponse)
@@ -386,11 +367,6 @@ export function AdminAvailabilityPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    {b.status === "pending" && (
-                      <ShimBtn sm onClick={() => handleConfirm(b)} disabled={confirmingId === b.id}>
-                        <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5" />{confirmingId === b.id ? "Confirmation…" : "Confirmer"}</span>
-                      </ShimBtn>
-                    )}
                     <VBtn sm onClick={() => openProposal(b)}><span className="flex items-center gap-1.5"><CalendarCog className="w-3.5 h-3.5" />Proposer un autre créneau</span></VBtn>
                     <VBtn sm onClick={() => handleCancel(b)}>Annuler</VBtn>
                   </div>

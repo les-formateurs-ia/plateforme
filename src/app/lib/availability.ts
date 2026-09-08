@@ -221,22 +221,6 @@ export async function proposeReschedule(rdvId: string, formateurId: string, stud
   );
 }
 
-// Confirmation explicite du formateur — seul ce moment (ou l'acceptation
-// d'une proposition de nouveau créneau, cf. acceptReschedule) déclenche la
-// création du Google Meet.
-export async function confirmRdv(rdvId: string, formateurId: string, studentId: string, slotDate: string, startTime: string): Promise<void> {
-  const { error } = await supabase.from("rendez_vous").update({ status: "confirmed" }).eq("id", rdvId);
-  if (error) throw error;
-  await createNotification(
-    studentId,
-    "rdv_confirmed",
-    "Rendez-vous confirmé",
-    `Votre formateur a confirmé votre rendez-vous du ${formatFR(slotDate, startTime)}. Le lien de la visio vous sera envoyé par email.`,
-    rdvId,
-  );
-  void syncMeetEvent(rdvId);
-}
-
 // ── Vue élève : disponibilités du formateur/admin qui lui est attribué ────
 
 export interface ExpertAvailableSlot {
@@ -381,34 +365,35 @@ async function getStudentName(studentId: string): Promise<string> {
 }
 
 // L'élève choisit un créneau parmi les disponibilités proposées — le
-// formateur/admin attribué doit être notifié immédiatement. Le rendez-vous
-// part "en attente" : pas de Meet tant que le formateur n'a pas confirmé
-// (cf. confirmRdv).
+// rendez-vous est confirmé immédiatement (pas d'étape de validation manuelle
+// du formateur) : le Google Meet est créé et son lien envoyé par email aux
+// deux parties dès ce moment (cf. syncMeetEvent).
 export async function bookSlot(studentId: string, formateurId: string, slotDate: string, startTime: string): Promise<void> {
   const endTime = addMinutes(startTime, SESSION_MINUTES);
   const { data, error } = await supabase
     .from("rendez_vous")
-    .insert({ student_id: studentId, formateur_id: formateurId, slot_date: slotDate, start_time: startTime, end_time: endTime })
+    .insert({ student_id: studentId, formateur_id: formateurId, slot_date: slotDate, start_time: startTime, end_time: endTime, status: "confirmed" })
     .select("id")
     .single();
   if (error) throw error;
   const studentName = await getStudentName(studentId).catch(() => "Votre élève");
-  await createNotification(formateurId, "rdv_booked", "Nouvelle demande de rendez-vous", `${studentName} a demandé un rendez-vous le ${formatFR(slotDate, startTime)} — à confirmer.`, data.id);
+  await createNotification(formateurId, "rdv_booked", "Nouveau rendez-vous", `${studentName} a réservé un rendez-vous le ${formatFR(slotDate, startTime)}. Le lien de la visio a été envoyé par email.`, data.id);
+  void syncMeetEvent(data.id);
 }
 
 // Modifie un rendez-vous existant (au lieu d'en créer un second — un élève
-// ne peut en avoir qu'un seul actif à la fois) — repasse "en attente" (même
-// s'il était déjà confirmé) : un changement d'horaire redemande une
-// confirmation du formateur avant tout nouveau Meet.
+// ne peut en avoir qu'un seul actif à la fois) — reste confirmé et
+// recrée le Meet sur le nouveau créneau (cf. syncMeetEvent).
 export async function changeBooking(rdvId: string, studentId: string, formateurId: string, slotDate: string, startTime: string): Promise<void> {
   const endTime = addMinutes(startTime, SESSION_MINUTES);
   const { error } = await supabase
     .from("rendez_vous")
-    .update({ formateur_id: formateurId, slot_date: slotDate, start_time: startTime, end_time: endTime, status: "pending", meet_link: null })
+    .update({ formateur_id: formateurId, slot_date: slotDate, start_time: startTime, end_time: endTime, status: "confirmed" })
     .eq("id", rdvId);
   if (error) throw error;
   const studentName = await getStudentName(studentId).catch(() => "Votre élève");
-  await createNotification(formateurId, "rdv_booked", "Rendez-vous modifié", `${studentName} a déplacé son rendez-vous au ${formatFR(slotDate, startTime)} — à confirmer.`, rdvId);
+  await createNotification(formateurId, "rdv_booked", "Rendez-vous modifié", `${studentName} a déplacé son rendez-vous au ${formatFR(slotDate, startTime)}. Le lien de la visio a été envoyé par email.`, rdvId);
+  void syncMeetEvent(rdvId);
 }
 
 // Annulation par l'élève lui-même — contrairement aux autres mutations, le

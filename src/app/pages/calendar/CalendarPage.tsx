@@ -228,9 +228,6 @@ export function CalendarPage() {
                 <CalendarIcon className="w-3.5 h-3.5" style={{ color: th.navAC }} />
                 {formatDay(activeBooking.slotDate)} · {activeBooking.startTime}–{activeBooking.endTime}
               </div>
-              {activeBooking.status === "pending" && (
-                <div className="text-xs mt-1.5 italic" style={{ color: th.fg3 }}>En attente de confirmation du formateur.</div>
-              )}
               {activeBooking.meetLink && (
                 <a href={activeBooking.meetLink} target="_blank" rel="noreferrer" className="text-xs mt-1.5 flex items-center gap-1.5 font-semibold hover:opacity-80" style={{ color: th.navAC }}>
                   <Video className="w-3.5 h-3.5" />Rejoindre le Meet
@@ -288,7 +285,7 @@ export function CalendarPage() {
       <Dialog open={!!pending} onOpenChange={(open) => !open && setPending(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{activeBooking ? "Modifier votre rendez-vous" : "Demander ce rendez-vous"}</DialogTitle>
+            <DialogTitle>{activeBooking ? "Modifier votre rendez-vous" : "Confirmer ce rendez-vous"}</DialogTitle>
             <DialogDescription>
               {pending && (
                 <span className="flex items-center gap-1.5 mt-1" style={{ color: th.fg2 }}>
@@ -298,7 +295,7 @@ export function CalendarPage() {
               )}
             </DialogDescription>
           </DialogHeader>
-          <ShimBtn full onClick={confirmBooking} disabled={booking}>{booking ? "Envoi…" : "Envoyer la demande"}</ShimBtn>
+          <ShimBtn full onClick={confirmBooking} disabled={booking}>{booking ? "Confirmation…" : "Confirmer"}</ShimBtn>
         </DialogContent>
       </Dialog>
 
@@ -306,10 +303,10 @@ export function CalendarPage() {
         <DialogContent className="sm:max-w-sm">
           <div className="flex flex-col items-center text-center py-4 gap-3">
             <SuccessCheck />
-            <DialogTitle>Demande envoyée !</DialogTitle>
+            <DialogTitle>Rendez-vous confirmé !</DialogTitle>
             {justBooked && (
               <DialogDescription className="text-center">
-                Votre demande pour le <strong style={{ color: th.fg }}>{formatDay(justBooked.date)}</strong> de <strong style={{ color: th.fg }}>{justBooked.start} à {justBooked.end}</strong> a bien été envoyée. Votre formateur va la confirmer sous peu.
+                Votre rendez-vous du <strong style={{ color: th.fg }}>{formatDay(justBooked.date)}</strong> de <strong style={{ color: th.fg }}>{justBooked.start} à {justBooked.end}</strong> est confirmé. Le lien de la visio vous a été envoyé par email, ainsi qu'à votre formateur.
               </DialogDescription>
             )}
             <ShimBtn sm onClick={() => setJustBooked(null)}>Parfait</ShimBtn>
