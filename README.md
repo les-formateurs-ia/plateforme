@@ -26,7 +26,7 @@ Puis ouvre l'URL affichée par Vite dans le terminal.
 ## Structure
 
 - `src/app/App.tsx` — racine : providers (thème, profil) + routes (`react-router`).
-- `src/app/pages/` — une page par route (onboarding, dashboard, leçons, pratique, planning, avantages, profil, leçon).
+- `src/app/pages/` — une page par route (onboarding, dashboard, leçons, pratique, planning, profil, leçon).
 - `src/app/components/layout/` — `MainLayout` (sidebar + topbar, `<Outlet/>`).
 - `src/app/components/common/` — composants UI partagés (GCard, boutons, fond animé…).
 - `src/app/components/ui/` — composants UI de base (shadcn/radix).

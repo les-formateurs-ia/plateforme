@@ -108,16 +108,15 @@ export function MainLayout() {
             // (ajoutés séparément plus bas) — tout le reste de cette liste
             // est un concept CPF (Pratique IA, Élèves, Rendez-vous...).
             if (entrepriseMode) return null;
-            // "Tableau de bord", "Mes leçons", "Mon Agent IA" et "Mes
-            // avantages" sont pensés pour un parcours élève (progression,
-            // agent personnel, gains) — pas de version admin/formateur pour
-            // l'instant, donc masqués pour le staff plutôt que d'afficher
-            // une page vide/hors-sujet.
-            if ((id === "dashboard" || id === "lessons" || id === "agent" || id === "benefits") && isStaff(role)) return null;
+            // "Tableau de bord", "Mes leçons" et "Mon Agent IA" sont pensés
+            // pour un parcours élève (progression, agent personnel, gains)
+            // — pas de version admin/formateur pour l'instant, donc masqués
+            // pour le staff plutôt que d'afficher une page vide/hors-sujet.
+            if ((id === "dashboard" || id === "lessons" || id === "agent") && isStaff(role)) return null;
             // Collaborateur entreprise : parcours CPF (leçons, pratique,
-            // agent, RDV, avantages) hors-sujet, seul "Tableau de bord" (son
-            // espace entreprise) et "Mon profil" restent pertinents.
-            if ((id === "lessons" || id === "practice" || id === "agent" || id === "calendar" || id === "benefits") && companyId) return null;
+            // agent, RDV) hors-sujet, seul "Tableau de bord" (son espace
+            // entreprise) et "Mon profil" restent pertinents.
+            if ((id === "lessons" || id === "practice" || id === "agent" || id === "calendar") && companyId) return null;
             // Pour l'admin/formateur, "Élèves (& formateurs)" (gestion, même
             // page pour les deux rôles — le formateur n'y voit que ses
             // propres élèves, pas d'onglet Formateurs) s'ajoute juste avant
