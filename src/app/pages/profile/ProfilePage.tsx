@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { Trophy, CheckCircle, Lock, Award, Sparkles, Sun, Moon, Monitor, LogOut, Camera, CalendarClock, CalendarCheck2 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
@@ -37,7 +37,6 @@ function GoogleLogo({ className }: { className?: string }) {
 
 export function ProfilePage() {
   const th = useTh();
-  const navigate = useNavigate();
   const { user, role, signOut } = useAuth();
   const { profile, updateProfile, updateAvatar } = useProfile();
   const name = profile.name || "Alex Dubois";
@@ -167,9 +166,15 @@ export function ProfilePage() {
   const firstActiveIndex = certChapters.findIndex((c) => !c.done);
   const maxActivity = Math.max(1, ...activity.map((a) => a.count));
 
+  // Pas de navigate("/login") ici : ça court-circuitait le changement de
+  // statut d'auth encore en vol (onAuthStateChange asynchrone côté
+  // auth-context.tsx) — RedirectIfAuthenticated (App.tsx) voyait alors un
+  // status encore "authenticated" sur /login et rebondissait sur "/", qui
+  // affichait le tableau de bord du même compte au lieu de déconnecter.
+  // RequireAuth redirige déjà tout seul vers /login dès que le statut passe
+  // à "unauthenticated" — inutile et dangereux de le court-circuiter.
   const handleSignOut = async () => {
     await signOut();
-    navigate("/login");
   };
 
   const saveObjective = async () => {

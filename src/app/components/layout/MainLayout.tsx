@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { NavLink, Outlet, useLocation } from "react-router";
-import { Search, Plus, CalendarClock, Menu, X, Bug } from "lucide-react";
+import { Link, NavLink, Outlet, useLocation } from "react-router";
+import { Search, Plus, CalendarClock, Menu, X, Bug, Building2 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
@@ -17,9 +17,19 @@ import { NAV_ITEMS } from "@/app/data/mock";
 import { supabase } from "@/app/lib/supabase/client";
 import { countUnreadIncidentNotifications } from "@/app/lib/notifications";
 
+const STAFF_SPACE_KEY = "staffSpace";
+
+function readStoredStaffSpace(): "cpf" | "entreprise" {
+  try {
+    return localStorage.getItem(STAFF_SPACE_KEY) === "entreprise" ? "entreprise" : "cpf";
+  } catch {
+    return "cpf";
+  }
+}
+
 export function MainLayout() {
   const th = useTh();
-  const { role, user } = useAuth();
+  const { role, user, companyId } = useAuth();
   const staffBase = useStaffBasePath();
   const { profile } = useProfile();
   const name = profile.name.split(" ")[0] || "Alex";
@@ -28,6 +38,24 @@ export function MainLayout() {
   const location = useLocation();
   const gen = useBulkGeneration();
   const genPct = gen.total > 0 ? Math.round((gen.done / gen.total) * 100) : 0;
+  // Le staff bascule entre deux espaces (choisis sur "/", cf. RootGate) : tant
+  // qu'il navigue sous /entreprise, la barre latérale ne montre plus que ce
+  // qui concerne l'entreprise — le reste (Pratique IA, Élèves, RDV, Modifier
+  // les formations) appartient au CPF et redeviendra visible en y retournant
+  // (logo cliquable → "/", qui renvoie vers le choix). "/profile" est
+  // partagé entre les deux espaces (même page pour tout le monde) : on ne
+  // le laisse pas faire basculer l'espace mémorisé, sinon "Mon profil"
+  // depuis Entreprise renvoyait visuellement vers la nav CPF complète.
+  const [space, setSpace] = useState<"cpf" | "entreprise">(
+    () => (location.pathname.startsWith("/entreprise") ? "entreprise" : readStoredStaffSpace()),
+  );
+  useEffect(() => {
+    if (location.pathname === "/profile") return;
+    const next = location.pathname.startsWith("/entreprise") ? "entreprise" : "cpf";
+    setSpace(next);
+    try { localStorage.setItem(STAFF_SPACE_KEY, next); } catch { /* ignore */ }
+  }, [location.pathname]);
+  const entrepriseMode = isStaff(role) && space === "entreprise";
 
   useEffect(() => { setNavOpen(false); }, [location.pathname]);
 
@@ -67,19 +95,28 @@ export function MainLayout() {
         navOpen ? "translate-x-0" : "-translate-x-full",
       )} style={{ background: th.sidebar, borderRight: `1px solid ${th.sidebarB}` }}>
         <div className="px-6 py-6 flex items-center justify-between" style={{ borderBottom: `1px solid ${th.sidebarB}` }}>
-          <Logo h={26} />
+          <Link to="/" onClick={() => setNavOpen(false)} className="transition-opacity hover:opacity-80" title={isStaff(role) ? "Changer d'espace (CPF / Entreprise)" : "Accueil"}>
+            <Logo h={26} />
+          </Link>
           <button className="lg:hidden w-8 h-8 -mr-1.5 rounded-full flex items-center justify-center shrink-0" onClick={() => setNavOpen(false)} style={{ color: th.fg3 }}>
             <X className="w-4 h-4" />
           </button>
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {NAV_ITEMS.filter(({ id }) => id !== "profile").map(({ id, Icon, label, path }) => {
-            // "Tableau de bord", "Mes leçons", "Mon Agent IA" et "Mes
-            // avantages" sont pensés pour un parcours élève (progression,
-            // agent personnel, gains) — pas de version admin/formateur pour
-            // l'instant, donc masqués pour le staff plutôt que d'afficher
-            // une page vide/hors-sujet.
-            if ((id === "dashboard" || id === "lessons" || id === "agent" || id === "benefits") && isStaff(role)) return null;
+            // Espace Entreprise : seuls "Entreprise" et "Mon profil" restent
+            // (ajoutés séparément plus bas) — tout le reste de cette liste
+            // est un concept CPF (Pratique IA, Élèves, Rendez-vous...).
+            if (entrepriseMode) return null;
+            // "Tableau de bord", "Mes leçons" et "Mon Agent IA" sont pensés
+            // pour un parcours élève (progression, agent personnel, gains)
+            // — pas de version admin/formateur pour l'instant, donc masqués
+            // pour le staff plutôt que d'afficher une page vide/hors-sujet.
+            if ((id === "dashboard" || id === "lessons" || id === "agent") && isStaff(role)) return null;
+            // Collaborateur entreprise : parcours CPF (leçons, pratique,
+            // agent, RDV) hors-sujet, seul "Tableau de bord" (son espace
+            // entreprise) et "Mon profil" restent pertinents.
+            if ((id === "lessons" || id === "practice" || id === "agent" || id === "calendar") && companyId) return null;
             // Pour l'admin/formateur, "Élèves (& formateurs)" (gestion, même
             // page pour les deux rôles — le formateur n'y voit que ses
             // propres élèves, pas d'onglet Formateurs) s'ajoute juste avant
@@ -97,13 +134,19 @@ export function MainLayout() {
               ];
             }
             return (
-              <NavLink key={id} to={path} end={path === "/"} onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
+              <NavLink key={id} to={path} end onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
                 style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
                 <Icon className="w-4 h-4 shrink-0" />{label}
               </NavLink>
             );
           })}
-          {isAdmin(role) && (
+          {entrepriseMode && (
+            <NavLink to="/entreprise" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
+              style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
+              <Building2 className="w-4 h-4 shrink-0" />Entreprise
+            </NavLink>
+          )}
+          {isAdmin(role) && !entrepriseMode && (
             <NavLink to="/admin/incidents" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
               style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
               <span className="relative shrink-0">
@@ -127,7 +170,7 @@ export function MainLayout() {
             );
           })()}
         </nav>
-        {isStaff(role) && (
+        {isStaff(role) && !entrepriseMode && (
           <div className="px-3 pb-3 space-y-1.5">
             {gen.running && (
               <div className="rounded-xl px-3 py-2.5" style={{ background: th.isDark ? "rgba(255,255,255,0.05)" : "rgba(15,14,20,0.03)", border: `1px solid ${th.inputB}` }}>
@@ -162,7 +205,7 @@ export function MainLayout() {
             <button className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }} onClick={() => setNavOpen(true)}>
               <Menu className="w-4 h-4" style={{ color: th.fg3 }} />
             </button>
-            <Logo h={20} />
+            <Link to="/" className="transition-opacity hover:opacity-80"><Logo h={20} /></Link>
           </div>
           <div className="flex items-center gap-2.5 px-4 py-2 rounded-full w-full max-w-[220px] sm:max-w-none sm:w-64 hidden sm:flex" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
             <Search className="w-3.5 h-3.5 shrink-0" style={{ color: th.fg3 }} />

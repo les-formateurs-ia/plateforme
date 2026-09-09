@@ -3,19 +3,18 @@
 // Chaque export ici correspond à une table du schéma (voir supabase/migrations).
 // ═══════════════════════════════════════════════════════════════════════════
 import {
-  BarChart3, BookOpen, Code2, Calendar, Star, User,
+  BarChart3, BookOpen, Code2, Calendar, User,
   Monitor, Headphones, FileText, Bot,
   type LucideIcon,
 } from "lucide-react";
 import type { NavId } from "@/app/types";
 
 export const NAV_ITEMS: { id: NavId; Icon: LucideIcon; label: string; path: string }[] = [
-  { id: "dashboard", Icon: BarChart3, label: "Tableau de bord", path: "/" },
+  { id: "dashboard", Icon: BarChart3, label: "Tableau de bord", path: "/dashboard" },
   { id: "lessons",   Icon: BookOpen,  label: "Mes leçons",      path: "/lessons" },
   { id: "practice",  Icon: Code2,     label: "Pratique IA",     path: "/practice" },
   { id: "agent",     Icon: Bot,       label: "Mon Agent IA",    path: "/agent" },
   { id: "calendar",  Icon: Calendar,  label: "Rendez-vous",     path: "/calendar" },
-  { id: "benefits",  Icon: Star,      label: "Mes avantages",   path: "/benefits" },
   { id: "profile",   Icon: User,      label: "Mon profil",      path: "/profile" },
 ];
 
@@ -77,13 +76,6 @@ export const PROMPT_CATS = [
   { emoji: "⚙️", label: "Automatisation", count: 35 }, { emoji: "🧠", label: "Stratégie & RH", count: 22 },
 ];
 
-export const AI_TOOLS = [
-  { name: "ChatGPT", sub: "GPT-4o", color: "#10A37F", letter: "G" },
-  { name: "Claude", sub: "Sonnet 4.5", color: "#dbacf0", letter: "C" },
-  { name: "Gemini", sub: "Pro 2.0", color: "#4285F4", letter: "G" },
-  { name: "Mistral", sub: "Large 2", color: "#FF7000", letter: "M" },
-  { name: "Perplexity", sub: "Pro", color: "#20808D", letter: "P" },
-];
 
 export const CAL_EVENTS = [
   { col: 0, label: "Révision Leçon 1", type: "review" },
