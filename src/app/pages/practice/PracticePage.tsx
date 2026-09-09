@@ -19,7 +19,7 @@ export function PracticePage() {
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div><h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Pratique IA</GT></h2><p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Entraîne-toi et construis tes compétences en pratiquant</p></div>
+        <div><h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Exercez-vous !</GT></h2><p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Entraîne-toi et construis tes compétences en pratiquant</p></div>
         <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold shrink-0" style={{ background: "rgba(251,194,173,0.1)", border: "1px solid rgba(251,194,173,0.25)", color: "#fbc2ad" }}><Flame className="w-3.5 h-3.5" />7 jours de suite !</div>
       </div>
 
