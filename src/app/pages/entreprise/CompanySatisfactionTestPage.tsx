@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router";
 import { ArrowLeft, CheckCircle2, Star } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
+import { isStaff } from "@/app/lib/permissions";
 import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
 import { ShimBtn } from "@/app/components/common/Buttons";
@@ -15,7 +16,9 @@ import {
 export function CompanySatisfactionTestPage() {
   const th = useTh();
   const navigate = useNavigate();
-  const { user, companyId } = useAuth();
+  const { user, companyId, role } = useAuth();
+  // Voir CompanyPositioningTestPage : même logique d'aperçu formateur.
+  const isPreview = isStaff(role) && !companyId;
   const { testId } = useParams<{ testId: string }>();
 
   const [title, setTitle] = useState("");
@@ -45,11 +48,14 @@ export function CompanySatisfactionTestPage() {
   const setAnswer = (questionId: string, value: string | number) => setAnswers((prev) => ({ ...prev, [questionId]: value }));
 
   const handleSubmit = async () => {
-    if (!user || !companyId || !testId || submitting) return;
+    if (!user || !testId || submitting) return;
     setSubmitting(true);
     try {
       const payload: SatisfactionAnswer[] = questions.map((q) => ({ questionId: q.id, type: q.type, value: answers[q.id] ?? "" }));
-      await submitSatisfactionResponse(testId, companyId, user.id, payload);
+      if (!isPreview) {
+        if (!companyId) return;
+        await submitSatisfactionResponse(testId, companyId, user.id, payload);
+      }
       setDone(true);
     } finally {
       setSubmitting(false);
@@ -73,7 +79,7 @@ export function CompanySatisfactionTestPage() {
       {!loading && done && (
         <GCard glow accent className="p-8 text-center">
           <CheckCircle2 className="w-10 h-10 mx-auto mb-3" style={{ color: "#6adeb1" }} />
-          <p className="text-sm" style={{ color: th.fg3 }}>Merci pour ton retour !</p>
+          <p className="text-sm" style={{ color: th.fg3 }}>{isPreview ? "Aperçu — réponses non enregistrées." : "Merci pour ton retour !"}</p>
         </GCard>
       )}
 

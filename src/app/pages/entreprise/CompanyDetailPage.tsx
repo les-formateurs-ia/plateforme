@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { ArrowLeft, Users, ClipboardList, FileText, Code2, Star, Tag, type LucideIcon } from "lucide-react";
+import { ArrowLeft, Eye, Users, ClipboardList, FileText, Code2, Star, Tag, type LucideIcon } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { GT } from "@/app/components/common/GT";
+import { VBtn } from "@/app/components/common/Buttons";
 import { getCompany } from "@/app/lib/entreprise/companies";
 import { CompanyEmployeesTab } from "@/app/components/entreprise/CompanyEmployeesTab";
 import { CompanyPositioningTab } from "@/app/components/entreprise/CompanyPositioningTab";
@@ -45,13 +46,20 @@ export function CompanyDetailPage() {
 
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
-      <div>
-        <button onClick={() => navigate("/entreprise")} className="flex items-center gap-1.5 text-sm mb-2 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
-          <ArrowLeft className="w-4 h-4" />Entreprises
-        </button>
-        <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}>
-          <GT>{loading ? "Chargement…" : (name ?? "Entreprise introuvable")}</GT>
-        </h2>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <button onClick={() => navigate("/entreprise")} className="flex items-center gap-1.5 text-sm mb-2 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
+            <ArrowLeft className="w-4 h-4" />Entreprises
+          </button>
+          <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}>
+            <GT>{loading ? "Chargement…" : (name ?? "Entreprise introuvable")}</GT>
+          </h2>
+        </div>
+        {name && (
+          <VBtn onClick={() => navigate(`/entreprise/${companyId}/preview`)}>
+            <span className="flex items-center gap-2"><Eye className="w-4 h-4" />Aperçu élève</span>
+          </VBtn>
+        )}
       </div>
 
       {name && (

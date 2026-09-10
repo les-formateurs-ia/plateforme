@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
+import { isStaff } from "@/app/lib/permissions";
 import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
 import { ShimBtn } from "@/app/components/common/Buttons";
@@ -11,7 +12,12 @@ import { getPositioningTestForTaking, submitPositioningAttempt, type Positioning
 export function CompanyPositioningTestPage() {
   const th = useTh();
   const navigate = useNavigate();
-  const { user, companyId } = useAuth();
+  const { user, companyId, role } = useAuth();
+  // Un membre du staff n'a pas de companyId sur son propre profil : s'il
+  // atteint cette page (aperçu depuis CompanyPreviewPage), on calcule le
+  // score localement sans écrire en base — la RLS (same_company()) refuserait
+  // de toute façon l'insert pour un compte staff.
+  const isPreview = isStaff(role) && !companyId;
   const { testId } = useParams<{ testId: string }>();
 
   const [title, setTitle] = useState("");
@@ -41,7 +47,7 @@ export function CompanyPositioningTestPage() {
   const select = (questionId: string, optionId: string) => setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
 
   const handleSubmit = async () => {
-    if (!user || !companyId || !testId || submitting) return;
+    if (!user || !testId || submitting) return;
     setSubmitting(true);
     try {
       const payload = questions.map((q) => {
@@ -49,6 +55,11 @@ export function CompanyPositioningTestPage() {
         const correct = q.options.find((o) => o.id === selectedOptionId)?.isCorrect ?? false;
         return { questionId: q.id, selectedOptionId, correct };
       });
+      if (isPreview) {
+        setScore(payload.length ? Math.round((payload.filter((a) => a.correct).length / payload.length) * 100) : 0);
+        return;
+      }
+      if (!companyId) return;
       const result = await submitPositioningAttempt(testId, companyId, user.id, payload);
       setScore(result);
     } finally {
@@ -71,7 +82,7 @@ export function CompanyPositioningTestPage() {
         <GCard glow accent className="p-8 text-center">
           <CheckCircle2 className="w-10 h-10 mx-auto mb-3" style={{ color: "#6adeb1" }} />
           <div className="text-2xl font-black" style={{ color: th.fg }}>{score}%</div>
-          <p className="text-sm mt-1" style={{ color: th.fg3 }}>Réponses enregistrées. Merci !</p>
+          <p className="text-sm mt-1" style={{ color: th.fg3 }}>{isPreview ? "Aperçu — réponses non enregistrées." : "Réponses enregistrées. Merci !"}</p>
         </GCard>
       )}
 
