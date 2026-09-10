@@ -9,6 +9,7 @@ export type PedagogyStyle = "soft" | "strict" | "synth";
 export interface StudentOnboardingInfo {
   age: string | null;
   profession: string | null;
+  experience: string | null;
   objective: string | null;
   tutorPersona: PedagogyStyle | null;
 }
@@ -16,7 +17,7 @@ export interface StudentOnboardingInfo {
 export async function getStudentOnboarding(studentId: string): Promise<StudentOnboardingInfo | null> {
   const { data, error } = await supabase
     .from("student_onboarding")
-    .select("age, profession, goal, goal_detail, ai_tutor_persona")
+    .select("age, profession, experience, goal, goal_detail, ai_tutor_persona")
     .eq("user_id", studentId)
     .maybeSingle();
   if (error) throw error;
@@ -24,9 +25,18 @@ export async function getStudentOnboarding(studentId: string): Promise<StudentOn
   return {
     age: data.age,
     profession: data.profession,
+    experience: data.experience,
     objective: data.goal_detail || data.goal,
     tutorPersona: (data.ai_tutor_persona as PedagogyStyle | null) ?? null,
   };
+}
+
+export async function updateStudentExperience(studentId: string, experience: string): Promise<void> {
+  const cleaned = experience.trim();
+  const { error } = await supabase
+    .from("student_onboarding")
+    .upsert({ user_id: studentId, experience: cleaned });
+  if (error) throw error;
 }
 
 export async function updateStudentObjective(studentId: string, objective: string): Promise<void> {

@@ -15,7 +15,7 @@ import {
 } from "@/app/lib/formationInstances";
 import { listCoachAssignableCards, assignFormateurToStudent, type PersonCard } from "@/app/lib/planning";
 import {
-  getStudentOnboarding, updateStudentObjective, updateStudentTutorPersona,
+  getStudentOnboarding, updateStudentObjective, updateStudentExperience, updateStudentTutorPersona,
   type StudentOnboardingInfo, type PedagogyStyle,
 } from "@/app/lib/studentOnboarding";
 import type { EnrollmentStatus } from "@/app/lib/supabase/database.types";
@@ -24,7 +24,7 @@ import { isAdmin, isStaff } from "@/app/lib/permissions";
 import { useStaffBasePath } from "@/app/lib/staffBase";
 import { TUTOR_STYLES } from "@/app/data/mock";
 
-interface StudentProfile { id: string; first_name: string | null; last_name: string | null; email: string; avatar_url: string | null; formateur_id: string | null; }
+interface StudentProfile { id: string; first_name: string | null; last_name: string | null; email: string; phone: string | null; avatar_url: string | null; formateur_id: string | null; }
 
 const STATUS_LABEL: Record<EnrollmentStatus, { label: string; color: string; bg: string }> = {
   active: { label: "Active", color: "#6adeb1", bg: "rgba(106,222,177,0.1)" },
@@ -50,6 +50,9 @@ export function AdminStudentDetailPage() {
   const [objectiveDraft, setObjectiveDraft] = useState("");
   const [objectiveEditing, setObjectiveEditing] = useState(false);
   const [objectiveSaving, setObjectiveSaving] = useState(false);
+  const [experienceDraft, setExperienceDraft] = useState("");
+  const [experienceEditing, setExperienceEditing] = useState(false);
+  const [experienceSaving, setExperienceSaving] = useState(false);
   const [tutorSaving, setTutorSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [assigning, setAssigning] = useState(false);
@@ -60,7 +63,7 @@ export function AdminStudentDetailPage() {
     setLoading(true);
     try {
       const [{ data: p, error: profileError }, instanceRows, templateRows, formateurRows, onboardingInfo] = await Promise.all([
-        supabase.from("profiles").select("id, first_name, last_name, email, avatar_url, formateur_id").eq("id", studentId).single(),
+        supabase.from("profiles").select("id, first_name, last_name, email, phone, avatar_url, formateur_id").eq("id", studentId).single(),
         listInstancesForStudent(studentId),
         listPublishedTemplates(),
         listCoachAssignableCards(),
@@ -75,6 +78,8 @@ export function AdminStudentDetailPage() {
       setOnboarding(onboardingInfo);
       setObjectiveDraft(onboardingInfo?.objective ?? "");
       setObjectiveEditing(false);
+      setExperienceDraft(onboardingInfo?.experience ?? "");
+      setExperienceEditing(false);
     } catch (err) {
       console.error(err);
       toast.error("Impossible de charger la fiche de cet élève.");
@@ -102,12 +107,28 @@ export function AdminStudentDetailPage() {
     }
   };
 
+  const saveExperience = async () => {
+    if (!studentId) return;
+    setExperienceSaving(true);
+    try {
+      const cleaned = experienceDraft.trim();
+      await updateStudentExperience(studentId, cleaned);
+      setOnboarding((o) => (o ? { ...o, experience: cleaned } : o));
+      setExperienceEditing(false);
+    } catch (err) {
+      console.error(err);
+      toast.error("Impossible d'enregistrer l'expérience professionnelle.");
+    } finally {
+      setExperienceSaving(false);
+    }
+  };
+
   const changeTutorPersona = async (style: string) => {
     if (!studentId) return;
     setTutorSaving(true);
     try {
       await updateStudentTutorPersona(studentId, style as PedagogyStyle);
-      setOnboarding((o) => (o ? { ...o, tutorPersona: style as PedagogyStyle } : { age: null, profession: null, objective: null, tutorPersona: style as PedagogyStyle }));
+      setOnboarding((o) => (o ? { ...o, tutorPersona: style as PedagogyStyle } : { age: null, profession: null, experience: null, objective: null, tutorPersona: style as PedagogyStyle }));
       toast.success("Style pédagogique mis à jour.");
     } catch (err) {
       console.error(err);
@@ -190,7 +211,7 @@ export function AdminStudentDetailPage() {
         <GCard><div className="p-6">
           <h3 className="text-sm font-black mb-4" style={{ color: th.fg }}>Informations</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
-            {[["Âge", onboarding?.age ? `${onboarding.age} ans` : "Non renseigné"], ["Email", profile.email], ["Profession", onboarding?.profession || "Non renseignée"]].map(([label, val]) => (
+            {[["Âge", onboarding?.age ? `${onboarding.age} ans` : "Non renseigné"], ["Email", profile.email], ["Téléphone", profile.phone || "Non renseigné"], ["Profession", onboarding?.profession || "Non renseignée"]].map(([label, val]) => (
               <div key={label}>
                 <label className="block text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>{label}</label>
                 <p className="text-sm" style={{ color: th.fg2 }}>{val}</p>
@@ -221,6 +242,32 @@ export function AdminStudentDetailPage() {
               </div>
             ) : (
               <p className="text-sm" style={{ color: th.fg2 }}>{onboarding?.objective || "Non renseigné."}</p>
+            )}
+          </div>
+
+          <div className="mb-5">
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-widest" style={{ color: th.fg3 }}>Expérience professionnelle</label>
+              {!experienceEditing && (
+                <button onClick={() => setExperienceEditing(true)} className="text-xs font-semibold transition-colors hover:opacity-70" style={{ color: th.navAC }}>Modifier</button>
+              )}
+            </div>
+            {experienceEditing ? (
+              <div className="space-y-2">
+                <textarea
+                  value={experienceDraft}
+                  onChange={(e) => setExperienceDraft(e.target.value)}
+                  rows={5}
+                  placeholder="Parcours, poste actuel, usage actuel de l'IA…"
+                  className="w-full rounded-xl px-3.5 py-2.5 text-sm g-input resize-none"
+                />
+                <div className="flex items-center gap-2">
+                  <ShimBtn sm onClick={saveExperience} disabled={experienceSaving}>{experienceSaving ? "Enregistrement…" : "Enregistrer"}</ShimBtn>
+                  <VBtn sm onClick={() => { setExperienceDraft(onboarding?.experience ?? ""); setExperienceEditing(false); }} disabled={experienceSaving}>Annuler</VBtn>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm whitespace-pre-wrap" style={{ color: th.fg2 }}>{onboarding?.experience || "Non renseignée."}</p>
             )}
           </div>
 

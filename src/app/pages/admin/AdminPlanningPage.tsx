@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
+import { Plus } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { GT } from "@/app/components/common/GT";
 import { GCard } from "@/app/components/common/GCard";
 import { Avatar } from "@/app/components/common/Avatar";
+import { VBtn, ShimBtn } from "@/app/components/common/Buttons";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/app/components/ui/dialog";
 import { listStudentCards, listFormateurCards, type StudentCard, type PersonCard } from "@/app/lib/planning";
+import { createStudent } from "@/app/lib/students";
 import { useStaffBasePath } from "@/app/lib/staffBase";
 
 type PlanningTab = "etudiants" | "formateurs";
@@ -62,6 +67,24 @@ export function AdminPlanningPage() {
   const [loadingFormateurs, setLoadingFormateurs] = useState(isAdmin);
   const [tab, setTab] = useState<PlanningTab>("etudiants");
 
+  const [createOpen, setCreateOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [experience, setExperience] = useState("");
+  const [objective, setObjective] = useState("");
+
+  const loadStudents = async () => {
+    if (!user) return;
+    setLoadingStudents(true);
+    const rows = await listStudentCards(isAdmin ? undefined : user.id);
+    setStudents(rows);
+    setLoadingStudents(false);
+  };
+
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
@@ -80,11 +103,47 @@ export function AdminPlanningPage() {
     return () => { cancelled = true; };
   }, [user, isAdmin]);
 
+  const openCreate = () => {
+    setFirstName(""); setLastName(""); setEmail(""); setPhone(""); setExperience(""); setObjective("");
+    setCreateError(null);
+    setCreateOpen(true);
+  };
+
+  const handleCreateStudent = async () => {
+    if (!firstName.trim() || !email.trim() || creating) return;
+    setCreating(true);
+    setCreateError(null);
+    try {
+      await createStudent({
+        firstName: firstName.trim(),
+        lastName: lastName.trim() || undefined,
+        email: email.trim(),
+        phone: phone.trim() || undefined,
+        experience: experience.trim() || undefined,
+        objective: objective.trim() || undefined,
+      });
+      setCreateOpen(false);
+      toast.success("Élève créé.");
+      await loadStudents();
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : "Erreur inconnue.");
+    } finally {
+      setCreating(false);
+    }
+  };
+
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
-      <div>
-        <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>{isAdmin ? "Élèves & formateurs" : "Élèves"}</GT></h2>
-        <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>{isAdmin ? "Gère les élèves et les formateurs de la plateforme." : "Tes élèves."}</p>
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>{isAdmin ? "Élèves & formateurs" : "Élèves"}</GT></h2>
+          <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>{isAdmin ? "Gère les élèves et les formateurs de la plateforme." : "Tes élèves."}</p>
+        </div>
+        {(!isAdmin || tab === "etudiants") && (
+          <ShimBtn sm onClick={openCreate}>
+            <span className="flex items-center gap-2"><Plus className="w-3.5 h-3.5" />Nouvel élève</span>
+          </ShimBtn>
+        )}
       </div>
 
       {isAdmin && (
@@ -122,6 +181,31 @@ export function AdminPlanningPage() {
           <PersonGrid people={formateurs} loading={loadingFormateurs} onClick={(id) => navigate(`${base}/planning/formateurs/${id}`)} />
         )}
       </div>
+
+      <Dialog open={createOpen} onOpenChange={(v) => !creating && setCreateOpen(v)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nouvel élève</DialogTitle>
+            <DialogDescription>Crée le compte pour que le formateur puisse préparer sa formation. Aucun email n'est envoyé à l'élève.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <input value={firstName} onChange={(e) => setFirstName(e.target.value)} autoFocus placeholder="Prénom" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
+              <input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Nom" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
+            </div>
+            <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="email@exemple.com" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
+            <input value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" placeholder="Téléphone (optionnel)" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
+            <textarea value={experience} onChange={(e) => setExperience(e.target.value)} rows={4} placeholder="Expérience professionnelle (optionnel)" className="w-full rounded-xl px-4 py-2.5 text-sm g-input resize-none" />
+            <textarea value={objective} onChange={(e) => setObjective(e.target.value)} rows={4} placeholder="Objectif professionnel (optionnel)" className="w-full rounded-xl px-4 py-2.5 text-sm g-input resize-none" />
+          </div>
+          {createError && <p className="text-xs" style={{ color: "#fbc2ad" }}>{createError}</p>}
+          <DialogFooter>
+            <ShimBtn onClick={handleCreateStudent} disabled={!firstName.trim() || !email.trim() || creating}>
+              {creating ? "Création…" : "Créer l'élève"}
+            </ShimBtn>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
