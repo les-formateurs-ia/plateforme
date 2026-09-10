@@ -15,6 +15,7 @@ import { DashboardPage } from "@/app/pages/dashboard/DashboardPage";
 import { LessonsPage } from "@/app/pages/lessons/LessonsPage";
 import { PracticePage } from "@/app/pages/practice/PracticePage";
 import { StudioPage } from "@/app/pages/studio/StudioPage";
+import { StudioImagesPage } from "@/app/pages/studio/StudioImagesPage";
 import { StudioToolPage } from "@/app/pages/studio/StudioToolPage";
 import { AgentPage } from "@/app/pages/agent/AgentPage";
 import { BasicExercisesPage } from "@/app/pages/practice/BasicExercisesPage";
@@ -177,6 +178,7 @@ function AppRoutes() {
         <Route path="practice/html" element={<HtmlExerciseSessionsPage />} />
         <Route path="practice/html/:sessionId" element={<HtmlExercisePage />} />
         <Route path="studio" element={<StudioPage />} />
+        <Route path="studio/images" element={<StudioImagesPage />} />
         <Route path="studio/:tool" element={<StudioToolPage />} />
         <Route path="agent" element={<AgentPage />} />
         <Route path="agent/:conversationId" element={<AgentPage />} />

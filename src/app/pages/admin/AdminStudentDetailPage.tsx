@@ -14,6 +14,7 @@ import {
   updateInstanceStatus, deleteInstance, type FormationInstanceRow, type PublishedTemplate,
 } from "@/app/lib/formationInstances";
 import { listCoachAssignableCards, assignFormateurToStudent, type PersonCard } from "@/app/lib/planning";
+import { StudentStudioGallery } from "@/app/components/admin/StudentStudioGallery";
 import {
   getStudentOnboarding, updateStudentObjective, updateStudentExperience, updateStudentTutorPersona,
   type StudentOnboardingInfo, type PedagogyStyle,
@@ -353,6 +354,8 @@ export function AdminStudentDetailPage() {
           {!templates.length && <p className="text-xs mt-3" style={{ color: th.fg3 }}>Aucune formation disponible pour l'instant.</p>}
         </div></GCard>
       )}
+
+      {staff && <StudentStudioGallery studentId={profile.id} />}
     </div>
   );
 }

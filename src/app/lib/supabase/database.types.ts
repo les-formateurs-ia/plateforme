@@ -18,6 +18,7 @@ export type AgentMessageModality = "text" | "voice";
 export type IncidentPage = "lecon" | "tableau_de_bord" | "outil_ia" | "exercice" | "autre";
 export type IncidentStatus = "a_traiter" | "corrige";
 export type SatisfactionQuestionType = "qcm" | "rating" | "text";
+export type StudioImageStatus = "pending" | "ready" | "failed";
 
 export interface Database {
   public: {
@@ -81,6 +82,37 @@ export interface Database {
           completed_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["student_onboarding"]["Insert"]>;
+      };
+      studio_image_generations: {
+        Row: {
+          id: string;
+          user_id: string;
+          status: StudioImageStatus;
+          model: string;
+          aspect_ratio: string;
+          prompt: string;
+          source_image_path: string | null;
+          image_path: string | null;
+          external_request_id: string | null;
+          error_message: string | null;
+          created_at: string;
+          completed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          status?: StudioImageStatus;
+          model: string;
+          aspect_ratio: string;
+          prompt: string;
+          source_image_path?: string | null;
+          image_path?: string | null;
+          external_request_id?: string | null;
+          error_message?: string | null;
+          created_at?: string;
+          completed_at?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["studio_image_generations"]["Insert"]>;
       };
       formations: {
         Row: {
