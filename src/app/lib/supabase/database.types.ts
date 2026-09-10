@@ -29,6 +29,7 @@ export interface Database {
           first_name: string | null;
           last_name: string | null;
           email: string;
+          phone: string | null;
           must_onboard: boolean;
           theme_preference: ThemePreference;
           avatar_url: string | null;
@@ -43,6 +44,7 @@ export interface Database {
           first_name?: string | null;
           last_name?: string | null;
           email: string;
+          phone?: string | null;
           must_onboard?: boolean;
           theme_preference?: ThemePreference;
           avatar_url?: string | null;

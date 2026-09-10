@@ -18,13 +18,14 @@ import {
   getStudentOnboarding, updateStudentObjective, updateStudentTutorPersona,
   type StudentOnboardingInfo, type PedagogyStyle,
 } from "@/app/lib/studentOnboarding";
+import { saveStudentInfo } from "@/app/lib/students";
 import type { EnrollmentStatus } from "@/app/lib/supabase/database.types";
 import { useAuth } from "@/app/state/auth-context";
 import { isAdmin, isStaff } from "@/app/lib/permissions";
 import { useStaffBasePath } from "@/app/lib/staffBase";
 import { TUTOR_STYLES } from "@/app/data/mock";
 
-interface StudentProfile { id: string; first_name: string | null; last_name: string | null; email: string; avatar_url: string | null; formateur_id: string | null; }
+interface StudentProfile { id: string; first_name: string | null; last_name: string | null; email: string; phone: string | null; avatar_url: string | null; formateur_id: string | null; }
 
 const STATUS_LABEL: Record<EnrollmentStatus, { label: string; color: string; bg: string }> = {
   active: { label: "Active", color: "#6adeb1", bg: "rgba(106,222,177,0.1)" },
@@ -51,6 +52,14 @@ export function AdminStudentDetailPage() {
   const [objectiveEditing, setObjectiveEditing] = useState(false);
   const [objectiveSaving, setObjectiveSaving] = useState(false);
   const [tutorSaving, setTutorSaving] = useState(false);
+  const [infoEditing, setInfoEditing] = useState(false);
+  const [infoSaving, setInfoSaving] = useState(false);
+  const [infoError, setInfoError] = useState<string | null>(null);
+  const [firstNameDraft, setFirstNameDraft] = useState("");
+  const [emailDraft, setEmailDraft] = useState("");
+  const [phoneDraft, setPhoneDraft] = useState("");
+  const [ageDraft, setAgeDraft] = useState("");
+  const [professionDraft, setProfessionDraft] = useState("");
   const [loading, setLoading] = useState(true);
   const [assigning, setAssigning] = useState(false);
   const [assigningFormateur, setAssigningFormateur] = useState(false);
@@ -60,7 +69,7 @@ export function AdminStudentDetailPage() {
     setLoading(true);
     try {
       const [{ data: p, error: profileError }, instanceRows, templateRows, formateurRows, onboardingInfo] = await Promise.all([
-        supabase.from("profiles").select("id, first_name, last_name, email, avatar_url, formateur_id").eq("id", studentId).single(),
+        supabase.from("profiles").select("id, first_name, last_name, email, phone, avatar_url, formateur_id").eq("id", studentId).single(),
         listInstancesForStudent(studentId),
         listPublishedTemplates(),
         listCoachAssignableCards(),
@@ -75,6 +84,13 @@ export function AdminStudentDetailPage() {
       setOnboarding(onboardingInfo);
       setObjectiveDraft(onboardingInfo?.objective ?? "");
       setObjectiveEditing(false);
+      setFirstNameDraft(p?.first_name ?? "");
+      setEmailDraft(p?.email ?? "");
+      setPhoneDraft(p?.phone ?? "");
+      setAgeDraft(onboardingInfo?.age ?? "");
+      setProfessionDraft(onboardingInfo?.profession ?? "");
+      setInfoEditing(false);
+      setInfoError(null);
     } catch (err) {
       console.error(err);
       toast.error("Impossible de charger la fiche de cet élève.");
@@ -99,6 +115,41 @@ export function AdminStudentDetailPage() {
       toast.error("Impossible d'enregistrer l'objectif professionnel.");
     } finally {
       setObjectiveSaving(false);
+    }
+  };
+
+  const cancelInfoEdit = () => {
+    if (!profile) return;
+    setFirstNameDraft(profile.first_name ?? "");
+    setEmailDraft(profile.email ?? "");
+    setPhoneDraft(profile.phone ?? "");
+    setAgeDraft(onboarding?.age ?? "");
+    setProfessionDraft(onboarding?.profession ?? "");
+    setInfoError(null);
+    setInfoEditing(false);
+  };
+
+  const saveInfo = async () => {
+    if (!studentId || !profile) return;
+    setInfoSaving(true);
+    setInfoError(null);
+    try {
+      await saveStudentInfo(studentId, profile.email, {
+        firstName: firstNameDraft,
+        email: emailDraft,
+        phone: phoneDraft,
+        age: ageDraft,
+        profession: professionDraft,
+      });
+      setProfile((p) => (p ? { ...p, first_name: firstNameDraft.trim() || null, email: emailDraft.trim() || p.email, phone: phoneDraft.trim() || null } : p));
+      setOnboarding((o) => (o ? { ...o, age: ageDraft.trim() || null, profession: professionDraft.trim() || null } : o));
+      setInfoEditing(false);
+      toast.success("Informations mises à jour.");
+    } catch (err) {
+      console.error(err);
+      setInfoError(err instanceof Error ? err.message : "Erreur inconnue.");
+    } finally {
+      setInfoSaving(false);
     }
   };
 
@@ -188,15 +239,53 @@ export function AdminStudentDetailPage() {
 
       {staff && (
         <GCard><div className="p-6">
-          <h3 className="text-sm font-black mb-4" style={{ color: th.fg }}>Informations</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
-            {[["Âge", onboarding?.age ? `${onboarding.age} ans` : "Non renseigné"], ["Email", profile.email], ["Profession", onboarding?.profession || "Non renseignée"]].map(([label, val]) => (
-              <div key={label}>
-                <label className="block text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>{label}</label>
-                <p className="text-sm" style={{ color: th.fg2 }}>{val}</p>
-              </div>
-            ))}
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-black" style={{ color: th.fg }}>Informations</h3>
+            {admin && !infoEditing && (
+              <button onClick={() => setInfoEditing(true)} className="text-xs font-semibold transition-colors hover:opacity-70" style={{ color: th.navAC }}>Modifier</button>
+            )}
           </div>
+
+          {infoEditing ? (
+            <div className="space-y-3 mb-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Prénom</label>
+                  <input value={firstNameDraft} onChange={(e) => setFirstNameDraft(e.target.value)} className="w-full rounded-xl px-3.5 py-2.5 text-sm g-input" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Âge</label>
+                  <input value={ageDraft} onChange={(e) => setAgeDraft(e.target.value)} type="number" className="w-full rounded-xl px-3.5 py-2.5 text-sm g-input" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Email</label>
+                  <input value={emailDraft} onChange={(e) => setEmailDraft(e.target.value)} type="email" className="w-full rounded-xl px-3.5 py-2.5 text-sm g-input" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Téléphone</label>
+                  <input value={phoneDraft} onChange={(e) => setPhoneDraft(e.target.value)} type="tel" className="w-full rounded-xl px-3.5 py-2.5 text-sm g-input" />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Profession</label>
+                  <input value={professionDraft} onChange={(e) => setProfessionDraft(e.target.value)} className="w-full rounded-xl px-3.5 py-2.5 text-sm g-input" />
+                </div>
+              </div>
+              {infoError && <p className="text-xs" style={{ color: "#fbc2ad" }}>{infoError}</p>}
+              <div className="flex items-center gap-2">
+                <ShimBtn sm onClick={saveInfo} disabled={infoSaving}>{infoSaving ? "Enregistrement…" : "Enregistrer"}</ShimBtn>
+                <VBtn sm onClick={cancelInfoEdit} disabled={infoSaving}>Annuler</VBtn>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+              {[["Prénom", profile.first_name || "Non renseigné"], ["Âge", onboarding?.age ? `${onboarding.age} ans` : "Non renseigné"], ["Email", profile.email], ["Téléphone", profile.phone || "Non renseigné"], ["Profession", onboarding?.profession || "Non renseignée"]].map(([label, val]) => (
+                <div key={label}>
+                  <label className="block text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>{label}</label>
+                  <p className="text-sm" style={{ color: th.fg2 }}>{val}</p>
+                </div>
+              ))}
+            </div>
+          )}
 
           <div className="mb-5">
             <div className="flex items-center justify-between mb-1.5">
