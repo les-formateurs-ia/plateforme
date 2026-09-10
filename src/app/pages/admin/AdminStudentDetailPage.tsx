@@ -15,6 +15,7 @@ import {
 } from "@/app/lib/formationInstances";
 import { listCoachAssignableCards, assignFormateurToStudent, type PersonCard } from "@/app/lib/planning";
 import { StudentStudioGallery } from "@/app/components/admin/StudentStudioGallery";
+import { StudentStudioVideoGallery } from "@/app/components/admin/StudentStudioVideoGallery";
 import {
   getStudentOnboarding, updateStudentObjective, updateStudentExperience, updateStudentTutorPersona,
   type StudentOnboardingInfo, type PedagogyStyle,
@@ -356,6 +357,7 @@ export function AdminStudentDetailPage() {
       )}
 
       {staff && <StudentStudioGallery studentId={profile.id} />}
+      {staff && <StudentStudioVideoGallery studentId={profile.id} />}
     </div>
   );
 }

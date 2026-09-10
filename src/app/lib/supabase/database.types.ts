@@ -114,6 +114,37 @@ export interface Database {
         };
         Update: Partial<Database["public"]["Tables"]["studio_image_generations"]["Insert"]>;
       };
+      studio_video_generations: {
+        Row: {
+          id: string;
+          user_id: string;
+          status: StudioImageStatus;
+          model: string;
+          options: Record<string, unknown>;
+          prompt: string;
+          source_image_path: string | null;
+          video_path: string | null;
+          external_request_id: string | null;
+          error_message: string | null;
+          created_at: string;
+          completed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          status?: StudioImageStatus;
+          model: string;
+          options?: Record<string, unknown>;
+          prompt: string;
+          source_image_path?: string | null;
+          video_path?: string | null;
+          external_request_id?: string | null;
+          error_message?: string | null;
+          created_at?: string;
+          completed_at?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["studio_video_generations"]["Insert"]>;
+      };
       formations: {
         Row: {
           id: string;
