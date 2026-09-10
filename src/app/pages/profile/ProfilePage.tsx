@@ -38,22 +38,14 @@ function GoogleLogo({ className }: { className?: string }) {
 export function ProfilePage() {
   const th = useTh();
   const { user, role, signOut } = useAuth();
-  const { profile, updateProfile, updateAvatar } = useProfile();
+  const { profile, updateAvatar } = useProfile();
   const name = profile.name || "Alex Dubois";
   const [searchParams, setSearchParams] = useSearchParams();
   const [tab, setTab] = useState<"overview" | "badges" | "settings">("overview");
   const [googleConnected, setGoogleConnected] = useState(false);
   const [googleCalendarEmail, setGoogleCalendarEmail] = useState<string | null>(null);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [objectiveDraft, setObjectiveDraft] = useState(profile.goalFinal || profile.goal || "");
-  const [objectiveEditing, setObjectiveEditing] = useState(false);
-  const [objectiveSaving, setObjectiveSaving] = useState(false);
-  const [objectiveError, setObjectiveError] = useState<string | null>(null);
   const currentObjective = profile.goalFinal || profile.goal || "";
-  const [phoneDraft, setPhoneDraft] = useState(profile.phone || "");
-  const [phoneEditing, setPhoneEditing] = useState(false);
-  const [phoneSaving, setPhoneSaving] = useState(false);
-  const [phoneError, setPhoneError] = useState<string | null>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarError, setAvatarError] = useState<string | null>(null);
@@ -125,14 +117,6 @@ export function ProfilePage() {
   const [enrolledSince, setEnrolledSince] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!objectiveEditing) setObjectiveDraft(currentObjective);
-  }, [currentObjective, objectiveEditing]);
-
-  useEffect(() => {
-    if (!phoneEditing) setPhoneDraft(profile.phone || "");
-  }, [profile.phone, phoneEditing]);
-
-  useEffect(() => {
     if (!user) return;
     let cancelled = false;
     (async () => {
@@ -175,31 +159,6 @@ export function ProfilePage() {
   // à "unauthenticated" — inutile et dangereux de le court-circuiter.
   const handleSignOut = async () => {
     await signOut();
-  };
-
-  const saveObjective = async () => {
-    setObjectiveSaving(true);
-    setObjectiveError(null);
-    const cleanedObjective = objectiveDraft.trim();
-    const { error } = await updateProfile({ goal: cleanedObjective, goalFinal: cleanedObjective });
-    setObjectiveSaving(false);
-    if (error) {
-      setObjectiveError(error);
-      return;
-    }
-    setObjectiveEditing(false);
-  };
-
-  const savePhone = async () => {
-    setPhoneSaving(true);
-    setPhoneError(null);
-    const { error } = await updateProfile({ phone: phoneDraft.trim() });
-    setPhoneSaving(false);
-    if (error) {
-      setPhoneError(error);
-      return;
-    }
-    setPhoneEditing(false);
   };
 
   return (
@@ -331,81 +290,20 @@ export function ProfilePage() {
             </div>
           </div></GCard>
 
-          {/* Theme toggle */}
+          {/* Objectif professionnel — lecture seule, modifiable uniquement par un formateur/admin */}
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="block text-xs font-bold uppercase tracking-widest" style={{ color: th.fg3 }}>Objectif professionnel</label>
-              {!objectiveEditing && (
-                <button onClick={() => setObjectiveEditing(true)} className="text-xs font-semibold transition-colors hover:opacity-70" style={{ color: th.navAC }}>
-                  Modifier
-                </button>
-              )}
+            <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Objectif professionnel</label>
+            <div className="w-full rounded-xl px-4 py-3 text-sm" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
+              <span style={{ color: currentObjective ? th.fg2 : th.fg3 }}>{currentObjective || "Non renseigné."}</span>
             </div>
-            {objectiveEditing ? (
-              <div className="space-y-2">
-                <textarea
-                  value={objectiveDraft}
-                  onChange={e => setObjectiveDraft(e.target.value)}
-                  rows={5}
-                  placeholder="Decris ton objectif professionnel..."
-                  className="w-full rounded-xl px-4 py-3 text-sm g-input resize-none"
-                />
-                {objectiveError && <p className="text-xs" style={{ color: "#fbc2ad" }}>{objectiveError}</p>}
-                <div className="flex items-center gap-2">
-                  <button onClick={saveObjective} disabled={objectiveSaving} className="px-4 py-2 rounded-lg text-xs font-bold transition-all hover:opacity-80 disabled:opacity-50"
-                    style={{ background: `${th.gradShadow(0.12)}`, border: `1px solid ${th.gradShadow(0.25)}`, color: th.navAC }}>
-                    {objectiveSaving ? "Enregistrement..." : "Enregistrer"}
-                  </button>
-                  <button onClick={() => { setObjectiveDraft(currentObjective); setObjectiveEditing(false); setObjectiveError(null); }} disabled={objectiveSaving}
-                    className="px-4 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-70 disabled:opacity-50" style={{ color: th.fg3 }}>
-                    Annuler
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="w-full rounded-xl px-4 py-3 text-sm flex items-center justify-between" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
-                <span style={{ color: currentObjective ? th.fg2 : th.fg3 }}>{currentObjective || "Non renseigne - complete ton objectif ici."}</span>
-              </div>
-            )}
           </div>
 
-          {/* Téléphone — optionnel, saisi à l'inscription ou modifiable ici */}
+          {/* Téléphone — lecture seule, modifiable uniquement par un formateur/admin */}
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="block text-xs font-bold uppercase tracking-widest" style={{ color: th.fg3 }}>Téléphone</label>
-              {!phoneEditing && (
-                <button onClick={() => setPhoneEditing(true)} className="text-xs font-semibold transition-colors hover:opacity-70" style={{ color: th.navAC }}>
-                  Modifier
-                </button>
-              )}
+            <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Téléphone</label>
+            <div className="w-full rounded-xl px-4 py-3 text-sm" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
+              <span style={{ color: profile.phone ? th.fg2 : th.fg3 }}>{profile.phone || "Non renseigné"}</span>
             </div>
-            {phoneEditing ? (
-              <div className="space-y-2">
-                <input
-                  type="tel"
-                  autoComplete="tel"
-                  value={phoneDraft}
-                  onChange={e => setPhoneDraft(e.target.value)}
-                  placeholder="06 12 34 56 78"
-                  className="w-full rounded-xl px-4 py-3 text-sm g-input"
-                />
-                {phoneError && <p className="text-xs" style={{ color: "#fbc2ad" }}>{phoneError}</p>}
-                <div className="flex items-center gap-2">
-                  <button onClick={savePhone} disabled={phoneSaving} className="px-4 py-2 rounded-lg text-xs font-bold transition-all hover:opacity-80 disabled:opacity-50"
-                    style={{ background: `${th.gradShadow(0.12)}`, border: `1px solid ${th.gradShadow(0.25)}`, color: th.navAC }}>
-                    {phoneSaving ? "Enregistrement..." : "Enregistrer"}
-                  </button>
-                  <button onClick={() => { setPhoneDraft(profile.phone || ""); setPhoneEditing(false); setPhoneError(null); }} disabled={phoneSaving}
-                    className="px-4 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-70 disabled:opacity-50" style={{ color: th.fg3 }}>
-                    Annuler
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="w-full rounded-xl px-4 py-3 text-sm flex items-center justify-between" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
-                <span style={{ color: profile.phone ? th.fg2 : th.fg3 }}>{profile.phone || "Non renseigné"}</span>
-              </div>
-            )}
           </div>
 
           <GCard><div className="p-5 flex items-center justify-between gap-4 flex-wrap">
@@ -466,9 +364,8 @@ export function ProfilePage() {
             {[["Prénom", profile.name || "Alex"], ["Âge", profile.age ? `${profile.age} ans` : "Non renseigné"], ["Profession", profile.profession || "Chef de projet"], ["Email", user?.email || "—"]].map(([label, val]) => (
               <div key={label}>
                 <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>{label}</label>
-                <div className="w-full rounded-xl px-4 py-3 text-sm flex items-center justify-between" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
+                <div className="w-full rounded-xl px-4 py-3 text-sm" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
                   <span style={{ color: th.fg2 }}>{val}</span>
-                  <button className="text-xs transition-colors hover:opacity-70" style={{ color: th.navAC }}>Modifier</button>
                 </div>
               </div>
             ))}
