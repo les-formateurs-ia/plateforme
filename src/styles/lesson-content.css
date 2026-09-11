@@ -1,0 +1,90 @@
+/* Styles par défaut pour le HTML "CONTENU DU COURS" injecté dans LessonPage.tsx
+   (voir .lesson-html-content). Le formateur écrit du HTML libre et peut tout
+   surcharger (style inline, balises structurantes) — ceci n'est qu'un filet pour
+   du HTML minimal sans mise en forme explicite. Conteneur volontairement sans
+   bordure/ombre/scroll propre : il s'intègre dans le flux et le scroll de la page. */
+.lesson-html-content > :first-child { margin-top: 0; }
+.lesson-html-content > :last-child { margin-bottom: 0; }
+
+.lesson-html-content h1,
+.lesson-html-content h2,
+.lesson-html-content h3,
+.lesson-html-content h4,
+.lesson-html-content h5,
+.lesson-html-content h6 {
+  font-weight: 900;
+  color: var(--foreground);
+  margin: 1.5em 0 0.6em;
+}
+.lesson-html-content h1 { font-size: 1.125rem; }
+.lesson-html-content h2 { font-size: 1rem; }
+.lesson-html-content h3,
+.lesson-html-content h4 { font-size: 0.9rem; }
+
+.lesson-html-content p { margin: 0 0 0.75em; }
+
+.lesson-html-content ul,
+.lesson-html-content ol {
+  margin: 0 0 0.75em;
+  padding-left: 1.25em;
+}
+.lesson-html-content ul { list-style: disc; }
+.lesson-html-content ol { list-style: decimal; }
+.lesson-html-content li + li { margin-top: 0.25em; }
+
+.lesson-html-content strong,
+.lesson-html-content b { color: var(--foreground); }
+
+.lesson-html-content a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.lesson-html-content blockquote {
+  margin: 0.75em 0;
+  padding-left: 1em;
+  border-left: 3px solid var(--primary);
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+.lesson-html-content code {
+  padding: 0.15em 0.4em;
+  border-radius: 0.35em;
+  background: var(--muted);
+  font-size: 0.85em;
+  font-family: ui-monospace, monospace;
+}
+.lesson-html-content pre {
+  padding: 1em;
+  border-radius: 0.75em;
+  background: var(--muted);
+  overflow-x: auto;
+}
+.lesson-html-content pre code { padding: 0; background: none; }
+
+.lesson-html-content hr {
+  margin: 1.25em 0;
+  border: none;
+  border-top: 1px solid var(--border);
+}
+
+.lesson-html-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.75em;
+}
+
+.lesson-html-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 0.75em;
+  font-size: 0.85em;
+}
+.lesson-html-content th,
+.lesson-html-content td {
+  text-align: left;
+  padding: 0.5em 0.75em;
+  border-bottom: 1px solid var(--border);
+}
+.lesson-html-content th { font-weight: 700; }

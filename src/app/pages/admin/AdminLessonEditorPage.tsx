@@ -361,10 +361,10 @@ export function AdminLessonEditorPage() {
         </div>
 
         <div>
-          <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Contenu du cours (texte de référence, Markdown)</label>
+          <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Contenu du cours (HTML)</label>
           <textarea value={referenceContent} onChange={(e) => setReferenceContent(e.target.value)} rows={14}
-            className="w-full rounded-xl px-4 py-3 text-sm g-input resize-y font-mono" placeholder="## Objectif&#10;&#10;...&#10;&#10;### Théorie&#10;..." />
-          <p className="text-xs mt-1.5" style={{ color: th.fg3 }}>Contenu fixe affiché à tous les élèves — sert de base à la personnalisation IA (Étape 2).</p>
+            className="w-full rounded-xl px-4 py-3 text-sm g-input resize-y font-mono" placeholder="<h2>Objectif</h2>&#10;<p>...</p>&#10;&#10;<h3>Théorie</h3>&#10;<p>...</p>" />
+          <p className="text-xs mt-1.5" style={{ color: th.fg3 }}>Contenu fixe affiché à tous les élèves — sert de base à la personnalisation IA (Étape 2). HTML brut (balises, style, tableaux…) ; nettoyé automatiquement des scripts et attributs dangereux à l'affichage.</p>
         </div>
 
         <div>

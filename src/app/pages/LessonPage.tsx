@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import DOMPurify from "dompurify";
 import {
   ChevronRight, ChevronLeft, Mic, Send,
   Sparkles, MessageSquare, CheckCircle, X,
@@ -36,34 +35,34 @@ import { MindmapView } from "@/app/components/lesson/MindmapView";
 
 const DEFAULT_AI = "Je suis ton Copilote IA. Pose-moi n'importe quelle question sur cette leçon ou sur comment l'appliquer à ton métier 👋";
 
-// Le contenu de cours est rédigé par les formateurs et mentionne parfois les critères de
-// certification (ex: "Lien avec la certification — Cr1.3 : ..."), une info interne qui ne
-// doit pas apparaître côté élève. On la retire à l'affichage plutôt qu'en base, pour ne pas
-// devoir ré-éditer chaque leçon existante.
-function stripCertificationMentions(markdown: string): string {
-  const lines = markdown.split("\n");
-  const kept: string[] = [];
+// Le contenu de cours est rédigé par les formateurs en HTML brut et mentionne parfois les
+// critères de certification (ex: "Lien avec la certification — Cr1.3 : ..."), une info interne
+// qui ne doit pas apparaître côté élève. On la retire à l'affichage plutôt qu'en base, pour ne
+// pas devoir ré-éditer chaque leçon existante. Les sections sont délimitées par des balises de
+// titre (h1-h6), comme pour les anciens contenus Markdown.
+function stripCertificationMentions(html: string): string {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const HEADING_RE = /^H[1-6]$/;
+  const STARTS_WITH_MENTION_RE = /^lien avec la certification/i;
   let skipping = false;
   let skipLevel = 0;
-  for (const line of lines) {
-    const heading = line.match(/^(#{1,6})\s+(.*)$/);
-    if (heading) {
-      const level = heading[1].length;
+  for (const node of Array.from(doc.body.children)) {
+    if (HEADING_RE.test(node.tagName)) {
+      const level = Number(node.tagName[1]);
       if (skipping && level <= skipLevel) skipping = false;
-      if (!skipping && /lien avec la certification/i.test(heading[2])) {
+      if (!skipping && STARTS_WITH_MENTION_RE.test((node.textContent ?? "").trim())) {
         skipping = true;
         skipLevel = level;
-        continue;
       }
+    } else if (!skipping && STARTS_WITH_MENTION_RE.test((node.textContent ?? "").trim())) {
+      // Bloc isolé (pas un titre) qui mentionne directement la certification, ex: un
+      // paragraphe en gras — pas de "niveau" à comparer, on le retire lui seul.
+      node.remove();
+      continue;
     }
-    if (!skipping) kept.push(line);
+    if (skipping) node.remove();
   }
-  return kept
-    .join("\n")
-    .split(/\n{2,}/)
-    .filter((block) => !/^[\s>*_-]*\**\s*lien avec la certification/i.test(block.trim()))
-    .join("\n\n")
-    .trim();
+  return doc.body.innerHTML.trim();
 }
 
 export function LessonPage() {
@@ -111,6 +110,12 @@ export function LessonPage() {
   // sinon un admin/élève inscrit à plusieurs cours resterait bloqué sur une leçon
   // d'un cours différent de celui utilisé pour calculer sa progression "active".
   const course = useCourseProgress(lesson?.instanceId);
+  // HTML rédigé par le formateur (voir AdminLessonEditorPage) — nettoyé des critères de
+  // certification puis assaini avant injection, jamais affiché tel quel.
+  const courseHtml = useMemo(() => {
+    if (!lesson?.referenceContent) return "";
+    return DOMPurify.sanitize(stripCertificationMentions(lesson.referenceContent));
+  }, [lesson?.referenceContent]);
   useEffect(() => {
     if (lesson && !lesson.videoUrl && tab === "video") setTab("mindmap");
   }, [lesson, tab]);
@@ -927,35 +932,21 @@ export function LessonPage() {
           </div>
 
           <div className="space-y-5">
-            {lesson.referenceContent && stripCertificationMentions(lesson.referenceContent) && (
-              <GCard><div className="p-6">
+            {courseHtml && (
+              <div>
                 <div className="flex items-center gap-2.5 mb-4">
                   <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: `${th.gradShadow(0.1)}`, border: `1px solid ${th.gradShadow(0.2)}` }}><BookOpen className="w-4 h-4" style={{ color: th.navAC }} /></div>
                   <span className="text-sm font-black" style={{ color: th.fg }}>Cours</span>
                 </div>
-                <div style={{ color: th.fg2, fontSize: "0.9rem", lineHeight: 1.7 }}>
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    components={{
-                      h1: (p) => <h2 className="text-lg font-black mt-6 mb-3 first:mt-0" style={{ color: th.fg }} {...p} />,
-                      h2: (p) => <h3 className="text-base font-black mt-6 mb-2.5 first:mt-0" style={{ color: th.fg }} {...p} />,
-                      h3: (p) => <h4 className="text-sm font-bold mt-5 mb-2" style={{ color: th.fg }} {...p} />,
-                      p: (p) => <p className="mb-3" {...p} />,
-                      ul: (p) => <ul className="list-disc pl-5 mb-3 space-y-1" {...p} />,
-                      ol: (p) => <ol className="list-decimal pl-5 mb-3 space-y-1" {...p} />,
-                      strong: (p) => <strong style={{ color: th.fg }} {...p} />,
-                      blockquote: (p) => <blockquote className="pl-4 my-3 italic" style={{ borderLeft: `3px solid ${th.navAC}`, color: th.fg3 }} {...p} />,
-                      code: (p) => <code className="px-1.5 py-0.5 rounded text-xs font-mono" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : `${th.gradShadow(0.08)}` }} {...p} />,
-                      hr: () => <hr className="my-5" style={{ borderColor: th.sep }} />,
-                      table: (p) => <div className="overflow-x-auto mb-3"><table className="w-full text-xs border-collapse" {...p} /></div>,
-                      th: (p) => <th className="text-left px-3 py-2 font-bold" style={{ color: th.fg, borderBottom: `1px solid ${th.sep}` }} {...p} />,
-                      td: (p) => <td className="px-3 py-2 align-top" style={{ borderBottom: `1px solid ${th.sep}` }} {...p} />,
-                    }}
-                  >
-                    {stripCertificationMentions(lesson.referenceContent)}
-                  </ReactMarkdown>
-                </div>
-              </div></GCard>
+                {/* Rendu HTML "seamless" (pas de carte, pas de scroll interne) — voir
+                    .lesson-html-content dans src/styles/lesson-content.css pour les styles par
+                    défaut ; le formateur peut tout surcharger via des attributs style inline. */}
+                <div
+                  className="lesson-html-content"
+                  style={{ color: th.fg2, fontSize: "0.9rem", lineHeight: 1.7 }}
+                  dangerouslySetInnerHTML={{ __html: courseHtml }}
+                />
+              </div>
             )}
 
             <GCard><div className="p-5">
