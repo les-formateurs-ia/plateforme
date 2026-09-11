@@ -192,10 +192,10 @@ export function MainLayout() {
           </div>
         )}
         <div className="p-4" style={{ borderTop: `1px solid ${th.sidebarB}` }}>
-          <div className="w-full flex items-center gap-3 px-2 py-1 rounded-xl">
+          <Link to="/profile" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-2 py-1 rounded-xl cursor-pointer transition-opacity hover:opacity-80">
             <Avatar url={profile.avatarUrl} size={36} />
             <div className="min-w-0 flex-1 text-left"><div className="text-sm font-semibold truncate" style={{ color: th.fg }}>{name}</div><div className="text-xs truncate" style={{ color: th.fg3 }}>{profile.profession || "Apprenant IA"}</div></div>
-          </div>
+          </Link>
         </div>
       </aside>
 
