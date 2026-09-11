@@ -1,24 +1,27 @@
 import { useNavigate } from "react-router";
-import { ArrowRight, Image as ImageIcon, Video, Music, Speech, Volume2, Languages, UserRoundCog } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { GT } from "@/app/components/common/GT";
+import imgImages from "@/imports/Créer vos images.png";
+import imgVideos from "@/imports/Imaginez vos vidéos.png";
+import imgMusiques from "@/imports/Concevez vos propres musiques.png";
+import imgTalkingHead from "@/imports/Faites parler vos images.png";
+import imgTextToSpeech from "@/imports/Du texte à l'audio.png";
+import imgDoublage from "@/imports/Parlez n'importe quelle langue.png";
+import imgFaceSwap from "@/imports/Prenez l'apparence de qui vous voulez.png";
 
-// Visuels/illustrations de chaque carte : en attente de validation du dossier
-// d'assets par le Product Owner (cf. ticket "Le Studio") — un dégradé +
-// icône sert de placeholder, à remplacer par `image` une fois le dossier
-// livré, sans changer la structure de la grille.
 // `restricted` : modules pas encore prêts (intégration API à venir) —
 // visibles en aperçu (grisé, non cliquable) pour l'admin seulement, masqués
 // pour le formateur et l'élève.
 const STUDIO_MODULES = [
-  { slug: "images",       Icon: ImageIcon,    title: "Créer vos images",                      subtitle: "Text-to-Image",                    desc: "Génère des visuels percutants à partir d'une simple description.", colors: ["#f97362", "#fbc2ad"] as const, restricted: false },
-  { slug: "videos",       Icon: Video,        title: "Imaginez vos vidéos",                    subtitle: "Text/Image-to-Video",              desc: "Transforme un texte ou une image en vidéo animée.",                colors: ["#6a8dde", "#78d5e2"] as const, restricted: false },
-  { slug: "musiques",     Icon: Music,        title: "Concevez vos propres musiques",          subtitle: "Text-to-Music",                    desc: "Compose une bande originale unique pour tes créations.",           colors: ["#b58de0", "#dbacf0"] as const, restricted: true },
-  { slug: "talking-head", Icon: Speech,       title: "Faites parler vos images",               subtitle: "Lip-sync / Talking Head",          desc: "Anime et synchronise les lèvres de tes visuels sur un discours.",  colors: ["#6adeb1", "#78d5e2"] as const, restricted: true },
-  { slug: "text-to-speech", Icon: Volume2,    title: "Du texte à l'audio",                     subtitle: "Text-to-Speech",                   desc: "Convertis instantanément un script écrit en voix naturelle.",      colors: ["#fbc2ad", "#fceccd"] as const, restricted: true },
-  { slug: "doublage",     Icon: Languages,    title: "Parlez n'importe quelle langue",         subtitle: "Traduction & Doublage audio",      desc: "Traduis et double automatiquement l'audio de tes vidéos.",         colors: ["#78d5e2", "#b58de0"] as const, restricted: true },
-  { slug: "face-swap",    Icon: UserRoundCog, title: "Prenez l'apparence de qui vous voulez",  subtitle: "Face Swap / Avatar",               desc: "Incarne un avatar ou échange de visage sur tes vidéos.",           colors: ["#dbacf0", "#f97362"] as const, restricted: true },
+  { slug: "images",       image: imgImages,       title: "Créer vos images",                      subtitle: "Text-to-Image",                    desc: "Génère des visuels percutants à partir d'une simple description.", restricted: false },
+  { slug: "videos",       image: imgVideos,       title: "Imaginez vos vidéos",                    subtitle: "Text/Image-to-Video",              desc: "Transforme un texte ou une image en vidéo animée.",                restricted: false },
+  { slug: "musiques",     image: imgMusiques,     title: "Concevez vos propres musiques",          subtitle: "Text-to-Music",                    desc: "Compose une bande originale unique pour tes créations.",           restricted: true },
+  { slug: "talking-head", image: imgTalkingHead,  title: "Faites parler vos images",               subtitle: "Lip-sync / Talking Head",          desc: "Anime et synchronise les lèvres de tes visuels sur un discours.",  restricted: true },
+  { slug: "text-to-speech", image: imgTextToSpeech, title: "Du texte à l'audio",                   subtitle: "Text-to-Speech",                   desc: "Convertis instantanément un script écrit en voix naturelle.",      restricted: true },
+  { slug: "doublage",     image: imgDoublage,     title: "Parlez n'importe quelle langue",         subtitle: "Traduction & Doublage audio",      desc: "Traduis et double automatiquement l'audio de tes vidéos.",         restricted: true },
+  { slug: "face-swap",    image: imgFaceSwap,     title: "Prenez l'apparence de qui vous voulez",  subtitle: "Face Swap / Avatar",               desc: "Incarne un avatar ou échange de visage sur tes vidéos.",           restricted: true },
 ];
 
 export function StudioPage() {
@@ -36,12 +39,12 @@ export function StudioPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-        {visibleModules.map(({ slug, Icon, title, subtitle, desc, colors, restricted }) => (
+        {visibleModules.map(({ slug, image, title, subtitle, desc, restricted }) => (
           <div key={slug} className={`relative rounded-3xl overflow-hidden transition-transform ${restricted ? "opacity-45 cursor-default" : "group cursor-pointer hover:scale-[1.01]"}`}
-            style={{ minHeight: 220, background: `linear-gradient(135deg,${colors[0]},${colors[1]})` }}
+            style={{ minHeight: 220 }}
             onClick={restricted ? undefined : () => navigate(`/studio/${slug}`)}>
-            <Icon className="absolute -right-4 -bottom-4 w-32 h-32 opacity-15 text-white" strokeWidth={1.25} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(180deg,rgba(10,10,16,0.05) 0%,rgba(10,10,16,0.55) 100%)" }} />
+            <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: `url(${image})`, backgroundSize: "cover", backgroundPosition: "center" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(180deg,rgba(10,10,16,0.15) 0%,rgba(10,10,16,0.75) 100%)" }} />
             <div className="relative h-full flex flex-col justify-between p-5" style={{ minHeight: 220 }}>
               <div>
                 <span className="inline-block text-[10px] font-bold px-2.5 py-1 rounded-full mb-2" style={{ background: "rgba(255,255,255,0.18)", color: "#fff", backdropFilter: "blur(4px)" }}>{subtitle}</span>
