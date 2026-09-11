@@ -43,7 +43,10 @@ export function StudioPage() {
           <div key={slug} className={`relative rounded-3xl overflow-hidden transition-transform ${restricted ? "opacity-45 cursor-default" : "group cursor-pointer hover:scale-[1.01]"}`}
             style={{ minHeight: 220 }}
             onClick={restricted ? undefined : () => navigate(`/studio/${slug}`)}>
-            <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: `url(${image})`, backgroundSize: "cover", backgroundPosition: "center" }} />
+            {/* url() entre guillemets : certains fichiers (ex. "Du texte à l'audio.png") ont une
+                apostrophe dans leur nom, invalide dans un url() CSS non quoté — sans les
+                guillemets, le navigateur rejette toute la déclaration et l'image disparaît. */}
+            <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: `url("${image}")`, backgroundSize: "cover", backgroundPosition: "center" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(180deg,rgba(10,10,16,0.15) 0%,rgba(10,10,16,0.75) 100%)" }} />
             <div className="relative h-full flex flex-col justify-between p-5" style={{ minHeight: 220 }}>
               <div>
