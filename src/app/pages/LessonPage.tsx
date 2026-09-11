@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
-import DOMPurify from "dompurify";
 import {
   ChevronRight, ChevronLeft, Mic, Send,
   Sparkles, MessageSquare, CheckCircle, X,
@@ -30,7 +29,7 @@ import { getMyMindmap, requestMindmapGeneration, type MindmapTree } from "@/app/
 import { findLatestConversationForInstance, getAgentMessages, sendAgentMessage, ensureConversation, insertAgentVoiceMessage } from "@/app/lib/agentChat";
 import { getMyAvatarVideo, getAvatarVideoSignedUrl, requestAvatarVideoGeneration, pollAvatarVideoStatus, type AvatarVideo } from "@/app/lib/avatarVideos";
 import { startGeminiVoiceSession, type GeminiVoiceSession } from "@/app/lib/geminiVoice";
-import { injectPlatformAuth, normalizeSmartQuotes } from "@/app/lib/platformHtml";
+import { injectPlatformAuth, injectAutoResize, normalizeSmartQuotes } from "@/app/lib/platformHtml";
 import { MindmapView } from "@/app/components/lesson/MindmapView";
 
 const DEFAULT_AI = "Je suis ton Copilote IA. Pose-moi n'importe quelle question sur cette leçon ou sur comment l'appliquer à ton métier 👋";
@@ -62,7 +61,9 @@ function stripCertificationMentions(html: string): string {
     }
     if (skipping) node.remove();
   }
-  return doc.body.innerHTML.trim();
+  // outerHTML (pas body.innerHTML) : si le formateur a collé un document complet avec un
+  // <head><style>...</style></head>, on ne veut pas le perdre en ne resérialisant que le body.
+  return doc.documentElement.outerHTML;
 }
 
 export function LessonPage() {
@@ -110,12 +111,27 @@ export function LessonPage() {
   // sinon un admin/élève inscrit à plusieurs cours resterait bloqué sur une leçon
   // d'un cours différent de celui utilisé pour calculer sa progression "active".
   const course = useCourseProgress(lesson?.instanceId);
-  // HTML rédigé par le formateur (voir AdminLessonEditorPage) — nettoyé des critères de
-  // certification puis assaini avant injection, jamais affiché tel quel.
+  // HTML rédigé par le formateur (voir AdminLessonEditorPage), rendu comme le Playground :
+  // vrai document dans une iframe sandboxée plutôt qu'un fragment injecté dans la page — pas
+  // d'assainissement ici, la sandbox (sans allow-same-origin) est la frontière de sécurité,
+  // comme pour lesson.customHtmlContent plus bas.
   const courseHtml = useMemo(() => {
     if (!lesson?.referenceContent) return "";
-    return DOMPurify.sanitize(stripCertificationMentions(lesson.referenceContent));
+    return stripCertificationMentions(lesson.referenceContent);
   }, [lesson?.referenceContent]);
+  const courseIframeRef = useRef<HTMLIFrameElement>(null);
+  const [courseIframeHeight, setCourseIframeHeight] = useState(0);
+  useEffect(() => { setCourseIframeHeight(0); }, [courseHtml]);
+  useEffect(() => {
+    function onMessage(e: MessageEvent) {
+      const data = e.data as { __autoResizeHeight?: number } | null;
+      if (!data || typeof data.__autoResizeHeight !== "number") return;
+      if (e.source !== courseIframeRef.current?.contentWindow) return;
+      setCourseIframeHeight(Math.ceil(data.__autoResizeHeight));
+    }
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, []);
   useEffect(() => {
     if (lesson && !lesson.videoUrl && tab === "video") setTab("mindmap");
   }, [lesson, tab]);
@@ -938,13 +954,19 @@ export function LessonPage() {
                   <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: `${th.gradShadow(0.1)}`, border: `1px solid ${th.gradShadow(0.2)}` }}><BookOpen className="w-4 h-4" style={{ color: th.navAC }} /></div>
                   <span className="text-sm font-black" style={{ color: th.fg }}>Cours</span>
                 </div>
-                {/* Rendu HTML "seamless" (pas de carte, pas de scroll interne) — voir
-                    .lesson-html-content dans src/styles/lesson-content.css pour les styles par
-                    défaut ; le formateur peut tout surcharger via des attributs style inline. */}
-                <div
-                  className="lesson-html-content"
-                  style={{ color: th.fg2, fontSize: "0.9rem", lineHeight: 1.7 }}
-                  dangerouslySetInnerHTML={{ __html: courseHtml }}
+                {/* Rendu "Playground" : vrai document HTML dans une iframe sandboxée (comme
+                    l'onglet Playground plus haut) au lieu d'un fragment injecté dans la page —
+                    le <style>/<script> du formateur s'exécute tel quel. L'iframe se
+                    redimensionne elle-même (postMessage, cf. injectAutoResize) pour épouser la
+                    hauteur du contenu : pas de hauteur fixe, pas de scroll propre, seul le
+                    scroll de la page reste actif. */}
+                <iframe
+                  ref={courseIframeRef}
+                  key={lesson.id}
+                  title={`${lesson.title} — Cours`}
+                  srcDoc={injectAutoResize(courseHtml)}
+                  sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
+                  style={{ width: "100%", height: courseIframeHeight, border: 0, display: "block" }}
                 />
               </div>
             )}
