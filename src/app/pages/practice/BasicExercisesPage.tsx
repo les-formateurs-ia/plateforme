@@ -75,7 +75,7 @@ export function BasicExercisesPage() {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <button onClick={() => navigate("/practice")} className="flex items-center gap-1.5 text-sm mb-2 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
-            <ArrowLeft className="w-4 h-4" />Pratique IA
+            <ArrowLeft className="w-4 h-4" />Exercez-vous !
           </button>
           <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Exercices basiques</GT></h2>
           <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Un thème = une leçon. Termine une leçon pour débloquer son QCM et réviser à volonté.</p>

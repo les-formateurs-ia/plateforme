@@ -14,6 +14,10 @@ import { LessonPage } from "@/app/pages/LessonPage";
 import { DashboardPage } from "@/app/pages/dashboard/DashboardPage";
 import { LessonsPage } from "@/app/pages/lessons/LessonsPage";
 import { PracticePage } from "@/app/pages/practice/PracticePage";
+import { StudioPage } from "@/app/pages/studio/StudioPage";
+import { StudioImagesPage } from "@/app/pages/studio/StudioImagesPage";
+import { StudioVideosPage } from "@/app/pages/studio/StudioVideosPage";
+import { StudioToolPage } from "@/app/pages/studio/StudioToolPage";
 import { AgentPage } from "@/app/pages/agent/AgentPage";
 import { BasicExercisesPage } from "@/app/pages/practice/BasicExercisesPage";
 import { PromptSessionsPage } from "@/app/pages/practice/PromptSessionsPage";
@@ -38,6 +42,7 @@ import { EntrepriseChoicePage } from "@/app/pages/entreprise/EntrepriseChoicePag
 import { CompaniesListPage } from "@/app/pages/entreprise/CompaniesListPage";
 import { CompanyDetailPage } from "@/app/pages/entreprise/CompanyDetailPage";
 import { CompanyStudentHomePage } from "@/app/pages/entreprise/CompanyStudentHomePage";
+import { CompanyPreviewPage } from "@/app/pages/entreprise/CompanyPreviewPage";
 import { CompanyPositioningTestPage } from "@/app/pages/entreprise/CompanyPositioningTestPage";
 import { CompanyHtmlExercisePage } from "@/app/pages/entreprise/CompanyHtmlExercisePage";
 import { CompanySatisfactionTestPage } from "@/app/pages/entreprise/CompanySatisfactionTestPage";
@@ -100,11 +105,14 @@ function CompanyWelcomeGuard({ children }: { children: ReactElement }) {
 }
 
 // Pages élève entreprise (test de positionnement, exercice HTML, test de
-// satisfaction) : réservées à un profil rattaché à une entreprise.
+// satisfaction) : réservées à un profil rattaché à une entreprise, OU au
+// staff qui prévisualise l'espace d'une entreprise (voir CompanyPreviewPage
+// et CompanyStudentHome — sans companyId sur son propre profil, le staff est
+// alors traité comme "en aperçu", réponses non enregistrées).
 function RequireCompanyStudent({ children }: { children: ReactElement }) {
   const { role, companyId } = useAuth();
   if (role === null) return <LoadingScreen />;
-  if (!companyId) return <Navigate to="/" replace />;
+  if (!companyId && !isStaff(role)) return <Navigate to="/" replace />;
   return children;
 }
 
@@ -174,6 +182,10 @@ function AppRoutes() {
         <Route path="practice/media/:sessionId" element={<MediaExercisePage />} />
         <Route path="practice/html" element={<HtmlExerciseSessionsPage />} />
         <Route path="practice/html/:sessionId" element={<HtmlExercisePage />} />
+        <Route path="studio" element={<StudioPage />} />
+        <Route path="studio/images" element={<StudioImagesPage />} />
+        <Route path="studio/videos" element={<StudioVideosPage />} />
+        <Route path="studio/:tool" element={<StudioToolPage />} />
         <Route path="agent" element={<AgentPage />} />
         <Route path="agent/:conversationId" element={<AgentPage />} />
         <Route path="calendar" element={<CalendarPage />} />
@@ -209,6 +221,7 @@ function AppRoutes() {
 
         <Route path="entreprise" element={<RequireStaff><CompaniesListPage /></RequireStaff>} />
         <Route path="entreprise/:companyId" element={<RequireStaff><CompanyDetailPage /></RequireStaff>} />
+        <Route path="entreprise/:companyId/preview" element={<RequireStaff><CompanyPreviewPage /></RequireStaff>} />
         <Route path="entreprise/positioning/:testId" element={<RequireCompanyStudent><CompanyPositioningTestPage /></RequireCompanyStudent>} />
         <Route path="entreprise/html/:exerciseId" element={<RequireCompanyStudent><CompanyHtmlExercisePage /></RequireCompanyStudent>} />
         <Route path="entreprise/satisfaction/:testId" element={<RequireCompanyStudent><CompanySatisfactionTestPage /></RequireCompanyStudent>} />

@@ -2,6 +2,9 @@
 // profiles/student_onboarding passent par une écriture directe (RLS
 // is_admin() les autorise déjà) ; l'email est un cas à part — cf.
 // updateStudentEmail.
+// Création d'un élève depuis l'admin (fiche "Nouvel élève") — passe par une
+// Edge Function service-role car ça crée un compte auth.users, cf.
+// supabase/functions/create-student. Aucun email n'est envoyé.
 import { supabase } from "@/app/lib/supabase/client";
 
 export interface StudentInfoUpdate {
@@ -10,6 +13,15 @@ export interface StudentInfoUpdate {
   phone: string;
   age: string;
   profession: string;
+}
+
+export interface CreateStudentInput {
+  firstName: string;
+  lastName?: string;
+  email: string;
+  phone?: string;
+  experience?: string;
+  objective?: string;
 }
 
 async function extractFunctionError(error: { message: string; context?: Response }): Promise<string> {
@@ -50,4 +62,11 @@ export async function saveStudentInfo(studentId: string, currentEmail: string, u
   if (trimmedEmail && trimmedEmail !== currentEmail) {
     await updateStudentEmail(studentId, trimmedEmail);
   }
+}
+
+export async function createStudent(input: CreateStudentInput): Promise<{ id: string }> {
+  const { data, error } = await supabase.functions.invoke("create-student", { body: input });
+  if (error) throw new Error(await extractFunctionError(error));
+  if (data?.error) throw new Error(data.error);
+  return data;
 }

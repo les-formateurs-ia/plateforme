@@ -85,7 +85,7 @@ export function MediaExerciseSessionsPage() {
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div>
         <button onClick={() => navigate("/practice")} className="flex items-center gap-1.5 text-sm mb-2 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
-          <ArrowLeft className="w-4 h-4" />Pratique IA
+          <ArrowLeft className="w-4 h-4" />Exercez-vous !
         </button>
         <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Génération images & vidéos</GT></h2>
         <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Reprends un historique existant ou lance un nouveau test.</p>
