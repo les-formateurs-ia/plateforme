@@ -8,7 +8,7 @@ const EMPTY_PROFILE: Profile = { name: "", age: "", profession: "", phone: "", g
 interface ProfileContextValue {
   profile: Profile;
   loading: boolean;
-  saveOnboarding: (profile: Profile) => Promise<void>;
+  saveOnboarding: (profile: Profile, userId?: string) => Promise<void>;
   updateProfile: (patch: Partial<Profile>) => Promise<{ error: string | null }>;
   updateAvatar: (file: File) => Promise<{ error: string | null }>;
 }
@@ -64,11 +64,15 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     return () => { cancelled = true; };
   }, [user]);
 
-  const saveOnboarding = async (p: Profile) => {
-    if (!user) return;
-    await supabase.from("profiles").update({ first_name: p.name, must_onboard: false }).eq("id", user.id);
+  const saveOnboarding = async (p: Profile, userId?: string) => {
+    // signUp() vient de créer le compte : le contexte auth n'a pas forcément
+    // encore propagé `user` à ce stade, donc on privilégie l'id transmis
+    // explicitement plutôt que d'attendre ce re-render.
+    const id = userId ?? user?.id;
+    if (!id) return;
+    await supabase.from("profiles").update({ first_name: p.name, must_onboard: false }).eq("id", id);
     await supabase.from("student_onboarding").upsert({
-      user_id: user.id,
+      user_id: id,
       age: p.age,
       profession: p.profession,
       goal: p.goal,

@@ -24,7 +24,7 @@ export function SignupPage() {
   const { user, signUp } = useAuth();
   const { saveOnboarding } = useProfile();
 
-  const firstStep = user ? 2 : 1;
+  const [firstStep] = useState(user ? 2 : 1);
   const [step, setStep] = useState(firstStep);
 
   const [email, setEmail] = useState("");
@@ -32,7 +32,6 @@ export function SignupPage() {
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [accountError, setAccountError] = useState<string | null>(null);
-  const [accountLoading, setAccountLoading] = useState(false);
 
   const [p, setP] = useState<Profile>({ name: "", age: "", profession: "", phone: "", goal: "", goalFinal: "", style: "", tutor: "", avatarUrl: null });
   const [aiState, setAiState] = useState<"idle" | "loading" | "proposal">("idle");
@@ -45,14 +44,14 @@ export function SignupPage() {
     return !!p.tutor;
   };
 
-  const handleCreateAccount = async (e: FormEvent) => {
+  // Le compte n'est créé qu'à la toute fin (voir finishOnboarding) : tant que
+  // l'utilisateur n'a pas validé le dernier écran, on ne fait que valider le
+  // formulaire localement, pour éviter de laisser des comptes orphelins en base
+  // si l'inscription est abandonnée en cours de route.
+  const handleAccountStep = (e: FormEvent) => {
     e.preventDefault();
     if (password !== passwordConfirm) { setAccountError("Les mots de passe ne correspondent pas."); return; }
     setAccountError(null);
-    setAccountLoading(true);
-    const { error } = await signUp(email, password, phone);
-    setAccountLoading(false);
-    if (error) { setAccountError(error); return; }
     setStep(2);
   };
 
@@ -69,9 +68,19 @@ export function SignupPage() {
   const acceptProposal = () => { setP(x => ({ ...x, goal: aiProposal, goalFinal: aiProposal })); setAiState("idle"); setAiProposal(""); };
   const discardProposal = () => { setAiState("idle"); setAiProposal(""); };
 
+  // Le compte n'existe pas encore en base à ce stade : on ne le crée qu'ici,
+  // une fois toutes les étapes validées, pour ne jamais laisser de compte
+  // orphelin si l'inscription est abandonnée avant la fin.
   const finishOnboarding = async () => {
     setFinishing(true);
-    await saveOnboarding(p);
+    const { error, userId } = await signUp(email, password, phone);
+    if (error || !userId) {
+      setFinishing(false);
+      setAccountError(error ?? "Une erreur est survenue lors de la création du compte.");
+      setStep(1);
+      return;
+    }
+    await saveOnboarding(p, userId);
     navigate("/");
   };
 
@@ -83,6 +92,11 @@ export function SignupPage() {
         <div className="flex justify-center mb-10"><Logo h={30} /></div>
         <GCard glow>
           <div className="p-6 sm:p-8 lg:p-10">
+            {step === 1 && (
+              <Link to="/" className="inline-flex items-center gap-1.5 text-sm mb-5 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
+                <ChevronLeft className="w-4 h-4" />Retour à l'accueil
+              </Link>
+            )}
             <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
               <div className="flex items-center gap-2">
                 {[1, 2, 3, 4].map(i => (
@@ -114,7 +128,7 @@ export function SignupPage() {
             </div>
 
             {step === 1 && (
-              <form onSubmit={handleCreateAccount} className="space-y-4 fade-up">
+              <form onSubmit={handleAccountStep} className="space-y-4 fade-up">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Email</label>
                   <input type="email" required autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="toi@exemple.com" className="w-full rounded-xl px-4 py-3 text-sm g-input" />
@@ -135,8 +149,8 @@ export function SignupPage() {
                 </div>
                 {accountError && <p className="text-xs" style={{ color: "#fbc2ad" }}>{accountError}</p>}
                 <div className="pt-2">
-                  <ShimBtn full disabled={accountLoading}>
-                    <span className="flex items-center justify-center gap-2.5">{accountLoading ? "Création…" : <>Continuer<ArrowRight className="w-5 h-5" /></>}</span>
+                  <ShimBtn full>
+                    <span className="flex items-center justify-center gap-2.5">Continuer<ArrowRight className="w-5 h-5" /></span>
                   </ShimBtn>
                 </div>
                 <p className="text-xs text-center" style={{ color: th.fg3 }}>

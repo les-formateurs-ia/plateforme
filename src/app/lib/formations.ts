@@ -4,6 +4,7 @@
 // une erreur Postgres, ces garde-fous côté client ne sont qu'un confort UX.
 import { supabase } from "@/app/lib/supabase/client";
 import type { FormationStatus } from "@/app/lib/supabase/database.types";
+import { deleteLessonVideoFiles } from "@/app/lib/lessonVideos";
 
 // Utilisé par le contexte de génération groupée (bulk-generation-context) une
 // fois la génération des mindmaps de référence terminée, et pour repasser en
@@ -34,8 +35,18 @@ export async function restoreFormation(formationId: string): Promise<void> {
 // Irréversible : supprime la ligne pour de bon (sections/leçons/quiz liés
 // suivent par cascade). Aucun retour en arrière possible après cet appel.
 export async function permanentlyDeleteFormation(formationId: string): Promise<void> {
+  const { data: sections } = await supabase.from("sections").select("id").eq("formation_id", formationId);
+  const sectionIds = (sections ?? []).map((s) => s.id);
+  const videoUrls: (string | null)[] = [];
+  if (sectionIds.length) {
+    const { data: lessons } = await supabase.from("lessons").select("video_url").in("section_id", sectionIds);
+    videoUrls.push(...(lessons ?? []).map((l) => l.video_url));
+  }
   const { error } = await supabase.from("formations").delete().eq("id", formationId);
   if (error) throw error;
+  // La cascade DB supprime aussi sections/leçons — on nettoie leurs vidéos
+  // dans le storage pour ne pas laisser de fichiers orphelins.
+  await deleteLessonVideoFiles(videoUrls);
 }
 
 export async function listTrashedFormations(): Promise<TrashedFormationRow[]> {

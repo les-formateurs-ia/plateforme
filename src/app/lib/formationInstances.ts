@@ -3,6 +3,7 @@
 // (mode instance), ce module couvre juste le cycle de vie de l'attribution.
 import { supabase } from "@/app/lib/supabase/client";
 import type { EnrollmentStatus, FormationStatus } from "@/app/lib/supabase/database.types";
+import { deleteLessonVideoFiles } from "@/app/lib/lessonVideos";
 
 export interface FormationInstanceRow {
   id: string;
@@ -67,6 +68,16 @@ export async function updateInstanceStatus(instanceId: string, status: Enrollmen
 }
 
 export async function deleteInstance(instanceId: string): Promise<void> {
+  const { data: sections } = await supabase.from("instance_sections").select("id").eq("instance_id", instanceId);
+  const sectionIds = (sections ?? []).map((s) => s.id);
+  const videoUrls: (string | null)[] = [];
+  if (sectionIds.length) {
+    const { data: lessons } = await supabase.from("instance_lessons").select("video_url").in("section_id", sectionIds);
+    videoUrls.push(...(lessons ?? []).map((l) => l.video_url));
+  }
   const { error } = await supabase.from("formation_instances").delete().eq("id", instanceId);
   if (error) throw error;
+  // La cascade DB supprime aussi instance_sections/instance_lessons — on
+  // nettoie leurs vidéos dans le storage pour ne pas laisser de fichiers orphelins.
+  await deleteLessonVideoFiles(videoUrls);
 }

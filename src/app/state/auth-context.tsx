@@ -26,7 +26,7 @@ interface AuthContextValue {
   themeMode: ThemeMode | null;
   setThemeMode: (mode: ThemeMode) => Promise<void>;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
-  signUp: (email: string, password: string, phone?: string) => Promise<{ error: string | null }>;
+  signUp: (email: string, password: string, phone?: string) => Promise<{ error: string | null; userId: string | null }>;
   signOut: () => Promise<void>;
   markOnboarded: () => void;
 }
@@ -41,7 +41,7 @@ const AuthContext = createContext<AuthContextValue>({
   themeMode: null,
   setThemeMode: async () => {},
   signIn: async () => ({ error: "Auth non initialisée" }),
-  signUp: async () => ({ error: "Auth non initialisée" }),
+  signUp: async () => ({ error: "Auth non initialisée", userId: null }),
   signOut: async () => {},
   markOnboarded: () => {},
 });
@@ -129,14 +129,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp: AuthContextValue["signUp"] = async (email, password, phone) => {
     const { error } = await supabase.auth.signUp({ email, password });
-    if (error) return { error: translateAuthError(error.message) };
+    if (error) return { error: translateAuthError(error.message), userId: null };
     const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-    if (signInError) return { error: translateAuthError(signInError.message) };
+    if (signInError) return { error: translateAuthError(signInError.message), userId: null };
     const trimmedPhone = phone?.trim();
     if (trimmedPhone && signInData.user) {
       await supabase.from("profiles").update({ phone: trimmedPhone }).eq("id", signInData.user.id);
     }
-    return { error: null };
+    return { error: null, userId: signInData.user?.id ?? null };
   };
 
   const signOut = async () => {

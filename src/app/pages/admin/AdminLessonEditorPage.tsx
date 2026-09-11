@@ -5,8 +5,9 @@ import { useTh } from "@/app/theme/theme";
 import { supabase } from "@/app/lib/supabase/client";
 import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
-import { ShimBtn } from "@/app/components/common/Buttons";
+import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
 import { useStaffBasePath } from "@/app/lib/staffBase";
+import { deleteLessonVideoFiles } from "@/app/lib/lessonVideos";
 
 interface QuizOptionDraft { id?: string; label: string; is_correct: boolean; }
 interface QuizQuestionDraft { id?: string; question: string; explanation: string; options: QuizOptionDraft[]; }
@@ -17,6 +18,87 @@ const EMPTY_QUESTION = (): QuizQuestionDraft => ({ question: "", explanation: ""
 const slugify = (s: string) => s.toLowerCase().trim()
   .normalize("NFD").replace(/[̀-ͯ]/g, "")
   .replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+// Import CSV du quiz — colonnes attendues (ordre libre, insensible aux accents/casse) :
+// question, reponse_1, reponse_2, …, bonne_reponse (numéro ou texte exact de la réponse), explication (optionnel).
+const normalizeHeader = (h: string) => h.trim().toLowerCase()
+  .normalize("NFD").replace(/[̀-ͯ]/g, "")
+  .replace(/[^a-z0-9]+/g, "_").replace(/(^_|_$)/g, "");
+
+function parseCsvRows(text: string): string[][] {
+  // Détecte le séparateur : virgule (CSV standard) ou point-virgule (export Excel FR).
+  const firstLine = text.split(/\r?\n/, 1)[0] ?? "";
+  const delimiter = (firstLine.match(/;/g)?.length ?? 0) > (firstLine.match(/,/g)?.length ?? 0) ? ";" : ",";
+
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let field = "";
+  let inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else inQuotes = false; }
+      else field += c;
+    } else if (c === '"') {
+      inQuotes = true;
+    } else if (c === delimiter) {
+      row.push(field); field = "";
+    } else if (c === "\n" || c === "\r") {
+      if (c === "\r" && text[i + 1] === "\n") i++;
+      row.push(field); field = "";
+      if (row.some((f) => f.trim() !== "")) rows.push(row);
+      row = [];
+    } else field += c;
+  }
+  if (field.length || row.length) { row.push(field); if (row.some((f) => f.trim() !== "")) rows.push(row); }
+  return rows;
+}
+
+function parseQuizCsv(text: string): { questions: QuizQuestionDraft[]; errors: string[] } {
+  const rows = parseCsvRows(text);
+  const errors: string[] = [];
+  if (rows.length < 2) return { questions: [], errors: ["Le fichier est vide."] };
+
+  const headers = rows[0].map(normalizeHeader);
+  const questionCol = headers.findIndex((h) => h === "question");
+  const correctCol = headers.findIndex((h) => ["bonne_reponse", "reponse_correcte", "correct", "correct_answer"].includes(h));
+  const explanationCol = headers.findIndex((h) => ["explication", "explanation"].includes(h));
+  const optionCols = headers
+    .map((h, i) => ({ h, i }))
+    .filter(({ h }) => /^(reponse|option)_?\d+$/.test(h))
+    .sort((a, b) => parseInt(a.h.replace(/\D/g, ""), 10) - parseInt(b.h.replace(/\D/g, ""), 10))
+    .map(({ i }) => i);
+
+  if (questionCol === -1 || correctCol === -1 || optionCols.length < 2) {
+    return { questions: [], errors: ["Colonnes attendues introuvables : question, reponse_1, reponse_2…, bonne_reponse."] };
+  }
+
+  const questions: QuizQuestionDraft[] = [];
+  rows.slice(1).forEach((cols, rowIndex) => {
+    const questionText = (cols[questionCol] ?? "").trim();
+    if (!questionText) return;
+    const options = optionCols.map((c) => (cols[c] ?? "").trim()).filter(Boolean);
+    if (options.length < 2) { errors.push(`Ligne ${rowIndex + 2} : moins de 2 réponses, ignorée.`); return; }
+    const correctRaw = (cols[correctCol] ?? "").trim();
+    const correctIndexFromNumber = /^\d+$/.test(correctRaw) ? parseInt(correctRaw, 10) - 1 : -1;
+    const correctIndex = correctIndexFromNumber >= 0 && correctIndexFromNumber < options.length
+      ? correctIndexFromNumber
+      : options.findIndex((o) => o.toLowerCase() === correctRaw.toLowerCase());
+    if (correctIndex === -1) { errors.push(`Ligne ${rowIndex + 2} : bonne réponse "${correctRaw}" introuvable parmi les réponses.`); return; }
+    questions.push({
+      question: questionText,
+      explanation: explanationCol !== -1 ? (cols[explanationCol] ?? "").trim() : "",
+      options: options.map((label, i) => ({ label, is_correct: i === correctIndex })),
+    });
+  });
+
+  return { questions, errors };
+}
+
+const QUIZ_CSV_TEMPLATE = [
+  "question,reponse_1,reponse_2,reponse_3,reponse_4,bonne_reponse,explication",
+  '"Quelle est la capitale de la France ?","Paris","Lyon","Marseille","Nice","1","Paris est la capitale de la France depuis le Xe siècle."',
+].join("\n");
 
 // Édite soit une leçon TEMPLATE (/admin/courses/:courseId/lessons/…, tables
 // lessons/quiz_questions/quiz_options) soit une leçon d'un DUPLICATA élève
@@ -51,7 +133,9 @@ export function AdminLessonEditorPage() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [importNotice, setImportNotice] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const quizFileInputRef = useRef<HTMLInputElement>(null);
 
   const coursesBase = isInstance ? `${base}/instances/${courseId}` : `${base}/courses/${courseId}`;
 
@@ -113,6 +197,7 @@ export function AdminLessonEditorPage() {
     if (!courseId || !sectionId) return;
     setUploading(true);
     setError(null);
+    const previousUrl = videoUrl;
     const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
     const path = `${courseId}/${sectionId}/${Date.now()}-${safeName}`;
     const { error: uploadError } = await supabase.storage.from("lesson-videos").upload(path, file, { upsert: true });
@@ -120,6 +205,9 @@ export function AdminLessonEditorPage() {
     const { data } = supabase.storage.from("lesson-videos").getPublicUrl(path);
     setVideoUrl(data.publicUrl);
     setUploading(false);
+    // La vidéo remplacée n'est plus référencée par aucune leçon — on la
+    // supprime du storage pour ne pas laisser de fichier orphelin.
+    await deleteLessonVideoFiles([previousUrl]);
   };
 
   const addQuestion = () => setQuestions((qs) => [...qs, EMPTY_QUESTION()]);
@@ -134,6 +222,26 @@ export function AdminLessonEditorPage() {
     setQuestions((qs) => qs.map((q, i) => (i === qIndex ? { ...q, options: q.options.map((o, j) => (j === oIndex ? { ...o, label } : o)) } : q)));
   const setCorrectOption = (qIndex: number, oIndex: number) =>
     setQuestions((qs) => qs.map((q, i) => (i === qIndex ? { ...q, options: q.options.map((o, j) => ({ ...o, is_correct: j === oIndex })) } : q)));
+
+  const handleQuizCsvImport = async (file: File) => {
+    setImportNotice(null);
+    const text = await file.text();
+    const { questions: imported, errors } = parseQuizCsv(text);
+    if (imported.length) setQuestions((qs) => [...qs, ...imported]);
+    if (!imported.length) setImportNotice(errors[0] ?? "Aucune question valide trouvée dans le fichier.");
+    else if (errors.length) setImportNotice(`${imported.length} question(s) importée(s), mais : ${errors.join(" ")}`);
+    else setImportNotice(`${imported.length} question(s) importée(s) avec succès.`);
+  };
+
+  const downloadQuizCsvTemplate = () => {
+    const blob = new Blob([QUIZ_CSV_TEMPLATE], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "modele-quiz.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const save = async () => {
     if (!sectionId) { setError("Section inconnue — reviens depuis la fiche du cours."); return; }
@@ -303,10 +411,22 @@ export function AdminLessonEditorPage() {
       </div></GCard>
 
       <GCard><div className="p-6">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-2 gap-3 flex-wrap">
           <h3 className="text-sm font-black" style={{ color: th.fg }}>Quiz</h3>
-          <button onClick={addQuestion} className="flex items-center gap-1.5 text-xs font-semibold hover:opacity-70" style={{ color: th.navAC }}><Plus className="w-3.5 h-3.5" />Ajouter une question</button>
+          <div className="flex items-center gap-3">
+            <button type="button" onClick={downloadQuizCsvTemplate} className="text-xs font-semibold hover:opacity-70" style={{ color: th.fg3 }}>Modèle CSV</button>
+            <input ref={quizFileInputRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => e.target.files?.[0] && handleQuizCsvImport(e.target.files[0])} />
+            <button type="button" onClick={() => quizFileInputRef.current?.click()}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all hover:opacity-80"
+              style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg }}>
+              <Upload className="w-3.5 h-3.5" />Importer un CSV
+            </button>
+          </div>
         </div>
+        <p className="text-xs mb-4" style={{ color: th.fg3 }}>
+          Colonnes attendues : question, reponse_1, reponse_2…, bonne_reponse (numéro ou texte de la réponse), explication (optionnel).
+        </p>
+        {importNotice && <p className="text-xs mb-4" style={{ color: th.navAC }}>{importNotice}</p>}
 
         <div className="space-y-4">
           {questions.map((q, qIndex) => (
@@ -334,6 +454,10 @@ export function AdminLessonEditorPage() {
             </div>
           ))}
           {!questions.length && <p className="text-xs" style={{ color: th.fg3 }}>Aucune question pour l'instant.</p>}
+        </div>
+
+        <div className="flex justify-center mt-5">
+          <VBtn onClick={addQuestion} sm><span className="flex items-center gap-1.5"><Plus className="w-3.5 h-3.5" />Ajouter une question</span></VBtn>
         </div>
       </div></GCard>
 
