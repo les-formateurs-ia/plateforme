@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router";
-import { ArrowRight } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { GT } from "@/app/components/common/GT";
@@ -39,7 +38,7 @@ export function StudioPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-        {visibleModules.map(({ slug, image, title, subtitle, desc, restricted }) => (
+        {visibleModules.map(({ slug, image, title, subtitle, restricted }) => (
           <div key={slug} className={`relative rounded-3xl overflow-hidden transition-transform ${restricted ? "opacity-45 cursor-default" : "group cursor-pointer hover:scale-[1.01]"}`}
             style={{ minHeight: 220 }}
             onClick={restricted ? undefined : () => navigate(`/studio/${slug}`)}>
@@ -48,16 +47,9 @@ export function StudioPage() {
                 guillemets, le navigateur rejette toute la déclaration et l'image disparaît. */}
             <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: `url("${image}")`, backgroundSize: "cover", backgroundPosition: "center" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(180deg,rgba(10,10,16,0.15) 0%,rgba(10,10,16,0.75) 100%)" }} />
-            <div className="relative h-full flex flex-col justify-between p-5" style={{ minHeight: 220 }}>
-              <div>
-                <span className="inline-block text-[10px] font-bold px-2.5 py-1 rounded-full mb-2" style={{ background: "rgba(255,255,255,0.18)", color: "#fff", backdropFilter: "blur(4px)" }}>{subtitle}</span>
-                <h3 className="text-lg font-black text-white leading-snug">{title}</h3>
-                <p className="text-xs text-white/80 mt-1.5 leading-relaxed max-w-[85%]">{desc}</p>
-              </div>
-              <button disabled={restricted} className="self-start flex items-center gap-1.5 text-xs font-bold px-4 py-2.5 rounded-full transition-colors disabled:pointer-events-none hover:bg-white"
-                style={{ background: "rgba(255,255,255,0.92)", color: "#0f0e14" }}>
-                Créer maintenant <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+            <div className="relative h-full flex flex-col justify-end p-5" style={{ minHeight: 220 }}>
+              <span className="inline-block text-[10px] font-bold px-2.5 py-1 rounded-full mb-2 self-start" style={{ background: "rgba(255,255,255,0.18)", color: "#fff", backdropFilter: "blur(4px)" }}>{subtitle}</span>
+              <h3 className="text-lg font-black text-white leading-snug">{title}</h3>
             </div>
           </div>
         ))}
