@@ -47,9 +47,9 @@ export function StudioPage() {
                 guillemets, le navigateur rejette toute la déclaration et l'image disparaît. */}
             <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: `url("${image}")`, backgroundSize: "cover", backgroundPosition: "center" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(180deg,rgba(10,10,16,0.15) 0%,rgba(10,10,16,0.75) 100%)" }} />
-            <div className="relative h-full flex flex-col justify-end p-5" style={{ minHeight: 220 }}>
+            <div className="relative h-full flex flex-col justify-start p-5" style={{ minHeight: 220 }}>
               <span className="inline-block text-[10px] font-bold px-2.5 py-1 rounded-full mb-2 self-start" style={{ background: "rgba(255,255,255,0.18)", color: "#fff", backdropFilter: "blur(4px)" }}>{subtitle}</span>
-              <h3 className="text-lg font-black text-white leading-snug">{title}</h3>
+              <h3 className="text-2xl font-black text-white leading-tight max-w-[65%]">{title}</h3>
             </div>
           </div>
         ))}

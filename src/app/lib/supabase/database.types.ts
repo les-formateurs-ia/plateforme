@@ -7,7 +7,7 @@ export type EnrollmentStatus = "active" | "completed" | "paused";
 export type LessonProgressStatus = "locked" | "in_progress" | "completed";
 export type RdvStatus = "pending" | "confirmed" | "cancelled";
 export type NotificationType = "rdv_cancelled" | "rdv_reschedule_proposed" | "rdv_reschedule_accepted" | "rdv_reschedule_declined" | "rdv_booked" | "bilan_reminder" | "rdv_confirmed" | "incident_reported";
-export type AiContentType = "practical_exercise" | "mindmap" | "podcast" | "text_summary" | "remedial_explanation" | "remedial_quiz";
+export type AiContentType = "practical_exercise" | "mindmap" | "podcast" | "text_summary" | "remedial_explanation" | "remedial_quiz" | "avatar_video";
 export type ChatRole = "user" | "ai";
 export type VideoProvider = "cloudflare_stream" | "youtube" | "vimeo" | "external_url";
 export type FormationStatus = "draft" | "published" | "archived" | "generating";
@@ -55,6 +55,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
+        Relationships: never[];
       };
       student_onboarding: {
         Row: {
@@ -82,6 +83,7 @@ export interface Database {
           completed_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["student_onboarding"]["Insert"]>;
+        Relationships: never[];
       };
       studio_image_generations: {
         Row: {
@@ -113,6 +115,7 @@ export interface Database {
           completed_at?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["studio_image_generations"]["Insert"]>;
+        Relationships: never[];
       };
       studio_video_generations: {
         Row: {
@@ -144,6 +147,7 @@ export interface Database {
           completed_at?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["studio_video_generations"]["Insert"]>;
+        Relationships: never[];
       };
       formations: {
         Row: {
@@ -177,6 +181,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["formations"]["Insert"]>;
+        Relationships: never[];
       };
       sections: {
         Row: {
@@ -194,6 +199,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["sections"]["Insert"]>;
+        Relationships: never[];
       };
       lessons: {
         Row: {
@@ -231,6 +237,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["lessons"]["Insert"]>;
+        Relationships: never[];
       };
       quiz_questions: {
         Row: {
@@ -250,6 +257,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["quiz_questions"]["Insert"]>;
+        Relationships: never[];
       };
       quiz_options: {
         Row: {
@@ -267,6 +275,7 @@ export interface Database {
           order_index: number;
         };
         Update: Partial<Database["public"]["Tables"]["quiz_options"]["Insert"]>;
+        Relationships: never[];
       };
       ai_generated_content: {
         Row: {
@@ -294,6 +303,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["ai_generated_content"]["Insert"]>;
+        Relationships: never[];
       };
       prompt_exercise_attempts: {
         Row: {
@@ -319,6 +329,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["prompt_exercise_attempts"]["Insert"]>;
+        Relationships: never[];
       };
       media_exercise_attempts: {
         Row: {
@@ -360,6 +371,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["media_exercise_attempts"]["Insert"]>;
+        Relationships: never[];
       };
       html_exercise_attempts: {
         Row: {
@@ -379,6 +391,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["html_exercise_attempts"]["Insert"]>;
+        Relationships: never[];
       };
       exercise_sessions: {
         Row: {
@@ -402,6 +415,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["exercise_sessions"]["Insert"]>;
+        Relationships: never[];
       };
       html_exercises: {
         Row: {
@@ -425,6 +439,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["html_exercises"]["Insert"]>;
+        Relationships: never[];
       };
       html_exercise_assignments: {
         Row: {
@@ -442,6 +457,7 @@ export interface Database {
           assigned_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["html_exercise_assignments"]["Insert"]>;
+        Relationships: never[];
       };
       exercise_tags: {
         Row: {
@@ -457,6 +473,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["exercise_tags"]["Insert"]>;
+        Relationships: never[];
       };
       html_exercise_tag_assignments: {
         Row: {
@@ -474,6 +491,7 @@ export interface Database {
           assigned_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["html_exercise_tag_assignments"]["Insert"]>;
+        Relationships: never[];
       };
       chat_messages: {
         Row: {
@@ -495,6 +513,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["chat_messages"]["Insert"]>;
+        Relationships: never[];
       };
       agent_conversations: {
         Row: {
@@ -514,6 +533,7 @@ export interface Database {
           last_message_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["agent_conversations"]["Insert"]>;
+        Relationships: never[];
       };
       agent_messages: {
         Row: {
@@ -535,6 +555,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["agent_messages"]["Insert"]>;
+        Relationships: never[];
       };
       formation_instances: {
         Row: {
@@ -574,6 +595,7 @@ export interface Database {
           is_preview?: boolean;
         };
         Update: Partial<Database["public"]["Tables"]["formation_instances"]["Insert"]>;
+        Relationships: never[];
       };
       instance_sections: {
         Row: {
@@ -591,6 +613,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["instance_sections"]["Insert"]>;
+        Relationships: never[];
       };
       instance_lessons: {
         Row: {
@@ -628,6 +651,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["instance_lessons"]["Insert"]>;
+        Relationships: never[];
       };
       instance_quiz_questions: {
         Row: {
@@ -647,6 +671,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["instance_quiz_questions"]["Insert"]>;
+        Relationships: never[];
       };
       instance_quiz_options: {
         Row: {
@@ -664,6 +689,7 @@ export interface Database {
           order_index: number;
         };
         Update: Partial<Database["public"]["Tables"]["instance_quiz_options"]["Insert"]>;
+        Relationships: never[];
       };
       lesson_progress: {
         Row: {
@@ -687,6 +713,7 @@ export interface Database {
           completed_at?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["lesson_progress"]["Insert"]>;
+        Relationships: never[];
       };
       quiz_attempts: {
         Row: {
@@ -712,6 +739,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["quiz_attempts"]["Insert"]>;
+        Relationships: never[];
       };
       badges: {
         Row: {
@@ -731,6 +759,7 @@ export interface Database {
           criteria?: Record<string, unknown>;
         };
         Update: Partial<Database["public"]["Tables"]["badges"]["Insert"]>;
+        Relationships: never[];
       };
       user_badges: {
         Row: {
@@ -744,6 +773,7 @@ export interface Database {
           earned_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["user_badges"]["Insert"]>;
+        Relationships: never[];
       };
       availability_slots: {
         Row: {
@@ -761,6 +791,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["availability_slots"]["Insert"]>;
+        Relationships: never[];
       };
       rendez_vous: {
         Row: {
@@ -816,6 +847,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["rendez_vous"]["Insert"]>;
+        Relationships: never[];
       };
       google_oauth_tokens: {
         Row: {
@@ -837,6 +869,7 @@ export interface Database {
           is_platform_default?: boolean;
         };
         Update: Partial<Database["public"]["Tables"]["google_oauth_tokens"]["Insert"]>;
+        Relationships: never[];
       };
       google_oauth_states: {
         Row: {
@@ -850,6 +883,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["google_oauth_states"]["Insert"]>;
+        Relationships: never[];
       };
       notifications: {
         Row: {
@@ -875,6 +909,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["notifications"]["Insert"]>;
+        Relationships: never[];
       };
       student_ai_memory: {
         Row: {
@@ -890,6 +925,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["student_ai_memory"]["Insert"]>;
+        Relationships: never[];
       };
       reported_incidents: {
         Row: {
@@ -911,6 +947,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["reported_incidents"]["Insert"]>;
+        Relationships: never[];
       };
       companies: {
         Row: {
@@ -928,6 +965,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["companies"]["Insert"]>;
+        Relationships: never[];
       };
       company_employees: {
         Row: {
@@ -955,6 +993,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["company_employees"]["Insert"]>;
+        Relationships: never[];
       };
       company_positioning_tests: {
         Row: {
@@ -976,6 +1015,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["company_positioning_tests"]["Insert"]>;
+        Relationships: never[];
       };
       company_positioning_questions: {
         Row: {
@@ -993,6 +1033,7 @@ export interface Database {
           order_index: number;
         };
         Update: Partial<Database["public"]["Tables"]["company_positioning_questions"]["Insert"]>;
+        Relationships: never[];
       };
       company_positioning_options: {
         Row: {
@@ -1010,6 +1051,7 @@ export interface Database {
           order_index: number;
         };
         Update: Partial<Database["public"]["Tables"]["company_positioning_options"]["Insert"]>;
+        Relationships: never[];
       };
       company_positioning_attempts: {
         Row: {
@@ -1031,6 +1073,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["company_positioning_attempts"]["Insert"]>;
+        Relationships: never[];
       };
       company_files: {
         Row: {
@@ -1058,6 +1101,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["company_files"]["Insert"]>;
+        Relationships: never[];
       };
       company_html_exercises: {
         Row: {
@@ -1083,6 +1127,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["company_html_exercises"]["Insert"]>;
+        Relationships: never[];
       };
       company_satisfaction_tests: {
         Row: {
@@ -1104,6 +1149,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["company_satisfaction_tests"]["Insert"]>;
+        Relationships: never[];
       };
       company_satisfaction_questions: {
         Row: {
@@ -1121,6 +1167,7 @@ export interface Database {
           order_index: number;
         };
         Update: Partial<Database["public"]["Tables"]["company_satisfaction_questions"]["Insert"]>;
+        Relationships: never[];
       };
       company_satisfaction_options: {
         Row: {
@@ -1136,6 +1183,7 @@ export interface Database {
           order_index: number;
         };
         Update: Partial<Database["public"]["Tables"]["company_satisfaction_options"]["Insert"]>;
+        Relationships: never[];
       };
       company_satisfaction_responses: {
         Row: {
@@ -1155,6 +1203,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["company_satisfaction_responses"]["Insert"]>;
+        Relationships: never[];
       };
       company_file_categories: {
         Row: {
@@ -1170,6 +1219,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["company_file_categories"]["Insert"]>;
+        Relationships: never[];
       };
       company_student_uploads: {
         Row: {
@@ -1195,6 +1245,18 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["company_student_uploads"]["Insert"]>;
+        Relationships: never[];
+      };
+    };
+    Views: Record<string, never>;
+    Functions: {
+      assign_formation_to_student: {
+        Args: { p_template_id: string; p_student_id: string };
+        Returns: string;
+      };
+      preview_formation_as_staff: {
+        Args: { p_template_id: string };
+        Returns: string;
       };
     };
   };

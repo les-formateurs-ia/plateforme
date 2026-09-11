@@ -89,7 +89,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 
     const nextProfile = { ...profile, ...patch };
 
-    const profileFields: Record<string, string> = {};
+    const profileFields: Partial<{ first_name: string; phone: string }> = {};
     if (patch.name !== undefined) profileFields.first_name = patch.name;
     if (patch.phone !== undefined) profileFields.phone = patch.phone;
     const profileUpdate =
