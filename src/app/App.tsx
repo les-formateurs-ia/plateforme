@@ -26,6 +26,14 @@ import { MediaExerciseSessionsPage } from "@/app/pages/practice/MediaExerciseSes
 import { MediaExercisePage } from "@/app/pages/practice/MediaExercisePage";
 import { HtmlExerciseSessionsPage } from "@/app/pages/practice/HtmlExerciseSessionsPage";
 import { HtmlExercisePage } from "@/app/pages/practice/HtmlExercisePage";
+import { PracticePage2 } from "@/app/pages/practice2/PracticePage2";
+import { BasicExercisesPage2 } from "@/app/pages/practice2/BasicExercisesPage2";
+import { PromptSessionsPage2 } from "@/app/pages/practice2/PromptSessionsPage2";
+import { PromptExercisePage2 } from "@/app/pages/practice2/PromptExercisePage2";
+import { MediaExerciseSessionsPage2 } from "@/app/pages/practice2/MediaExerciseSessionsPage2";
+import { MediaExercisePage2 } from "@/app/pages/practice2/MediaExercisePage2";
+import { HtmlExerciseSessionsPage2 } from "@/app/pages/practice2/HtmlExerciseSessionsPage2";
+import { HtmlExercisePage2 } from "@/app/pages/practice2/HtmlExercisePage2";
 import { CalendarPage } from "@/app/pages/calendar/CalendarPage";
 import { ProfilePage } from "@/app/pages/profile/ProfilePage";
 import { AdminCoursesPage } from "@/app/pages/admin/AdminCoursesPage";
@@ -182,6 +190,14 @@ function AppRoutes() {
         <Route path="practice/media/:sessionId" element={<MediaExercisePage />} />
         <Route path="practice/html" element={<HtmlExerciseSessionsPage />} />
         <Route path="practice/html/:sessionId" element={<HtmlExercisePage />} />
+        <Route path="practice2" element={<PracticePage2 />} />
+        <Route path="practice2/basics" element={<BasicExercisesPage2 />} />
+        <Route path="practice2/prompts" element={<PromptSessionsPage2 />} />
+        <Route path="practice2/prompts/:sessionId" element={<PromptExercisePage2 />} />
+        <Route path="practice2/media" element={<MediaExerciseSessionsPage2 />} />
+        <Route path="practice2/media/:sessionId" element={<MediaExercisePage2 />} />
+        <Route path="practice2/html" element={<HtmlExerciseSessionsPage2 />} />
+        <Route path="practice2/html/:sessionId" element={<HtmlExercisePage2 />} />
         <Route path="studio" element={<StudioPage />} />
         <Route path="studio/images" element={<StudioImagesPage />} />
         <Route path="studio/videos" element={<StudioVideosPage />} />

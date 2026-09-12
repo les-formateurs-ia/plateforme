@@ -116,7 +116,7 @@ export function MainLayout() {
             // Collaborateur entreprise : parcours CPF (leçons, pratique,
             // agent, RDV) hors-sujet, seul "Tableau de bord" (son espace
             // entreprise) et "Mon profil" restent pertinents.
-            if ((id === "lessons" || id === "practice" || id === "studio" || id === "agent" || id === "calendar") && companyId) return null;
+            if ((id === "lessons" || id === "practice" || id === "practice2" || id === "studio" || id === "agent" || id === "calendar") && companyId) return null;
             // Pour l'admin/formateur, "Élèves (& formateurs)" (gestion, même
             // page pour les deux rôles — le formateur n'y voit que ses
             // propres élèves, pas d'onglet Formateurs) s'ajoute juste avant

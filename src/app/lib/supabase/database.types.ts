@@ -14,6 +14,10 @@ export type FormationStatus = "draft" | "published" | "archived" | "generating";
 export type ThemePreference = "light" | "dark" | "system";
 export type ExerciseSessionType = "prompt" | "media" | "html";
 export type ExerciseVisibility = "global" | "private";
+// "Exercez-vous 2" — duplicat indépendant du module "Pratique IA" ci-dessus
+// (voir migration 0065_practice2_module.sql), tables/types propres suffixés _2.
+export type ExerciseSessionType2 = "prompt" | "media" | "html";
+export type ExerciseVisibility2 = "global" | "private";
 export type AgentMessageModality = "text" | "voice";
 export type IncidentPage = "lecon" | "tableau_de_bord" | "outil_ia" | "exercice" | "autre";
 export type IncidentStatus = "a_traiter" | "corrige";
@@ -491,6 +495,195 @@ export interface Database {
           assigned_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["html_exercise_tag_assignments"]["Insert"]>;
+        Relationships: never[];
+      };
+      // ── "Exercez-vous 2" — duplicat indépendant, voir migration 0065_practice2_module.sql ──
+      prompt_exercise_attempts_2: {
+        Row: {
+          id: string;
+          user_id: string;
+          session_id: string;
+          attempt_number: number;
+          prompt_text: string;
+          score: number;
+          feedback: Record<string, unknown>;
+          model: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          session_id: string;
+          attempt_number: number;
+          prompt_text: string;
+          score: number;
+          feedback: Record<string, unknown>;
+          model?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["prompt_exercise_attempts_2"]["Insert"]>;
+        Relationships: never[];
+      };
+      media_exercise_attempts_2: {
+        Row: {
+          id: string;
+          user_id: string;
+          session_id: string;
+          attempt_number: number;
+          mode: "image" | "video";
+          prompt_text: string;
+          corrected_prompt_text: string;
+          score: number;
+          feedback: Record<string, unknown>;
+          status: "generating" | "ready" | "failed";
+          error: string | null;
+          original_media_path: string | null;
+          corrected_media_path: string | null;
+          original_operation_name: string | null;
+          corrected_operation_name: string | null;
+          model: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          session_id: string;
+          attempt_number: number;
+          mode: "image" | "video";
+          prompt_text: string;
+          corrected_prompt_text: string;
+          score: number;
+          feedback: Record<string, unknown>;
+          status?: "generating" | "ready" | "failed";
+          error?: string | null;
+          original_media_path?: string | null;
+          corrected_media_path?: string | null;
+          original_operation_name?: string | null;
+          corrected_operation_name?: string | null;
+          model?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["media_exercise_attempts_2"]["Insert"]>;
+        Relationships: never[];
+      };
+      html_exercise_attempts_2: {
+        Row: {
+          id: string;
+          user_id: string;
+          session_id: string;
+          attempt_number: number;
+          html_content: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          session_id: string;
+          attempt_number: number;
+          html_content: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["html_exercise_attempts_2"]["Insert"]>;
+        Relationships: never[];
+      };
+      exercise_sessions_2: {
+        Row: {
+          id: string;
+          user_id: string;
+          exercise_type: ExerciseSessionType2;
+          name: string | null;
+          description: string | null;
+          exercise_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          exercise_type: ExerciseSessionType2;
+          name?: string | null;
+          description?: string | null;
+          exercise_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["exercise_sessions_2"]["Insert"]>;
+        Relationships: never[];
+      };
+      html_exercises_2: {
+        Row: {
+          id: string;
+          name: string;
+          description: string | null;
+          html_content: string;
+          visibility: ExerciseVisibility2;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          description?: string | null;
+          html_content?: string;
+          visibility?: ExerciseVisibility2;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["html_exercises_2"]["Insert"]>;
+        Relationships: never[];
+      };
+      html_exercise_assignments_2: {
+        Row: {
+          id: string;
+          exercise_id: string;
+          student_id: string;
+          assigned_by: string | null;
+          assigned_at: string;
+        };
+        Insert: {
+          id?: string;
+          exercise_id: string;
+          student_id: string;
+          assigned_by?: string | null;
+          assigned_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["html_exercise_assignments_2"]["Insert"]>;
+        Relationships: never[];
+      };
+      exercise_tags_2: {
+        Row: {
+          id: string;
+          name: string;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["exercise_tags_2"]["Insert"]>;
+        Relationships: never[];
+      };
+      html_exercise_tag_assignments_2: {
+        Row: {
+          id: string;
+          exercise_id: string;
+          tag_id: string;
+          assigned_by: string | null;
+          assigned_at: string;
+        };
+        Insert: {
+          id?: string;
+          exercise_id: string;
+          tag_id: string;
+          assigned_by?: string | null;
+          assigned_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["html_exercise_tag_assignments_2"]["Insert"]>;
         Relationships: never[];
       };
       chat_messages: {
