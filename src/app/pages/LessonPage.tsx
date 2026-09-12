@@ -15,7 +15,6 @@ import { isStaff } from "@/app/lib/permissions";
 import { useProfile } from "@/app/state/profile-context";
 import { useCourseProgress } from "@/app/state/useCourseProgress";
 import { Background } from "@/app/components/common/Background";
-import { GCard } from "@/app/components/common/GCard";
 import { VBtn, ShimBtn } from "@/app/components/common/Buttons";
 import { cx } from "@/app/lib/cx";
 import type { ChatMsg } from "@/app/types";
@@ -132,8 +131,10 @@ export function LessonPage() {
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
   }, []);
+  // Mindmap masquée partout pour le moment (onglet retiré ci-dessous) — le code de
+  // génération/lecture reste en place, comme pour l'onglet "Vidéo IA" plus haut.
   useEffect(() => {
-    if (lesson && !lesson.videoUrl && tab === "video") setTab("mindmap");
+    if (lesson && !lesson.videoUrl && tab === "video") setTab("podcast");
   }, [lesson, tab]);
 
   const [quizStep, setQuizStep] = useState(0);
@@ -142,6 +143,8 @@ export function LessonPage() {
   const [quizResult, setQuizResult] = useState<{ score: number; passed: boolean } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [retaking, setRetaking] = useState(false);
+  const [showFinishConfirm, setShowFinishConfirm] = useState(false);
+  const [showQuizModal, setShowQuizModal] = useState(false);
 
   const [msgs, setMsgs] = useState<ChatMsg[]>([{ role: "ai", text: DEFAULT_AI }]);
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -612,7 +615,7 @@ export function LessonPage() {
   // le code de génération/lecture reste en place, seul l'onglet est retiré.
   const TABS: { id: LTab; Icon: typeof Monitor; label: string }[] = [
     ...(lesson?.videoUrl ? [{ id: "video" as const, Icon: Monitor, label: "Vidéo" }] : []),
-    { id: "mindmap", Icon: Network, label: "Mindmap" }, { id: "podcast", Icon: Headphones, label: "Podcast" },
+    { id: "podcast", Icon: Headphones, label: "Podcast" },
     { id: "html", Icon: Code, label: "Playground" },
     { id: "agent", Icon: AudioLines, label: "Agent" },
   ];
@@ -668,9 +671,12 @@ export function LessonPage() {
                 <Icon className="w-3.5 h-3.5" />{label}
               </button>
             ))}
-            {lesson.durationMinutes && (
-              <span className="ml-auto hidden sm:flex items-center gap-1.5 px-5 text-xs shrink-0 whitespace-nowrap" style={{ color: th.fg3 }}><Clock className="w-3.5 h-3.5" />{lesson.durationMinutes} min</span>
-            )}
+            <div className="ml-auto flex items-center gap-3 pr-3 sm:pr-5 shrink-0">
+              {lesson.durationMinutes && (
+                <span className="hidden sm:flex items-center gap-1.5 text-xs shrink-0 whitespace-nowrap" style={{ color: th.fg3 }}><Clock className="w-3.5 h-3.5" />{lesson.durationMinutes} min</span>
+              )}
+              <ShimBtn sm onClick={() => setShowFinishConfirm(true)}>Terminer la leçon</ShimBtn>
+            </div>
           </div>
 
           {tab === "html" ? (
@@ -970,16 +976,102 @@ export function LessonPage() {
                 />
               </div>
             )}
+          </div>
+          </>
+          )}
+        </div>
 
-            <GCard><div className="p-5">
+        {/* Copilot */}
+        {assistantOpen ? (
+        <div className="fixed inset-0 z-30 bg-black/50 lg:bg-transparent p-4 lg:static lg:z-auto lg:p-0 lg:w-[27rem] lg:shrink-0 lg:py-6 lg:pr-6" onClick={(e) => { if (e.target === e.currentTarget) setAssistantOpen(false); }}>
+        <div className="h-full flex flex-col rounded-2xl overflow-hidden" style={{ background: `linear-gradient(165deg,${th.grad1},${th.grad2})`, border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 12px 32px rgba(0,0,0,0.35)" }}>
+          <div className="shrink-0 px-5 py-4">
+            <div className="flex items-center gap-2.5 mb-3">
+              <Sparkles className="w-5 h-5 text-white shrink-0" />
+              <div className="min-w-0 flex-1"><div className="text-base font-black text-white">Copilote IA</div><div className="text-[11px] truncate text-white/60">Ton formateur pour cette leçon</div></div>
+              <span className="text-[10px] font-bold shrink-0 text-white/50">Bêta</span>
+              <button onClick={() => setAssistantOpen(false)} className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-colors hover:bg-white/10">
+                <X className="w-4 h-4 text-white/70" />
+              </button>
+            </div>
+            <div className="rounded-xl px-3.5 py-3" style={{ background: "rgba(255,255,255,0.1)" }}>
+              <p className="text-xs leading-relaxed text-white/85">💡 <strong>Pour {firstName} :</strong> Chaque concept → applique-le immédiatement en pratique.</p>
+            </div>
+          </div>
+          <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+            {msgs.map((m, i) => (
+              <div key={i} className={cx("flex", m.role === "user" ? "justify-end" : "justify-start")}>
+                {m.role === "ai" && <div className="w-6 h-6 rounded-full flex items-center justify-center mr-2 mt-0.5 shrink-0" style={{ background: "rgba(255,255,255,0.15)" }}><Sparkles className="w-3 h-3 text-white" /></div>}
+                <div className="max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-line"
+                  style={m.role === "user" ? { background: "rgba(255,255,255,0.92)", color: `${th.grad1}`, fontWeight: 600, borderRadius: "16px 16px 4px 16px" } : { background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.9)", borderRadius: "16px 16px 16px 4px" }}>
+                  {m.text}
+                </div>
+              </div>
+            ))}
+            {typing && <div className="flex"><div className="w-6 h-6 rounded-full flex items-center justify-center mr-2 shrink-0" style={{ background: "rgba(255,255,255,0.15)" }}><Sparkles className="w-3 h-3 text-white" /></div><div className="px-4 py-3 rounded-2xl flex gap-1 items-center" style={{ background: "rgba(255,255,255,0.1)" }}>{[0, 1, 2].map(i => <div key={i} className="w-1.5 h-1.5 rounded-full bg-white/60" style={{ animation: `bounce-dot 1.2s ease-in-out ${i * 0.15}s infinite` }} />)}</div></div>}
+            <div ref={chatEnd} />
+          </div>
+          <div className="px-5 py-4 shrink-0">
+            <div className="text-[11px] font-bold mb-2.5 text-white/60">Actions rapides</div>
+            <div className="space-y-2">
+              {[{ Icon: MessageSquare, label: "Reformule simplement", cmd: "reformule simplement" }, { Icon: Lightbulb, label: "Exemple pour mon métier", cmd: "exemple concret métier" }, { Icon: Zap, label: "Crash test 2 min", cmd: "crash test" }].map(({ Icon, label, cmd }) => (
+                <button key={label} onClick={() => sendMsg(cmd)} className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left transition-colors hover:bg-white/15" style={{ background: "rgba(255,255,255,0.1)" }}>
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(255,255,255,0.15)" }}><Icon className="w-4 h-4 text-white" /></div>
+                  <span className="text-sm font-semibold text-white">{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="px-5 pb-5 pt-1 shrink-0">
+            <div className="flex gap-2">
+              <input value={chatIn} onChange={e => setChatIn(e.target.value)} onKeyDown={e => e.key === "Enter" && !typing && sendMsg(chatIn)} placeholder="Pose ta question…"
+                className="flex-1 rounded-full px-4 py-2.5 text-sm text-white placeholder-white/40 outline-none" style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.15)" }} />
+              <button onClick={() => sendMsg(chatIn)} disabled={!chatIn.trim() || typing} className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 disabled:opacity-30" style={{ background: "#fff" }}>
+                <Send className="w-4 h-4" style={{ color: `${th.grad1}` }} />
+              </button>
+            </div>
+          </div>
+        </div>
+        </div>
+        ) : (
+          <button onClick={() => setAssistantOpen(true)}
+            className="absolute right-6 top-20 z-20 w-11 h-11 rounded-full flex items-center justify-center shrink-0"
+            style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, boxShadow: `0 4px 16px ${th.gradShadow(0.4)}` }}>
+            <Sparkles className="w-5 h-5 text-white" />
+          </button>
+        )}
+      </div>
+
+      {showFinishConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.7)" }} onClick={() => setShowFinishConfirm(false)}>
+          <div onClick={(e) => e.stopPropagation()} className="max-w-sm w-full rounded-2xl overflow-hidden p-6 text-center" style={{ background: th.card, border: `1px solid ${th.sep}` }}>
+            <PartyPopper className="w-8 h-8 mx-auto mb-3 text-[#6adeb1]" />
+            <p className="text-sm font-semibold mb-5" style={{ color: th.fg }}>
+              Félicitation pour cette leçon, testons maintenant tes connaissances pour vérifier si tu valides bien tous les acquis
+            </p>
+            <div className="flex items-center justify-center gap-3">
+              <VBtn sm onClick={() => setShowFinishConfirm(false)}>Annuler</VBtn>
+              <ShimBtn sm onClick={() => { setShowFinishConfirm(false); setShowQuizModal(true); }}>Commencer le QCM</ShimBtn>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showQuizModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.7)" }} onClick={() => setShowQuizModal(false)}>
+          <div onClick={(e) => e.stopPropagation()} className="max-w-lg w-full max-h-[85vh] overflow-y-auto rounded-2xl" style={{ background: th.card, border: `1px solid ${th.sep}` }}>
+            <div className="p-5">
               <div className="flex items-center gap-2.5 mb-4">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: `${th.gradShadow(0.1)}`, border: `1px solid ${th.gradShadow(0.2)}` }}><Brain className="w-4 h-4" style={{ color: th.navAC }} /></div>
-                <span className="text-sm font-black" style={{ color: th.fg }}>Quiz de la leçon</span>
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${th.gradShadow(0.1)}`, border: `1px solid ${th.gradShadow(0.2)}` }}><Brain className="w-4 h-4" style={{ color: th.navAC }} /></div>
+                <span className="text-sm font-black flex-1" style={{ color: th.fg }}>Quiz de la leçon</span>
                 {lesson.questions.length > 0 && !quizResult && (retaking || currentLessonState?.state !== "completed") && (
-                  <span className="ml-auto text-[10px] font-bold px-2.5 py-1 rounded-full" style={{ background: `${th.gradShadow(0.06)}`, color: th.navAC, border: `1px solid ${th.gradShadow(0.15)}` }}>
+                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0" style={{ background: `${th.gradShadow(0.06)}`, color: th.navAC, border: `1px solid ${th.gradShadow(0.15)}` }}>
                     Question {quizStep + 1}/{lesson.questions.length}
                   </span>
                 )}
+                <button onClick={() => setShowQuizModal(false)} className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
+                  <X className="w-4 h-4" />
+                </button>
               </div>
 
               {lesson.questions.length === 0 && (
@@ -1047,72 +1139,10 @@ export function LessonPage() {
                   )}
                 </>
               )}
-            </div></GCard>
-          </div>
-          </>
-          )}
-        </div>
-
-        {/* Copilot */}
-        {assistantOpen ? (
-        <div className="fixed inset-0 z-30 bg-black/50 lg:bg-transparent p-4 lg:static lg:z-auto lg:p-0 lg:w-[27rem] lg:shrink-0 lg:py-6 lg:pr-6" onClick={(e) => { if (e.target === e.currentTarget) setAssistantOpen(false); }}>
-        <div className="h-full flex flex-col rounded-2xl overflow-hidden" style={{ background: `linear-gradient(165deg,${th.grad1},${th.grad2})`, border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 12px 32px rgba(0,0,0,0.35)" }}>
-          <div className="shrink-0 px-5 py-4">
-            <div className="flex items-center gap-2.5 mb-3">
-              <Sparkles className="w-5 h-5 text-white shrink-0" />
-              <div className="min-w-0 flex-1"><div className="text-base font-black text-white">Copilote IA</div><div className="text-[11px] truncate text-white/60">Ton formateur pour cette leçon</div></div>
-              <span className="text-[10px] font-bold shrink-0 text-white/50">Bêta</span>
-              <button onClick={() => setAssistantOpen(false)} className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-colors hover:bg-white/10">
-                <X className="w-4 h-4 text-white/70" />
-              </button>
-            </div>
-            <div className="rounded-xl px-3.5 py-3" style={{ background: "rgba(255,255,255,0.1)" }}>
-              <p className="text-xs leading-relaxed text-white/85">💡 <strong>Pour {firstName} :</strong> Chaque concept → applique-le immédiatement en pratique.</p>
-            </div>
-          </div>
-          <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
-            {msgs.map((m, i) => (
-              <div key={i} className={cx("flex", m.role === "user" ? "justify-end" : "justify-start")}>
-                {m.role === "ai" && <div className="w-6 h-6 rounded-full flex items-center justify-center mr-2 mt-0.5 shrink-0" style={{ background: "rgba(255,255,255,0.15)" }}><Sparkles className="w-3 h-3 text-white" /></div>}
-                <div className="max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-line"
-                  style={m.role === "user" ? { background: "rgba(255,255,255,0.92)", color: `${th.grad1}`, fontWeight: 600, borderRadius: "16px 16px 4px 16px" } : { background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.9)", borderRadius: "16px 16px 16px 4px" }}>
-                  {m.text}
-                </div>
-              </div>
-            ))}
-            {typing && <div className="flex"><div className="w-6 h-6 rounded-full flex items-center justify-center mr-2 shrink-0" style={{ background: "rgba(255,255,255,0.15)" }}><Sparkles className="w-3 h-3 text-white" /></div><div className="px-4 py-3 rounded-2xl flex gap-1 items-center" style={{ background: "rgba(255,255,255,0.1)" }}>{[0, 1, 2].map(i => <div key={i} className="w-1.5 h-1.5 rounded-full bg-white/60" style={{ animation: `bounce-dot 1.2s ease-in-out ${i * 0.15}s infinite` }} />)}</div></div>}
-            <div ref={chatEnd} />
-          </div>
-          <div className="px-5 py-4 shrink-0">
-            <div className="text-[11px] font-bold mb-2.5 text-white/60">Actions rapides</div>
-            <div className="space-y-2">
-              {[{ Icon: MessageSquare, label: "Reformule simplement", cmd: "reformule simplement" }, { Icon: Lightbulb, label: "Exemple pour mon métier", cmd: "exemple concret métier" }, { Icon: Zap, label: "Crash test 2 min", cmd: "crash test" }].map(({ Icon, label, cmd }) => (
-                <button key={label} onClick={() => sendMsg(cmd)} className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left transition-colors hover:bg-white/15" style={{ background: "rgba(255,255,255,0.1)" }}>
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(255,255,255,0.15)" }}><Icon className="w-4 h-4 text-white" /></div>
-                  <span className="text-sm font-semibold text-white">{label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="px-5 pb-5 pt-1 shrink-0">
-            <div className="flex gap-2">
-              <input value={chatIn} onChange={e => setChatIn(e.target.value)} onKeyDown={e => e.key === "Enter" && !typing && sendMsg(chatIn)} placeholder="Pose ta question…"
-                className="flex-1 rounded-full px-4 py-2.5 text-sm text-white placeholder-white/40 outline-none" style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.15)" }} />
-              <button onClick={() => sendMsg(chatIn)} disabled={!chatIn.trim() || typing} className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 disabled:opacity-30" style={{ background: "#fff" }}>
-                <Send className="w-4 h-4" style={{ color: `${th.grad1}` }} />
-              </button>
             </div>
           </div>
         </div>
-        </div>
-        ) : (
-          <button onClick={() => setAssistantOpen(true)}
-            className="absolute right-6 top-20 z-20 w-11 h-11 rounded-full flex items-center justify-center shrink-0"
-            style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, boxShadow: `0 4px 16px ${th.gradShadow(0.4)}` }}>
-            <Sparkles className="w-5 h-5 text-white" />
-          </button>
-        )}
-      </div>
+      )}
     </div>
   );
 }
