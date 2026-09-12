@@ -1,11 +1,12 @@
-// Soumet une génération d'image à l'API Higgsfield (module "Créer vos
-// images" du Studio). Tourne avec le JWT de l'appelant (pas de service-role)
-// : RLS suffit — l'élève ne peut créer une ligne que pour lui-même
-// (studio_images_insert_own), et lire/signer sa propre image source
-// (studio_images_storage_read). Les clés Higgsfield restent côté serveur.
+// Soumet une génération d'image à l'API Runware (module "Créer vos images"
+// du Studio — remplace Higgsfield). Tourne avec le JWT de l'appelant (pas de
+// service-role) : RLS suffit — l'élève ne peut créer une ligne que pour
+// lui-même (studio_images_insert_own), et lire/signer sa propre image source
+// (studio_images_storage_read). La clé Runware reste côté serveur.
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
-import { STUDIO_MODELS, HIGGSFIELD_BASE_URL } from "../_shared/studio-models.ts";
+import { STUDIO_MODELS, ASPECT_RATIO_DIMENSIONS } from "../_shared/studio-models.ts";
+import { submitRunwareTask, finalizeRunwareResult } from "../_shared/runware.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
@@ -18,7 +19,8 @@ Deno.serve(async (req) => {
 
     const modelConfig = STUDIO_MODELS[model];
     if (!modelConfig) return jsonResponse({ error: "Modèle inconnu." }, 400);
-    if (!modelConfig.aspectRatios.includes(aspectRatio)) return jsonResponse({ error: "Format non supporté par ce modèle." }, 400);
+    const dims = ASPECT_RATIO_DIMENSIONS[aspectRatio];
+    if (!dims) return jsonResponse({ error: "Format non supporté." }, 400);
     if (sourceImagePath && !modelConfig.supportsSourceImage) return jsonResponse({ error: "Ce modèle ne prend pas d'image source." }, 400);
 
     const authHeader = req.headers.get("Authorization");
@@ -42,22 +44,16 @@ Deno.serve(async (req) => {
       sourceImageUrl = signed.signedUrl;
     }
 
-    const keyId = Deno.env.get("HIGGSFIELD_API_ID");
-    const keySecret = Deno.env.get("HIGGSFIELD_API_SECRET");
-    if (!keyId || !keySecret) return jsonResponse({ error: "Configuration Higgsfield manquante." }, 500);
+    const apiKey = Deno.env.get("RUNWARE_API_KEY");
+    if (!apiKey) return jsonResponse({ error: "Configuration Runware manquante." }, 500);
 
-    const submitResp = await fetch(`${HIGGSFIELD_BASE_URL}${modelConfig.path}`, {
-      method: "POST",
-      headers: { Authorization: `Key ${keyId}:${keySecret}`, "Content-Type": "application/json" },
-      body: JSON.stringify(modelConfig.buildBody({ prompt: trimmedPrompt, aspectRatio, sourceImageUrl })),
-    });
-    const submitText = await submitResp.text();
-    if (!submitResp.ok) return jsonResponse({ error: `Higgsfield a refusé la demande : ${submitText}` }, 502);
+    const task = modelConfig.buildTask({ prompt: trimmedPrompt, width: dims.width, height: dims.height, sourceImageUrl });
 
-    const submitJson = JSON.parse(submitText) as { request_id?: string; status?: string; error?: string | null };
-    if (!submitJson.request_id) return jsonResponse({ error: "Réponse Higgsfield inattendue (pas de request_id)." }, 502);
-    if (submitJson.status === "failed" || submitJson.status === "nsfw") {
-      return jsonResponse({ error: submitJson.error || "Génération refusée par Higgsfield." }, 400);
+    let submitted;
+    try {
+      submitted = await submitRunwareTask(apiKey, task);
+    } catch (err) {
+      return jsonResponse({ error: err instanceof Error ? err.message : "Runware a refusé la demande." }, 502);
     }
 
     const { data: row, error: insertError } = await userClient
@@ -69,11 +65,25 @@ Deno.serve(async (req) => {
         aspect_ratio: aspectRatio,
         prompt: trimmedPrompt,
         source_image_path: sourceImagePath ?? null,
-        external_request_id: submitJson.request_id,
+        external_request_id: submitted.status === "pending" ? submitted.taskUUID : null,
       })
       .select("id")
       .single();
     if (insertError || !row) return jsonResponse({ error: insertError?.message ?? "Échec de l'enregistrement." }, 500);
+
+    // Beaucoup de modèles Runware répondent dans la foulée (pas de polling
+    // nécessaire) — on finalise tout de suite plutôt que de faire attendre
+    // le client pour un premier check-studio-image-status inutile.
+    if (submitted.status === "ready") {
+      await finalizeRunwareResult(userClient, {
+        bucket: "studio-images",
+        pathPrefix: `${userId}/results/${row.id}`,
+        url: submitted.url,
+        table: "studio_image_generations",
+        rowId: row.id,
+        kind: "image",
+      });
+    }
 
     return jsonResponse({ id: row.id });
   } catch (err) {

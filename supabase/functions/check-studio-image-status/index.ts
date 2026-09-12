@@ -1,12 +1,11 @@
-// Poll unique du statut d'une génération Higgsfield (rappelé par le client
-// toutes les ~4s, cf. pollGenerationStatus côté studioImages.ts — même
-// logique que check-avatar-video-status). Tourne avec le JWT de l'élève
-// propriétaire : RLS suffit, pas de service-role nécessaire (l'upload du
-// résultat final dans son propre dossier passe la policy
-// studio_images_storage_write).
+// Poll unique du statut d'une génération Runware (rappelé par le client
+// toutes les ~4s, cf. pollGenerationStatus côté studioImages.ts). Tourne
+// avec le JWT de l'élève propriétaire : RLS suffit, pas de service-role
+// nécessaire (l'upload du résultat final dans son propre dossier passe la
+// policy studio_images_storage_write).
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
-import { HIGGSFIELD_BASE_URL } from "../_shared/studio-models.ts";
+import { pollRunwareTask, finalizeRunwareResult } from "../_shared/runware.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
@@ -38,54 +37,32 @@ Deno.serve(async (req) => {
     if (row.status !== "pending") {
       return jsonResponse({ status: row.status, imagePath: row.image_path, error: row.error_message });
     }
-
-    const keyId = Deno.env.get("HIGGSFIELD_API_ID");
-    const keySecret = Deno.env.get("HIGGSFIELD_API_SECRET");
-    if (!keyId || !keySecret) return jsonResponse({ error: "Configuration Higgsfield manquante." }, 500);
-
-    const statusResp = await fetch(`${HIGGSFIELD_BASE_URL}/requests/${row.external_request_id}/status`, {
-      headers: { Authorization: `Key ${keyId}:${keySecret}` },
-    });
-    const statusText = await statusResp.text();
-    if (!statusResp.ok) return jsonResponse({ error: `Higgsfield: ${statusText}` }, 502);
-    const statusJson = JSON.parse(statusText) as {
-      status: string;
-      error?: string | null;
-      images?: { url: string }[];
-    };
-
-    if (statusJson.status === "queued" || statusJson.status === "in_progress") {
+    if (!row.external_request_id) {
+      // Ne devrait pas arriver : le chemin "réponse immédiate" de
+      // generate-studio-image finalise avant de renvoyer — sécurité seulement.
       return jsonResponse({ status: "pending" });
     }
 
-    if (statusJson.status !== "completed" || !statusJson.images?.length) {
-      const message = statusJson.error || `Génération ${statusJson.status === "nsfw" ? "refusée (contenu sensible)" : "échouée"}.`;
-      await userClient.from("studio_image_generations").update({ status: "failed", error_message: message }).eq("id", generationId);
-      return jsonResponse({ status: "failed", error: message });
+    const apiKey = Deno.env.get("RUNWARE_API_KEY");
+    if (!apiKey) return jsonResponse({ error: "Configuration Runware manquante." }, 500);
+
+    const polled = await pollRunwareTask(apiKey, row.external_request_id);
+    if (polled.status === "pending") return jsonResponse({ status: "pending" });
+    if (polled.status === "failed") {
+      await userClient.from("studio_image_generations").update({ status: "failed", error_message: polled.error }).eq("id", generationId);
+      return jsonResponse({ status: "failed", error: polled.error });
     }
 
-    const imageResp = await fetch(statusJson.images[0].url);
-    if (!imageResp.ok) {
-      await userClient.from("studio_image_generations").update({ status: "failed", error_message: "Téléchargement de l'image échoué." }).eq("id", generationId);
-      return jsonResponse({ status: "failed", error: "Téléchargement de l'image échoué." });
-    }
-    const contentType = imageResp.headers.get("content-type") || "image/jpeg";
-    const ext = contentType.includes("png") ? "png" : "jpg";
-    const bytes = new Uint8Array(await imageResp.arrayBuffer());
-    const imagePath = `${userId}/results/${generationId}.${ext}`;
-
-    const { error: uploadError } = await userClient.storage
-      .from("studio-images")
-      .upload(imagePath, bytes, { contentType, upsert: true });
-    if (uploadError) return jsonResponse({ error: uploadError.message }, 500);
-
-    const { error: updateError } = await userClient
-      .from("studio_image_generations")
-      .update({ status: "ready", image_path: imagePath, completed_at: new Date().toISOString() })
-      .eq("id", generationId);
-    if (updateError) return jsonResponse({ error: updateError.message }, 500);
-
-    return jsonResponse({ status: "ready", imagePath });
+    const result = await finalizeRunwareResult(userClient, {
+      bucket: "studio-images",
+      pathPrefix: `${userId}/results/${generationId}`,
+      url: polled.url,
+      table: "studio_image_generations",
+      rowId: generationId,
+      kind: "image",
+    });
+    if (!result.ok) return jsonResponse({ status: "failed", error: result.error });
+    return jsonResponse({ status: "ready", imagePath: result.path });
   } catch (err) {
     return jsonResponse({ error: err instanceof Error ? err.message : "Erreur inconnue." }, 500);
   }

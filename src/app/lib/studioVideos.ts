@@ -1,10 +1,11 @@
 // Module "Imaginez vos vidéos" (Le Studio) — génération Text-to-Video /
-// Image-to-Video via l'API Higgsfield. Modèles réellement activés sur ce
-// compte (cf. supabase/functions/_shared/studio-video-models.ts, à garder en
-// phase) : MiniMax Hailuo 02 (image de référence optionnelle), Kling v2.1
-// (image de référence obligatoire) et Wan 2.5 (texte uniquement). Aucun de
-// ces modèles n'expose de ratio d'aspect configurable — Kling hérite du
-// ratio de l'image fournie, Hailuo/Wan rendent dans un ratio fixe.
+// Image-to-Video via l'API Runware (remplace Higgsfield, cf.
+// supabase/functions/_shared/studio-video-models.ts, à garder en phase).
+// IMPORTANT : au moment de cette migration, le compte Runware n'a aucun
+// solde crédité et TOUTE génération vidéo (quel que soit le modèle) exige
+// un solde ≥5$ (https://my.runware.ai/wallet) — l'élève verra donc l'erreur
+// Runware explicite tant que le compte n'est pas alimenté. Le code est prêt
+// et fonctionnera dès que ce sera fait, sans changement supplémentaire.
 import { supabase } from "@/app/lib/supabase/client";
 import type { StudioImageStatus } from "@/app/lib/supabase/database.types";
 
@@ -26,31 +27,28 @@ export interface StudioVideoModel {
 
 export const STUDIO_VIDEO_MODELS: StudioVideoModel[] = [
   {
-    id: "hailuo-02-standard",
-    label: "MiniMax Hailuo 02",
+    id: "veo-3-1",
+    label: "Google Veo 3.1",
     description: "Texte seul ou animation d'une photo de référence (optionnelle).",
     supportsSourceImage: true,
     requiresSourceImage: false,
-    options: [{ key: "duration", label: "Durée", choices: ["6", "10"], default: "6" }],
+    options: [{ key: "duration", label: "Durée", choices: ["5", "8"], default: "8" }],
   },
   {
-    id: "kling-v21-standard",
-    label: "Kling v2.1",
+    id: "kling",
+    label: "Kling",
     description: "Animation d'une photo de référence — image obligatoire.",
     supportsSourceImage: true,
     requiresSourceImage: true,
     options: [{ key: "duration", label: "Durée", choices: ["5", "10"], default: "5" }],
   },
   {
-    id: "wan-25-preview",
-    label: "Wan 2.5",
-    description: "Texte uniquement, avec choix de la résolution.",
+    id: "flux-video",
+    label: "FLUX Video",
+    description: "Texte uniquement.",
     supportsSourceImage: false,
     requiresSourceImage: false,
-    options: [
-      { key: "duration", label: "Durée", choices: ["5", "10"], default: "5" },
-      { key: "resolution", label: "Résolution", choices: ["480p", "720p", "1080p"], default: "720p" },
-    ],
+    options: [{ key: "duration", label: "Durée", choices: ["5"], default: "5" }],
   },
 ];
 

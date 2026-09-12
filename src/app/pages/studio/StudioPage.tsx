@@ -34,7 +34,7 @@ export function StudioPage() {
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div>
-        <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Le Studio</GT></h2>
+        <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif", color: th.fg }}><GT>Le Studio</GT></h2>
         <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Pratique la génération multimédia avec de vrais modèles d'IA — image, vidéo, musique, voix et avatar.</p>
       </div>
 

@@ -13,6 +13,27 @@ export function ShimBtn({ children, onClick, sm, full, disabled }: { children: R
   );
 }
 
+// Segmented pill toggle — for short, small choice sets (duration, resolution…)
+export function Segmented({ value, onChange, options, disabled }: {
+  value: string; onChange: (value: string) => void; options: { value: string; label: string }[]; disabled?: boolean;
+}) {
+  const th = useTh();
+  return (
+    <div className="inline-flex items-center gap-1 rounded-full p-1 shrink-0" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
+      {options.map((o) => {
+        const active = o.value === value;
+        return (
+          <button key={o.value} type="button" disabled={disabled} onClick={() => onChange(o.value)}
+            className={cx("px-3 py-1.5 rounded-full text-xs font-semibold transition-all disabled:opacity-50 disabled:pointer-events-none", !active && "hover:opacity-80")}
+            style={active ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff" } : { color: th.fg3 }}>
+            {o.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 // Secondary button — outline pill, no animation
 export function VBtn({ children, onClick, sm, full, disabled }: { children: ReactNode; onClick?: () => void; sm?: boolean; full?: boolean; disabled?: boolean }) {
   const th = useTh();

@@ -1,61 +1,73 @@
-// Modèles vidéo réellement activés sur ce compte Higgsfield (vérifiés en
-// sondant l'API : Veo3.1, Seedance et Sora-2 existent dans le catalogue mais
-// renvoient model_not_found/model_disabled sur cette clé). Aucun de ces
-// modèles n'expose de ratio d'aspect configurable (contrairement aux modèles
-// image) : Kling et Dop héritent du ratio de l'image source, Hailuo et Wan
-// rendent dans un ratio fixe côté Higgsfield. À tenir en phase avec
-// src/app/lib/studioVideos.ts.
+// Catalogue vidéo Runware (remplace Higgsfield). IDs de modèles confirmés
+// reconnus par l'API le 2026-09-12 (erreur videoInferenceInsufficientCredits,
+// pas modelNotFound) mais la génération elle-même n'a pas pu être testée de
+// bout en bout : ce compte Runware n'a aucun solde crédité et TOUTE
+// génération vidéo (quel que soit le modèle) l'exige
+// (https://my.runware.ai/wallet). Le code fonctionnera dès que le compte
+// sera alimenté ; en attendant, l'élève verra le message d'erreur Runware
+// clair (formatRunwareError) plutôt qu'une génération silencieusement cassée.
 export interface StudioVideoOption {
   key: string;
   label: string;
   choices: string[];
   default: string;
-  numeric?: boolean; // envoyer la valeur en nombre plutôt qu'en chaîne
+  numeric?: boolean;
 }
 
 export interface StudioVideoModelConfig {
+  runwareModel: string;
   supportsSourceImage: boolean;
   requiresSourceImage: boolean;
   options: StudioVideoOption[];
-  pathFor: (hasImage: boolean) => string;
-  buildBody: (params: { prompt: string; sourceImageUrl?: string; optionValues: Record<string, string> }) => Record<string, unknown>;
+  buildTask: (params: { prompt: string; sourceImageUrl?: string; optionValues: Record<string, string> }) => Record<string, unknown>;
 }
 
+const DEFAULT_WIDTH = 1280;
+const DEFAULT_HEIGHT = 720;
+
 export const STUDIO_VIDEO_MODELS: Record<string, StudioVideoModelConfig> = {
-  "hailuo-02-standard": {
+  "veo-3-1": {
+    runwareModel: "google:3@2",
     supportsSourceImage: true,
     requiresSourceImage: false,
-    options: [{ key: "duration", label: "Durée", choices: ["6", "10"], default: "6", numeric: true }],
-    pathFor: (hasImage) => (hasImage ? "/minimax/hailuo-02/standard/image-to-video" : "/minimax/hailuo-02/standard/text-to-video"),
-    buildBody: ({ prompt, sourceImageUrl, optionValues }) => ({
-      prompt,
-      duration: Number(optionValues.duration ?? "6"),
-      ...(sourceImageUrl ? { image_url: sourceImageUrl } : {}),
+    options: [{ key: "duration", label: "Durée", choices: ["5", "8"], default: "8", numeric: true }],
+    buildTask: ({ prompt, sourceImageUrl, optionValues }) => ({
+      taskType: "videoInference",
+      model: "google:3@2",
+      positivePrompt: prompt,
+      width: DEFAULT_WIDTH,
+      height: DEFAULT_HEIGHT,
+      duration: Number(optionValues.duration ?? "8"),
+      ...(sourceImageUrl ? { frameImages: [{ inputImage: sourceImageUrl, frame: "first" }] } : {}),
     }),
   },
-  "kling-v21-standard": {
+  "kling": {
+    runwareModel: "klingai:5@3",
     supportsSourceImage: true,
     requiresSourceImage: true,
     options: [{ key: "duration", label: "Durée", choices: ["5", "10"], default: "5", numeric: true }],
-    pathFor: () => "/kling-video/v2.1/standard/image-to-video",
-    buildBody: ({ prompt, sourceImageUrl, optionValues }) => ({
-      prompt,
-      image_url: sourceImageUrl,
+    buildTask: ({ prompt, sourceImageUrl, optionValues }) => ({
+      taskType: "videoInference",
+      model: "klingai:5@3",
+      positivePrompt: prompt,
+      width: DEFAULT_WIDTH,
+      height: DEFAULT_HEIGHT,
       duration: Number(optionValues.duration ?? "5"),
+      frameImages: [{ inputImage: sourceImageUrl, frame: "first" }],
     }),
   },
-  "wan-25-preview": {
+  "flux-video": {
+    runwareModel: "bfl:flux@3-video",
     supportsSourceImage: false,
     requiresSourceImage: false,
-    options: [
-      { key: "duration", label: "Durée", choices: ["5", "10"], default: "5", numeric: true },
-      { key: "resolution", label: "Résolution", choices: ["480p", "720p", "1080p"], default: "720p" },
-    ],
-    pathFor: () => "/wan-25-preview/text-to-video",
-    buildBody: ({ prompt, optionValues }) => ({
-      prompt,
+    options: [{ key: "duration", label: "Durée", choices: ["5"], default: "5", numeric: true }],
+    buildTask: ({ prompt, optionValues }) => ({
+      taskType: "videoInference",
+      model: "bfl:flux@3-video",
+      positivePrompt: prompt,
+      width: DEFAULT_WIDTH,
+      height: DEFAULT_HEIGHT,
       duration: Number(optionValues.duration ?? "5"),
-      resolution: optionValues.resolution ?? "720p",
     }),
   },
 };

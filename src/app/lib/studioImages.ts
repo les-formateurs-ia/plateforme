@@ -1,9 +1,9 @@
 // Module "Créer vos images" (Le Studio) — génération Text-to-Image / Image-to-Image
-// via l'API Higgsfield. Modèles réellement activés sur ce compte Higgsfield
-// (cf. supabase/functions/_shared/studio-models.ts, à garder en phase avec ce
-// fichier) : Higgsfield Soul (texte seul) et Higgsfield Popcorn (accepte une
-// image source optionnelle). D'autres modèles existent dans le catalogue
-// Higgsfield (Nano Banana, Flux Pro…) mais ne sont pas activés sur ce compte.
+// via l'API Runware (remplace Higgsfield). Seuls des modèles FLUX natifs
+// Runware sont proposés pour l'instant : les modèles tiers (Google, OpenAI,
+// Ideogram...) exigent un solde Runware crédité (compte non alimenté au
+// moment de la migration, cf. supabase/functions/_shared/studio-models.ts,
+// à garder en phase avec ce fichier).
 import { supabase } from "@/app/lib/supabase/client";
 import type { StudioImageStatus } from "@/app/lib/supabase/database.types";
 
@@ -16,21 +16,23 @@ export interface StudioModel {
   defaultAspectRatio: string;
 }
 
+const COMMON_ASPECT_RATIOS = ["1:1", "4:3", "3:4", "3:2", "2:3", "16:9", "9:16"];
+
 export const STUDIO_MODELS: StudioModel[] = [
   {
-    id: "soul-standard",
-    label: "Higgsfield Soul",
-    description: "Rendu éditorial haute qualité, texte uniquement.",
-    supportsSourceImage: false,
-    aspectRatios: ["1:1", "4:3", "3:4", "3:2", "2:3", "5:4", "4:5", "16:9", "9:16", "21:9"],
+    id: "flux-dev",
+    label: "FLUX.1 Dev",
+    description: "Rendu haute qualité — texte seul ou à partir d'une image source (Image-to-Image).",
+    supportsSourceImage: true,
+    aspectRatios: COMMON_ASPECT_RATIOS,
     defaultAspectRatio: "4:3",
   },
   {
-    id: "popcorn-auto",
-    label: "Higgsfield Popcorn",
-    description: "Accepte une image source à transformer (Image-to-Image).",
+    id: "flux-schnell",
+    label: "FLUX.1 Schnell",
+    description: "Génération très rapide — texte seul ou à partir d'une image source (Image-to-Image).",
     supportsSourceImage: true,
-    aspectRatios: ["1:1", "4:3", "3:4", "3:2", "2:3", "16:9", "9:16"],
+    aspectRatios: COMMON_ASPECT_RATIOS,
     defaultAspectRatio: "4:3",
   },
 ];
@@ -142,9 +144,10 @@ export interface GenerationPollResult {
   error: string | null;
 }
 
-// Higgsfield rend une image en quelques dizaines de secondes en général —
-// on interroge par courts appels plutôt qu'une seule invocation longue
-// (même logique que les podcasts/vidéos avatar).
+// Runware rend souvent une image en quelques secondes (parfois immédiat, cf.
+// generate-studio-image) — on interroge quand même par courts appels au cas
+// où le modèle reste "pending" plus longtemps (même logique que les
+// podcasts/vidéos avatar).
 export async function pollGenerationStatus(
   generationId: string,
   { intervalMs = 4000, timeoutMs = 180000 }: { intervalMs?: number; timeoutMs?: number } = {},

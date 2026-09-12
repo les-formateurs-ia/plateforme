@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router";
-import { Search, Plus, CalendarClock, Menu, X, Bug, Building2 } from "lucide-react";
+import { Search, Plus, CalendarClock, Menu, X, Bug, Building2, ScanEye } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
@@ -156,6 +156,12 @@ export function MainLayout() {
                 )}
               </span>
               Incidents
+            </NavLink>
+          )}
+          {isStaff(role) && !entrepriseMode && (
+            <NavLink to="/admin/ai-detection-gallery" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
+              style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
+              <ScanEye className="w-4 h-4 shrink-0" />Galerie Détection IA
             </NavLink>
           )}
           {(() => {

@@ -14,8 +14,9 @@ const TOOL_INFO: Record<string, { Icon: LucideIcon; title: string; subtitle: str
   "face-swap":      { Icon: UserRoundCog, title: "Prenez l'apparence de qui vous voulez", subtitle: "Face Swap / Avatar" },
 };
 
-// Placeholder commun aux 7 modules du Studio, tant que l'intégration API
-// (Higgsfield) n'est pas branchée côté back — cf. ticket "Le Studio".
+// Placeholder commun aux 5 modules du Studio pas encore branchés côté back
+// (musiques, talking-head, text-to-speech, doublage, face-swap) — images et
+// vidéos ont leurs propres pages dédiées, alimentées par Runware.
 export function StudioToolPage() {
   const th = useTh();
   const navigate = useNavigate();

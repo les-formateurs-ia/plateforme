@@ -1,11 +1,10 @@
-// Soumet une génération vidéo à l'API Higgsfield (module "Imaginez vos
-// vidéos" du Studio). Même principe que generate-studio-image : JWT de
-// l'appelant, pas de service-role (RLS suffit).
+// Soumet une génération vidéo à l'API Runware (module "Imaginez vos vidéos"
+// du Studio — remplace Higgsfield). Même principe que generate-studio-image :
+// JWT de l'appelant, pas de service-role (RLS suffit).
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
 import { STUDIO_VIDEO_MODELS } from "../_shared/studio-video-models.ts";
-
-const HIGGSFIELD_BASE_URL = "https://api.higgsfield.ai";
+import { submitRunwareTask, finalizeRunwareResult } from "../_shared/runware.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
@@ -48,23 +47,16 @@ Deno.serve(async (req) => {
       sourceImageUrl = signed.signedUrl;
     }
 
-    const keyId = Deno.env.get("HIGGSFIELD_API_ID");
-    const keySecret = Deno.env.get("HIGGSFIELD_API_SECRET");
-    if (!keyId || !keySecret) return jsonResponse({ error: "Configuration Higgsfield manquante." }, 500);
+    const apiKey = Deno.env.get("RUNWARE_API_KEY");
+    if (!apiKey) return jsonResponse({ error: "Configuration Runware manquante." }, 500);
 
-    const path = modelConfig.pathFor(!!sourceImageUrl);
-    const submitResp = await fetch(`${HIGGSFIELD_BASE_URL}${path}`, {
-      method: "POST",
-      headers: { Authorization: `Key ${keyId}:${keySecret}`, "Content-Type": "application/json" },
-      body: JSON.stringify(modelConfig.buildBody({ prompt: trimmedPrompt, sourceImageUrl, optionValues })),
-    });
-    const submitText = await submitResp.text();
-    if (!submitResp.ok) return jsonResponse({ error: `Higgsfield a refusé la demande : ${submitText}` }, 502);
+    const task = modelConfig.buildTask({ prompt: trimmedPrompt, sourceImageUrl, optionValues });
 
-    const submitJson = JSON.parse(submitText) as { request_id?: string; status?: string; error?: string | null };
-    if (!submitJson.request_id) return jsonResponse({ error: "Réponse Higgsfield inattendue (pas de request_id)." }, 502);
-    if (submitJson.status === "failed" || submitJson.status === "nsfw") {
-      return jsonResponse({ error: submitJson.error || "Génération refusée par Higgsfield." }, 400);
+    let submitted;
+    try {
+      submitted = await submitRunwareTask(apiKey, task);
+    } catch (err) {
+      return jsonResponse({ error: err instanceof Error ? err.message : "Runware a refusé la demande." }, 502);
     }
 
     const { data: row, error: insertError } = await userClient
@@ -76,11 +68,22 @@ Deno.serve(async (req) => {
         options: optionValues,
         prompt: trimmedPrompt,
         source_image_path: sourceImagePath ?? null,
-        external_request_id: submitJson.request_id,
+        external_request_id: submitted.status === "pending" ? submitted.taskUUID : null,
       })
       .select("id")
       .single();
     if (insertError || !row) return jsonResponse({ error: insertError?.message ?? "Échec de l'enregistrement." }, 500);
+
+    if (submitted.status === "ready") {
+      await finalizeRunwareResult(userClient, {
+        bucket: "studio-videos",
+        pathPrefix: `${userId}/results/${row.id}`,
+        url: submitted.url,
+        table: "studio_video_generations",
+        rowId: row.id,
+        kind: "video",
+      });
+    }
 
     return jsonResponse({ id: row.id });
   } catch (err) {
