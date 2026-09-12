@@ -1,6 +1,7 @@
 // Atelier "Battle Ground" — un même prompt envoyé à 2-3 vrais fournisseurs IA
-// (Gemini, GPT-4o, Claude), affichés côte à côte. Voir
-// supabase/functions/generate-battle-responses.
+// (Gemini, GPT, Claude), affichés côte à côte. Voir
+// supabase/functions/generate-battle-responses — GPT et Claude sont routés
+// via Runware (pas de clé OpenAI/Anthropic séparée nécessaire).
 //
 // IMPORTANT : ALLOWED_BATTLE_MODELS doit rester synchronisée avec
 // BATTLE_MODELS côté edge function.
@@ -10,8 +11,8 @@ export type BattleProvider = "gemini" | "openai" | "anthropic";
 
 export const ALLOWED_BATTLE_MODELS: { id: BattleProvider; label: string }[] = [
   { id: "gemini", label: "Gemini (Google)" },
-  { id: "openai", label: "GPT-4o (OpenAI)" },
-  { id: "anthropic", label: "Claude Sonnet (Anthropic)" },
+  { id: "openai", label: "GPT-5.4 Pro (OpenAI)" },
+  { id: "anthropic", label: "Claude Opus 5 (Anthropic)" },
 ];
 
 export interface BattleResponse {

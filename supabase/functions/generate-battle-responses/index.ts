@@ -1,13 +1,22 @@
 // "Battle Ground" — un même prompt envoyé à 2-3 vrais fournisseurs IA en
-// parallèle (Gemini, GPT-4o, Claude), affichés côte à côte côté client.
+// parallèle (Gemini, GPT, Claude), affichés côte à côte côté client.
 // Chaque appel est isolé (Promise.allSettled) : l'échec d'un fournisseur
 // (clé manquante, quota, timeout) n'empêche pas d'afficher les autres.
+//
+// Gemini reste appelé directement (GEMINI_API_KEY, déjà utilisé partout
+// dans ce projet). GPT et Claude sont routés via Runware (textInference,
+// deliveryMethod "async") plutôt que d'exiger des clés OpenAI/Anthropic
+// séparées — le compte Runware déjà crédité pour Le Studio couvre aussi
+// ces modèles tiers en texte. Catalogue vérifié en direct le 2026-09-12
+// (modelSearch category="text") : `openai:gpt@5.4-pro` et
+// `anthropic:claude@opus-5` confirmés fonctionnels de bout en bout.
 //
 // IMPORTANT : la liste BATTLE_MODELS ci-dessous doit rester synchronisée
 // avec ALLOWED_BATTLE_MODELS dans src/app/lib/battleGround.ts (même
 // convention que _shared/studio-models.ts pour le Studio).
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
+import { submitAndAwaitRunwareText } from "../_shared/runware.ts";
 
 type Provider = "gemini" | "openai" | "anthropic";
 
@@ -15,8 +24,8 @@ interface BattleModel { id: Provider; model: string }
 
 const BATTLE_MODELS: Record<Provider, BattleModel> = {
   gemini: { id: "gemini", model: "gemini-3.6-flash" },
-  openai: { id: "openai", model: "gpt-4o" },
-  anthropic: { id: "anthropic", model: "claude-sonnet-5" },
+  openai: { id: "openai", model: "openai:gpt@5.4-pro" },
+  anthropic: { id: "anthropic", model: "anthropic:claude@opus-5" },
 };
 
 interface BattleResponse {
@@ -40,30 +49,19 @@ async function callGemini(prompt: string, apiKey: string | undefined, model: str
   return text ? { text, error: null } : { text: null, error: "Gemini n'a renvoyé aucun texte." };
 }
 
-async function callOpenAi(prompt: string, apiKey: string | undefined, model: string): Promise<{ text: string | null; error: string | null }> {
-  if (!apiKey) return { text: null, error: "OPENAI_API_KEY non configurée côté serveur." };
-  const resp = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ model, messages: [{ role: "user", content: prompt }] }),
-  });
-  if (!resp.ok) return { text: null, error: `OpenAI a échoué (${resp.status}) : ${(await resp.text()).slice(0, 300)}` };
-  const json = await resp.json();
-  const text = json?.choices?.[0]?.message?.content;
-  return text ? { text, error: null } : { text: null, error: "OpenAI n'a renvoyé aucun texte." };
-}
-
-async function callAnthropic(prompt: string, apiKey: string | undefined, model: string): Promise<{ text: string | null; error: string | null }> {
-  if (!apiKey) return { text: null, error: "ANTHROPIC_API_KEY non configurée côté serveur." };
-  const resp = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01", "Content-Type": "application/json" },
-    body: JSON.stringify({ model, max_tokens: 1024, messages: [{ role: "user", content: prompt }] }),
-  });
-  if (!resp.ok) return { text: null, error: `Claude a échoué (${resp.status}) : ${(await resp.text()).slice(0, 300)}` };
-  const json = await resp.json();
-  const text = json?.content?.[0]?.text;
-  return text ? { text, error: null } : { text: null, error: "Claude n'a renvoyé aucun texte." };
+async function callRunwareText(prompt: string, apiKey: string | undefined, model: string): Promise<{ text: string | null; error: string | null }> {
+  if (!apiKey) return { text: null, error: "RUNWARE_API_KEY non configurée côté serveur." };
+  try {
+    const text = await submitAndAwaitRunwareText(apiKey, {
+      taskType: "textInference",
+      model,
+      messages: [{ role: "user", content: prompt }],
+      settings: { maxTokens: 1024 },
+    }, { timeoutMs: 75000 });
+    return { text, error: null };
+  } catch (err) {
+    return { text: null, error: err instanceof Error ? err.message : "Erreur Runware inconnue." };
+  }
 }
 
 async function callProvider(provider: Provider, prompt: string, keys: Record<string, string | undefined>): Promise<BattleResponse> {
@@ -72,9 +70,7 @@ async function callProvider(provider: Provider, prompt: string, keys: Record<str
   try {
     const result = provider === "gemini"
       ? await callGemini(prompt, keys.GEMINI_API_KEY, model)
-      : provider === "openai"
-      ? await callOpenAi(prompt, keys.OPENAI_API_KEY, model)
-      : await callAnthropic(prompt, keys.ANTHROPIC_API_KEY, model);
+      : await callRunwareText(prompt, keys.RUNWARE_API_KEY, model);
     return { provider, model, text: result.text, error: result.error, latencyMs: Date.now() - started };
   } catch (err) {
     return { provider, model, text: null, error: err instanceof Error ? err.message : "Erreur inconnue.", latencyMs: Date.now() - started };
@@ -106,8 +102,7 @@ Deno.serve(async (req) => {
 
     const keys = {
       GEMINI_API_KEY: Deno.env.get("GEMINI_API_KEY"),
-      OPENAI_API_KEY: Deno.env.get("OPENAI_API_KEY"),
-      ANTHROPIC_API_KEY: Deno.env.get("ANTHROPIC_API_KEY"),
+      RUNWARE_API_KEY: Deno.env.get("RUNWARE_API_KEY"),
     };
 
     const responses = await Promise.all(selected.map((provider) => callProvider(provider, prompt.trim(), keys)));

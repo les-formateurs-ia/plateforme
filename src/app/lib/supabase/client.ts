@@ -8,16 +8,12 @@ if (!url || !anonKey) {
   throw new Error("Missing VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY — copy .env.example to .env and fill in your project's values.");
 }
 
-// supabase-js serializes auth calls across tabs with the browser's Web Locks API
-// by default. A request that never settles (flaky network, a stuck refresh…)
-// can leave that per-origin lock held, and every future getSession()/auth call
-// in that browser profile then hangs forever — only a profile with no stored
-// lock state (e.g. an incognito window) works again. We don't need cross-tab
-// session serialization here, so we skip the lock entirely.
-async function noopLock(_name: string, _acquireTimeout: number, fn: () => Promise<any>): Promise<any> {
-  return fn();
-}
-
-export const supabase = createClient<Database>(url, anonKey, {
-  auth: { lock: noopLock },
-});
+// supabase-js@2.116.0 coordinates session refreshes internally without
+// needing the "lock" option at all (deprecated, removed in v3 — see
+// https://github.com/supabase/supabase-js/blob/master/packages/core/auth-js/migrations/lockless-coordination.md).
+// A previous workaround here forced a no-op lock to avoid a stuck Web Locks
+// mutex on older versions; with this version that override instead let
+// concurrent refresh calls race each other and reuse an already-spent
+// (single-use) refresh token, causing real `400` refresh failures and
+// downstream `401`s on API calls. Just use the client's default behavior.
+export const supabase = createClient<Database>(url, anonKey);

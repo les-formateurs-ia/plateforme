@@ -20,6 +20,7 @@ interface RunwareResultItem {
   taskType: string;
   imageURL?: string;
   videoURL?: string;
+  text?: string;
 }
 
 interface RunwareErrorItem {
@@ -109,7 +110,33 @@ export async function submitAndAwaitRunware(apiKey: string, task: Record<string,
   throw new Error("La génération Runware prend plus de temps que prévu — réessaie dans quelques instants.");
 }
 
-export async function downloadBytes(url: string): Promise<{ bytes: Uint8Array; contentType: string }> {
+// Génération de texte (taskType "textInference") — utilisé par Battle Ground
+// pour router GPT/Claude via Runware plutôt que d'exiger des clés OpenAI/
+// Anthropic séparées (le compte Runware crédité couvre déjà ces modèles
+// tiers). deliveryMethod "async" impose le même cycle soumission+polling
+// que l'image/vidéo ; la réponse texte arrive dans le champ `text`, pas
+// une URL.
+export async function submitAndAwaitRunwareText(apiKey: string, task: Record<string, unknown>, { timeoutMs = 45000 }: { timeoutMs?: number } = {}): Promise<string> {
+  const taskUUID = (task.taskUUID as string | undefined) ?? crypto.randomUUID();
+  const { data, errors } = await callRunware(apiKey, [{ deliveryMethod: "async", ...task, taskUUID }]);
+  if (errors.length) throw new Error(formatRunwareError(errors));
+  const immediate = data[0]?.text;
+  if (immediate) return immediate;
+
+  const deadline = Date.now() + timeoutMs;
+  let delay = 1500;
+  while (Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, delay));
+    const { data: pollData, errors: pollErrors } = await callRunware(apiKey, [{ taskType: "getResponse", taskUUID }]);
+    if (pollErrors.length) throw new Error(formatRunwareError(pollErrors));
+    const text = pollData[0]?.text;
+    if (text) return text;
+    delay = Math.min(delay * 1.5, 8000);
+  }
+  throw new Error("La génération de texte Runware prend plus de temps que prévu.");
+}
+
+async function downloadBytes(url: string): Promise<{ bytes: Uint8Array; contentType: string }> {
   const resp = await fetch(url);
   if (!resp.ok) throw new Error("Téléchargement du média Runware échoué.");
   const contentType = resp.headers.get("content-type") || "application/octet-stream";
