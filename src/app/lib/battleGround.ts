@@ -72,3 +72,8 @@ export async function listMyBattleGroundAttempts(userId: string, limit = 10): Pr
   if (error) throw error;
   return (data ?? []).map((row) => mapRow(row as unknown as Row));
 }
+
+export async function deleteBattleGroundAttempt(id: string): Promise<void> {
+  const { error } = await supabase.from("battle_ground_attempts").delete().eq("id", id);
+  if (error) throw error;
+}

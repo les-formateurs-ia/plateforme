@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { ArrowLeft, Send, Sparkles, AlertTriangle, Swords } from "lucide-react";
+import { ArrowLeft, Send, Sparkles, AlertTriangle, Swords, Trash2 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { GCard } from "@/app/components/common/GCard";
@@ -8,7 +8,7 @@ import { GT } from "@/app/components/common/GT";
 import { ShimBtn } from "@/app/components/common/Buttons";
 import { MarkdownText } from "@/app/components/common/MarkdownText";
 import {
-  ALLOWED_BATTLE_MODELS, runBattleGround, listMyBattleGroundAttempts,
+  ALLOWED_BATTLE_MODELS, runBattleGround, listMyBattleGroundAttempts, deleteBattleGroundAttempt,
   type BattleProvider, type BattleGroundAttempt,
 } from "@/app/lib/battleGround";
 
@@ -25,6 +25,7 @@ export function BattleGroundPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [current, setCurrent] = useState<BattleGroundAttempt | null>(null);
   const [history, setHistory] = useState<BattleGroundAttempt[]>([]);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -55,6 +56,20 @@ export function BattleGroundPage() {
   };
 
   const modelLabel = (id: BattleProvider) => ALLOWED_BATTLE_MODELS.find((m) => m.id === id)?.label ?? id;
+
+  const handleDelete = async (id: string) => {
+    if (deletingId) return;
+    setDeletingId(id);
+    try {
+      await deleteBattleGroundAttempt(id);
+      setHistory((prev) => prev.filter((h) => h.id !== id));
+      setCurrent((prev) => (prev?.id === id ? null : prev));
+    } catch {
+      // silencieux : l'entrée reste visible, l'utilisateur peut réessayer
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
@@ -125,11 +140,19 @@ export function BattleGroundPage() {
           <h3 className="text-xs font-black uppercase tracking-widest" style={{ color: th.navAC }}>Tes tentatives précédentes</h3>
           <div className="space-y-2">
             {history.slice(0, 8).map((h) => (
-              <button key={h.id} onClick={() => setCurrent(h)}
-                className="w-full text-left px-4 py-2.5 rounded-xl text-xs transition-colors hover:opacity-80"
-                style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg2 }}>
-                {h.promptText.length > 90 ? `${h.promptText.slice(0, 90)}…` : h.promptText}
-              </button>
+              <div key={h.id} className="flex items-center gap-2">
+                <button onClick={() => setCurrent(h)}
+                  className="flex-1 min-w-0 text-left px-4 py-2.5 rounded-xl text-xs transition-colors hover:opacity-80"
+                  style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg2 }}>
+                  {h.promptText.length > 90 ? `${h.promptText.slice(0, 90)}…` : h.promptText}
+                </button>
+                <button onClick={() => handleDelete(h.id)} disabled={deletingId === h.id}
+                  title="Supprimer cette tentative" aria-label="Supprimer cette tentative"
+                  className="shrink-0 p-2 rounded-xl transition-colors hover:opacity-80 disabled:opacity-40"
+                  style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: RED }}>
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
             ))}
           </div>
         </div></GCard>
