@@ -54,7 +54,7 @@ export function MediaExerciseSessionsPage() {
     setCreating(true);
     try {
       const session = await createExerciseSession(user.id, "media");
-      navigate(`/practice/media/${session.id}`);
+      navigate(`/practice2/media/${session.id}`);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Impossible de créer un nouveau test.");
       setCreating(false);
@@ -84,8 +84,8 @@ export function MediaExerciseSessionsPage() {
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div>
-        <button onClick={() => navigate("/practice")} className="flex items-center gap-1.5 text-sm mb-2 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
-          <ArrowLeft className="w-4 h-4" />Exercez-vous !
+        <button onClick={() => navigate("/practice2")} className="flex items-center gap-1.5 text-sm mb-2 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
+          <ArrowLeft className="w-4 h-4" />Exercez-vous 2 !
         </button>
         <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Génération images & vidéos</GT></h2>
         <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Reprends un historique existant ou lance un nouveau test.</p>
@@ -113,7 +113,7 @@ export function MediaExerciseSessionsPage() {
             const tone = s.lastScore !== null ? scoreTone(s.lastScore) : null;
             const gradient = s.mode ? MODE_GRADIENT[s.mode] : "linear-gradient(150deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))";
             return (
-              <div key={s.sessionId} onClick={() => navigate(`/practice/media/${s.sessionId}`)}
+              <div key={s.sessionId} onClick={() => navigate(`/practice2/media/${s.sessionId}`)}
                 className="group relative overflow-hidden rounded-2xl cursor-pointer flex flex-col transition-all duration-300 hover:scale-[1.02]"
                 style={{ aspectRatio: "1/1", background: th.card, border: `1px solid ${th.sep}`, boxShadow: "0 4px 18px rgba(0,0,0,0.16)" }}>
                 <div className="relative flex-1 flex items-center justify-center overflow-hidden" style={{ background: gradient }}>

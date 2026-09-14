@@ -1,4 +1,4 @@
-// Signalement d'incidents techniques (bouton topbar) + suivi admin.
+// Signalement d'incidents techniques (bouton d'assistance) + suivi admin.
 import { supabase } from "@/app/lib/supabase/client";
 import type { IncidentPage, IncidentStatus } from "@/app/lib/supabase/database.types";
 

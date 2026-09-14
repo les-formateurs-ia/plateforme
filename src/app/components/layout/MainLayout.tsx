@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router";
-import { Search, Plus, CalendarClock, Menu, X, Bug, Building2, ScanEye } from "lucide-react";
+import { Plus, CalendarClock, Menu, X, Bug, Building2, ScanEye } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
@@ -213,24 +213,6 @@ export function MainLayout() {
         <button className="fixed top-3 left-3 z-30 w-9 h-9 rounded-full flex items-center justify-center shrink-0 lg:hidden" style={{ background: th.card, border: `1px solid ${th.inputB}`, boxShadow: "0 6px 18px rgba(0,0,0,0.14)" }} onClick={() => setNavOpen(true)}>
           <Menu className="w-4 h-4" style={{ color: th.fg3 }} />
         </button>
-
-        {false && (
-          <div className="flex items-center gap-3 min-w-0 lg:hidden">
-            <button className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }} onClick={() => setNavOpen(true)}>
-              <Menu className="w-4 h-4" style={{ color: th.fg3 }} />
-            </button>
-            <Link to="/" className="transition-opacity hover:opacity-80"><Logo h={20} /></Link>
-          </div>
-          <div className="flex items-center gap-2.5 px-4 py-2 rounded-full w-full max-w-[220px] sm:max-w-none sm:w-64 hidden sm:flex" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
-            <Search className="w-3.5 h-3.5 shrink-0" style={{ color: th.fg3 }} />
-            <input placeholder="Recherche…" className="flex-1 min-w-0 bg-transparent text-sm outline-none" style={{ color: th.fg2 }} />
-          </div>
-          <div className="flex items-center gap-3 shrink-0 ml-auto sm:ml-0">
-            <button className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 sm:hidden" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
-              <Search className="w-4 h-4" style={{ color: th.fg3 }} />
-            </button>
-          </div>
-        </div>
 
         <div className="flex-1 min-h-0 flex flex-col overflow-hidden pt-10 lg:pt-0">
           <Outlet />

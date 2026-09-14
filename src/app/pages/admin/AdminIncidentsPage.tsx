@@ -79,7 +79,7 @@ export function AdminIncidentsPage() {
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div>
         <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Incidents techniques</GT></h2>
-        <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Bugs signalés par les utilisateurs depuis le bouton de la topbar.</p>
+        <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Bugs signalés par les utilisateurs depuis l'assistance technique.</p>
       </div>
 
       {loading && <p className="text-sm" style={{ color: th.fg3 }}>Chargement…</p>}
