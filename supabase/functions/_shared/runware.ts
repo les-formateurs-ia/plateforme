@@ -155,7 +155,8 @@ export async function finalizeRunwareResult(userClient: any, {
 > {
   try {
     const { bytes, contentType } = await downloadBytes(url);
-    const ext = kind === "video" ? "mp4" : (contentType.includes("png") ? "png" : "jpg");
+    // Recraft V4 Pro Vector renvoie du SVG (pas du PNG/JPG) — cf. studio-models.ts.
+    const ext = kind === "video" ? "mp4" : contentType.includes("svg") ? "svg" : contentType.includes("png") ? "png" : "jpg";
     const finalPath = `${pathPrefix}.${ext}`;
     const { error: uploadError } = await userClient.storage.from(bucket).upload(finalPath, bytes, { contentType, upsert: true });
     if (uploadError) throw new Error(uploadError.message);

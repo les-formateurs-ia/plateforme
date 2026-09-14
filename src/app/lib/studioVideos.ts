@@ -1,11 +1,17 @@
 // Module "Imaginez vos vidéos" (Le Studio) — génération Text-to-Video /
 // Image-to-Video via l'API Runware (remplace Higgsfield, cf.
 // supabase/functions/_shared/studio-video-models.ts, à garder en phase).
+// Catalogue complet (21 modèles demandés le 2026-09-14). Chaque modèle expose
+// désormais un choix de format (paysage/portrait/carré, cf. "aspectRatio"
+// dans les `options` ci-dessous) en plus de la durée — jusqu'ici seule la
+// durée était réglable et tout tournait en 16:9 fixe, ce qui rendait le
+// portrait impossible (bug corrigé le 2026-09-14).
 // IMPORTANT : le compte Runware n'a aucun solde crédité et TOUTE génération
 // vidéo (quel que soit le modèle, Sora 2 inclus) exige un solde ≥5$
 // (https://my.runware.ai/wallet) — l'élève verra donc l'erreur Runware
 // explicite tant que le compte n'est pas alimenté. Le code est prêt et
-// fonctionnera dès que ce sera fait, sans changement supplémentaire.
+// fonctionnera dès que ce sera fait, sans changement supplémentaire. Seul
+// "kling" a été testé bout en bout avec succès (2026-09-12).
 import { supabase } from "@/app/lib/supabase/client";
 import type { StudioImageStatus } from "@/app/lib/supabase/database.types";
 
@@ -25,14 +31,28 @@ export interface StudioVideoModel {
   options: StudioVideoOption[];
 }
 
+const RATIO_16_9_9_16 = { key: "aspectRatio", label: "Format", choices: ["16:9", "9:16"], default: "16:9" };
+const RATIO_16_9_9_16_1_1 = { key: "aspectRatio", label: "Format", choices: ["16:9", "9:16", "1:1"], default: "16:9" };
+const RATIO_GEN45 = { key: "aspectRatio", label: "Format", choices: ["16:9", "9:16", "4:3", "3:4", "1:1"], default: "16:9" };
+const DURATION_5_10 = { key: "duration", label: "Durée", choices: ["5", "10"], default: "5" };
+const DURATION_6_8_10 = { key: "duration", label: "Durée", choices: ["6", "8", "10"], default: "8" };
+
 export const STUDIO_VIDEO_MODELS: StudioVideoModel[] = [
   {
     id: "veo-3-1",
-    label: "Google Veo 3.1",
+    label: "Veo 3.1",
     description: "Texte seul ou animation d'une photo de référence (optionnelle).",
     supportsSourceImage: true,
     requiresSourceImage: false,
-    options: [{ key: "duration", label: "Durée", choices: ["5", "8"], default: "8" }],
+    options: [RATIO_16_9_9_16, { key: "duration", label: "Durée", choices: ["5", "8"], default: "8" }],
+  },
+  {
+    id: "veo-3-1-fast",
+    label: "Veo 3.1 Fast",
+    description: "Version rapide de Veo 3.1 — texte seul ou animation d'une photo de référence (optionnelle).",
+    supportsSourceImage: true,
+    requiresSourceImage: false,
+    options: [RATIO_16_9_9_16, { key: "duration", label: "Durée", choices: ["5", "8"], default: "8" }],
   },
   {
     id: "kling",
@@ -40,7 +60,39 @@ export const STUDIO_VIDEO_MODELS: StudioVideoModel[] = [
     description: "Animation d'une photo de référence — image obligatoire.",
     supportsSourceImage: true,
     requiresSourceImage: true,
-    options: [{ key: "duration", label: "Durée", choices: ["5", "10"], default: "5" }],
+    options: [RATIO_16_9_9_16_1_1, DURATION_5_10],
+  },
+  {
+    id: "kling-video-3-pro",
+    label: "Kling VIDEO 3.0 Pro",
+    description: "Texte seul ou animation d'une photo de référence (optionnelle).",
+    supportsSourceImage: true,
+    requiresSourceImage: false,
+    options: [RATIO_16_9_9_16_1_1, DURATION_5_10],
+  },
+  {
+    id: "kling-video-3-4k",
+    label: "Kling VIDEO 3.0 4K",
+    description: "Kling en résolution 4K — texte seul ou animation d'une photo de référence (optionnelle).",
+    supportsSourceImage: true,
+    requiresSourceImage: false,
+    options: [RATIO_16_9_9_16_1_1, DURATION_5_10],
+  },
+  {
+    id: "kling-video-o1-pro",
+    label: "Kling VIDEO O1 Pro",
+    description: "Texte seul ou animation d'une photo de référence (optionnelle).",
+    supportsSourceImage: true,
+    requiresSourceImage: false,
+    options: [RATIO_16_9_9_16, DURATION_5_10],
+  },
+  {
+    id: "kling-video-o1-standard",
+    label: "Kling VIDEO O1 Standard",
+    description: "Texte seul ou animation d'une photo de référence (optionnelle).",
+    supportsSourceImage: true,
+    requiresSourceImage: false,
+    options: [RATIO_16_9_9_16, DURATION_5_10],
   },
   {
     id: "flux-video",
@@ -48,7 +100,7 @@ export const STUDIO_VIDEO_MODELS: StudioVideoModel[] = [
     description: "Texte uniquement.",
     supportsSourceImage: false,
     requiresSourceImage: false,
-    options: [{ key: "duration", label: "Durée", choices: ["5"], default: "5" }],
+    options: [RATIO_16_9_9_16_1_1, { key: "duration", label: "Durée", choices: ["5"], default: "5" }],
   },
   {
     id: "sora-2",
@@ -56,7 +108,127 @@ export const STUDIO_VIDEO_MODELS: StudioVideoModel[] = [
     description: "Texte seul ou animation d'une photo de référence (optionnelle) — audio synchronisé.",
     supportsSourceImage: true,
     requiresSourceImage: false,
-    options: [{ key: "duration", label: "Durée", choices: ["4", "8", "12", "16", "20"], default: "8" }],
+    options: [RATIO_16_9_9_16, { key: "duration", label: "Durée", choices: ["4", "8", "12", "16", "20"], default: "8" }],
+  },
+  {
+    id: "runway-gen-4-5",
+    label: "Runway Gen-4.5",
+    description: "Texte seul ou animation d'une photo de référence (optionnelle).",
+    supportsSourceImage: true,
+    requiresSourceImage: false,
+    options: [RATIO_GEN45, { key: "duration", label: "Durée", choices: ["5", "8", "10"], default: "8" }],
+  },
+  {
+    id: "seedance-2-0",
+    label: "Seedance 2.0",
+    description: "Texte seul ou animation d'une photo de référence (optionnelle).",
+    supportsSourceImage: true,
+    requiresSourceImage: false,
+    options: [RATIO_16_9_9_16_1_1, DURATION_5_10],
+  },
+  {
+    id: "seedance-2-0-fast",
+    label: "Seedance 2.0 Fast",
+    description: "Version rapide de Seedance 2.0.",
+    supportsSourceImage: true,
+    requiresSourceImage: false,
+    options: [RATIO_16_9_9_16_1_1, DURATION_5_10],
+  },
+  {
+    id: "seedance-1-5-pro",
+    label: "Seedance 1.5 Pro",
+    description: "Texte seul ou animation d'une photo de référence (optionnelle).",
+    supportsSourceImage: true,
+    requiresSourceImage: false,
+    options: [RATIO_16_9_9_16_1_1, DURATION_5_10],
+  },
+  {
+    id: "ltx-2-5-pro",
+    label: "LTX-2.5 Pro",
+    description: "Texte seul ou animation d'une photo de référence (optionnelle).",
+    supportsSourceImage: true,
+    requiresSourceImage: false,
+    options: [RATIO_16_9_9_16, DURATION_6_8_10],
+  },
+  {
+    id: "ltx-2-5-fast",
+    label: "LTX-2.5 Fast",
+    description: "Version rapide de LTX-2.5.",
+    supportsSourceImage: true,
+    requiresSourceImage: false,
+    options: [RATIO_16_9_9_16, DURATION_6_8_10],
+  },
+  {
+    id: "minimax-hailuo-2-3",
+    label: "MiniMax Hailuo 2.3",
+    description: "Texte seul ou animation d'une photo de référence (optionnelle) — paysage uniquement.",
+    supportsSourceImage: true,
+    requiresSourceImage: false,
+    options: [{ key: "duration", label: "Durée", choices: ["6", "10"], default: "6" }],
+  },
+  {
+    id: "minimax-hailuo-02",
+    label: "MiniMax Hailuo 02",
+    description: "Texte seul ou animation d'une photo de référence (optionnelle) — paysage uniquement.",
+    supportsSourceImage: true,
+    requiresSourceImage: false,
+    options: [{ key: "duration", label: "Durée", choices: ["6", "10"], default: "6" }],
+  },
+  {
+    id: "wan27-video",
+    label: "Wan2.7",
+    description: "Texte seul ou animation d'une photo de référence (optionnelle).",
+    supportsSourceImage: true,
+    requiresSourceImage: false,
+    options: [RATIO_16_9_9_16_1_1, DURATION_5_10],
+  },
+  {
+    id: "happyhorse-1-0",
+    label: "HappyHorse-1.0",
+    description: "Texte seul ou animation d'une photo de référence (optionnelle).",
+    supportsSourceImage: true,
+    requiresSourceImage: false,
+    options: [RATIO_16_9_9_16_1_1, DURATION_5_10],
+  },
+  {
+    id: "vidu-q3",
+    label: "Vidu Q3",
+    description: "Texte seul ou animation d'une photo de référence (optionnelle).",
+    supportsSourceImage: true,
+    requiresSourceImage: false,
+    options: [RATIO_16_9_9_16_1_1, DURATION_5_10],
+  },
+  {
+    id: "pixverse-v5-5",
+    label: "PixVerse V5.5",
+    description: "Texte seul ou animation d'une photo de référence (optionnelle).",
+    supportsSourceImage: true,
+    requiresSourceImage: false,
+    options: [RATIO_16_9_9_16_1_1, { key: "duration", label: "Durée", choices: ["5", "8"], default: "5" }],
+  },
+  {
+    id: "pixverse-v6",
+    label: "PixVerse V6",
+    description: "Texte seul ou animation d'une photo de référence (optionnelle).",
+    supportsSourceImage: true,
+    requiresSourceImage: false,
+    options: [RATIO_16_9_9_16_1_1, { key: "duration", label: "Durée", choices: ["5", "8", "10"], default: "5" }],
+  },
+  {
+    id: "skyreels-v4",
+    label: "SkyReels V4",
+    description: "Texte seul ou animation d'une photo de référence (optionnelle).",
+    supportsSourceImage: true,
+    requiresSourceImage: false,
+    options: [RATIO_16_9_9_16_1_1, DURATION_5_10],
+  },
+  {
+    id: "grok-imagine-video",
+    label: "Grok Imagine Video",
+    description: "Texte seul ou animation d'une photo de référence (optionnelle).",
+    supportsSourceImage: true,
+    requiresSourceImage: false,
+    options: [RATIO_16_9_9_16_1_1, DURATION_5_10],
   },
 ];
 

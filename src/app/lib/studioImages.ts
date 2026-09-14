@@ -1,10 +1,11 @@
 // Module "Créer vos images" (Le Studio) — génération Text-to-Image / Image-to-Image
-// via l'API Runware (remplace Higgsfield). Modèles FLUX natifs Runware +
-// GPT Image (OpenAI), Nano Banana Pro (Gemini/Google) et Kling Image 3.0
-// (KlingAI) — ces trois derniers resteront en erreur tant que le compte
-// Runware n'est pas crédité (carte + solde ≥5$, https://my.runware.ai/wallet),
-// cf. supabase/functions/_shared/studio-models.ts (à garder en phase avec ce
-// fichier) pour le détail.
+// via l'API Runware (remplace Higgsfield). Catalogue complet (23 modèles
+// tiers demandés le 2026-09-14) — cf. supabase/functions/_shared/studio-models.ts
+// (à garder en phase avec ce fichier) pour le détail des AIR identifiers et
+// des sources. Seuls flux-dev/flux-schnell (natifs Runware) fonctionnent sans
+// solde Runware crédité (carte + solde ≥5$, https://my.runware.ai/wallet) —
+// tous les autres modèles resteront en erreur tant que le compte n'est pas
+// alimenté (thirdPartyInsufficientCredits), erreur explicite côté élève.
 import { supabase } from "@/app/lib/supabase/client";
 import type { StudioImageStatus } from "@/app/lib/supabase/database.types";
 
@@ -18,6 +19,10 @@ export interface StudioModel {
 }
 
 const COMMON_ASPECT_RATIOS = ["1:1", "4:3", "3:4", "3:2", "2:3", "16:9", "9:16"];
+// Modèles à presets fixes côté Runware (pas de dimensions libres) — cf.
+// fixedPresetTask dans _shared/studio-models.ts, doit rester identique à
+// FIXED_PRESET_ASPECT_RATIOS côté serveur.
+const FIXED_PRESET_ASPECT_RATIOS = ["16:9", "9:16", "1:1"];
 
 export const STUDIO_MODELS: StudioModel[] = [
   {
@@ -37,9 +42,65 @@ export const STUDIO_MODELS: StudioModel[] = [
     defaultAspectRatio: "4:3",
   },
   {
+    id: "flux2-pro",
+    label: "FLUX.2 [pro]",
+    description: "FLUX.2 professionnel (Black Forest Labs) — haute fidélité, jusqu'à 9 images de référence.",
+    supportsSourceImage: true,
+    aspectRatios: COMMON_ASPECT_RATIOS,
+    defaultAspectRatio: "4:3",
+  },
+  {
+    id: "flux2-max",
+    label: "FLUX.2 [max]",
+    description: "FLUX.2 le plus avancé (Black Forest Labs) — qualité maximale.",
+    supportsSourceImage: true,
+    aspectRatios: COMMON_ASPECT_RATIOS,
+    defaultAspectRatio: "4:3",
+  },
+  {
+    id: "flux2-flex",
+    label: "FLUX.2 [flex]",
+    description: "FLUX.2 configurable (Black Forest Labs) — contrôle fin des étapes de génération.",
+    supportsSourceImage: true,
+    aspectRatios: COMMON_ASPECT_RATIOS,
+    defaultAspectRatio: "4:3",
+  },
+  {
+    id: "flux2-dev",
+    label: "FLUX.2 [dev]",
+    description: "FLUX.2 pour l'expérimentation (Black Forest Labs, hébergé nativement par Runware).",
+    supportsSourceImage: true,
+    aspectRatios: COMMON_ASPECT_RATIOS,
+    defaultAspectRatio: "4:3",
+  },
+  {
+    id: "flux2-klein-9b",
+    label: "FLUX.2 [klein] 9B",
+    description: "FLUX.2 compact et très rapide (Black Forest Labs).",
+    supportsSourceImage: true,
+    aspectRatios: COMMON_ASPECT_RATIOS,
+    defaultAspectRatio: "4:3",
+  },
+  {
+    id: "flux2-klein-9b-base",
+    label: "FLUX.2 [klein] 9B Base",
+    description: "FLUX.2 compact, version de base non distillée (Black Forest Labs).",
+    supportsSourceImage: true,
+    aspectRatios: COMMON_ASPECT_RATIOS,
+    defaultAspectRatio: "4:3",
+  },
+  {
     id: "gpt-image",
     label: "GPT Image (OpenAI)",
     description: "Modèle image d'OpenAI (ChatGPT) — bon suivi des instructions et texte intégré lisible.",
+    supportsSourceImage: true,
+    aspectRatios: COMMON_ASPECT_RATIOS,
+    defaultAspectRatio: "1:1",
+  },
+  {
+    id: "gpt-image-2",
+    label: "GPT Image 2",
+    description: "Nouvelle génération du modèle image d'OpenAI — dimensions plus libres que GPT Image 1.5.",
     supportsSourceImage: true,
     aspectRatios: COMMON_ASPECT_RATIOS,
     defaultAspectRatio: "1:1",
@@ -53,9 +114,121 @@ export const STUDIO_MODELS: StudioModel[] = [
     defaultAspectRatio: "4:3",
   },
   {
+    id: "nano-banana-2",
+    label: "Nano Banana 2 (Gemini)",
+    description: "Nouvelle génération Nano Banana (Google Gemini).",
+    supportsSourceImage: true,
+    aspectRatios: COMMON_ASPECT_RATIOS,
+    defaultAspectRatio: "4:3",
+  },
+  {
+    id: "recraft-v4-pro",
+    label: "Recraft V4 Pro",
+    description: "Rendu graphique/illustration haut de gamme (Recraft) — texte seul uniquement.",
+    supportsSourceImage: false,
+    aspectRatios: FIXED_PRESET_ASPECT_RATIOS,
+    defaultAspectRatio: "1:1",
+  },
+  {
+    id: "recraft-v4-pro-vector",
+    label: "Recraft V4 Pro Vector",
+    description: "Variante Recraft V4 Pro qui génère un visuel vectoriel (SVG) — texte seul uniquement.",
+    supportsSourceImage: false,
+    aspectRatios: FIXED_PRESET_ASPECT_RATIOS,
+    defaultAspectRatio: "1:1",
+  },
+  {
+    id: "seedream-4-5",
+    label: "Seedream 4.5",
+    description: "Modèle image de ByteDance — dimensions très libres, jusqu'à 14 images de référence.",
+    supportsSourceImage: true,
+    aspectRatios: COMMON_ASPECT_RATIOS,
+    defaultAspectRatio: "4:3",
+  },
+  {
+    id: "seedream-5-lite",
+    label: "Seedream 5.0 Lite",
+    description: "Modèle image de ByteDance, version rapide.",
+    supportsSourceImage: true,
+    aspectRatios: FIXED_PRESET_ASPECT_RATIOS,
+    defaultAspectRatio: "1:1",
+  },
+  {
+    id: "runway-gen4-image",
+    label: "Runway Gen-4 Image",
+    description: "Modèle image de Runway ML.",
+    supportsSourceImage: true,
+    aspectRatios: FIXED_PRESET_ASPECT_RATIOS,
+    defaultAspectRatio: "16:9",
+  },
+  {
+    id: "imagineart-1-5-pro",
+    label: "ImagineArt 1.5 Pro",
+    description: "Modèle image ImagineArt, rendu en très haute définition — texte seul uniquement.",
+    supportsSourceImage: false,
+    aspectRatios: FIXED_PRESET_ASPECT_RATIOS,
+    defaultAspectRatio: "1:1",
+  },
+  {
+    id: "wan27-image-pro",
+    label: "Wan2.7 Image Pro",
+    description: "Modèle image d'Alibaba.",
+    supportsSourceImage: true,
+    aspectRatios: COMMON_ASPECT_RATIOS,
+    defaultAspectRatio: "4:3",
+  },
+  {
+    id: "z-image-turbo",
+    label: "Z-Image-Turbo",
+    description: "Modèle image d'Alibaba, génération très rapide.",
+    supportsSourceImage: true,
+    aspectRatios: COMMON_ASPECT_RATIOS,
+    defaultAspectRatio: "4:3",
+  },
+  {
+    id: "z-image",
+    label: "Z-Image",
+    description: "Modèle image d'Alibaba, version standard.",
+    supportsSourceImage: true,
+    aspectRatios: COMMON_ASPECT_RATIOS,
+    defaultAspectRatio: "4:3",
+  },
+  {
     id: "kling-image",
-    label: "Kling Image 3.0",
+    label: "Kling IMAGE 3.0",
     description: "Modèle image de KlingAI — texte seul ou à partir d'une image source (Image-to-Image).",
+    supportsSourceImage: true,
+    aspectRatios: COMMON_ASPECT_RATIOS,
+    defaultAspectRatio: "4:3",
+  },
+  {
+    id: "kling-image-o3",
+    label: "Kling IMAGE O3",
+    description: "Modèle image de KlingAI, nouvelle génération.",
+    supportsSourceImage: true,
+    aspectRatios: FIXED_PRESET_ASPECT_RATIOS,
+    defaultAspectRatio: "1:1",
+  },
+  {
+    id: "qwen-image-2512",
+    label: "Qwen-Image-2512",
+    description: "Modèle image d'Alibaba (Qwen).",
+    supportsSourceImage: true,
+    aspectRatios: COMMON_ASPECT_RATIOS,
+    defaultAspectRatio: "4:3",
+  },
+  {
+    id: "uni-1",
+    label: "UNI-1",
+    description: "Modèle image de Luma AI.",
+    supportsSourceImage: true,
+    aspectRatios: FIXED_PRESET_ASPECT_RATIOS,
+    defaultAspectRatio: "1:1",
+  },
+  {
+    id: "stable-diffusion-3",
+    label: "Stable Diffusion 3",
+    description: "Modèle image de Stability AI.",
     supportsSourceImage: true,
     aspectRatios: COMMON_ASPECT_RATIOS,
     defaultAspectRatio: "4:3",

@@ -5,7 +5,7 @@
 // (studio_images_storage_read). La clé Runware reste côté serveur.
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
-import { STUDIO_MODELS, ASPECT_RATIO_DIMENSIONS } from "../_shared/studio-models.ts";
+import { STUDIO_MODELS, ASPECT_RATIO_DIMENSIONS, aspectRatiosForModel } from "../_shared/studio-models.ts";
 import { submitRunwareTask, finalizeRunwareResult } from "../_shared/runware.ts";
 
 Deno.serve(async (req) => {
@@ -19,6 +19,7 @@ Deno.serve(async (req) => {
 
     const modelConfig = STUDIO_MODELS[model];
     if (!modelConfig) return jsonResponse({ error: "Modèle inconnu." }, 400);
+    if (!aspectRatiosForModel(model).includes(aspectRatio)) return jsonResponse({ error: "Ce format n'est pas disponible pour ce modèle." }, 400);
     const dims = ASPECT_RATIO_DIMENSIONS[aspectRatio];
     if (!dims) return jsonResponse({ error: "Format non supporté." }, 400);
     if (sourceImagePath && !modelConfig.supportsSourceImage) return jsonResponse({ error: "Ce modèle ne prend pas d'image source." }, 400);
