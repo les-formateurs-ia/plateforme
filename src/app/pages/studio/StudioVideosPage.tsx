@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { ArrowLeft, Eye, Loader2, Play, Sparkles, Upload, Video as VideoIcon, X } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
@@ -55,7 +55,11 @@ export function StudioVideosPage() {
   const th = useTh();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [modelId, setModelId] = useState(STUDIO_VIDEO_MODELS[0].id);
+  const [searchParams] = useSearchParams();
+  const preselectedModel = searchParams.get("model");
+  const [modelId, setModelId] = useState(
+    preselectedModel && STUDIO_VIDEO_MODELS.some((m) => m.id === preselectedModel) ? preselectedModel : STUDIO_VIDEO_MODELS[0].id,
+  );
   const model = STUDIO_VIDEO_MODELS.find((m) => m.id === modelId)!;
   const [optionValues, setOptionValues] = useState<Record<string, string>>(
     Object.fromEntries(model.options.map((o) => [o.key, o.default])),

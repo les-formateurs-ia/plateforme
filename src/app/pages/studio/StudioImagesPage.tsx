@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { ArrowLeft, Eye, Image as ImageIcon, Loader2, Sparkles, Upload, X } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
@@ -50,7 +50,11 @@ export function StudioImagesPage() {
   const th = useTh();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [modelId, setModelId] = useState(STUDIO_MODELS[0].id);
+  const [searchParams] = useSearchParams();
+  const preselectedModel = searchParams.get("model");
+  const [modelId, setModelId] = useState(
+    preselectedModel && STUDIO_MODELS.some((m) => m.id === preselectedModel) ? preselectedModel : STUDIO_MODELS[0].id,
+  );
   const model = STUDIO_MODELS.find((m) => m.id === modelId)!;
   const [aspectRatio, setAspectRatio] = useState(model.defaultAspectRatio);
   const [prompt, setPrompt] = useState("");

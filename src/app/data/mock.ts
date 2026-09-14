@@ -4,19 +4,21 @@
 // ═══════════════════════════════════════════════════════════════════════════
 import {
   BarChart3, BookOpen, Code2, Calendar, User,
-  Monitor, Headphones, FileText, Bot, Sparkles,
+  Monitor, Headphones, FileText, Bot, Sparkles, LayoutGrid, ListChecks,
   type LucideIcon,
 } from "lucide-react";
 import type { NavId } from "@/app/types";
 
 export const NAV_ITEMS: { id: NavId; Icon: LucideIcon; label: string; path: string }[] = [
-  { id: "dashboard", Icon: BarChart3, label: "Tableau de bord", path: "/dashboard" },
-  { id: "lessons",   Icon: BookOpen,  label: "Mes leçons",      path: "/lessons" },
-  { id: "practice",  Icon: Code2,     label: "Exercez-vous !",  path: "/practice" },
-  { id: "studio",    Icon: Sparkles,  label: "Le Studio",       path: "/studio" },
-  { id: "agent",     Icon: Bot,       label: "Mon Agent IA",    path: "/agent" },
-  { id: "calendar",  Icon: Calendar,  label: "Rendez-vous",     path: "/calendar" },
-  { id: "profile",   Icon: User,      label: "Mon profil",      path: "/profile" },
+  { id: "dashboard", Icon: BarChart3,  label: "Tableau de bord", path: "/dashboard" },
+  { id: "lessons",   Icon: BookOpen,   label: "Mes leçons",      path: "/lessons" },
+  { id: "practice",  Icon: Code2,      label: "Exercez-vous !",  path: "/practice" },
+  { id: "studio",    Icon: Sparkles,   label: "Le Studio",       path: "/studio" },
+  { id: "hub",       Icon: LayoutGrid, label: "Hub IA",          path: "/hub" },
+  { id: "ai-list",   Icon: ListChecks, label: "Liste des IA",    path: "/ai-models" },
+  { id: "agent",     Icon: Bot,        label: "Mon Agent IA",    path: "/agent" },
+  { id: "calendar",  Icon: Calendar,   label: "Rendez-vous",     path: "/calendar" },
+  { id: "profile",   Icon: User,       label: "Mon profil",      path: "/profile" },
 ];
 
 export const MEMORY_DATA = [
