@@ -38,24 +38,24 @@ export function StudioPage() {
         <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Pratique la génération multimédia avec de vrais modèles d'IA — image, vidéo, musique, voix et avatar.</p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
         {visibleModules.map(({ slug, image, title, subtitle, restricted }) => (
-          <div key={slug} className={`relative rounded-2xl overflow-hidden transition-transform ${restricted ? "opacity-45 cursor-default" : "group"}`}
+          <div key={slug} className={`relative min-h-[280px] sm:min-h-[260px] rounded-2xl overflow-hidden transition-transform ${restricted ? "opacity-45 cursor-default" : "group"}`}
             style={{ aspectRatio: "3 / 2" }}>
             {/* url() entre guillemets : certains fichiers (ex. "Du texte à l'audio.png") ont une
                 apostrophe dans leur nom, invalide dans un url() CSS non quoté — sans les
                 guillemets, le navigateur rejette toute la déclaration et l'image disparaît. */}
             <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: `url("${image}")`, backgroundSize: "cover", backgroundPosition: "center" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(180deg,rgba(10,10,16,0.15) 0%,rgba(10,10,16,0.75) 100%)" }} />
-            <div className="relative h-full flex flex-col justify-between p-3">
+            <div className="relative h-full flex flex-col justify-between gap-5 p-4 sm:p-3">
               <div>
-                <span className="inline-block text-[14px] font px-4 py-1 rounded-full mb-2.5 self-start" style={{ background: "rgba(255,255,255,0.18)", color: "#fff", backdropFilter: "blur(4px)" }}>{subtitle}</span>
-                <h3 className="font-black text-white leading-tight max-w-[65%]" style={{ fontSize: 38 }}>{title}</h3>
+                <span className="inline-block text-xs sm:text-[13px] font-semibold px-3 sm:px-4 py-1 rounded-full mb-3 self-start" style={{ background: "rgba(255,255,255,0.18)", color: "#fff", backdropFilter: "blur(4px)" }}>{subtitle}</span>
+                <h3 className="font-black text-white leading-tight max-w-[88%] sm:max-w-[78%] text-[28px] sm:text-[30px] lg:text-[34px]">{title}</h3>
               </div>
               {!restricted && (
                 <button
                   onClick={() => navigate(`/studio/${slug}`)}
-                  className="inline-flex items-center gap-2 self-start text-base font-semibold px-6 py-3 rounded-full transition-colors mb-3"
+                  className="inline-flex items-center gap-2 self-start text-sm sm:text-base font-semibold px-4 sm:px-6 py-2.5 sm:py-3 rounded-full transition-colors"
                   style={{ background: "rgba(255,255,255,0.18)", color: "#fff", backdropFilter: "blur(4px)" }}
                   onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.3)")}
                   onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.18)")}
