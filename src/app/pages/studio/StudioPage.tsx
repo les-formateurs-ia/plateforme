@@ -38,9 +38,9 @@ export function StudioPage() {
         <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Pratique la génération multimédia avec de vrais modèles d'IA — image, vidéo, musique, voix et avatar.</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
         {visibleModules.map(({ slug, image, title, subtitle, restricted }) => (
-          <div key={slug} className={`relative min-h-[280px] sm:min-h-[260px] rounded-2xl overflow-hidden transition-transform ${restricted ? "opacity-45 cursor-default" : "group"}`}
+          <div key={slug} className={`relative min-h-[220px] md:min-h-[260px] rounded-2xl overflow-hidden transition-transform ${restricted ? "opacity-45 cursor-default" : "group"}`}
             style={{ aspectRatio: "3 / 2" }}>
             {/* url() entre guillemets : certains fichiers (ex. "Du texte à l'audio.png") ont une
                 apostrophe dans leur nom, invalide dans un url() CSS non quoté — sans les
@@ -50,7 +50,7 @@ export function StudioPage() {
             <div className="relative h-full flex flex-col justify-between gap-5 p-4 sm:p-3">
               <div>
                 <span className="inline-block text-xs sm:text-[13px] font-semibold px-3 sm:px-4 py-1 rounded-full mb-3 self-start" style={{ background: "rgba(255,255,255,0.18)", color: "#fff", backdropFilter: "blur(4px)" }}>{subtitle}</span>
-                <h3 className="font-black text-white leading-tight max-w-[88%] sm:max-w-[78%] text-[28px] sm:text-[30px] lg:text-[34px]">{title}</h3>
+                <h3 className="font-black text-white leading-tight break-words max-w-[92%] sm:max-w-[78%] text-[20px] min-[381px]:text-[22px] sm:text-[30px] lg:text-[34px]">{title}</h3>
               </div>
               {!restricted && (
                 <button

@@ -24,30 +24,71 @@ export interface StudioModelConfig {
 
 // -- Helpers de construction de tâche (évite la répétition sur ~20 modèles) --
 
+// Contraintes de dimensions par modèle "à dimensions libres" — nécessaire car
+// nos ASPECT_RATIO_DIMENSIONS partagées (~1024-1344px, pensées pour les FLUX)
+// ne respectent PAS forcément les bornes des modèles tiers, qui peuvent
+// exiger une résolution beaucoup plus grande. Constaté en direct le
+// 2026-09-14 sur Seedream 4.5 : erreur Runware "Invalid image pixels. Total
+// pixels (width x height) must be between 3686400 and 16777216" (= entre
+// 2560x1440 et 4096x4096) alors qu'on envoyait ~1024x1024 (1.05MP, bien en
+// dessous du minimum). D'où minArea/maxArea ci-dessous en plus de
+// minSide/maxSide (limites par côté, sourcées depuis la doc officielle).
+interface DimensionConstraints { minSide?: number; maxSide?: number; minArea?: number; maxArea?: number; step?: number }
+
+// Redimensionne (en conservant le ratio) pour respecter les bornes du modèle,
+// puis arrondit au multiple de `step` le plus proche (16 par défaut, comme
+// l'exige la plupart des modèles Runware à dimensions libres).
+function fitDimensions(width: number, height: number, c?: DimensionConstraints): { width: number; height: number } {
+  if (!c) return { width, height };
+  const step = c.step ?? 16;
+  const area = width * height;
+  let scale = 1;
+  if (c.minArea && area * scale * scale < c.minArea) scale = Math.sqrt(c.minArea / area);
+  if (c.maxArea && area * scale * scale > c.maxArea) scale = Math.min(scale, Math.sqrt(c.maxArea / area));
+  let w = width * scale;
+  let h = height * scale;
+  if (c.minSide) {
+    const need = c.minSide / Math.min(w, h);
+    if (need > 1) { w *= need; h *= need; }
+  }
+  if (c.maxSide) {
+    const need = c.maxSide / Math.max(w, h);
+    if (need < 1) { w *= need; h *= need; }
+  }
+  const round = (n: number) => Math.max(step, Math.round(n / step) * step);
+  return { width: round(w), height: round(h) };
+}
+
 // Modèles à dimensions libres (multiples de 16/64 dans une plage min/max) qui
 // acceptent une image source via seedImage+strength (style FLUX.1 "natif").
-function seedImageTask(modelId: string) {
-  return ({ prompt, width, height, sourceImageUrl }: { prompt: string; width: number; height: number; sourceImageUrl?: string }) => ({
-    taskType: "imageInference",
-    model: modelId,
-    positivePrompt: prompt,
-    width,
-    height,
-    ...(sourceImageUrl ? { seedImage: sourceImageUrl, strength: 0.75 } : {}),
-  });
+function seedImageTask(modelId: string, constraints?: DimensionConstraints) {
+  return ({ prompt, width, height, sourceImageUrl }: { prompt: string; width: number; height: number; sourceImageUrl?: string }) => {
+    const dims = fitDimensions(width, height, constraints);
+    return {
+      taskType: "imageInference",
+      model: modelId,
+      positivePrompt: prompt,
+      width: dims.width,
+      height: dims.height,
+      ...(sourceImageUrl ? { seedImage: sourceImageUrl, strength: 0.75 } : {}),
+    };
+  };
 }
 
 // Modèles à dimensions libres qui acceptent une image source via
 // referenceImages (FLUX.2, Google, OpenAI, ByteDance, Alibaba récents...).
-function referenceImageTask(modelId: string) {
-  return ({ prompt, width, height, sourceImageUrl }: { prompt: string; width: number; height: number; sourceImageUrl?: string }) => ({
-    taskType: "imageInference",
-    model: modelId,
-    positivePrompt: prompt,
-    width,
-    height,
-    ...(sourceImageUrl ? { referenceImages: [sourceImageUrl] } : {}),
-  });
+function referenceImageTask(modelId: string, constraints?: DimensionConstraints) {
+  return ({ prompt, width, height, sourceImageUrl }: { prompt: string; width: number; height: number; sourceImageUrl?: string }) => {
+    const dims = fitDimensions(width, height, constraints);
+    return {
+      taskType: "imageInference",
+      model: modelId,
+      positivePrompt: prompt,
+      width: dims.width,
+      height: dims.height,
+      ...(sourceImageUrl ? { referenceImages: [sourceImageUrl] } : {}),
+    };
+  };
 }
 
 // Modèles sans dimensions libres : Runware n'accepte qu'une liste fermée de
@@ -84,14 +125,18 @@ export const STUDIO_MODELS: Record<string, StudioModelConfig> = {
   // -- FLUX.2 (Black Forest Labs) — pro/max/flex passent par bfl: (passthrough
   // direct BFL), dev/klein sont hébergés nativement par Runware (runware:400@N),
   // tous en dimensions libres 128/256/512–2048px (16px), referenceImages. --
-  "flux2-pro": { runwareModel: "bfl:5@1", supportsSourceImage: true, buildTask: referenceImageTask("bfl:5@1") },
-  "flux2-max": { runwareModel: "bfl:7@1", supportsSourceImage: true, buildTask: referenceImageTask("bfl:7@1") },
-  "flux2-flex": { runwareModel: "bfl:6@1", supportsSourceImage: true, buildTask: referenceImageTask("bfl:6@1") },
-  "flux2-dev": { runwareModel: "runware:400@1", supportsSourceImage: true, buildTask: referenceImageTask("runware:400@1") },
-  "flux2-klein-9b": { runwareModel: "runware:400@2", supportsSourceImage: true, buildTask: referenceImageTask("runware:400@2") },
-  "flux2-klein-9b-base": { runwareModel: "runware:400@3", supportsSourceImage: true, buildTask: referenceImageTask("runware:400@3") },
+  "flux2-pro": { runwareModel: "bfl:5@1", supportsSourceImage: true, buildTask: referenceImageTask("bfl:5@1", { minSide: 256, maxSide: 2048, step: 16 }) },
+  "flux2-max": { runwareModel: "bfl:7@1", supportsSourceImage: true, buildTask: referenceImageTask("bfl:7@1", { minSide: 256, maxSide: 2048, step: 16 }) },
+  "flux2-flex": { runwareModel: "bfl:6@1", supportsSourceImage: true, buildTask: referenceImageTask("bfl:6@1", { minSide: 256, maxSide: 2048, step: 16 }) },
+  "flux2-dev": { runwareModel: "runware:400@1", supportsSourceImage: true, buildTask: referenceImageTask("runware:400@1", { minSide: 512, maxSide: 2048, step: 16 }) },
+  "flux2-klein-9b": { runwareModel: "runware:400@2", supportsSourceImage: true, buildTask: referenceImageTask("runware:400@2", { minSide: 128, maxSide: 2048, step: 16 }) },
+  "flux2-klein-9b-base": { runwareModel: "runware:400@3", supportsSourceImage: true, buildTask: referenceImageTask("runware:400@3", { minSide: 128, maxSide: 2048, step: 16 }) },
 
-  // -- Google Gemini --
+  // -- Google Gemini -- (bornes non documentées avec certitude, on laisse les
+  // dimensions communes telles quelles — nano-banana tourne ainsi depuis
+  // avant ce catalogue étendu ; si nano-banana-2 renvoie la même erreur
+  // "Invalid image pixels", remonter le message exact pour qu'on ajoute les
+  // bonnes bornes, comme fait pour Seedream 4.5 ci-dessous.)
   "nano-banana": { runwareModel: "google:4@2", supportsSourceImage: true, buildTask: referenceImageTask("google:4@2") }, // Nano Banana Pro
   "nano-banana-2": { runwareModel: "google:4@3", supportsSourceImage: true, buildTask: referenceImageTask("google:4@3") },
 
@@ -106,17 +151,18 @@ export const STUDIO_MODELS: Record<string, StudioModelConfig> = {
       return { taskType: "imageInference", model: "openai:4@1", positivePrompt: prompt, width: w, height: h, ...(sourceImageUrl ? { referenceImages: [sourceImageUrl] } : {}) };
     },
   },
-  // GPT Image 2 — dimensions libres 16–3840px (16px), contrairement à la 1.5.
-  "gpt-image-2": { runwareModel: "openai:gpt-image@2", supportsSourceImage: true, buildTask: referenceImageTask("openai:gpt-image@2") },
+  // GPT Image 2 — dimensions libres 16–3840px (16px), aire 655 360–8 294 400px².
+  "gpt-image-2": { runwareModel: "openai:gpt-image@2", supportsSourceImage: true, buildTask: referenceImageTask("openai:gpt-image@2", { minSide: 16, maxSide: 3840, minArea: 655360, maxArea: 8294400, step: 16 }) },
 
   // -- Alibaba --
-  "z-image-turbo": { runwareModel: "runware:z-image@turbo", supportsSourceImage: true, buildTask: seedImageTask("runware:z-image@turbo") },
+  "z-image-turbo": { runwareModel: "runware:z-image@turbo", supportsSourceImage: true, buildTask: seedImageTask("runware:z-image@turbo", { minSide: 128, maxSide: 2048, step: 16 }) },
   // Confiance faible (une seule source doc) — AIR à revalider.
-  "z-image": { runwareModel: "runware:z-image@0", supportsSourceImage: true, buildTask: seedImageTask("runware:z-image@0") },
-  "qwen-image-2512": { runwareModel: "alibaba:qwen-image@2512", supportsSourceImage: true, buildTask: seedImageTask("alibaba:qwen-image@2512") },
-  // Dimensions libres 768–4096px mais plafonnées à 2048px avec referenceImages
-  // — nos ASPECT_RATIO_DIMENSIONS (≤1344px) respectent déjà cette limite.
-  "wan27-image-pro": { runwareModel: "alibaba:wan@2.7-image-pro", supportsSourceImage: true, buildTask: referenceImageTask("alibaba:wan@2.7-image-pro") },
+  "z-image": { runwareModel: "runware:z-image@0", supportsSourceImage: true, buildTask: seedImageTask("runware:z-image@0", { minSide: 128, maxSide: 2048, step: 16 }) },
+  "qwen-image-2512": { runwareModel: "alibaba:qwen-image@2512", supportsSourceImage: true, buildTask: seedImageTask("alibaba:qwen-image@2512", { minSide: 256, maxSide: 2048, step: 16 }) },
+  // Dimensions libres 768–4096px, plafonnées à 2048px dès qu'une image de
+  // référence est fournie (notre UI permet toujours cette option) — on
+  // applique donc la borne 2048 dans tous les cas, plus simple et sûr.
+  "wan27-image-pro": { runwareModel: "alibaba:wan@2.7-image-pro", supportsSourceImage: true, buildTask: referenceImageTask("alibaba:wan@2.7-image-pro", { minSide: 768, maxSide: 2048, step: 16 }) },
 
   // -- Luma --
   // Presets fixes ~3K uniquement (pas de dimensions libres).
@@ -127,7 +173,7 @@ export const STUDIO_MODELS: Record<string, StudioModelConfig> = {
   },
 
   // -- Stability AI --
-  "stable-diffusion-3": { runwareModel: "runware:5@1", supportsSourceImage: true, buildTask: seedImageTask("runware:5@1") },
+  "stable-diffusion-3": { runwareModel: "runware:5@1", supportsSourceImage: true, buildTask: seedImageTask("runware:5@1", { minSide: 128, maxSide: 2048, step: 16 }) },
 
   // -- Recraft (sortie vectorielle pour la variante Vector — cf. gestion SVG
   // dans finalizeRunwareResult, _shared/runware.ts). Pas d'image-to-image
@@ -145,8 +191,13 @@ export const STUDIO_MODELS: Record<string, StudioModelConfig> = {
   },
 
   // -- ByteDance --
-  // Seedream 4.5 : dimensions libres jusqu'à 16383px.
-  "seedream-4-5": { runwareModel: "bytedance:seedream@4.5", supportsSourceImage: true, buildTask: referenceImageTask("bytedance:seedream@4.5") },
+  // Seedream 4.5 : dimensions libres jusqu'à 16383px par côté, MAIS l'aire
+  // totale doit rester entre 3 686 400 et 16 777 216 px² (= entre 2560x1440
+  // et 4096x4096) — confirmé en direct le 2026-09-14 via l'erreur Runware
+  // "Invalid image pixels. Total pixels (width x height) must be between
+  // 3686400 and 16777216." (nos dimensions par défaut ~1024x1024 étaient
+  // bien en dessous du minimum, d'où l'échec).
+  "seedream-4-5": { runwareModel: "bytedance:seedream@4.5", supportsSourceImage: true, buildTask: referenceImageTask("bytedance:seedream@4.5", { minArea: 3686400, maxArea: 16777216, step: 32 }) },
   // Seedream 5.0 Lite : presets fixes 2K/3K uniquement.
   "seedream-5-lite": {
     runwareModel: "bytedance:seedream@5.0-lite",
