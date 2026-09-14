@@ -56,8 +56,8 @@ export function AiDetectionPage() {
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <button onClick={() => navigate("/practice2")} className="flex items-center gap-1.5 text-sm mb-2 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
-            <ArrowLeft className="w-4 h-4" />Exercez-vous 2 !
+          <button onClick={() => navigate("/practice")} className="flex items-center gap-1.5 text-sm mb-2 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
+            <ArrowLeft className="w-4 h-4" />Exercez-vous !
           </button>
           <h2 className="text-2xl font-black flex items-center gap-2" style={{ fontFamily: "'Funnel Display',sans-serif" }}><ScanEye className="w-5 h-5" /><GT>Détection Image IA</GT></h2>
           <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Réelle ou générée par IA ? Regarde bien avant de répondre.</p>

@@ -13,13 +13,11 @@ import { SignupPage } from "@/app/pages/auth/SignupPage";
 import { LessonPage } from "@/app/pages/LessonPage";
 import { DashboardPage } from "@/app/pages/dashboard/DashboardPage";
 import { LessonsPage } from "@/app/pages/lessons/LessonsPage";
-import { PracticePage } from "@/app/pages/practice/PracticePage";
 import { StudioPage } from "@/app/pages/studio/StudioPage";
 import { StudioImagesPage } from "@/app/pages/studio/StudioImagesPage";
 import { StudioVideosPage } from "@/app/pages/studio/StudioVideosPage";
 import { StudioToolPage } from "@/app/pages/studio/StudioToolPage";
 import { AgentPage } from "@/app/pages/agent/AgentPage";
-import { BasicExercisesPage } from "@/app/pages/practice/BasicExercisesPage";
 import { PromptSessionsPage } from "@/app/pages/practice/PromptSessionsPage";
 import { PromptExercisePage } from "@/app/pages/practice/PromptExercisePage";
 import { MediaExerciseSessionsPage } from "@/app/pages/practice/MediaExerciseSessionsPage";
@@ -179,18 +177,16 @@ function AppRoutes() {
       <Route element={<RequireAuth><MainLayout /></RequireAuth>}>
         <Route path="dashboard" element={<DashboardRoute />} />
         <Route path="lessons" element={<LessonsPage />} />
-        <Route path="practice" element={<PracticePage />} />
-        <Route path="practice/basics" element={<BasicExercisesPage />} />
-        <Route path="practice2" element={<PracticePage2 />} />
-        <Route path="practice2/prompts" element={<PromptSessionsPage />} />
-        <Route path="practice2/prompts/:sessionId" element={<PromptExercisePage />} />
-        <Route path="practice2/media" element={<MediaExerciseSessionsPage />} />
-        <Route path="practice2/media/:sessionId" element={<MediaExercisePage />} />
-        <Route path="practice2/html" element={<HtmlExerciseSessionsPage />} />
-        <Route path="practice2/html/:sessionId" element={<HtmlExercisePage />} />
-        <Route path="practice2/battle-ground" element={<BattleGroundPage />} />
-        <Route path="practice2/reverse-prompting" element={<ReversePromptingPage />} />
-        <Route path="practice2/ai-detection" element={<AiDetectionPage />} />
+        <Route path="practice" element={<PracticePage2 />} />
+        <Route path="practice/prompts" element={<PromptSessionsPage />} />
+        <Route path="practice/prompts/:sessionId" element={<PromptExercisePage />} />
+        <Route path="practice/media" element={<MediaExerciseSessionsPage />} />
+        <Route path="practice/media/:sessionId" element={<MediaExercisePage />} />
+        <Route path="practice/html" element={<HtmlExerciseSessionsPage />} />
+        <Route path="practice/html/:sessionId" element={<HtmlExercisePage />} />
+        <Route path="practice/battle-ground" element={<BattleGroundPage />} />
+        <Route path="practice/reverse-prompting" element={<ReversePromptingPage />} />
+        <Route path="practice/ai-detection" element={<AiDetectionPage />} />
         <Route path="studio" element={<StudioPage />} />
         <Route path="studio/images" element={<StudioImagesPage />} />
         <Route path="studio/videos" element={<StudioVideosPage />} />

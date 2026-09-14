@@ -13,7 +13,6 @@ export const NAV_ITEMS: { id: NavId; Icon: LucideIcon; label: string; path: stri
   { id: "dashboard", Icon: BarChart3, label: "Tableau de bord", path: "/dashboard" },
   { id: "lessons",   Icon: BookOpen,  label: "Mes leçons",      path: "/lessons" },
   { id: "practice",  Icon: Code2,     label: "Exercez-vous !",  path: "/practice" },
-  { id: "practice2", Icon: Code2,     label: "Exercez-vous 2",  path: "/practice2" },
   { id: "studio",    Icon: Sparkles,  label: "Le Studio",       path: "/studio" },
   { id: "agent",     Icon: Bot,       label: "Mon Agent IA",    path: "/agent" },
   { id: "calendar",  Icon: Calendar,  label: "Rendez-vous",     path: "/calendar" },
@@ -70,14 +69,6 @@ export const CERT_CHAPTERS = [
   { title: "Agents IA & Workflows", pct: 0, done: false },
   { title: "Projet Final", pct: 0, done: false },
 ];
-
-export const PROMPT_CATS = [
-  { emoji: "📧", label: "Marketing & Email", count: 42 }, { emoji: "💻", label: "Dev & Code", count: 38 },
-  { emoji: "📊", label: "Data & Analyse", count: 29 }, { emoji: "🎨", label: "Design & Créatif", count: 31 },
-  { emoji: "📝", label: "Rédaction & SEO", count: 44 }, { emoji: "🤝", label: "Commercial", count: 27 },
-  { emoji: "⚙️", label: "Automatisation", count: 35 }, { emoji: "🧠", label: "Stratégie & RH", count: 22 },
-];
-
 
 export const CAL_EVENTS = [
   { col: 0, label: "Révision Leçon 1", type: "review" },

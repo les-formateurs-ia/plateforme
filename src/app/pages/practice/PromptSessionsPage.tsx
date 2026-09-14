@@ -48,7 +48,7 @@ export function PromptSessionsPage() {
     setCreating(true);
     try {
       const session = await createExerciseSession(user.id, "prompt");
-      navigate(`/practice2/prompts/${session.id}`);
+      navigate(`/practice/prompts/${session.id}`);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Impossible de créer un nouveau test.");
       setCreating(false);
@@ -78,8 +78,8 @@ export function PromptSessionsPage() {
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div>
-        <button onClick={() => navigate("/practice2")} className="flex items-center gap-1.5 text-sm mb-2 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
-          <ArrowLeft className="w-4 h-4" />Exercez-vous 2 !
+        <button onClick={() => navigate("/practice")} className="flex items-center gap-1.5 text-sm mb-2 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
+          <ArrowLeft className="w-4 h-4" />Exercez-vous !
         </button>
         <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Exercices prompts</GT></h2>
         <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Écris un prompt, l'IA le note sur 20 et t'explique précisément quoi corriger.</p>
@@ -108,7 +108,7 @@ export function PromptSessionsPage() {
           {sessions.map((s) => {
             const tone = s.lastScore !== null ? scoreTone(s.lastScore) : null;
             return (
-              <div key={s.sessionId} onClick={() => navigate(`/practice2/prompts/${s.sessionId}`)}
+              <div key={s.sessionId} onClick={() => navigate(`/practice/prompts/${s.sessionId}`)}
                 className="group relative overflow-hidden rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.004]"
                 style={{ background: th.card, border: `1px solid ${th.sep}`, boxShadow: "0 2px 10px rgba(0,0,0,0.18)" }}>
                 <div className="absolute left-0 top-0 bottom-0 w-1" style={{ background: tone ? tone.color : th.sep, opacity: tone ? 0.7 : 0.3 }} />
