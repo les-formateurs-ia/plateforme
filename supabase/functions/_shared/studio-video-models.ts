@@ -9,6 +9,10 @@
 // le crédit du compte). FLUX Video a été ajusté sur une résolution de sa
 // liste autorisée (voir erreur unsupportedModelResolution) mais pas encore
 // testé de bout en bout.
+// Sora 2 (OpenAI) ajouté le 2026-09-14, sourcé depuis
+// runware.ai/docs/models/openai-sora-2 — dimensions/durées/paramètre
+// frameImages documentés officiellement, mais pas testés de bout en bout
+// (même blocage de solde que les autres modèles tiers/vidéo).
 export interface StudioVideoOption {
   key: string;
   label: string;
@@ -80,6 +84,25 @@ export const STUDIO_VIDEO_MODELS: Record<string, StudioVideoModelConfig> = {
       width: 1280,
       height: 704,
       duration: Number(optionValues.duration ?? "5"),
+    }),
+  },
+  // Sora 2 (OpenAI) — résolutions fixes 1280x720/720x1280, durées 4/8/12/16/20s,
+  // image source via frameImages (même paramètre que Veo ci-dessus).
+  "sora-2": {
+    runwareModel: "openai:3@1",
+    supportsSourceImage: true,
+    requiresSourceImage: false,
+    width: 1280,
+    height: 720,
+    options: [{ key: "duration", label: "Durée", choices: ["4", "8", "12", "16", "20"], default: "8", numeric: true }],
+    buildTask: ({ prompt, sourceImageUrl, optionValues }) => ({
+      taskType: "videoInference",
+      model: "openai:3@1",
+      positivePrompt: prompt,
+      width: 1280,
+      height: 720,
+      duration: Number(optionValues.duration ?? "8"),
+      ...(sourceImageUrl ? { frameImages: [{ inputImage: sourceImageUrl, frame: "first" }] } : {}),
     }),
   },
 };

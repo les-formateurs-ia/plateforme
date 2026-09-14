@@ -1,11 +1,11 @@
 // Module "Imaginez vos vidéos" (Le Studio) — génération Text-to-Video /
 // Image-to-Video via l'API Runware (remplace Higgsfield, cf.
 // supabase/functions/_shared/studio-video-models.ts, à garder en phase).
-// IMPORTANT : au moment de cette migration, le compte Runware n'a aucun
-// solde crédité et TOUTE génération vidéo (quel que soit le modèle) exige
-// un solde ≥5$ (https://my.runware.ai/wallet) — l'élève verra donc l'erreur
-// Runware explicite tant que le compte n'est pas alimenté. Le code est prêt
-// et fonctionnera dès que ce sera fait, sans changement supplémentaire.
+// IMPORTANT : le compte Runware n'a aucun solde crédité et TOUTE génération
+// vidéo (quel que soit le modèle, Sora 2 inclus) exige un solde ≥5$
+// (https://my.runware.ai/wallet) — l'élève verra donc l'erreur Runware
+// explicite tant que le compte n'est pas alimenté. Le code est prêt et
+// fonctionnera dès que ce sera fait, sans changement supplémentaire.
 import { supabase } from "@/app/lib/supabase/client";
 import type { StudioImageStatus } from "@/app/lib/supabase/database.types";
 
@@ -49,6 +49,14 @@ export const STUDIO_VIDEO_MODELS: StudioVideoModel[] = [
     supportsSourceImage: false,
     requiresSourceImage: false,
     options: [{ key: "duration", label: "Durée", choices: ["5"], default: "5" }],
+  },
+  {
+    id: "sora-2",
+    label: "Sora 2 (OpenAI)",
+    description: "Texte seul ou animation d'une photo de référence (optionnelle) — audio synchronisé.",
+    supportsSourceImage: true,
+    requiresSourceImage: false,
+    options: [{ key: "duration", label: "Durée", choices: ["4", "8", "12", "16", "20"], default: "8" }],
   },
 ];
 

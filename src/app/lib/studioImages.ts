@@ -1,9 +1,9 @@
 // Module "Créer vos images" (Le Studio) — génération Text-to-Image / Image-to-Image
 // via l'API Runware (remplace Higgsfield). Modèles FLUX natifs Runware +
-// GPT Image (OpenAI) et Nano Banana Pro (Gemini/Google) — ces deux derniers
-// resteront en erreur tant que le compte Runware n'est pas crédité (carte +
-// solde ≥5$, https://my.runware.ai/wallet), cf.
-// supabase/functions/_shared/studio-models.ts (à garder en phase avec ce
+// GPT Image (OpenAI), Nano Banana Pro (Gemini/Google) et Kling Image 3.0
+// (KlingAI) — ces trois derniers resteront en erreur tant que le compte
+// Runware n'est pas crédité (carte + solde ≥5$, https://my.runware.ai/wallet),
+// cf. supabase/functions/_shared/studio-models.ts (à garder en phase avec ce
 // fichier) pour le détail.
 import { supabase } from "@/app/lib/supabase/client";
 import type { StudioImageStatus } from "@/app/lib/supabase/database.types";
@@ -48,6 +48,14 @@ export const STUDIO_MODELS: StudioModel[] = [
     id: "nano-banana",
     label: "Nano Banana Pro (Gemini)",
     description: "Modèle image le plus avancé de Google (Gemini) — bon rendu photoréaliste et édition précise.",
+    supportsSourceImage: true,
+    aspectRatios: COMMON_ASPECT_RATIOS,
+    defaultAspectRatio: "4:3",
+  },
+  {
+    id: "kling-image",
+    label: "Kling Image 3.0",
+    description: "Modèle image de KlingAI — texte seul ou à partir d'une image source (Image-to-Image).",
     supportsSourceImage: true,
     aspectRatios: COMMON_ASPECT_RATIOS,
     defaultAspectRatio: "4:3",

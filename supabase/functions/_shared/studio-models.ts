@@ -8,9 +8,9 @@
 // pas crédité ; ce n'est pas un bug côté code, l'erreur Runware renvoyée au
 // client le dit explicitement (cf. ERROR_MESSAGES dans _shared/runware.ts).
 // Identifiants AIR + tailles/paramètres sourcés depuis la doc officielle
-// Runware (runware.ai/docs/models/openai-gpt-image-1-5 et
-// .../google-nano-banana-pro) — non testés de bout en bout faute de compte
-// crédité, à valider une fois le solde disponible.
+// Runware (runware.ai/docs/models/openai-gpt-image-1-5,
+// .../google-nano-banana-pro, .../klingai-image-3-0) — non testés de bout
+// en bout faute de compte crédité, à valider une fois le solde disponible.
 // À tenir en phase avec src/app/lib/studioImages.ts (même liste côté client).
 export interface StudioModelConfig {
   runwareModel: string;
@@ -71,6 +71,21 @@ export const STUDIO_MODELS: Record<string, StudioModelConfig> = {
     buildTask: ({ prompt, width, height, sourceImageUrl }) => ({
       taskType: "imageInference",
       model: "google:4@2",
+      positivePrompt: prompt,
+      width,
+      height,
+      ...(sourceImageUrl ? { referenceImages: [sourceImageUrl] } : {}),
+    }),
+  },
+  // Kling Image 3.0 (KlingAI) — dimensions libres si on ne passe pas
+  // `resolution` (voir doc), image source via `referenceImages` comme
+  // GPT Image/Nano Banana.
+  "kling-image": {
+    runwareModel: "klingai:kling-image@3",
+    supportsSourceImage: true,
+    buildTask: ({ prompt, width, height, sourceImageUrl }) => ({
+      taskType: "imageInference",
+      model: "klingai:kling-image@3",
       positivePrompt: prompt,
       width,
       height,
