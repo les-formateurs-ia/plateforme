@@ -197,7 +197,11 @@ export function MainLayout() {
             </NavLink>
           </div>
         )}
-        <div className="p-4" style={{ borderTop: `1px solid ${th.sidebarB}` }}>
+        <div className="px-4 pt-3 pb-2 flex items-center gap-2" style={{ borderTop: `1px solid ${th.sidebarB}` }}>
+          <ReportIncidentDialog />
+          <NotificationBell />
+        </div>
+        <div className="px-4 pb-4 pt-1">
           <Link to="/profile" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-2 py-1 rounded-xl cursor-pointer transition-opacity hover:opacity-80">
             <Avatar url={profile.avatarUrl} size={36} />
             <div className="min-w-0 flex-1 text-left"><div className="text-sm font-semibold truncate" style={{ color: th.fg }}>{name}</div><div className="text-xs truncate" style={{ color: th.fg3 }}>{profile.profession || "Apprenant IA"}</div></div>
@@ -206,7 +210,11 @@ export function MainLayout() {
       </aside>
 
       <div className="flex-1 min-w-0 flex flex-col relative z-10 overflow-hidden">
-        <div className="shrink-0 flex items-center justify-between gap-3 px-4 sm:px-6 lg:px-8 py-3 sm:py-4" style={{ borderBottom: `1px solid ${th.sep}`, background: th.topbar }}>
+        <button className="fixed top-3 left-3 z-30 w-9 h-9 rounded-full flex items-center justify-center shrink-0 lg:hidden" style={{ background: th.card, border: `1px solid ${th.inputB}`, boxShadow: "0 6px 18px rgba(0,0,0,0.14)" }} onClick={() => setNavOpen(true)}>
+          <Menu className="w-4 h-4" style={{ color: th.fg3 }} />
+        </button>
+
+        {false && (
           <div className="flex items-center gap-3 min-w-0 lg:hidden">
             <button className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }} onClick={() => setNavOpen(true)}>
               <Menu className="w-4 h-4" style={{ color: th.fg3 }} />
@@ -221,12 +229,10 @@ export function MainLayout() {
             <button className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 sm:hidden" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
               <Search className="w-4 h-4" style={{ color: th.fg3 }} />
             </button>
-            <ReportIncidentDialog />
-            <NotificationBell />
           </div>
         </div>
 
-        <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+        <div className="flex-1 min-h-0 flex flex-col overflow-hidden pt-10 lg:pt-0">
           <Outlet />
         </div>
       </div>
