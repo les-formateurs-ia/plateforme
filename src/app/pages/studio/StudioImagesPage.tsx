@@ -145,8 +145,8 @@ export function StudioImagesPage() {
   };
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col">
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
+    <div className="relative flex-1 min-h-0 flex flex-col">
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pt-5 sm:pt-6 pb-56 sm:pb-52 space-y-6">
         <button onClick={() => navigate("/studio")} className="flex items-center gap-1.5 text-sm transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
           <ArrowLeft className="w-4 h-4" />Le Studio
         </button>
@@ -176,8 +176,8 @@ export function StudioImagesPage() {
         </div>
       </div>
 
-      <div className="shrink-0 px-4 sm:px-6 lg:px-8 pb-5 sm:pb-6 pt-2">
-        <div className="rounded-3xl overflow-hidden max-w-[96%] mx-auto" style={{ background: th.card, border: `1px solid ${th.sep}`, boxShadow: "0 2px 10px rgba(0,0,0,0.18)" }}>
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 px-4 sm:px-6 lg:px-8 pb-5 sm:pb-6 pt-2">
+        <div className="pointer-events-auto rounded-3xl overflow-hidden max-w-[96%] mx-auto" style={{ background: th.card, border: `1px solid ${th.sep}`, boxShadow: "0 2px 10px rgba(0,0,0,0.18)" }}>
           <div className="flex flex-wrap items-center gap-3 px-4 sm:px-5 py-3" style={{ borderBottom: `1px solid ${th.sep}` }}>
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold shrink-0" style={{ color: th.fg3 }}>Modèle</span>
