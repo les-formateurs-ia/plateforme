@@ -177,7 +177,7 @@ export function StudioImagesPage() {
       </div>
 
       <div className="shrink-0 px-4 sm:px-6 lg:px-8 pb-5 sm:pb-6 pt-2">
-        <div className="rounded-3xl overflow-hidden max-w-[96%] mx-auto" style={{ background: "transparent" }}>
+        <div className="rounded-3xl overflow-hidden max-w-[96%] mx-auto" style={{ background: th.card, border: `1px solid ${th.sep}`, boxShadow: "0 2px 10px rgba(0,0,0,0.18)" }}>
           <div className="flex flex-wrap items-center gap-3 px-4 sm:px-5 py-3" style={{ borderBottom: `1px solid ${th.sep}` }}>
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold shrink-0" style={{ color: th.fg3 }}>Modèle</span>
