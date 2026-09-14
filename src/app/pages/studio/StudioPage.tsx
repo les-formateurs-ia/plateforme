@@ -40,7 +40,7 @@ export function StudioPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
         {visibleModules.map(({ slug, image, title, subtitle, restricted }) => (
-          <div key={slug} className={`relative min-h-[220px] md:min-h-[260px] rounded-2xl overflow-hidden transition-transform ${restricted ? "opacity-45 cursor-default" : "group"}`}
+          <div key={slug} className={`relative w-full min-h-[220px] md:min-h-[260px] rounded-2xl overflow-hidden transition-transform ${restricted ? "opacity-45 cursor-default" : "group"}`}
             style={{ aspectRatio: "3 / 2" }}>
             {/* url() entre guillemets : certains fichiers (ex. "Du texte à l'audio.png") ont une
                 apostrophe dans leur nom, invalide dans un url() CSS non quoté — sans les
