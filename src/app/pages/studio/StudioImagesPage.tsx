@@ -189,7 +189,7 @@ export function StudioImagesPage() {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold shrink-0" style={{ color: th.fg3 }}>Format</span>
-              <div className="w-[104px]"><VSelect sm value={aspectRatio} onValueChange={setAspectRatio} options={model.aspectRatios.map((r) => ({ value: r, label: aspectRatioLabel(r) }))} disabled={generating} /></div>
+              <div className="w-[150px] sm:w-[160px]"><VSelect sm value={aspectRatio} onValueChange={setAspectRatio} options={model.aspectRatios.map((r) => ({ value: r, label: aspectRatioLabel(r) }))} disabled={generating} /></div>
             </div>
             <div className="flex-1 min-w-0" />
             {model.supportsSourceImage && (
