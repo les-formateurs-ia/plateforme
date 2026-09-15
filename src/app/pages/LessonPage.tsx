@@ -72,7 +72,11 @@ export function LessonPage() {
   const { user, role } = useAuth();
   const navigate = useNavigate();
   const { lessonId } = useParams<{ lessonId: string }>();
-  const goBack = () => navigate("/lessons");
+  // Un admin/formateur qui prévisualise une leçon (depuis AdminFormationPreviewPage)
+  // n'a pas de "/lessons" : cette route liste les leçons de l'ÉLÈVE connecté, vide ou
+  // sans rapport pour le staff. Pour lui, on revient simplement à la page précédente
+  // (l'aperçu du cours) plutôt que de forcer une redirection vers "/lessons".
+  const goBack = () => { if (isStaff(role)) navigate(-1); else navigate("/lessons"); };
 
   type LTab = "video" | "customVideo" | "mindmap" | "podcast" | "avatar" | "html" | "agent";
   const [tab, setTab] = useState<LTab>("video");

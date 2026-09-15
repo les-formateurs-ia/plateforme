@@ -310,7 +310,16 @@ export function AdminCourseEditorPage() {
   // utilisateur : trop de défilement pour atteindre les leçons.
   const labelCls = isInstance ? "block text-[10px] font-bold uppercase tracking-widest mb-1.5" : "block text-xs font-bold uppercase tracking-widest mb-2";
   const inputCls = isInstance ? "w-full rounded-lg px-3 py-2 text-sm g-input" : "w-full rounded-xl px-4 py-3 text-sm g-input";
-  const textareaCls = isInstance ? "w-full rounded-lg px-3 py-2 text-xs g-input resize-none" : "w-full rounded-xl px-4 py-3 text-sm g-input resize-none";
+  const textareaCls = isInstance ? "w-full rounded-lg px-3 py-2 text-xs g-input resize-none overflow-hidden" : "w-full rounded-xl px-4 py-3 text-sm g-input resize-none overflow-hidden";
+
+  // Textarea qui grandit avec son contenu au lieu de scroller ou de couper le
+  // texte — appelé au montage (ref) et à chaque frappe (onChange), pour que
+  // tout le champ soit toujours visible sans défilement interne.
+  const autoGrow = (el: HTMLTextAreaElement | null) => {
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  };
 
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
@@ -342,7 +351,8 @@ export function AdminCourseEditorPage() {
         <div>
           <label className={labelCls} style={{ color: th.fg3 }}>Nom</label>
           {isInstance ? (
-            <textarea value={course.name} onChange={(e) => handleNameChange(e.target.value)} placeholder="Maîtriser l'IA Générative" rows={2} className={`${inputCls} resize-none`} />
+            <textarea ref={autoGrow} value={course.name} onChange={(e) => { handleNameChange(e.target.value); autoGrow(e.target); }}
+              placeholder="Maîtriser l'IA Générative" rows={1} className={`${inputCls} resize-none overflow-hidden`} />
           ) : (
             <input value={course.name} onChange={(e) => handleNameChange(e.target.value)} placeholder="Maîtriser l'IA Générative" className={inputCls} />
           )}
@@ -359,7 +369,8 @@ export function AdminCourseEditorPage() {
 
         <div>
           <label className={labelCls} style={{ color: th.fg3 }}>Description</label>
-          <textarea value={course.description} onChange={(e) => setCourse((c) => ({ ...c, description: e.target.value }))} rows={isInstance ? 2 : 3} className={textareaCls} />
+          <textarea ref={autoGrow} value={course.description} onChange={(e) => { setCourse((c) => ({ ...c, description: e.target.value })); autoGrow(e.target); }}
+            rows={isInstance ? 2 : 3} className={textareaCls} />
         </div>
 
         <div className={isInstance ? "grid grid-cols-1 gap-4" : "grid grid-cols-1 sm:grid-cols-2 gap-4"}>
@@ -441,17 +452,21 @@ export function AdminCourseEditorPage() {
               const isOpen = expanded[section.id] !== false;
               return (
                 <div key={section.id} className="rounded-xl" style={{ border: `1px solid ${th.sep}` }}>
-                  <div className="flex flex-wrap items-center gap-2 px-3 py-2.5">
-                    <GripVertical className="w-4 h-4 shrink-0" style={{ color: th.fg3 }} />
-                    <input value={section.title} onChange={(e) => renameSection(section.id, e.target.value)} onBlur={(e) => persistSectionTitle(section.id, e.target.value)}
-                      className="flex-1 min-w-[140px] bg-transparent text-sm font-semibold outline-none" style={{ color: th.fg }} />
-                    <span className="text-xs shrink-0" style={{ color: th.fg3 }}>{lessons.length} leçon{lessons.length !== 1 ? "s" : ""}</span>
-                    <button onClick={() => moveSection(index, -1)} disabled={index === 0} className="disabled:opacity-20"><ChevronUp className="w-4 h-4" style={{ color: th.fg3 }} /></button>
-                    <button onClick={() => moveSection(index, 1)} disabled={index === sections.length - 1} className="disabled:opacity-20"><ChevronDown className="w-4 h-4" style={{ color: th.fg3 }} /></button>
-                    <button onClick={() => deleteSection(section.id)}><Trash2 className="w-4 h-4" style={{ color: "#fbc2ad" }} /></button>
-                    <button onClick={() => setExpanded((m) => ({ ...m, [section.id]: !isOpen }))}>
-                      <ChevronRightIcon className="w-4 h-4 transition-transform" style={{ color: th.fg3, transform: isOpen ? "rotate(90deg)" : "none" }} />
-                    </button>
+                  <div className="flex flex-wrap items-start gap-2 px-3 py-2.5">
+                    <GripVertical className="w-4 h-4 shrink-0 mt-1.5" style={{ color: th.fg3 }} />
+                    <textarea ref={autoGrow} value={section.title} rows={1}
+                      onChange={(e) => { renameSection(section.id, e.target.value); autoGrow(e.target); }}
+                      onBlur={(e) => persistSectionTitle(section.id, e.target.value)}
+                      className="flex-1 min-w-[140px] bg-transparent text-sm font-semibold outline-none resize-none overflow-hidden leading-snug py-1" style={{ color: th.fg }} />
+                    <div className="flex items-center gap-2 shrink-0 mt-1">
+                      <span className="text-xs shrink-0" style={{ color: th.fg3 }}>{lessons.length} leçon{lessons.length !== 1 ? "s" : ""}</span>
+                      <button onClick={() => moveSection(index, -1)} disabled={index === 0} className="disabled:opacity-20"><ChevronUp className="w-4 h-4" style={{ color: th.fg3 }} /></button>
+                      <button onClick={() => moveSection(index, 1)} disabled={index === sections.length - 1} className="disabled:opacity-20"><ChevronDown className="w-4 h-4" style={{ color: th.fg3 }} /></button>
+                      <button onClick={() => deleteSection(section.id)}><Trash2 className="w-4 h-4" style={{ color: "#fbc2ad" }} /></button>
+                      <button onClick={() => setExpanded((m) => ({ ...m, [section.id]: !isOpen }))}>
+                        <ChevronRightIcon className="w-4 h-4 transition-transform" style={{ color: th.fg3, transform: isOpen ? "rotate(90deg)" : "none" }} />
+                      </button>
+                    </div>
                   </div>
 
                   {isOpen && (
