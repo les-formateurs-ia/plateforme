@@ -316,19 +316,28 @@ export function AdminCourseEditorPage() {
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div className="flex items-center justify-between gap-3">
         <Link to={backHref} className="flex items-center gap-1.5 text-sm transition-colors hover:opacity-70" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />{backLabel}</Link>
-        {courseId && isInstance && (
-          <button type="button" onClick={openPreview} className="flex items-center gap-1.5 text-sm font-semibold hover:opacity-70" style={{ color: th.navAC }}>
-            <Eye className="w-4 h-4" />Voir en tant qu'élève
-          </button>
-        )}
       </div>
+
+      {isInstance && (
+        <h1 className="text-xl sm:text-2xl font-black" style={{ color: th.fg }}><GT>Personnaliser la formation</GT></h1>
+      )}
 
       <div className={isInstance ? "space-y-6 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-6 lg:items-start" : "space-y-6"}>
       <div className="space-y-4">
       <GCard glow><div className={isInstance ? "p-4 space-y-3" : "p-6 space-y-4"}>
-        <h2 className={isInstance ? "text-sm font-black" : "text-lg font-black"} style={{ color: th.fg }}>
-          <GT>{isNew ? "Nouvelle formation" : isInstance ? "Personnaliser la formation" : "Informations du cours"}</GT>
-        </h2>
+        {isInstance ? (
+          courseId && (
+            <button type="button" onClick={openPreview}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold transition-all hover:opacity-80 active:scale-[0.98]"
+              style={{ background: th.gradShadow(0.12), border: `1px solid ${th.gradShadow(0.3)}`, color: th.navAC }}>
+              <Eye className="w-4 h-4" />Voir en tant qu'élève
+            </button>
+          )
+        ) : (
+          <h2 className="text-lg font-black" style={{ color: th.fg }}>
+            <GT>{isNew ? "Nouvelle formation" : "Informations du cours"}</GT>
+          </h2>
+        )}
 
         <div>
           <label className={labelCls} style={{ color: th.fg3 }}>Nom</label>
@@ -386,60 +395,6 @@ export function AdminCourseEditorPage() {
       {!courseId && (
         <p className="text-xs" style={{ color: th.fg3 }}>Enregistre d'abord le cours pour pouvoir ajouter des modules.</p>
       )}
-      </div>
-
-      <div className={isInstance ? "lg:col-span-2 space-y-6" : "space-y-6"}>
-
-      {courseId && (
-        <GCard><div className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-black" style={{ color: th.fg }}>Modules</h3>
-            <VBtn sm onClick={addSection}><span className="flex items-center gap-1.5"><Plus className="w-3.5 h-3.5" />Ajouter un module</span></VBtn>
-          </div>
-
-          <div className="space-y-2">
-            {sections.map((section, index) => {
-              const lessons = lessonsBySection[section.id] ?? [];
-              const isOpen = expanded[section.id] !== false;
-              return (
-                <div key={section.id} className="rounded-xl" style={{ border: `1px solid ${th.sep}` }}>
-                  <div className="flex items-center gap-2 px-3 py-2.5">
-                    <GripVertical className="w-4 h-4 shrink-0" style={{ color: th.fg3 }} />
-                    <input value={section.title} onChange={(e) => renameSection(section.id, e.target.value)} onBlur={(e) => persistSectionTitle(section.id, e.target.value)}
-                      className="flex-1 min-w-0 bg-transparent text-sm font-semibold outline-none" style={{ color: th.fg }} />
-                    <span className="text-xs shrink-0" style={{ color: th.fg3 }}>{lessons.length} leçon{lessons.length !== 1 ? "s" : ""}</span>
-                    <button onClick={() => moveSection(index, -1)} disabled={index === 0} className="disabled:opacity-20"><ChevronUp className="w-4 h-4" style={{ color: th.fg3 }} /></button>
-                    <button onClick={() => moveSection(index, 1)} disabled={index === sections.length - 1} className="disabled:opacity-20"><ChevronDown className="w-4 h-4" style={{ color: th.fg3 }} /></button>
-                    <button onClick={() => deleteSection(section.id)}><Trash2 className="w-4 h-4" style={{ color: "#fbc2ad" }} /></button>
-                    <button onClick={() => setExpanded((m) => ({ ...m, [section.id]: !isOpen }))}>
-                      <ChevronRightIcon className="w-4 h-4 transition-transform" style={{ color: th.fg3, transform: isOpen ? "rotate(90deg)" : "none" }} />
-                    </button>
-                  </div>
-
-                  {isOpen && (
-                    <div style={{ borderTop: `1px solid ${th.sep}` }}>
-                      {lessons.map((lesson) => (
-                        <div key={lesson.id} className="flex items-center gap-3 px-4 py-2.5" style={{ borderBottom: `1px solid ${th.sep}` }}>
-                          <button onClick={() => navigate(`${lessonsBase}/${lesson.id}`)} className="flex-1 min-w-0 truncate text-left text-sm hover:opacity-70" style={{ color: th.fg2 }}>{lesson.title}</button>
-                          <span className="text-xs font-mono" style={{ color: th.fg3 }}>{lesson.duration_minutes ? `${lesson.duration_minutes} min` : "—"}</span>
-                          <button onClick={() => deleteLesson(section.id, lesson.id)}><Trash2 className="w-3.5 h-3.5" style={{ color: "#fbc2ad" }} /></button>
-                        </div>
-                      ))}
-                      <div className="px-4 py-2.5">
-                        <button onClick={() => navigate(`${lessonsBase}/new`, { state: { sectionId: section.id } })}
-                          className="flex items-center gap-1.5 text-xs font-semibold hover:opacity-70" style={{ color: th.navAC }}>
-                          <Plus className="w-3.5 h-3.5" />Ajouter une leçon
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-            {!sections.length && <p className="text-xs py-4 text-center" style={{ color: th.fg3 }}>Aucun module. Commence par en ajouter un.</p>}
-          </div>
-        </div></GCard>
-      )}
 
       {courseId && isInstance && studentId && (
         <GCard><div className="p-6">
@@ -463,6 +418,60 @@ export function AdminCourseEditorPage() {
             ))}
           </div>
           {!studentExercises.length && <p className="text-xs mt-3" style={{ color: th.fg3 }}>Aucun exercice privé attribué à cet élève pour l'instant.</p>}
+        </div></GCard>
+      )}
+      </div>
+
+      <div className={isInstance ? "lg:col-span-2 space-y-6" : "space-y-6"}>
+
+      {courseId && (
+        <GCard><div className="p-6">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <h3 className="text-sm font-black" style={{ color: th.fg }}>Modules</h3>
+            <VBtn sm onClick={addSection}><span className="flex items-center gap-1.5"><Plus className="w-3.5 h-3.5" />Ajouter un module</span></VBtn>
+          </div>
+
+          <div className="space-y-2">
+            {sections.map((section, index) => {
+              const lessons = lessonsBySection[section.id] ?? [];
+              const isOpen = expanded[section.id] !== false;
+              return (
+                <div key={section.id} className="rounded-xl" style={{ border: `1px solid ${th.sep}` }}>
+                  <div className="flex flex-wrap items-center gap-2 px-3 py-2.5">
+                    <GripVertical className="w-4 h-4 shrink-0" style={{ color: th.fg3 }} />
+                    <input value={section.title} onChange={(e) => renameSection(section.id, e.target.value)} onBlur={(e) => persistSectionTitle(section.id, e.target.value)}
+                      className="flex-1 min-w-[140px] bg-transparent text-sm font-semibold outline-none" style={{ color: th.fg }} />
+                    <span className="text-xs shrink-0" style={{ color: th.fg3 }}>{lessons.length} leçon{lessons.length !== 1 ? "s" : ""}</span>
+                    <button onClick={() => moveSection(index, -1)} disabled={index === 0} className="disabled:opacity-20"><ChevronUp className="w-4 h-4" style={{ color: th.fg3 }} /></button>
+                    <button onClick={() => moveSection(index, 1)} disabled={index === sections.length - 1} className="disabled:opacity-20"><ChevronDown className="w-4 h-4" style={{ color: th.fg3 }} /></button>
+                    <button onClick={() => deleteSection(section.id)}><Trash2 className="w-4 h-4" style={{ color: "#fbc2ad" }} /></button>
+                    <button onClick={() => setExpanded((m) => ({ ...m, [section.id]: !isOpen }))}>
+                      <ChevronRightIcon className="w-4 h-4 transition-transform" style={{ color: th.fg3, transform: isOpen ? "rotate(90deg)" : "none" }} />
+                    </button>
+                  </div>
+
+                  {isOpen && (
+                    <div style={{ borderTop: `1px solid ${th.sep}` }}>
+                      {lessons.map((lesson) => (
+                        <div key={lesson.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5" style={{ borderBottom: `1px solid ${th.sep}` }}>
+                          <button onClick={() => navigate(`${lessonsBase}/${lesson.id}`)} className="flex-1 min-w-[140px] text-left text-sm break-words hover:opacity-70" style={{ color: th.fg2 }}>{lesson.title}</button>
+                          <span className="text-xs font-mono shrink-0" style={{ color: th.fg3 }}>{lesson.duration_minutes ? `${lesson.duration_minutes} min` : "—"}</span>
+                          <button onClick={() => deleteLesson(section.id, lesson.id)} className="shrink-0"><Trash2 className="w-3.5 h-3.5" style={{ color: "#fbc2ad" }} /></button>
+                        </div>
+                      ))}
+                      <div className="px-4 py-2.5">
+                        <button onClick={() => navigate(`${lessonsBase}/new`, { state: { sectionId: section.id } })}
+                          className="flex items-center gap-1.5 text-xs font-semibold hover:opacity-70" style={{ color: th.navAC }}>
+                          <Plus className="w-3.5 h-3.5" />Ajouter une leçon
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            {!sections.length && <p className="text-xs py-4 text-center" style={{ color: th.fg3 }}>Aucun module. Commence par en ajouter un.</p>}
+          </div>
         </div></GCard>
       )}
       </div>
