@@ -105,7 +105,9 @@ export function MainLayout() {
           </button>
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {NAV_ITEMS.filter(({ id }) => id !== "profile").map(({ id, Icon, label, path }) => {
+          {NAV_ITEMS.filter(({ id }) => id !== "profile")
+            .sort((a, b) => isStaff(role) ? Number(b.id === "calendar") - Number(a.id === "calendar") : 0)
+            .map(({ id, Icon, label, path }) => {
             // Espace Entreprise : seuls "Entreprise" et "Mon profil" restent
             // (ajoutés séparément plus bas) — tout le reste de cette liste
             // est un concept CPF (Pratique IA, Élèves, Rendez-vous...).
@@ -119,19 +121,33 @@ export function MainLayout() {
             // agent, RDV) hors-sujet, seul "Tableau de bord" (son espace
             // entreprise) et "Mon profil" restent pertinents.
             if ((id === "lessons" || id === "practice" || id === "studio" || id === "hub" || id === "agent" || id === "calendar") && companyId) return null;
-            // Pour l'admin/formateur, "Élèves (& formateurs)" (gestion, même
-            // page pour les deux rôles — le formateur n'y voit que ses
-            // propres élèves, pas d'onglet Formateurs) s'ajoute juste avant
-            // "Rendez-vous", leur calendrier de RDV perso.
+            // Staff : élèves, incidents (admin uniquement), rendez-vous et
+            // galerie précèdent les outils pédagogiques.
             if (id === "calendar" && isStaff(role)) {
               return [
                 <NavLink key="planning" to={`${staffBase}/planning`} onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
                   style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
                   <CalendarClock className="w-4 h-4 shrink-0" />{role === "admin" ? "Élèves & formateurs" : "Élèves"}
                 </NavLink>,
+                isAdmin(role) && (
+                  <NavLink key="incidents" to="/admin/incidents" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
+                    style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
+                    <span className="relative shrink-0">
+                      <Bug className="w-4 h-4" />
+                      {unreadIncidents > 0 && (
+                        <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full" style={{ background: "#fb7185" }} />
+                      )}
+                    </span>
+                    Incidents
+                  </NavLink>
+                ),
                 <NavLink key={id} to="/planning" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
                   style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
                   <Icon className="w-4 h-4 shrink-0" />{label}
+                </NavLink>,
+                <NavLink key="gallery" to="/admin/ai-detection-gallery" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
+                  style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
+                  <ScanEye className="w-4 h-4 shrink-0" />Galerie Détection IA
                 </NavLink>,
               ];
             }
@@ -146,24 +162,6 @@ export function MainLayout() {
             <NavLink to="/entreprise" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
               style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
               <Building2 className="w-4 h-4 shrink-0" />Entreprise
-            </NavLink>
-          )}
-          {isAdmin(role) && !entrepriseMode && (
-            <NavLink to="/admin/incidents" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
-              style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
-              <span className="relative shrink-0">
-                <Bug className="w-4 h-4" />
-                {unreadIncidents > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full" style={{ background: "#fb7185" }} />
-                )}
-              </span>
-              Incidents
-            </NavLink>
-          )}
-          {isStaff(role) && !entrepriseMode && (
-            <NavLink to="/admin/ai-detection-gallery" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
-              style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
-              <ScanEye className="w-4 h-4 shrink-0" />Galerie Détection IA
             </NavLink>
           )}
           {(() => {
