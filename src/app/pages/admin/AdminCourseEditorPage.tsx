@@ -341,7 +341,11 @@ export function AdminCourseEditorPage() {
 
         <div>
           <label className={labelCls} style={{ color: th.fg3 }}>Nom</label>
-          <input value={course.name} onChange={(e) => handleNameChange(e.target.value)} placeholder="Maîtriser l'IA Générative" className={inputCls} />
+          {isInstance ? (
+            <textarea value={course.name} onChange={(e) => handleNameChange(e.target.value)} placeholder="Maîtriser l'IA Générative" rows={2} className={`${inputCls} resize-none`} />
+          ) : (
+            <input value={course.name} onChange={(e) => handleNameChange(e.target.value)} placeholder="Maîtriser l'IA Générative" className={inputCls} />
+          )}
           {!isInstance && (!slugEditing ? (
             <p className="text-xs mt-1.5" style={{ color: th.fg3 }}>
               URL : <span className="font-mono">{course.slug || "…"}</span>{" "}
