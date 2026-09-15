@@ -305,6 +305,13 @@ export function AdminCourseEditorPage() {
 
   if (loading) return <div className="flex-1 flex items-center justify-center"><p className="text-sm" style={{ color: th.fg3 }}>Chargement…</p></div>;
 
+  // Sur "Personnaliser la formation" (isInstance), la carte infos passe en
+  // mode compact pour laisser toute la place aux modules — cf. demande
+  // utilisateur : trop de défilement pour atteindre les leçons.
+  const labelCls = isInstance ? "block text-[10px] font-bold uppercase tracking-widest mb-1.5" : "block text-xs font-bold uppercase tracking-widest mb-2";
+  const inputCls = isInstance ? "w-full rounded-lg px-3 py-2 text-sm g-input" : "w-full rounded-xl px-4 py-3 text-sm g-input";
+  const textareaCls = isInstance ? "w-full rounded-lg px-3 py-2 text-xs g-input resize-none" : "w-full rounded-xl px-4 py-3 text-sm g-input resize-none";
+
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div className="flex items-center justify-between gap-3">
@@ -316,14 +323,16 @@ export function AdminCourseEditorPage() {
         )}
       </div>
 
-      <GCard glow><div className="p-6 space-y-4">
-        <h2 className="text-lg font-black" style={{ color: th.fg }}>
+      <div className={isInstance ? "space-y-6 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-6 lg:items-start" : "space-y-6"}>
+      <div className="space-y-4">
+      <GCard glow><div className={isInstance ? "p-4 space-y-3" : "p-6 space-y-4"}>
+        <h2 className={isInstance ? "text-sm font-black" : "text-lg font-black"} style={{ color: th.fg }}>
           <GT>{isNew ? "Nouvelle formation" : isInstance ? "Personnaliser la formation" : "Informations du cours"}</GT>
         </h2>
 
         <div>
-          <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Nom</label>
-          <input value={course.name} onChange={(e) => handleNameChange(e.target.value)} placeholder="Maîtriser l'IA Générative" className="w-full rounded-xl px-4 py-3 text-sm g-input" />
+          <label className={labelCls} style={{ color: th.fg3 }}>Nom</label>
+          <input value={course.name} onChange={(e) => handleNameChange(e.target.value)} placeholder="Maîtriser l'IA Générative" className={inputCls} />
           {!isInstance && (!slugEditing ? (
             <p className="text-xs mt-1.5" style={{ color: th.fg3 }}>
               URL : <span className="font-mono">{course.slug || "…"}</span>{" "}
@@ -336,14 +345,14 @@ export function AdminCourseEditorPage() {
         </div>
 
         <div>
-          <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Description</label>
-          <textarea value={course.description} onChange={(e) => setCourse((c) => ({ ...c, description: e.target.value }))} rows={3} className="w-full rounded-xl px-4 py-3 text-sm g-input resize-none" />
+          <label className={labelCls} style={{ color: th.fg3 }}>Description</label>
+          <textarea value={course.description} onChange={(e) => setCourse((c) => ({ ...c, description: e.target.value }))} rows={isInstance ? 2 : 3} className={textareaCls} />
         </div>
 
         <div className={isInstance ? "grid grid-cols-1 gap-4" : "grid grid-cols-1 sm:grid-cols-2 gap-4"}>
           <div>
-            <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Durée (min)</label>
-            <input type="number" value={course.duration_minutes} onChange={(e) => setCourse((c) => ({ ...c, duration_minutes: e.target.value }))} className="w-full rounded-xl px-4 py-3 text-sm g-input" />
+            <label className={labelCls} style={{ color: th.fg3 }}>Durée (min)</label>
+            <input type="number" value={course.duration_minutes} onChange={(e) => setCourse((c) => ({ ...c, duration_minutes: e.target.value }))} className={inputCls} />
           </div>
           {!isInstance && (
             <div>
@@ -377,6 +386,9 @@ export function AdminCourseEditorPage() {
       {!courseId && (
         <p className="text-xs" style={{ color: th.fg3 }}>Enregistre d'abord le cours pour pouvoir ajouter des modules.</p>
       )}
+      </div>
+
+      <div className={isInstance ? "lg:col-span-2 space-y-6" : "space-y-6"}>
 
       {courseId && (
         <GCard><div className="p-6">
@@ -388,7 +400,7 @@ export function AdminCourseEditorPage() {
           <div className="space-y-2">
             {sections.map((section, index) => {
               const lessons = lessonsBySection[section.id] ?? [];
-              const isOpen = !!expanded[section.id];
+              const isOpen = expanded[section.id] !== false;
               return (
                 <div key={section.id} className="rounded-xl" style={{ border: `1px solid ${th.sep}` }}>
                   <div className="flex items-center gap-2 px-3 py-2.5">
@@ -453,6 +465,8 @@ export function AdminCourseEditorPage() {
           {!studentExercises.length && <p className="text-xs mt-3" style={{ color: th.fg3 }}>Aucun exercice privé attribué à cet élève pour l'instant.</p>}
         </div></GCard>
       )}
+      </div>
+      </div>
 
       <div className="flex justify-end">
         <SaveButton state={saveButtonState} onClick={saveCourse} />

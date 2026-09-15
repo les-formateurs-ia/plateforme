@@ -56,6 +56,12 @@ export function injectMissionBridge(html: string, { readOnly }: { readOnly: bool
     root.querySelectorAll('input,textarea,select').forEach(function(el){
       if (el.tagName === 'SELECT') {
         Array.prototype.forEach.call(el.options, function(opt){ opt.toggleAttribute('selected', opt.selected); });
+      } else if (el.tagName === 'TEXTAREA') {
+        // Contrairement à <input>, la sérialisation d'un <textarea> reflète son
+        // contenu TEXTE (defaultValue), pas un attribut "value" — un
+        // setAttribute('value', ...) ici n'aurait aucun effet et la saisie de
+        // l'élève serait silencieusement perdue au moment du snapshot.
+        el.textContent = el.value;
       } else if (el.type === 'checkbox' || el.type === 'radio') {
         el.toggleAttribute('checked', el.checked);
       } else {
