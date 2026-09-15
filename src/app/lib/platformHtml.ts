@@ -42,6 +42,45 @@ export function injectAutoResize(html: string): string {
   return extras + html;
 }
 
+// Pour une leçon "Mission" (LessonPage.tsx) : le HTML du formateur tourne dans une
+// iframe sandboxée sans allow-same-origin, donc le parent ne peut pas lire
+// contentDocument pour récupérer ce que l'élève a rempli. On injecte un petit "pont"
+// qui répond à une demande de snapshot (postMessage) en gelant d'abord la valeur JS
+// courante de chaque champ dans son attribut HTML (value/checked/selected — un
+// outerHTML brut ne reflète jamais la saisie de l'utilisateur, seulement la valeur
+// initiale) avant de sérialiser tout le document. En lecture seule (mission déjà
+// validée), désactive aussi tous les champs/boutons au chargement.
+export function injectMissionBridge(html: string, { readOnly }: { readOnly: boolean }): string {
+  const script = `<script>(function(){
+  function freezeFormState(root){
+    root.querySelectorAll('input,textarea,select').forEach(function(el){
+      if (el.tagName === 'SELECT') {
+        Array.prototype.forEach.call(el.options, function(opt){ opt.toggleAttribute('selected', opt.selected); });
+      } else if (el.type === 'checkbox' || el.type === 'radio') {
+        el.toggleAttribute('checked', el.checked);
+      } else {
+        el.setAttribute('value', el.value);
+      }
+    });
+  }
+  window.addEventListener('message', function(e){
+    if (!e.data || !e.data.__missionRequestSnapshot) return;
+    freezeFormState(document);
+    parent.postMessage({ __missionSnapshotHtml: document.documentElement.outerHTML }, '*');
+  });
+  ${readOnly ? `
+  function lockFields(){
+    document.querySelectorAll('input,textarea,select,button').forEach(function(el){ el.disabled = true; });
+  }
+  window.addEventListener('load', lockFields);
+  document.addEventListener('DOMContentLoaded', lockFields);
+  setTimeout(lockFields, 50);` : ""}
+})();</script>`;
+  if (/<head[^>]*>/i.test(html)) return html.replace(/<head[^>]*>/i, (m) => `${m}\n${script}`);
+  if (/<html[^>]*>/i.test(html)) return html.replace(/<html[^>]*>/i, (m) => `${m}\n${script}`);
+  return script + html;
+}
+
 // Word (et donc l'autocorrection dans les .docx) remplace souvent les guillemets
 // droits par des guillemets typographiques et "--" par un tiret cadratin — ce qui
 // casse la syntaxe des attributs HTML (class="foo" devient class="foo" avec des

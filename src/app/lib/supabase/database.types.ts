@@ -6,7 +6,7 @@ export type UserRole = "admin" | "formateur" | "student";
 export type EnrollmentStatus = "active" | "completed" | "paused";
 export type LessonProgressStatus = "locked" | "in_progress" | "completed";
 export type RdvStatus = "pending" | "confirmed" | "cancelled";
-export type NotificationType = "rdv_cancelled" | "rdv_reschedule_proposed" | "rdv_reschedule_accepted" | "rdv_reschedule_declined" | "rdv_booked" | "bilan_reminder" | "rdv_confirmed" | "incident_reported";
+export type NotificationType = "rdv_cancelled" | "rdv_reschedule_proposed" | "rdv_reschedule_accepted" | "rdv_reschedule_declined" | "rdv_booked" | "bilan_reminder" | "rdv_confirmed" | "incident_reported" | "mission_submitted";
 export type AiContentType = "practical_exercise" | "mindmap" | "podcast" | "text_summary" | "remedial_explanation" | "remedial_quiz" | "avatar_video";
 export type ChatRole = "user" | "ai";
 export type VideoProvider = "cloudflare_stream" | "youtube" | "vimeo" | "external_url";
@@ -19,6 +19,7 @@ export type IncidentPage = "lecon" | "tableau_de_bord" | "outil_ia" | "exercice"
 export type IncidentStatus = "a_traiter" | "corrige";
 export type SatisfactionQuestionType = "qcm" | "rating" | "text";
 export type StudioImageStatus = "pending" | "ready" | "failed";
+export type MissionSubmissionStatus = "draft" | "submitted";
 
 export interface Database {
   public: {
@@ -216,6 +217,7 @@ export interface Database {
           reference_content: string | null;
           custom_html_content: string | null;
           custom_video_url: string | null;
+          is_mission: boolean;
           order_index: number;
           created_at: string;
           updated_at: string;
@@ -234,6 +236,7 @@ export interface Database {
           reference_content?: string | null;
           custom_html_content?: string | null;
           custom_video_url?: string | null;
+          is_mission?: boolean;
           order_index: number;
           created_at?: string;
           updated_at?: string;
@@ -741,6 +744,7 @@ export interface Database {
           reference_content: string | null;
           custom_html_content: string | null;
           custom_video_url: string | null;
+          is_mission: boolean;
           order_index: number;
           created_at: string;
           updated_at: string;
@@ -759,6 +763,7 @@ export interface Database {
           reference_content?: string | null;
           custom_html_content?: string | null;
           custom_video_url?: string | null;
+          is_mission?: boolean;
           order_index: number;
           created_at?: string;
           updated_at?: string;
@@ -1007,6 +1012,7 @@ export interface Database {
           body: string | null;
           rdv_id: string | null;
           incident_id: string | null;
+          mission_submission_id: string | null;
           read_at: string | null;
           created_at: string;
         };
@@ -1018,10 +1024,39 @@ export interface Database {
           body?: string | null;
           rdv_id?: string | null;
           incident_id?: string | null;
+          mission_submission_id?: string | null;
           read_at?: string | null;
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["notifications"]["Insert"]>;
+        Relationships: never[];
+      };
+      mission_submissions: {
+        Row: {
+          id: string;
+          lesson_id: string;
+          student_id: string;
+          status: MissionSubmissionStatus;
+          html_content: string;
+          pdf_path: string | null;
+          viewed_at: string | null;
+          submitted_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          lesson_id: string;
+          student_id: string;
+          status?: MissionSubmissionStatus;
+          html_content: string;
+          pdf_path?: string | null;
+          viewed_at?: string | null;
+          submitted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["mission_submissions"]["Insert"]>;
         Relationships: never[];
       };
       student_ai_memory: {

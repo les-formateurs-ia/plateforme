@@ -129,6 +129,7 @@ export function AdminLessonEditorPage() {
   const [practicalExercisePrompt, setPracticalExercisePrompt] = useState("");
   const [customHtml, setCustomHtml] = useState("");
   const [htmlPreviewOpen, setHtmlPreviewOpen] = useState(false);
+  const [isMission, setIsMission] = useState(false);
   const [questions, setQuestions] = useState<QuizQuestionDraft[]>([]);
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
@@ -162,6 +163,7 @@ export function AdminLessonEditorPage() {
       setAiContentPrompt(lesson.ai_content_prompt ?? "");
       setPracticalExercisePrompt(lesson.practical_exercise_prompt ?? "");
       setCustomHtml(lesson.custom_html_content ?? "");
+      setIsMission(lesson.is_mission ?? false);
 
       if (isInstance) {
         const { data: questionRows } = await supabase.from("instance_quiz_questions").select("id, question, explanation, order_index").eq("lesson_id", routeLessonId).order("order_index");
@@ -302,6 +304,7 @@ export function AdminLessonEditorPage() {
       ai_content_prompt: aiContentPrompt || null,
       practical_exercise_prompt: practicalExercisePrompt || null,
       custom_html_content: customHtml.trim() || null,
+      is_mission: isMission,
     };
 
     let lessonId = routeLessonId;
@@ -374,7 +377,18 @@ export function AdminLessonEditorPage() {
       </div>
 
       <GCard glow><div className="p-6 space-y-4">
-        <h2 className="text-lg font-black" style={{ color: th.fg }}><GT>{isNew ? "Nouvelle leçon" : "Éditer la leçon"}</GT></h2>
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <h2 className="text-lg font-black" style={{ color: th.fg }}><GT>{isNew ? "Nouvelle leçon" : "Éditer la leçon"}</GT></h2>
+          <label className="flex items-center gap-2 cursor-pointer select-none px-3 py-2 rounded-xl" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
+            <input type="checkbox" checked={isMission} onChange={(e) => setIsMission(e.target.checked)} className="w-4 h-4" />
+            <span className="text-xs font-bold" style={{ color: th.fg }}>Mission</span>
+          </label>
+        </div>
+        {isMission && (
+          <p className="text-xs -mt-2" style={{ color: th.fg3 }}>
+            Leçon "Mission" : l'élève ne verra que le "Contenu du cours (HTML)" ci-dessous — pas de podcast, Playground, Agent, Copilote ni bouton "Terminer la leçon". Deux boutons "Enregistrer" et "Valider ma mission" apparaîtront sous le HTML.
+          </p>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="sm:col-span-2">

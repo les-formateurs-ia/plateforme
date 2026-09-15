@@ -28,7 +28,8 @@ import { getMyMindmap, requestMindmapGeneration, type MindmapTree } from "@/app/
 import { findLatestConversationForInstance, getAgentMessages, sendAgentMessage, ensureConversation, insertAgentVoiceMessage } from "@/app/lib/agentChat";
 import { getMyAvatarVideo, getAvatarVideoSignedUrl, requestAvatarVideoGeneration, pollAvatarVideoStatus, type AvatarVideo } from "@/app/lib/avatarVideos";
 import { startGeminiVoiceSession, type GeminiVoiceSession } from "@/app/lib/geminiVoice";
-import { injectPlatformAuth, injectAutoResize, normalizeSmartQuotes } from "@/app/lib/platformHtml";
+import { injectPlatformAuth, injectAutoResize, injectMissionBridge, normalizeSmartQuotes } from "@/app/lib/platformHtml";
+import { getMySubmission, saveMissionDraft, submitMission, type MissionSubmission } from "@/app/lib/missionSubmissions";
 import { MindmapView } from "@/app/components/lesson/MindmapView";
 
 const DEFAULT_AI = "Je suis ton Copilote IA. Pose-moi n'importe quelle question sur cette leçon ou sur comment l'appliquer à ton métier 👋";
@@ -136,6 +137,98 @@ export function LessonPage() {
   useEffect(() => {
     if (lesson && !lesson.videoUrl && tab === "video") setTab("podcast");
   }, [lesson, tab]);
+
+  // Leçon "Mission" : brouillon existant (s'il y en a un) affiché à la place
+  // du reference_content brut — priorité à ce que l'élève a déjà rempli.
+  const [missionSubmission, setMissionSubmission] = useState<MissionSubmission | null>(null);
+  const [missionSaving, setMissionSaving] = useState(false);
+  const [missionSubmitting, setMissionSubmitting] = useState(false);
+  const missionIframeRef = useRef<HTMLIFrameElement>(null);
+  const [missionIframeHeight, setMissionIframeHeight] = useState(0);
+  const missionHtmlSource = missionSubmission?.htmlContent ?? courseHtml;
+
+  useEffect(() => {
+    if (!lesson?.isMission || !lessonId || !user) { setMissionSubmission(null); return; }
+    let cancelled = false;
+    (async () => {
+      try {
+        const sub = await getMySubmission(lessonId, user.id);
+        if (!cancelled) setMissionSubmission(sub);
+      } catch (err) {
+        console.error(err);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [lesson?.isMission, lessonId, user]);
+
+  useEffect(() => { setMissionIframeHeight(0); }, [missionHtmlSource]);
+  useEffect(() => {
+    function onMessage(e: MessageEvent) {
+      const data = e.data as { __autoResizeHeight?: number } | null;
+      if (!data || typeof data.__autoResizeHeight !== "number") return;
+      if (e.source !== missionIframeRef.current?.contentWindow) return;
+      setMissionIframeHeight(Math.ceil(data.__autoResizeHeight));
+    }
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, []);
+
+  // Demande à l'iframe de la mission de figer les valeurs de formulaire dans
+  // les attributs puis de renvoyer le document sérialisé (cf.
+  // injectMissionBridge) — c'est ce snapshot qui est enregistré/validé.
+  const requestMissionSnapshot = (): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const win = missionIframeRef.current?.contentWindow;
+      if (!win) { reject(new Error("La page de la mission n'est pas encore chargée.")); return; }
+      const timeout = setTimeout(() => {
+        window.removeEventListener("message", onMessage);
+        reject(new Error("Impossible de récupérer le contenu de la mission."));
+      }, 4000);
+      function onMessage(e: MessageEvent) {
+        const data = e.data as { __missionSnapshotHtml?: string } | null;
+        if (!data || typeof data.__missionSnapshotHtml !== "string") return;
+        if (e.source !== win) return;
+        clearTimeout(timeout);
+        window.removeEventListener("message", onMessage);
+        resolve(data.__missionSnapshotHtml);
+      }
+      window.addEventListener("message", onMessage);
+      win.postMessage({ __missionRequestSnapshot: true }, "*");
+    });
+  };
+
+  const handleSaveMissionDraft = async () => {
+    if (!lessonId || !user) return;
+    setMissionSaving(true);
+    try {
+      const html = await requestMissionSnapshot();
+      await saveMissionDraft(lessonId, user.id, html);
+      setMissionSubmission((prev) => (prev ? { ...prev, htmlContent: html } : prev));
+      toast.success("Mission enregistrée — tu pourras reprendre où tu en étais.");
+    } catch (err) {
+      console.error(err);
+      toast.error(err instanceof Error ? err.message : "Impossible d'enregistrer la mission.");
+    } finally {
+      setMissionSaving(false);
+    }
+  };
+
+  const handleValidateMission = async () => {
+    if (!lessonId || !user || !lesson) return;
+    setMissionSubmitting(true);
+    try {
+      const html = await requestMissionSnapshot();
+      const studentName = profile.name?.trim() || user.email || "Élève";
+      await submitMission({ lessonId, studentId: user.id, htmlContent: html, lessonTitle: lesson.title, studentName });
+      course.refresh();
+      navigate(`/lesson/${lessonId}/mission-envoyee`);
+    } catch (err) {
+      console.error(err);
+      toast.error(err instanceof Error ? err.message : "Impossible de valider la mission.");
+    } finally {
+      setMissionSubmitting(false);
+    }
+  };
 
   const [quizStep, setQuizStep] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
@@ -665,6 +758,34 @@ export function LessonPage() {
         <div className="flex-1 min-w-0 overflow-y-auto px-4 sm:px-8 lg:px-16 py-5 sm:py-6">
           <h1 className="text-xl sm:text-2xl font-black mb-4" style={{ color: th.fg }}>{lesson.title}</h1>
 
+          {lesson.isMission ? (
+            <div className="pb-4">
+              {missionHtmlSource ? (
+                <iframe
+                  ref={missionIframeRef}
+                  key={missionHtmlSource}
+                  title={`${lesson.title} — Mission`}
+                  srcDoc={injectAutoResize(injectMissionBridge(missionHtmlSource, { readOnly: missionSubmission?.status === "submitted" }))}
+                  sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
+                  style={{ width: "100%", height: missionIframeHeight, border: 0, display: "block", background: "#fff" }}
+                />
+              ) : (
+                <p className="text-sm py-10 text-center" style={{ color: th.fg3 }}>Contenu de la mission pas encore disponible.</p>
+              )}
+
+              {missionSubmission?.status === "submitted" ? (
+                <div className="mt-5 rounded-2xl p-4 text-center text-sm font-semibold" style={{ background: "rgba(106,222,177,0.08)", border: "1px solid rgba(106,222,177,0.3)", color: "#6adeb1" }}>
+                  Mission envoyée — en attente de ton formateur.
+                </div>
+              ) : (
+                <div className="mt-5 flex items-center justify-center gap-3">
+                  <VBtn onClick={handleSaveMissionDraft} disabled={missionSaving || missionSubmitting}>{missionSaving ? "Enregistrement…" : "Enregistrer"}</VBtn>
+                  <ShimBtn onClick={handleValidateMission} disabled={missionSaving || missionSubmitting}>{missionSubmitting ? "Envoi…" : "Valider ma mission"}</ShimBtn>
+                </div>
+              )}
+            </div>
+          ) : (
+          <>
           <div className="flex shrink-0 mb-4 rounded-2xl overflow-x-auto" style={{ background: th.card, border: `1px solid ${th.sep}` }}>
             {TABS.map(({ id, Icon, label }) => (
               <button key={id} onClick={() => setTab(id)} className="flex items-center gap-2 px-3.5 sm:px-5 py-3.5 text-sm font-semibold transition-all border-b-2 -mb-px shrink-0 whitespace-nowrap"
@@ -983,10 +1104,12 @@ export function LessonPage() {
           </div>
           </>
           )}
+          </>
+          )}
         </div>
 
         {/* Copilot */}
-        {assistantOpen ? (
+        {!lesson.isMission && (assistantOpen ? (
         <div className="fixed inset-0 z-30 bg-black/50 lg:bg-transparent p-4 lg:static lg:z-auto lg:p-0 lg:w-[27rem] lg:shrink-0 lg:py-6 lg:pr-6" onClick={(e) => { if (e.target === e.currentTarget) setAssistantOpen(false); }}>
         <div className="h-full flex flex-col rounded-2xl overflow-hidden" style={{ background: `linear-gradient(165deg,${th.grad1},${th.grad2})`, border: "1px solid transparent", boxShadow: "0 12px 32px rgba(0,0,0,0.35)" }}>
           <div className="shrink-0 px-5 py-4">
@@ -1043,7 +1166,7 @@ export function LessonPage() {
             style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, boxShadow: `0 4px 16px ${th.gradShadow(0.4)}` }}>
             <Sparkles className="w-5 h-5 text-white" />
           </button>
-        )}
+        ))}
       </div>
 
       {showFinishConfirm && (

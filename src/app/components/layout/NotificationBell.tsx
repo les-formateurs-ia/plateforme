@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Bell, Calendar as CalendarIcon, XCircle, RefreshCw, CalendarPlus, ClipboardList, CheckCircle2, Flag } from "lucide-react";
+import { Bell, Calendar as CalendarIcon, XCircle, RefreshCw, CalendarPlus, ClipboardList, CheckCircle2, Flag, FileCheck } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { isStaff } from "@/app/lib/permissions";
+import { useStaffBasePath } from "@/app/lib/staffBase";
 import { supabase } from "@/app/lib/supabase/client";
 import { Popover, PopoverContent, PopoverTrigger } from "@/app/components/ui/popover";
 import { listMyNotifications, markNotificationRead, markAllNotificationsRead, type NotificationRow } from "@/app/lib/notifications";
@@ -24,6 +25,7 @@ const ICONS: Record<NotificationRow["type"], typeof Bell> = {
   bilan_reminder: ClipboardList,
   rdv_confirmed: CheckCircle2,
   incident_reported: Flag,
+  mission_submitted: FileCheck,
 };
 
 function timeAgo(iso: string): string {
@@ -39,13 +41,14 @@ function timeAgo(iso: string): string {
 type NotificationTableRow = Database["public"]["Tables"]["notifications"]["Row"];
 
 function mapRow(row: NotificationTableRow): NotificationRow {
-  return { id: row.id, type: row.type, title: row.title, body: row.body, rdvId: row.rdv_id, read: !!row.read_at, createdAt: row.created_at };
+  return { id: row.id, type: row.type, title: row.title, body: row.body, rdvId: row.rdv_id, missionSubmissionId: row.mission_submission_id, read: !!row.read_at, createdAt: row.created_at };
 }
 
 export function NotificationBell() {
   const th = useTh();
   const { user, role } = useAuth();
   const navigate = useNavigate();
+  const staffBase = useStaffBasePath();
   const [items, setItems] = useState<NotificationRow[]>([]);
   const [open, setOpen] = useState(false);
 
@@ -90,10 +93,17 @@ export function NotificationBell() {
   // proposition de nouveau créneau, réservation…) — on ouvre donc l'onglet
   // Rendez-vous de chacun : /planning (disponibilités + RDV à venir) pour le
   // staff, /calendar (réservation) pour l'élève. Un signalement d'incident
-  // (admin uniquement) ouvre plutôt le suivi des incidents.
-  const goTo = (n: NotificationRow) => {
+  // (admin uniquement) ouvre plutôt le suivi des incidents, et une mission
+  // validée ouvre la fiche de l'élève concerné (nouveau container PDF).
+  const goTo = async (n: NotificationRow) => {
     setOpen(false);
-    navigate(n.type === "incident_reported" ? "/admin/incidents" : isStaff(role) ? "/planning" : "/calendar");
+    if (n.type === "incident_reported") { navigate("/admin/incidents"); return; }
+    if (n.type === "mission_submitted" && n.missionSubmissionId) {
+      const { data } = await supabase.from("mission_submissions").select("student_id").eq("id", n.missionSubmissionId).maybeSingle();
+      navigate(data?.student_id ? `${staffBase}/planning/students/${data.student_id}` : `${staffBase}/planning`);
+      return;
+    }
+    navigate(isStaff(role) ? "/planning" : "/calendar");
   };
 
   const handleOpenChange = async (next: boolean) => {
@@ -128,7 +138,7 @@ export function NotificationBell() {
           {items.map((n) => {
             const Icon = ICONS[n.type];
             return (
-              <button key={n.id} onClick={() => { void markNotificationRead(n.id); goTo(n); }} className="w-full text-left px-4 py-3 flex items-start gap-2.5 transition-colors hover:opacity-80" style={{ borderBottom: `1px solid ${th.sep}` }}>
+              <button key={n.id} onClick={() => { void markNotificationRead(n.id); void goTo(n); }} className="w-full text-left px-4 py-3 flex items-start gap-2.5 transition-colors hover:opacity-80" style={{ borderBottom: `1px solid ${th.sep}` }}>
                 <Icon className="w-4 h-4 mt-0.5 shrink-0" style={{ color: th.navAC }} />
                 <div className="min-w-0">
                   <div className="text-xs font-bold" style={{ color: th.fg }}>{n.title}</div>

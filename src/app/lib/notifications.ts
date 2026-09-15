@@ -9,12 +9,13 @@ export interface NotificationRow {
   title: string;
   body: string | null;
   rdvId: string | null;
+  missionSubmissionId: string | null;
   read: boolean;
   createdAt: string;
 }
 
-function mapNotification(row: { id: string; type: NotificationType; title: string; body: string | null; rdv_id: string | null; read_at: string | null; created_at: string }): NotificationRow {
-  return { id: row.id, type: row.type, title: row.title, body: row.body, rdvId: row.rdv_id, read: !!row.read_at, createdAt: row.created_at };
+function mapNotification(row: { id: string; type: NotificationType; title: string; body: string | null; rdv_id: string | null; mission_submission_id?: string | null; read_at: string | null; created_at: string }): NotificationRow {
+  return { id: row.id, type: row.type, title: row.title, body: row.body, rdvId: row.rdv_id, missionSubmissionId: row.mission_submission_id ?? null, read: !!row.read_at, createdAt: row.created_at };
 }
 
 export async function listMyNotifications(userId: string): Promise<NotificationRow[]> {
@@ -41,6 +42,16 @@ export async function markAllNotificationsRead(userId: string): Promise<void> {
 export async function createNotification(userId: string, type: NotificationType, title: string, body: string, rdvId: string): Promise<void> {
   const { error } = await supabase.from("notifications").insert({ user_id: userId, type, title, body, rdv_id: rdvId });
   if (error) console.warn("Impossible d'envoyer la notification", error);
+}
+
+// Distincte de createNotification() (qui exige un rdv_id) : notifie le formateur
+// qu'un élève vient de valider une leçon "Mission" — cf. missionSubmissions.ts.
+// Autorisée par la policy RLS "notifications_insert_mission" (0070), qui ne
+// laisse un élève notifier que SON formateur assigné au sujet de SA propre
+// soumission.
+export async function createMissionNotification(formateurId: string, missionSubmissionId: string, title: string, body: string): Promise<void> {
+  const { error } = await supabase.from("notifications").insert({ user_id: formateurId, type: "mission_submitted", title, body, mission_submission_id: missionSubmissionId });
+  if (error) console.warn("Impossible d'envoyer la notification au formateur", error);
 }
 
 // Badge de l'onglet Incidents (staff/layout) — un incident signalé notifie

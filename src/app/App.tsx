@@ -13,6 +13,7 @@ import { SignupPage } from "@/app/pages/auth/SignupPage";
 import { LessonPage } from "@/app/pages/LessonPage";
 import { DashboardPage } from "@/app/pages/dashboard/DashboardPage";
 import { LessonsPage } from "@/app/pages/lessons/LessonsPage";
+import { MissionSubmittedPage } from "@/app/pages/lessons/MissionSubmittedPage";
 import { StudioPage } from "@/app/pages/studio/StudioPage";
 import { StudioImagesPage } from "@/app/pages/studio/StudioImagesPage";
 import { StudioVideosPage } from "@/app/pages/studio/StudioVideosPage";
@@ -237,6 +238,7 @@ function AppRoutes() {
         <Route path="entreprise/satisfaction/:testId" element={<RequireCompanyStudent><CompanySatisfactionTestPage /></RequireCompanyStudent>} />
       </Route>
       <Route path="/lesson/:lessonId" element={<RequireAuth><LessonPage /></RequireAuth>} />
+      <Route path="/lesson/:lessonId/mission-envoyee" element={<RequireAuth><MissionSubmittedPage /></RequireAuth>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

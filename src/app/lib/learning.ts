@@ -221,6 +221,7 @@ export interface LessonDetail {
   practicalExercisePrompt: string | null;
   referenceContent: string | null;
   customHtmlContent: string | null;
+  isMission: boolean;
   sectionTitle: string;
   instanceId: string;
   instanceName: string;
@@ -235,7 +236,7 @@ export interface LessonDetail {
 export async function getLessonDetail(lessonId: string): Promise<LessonDetail | null> {
   const { data: instanceLesson, error: instanceLessonError } = await supabase
     .from("instance_lessons")
-    .select("id, section_id, slug, title, video_provider, video_url, custom_video_url, duration_minutes, ai_content_prompt, practical_exercise_prompt, reference_content, custom_html_content")
+    .select("id, section_id, slug, title, video_provider, video_url, custom_video_url, duration_minutes, ai_content_prompt, practical_exercise_prompt, reference_content, custom_html_content, is_mission")
     .eq("id", lessonId)
     .maybeSingle();
   if (instanceLessonError) throw instanceLessonError;
@@ -284,6 +285,7 @@ export async function getLessonDetail(lessonId: string): Promise<LessonDetail | 
       practicalExercisePrompt: instanceLesson.practical_exercise_prompt,
       referenceContent: instanceLesson.reference_content,
       customHtmlContent: instanceLesson.custom_html_content,
+      isMission: instanceLesson.is_mission,
       sectionTitle: section?.title ?? "",
       instanceId: section?.instance_id ?? "",
       instanceName: instance?.name ?? "",
@@ -310,7 +312,7 @@ export async function getLessonDetail(lessonId: string): Promise<LessonDetail | 
   // un élève, via /lesson/:id — cf. bouton "œil" de AdminCourseEditorPage).
   const { data: lesson, error: lessonError } = await supabase
     .from("lessons")
-    .select("id, section_id, slug, title, video_provider, video_url, custom_video_url, duration_minutes, ai_content_prompt, practical_exercise_prompt, reference_content, custom_html_content")
+    .select("id, section_id, slug, title, video_provider, video_url, custom_video_url, duration_minutes, ai_content_prompt, practical_exercise_prompt, reference_content, custom_html_content, is_mission")
     .eq("id", lessonId)
     .maybeSingle();
   if (lessonError) throw lessonError;
@@ -359,6 +361,7 @@ export async function getLessonDetail(lessonId: string): Promise<LessonDetail | 
     practicalExercisePrompt: lesson.practical_exercise_prompt,
     referenceContent: lesson.reference_content,
     customHtmlContent: lesson.custom_html_content,
+    isMission: lesson.is_mission,
     sectionTitle: section?.title ?? "",
     instanceId: "",
     instanceName: formation?.name ?? "",
@@ -451,6 +454,29 @@ export async function submitQuiz(userId: string, lessonId: string, answers: Quiz
   if (progressError) throw progressError;
 
   return { score, passed, attemptNumber };
+}
+
+// Équivalent de la fin de submitQuiz() pour une leçon "Mission" (pas de QCM) :
+// valider la mission débloque directement la leçon suivante.
+export async function completeMissionLesson(userId: string, lessonId: string): Promise<void> {
+  const { data: existing, error: existingError } = await supabase
+    .from("lesson_progress")
+    .select("completed_at")
+    .eq("user_id", userId)
+    .eq("lesson_id", lessonId)
+    .maybeSingle();
+  if (existingError) throw existingError;
+
+  const { error } = await supabase.from("lesson_progress").upsert(
+    {
+      user_id: userId,
+      lesson_id: lessonId,
+      status: "completed",
+      completed_at: existing?.completed_at ?? new Date().toISOString(),
+    },
+    { onConflict: "user_id,lesson_id" },
+  );
+  if (error) throw error;
 }
 
 export interface BadgeRow {
