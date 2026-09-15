@@ -988,7 +988,7 @@ export function LessonPage() {
         {/* Copilot */}
         {assistantOpen ? (
         <div className="fixed inset-0 z-30 bg-black/50 lg:bg-transparent p-4 lg:static lg:z-auto lg:p-0 lg:w-[27rem] lg:shrink-0 lg:py-6 lg:pr-6" onClick={(e) => { if (e.target === e.currentTarget) setAssistantOpen(false); }}>
-        <div className="h-full flex flex-col rounded-2xl overflow-hidden" style={{ background: `linear-gradient(165deg,${th.grad1},${th.grad2})`, border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 12px 32px rgba(0,0,0,0.35)" }}>
+        <div className="h-full flex flex-col rounded-2xl overflow-hidden" style={{ background: `linear-gradient(165deg,${th.grad1},${th.grad2})`, border: "1px solid transparent", boxShadow: "0 12px 32px rgba(0,0,0,0.35)" }}>
           <div className="shrink-0 px-5 py-4">
             <div className="flex items-center gap-2.5 mb-3">
               <Sparkles className="w-5 h-5 text-white shrink-0" />
