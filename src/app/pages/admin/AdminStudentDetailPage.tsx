@@ -261,9 +261,9 @@ export function AdminStudentDetailPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,3fr)_minmax(0,1fr)] gap-4 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
       {staff && (
-        <GCard className="min-w-0"><div className="p-4 sm:p-5">
+        <GCard className="min-w-0 lg:col-span-3"><div className="p-4 sm:p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-black" style={{ color: th.fg }}>Informations</h3>
             {admin && !infoEditing && (
@@ -302,9 +302,9 @@ export function AdminStudentDetailPage() {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-x-5 gap-y-3 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-5 gap-y-3 mb-4">
               {[["Prénom", profile.first_name || "Non renseigné"], ["Âge", onboarding?.age ? `${onboarding.age} ans` : "Non renseigné"], ["Email", profile.email], ["Téléphone", profile.phone || "Non renseigné"], ["Profession", onboarding?.profession || "Non renseignée"]].map(([label, val]) => (
-                <div key={label} className="min-w-0">
+                <div key={label} className={label === "Profession" ? "min-w-0 sm:col-span-2" : "min-w-0"}>
                   <label className="block text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>{label}</label>
                   <p className="text-sm break-words" style={{ color: th.fg2 }}>{val}</p>
                 </div>
@@ -312,7 +312,7 @@ export function AdminStudentDetailPage() {
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4 border-t" style={{ borderColor: th.sep }}>
+          <div className="space-y-4 py-4 border-t" style={{ borderColor: th.sep }}>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
               <label className="block text-xs font-bold uppercase tracking-widest" style={{ color: th.fg3 }}>Objectif professionnel</label>
@@ -335,7 +335,7 @@ export function AdminStudentDetailPage() {
                 </div>
               </div>
             ) : (
-              <p className="text-sm whitespace-pre-wrap break-words" style={{ color: th.fg2 }}>{onboarding?.objective || "Non renseigné."}</p>
+              <p className="text-sm leading-relaxed whitespace-pre-wrap break-words" style={{ color: th.fg2 }}>{onboarding?.objective || "Non renseigné."}</p>
             )}
           </div>
 
@@ -361,7 +361,7 @@ export function AdminStudentDetailPage() {
                 </div>
               </div>
             ) : (
-              <p className="text-sm whitespace-pre-wrap break-words" style={{ color: th.fg2 }}>{onboarding?.experience || "Non renseignée."}</p>
+              <p className="text-sm leading-relaxed whitespace-pre-wrap break-words" style={{ color: th.fg2 }}>{onboarding?.experience || "Non renseignée."}</p>
             )}
           </div>
           </div>
