@@ -39,8 +39,8 @@ export async function permanentlyDeleteFormation(formationId: string): Promise<v
   const sectionIds = (sections ?? []).map((s) => s.id);
   const videoUrls: (string | null)[] = [];
   if (sectionIds.length) {
-    const { data: lessons } = await supabase.from("lessons").select("video_url").in("section_id", sectionIds);
-    videoUrls.push(...(lessons ?? []).map((l) => l.video_url));
+    const { data: lessons } = await supabase.from("lessons").select("video_url, custom_video_url").in("section_id", sectionIds);
+    videoUrls.push(...(lessons ?? []).flatMap((l) => [l.video_url, l.custom_video_url]));
   }
   const { error } = await supabase.from("formations").delete().eq("id", formationId);
   if (error) throw error;

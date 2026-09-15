@@ -5,7 +5,7 @@ import {
   ChevronRight, ChevronLeft, Mic, Send,
   Sparkles, MessageSquare, CheckCircle, X,
   Lightbulb, Monitor,
-  Network, RotateCcw, Play, Brain, Zap, Clock, PartyPopper, BookOpen, Headphones, Wand2, Bot, Code, Upload, Pencil, AudioLines,
+  Network, RotateCcw, Play, Brain, Zap, Clock, PartyPopper, BookOpen, Headphones, Wand2, Bot, Code, Upload, Pencil, AudioLines, Video,
   Phone, PhoneOff,
 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
@@ -73,7 +73,7 @@ export function LessonPage() {
   const { lessonId } = useParams<{ lessonId: string }>();
   const goBack = () => navigate("/lessons");
 
-  type LTab = "video" | "mindmap" | "podcast" | "avatar" | "html" | "agent";
+  type LTab = "video" | "customVideo" | "mindmap" | "podcast" | "avatar" | "html" | "agent";
   const [tab, setTab] = useState<LTab>("video");
   const [htmlEditing, setHtmlEditing] = useState(false);
   const [htmlDraft, setHtmlDraft] = useState("");
@@ -615,6 +615,7 @@ export function LessonPage() {
   // le code de génération/lecture reste en place, seul l'onglet est retiré.
   const TABS: { id: LTab; Icon: typeof Monitor; label: string }[] = [
     ...(lesson?.videoUrl ? [{ id: "video" as const, Icon: Monitor, label: "Vidéo" }] : []),
+    ...(lesson?.customVideoUrl ? [{ id: "customVideo" as const, Icon: Video, label: "Votre vidéo personnalisée" }] : []),
     { id: "podcast", Icon: Headphones, label: "Podcast" },
     { id: "html", Icon: Code, label: "Playground" },
     { id: "agent", Icon: AudioLines, label: "Agent" },
@@ -680,7 +681,7 @@ export function LessonPage() {
           </div>
 
           {tab === "html" ? (
-            <div className="relative rounded-2xl overflow-hidden" style={{ height: "78vh", background: "#060410", border: `1px solid ${th.sep}` }}>
+            <div className="relative rounded-2xl overflow-hidden" style={{ height: "78vh", background: "#060410" }}>
               {htmlEditing ? (
                 <div className="absolute inset-0 flex flex-col gap-3 p-5">
                   <textarea
@@ -819,6 +820,9 @@ export function LessonPage() {
                     <span className="text-xs text-white/40">Vidéo pas encore ajoutée pour cette leçon</span>
                   </div>
                 </>
+              )}
+              {tab === "customVideo" && lesson.customVideoUrl && (
+                <video src={lesson.customVideoUrl} controls className="absolute inset-0 w-full h-full bg-black" />
               )}
               {tab === "mindmap" && (
                 <div className="absolute inset-0" style={{ background: "#101017" }}>

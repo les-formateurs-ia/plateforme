@@ -9,7 +9,7 @@ import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
 import { VSelect } from "@/app/components/common/Select";
 import { cx } from "@/app/lib/cx";
 import {
-  STUDIO_MODELS, aspectRatioLabel, getMyGenerations, getStudioImageSignedUrl,
+  STUDIO_MODELS, aspectRatioLabel, aspectRatioToCss, getMyGenerations, getStudioImageSignedUrl,
   uploadStudioSourceImage, requestImageGeneration, pollGenerationStatus,
   type StudioImageGeneration,
 } from "@/app/lib/studioImages";
@@ -30,8 +30,8 @@ function GenerationCard({ gen, onOpen }: { gen: StudioImageGeneration; onOpen: (
 
   return (
     <div onClick={gen.status === "ready" ? onOpen : undefined}
-      className={cx("group relative rounded-3xl overflow-hidden transition-transform", gen.status === "ready" && "cursor-pointer hover:scale-[1.01]")}
-      style={{ aspectRatio: "1 / 1", background: th.isDark ? "rgba(255,255,255,0.03)" : th.gradShadow(0.04), border: `1px solid ${th.sep}` }}>
+      className={cx("group relative rounded-3xl overflow-hidden transition-transform mb-4 break-inside-avoid", gen.status === "ready" && "cursor-pointer hover:scale-[1.01]")}
+      style={{ aspectRatio: aspectRatioToCss(gen.aspectRatio), background: th.isDark ? "rgba(255,255,255,0.03)" : th.gradShadow(0.04), border: `1px solid ${th.sep}` }}>
       {gen.status === "pending" && <div className="absolute inset-0 flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin" style={{ color: th.fg3 }} /></div>}
       {gen.status === "failed" && <div className="absolute inset-0 flex items-center justify-center px-4"><p className="text-xs text-center" style={{ color: "#fbc2ad" }}>Échec</p></div>}
       {gen.status === "ready" && url && (
@@ -173,7 +173,7 @@ export function StudioImagesPage() {
             <GCard><div className="p-8 text-center"><ImageIcon className="w-8 h-8 mx-auto mb-2" style={{ color: th.fg3 }} /><p className="text-sm" style={{ color: th.fg3 }}>Aucune création pour l'instant.</p></div></GCard>
           )}
           {!!generations.length && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="columns-2 sm:columns-3 xl:columns-4 gap-4">
               {generations.map((gen) => <GenerationCard key={gen.id} gen={gen} onOpen={() => void openDetail(gen)} />)}
             </div>
           )}

@@ -123,6 +123,7 @@ export function AdminLessonEditorPage() {
   const [slugEditing, setSlugEditing] = useState(false);
   const [durationMinutes, setDurationMinutes] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
+  const [customVideoUrl, setCustomVideoUrl] = useState("");
   const [referenceContent, setReferenceContent] = useState("");
   const [aiContentPrompt, setAiContentPrompt] = useState("");
   const [practicalExercisePrompt, setPracticalExercisePrompt] = useState("");
@@ -132,9 +133,11 @@ export function AdminLessonEditorPage() {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingCustomVideo, setUploadingCustomVideo] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [importNotice, setImportNotice] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const customVideoFileInputRef = useRef<HTMLInputElement>(null);
   const quizFileInputRef = useRef<HTMLInputElement>(null);
 
   const coursesBase = isInstance ? `${base}/instances/${courseId}` : `${base}/courses/${courseId}`;
@@ -154,6 +157,7 @@ export function AdminLessonEditorPage() {
       setSlugTouched(true);
       setDurationMinutes(lesson.duration_minutes?.toString() ?? "");
       setVideoUrl(lesson.video_url ?? "");
+      setCustomVideoUrl(lesson.custom_video_url ?? "");
       setReferenceContent(lesson.reference_content ?? "");
       setAiContentPrompt(lesson.ai_content_prompt ?? "");
       setPracticalExercisePrompt(lesson.practical_exercise_prompt ?? "");
@@ -210,6 +214,37 @@ export function AdminLessonEditorPage() {
     await deleteLessonVideoFiles([previousUrl]);
   };
 
+  const handleCustomVideoFileSelect = async (file: File) => {
+    if (!courseId || !sectionId) return;
+    setUploadingCustomVideo(true);
+    setError(null);
+    const previousUrl = customVideoUrl;
+    const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+    const path = `${courseId}/${sectionId}/${Date.now()}-${safeName}`;
+    const { error: uploadError } = await supabase.storage.from("lesson-videos").upload(path, file, { upsert: true });
+    if (uploadError) { setError(uploadError.message); setUploadingCustomVideo(false); return; }
+    const { data } = supabase.storage.from("lesson-videos").getPublicUrl(path);
+    setCustomVideoUrl(data.publicUrl);
+    setUploadingCustomVideo(false);
+    await deleteLessonVideoFiles([previousUrl]);
+  };
+
+  // Suppression immédiate (pas seulement au prochain "Enregistrer") : cohérent avec le
+  // remplacement, qui nettoie déjà le storage tout de suite (cf. handleFileSelect/
+  // handleCustomVideoFileSelect ci-dessus) — sans ça, un "Retirer" jamais suivi d'un
+  // upload laisserait un fichier orphelin dans le bucket "lesson-videos".
+  const handleRemoveVideo = async () => {
+    if (!videoUrl || !confirm("Supprimer la vidéo de cette leçon ?")) return;
+    setVideoUrl("");
+    await deleteLessonVideoFiles([videoUrl]);
+  };
+
+  const handleRemoveCustomVideo = async () => {
+    if (!customVideoUrl || !confirm("Supprimer la vidéo personnalisée de cette leçon ?")) return;
+    setCustomVideoUrl("");
+    await deleteLessonVideoFiles([customVideoUrl]);
+  };
+
   const addQuestion = () => setQuestions((qs) => [...qs, EMPTY_QUESTION()]);
   const removeQuestion = (qIndex: number) => setQuestions((qs) => qs.filter((_, i) => i !== qIndex));
   const updateQuestion = (qIndex: number, patch: Partial<QuizQuestionDraft>) =>
@@ -262,6 +297,7 @@ export function AdminLessonEditorPage() {
       duration_minutes: durationMinutes ? parseInt(durationMinutes, 10) : null,
       video_provider: "external_url" as const,
       video_url: videoUrl || null,
+      custom_video_url: customVideoUrl || null,
       reference_content: referenceContent || null,
       ai_content_prompt: aiContentPrompt || null,
       practical_exercise_prompt: practicalExercisePrompt || null,
@@ -373,11 +409,39 @@ export function AdminLessonEditorPage() {
             <video src={videoUrl} controls className="w-full max-w-md rounded-xl mb-3 bg-black" style={{ aspectRatio: "16/9" }} />
           )}
           <input ref={fileInputRef} type="file" accept="video/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])} />
-          <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80 disabled:opacity-50"
-            style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg }}>
-            <Upload className="w-4 h-4" />{uploading ? "Envoi…" : videoUrl ? "Remplacer la vidéo" : "Choisir un fichier vidéo"}
-          </button>
+          <div className="flex items-center gap-3 flex-wrap gap-y-2">
+            <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80 disabled:opacity-50"
+              style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg }}>
+              <Upload className="w-4 h-4" />{uploading ? "Envoi…" : videoUrl ? "Remplacer la vidéo" : "Choisir un fichier vidéo"}
+            </button>
+            {videoUrl && (
+              <button type="button" onClick={handleRemoveVideo} className="flex items-center gap-1.5 text-xs font-semibold hover:opacity-70" style={{ color: "#fbc2ad" }}>
+                <Trash2 className="w-3.5 h-3.5" />Supprimer la vidéo
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Vidéo personnalisée (optionnelle)</label>
+          {customVideoUrl && (
+            <video src={customVideoUrl} controls className="w-full max-w-md rounded-xl mb-3 bg-black" style={{ aspectRatio: "16/9" }} />
+          )}
+          <input ref={customVideoFileInputRef} type="file" accept="video/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleCustomVideoFileSelect(e.target.files[0])} />
+          <div className="flex items-center gap-3 flex-wrap gap-y-2">
+            <button onClick={() => customVideoFileInputRef.current?.click()} disabled={uploadingCustomVideo}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80 disabled:opacity-50"
+              style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg }}>
+              <Upload className="w-4 h-4" />{uploadingCustomVideo ? "Envoi…" : customVideoUrl ? "Remplacer la vidéo" : "Choisir un fichier vidéo"}
+            </button>
+            {customVideoUrl && (
+              <button type="button" onClick={handleRemoveCustomVideo} className="flex items-center gap-1.5 text-xs font-semibold hover:opacity-70" style={{ color: "#fbc2ad" }}>
+                <Trash2 className="w-3.5 h-3.5" />Supprimer la vidéo personnalisée
+              </button>
+            )}
+          </div>
+          <p className="text-xs mt-1.5" style={{ color: th.fg3 }}>Si renseignée, affichée à l'élève dans un onglet dédié "Votre vidéo personnalisée".</p>
         </div>
 
         <div>

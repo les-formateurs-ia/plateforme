@@ -248,6 +248,14 @@ export function aspectRatioLabel(ratio: string): string {
   return ASPECT_RATIO_LABELS[ratio] ?? ratio;
 }
 
+// Convertit un ratio "L:H" en valeur CSS aspect-ratio ("L / H") — utilisé pour
+// dimensionner chaque tuile de la galerie selon le format réel de la
+// génération (portrait/paysage/carré), au lieu d'un cadre fixe qui recadre.
+export function aspectRatioToCss(ratio: string | null | undefined): string {
+  const [w, h] = (ratio ?? "").split(":").map(Number);
+  return w > 0 && h > 0 ? `${w} / ${h}` : "1 / 1";
+}
+
 export interface StudioImageGeneration {
   id: string;
   status: StudioImageStatus;

@@ -232,6 +232,15 @@ export const STUDIO_VIDEO_MODELS: StudioVideoModel[] = [
   },
 ];
 
+// Même logique que aspectRatioToCss (studioImages.ts) — le format vidéo vit
+// dans options.aspectRatio plutôt qu'une colonne dédiée, et certains modèles
+// n'exposent pas ce choix (options sans clé "aspectRatio") : on retombe alors
+// sur 16:9, le défaut le plus courant.
+export function videoAspectRatioToCss(options: Record<string, string> | null | undefined): string {
+  const [w, h] = (options?.aspectRatio ?? "16:9").split(":").map(Number);
+  return w > 0 && h > 0 ? `${w} / ${h}` : "16 / 9";
+}
+
 export interface StudioVideoGeneration {
   id: string;
   status: StudioImageStatus;

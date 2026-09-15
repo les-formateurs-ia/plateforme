@@ -9,7 +9,7 @@ import { useTh } from "@/app/theme/theme";
 import { GCard } from "@/app/components/common/GCard";
 import { VBtn } from "@/app/components/common/Buttons";
 import {
-  STUDIO_MODELS, aspectRatioLabel, getGenerationsForStudent, getStudioImageSignedUrl,
+  STUDIO_MODELS, aspectRatioLabel, aspectRatioToCss, getGenerationsForStudent, getStudioImageSignedUrl,
   type StudioImageGeneration,
 } from "@/app/lib/studioImages";
 
@@ -26,8 +26,8 @@ function Thumb({ gen, onOpen }: { gen: StudioImageGeneration; onOpen: () => void
   }, [gen.status, gen.imagePath]);
 
   return (
-    <GCard onClick={gen.status === "ready" ? onOpen : undefined} className="hover:scale-[1.02] transition-transform">
-      <div className="aspect-square flex items-center justify-center" style={{ background: th.isDark ? "rgba(255,255,255,0.03)" : `${th.gradShadow(0.04)}` }}>
+    <GCard onClick={gen.status === "ready" ? onOpen : undefined} className="hover:scale-[1.02] transition-transform mb-3 break-inside-avoid">
+      <div className="flex items-center justify-center" style={{ aspectRatio: aspectRatioToCss(gen.aspectRatio), background: th.isDark ? "rgba(255,255,255,0.03)" : `${th.gradShadow(0.04)}` }}>
         {gen.status === "pending" && <Loader2 className="w-5 h-5 animate-spin" style={{ color: th.fg3 }} />}
         {gen.status === "failed" && <p className="text-[10px] text-center px-2" style={{ color: "#fbc2ad" }}>Échec</p>}
         {gen.status === "ready" && url && <img src={url} alt={gen.prompt} className="w-full h-full object-cover" />}
@@ -84,7 +84,7 @@ export function StudentStudioGallery({ studentId }: { studentId: string }) {
         </div>
       )}
       {!!generations.length && (
-        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+        <div className="columns-3 sm:columns-4 lg:columns-6 gap-3">
           {generations.map((gen) => <Thumb key={gen.id} gen={gen} onOpen={() => void openDetail(gen)} />)}
         </div>
       )}
