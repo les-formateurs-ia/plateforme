@@ -281,21 +281,21 @@ export function AdminCourseEditorPage() {
   const deleteSection = async (id: string) => {
     if (!confirm("Supprimer ce module et toutes ses leçons ?")) return;
     const lessonTable = isInstance ? "instance_lessons" : "lessons";
-    const { data: lessons } = await supabase.from(lessonTable).select("video_url").eq("section_id", id);
+    const { data: lessons } = await supabase.from(lessonTable).select("video_url, custom_video_url").eq("section_id", id);
     await supabase.from(isInstance ? "instance_sections" : "sections").delete().eq("id", id);
     setSections((s) => s.filter((sec) => sec.id !== id));
     // Cascade DB : supprimer le module supprime aussi ses leçons — on nettoie
     // leurs vidéos dans le storage pour ne pas laisser de fichiers orphelins.
-    await deleteLessonVideoFiles((lessons ?? []).map((l) => l.video_url));
+    await deleteLessonVideoFiles((lessons ?? []).flatMap((l) => [l.video_url, l.custom_video_url]));
   };
 
   const deleteLesson = async (sectionId: string, lessonId: string) => {
     if (!confirm("Supprimer cette leçon ?")) return;
     const lessonTable = isInstance ? "instance_lessons" : "lessons";
-    const { data: lesson } = await supabase.from(lessonTable).select("video_url").eq("id", lessonId).single();
+    const { data: lesson } = await supabase.from(lessonTable).select("video_url, custom_video_url").eq("id", lessonId).single();
     await supabase.from(lessonTable).delete().eq("id", lessonId);
     setLessonsBySection((m) => ({ ...m, [sectionId]: (m[sectionId] ?? []).filter((l) => l.id !== lessonId) }));
-    await deleteLessonVideoFiles([lesson?.video_url]);
+    await deleteLessonVideoFiles([lesson?.video_url, lesson?.custom_video_url]);
   };
 
   const lessonsBase = isInstance ? `${base}/instances/${courseId}/lessons` : `${base}/courses/${courseId}/lessons`;

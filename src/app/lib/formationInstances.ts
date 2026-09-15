@@ -72,8 +72,8 @@ export async function deleteInstance(instanceId: string): Promise<void> {
   const sectionIds = (sections ?? []).map((s) => s.id);
   const videoUrls: (string | null)[] = [];
   if (sectionIds.length) {
-    const { data: lessons } = await supabase.from("instance_lessons").select("video_url").in("section_id", sectionIds);
-    videoUrls.push(...(lessons ?? []).map((l) => l.video_url));
+    const { data: lessons } = await supabase.from("instance_lessons").select("video_url, custom_video_url").in("section_id", sectionIds);
+    videoUrls.push(...(lessons ?? []).flatMap((l) => [l.video_url, l.custom_video_url]));
   }
   const { error } = await supabase.from("formation_instances").delete().eq("id", instanceId);
   if (error) throw error;

@@ -216,6 +216,7 @@ export interface LessonDetail {
   durationMinutes: number | null;
   videoProvider: string;
   videoUrl: string | null;
+  customVideoUrl: string | null;
   aiContentPrompt: string | null;
   practicalExercisePrompt: string | null;
   referenceContent: string | null;
@@ -234,7 +235,7 @@ export interface LessonDetail {
 export async function getLessonDetail(lessonId: string): Promise<LessonDetail | null> {
   const { data: instanceLesson, error: instanceLessonError } = await supabase
     .from("instance_lessons")
-    .select("id, section_id, slug, title, video_provider, video_url, duration_minutes, ai_content_prompt, practical_exercise_prompt, reference_content, custom_html_content")
+    .select("id, section_id, slug, title, video_provider, video_url, custom_video_url, duration_minutes, ai_content_prompt, practical_exercise_prompt, reference_content, custom_html_content")
     .eq("id", lessonId)
     .maybeSingle();
   if (instanceLessonError) throw instanceLessonError;
@@ -278,6 +279,7 @@ export async function getLessonDetail(lessonId: string): Promise<LessonDetail | 
       durationMinutes: instanceLesson.duration_minutes,
       videoProvider: instanceLesson.video_provider,
       videoUrl: instanceLesson.video_url,
+      customVideoUrl: instanceLesson.custom_video_url,
       aiContentPrompt: instanceLesson.ai_content_prompt,
       practicalExercisePrompt: instanceLesson.practical_exercise_prompt,
       referenceContent: instanceLesson.reference_content,
@@ -308,7 +310,7 @@ export async function getLessonDetail(lessonId: string): Promise<LessonDetail | 
   // un élève, via /lesson/:id — cf. bouton "œil" de AdminCourseEditorPage).
   const { data: lesson, error: lessonError } = await supabase
     .from("lessons")
-    .select("id, section_id, slug, title, video_provider, video_url, duration_minutes, ai_content_prompt, practical_exercise_prompt, reference_content, custom_html_content")
+    .select("id, section_id, slug, title, video_provider, video_url, custom_video_url, duration_minutes, ai_content_prompt, practical_exercise_prompt, reference_content, custom_html_content")
     .eq("id", lessonId)
     .maybeSingle();
   if (lessonError) throw lessonError;
@@ -352,6 +354,7 @@ export async function getLessonDetail(lessonId: string): Promise<LessonDetail | 
     durationMinutes: lesson.duration_minutes,
     videoProvider: lesson.video_provider,
     videoUrl: lesson.video_url,
+    customVideoUrl: lesson.custom_video_url,
     aiContentPrompt: lesson.ai_content_prompt,
     practicalExercisePrompt: lesson.practical_exercise_prompt,
     referenceContent: lesson.reference_content,

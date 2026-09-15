@@ -9,7 +9,7 @@ import { useTh } from "@/app/theme/theme";
 import { GCard } from "@/app/components/common/GCard";
 import { VBtn } from "@/app/components/common/Buttons";
 import {
-  STUDIO_VIDEO_MODELS, getVideoGenerationsForStudent, getStudioVideoSignedUrl,
+  STUDIO_VIDEO_MODELS, getVideoGenerationsForStudent, getStudioVideoSignedUrl, videoAspectRatioToCss,
   type StudioVideoGeneration,
 } from "@/app/lib/studioVideos";
 
@@ -26,8 +26,8 @@ function Thumb({ gen, onOpen }: { gen: StudioVideoGeneration; onOpen: () => void
   }, [gen.status, gen.videoPath]);
 
   return (
-    <GCard onClick={gen.status === "ready" ? onOpen : undefined} className="hover:scale-[1.02] transition-transform">
-      <div className="aspect-video flex items-center justify-center" style={{ background: th.isDark ? "rgba(255,255,255,0.03)" : `${th.gradShadow(0.04)}` }}>
+    <GCard onClick={gen.status === "ready" ? onOpen : undefined} className="hover:scale-[1.02] transition-transform mb-3 break-inside-avoid">
+      <div className="flex items-center justify-center" style={{ aspectRatio: videoAspectRatioToCss(gen.options), background: th.isDark ? "rgba(255,255,255,0.03)" : `${th.gradShadow(0.04)}` }}>
         {gen.status === "pending" && <Loader2 className="w-5 h-5 animate-spin" style={{ color: th.fg3 }} />}
         {gen.status === "failed" && <p className="text-[10px] text-center px-2" style={{ color: "#fbc2ad" }}>Échec</p>}
         {gen.status === "ready" && url && <video src={url} muted preload="metadata" className="w-full h-full object-cover" />}
@@ -84,7 +84,7 @@ export function StudentStudioVideoGallery({ studentId }: { studentId: string }) 
         </div>
       )}
       {!!generations.length && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div className="columns-2 sm:columns-3 lg:columns-4 gap-3">
           {generations.map((gen) => <Thumb key={gen.id} gen={gen} onOpen={() => void openDetail(gen)} />)}
         </div>
       )}

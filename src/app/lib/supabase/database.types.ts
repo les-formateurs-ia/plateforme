@@ -215,6 +215,7 @@ export interface Database {
           practical_exercise_prompt: string | null;
           reference_content: string | null;
           custom_html_content: string | null;
+          custom_video_url: string | null;
           order_index: number;
           created_at: string;
           updated_at: string;
@@ -232,6 +233,7 @@ export interface Database {
           practical_exercise_prompt?: string | null;
           reference_content?: string | null;
           custom_html_content?: string | null;
+          custom_video_url?: string | null;
           order_index: number;
           created_at?: string;
           updated_at?: string;
@@ -738,6 +740,7 @@ export interface Database {
           practical_exercise_prompt: string | null;
           reference_content: string | null;
           custom_html_content: string | null;
+          custom_video_url: string | null;
           order_index: number;
           created_at: string;
           updated_at: string;
@@ -755,6 +758,7 @@ export interface Database {
           practical_exercise_prompt?: string | null;
           reference_content?: string | null;
           custom_html_content?: string | null;
+          custom_video_url?: string | null;
           order_index: number;
           created_at?: string;
           updated_at?: string;
