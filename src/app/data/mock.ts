@@ -4,7 +4,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 import {
   BarChart3, BookOpen, Code2, Calendar, User,
-  Monitor, Headphones, FileText, Bot, Sparkles, LayoutGrid, ListChecks,
+  Monitor, Headphones, FileText, Bot, Sparkles, LayoutGrid,
   type LucideIcon,
 } from "lucide-react";
 import type { NavId } from "@/app/types";
@@ -15,7 +15,6 @@ export const NAV_ITEMS: { id: NavId; Icon: LucideIcon; label: string; path: stri
   { id: "practice",  Icon: Code2,      label: "Exercez-vous !",  path: "/practice" },
   { id: "studio",    Icon: Sparkles,   label: "Le Studio",       path: "/studio" },
   { id: "hub",       Icon: LayoutGrid, label: "Hub IA",          path: "/hub" },
-  { id: "ai-list",   Icon: ListChecks, label: "Liste des IA",    path: "/ai-models" },
   { id: "agent",     Icon: Bot,        label: "Mon Agent IA",    path: "/agent" },
   { id: "calendar",  Icon: Calendar,   label: "Rendez-vous",     path: "/calendar" },
   { id: "profile",   Icon: User,       label: "Mon profil",      path: "/profile" },

@@ -19,7 +19,6 @@ import { StudioVideosPage } from "@/app/pages/studio/StudioVideosPage";
 import { StudioToolPage } from "@/app/pages/studio/StudioToolPage";
 import { HubPage } from "@/app/pages/hub/HubPage";
 import { HubCategoryPage } from "@/app/pages/hub/HubCategoryPage";
-import { AiModelsListPage } from "@/app/pages/aiModels/AiModelsListPage";
 import { AgentPage } from "@/app/pages/agent/AgentPage";
 import { PromptSessionsPage } from "@/app/pages/practice/PromptSessionsPage";
 import { PromptExercisePage } from "@/app/pages/practice/PromptExercisePage";
@@ -196,7 +195,6 @@ function AppRoutes() {
         <Route path="studio/:tool" element={<StudioToolPage />} />
         <Route path="hub" element={<HubPage />} />
         <Route path="hub/:category" element={<HubCategoryPage />} />
-        <Route path="ai-models" element={<AiModelsListPage />} />
         <Route path="agent" element={<AgentPage />} />
         <Route path="agent/:conversationId" element={<AgentPage />} />
         <Route path="calendar" element={<CalendarPage />} />
