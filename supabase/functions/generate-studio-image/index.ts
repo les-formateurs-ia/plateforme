@@ -7,6 +7,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
 import { STUDIO_MODELS, ASPECT_RATIO_DIMENSIONS, aspectRatiosForModel } from "../_shared/studio-models.ts";
 import { submitRunwareTask, finalizeRunwareResult } from "../_shared/runware.ts";
+import { checkAiBudget } from "../_shared/ai-budget.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
@@ -35,6 +36,9 @@ Deno.serve(async (req) => {
     const { data: userData, error: userErr } = await userClient.auth.getUser();
     if (userErr || !userData?.user) return jsonResponse({ error: "Session invalide." }, 401);
     const userId = userData.user.id;
+
+    const budget = await checkAiBudget(userClient, userId);
+    if (!budget.ok) return jsonResponse({ error: budget.error }, 402);
 
     let sourceImageUrl: string | undefined;
     if (sourceImagePath) {
@@ -83,6 +87,7 @@ Deno.serve(async (req) => {
         table: "studio_image_generations",
         rowId: row.id,
         kind: "image",
+        usage: { userId, mediaType: "image", model: modelConfig.runwareModel, cost: submitted.cost, source: "studio_image" },
       });
     }
 

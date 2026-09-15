@@ -17,6 +17,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
 import { submitAndAwaitRunwareText } from "../_shared/runware.ts";
+import { checkAiBudget, recordAiUsage } from "../_shared/ai-budget.ts";
 
 type Provider = "gemini" | "openai" | "anthropic";
 
@@ -34,9 +35,10 @@ interface BattleResponse {
   text: string | null;
   error: string | null;
   latencyMs: number;
+  cost?: number;
 }
 
-async function callGemini(prompt: string, apiKey: string | undefined, model: string): Promise<{ text: string | null; error: string | null }> {
+async function callGemini(prompt: string, apiKey: string | undefined, model: string): Promise<{ text: string | null; error: string | null; cost?: number }> {
   if (!apiKey) return { text: null, error: "GEMINI_API_KEY non configurée côté serveur." };
   const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
     method: "POST",
@@ -49,16 +51,19 @@ async function callGemini(prompt: string, apiKey: string | undefined, model: str
   return text ? { text, error: null } : { text: null, error: "Gemini n'a renvoyé aucun texte." };
 }
 
-async function callRunwareText(prompt: string, apiKey: string | undefined, model: string): Promise<{ text: string | null; error: string | null }> {
+// Routé via Runware (pas d'appel direct OpenAI/Anthropic) — seul ce chemin
+// compte dans le budget IA de l'élève (cf. _shared/ai-budget.ts), Gemini ci-
+// dessus reste hors Runware et ne coûte donc rien sur ce budget.
+async function callRunwareText(prompt: string, apiKey: string | undefined, model: string): Promise<{ text: string | null; error: string | null; cost?: number }> {
   if (!apiKey) return { text: null, error: "RUNWARE_API_KEY non configurée côté serveur." };
   try {
-    const text = await submitAndAwaitRunwareText(apiKey, {
+    const result = await submitAndAwaitRunwareText(apiKey, {
       taskType: "textInference",
       model,
       messages: [{ role: "user", content: prompt }],
       settings: { maxTokens: 1024 },
     }, { timeoutMs: 75000 });
-    return { text, error: null };
+    return { text: result.text, error: null, cost: result.cost };
   } catch (err) {
     return { text: null, error: err instanceof Error ? err.message : "Erreur Runware inconnue." };
   }
@@ -71,7 +76,7 @@ async function callProvider(provider: Provider, prompt: string, keys: Record<str
     const result = provider === "gemini"
       ? await callGemini(prompt, keys.GEMINI_API_KEY, model)
       : await callRunwareText(prompt, keys.RUNWARE_API_KEY, model);
-    return { provider, model, text: result.text, error: result.error, latencyMs: Date.now() - started };
+    return { provider, model, text: result.text, error: result.error, latencyMs: Date.now() - started, cost: result.cost };
   } catch (err) {
     return { provider, model, text: null, error: err instanceof Error ? err.message : "Erreur inconnue.", latencyMs: Date.now() - started };
   }
@@ -99,6 +104,12 @@ Deno.serve(async (req) => {
     );
     const { data: userData, error: userErr } = await supabase.auth.getUser();
     if (userErr || !userData?.user) return jsonResponse({ error: "Session invalide." }, 401);
+    const userId = userData.user.id;
+
+    if (selected.some((p) => p !== "gemini")) {
+      const budget = await checkAiBudget(supabase, userId);
+      if (!budget.ok) return jsonResponse({ error: budget.error }, 402);
+    }
 
     const keys = {
       GEMINI_API_KEY: Deno.env.get("GEMINI_API_KEY"),
@@ -107,9 +118,13 @@ Deno.serve(async (req) => {
 
     const responses = await Promise.all(selected.map((provider) => callProvider(provider, prompt.trim(), keys)));
 
+    await Promise.all(responses.filter((r) => r.provider !== "gemini" && r.text).map((r) =>
+      recordAiUsage(supabase, { userId, mediaType: "text", model: r.model, cost: r.cost, source: "battle_ground" }),
+    ));
+
     const { data: inserted, error: insertErr } = await supabase
       .from("battle_ground_attempts")
-      .insert({ user_id: userData.user.id, prompt_text: prompt.trim(), responses })
+      .insert({ user_id: userId, prompt_text: prompt.trim(), responses })
       .select()
       .single();
     if (insertErr) return jsonResponse({ error: `Échec de l'enregistrement : ${insertErr.message}` }, 500);

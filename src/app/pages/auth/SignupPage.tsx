@@ -33,7 +33,7 @@ export function SignupPage() {
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [accountError, setAccountError] = useState<string | null>(null);
 
-  const [p, setP] = useState<Profile>({ name: "", age: "", profession: "", phone: "", goal: "", goalFinal: "", style: "", tutor: "", avatarUrl: null });
+  const [p, setP] = useState<Profile>({ name: "", age: "", profession: "", phone: "", goal: "", goalFinal: "", style: "", tutor: "", avatarUrl: null, spentUsd: 0 });
   const [aiState, setAiState] = useState<"idle" | "loading" | "proposal">("idle");
   const [aiProposal, setAiProposal] = useState("");
   const [finishing, setFinishing] = useState(false);

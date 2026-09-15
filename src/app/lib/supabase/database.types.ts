@@ -20,6 +20,8 @@ export type IncidentStatus = "a_traiter" | "corrige";
 export type SatisfactionQuestionType = "qcm" | "rating" | "text";
 export type StudioImageStatus = "pending" | "ready" | "failed";
 export type MissionSubmissionStatus = "draft" | "submitted";
+export type AiUsageMediaType = "image" | "video" | "audio" | "text";
+export type AiUsageSource = "studio_image" | "studio_video" | "battle_ground" | "reverse_prompt";
 
 export interface Database {
   public: {
@@ -38,6 +40,7 @@ export interface Database {
           formateur_id: string | null;
           google_calendar_email: string | null;
           company_id: string | null;
+          spent_usd: number;
           created_at: string;
         };
         Insert: {
@@ -53,6 +56,7 @@ export interface Database {
           formateur_id?: string | null;
           google_calendar_email?: string | null;
           company_id?: string | null;
+          spent_usd?: number;
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
@@ -148,6 +152,30 @@ export interface Database {
           completed_at?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["studio_video_generations"]["Insert"]>;
+        Relationships: never[];
+      };
+      ai_usage_events: {
+        Row: {
+          id: string;
+          user_id: string;
+          media_type: AiUsageMediaType;
+          provider: string;
+          model: string;
+          cost_usd: number;
+          source: AiUsageSource;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          media_type: AiUsageMediaType;
+          provider: string;
+          model: string;
+          cost_usd: number;
+          source: AiUsageSource;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["ai_usage_events"]["Insert"]>;
         Relationships: never[];
       };
       formations: {

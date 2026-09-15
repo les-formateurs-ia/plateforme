@@ -7,6 +7,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
 import { submitAndAwaitRunware, downloadBytes } from "../_shared/runware.ts";
+import { checkAiBudget, recordAiUsage } from "../_shared/ai-budget.ts";
 
 const GEMINI_TEXT_MODEL = "gemini-3.6-flash";
 const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta";
@@ -35,8 +36,8 @@ async function inventTargetPrompt(apiKey: string): Promise<string> {
   return text.trim();
 }
 
-async function generateImageBytes(runwareApiKey: string, prompt: string): Promise<Uint8Array> {
-  const url = await submitAndAwaitRunware(runwareApiKey, {
+async function generateImageBytes(runwareApiKey: string, prompt: string): Promise<{ bytes: Uint8Array; cost?: number }> {
+  const { url, cost } = await submitAndAwaitRunware(runwareApiKey, {
     taskType: "imageInference",
     model: RUNWARE_IMAGE_MODEL,
     positivePrompt: prompt,
@@ -44,7 +45,7 @@ async function generateImageBytes(runwareApiKey: string, prompt: string): Promis
     height: 1024,
   });
   const { bytes } = await downloadBytes(url);
-  return bytes;
+  return { bytes, cost };
 }
 
 Deno.serve(async (req) => {
@@ -68,6 +69,9 @@ Deno.serve(async (req) => {
     if (userErr || !userData?.user) return jsonResponse({ error: "Session invalide." }, 401);
     const userId = userData.user.id;
 
+    const budget = await checkAiBudget(supabase, userId);
+    if (!budget.ok) return jsonResponse({ error: budget.error }, 402);
+
     const targetPrompt = await inventTargetPrompt(geminiApiKey);
 
     const { data: session, error: insertErr } = await supabase
@@ -79,12 +83,13 @@ Deno.serve(async (req) => {
     const sessionId = session.id as string;
 
     try {
-      const imageBytes = await generateImageBytes(runwareApiKey, targetPrompt);
+      const { bytes: imageBytes, cost } = await generateImageBytes(runwareApiKey, targetPrompt);
       const targetPath = `${userId}/${sessionId}/target.png`;
       const { error: uploadErr } = await supabase.storage.from("reverse-prompt-images").upload(targetPath, imageBytes, { contentType: "image/png", upsert: true });
       if (uploadErr) throw new Error(uploadErr.message);
 
       await supabase.from("reverse_prompt_sessions").update({ status: "ready", target_image_path: targetPath }).eq("id", sessionId);
+      await recordAiUsage(supabase, { userId, mediaType: "image", model: RUNWARE_IMAGE_MODEL, cost, source: "reverse_prompt" });
 
       const { data: signed } = await supabase.storage.from("reverse-prompt-images").createSignedUrl(targetPath, 3600);
       return jsonResponse({ sessionId, targetImageUrl: signed?.signedUrl ?? null });

@@ -6,11 +6,12 @@
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
 import { submitAndAwaitRunware, downloadBytes } from "../_shared/runware.ts";
+import { checkAiBudget, recordAiUsage } from "../_shared/ai-budget.ts";
 
 const RUNWARE_IMAGE_MODEL = "runware:101@1"; // FLUX.1 dev — cf. generate-reverse-prompt-target
 
-async function generateImageBytes(runwareApiKey: string, prompt: string): Promise<Uint8Array> {
-  const url = await submitAndAwaitRunware(runwareApiKey, {
+async function generateImageBytes(runwareApiKey: string, prompt: string): Promise<{ bytes: Uint8Array; cost?: number }> {
+  const { url, cost } = await submitAndAwaitRunware(runwareApiKey, {
     taskType: "imageInference",
     model: RUNWARE_IMAGE_MODEL,
     positivePrompt: prompt,
@@ -18,7 +19,7 @@ async function generateImageBytes(runwareApiKey: string, prompt: string): Promis
     height: 1024,
   });
   const { bytes } = await downloadBytes(url);
-  return bytes;
+  return { bytes, cost };
 }
 
 Deno.serve(async (req) => {
@@ -45,6 +46,9 @@ Deno.serve(async (req) => {
     if (userErr || !userData?.user) return jsonResponse({ error: "Session invalide." }, 401);
     const userId = userData.user.id;
 
+    const budget = await checkAiBudget(supabase, userId);
+    if (!budget.ok) return jsonResponse({ error: budget.error }, 402);
+
     const { data: sessionRow, error: sessionErr } = await supabase
       .from("reverse_prompt_sessions")
       .select("id")
@@ -70,12 +74,13 @@ Deno.serve(async (req) => {
     const attemptId = inserted.id as string;
 
     try {
-      const imageBytes = await generateImageBytes(runwareApiKey, promptText.trim());
+      const { bytes: imageBytes, cost } = await generateImageBytes(runwareApiKey, promptText.trim());
       const attemptPath = `${userId}/${sessionId}/attempt-${attemptNumber}.png`;
       const { error: uploadErr } = await supabase.storage.from("reverse-prompt-images").upload(attemptPath, imageBytes, { contentType: "image/png", upsert: true });
       if (uploadErr) throw new Error(uploadErr.message);
 
       await supabase.from("reverse_prompt_attempts").update({ status: "ready", generated_image_path: attemptPath }).eq("id", attemptId);
+      await recordAiUsage(supabase, { userId, mediaType: "image", model: RUNWARE_IMAGE_MODEL, cost, source: "reverse_prompt" });
 
       const { data: signed } = await supabase.storage.from("reverse-prompt-images").createSignedUrl(attemptPath, 3600);
       return jsonResponse({ attemptId, attemptNumber, imageUrl: signed?.signedUrl ?? null });

@@ -8,6 +8,7 @@ export interface Profile {
   style: string;
   tutor: string;
   avatarUrl: string | null;
+  spentUsd: number;
 }
 
 export interface ChatMsg {

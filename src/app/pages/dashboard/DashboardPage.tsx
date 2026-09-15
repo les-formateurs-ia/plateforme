@@ -12,6 +12,7 @@ import { VSelect } from "@/app/components/common/Select";
 import { useCourseProgress } from "@/app/state/useCourseProgress";
 import { useMyInstances } from "@/app/state/useMyInstances";
 import { getAllBadges, getEarnedBadgeIds, formatDuration, type BadgeRow } from "@/app/lib/learning";
+import { AiUsagePanel } from "@/app/pages/dashboard/AiUsagePanel";
 
 export function DashboardPage() {
   const th = useTh();
@@ -21,6 +22,7 @@ export function DashboardPage() {
   const { instances, selectedId, setSelectedId } = useMyInstances();
   const course = useCourseProgress(selectedId ?? undefined);
   const firstName = profile.name.split(" ")[0] || "Alex";
+  const [tab, setTab] = useState<"overview" | "usage">("overview");
 
   const [badges, setBadges] = useState<BadgeRow[]>([]);
   const [earnedIds, setEarnedIds] = useState<Set<string>>(new Set());
@@ -59,10 +61,6 @@ export function DashboardPage() {
     { Icon: Percent, val: avgScore != null ? String(avgScore) : "—", unit: avgScore != null ? "%" : "", sub: "Score moyen aux quiz", accent: "#fbc2ad", glow: "rgba(251,194,173,0.15)" },
   ];
 
-  if (course.loading) {
-    return <div className="flex-1 flex items-center justify-center"><span className="text-sm" style={{ color: th.fg3 }}>Chargement…</span></div>;
-  }
-
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -70,7 +68,7 @@ export function DashboardPage() {
           <h2 className="text-2xl font-black mb-0.5 capitalize" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Bienvenue {firstName} 👋</GT></h2>
           <p className="text-sm" style={{ color: th.fg3 }}>Tes statistiques et ta progression en temps réel</p>
         </div>
-        {instances.length > 1 && (
+        {tab === "overview" && instances.length > 1 && (
           <div className="w-full sm:w-96 max-w-full shrink-0">
             <VSelect
               sm
@@ -82,7 +80,20 @@ export function DashboardPage() {
         )}
       </div>
 
-      {!course.outline ? (
+      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background: th.isDark ? "rgba(255,255,255,0.04)" : `${th.gradShadow(0.06)}`, border: `1px solid ${th.sep}` }}>
+        {(["overview", "usage"] as const).map((t) => (
+          <button key={t} onClick={() => setTab(t)} className="px-5 py-2 rounded-lg text-sm font-semibold transition-all"
+            style={tab === t ? { background: th.isDark ? `${th.gradShadow(0.14)}` : "rgba(255,255,255,0.8)", color: th.navAC, border: `1px solid ${th.gradShadow(0.25)}` } : { color: th.fg3, background: "transparent", border: "1px solid transparent" }}>
+            {t === "overview" ? "Vue d'ensemble" : "Mon utilisation IA"}
+          </button>
+        ))}
+      </div>
+
+      {tab === "usage" && <AiUsagePanel />}
+
+      {tab === "overview" && (course.loading ? (
+        <div className="flex items-center justify-center py-16"><span className="text-sm" style={{ color: th.fg3 }}>Chargement…</span></div>
+      ) : !course.outline ? (
         <GCard><div className="p-8 text-center">
           <p className="text-sm font-semibold mb-1" style={{ color: th.fg }}>Aucune formation en cours</p>
           <p className="text-xs" style={{ color: th.fg3 }}>Vous n'êtes inscrit·e à aucune formation pour le moment.</p>
@@ -174,7 +185,7 @@ export function DashboardPage() {
             </div>
           </div>
         </>
-      )}
+      ))}
     </div>
   );
 }

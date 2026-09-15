@@ -3,7 +3,7 @@ import { supabase } from "@/app/lib/supabase/client";
 import { useAuth } from "@/app/state/auth-context";
 import type { Profile } from "@/app/types";
 
-const EMPTY_PROFILE: Profile = { name: "", age: "", profession: "", phone: "", goal: "", goalFinal: "", style: "", tutor: "", avatarUrl: null };
+const EMPTY_PROFILE: Profile = { name: "", age: "", profession: "", phone: "", goal: "", goalFinal: "", style: "", tutor: "", avatarUrl: null, spentUsd: 0 };
 
 interface ProfileContextValue {
   profile: Profile;
@@ -39,7 +39,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     (async () => {
       try {
         const [{ data: p }, { data: o }] = await Promise.all([
-          supabase.from("profiles").select("first_name, avatar_url, phone").eq("id", user.id).maybeSingle(),
+          supabase.from("profiles").select("first_name, avatar_url, phone, spent_usd").eq("id", user.id).maybeSingle(),
           supabase.from("student_onboarding").select("*").eq("user_id", user.id).maybeSingle(),
         ]);
         if (cancelled) return;
@@ -53,6 +53,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
           style: o?.learning_style ?? "",
           tutor: o?.ai_tutor_persona ?? "",
           avatarUrl: p?.avatar_url ?? null,
+          spentUsd: p?.spent_usd ?? 0,
         });
       } catch (error) {
         console.warn("Unable to load profile details", error);
@@ -62,6 +63,28 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       }
     })();
     return () => { cancelled = true; };
+  }, [user]);
+
+  // Le budget IA (spent_usd) est incrémenté côté serveur par un trigger DB
+  // dès qu'une génération Runware termine (cf. migration
+  // 0071_ai_usage_budget.sql) — un abonnement realtime évite d'avoir à
+  // rafraîchir le profil depuis chaque écran qui déclenche une génération
+  // (Le Studio, Battle Ground, Rétro-ingénierie). Même motif que
+  // NotificationBell.tsx.
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(`profile-spent:${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${user.id}` },
+        (payload) => {
+          const spentUsd = (payload.new as { spent_usd?: number }).spent_usd;
+          if (typeof spentUsd === "number") setProfile((current) => ({ ...current, spentUsd }));
+        },
+      )
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
   }, [user]);
 
   const saveOnboarding = async (p: Profile, userId?: string) => {

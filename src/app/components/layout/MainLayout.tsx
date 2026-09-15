@@ -9,6 +9,8 @@ import { useStaffBasePath } from "@/app/lib/staffBase";
 import { Background } from "@/app/components/common/Background";
 import { Logo } from "@/app/components/common/Logo";
 import { Avatar } from "@/app/components/common/Avatar";
+import { AiBudgetBar } from "@/app/components/common/AiBudgetBar";
+import { AI_BUDGET_CAP_USD } from "@/app/lib/aiUsage";
 import { NotificationBell } from "@/app/components/layout/NotificationBell";
 import { useBulkGeneration } from "@/app/state/bulk-generation-context";
 import { ReportIncidentDialog } from "@/app/components/layout/ReportIncidentDialog";
@@ -201,7 +203,12 @@ export function MainLayout() {
           <ReportIncidentDialog />
           <NotificationBell />
         </div>
-        <div className="px-4 pb-4 pt-1">
+        {role === "student" && (
+          <div className="px-4 pt-1">
+            <AiBudgetBar spentUsd={profile.spentUsd} capUsd={AI_BUDGET_CAP_USD} size="sm" />
+          </div>
+        )}
+        <div className="px-4 pb-4 pt-2">
           <Link to="/profile" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-2 py-1 rounded-xl cursor-pointer transition-opacity hover:opacity-80">
             <Avatar url={profile.avatarUrl} size={36} />
             <div className="min-w-0 flex-1 text-left"><div className="text-sm font-semibold truncate" style={{ color: th.fg }}>{name}</div><div className="text-xs truncate" style={{ color: th.fg3 }}>{profile.profession || "Apprenant IA"}</div></div>

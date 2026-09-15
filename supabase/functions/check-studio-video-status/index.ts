@@ -5,6 +5,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
 import { pollRunwareTask, finalizeRunwareResult } from "../_shared/runware.ts";
+import { STUDIO_VIDEO_MODELS } from "../_shared/studio-video-models.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
@@ -27,7 +28,7 @@ Deno.serve(async (req) => {
 
     const { data: row, error: rowError } = await userClient
       .from("studio_video_generations")
-      .select("id, user_id, status, external_request_id, error_message, video_path")
+      .select("id, user_id, status, external_request_id, error_message, video_path, model")
       .eq("id", generationId)
       .single();
     if (rowError || !row) return jsonResponse({ error: "Génération introuvable." }, 404);
@@ -48,6 +49,7 @@ Deno.serve(async (req) => {
       return jsonResponse({ status: "failed", error: polled.error });
     }
 
+    const runwareModel = STUDIO_VIDEO_MODELS[row.model]?.runwareModel ?? row.model;
     const result = await finalizeRunwareResult(userClient, {
       bucket: "studio-videos",
       pathPrefix: `${userId}/results/${generationId}`,
@@ -55,6 +57,7 @@ Deno.serve(async (req) => {
       table: "studio_video_generations",
       rowId: generationId,
       kind: "video",
+      usage: { userId, mediaType: "video", model: runwareModel, cost: polled.cost, source: "studio_video" },
     });
     if (!result.ok) return jsonResponse({ status: "failed", error: result.error });
     return jsonResponse({ status: "ready", videoPath: result.path });
