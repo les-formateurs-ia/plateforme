@@ -759,7 +759,7 @@ export function LessonPage() {
       </div>
 
       <div className="flex-1 flex overflow-hidden relative z-10">
-        <div className="flex-1 min-w-0 overflow-y-auto px-4 sm:px-8 lg:px-16 py-5 sm:py-6">
+        <div className="lesson-content-scroll flex-1 min-w-0 overflow-y-auto px-4 sm:px-8 lg:px-16 py-5 sm:py-6">
           <h1 className="text-xl sm:text-2xl font-black mb-4" style={{ color: th.fg }}>{lesson.title}</h1>
 
           {lesson.isMission ? (
