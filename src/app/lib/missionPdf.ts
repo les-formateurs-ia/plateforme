@@ -16,9 +16,16 @@ export async function generateMissionPdf(snapshotHtml: string): Promise<Blob> {
   const parsed = new DOMParser().parseFromString(snapshotHtml, "text/html");
 
   const container = document.createElement("div");
-  container.style.position = "fixed";
-  container.style.left = "-9999px";
+  // IMPORTANT : "position: fixed" n'a pas de offsetParent (null dans la
+  // plupart des moteurs) — html2canvas s'appuie sur cette chaîne pour situer
+  // l'élément et produit alors une capture vide. "absolute" à (0,0) avec un
+  // z-index négatif reste invisible (toujours sous le reste de la page) sans
+  // casser ce calcul de position.
+  container.style.position = "absolute";
   container.style.top = "0";
+  container.style.left = "0";
+  container.style.zIndex = "-1000";
+  container.style.pointerEvents = "none";
   container.style.width = `${A4_WIDTH_PX}px`;
   container.style.background = "#fff";
 
@@ -32,12 +39,30 @@ export async function generateMissionPdf(snapshotHtml: string): Promise<Blob> {
 
   document.body.appendChild(container);
   try {
+    // Laisse le navigateur poser la mise en page du conteneur fraîchement
+    // attaché (largeurs/hauteurs "auto") avant que html2canvas ne mesure quoi
+    // que ce soit — un seul tick JS ne suffit pas toujours.
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+    if (!body.textContent?.trim() && !body.querySelector("img")) {
+      console.warn("generateMissionPdf: le contenu à capturer semble vide — le PDF risque d'être blanc.");
+    }
+
     const pdfBlob: Blob = await html2pdf()
       .from(container)
       .set({
         margin: 10,
         image: { type: "jpeg", quality: 0.95 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+          windowWidth: A4_WIDTH_PX,
+          x: 0,
+          y: 0,
+          scrollX: 0,
+          scrollY: 0,
+        },
         jsPDF: { unit: "pt", format: "a4", orientation: "portrait" },
       })
       .outputPdf("blob");
