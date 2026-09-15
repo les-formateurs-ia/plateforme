@@ -261,8 +261,9 @@ export function AdminStudentDetailPage() {
         </div>
       </div>
 
+      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,3fr)_minmax(0,1fr)] gap-4 items-start">
       {staff && (
-        <GCard><div className="p-6">
+        <GCard className="min-w-0"><div className="p-4 sm:p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-black" style={{ color: th.fg }}>Informations</h3>
             {admin && !infoEditing && (
@@ -301,18 +302,19 @@ export function AdminStudentDetailPage() {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-x-5 gap-y-3 mb-4">
               {[["Prénom", profile.first_name || "Non renseigné"], ["Âge", onboarding?.age ? `${onboarding.age} ans` : "Non renseigné"], ["Email", profile.email], ["Téléphone", profile.phone || "Non renseigné"], ["Profession", onboarding?.profession || "Non renseignée"]].map(([label, val]) => (
-                <div key={label}>
+                <div key={label} className="min-w-0">
                   <label className="block text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>{label}</label>
-                  <p className="text-sm" style={{ color: th.fg2 }}>{val}</p>
+                  <p className="text-sm break-words" style={{ color: th.fg2 }}>{val}</p>
                 </div>
               ))}
             </div>
           )}
 
-          <div className="mb-5">
-            <div className="flex items-center justify-between mb-1.5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4 border-t" style={{ borderColor: th.sep }}>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
               <label className="block text-xs font-bold uppercase tracking-widest" style={{ color: th.fg3 }}>Objectif professionnel</label>
               {!objectiveEditing && (
                 <button onClick={() => setObjectiveEditing(true)} className="text-xs font-semibold transition-colors hover:opacity-70" style={{ color: th.navAC }}>Modifier</button>
@@ -333,12 +335,12 @@ export function AdminStudentDetailPage() {
                 </div>
               </div>
             ) : (
-              <p className="text-sm" style={{ color: th.fg2 }}>{onboarding?.objective || "Non renseigné."}</p>
+              <p className="text-sm whitespace-pre-wrap break-words" style={{ color: th.fg2 }}>{onboarding?.objective || "Non renseigné."}</p>
             )}
           </div>
 
-          <div className="mb-5">
-            <div className="flex items-center justify-between mb-1.5">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
               <label className="block text-xs font-bold uppercase tracking-widest" style={{ color: th.fg3 }}>Expérience professionnelle</label>
               {!experienceEditing && (
                 <button onClick={() => setExperienceEditing(true)} className="text-xs font-semibold transition-colors hover:opacity-70" style={{ color: th.navAC }}>Modifier</button>
@@ -359,11 +361,12 @@ export function AdminStudentDetailPage() {
                 </div>
               </div>
             ) : (
-              <p className="text-sm whitespace-pre-wrap" style={{ color: th.fg2 }}>{onboarding?.experience || "Non renseignée."}</p>
+              <p className="text-sm whitespace-pre-wrap break-words" style={{ color: th.fg2 }}>{onboarding?.experience || "Non renseignée."}</p>
             )}
           </div>
+          </div>
 
-          <div>
+          <div className="pt-4 border-t" style={{ borderColor: th.sep }}>
             <label className="block text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Mode de pédagogie de l'IA</label>
             <div className="max-w-xs">
               <VSelect
@@ -378,10 +381,11 @@ export function AdminStudentDetailPage() {
         </div></GCard>
       )}
 
-      <GCard><div className="p-6">
-        <h3 className="text-sm font-black mb-4" style={{ color: th.fg }}>Formateur</h3>
+      <GCard className="min-w-0">
+      <div className="p-4">
+        <h3 className="text-sm font-black mb-3" style={{ color: th.fg }}>Formateur</h3>
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex-1 min-w-[220px]">
+          <div className="flex-1 min-w-0">
             <VSelect
               value={formateurToAssign}
               onValueChange={assignFormateur}
@@ -393,18 +397,21 @@ export function AdminStudentDetailPage() {
         </div>
         {!admin && <p className="text-xs mt-3" style={{ color: th.fg3 }}>Seul un administrateur peut attribuer un formateur.</p>}
         {admin && !formateurs.length && <p className="text-xs mt-3" style={{ color: th.fg3 }}>Aucun formateur pour l'instant.</p>}
-      </div></GCard>
+      </div>
 
-      <GCard><div className="p-6">
-        <h3 className="text-sm font-black mb-4" style={{ color: th.fg }}>Formations attribuées</h3>
-        <div className="space-y-2 mb-4">
+      <div className="p-4 border-t" style={{ borderColor: th.sep }}>
+        <h3 className="text-sm font-black mb-3" style={{ color: th.fg }}>Formations attribuées</h3>
+        <div className="space-y-3">
           {instances.map((inst) => {
             const sc = STATUS_LABEL[inst.status];
             return (
-              <div key={inst.id} className="flex items-center gap-3 px-3 py-2.5 rounded-xl flex-wrap" style={{ background: th.isDark ? "rgba(255,255,255,0.03)" : `${th.gradShadow(0.04)}`, border: `1px solid ${th.sep}` }}>
-                <span className="flex-1 min-w-0 text-sm font-semibold truncate" style={{ color: th.fg }}>{inst.name}</span>
+              <div key={inst.id} className="min-w-0 space-y-2.5">
+                <p className="text-sm font-semibold break-words" style={{ color: th.fg }}>{inst.name}</p>
+                <div className="flex items-center justify-between gap-2">
                 <span className="text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0" style={{ background: sc.bg, color: sc.color, border: `1px solid ${sc.color}30` }}>{sc.label}</span>
-                <div className="w-36 shrink-0">
+                {admin && <button onClick={() => remove(inst.id)} title="Retirer" aria-label={`Retirer ${inst.name}`} className="shrink-0 p-1"><X className="w-4 h-4" style={{ color: th.fg3 }} /></button>}
+                </div>
+                <div className="min-w-0">
                   <VSelect
                     sm
                     value={inst.status}
@@ -417,20 +424,19 @@ export function AdminStudentDetailPage() {
                     ]}
                   />
                 </div>
-                <VBtn sm onClick={() => navigate(`${base}/instances/${inst.id}`)}>Personnaliser</VBtn>
-                {admin && <button onClick={() => remove(inst.id)} title="Retirer"><X className="w-4 h-4" style={{ color: th.fg3 }} /></button>}
+                <VBtn sm full onClick={() => navigate(`${base}/instances/${inst.id}`)}>Personnaliser</VBtn>
               </div>
             );
           })}
           {!instances.length && <p className="text-xs" style={{ color: th.fg3 }}>Aucune formation attribuée pour l'instant.</p>}
         </div>
-      </div></GCard>
+      </div>
 
       {staff && (
-        <GCard><div className="p-6">
-          <h3 className="text-sm font-black mb-4" style={{ color: th.fg }}>Attribuer une formation</h3>
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex-1 min-w-[220px]">
+        <div className="p-4 border-t" style={{ borderColor: th.sep }}>
+          <h3 className="text-sm font-black mb-3" style={{ color: th.fg }}>Attribuer une formation</h3>
+          <div className="space-y-2.5">
+            <div className="min-w-0">
               <VSelect
                 value={templateToAssign}
                 onValueChange={setTemplateToAssign}
@@ -438,13 +444,15 @@ export function AdminStudentDetailPage() {
                 options={templates.map((t) => ({ value: t.id, label: t.status === "draft" ? `${t.name} (brouillon)` : t.name }))}
               />
             </div>
-            <ShimBtn sm onClick={assign} disabled={assigning || !templateToAssign}>
-              <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5" />{assigning ? "Attribution…" : "Attribuer"}</span>
+            <ShimBtn sm full onClick={assign} disabled={assigning || !templateToAssign}>
+              <span className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" />{assigning ? "Attribution…" : "Attribuer"}</span>
             </ShimBtn>
           </div>
           {!templates.length && <p className="text-xs mt-3" style={{ color: th.fg3 }}>Aucune formation disponible pour l'instant.</p>}
-        </div></GCard>
+        </div>
       )}
+      </GCard>
+      </div>
 
       {staff && <StudentMissionGallery studentId={profile.id} />}
       {staff && <StudentStudioGallery studentId={profile.id} />}
