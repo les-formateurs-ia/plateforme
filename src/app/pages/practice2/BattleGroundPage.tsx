@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { useNavigate } from "react-router";
 import { ArrowLeft, Send, Sparkles, AlertTriangle, Swords, Trash2 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
@@ -119,7 +119,10 @@ export function BattleGroundPage() {
       {current && (
         <div>
           <h3 className="text-sm font-bold mb-3" style={{ color: th.fg }}>Résultats</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" style={{ gridTemplateColumns: `repeat(${current.responses.length}, minmax(0, 1fr))` }}>
+          <div
+            className="grid grid-cols-1 gap-4 sm:[grid-template-columns:repeat(var(--cols),minmax(0,1fr))]"
+            style={{ "--cols": current.responses.length } as CSSProperties}
+          >
             {current.responses.map((r) => (
               <GCard key={r.provider}>
                 <div className="p-5 space-y-3">

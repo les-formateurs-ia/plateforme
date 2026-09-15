@@ -83,7 +83,7 @@ export function MainLayout() {
   }, [location.pathname]);
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: th.bg, fontFamily: "'Funnel Display',sans-serif" }}>
+    <div className="flex h-screen overflow-x-hidden overflow-y-hidden" style={{ background: th.bg, fontFamily: "'Funnel Display',sans-serif" }}>
       <Background />
 
       {navOpen && (
