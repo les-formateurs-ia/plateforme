@@ -64,9 +64,15 @@ export function formatRunwareError(errors: RunwareErrorItem[]): string {
 // 2026-09-16 sur le module musique (generate-studio-music), qui enchaîne un
 // appel Gemini + 2 soumissions Runware dans la même requête initiale — plus
 // de surface pour un stall que les modules image/vidéo (qui ne font qu'une
-// soumission). 30s est largement suffisant pour un appel qui répond
-// normalement en quelques secondes.
-const RUNWARE_CALL_TIMEOUT_MS = 30000;
+// soumission).
+// 30s s'est avéré trop court en pratique : la soumission audio MiniMax Music
+// (minimax:music@2.6) déclenche systématiquement notre propre timeout (donc
+// masque la vraie réponse/erreur Runware) — remonté à 60s le 2026-09-16 pour
+// laisser le temps à Runware de répondre (le code d'erreur "timeoutProvider"
+// existant ci-dessous suggère que Runware attend lui-même une réponse du
+// fournisseur tiers avant de répondre, ce qui peut légitimement prendre du
+// temps pour un modèle audio).
+const RUNWARE_CALL_TIMEOUT_MS = 60000;
 
 async function callRunware(apiKey: string, tasks: Record<string, unknown>[]): Promise<{ data: RunwareResultItem[]; errors: RunwareErrorItem[] }> {
   // includeCost: true fait revenir un champ `cost` (USD) par tâche dans la
@@ -100,12 +106,25 @@ async function callRunware(apiKey: string, tasks: Record<string, unknown>[]): Pr
   return { data: json.data ?? [], errors: json.errors ?? [] };
 }
 
-// Soumet une tâche (imageInference/videoInference). Certains modèles
-// répondent dans la foulée (data[0].imageURL/videoURL déjà présent) —
-// d'autres restent "en cours" et doivent être interrogés via getResponse.
+// Soumet une tâche (imageInference/videoInference/audioInference). Certains
+// modèles répondent dans la foulée (data[0].imageURL/videoURL/audioURL déjà
+// présent) — d'autres restent "en cours" et doivent être interrogés via
+// getResponse.
+// deliveryMethod: "async" est OBLIGATOIRE ici — cause racine du bug "musique
+// bloquée indéfiniment sur 'en cours'" trouvée le 2026-09-16 : sans lui,
+// Runware traite la tâche en mode SYNCHRONE par défaut (doc officielle :
+// "Async is for long-form audio generation... or any task that usually takes
+// more than 60 seconds") et essaie de tenir la connexion HTTP ouverte
+// jusqu'à la fin de la génération avant de répondre. Pour MiniMax Music 2.6
+// (~2-2.5 min de traitement typique), ça dépassait largement le timeout
+// RUNWARE_CALL_TIMEOUT_MS ci-dessus (30s puis 60s), qui masquait la vraie
+// cause en faisant croire à un simple stall réseau. Avec "async", Runware
+// accuse réception immédiatement (taskUUID, status "pending") et le
+// polling existant (check-studio-*-status -> pollRunwareTask -> getResponse)
+// reprend la main normalement, comme prévu depuis le début.
 export async function submitRunwareTask(apiKey: string, task: Record<string, unknown>): Promise<SubmitResult> {
   const taskUUID = (task.taskUUID as string | undefined) ?? crypto.randomUUID();
-  const { data, errors } = await callRunware(apiKey, [{ ...task, taskUUID }]);
+  const { data, errors } = await callRunware(apiKey, [{ deliveryMethod: "async", ...task, taskUUID }]);
   if (errors.length) throw new Error(formatRunwareError(errors));
   const result = data[0];
   const url = result?.imageURL ?? result?.videoURL ?? result?.audioURL;
