@@ -8,12 +8,14 @@
 // musiques").
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { toast } from "sonner";
 import { ArrowLeft, Download, Loader2, Music2, Sparkles } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { GCard } from "@/app/components/common/GCard";
 import { ShimBtn, VBtn, Segmented } from "@/app/components/common/Buttons";
+import { MediaGenerationPlaceholder } from "@/app/components/common/MediaGenerationPlaceholder";
+import { useMediaGenerations, type MediaGeneration } from "@/app/lib/useMediaGenerations";
+import { useGeneratedMedia } from "@/app/lib/useGeneratedMedia";
 import {
   getMyMusicGenerations, getStudioMusicSignedUrl, requestMusicGeneration, pollMusicGenerationStatus,
   type StudioMusicGeneration,
@@ -22,43 +24,27 @@ import {
 const PROMPT_MAX_HEIGHT = 140;
 const MODE_OPTIONS = [{ value: "song", label: "Chansons" }, { value: "instrumental", label: "Instrumental" }];
 
-function MusicCard({ gen, onOpen }: { gen: StudioMusicGeneration; onOpen: () => void }) {
+function MusicCard({ gen, onOpen, onRetry, retryDisabled }: { gen: MediaGeneration<StudioMusicGeneration>; onOpen: () => void; onRetry: () => void; retryDisabled: boolean }) {
   const th = useTh();
-  const [coverUrl, setCoverUrl] = useState<string | null>(null);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    if (gen.coverImagePath) {
-      getStudioMusicSignedUrl(gen.coverImagePath).then((u) => { if (!cancelled) setCoverUrl(u); }).catch(() => {});
-    }
-    if (gen.status === "ready" && gen.audioPath) {
-      getStudioMusicSignedUrl(gen.audioPath).then((u) => { if (!cancelled) setAudioUrl(u); }).catch(() => {});
-    }
-    return () => { cancelled = true; };
-  }, [gen.status, gen.coverImagePath, gen.audioPath]);
+  const cover = useGeneratedMedia(gen.status === "ready" ? gen.coverImagePath : null, getStudioMusicSignedUrl);
+  const audio = useGeneratedMedia(gen.status === "ready" ? gen.audioPath : null, getStudioMusicSignedUrl);
+  const coverUrl = cover.url;
+  const audioUrl = audio.url;
+  const error = gen.trackingError || (gen.status === "failed" ? gen.errorMessage || "La génération a échoué." : null) || audio.error || cover.error || (gen.status === "ready" && !gen.audioPath ? "Le média généré est indisponible." : null);
+  const ready = gen.status === "ready" && audio.loaded && (!gen.coverImagePath || cover.loaded) && !error;
 
   return (
     <div className="rounded-3xl overflow-hidden" style={{ background: th.card, border: `1px solid ${th.sep}`, boxShadow: "0 2px 10px rgba(0,0,0,0.18)" }}>
       <div className="relative w-full cursor-pointer" style={{ aspectRatio: "1 / 1" }} onClick={gen.status === "ready" ? onOpen : undefined}>
         {coverUrl ? (
-          <img src={coverUrl} alt={gen.title ?? gen.prompt} className="absolute inset-0 w-full h-full object-cover" />
+          <img key={coverUrl} src={coverUrl} onLoad={cover.onLoad} onError={cover.onError} alt={gen.title ?? gen.prompt} className="absolute inset-0 w-full h-full object-cover" />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center" style={{ background: th.isDark ? "rgba(255,255,255,0.03)" : th.gradShadow(0.06) }}>
             <Music2 className="w-8 h-8" style={{ color: th.fg3 }} />
           </div>
         )}
-        {gen.status === "pending" && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2" style={{ background: "rgba(10,10,16,0.55)" }}>
-            <Loader2 className="w-6 h-6 animate-spin text-white" />
-            <p className="text-xs font-semibold text-white">Génération…</p>
-          </div>
-        )}
-        {gen.status === "failed" && (
-          <div className="absolute inset-0 flex items-center justify-center px-4" style={{ background: "rgba(10,10,16,0.55)" }}>
-            <p className="text-xs text-center text-white">Échec de la génération</p>
-          </div>
-        )}
+        <MediaGenerationPlaceholder kind="music" ready={ready} error={error}
+          onRetry={audio.error || cover.error ? () => { audio.retry(); cover.retry(); } : onRetry} retryDisabled={retryDisabled && !audio.error && !cover.error} />
         {gen.status === "ready" && (
           <div className="absolute inset-x-0 bottom-0 p-3" style={{ background: "linear-gradient(180deg,rgba(10,10,16,0) 0%,rgba(10,10,16,0.85) 100%)" }}>
             <p className="text-sm font-bold text-white truncate">{gen.title || "Sans titre"}</p>
@@ -70,7 +56,7 @@ function MusicCard({ gen, onOpen }: { gen: StudioMusicGeneration; onOpen: () => 
       </div>
       {gen.status === "ready" && (
         <div className="p-3 space-y-2" onClick={(e) => e.stopPropagation()}>
-          {audioUrl ? <audio controls src={audioUrl} className="w-full h-9" /> : <p className="text-xs" style={{ color: th.fg3 }}>Chargement du lecteur…</p>}
+          {audioUrl ? <audio key={audioUrl} controls preload="metadata" src={audioUrl} onLoadedMetadata={audio.onLoad} onError={audio.onError} className="w-full h-9" /> : <p className="text-xs" style={{ color: th.fg3 }}>Chargement du lecteur…</p>}
           <div className="flex items-center justify-between gap-2">
             <button onClick={onOpen} className="text-xs font-semibold hover:opacity-70 transition-opacity" style={{ color: th.fg2 }}>Voir les paroles</button>
             {audioUrl && (
@@ -93,27 +79,10 @@ export function StudioMusicPage() {
   const [prompt, setPrompt] = useState("");
   const [lyrics, setLyrics] = useState("");
   const promptRef = useRef<HTMLTextAreaElement>(null);
-  const [generating, setGenerating] = useState(false);
-  const [generations, setGenerations] = useState<StudioMusicGeneration[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { generations, generating, loading, historyError, start, retry } = useMediaGenerations(user?.id, getMyMusicGenerations, pollMusicGenerationStatus, (result) => ({ audioPath: result.audioPath, coverImagePath: result.coverImagePath }));
   const [detail, setDetail] = useState<StudioMusicGeneration | null>(null);
   const [detailCoverUrl, setDetailCoverUrl] = useState<string | null>(null);
   const [detailAudioUrl, setDetailAudioUrl] = useState<string | null>(null);
-
-  const load = async () => {
-    if (!user) return;
-    setLoading(true);
-    try {
-      setGenerations(await getMyMusicGenerations(user.id));
-    } catch (err) {
-      console.error(err);
-      toast.error("Impossible de charger l'historique.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { void load(); }, [user]);
 
   useEffect(() => {
     const el = promptRef.current;
@@ -126,24 +95,8 @@ export function StudioMusicPage() {
 
   const handleGenerate = async () => {
     if (!user || !prompt.trim() || generating) return;
-    setGenerating(true);
-    try {
-      const id = await requestMusicGeneration({
-        prompt: prompt.trim(),
-        instrumental: mode === "instrumental",
-        lyrics: mode === "instrumental" ? undefined : (lyrics.trim() || undefined),
-      });
-      await load();
-      const result = await pollMusicGenerationStatus(id);
-      await load();
-      if (result.status === "failed") toast.error(result.error || "La génération a échoué.");
-      else if (result.status === "ready") toast.success("Musique générée.");
-    } catch (err) {
-      console.error(err);
-      toast.error(err instanceof Error ? err.message : "Impossible de générer cette musique.");
-    } finally {
-      setGenerating(false);
-    }
+    const draft: StudioMusicGeneration = { id: crypto.randomUUID(), status: "pending", prompt: prompt.trim(), instrumental: mode === "instrumental", lyricsInput: mode === "instrumental" ? null : lyrics.trim() || null, title: null, lyricsStructured: null, coverPrompt: null, audioPath: null, coverImagePath: null, errorMessage: null, createdAt: new Date().toISOString() };
+    await start(draft, () => requestMusicGeneration({ prompt: draft.prompt, instrumental: draft.instrumental, lyrics: draft.lyricsInput ?? undefined }));
   };
 
   const openDetail = async (gen: StudioMusicGeneration) => {
@@ -212,7 +165,7 @@ export function StudioMusicPage() {
 
             <ShimBtn full onClick={handleGenerate} disabled={!prompt.trim() || generating}>
               <span className="flex items-center justify-center gap-1.5">
-                {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                {generating ? <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" /> : <Sparkles className="w-4 h-4" />}
                 {generating ? "Génération…" : "Générer la musique"}
               </span>
             </ShimBtn>
@@ -225,18 +178,20 @@ export function StudioMusicPage() {
             <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg3 }}>{generations.length}</span>
             {pendingCount > 0 && (
               <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg3 }}>
-                <Loader2 className="w-3 h-3 animate-spin" />{pendingCount} en cours
+                <Loader2 className="w-3 h-3 animate-spin motion-reduce:animate-none" />{pendingCount} en cours
               </span>
             )}
           </div>
 
           {loading && <p className="text-sm" style={{ color: th.fg3 }}>Chargement…</p>}
+          {historyError && <p role="alert" className="text-sm" style={{ color: th.fg2 }}>{historyError}</p>}
           {!loading && !generations.length && (
             <GCard><div className="p-8 text-center"><Music2 className="w-8 h-8 mx-auto mb-2" style={{ color: th.fg3 }} /><p className="text-sm" style={{ color: th.fg3 }}>Aucune création pour l'instant.</p></div></GCard>
           )}
           {!!generations.length && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {generations.map((gen) => <MusicCard key={gen.id} gen={gen} onOpen={() => void openDetail(gen)} />)}
+              {generations.map((gen) => <MusicCard key={gen.clientKey ?? gen.id} gen={gen} onOpen={() => void openDetail(gen)} retryDisabled={generating}
+                onRetry={() => void retry(gen, () => requestMusicGeneration({ prompt: gen.prompt, instrumental: gen.instrumental, lyrics: gen.lyricsInput ?? undefined }))} />)}
             </div>
           )}
         </div>

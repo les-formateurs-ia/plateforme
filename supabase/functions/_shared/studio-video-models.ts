@@ -99,12 +99,16 @@ export const STUDIO_VIDEO_MODELS: Record<string, StudioVideoModelConfig> = {
     defaultAspectRatio: "16:9",
     options: [
       ...ratioOption({ "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 } }, "16:9"),
-      { key: "duration", label: "Durée", choices: ["5", "8"], default: "8", numeric: true },
+      // Runware/Veo 3.1 rejette toute valeur hors {4, 6, 8} ("Invalid value for
+      // 'duration' parameter") — corrigé le 2026-09-16, l'UI proposait 5/8.
+      { key: "duration", label: "Durée", choices: ["4", "6", "8"], default: "8", numeric: true },
     ],
     buildTask: framesTask("google:3@2", { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 } }, "16:9"),
   },
   "veo-3-1-fast": {
-    // Confiance moyenne (1 source) — AIR/résolutions à revalider.
+    // Confiance haute — vérifié le 2026-09-16 sur https://runware.ai/docs/models/google-veo-3-1-fast :
+    // AIR google:3@3 confirmé, durées autorisées 4/6/7/8s (7s utile en extension
+    // vidéo via inputs.video), résolutions 720p confirmées.
     runwareModel: "google:3@3",
     supportsSourceImage: true,
     requiresSourceImage: false,
@@ -112,7 +116,7 @@ export const STUDIO_VIDEO_MODELS: Record<string, StudioVideoModelConfig> = {
     defaultAspectRatio: "16:9",
     options: [
       ...ratioOption({ "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 } }, "16:9"),
-      { key: "duration", label: "Durée", choices: ["5", "8"], default: "8", numeric: true },
+      { key: "duration", label: "Durée", choices: ["4", "6", "7", "8"], default: "8", numeric: true },
     ],
     buildTask: framesTask("google:3@3", { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 } }, "16:9"),
   },
@@ -132,7 +136,10 @@ export const STUDIO_VIDEO_MODELS: Record<string, StudioVideoModelConfig> = {
     buildTask: requiredFrameTask("klingai:5@3", { "16:9": { width: 1920, height: 1080 }, "9:16": { width: 1080, height: 1920 }, "1:1": { width: 1080, height: 1080 } }, "16:9"),
   },
   "kling-video-3-pro": {
-    // Confiance moyenne (AIR confirmé, résolutions best-effort).
+    // Confiance haute — vérifié le 2026-09-16 sur
+    // https://runware.ai/docs/models/klingai-video-3-0-pro : AIR et résolutions
+    // (16:9 1920x1080, 1:1 1440x1440, 9:16 1080x1920) confirmés ; durée
+    // autorisée 3-15s (5/10 retenus ici sont valides).
     runwareModel: "klingai:kling-video@3-pro",
     supportsSourceImage: true,
     requiresSourceImage: false,
@@ -145,7 +152,10 @@ export const STUDIO_VIDEO_MODELS: Record<string, StudioVideoModelConfig> = {
     buildTask: framesTask("klingai:kling-video@3-pro", { "16:9": { width: 1920, height: 1080 }, "9:16": { width: 1080, height: 1920 }, "1:1": { width: 1440, height: 1440 } }, "16:9"),
   },
   "kling-video-3-4k": {
-    // Confiance moyenne (AIR confirmé, résolutions best-effort).
+    // Confiance haute — vérifié le 2026-09-16 sur
+    // https://runware.ai/docs/models/klingai-video-3-0-4k : AIR et résolutions
+    // (16:9 3840x2160, 9:16 2160x3840, 1:1 2880x2880) confirmés ; durée
+    // autorisée 3-15s (5/10 retenus ici sont valides).
     runwareModel: "klingai:kling-video@3-4k",
     supportsSourceImage: true,
     requiresSourceImage: false,
@@ -158,37 +168,46 @@ export const STUDIO_VIDEO_MODELS: Record<string, StudioVideoModelConfig> = {
     buildTask: framesTask("klingai:kling-video@3-4k", { "16:9": { width: 3840, height: 2160 }, "9:16": { width: 2160, height: 3840 }, "1:1": { width: 2880, height: 2880 } }, "16:9"),
   },
   "kling-video-o1-pro": {
-    // Confiance faible : résolutions introuvables dans la doc au 2026-09-14,
-    // on réutilise le palier 1080p de "kling" (testé bout en bout) — à
-    // revalider une fois le compte crédité.
+    // Confiance haute — vérifié le 2026-09-16 sur
+    // https://runware.ai/docs/models/klingai-video-o1-pro : AIR confirmé,
+    // résolutions 1080p incluant le carré (16:9 1920x1080, 1:1 1440x1440,
+    // 9:16 1080x1920 — le 1:1 manquait, corrigé). Avec frameImages, durée
+    // limitée à 5 ou 10s (DURATION_5_10 est donc correct).
     runwareModel: "klingai:kling@o1",
     supportsSourceImage: true,
     requiresSourceImage: false,
-    resolutions: { "16:9": { width: 1920, height: 1080 }, "9:16": { width: 1080, height: 1920 } },
+    resolutions: { "16:9": { width: 1920, height: 1080 }, "9:16": { width: 1080, height: 1920 }, "1:1": { width: 1440, height: 1440 } },
     defaultAspectRatio: "16:9",
     options: [
-      ...ratioOption({ "16:9": { width: 1920, height: 1080 }, "9:16": { width: 1080, height: 1920 } }, "16:9"),
+      ...ratioOption({ "16:9": { width: 1920, height: 1080 }, "9:16": { width: 1080, height: 1920 }, "1:1": { width: 1440, height: 1440 } }, "16:9"),
       DURATION_5_10,
     ],
-    buildTask: framesTask("klingai:kling@o1", { "16:9": { width: 1920, height: 1080 }, "9:16": { width: 1080, height: 1920 } }, "16:9"),
+    buildTask: framesTask("klingai:kling@o1", { "16:9": { width: 1920, height: 1080 }, "9:16": { width: 1080, height: 1920 }, "1:1": { width: 1440, height: 1440 } }, "16:9"),
   },
   "kling-video-o1-standard": {
-    // Confiance faible : même limitation que kling-video-o1-pro ci-dessus.
+    // Confiance haute — vérifié le 2026-09-16 sur
+    // https://runware.ai/docs/models/klingai-video-o1-standard : AIR confirmé,
+    // mais contrairement à kling-video-o1-pro ce modèle est en 720p (pas
+    // 1080p) — corrigé (16:9 1280x720, 9:16 720x1280, 1:1 960x960 ajouté).
+    // Avec frameImages, durée limitée à 5 ou 10s (DURATION_5_10 correct).
     runwareModel: "klingai:kling@o1-standard",
     supportsSourceImage: true,
     requiresSourceImage: false,
-    resolutions: { "16:9": { width: 1920, height: 1080 }, "9:16": { width: 1080, height: 1920 } },
+    resolutions: { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 960, height: 960 } },
     defaultAspectRatio: "16:9",
     options: [
-      ...ratioOption({ "16:9": { width: 1920, height: 1080 }, "9:16": { width: 1080, height: 1920 } }, "16:9"),
+      ...ratioOption({ "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 960, height: 960 } }, "16:9"),
       DURATION_5_10,
     ],
-    buildTask: framesTask("klingai:kling@o1-standard", { "16:9": { width: 1920, height: 1080 }, "9:16": { width: 1080, height: 1920 } }, "16:9"),
+    buildTask: framesTask("klingai:kling@o1-standard", { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 960, height: 960 } }, "16:9"),
   },
 
   // -- Black Forest Labs — liste de résolutions autorisées confirmée en
   // direct (erreur unsupportedModelResolution le 2026-09-12) puis revérifiée
-  // en doc le 2026-09-14 (palier 720p ci-dessous). --
+  // en doc le 2026-09-14 (palier 720p ci-dessous). Durée revérifiée le
+  // 2026-09-16 sur https://runware.ai/docs/models/bfl-flux-3-video : la doc
+  // autorise en fait tout entier de 5 à 20s (ou "auto"), pas seulement 5s —
+  // choix élargi à 5/10/15/20 (confiance haute). --
   "flux-video": {
     runwareModel: "bfl:flux@3-video",
     supportsSourceImage: false,
@@ -197,7 +216,7 @@ export const STUDIO_VIDEO_MODELS: Record<string, StudioVideoModelConfig> = {
     defaultAspectRatio: "16:9",
     options: [
       ...ratioOption({ "16:9": { width: 1280, height: 704 }, "9:16": { width: 704, height: 1280 }, "1:1": { width: 960, height: 960 } }, "16:9"),
-      { key: "duration", label: "Durée", choices: ["5"], default: "5", numeric: true },
+      { key: "duration", label: "Durée", choices: ["5", "10", "15", "20"], default: "5", numeric: true },
     ],
     buildTask: ({ prompt, optionValues }) => {
       const resolutions = { "16:9": { width: 1280, height: 704 }, "9:16": { width: 704, height: 1280 }, "1:1": { width: 960, height: 960 } };
@@ -206,7 +225,10 @@ export const STUDIO_VIDEO_MODELS: Record<string, StudioVideoModelConfig> = {
     },
   },
 
-  // -- OpenAI — résolutions confirmées (doc officielle). --
+  // -- OpenAI — résolutions confirmées (doc officielle), revérifié le
+  // 2026-09-16 sur https://runware.ai/docs/models/openai-sora-2 (AIR,
+  // résolutions et durées 4/8/12/16/20s tous confirmés à l'identique,
+  // confiance haute). --
   "sora-2": {
     runwareModel: "openai:3@1",
     supportsSourceImage: true,
@@ -220,7 +242,10 @@ export const STUDIO_VIDEO_MODELS: Record<string, StudioVideoModelConfig> = {
     buildTask: framesTask("openai:3@1", { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 } }, "16:9"),
   },
 
-  // -- Runway ML --
+  // -- Runway ML — confiance haute, vérifié le 2026-09-16 sur
+  // https://runware.ai/docs/models/runway-gen-4-5 : AIR et les 5 résolutions
+  // confirmés à l'identique ; durée doc 5/8/10s (défaut doc 10, on garde 8
+  // qui reste une valeur valide de la liste). --
   "runway-gen-4-5": {
     runwareModel: "runway:1@2",
     supportsSourceImage: true,
@@ -243,47 +268,56 @@ export const STUDIO_VIDEO_MODELS: Record<string, StudioVideoModelConfig> = {
     }, "16:9"),
   },
 
-  // -- ByteDance (Seedance) — palier 720p retenu pour les 3 variantes,
-  // best-effort (exemples de doc, pas une liste exhaustive). --
+  // -- ByteDance (Seedance) — palier 720p retenu pour les 3 variantes.
+  // Confiance haute — vérifié le 2026-09-16 sur
+  // https://runware.ai/docs/models/bytedance-seedance-2-0 (+ -2-0-fast et
+  // -1-5-pro, mêmes valeurs au palier 720p) : le carré 720p est 960x960, pas
+  // 1088x1088 comme précédemment renseigné — corrigé sur les 3 variantes.
+  // Durée doc : 2.0/2.0-fast acceptent 4-15s, 1.5-pro 4-12s ; DURATION_5_10
+  // (5/10) reste un sous-ensemble valide pour les 3. --
   "seedance-2-0": {
     runwareModel: "bytedance:seedance@2.0",
     supportsSourceImage: true,
     requiresSourceImage: false,
-    resolutions: { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 1088, height: 1088 } },
+    resolutions: { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 960, height: 960 } },
     defaultAspectRatio: "16:9",
     options: [
-      ...ratioOption({ "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 1088, height: 1088 } }, "16:9"),
+      ...ratioOption({ "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 960, height: 960 } }, "16:9"),
       DURATION_5_10,
     ],
-    buildTask: framesTask("bytedance:seedance@2.0", { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 1088, height: 1088 } }, "16:9"),
+    buildTask: framesTask("bytedance:seedance@2.0", { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 960, height: 960 } }, "16:9"),
   },
   "seedance-2-0-fast": {
     runwareModel: "bytedance:seedance@2.0-fast",
     supportsSourceImage: true,
     requiresSourceImage: false,
-    resolutions: { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 1088, height: 1088 } },
+    resolutions: { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 960, height: 960 } },
     defaultAspectRatio: "16:9",
     options: [
-      ...ratioOption({ "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 1088, height: 1088 } }, "16:9"),
+      ...ratioOption({ "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 960, height: 960 } }, "16:9"),
       DURATION_5_10,
     ],
-    buildTask: framesTask("bytedance:seedance@2.0-fast", { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 1088, height: 1088 } }, "16:9"),
+    buildTask: framesTask("bytedance:seedance@2.0-fast", { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 960, height: 960 } }, "16:9"),
   },
   "seedance-1-5-pro": {
     runwareModel: "bytedance:seedance@1.5-pro",
     supportsSourceImage: true,
     requiresSourceImage: false,
-    resolutions: { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 1088, height: 1088 } },
+    resolutions: { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 960, height: 960 } },
     defaultAspectRatio: "16:9",
     options: [
-      ...ratioOption({ "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 1088, height: 1088 } }, "16:9"),
+      ...ratioOption({ "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 960, height: 960 } }, "16:9"),
       DURATION_5_10,
     ],
-    buildTask: framesTask("bytedance:seedance@1.5-pro", { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 1088, height: 1088 } }, "16:9"),
+    buildTask: framesTask("bytedance:seedance@1.5-pro", { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 960, height: 960 } }, "16:9"),
   },
 
   // -- Lightricks (LTX) — résolutions confirmées (doc officielle, 16:9/9:16
-  // uniquement, pas de carré). --
+  // uniquement, pas de carré). Revérifié le 2026-09-16 :
+  // https://runware.ai/docs/models/lightricks-ltx-2-5-pro (durée 6/8/10/auto,
+  // défaut doc 6 ; plafond 1080p) et .../lightricks-ltx-2-5-fast (durée
+  // 6/8/10/12/14/16/18/20/auto, défaut doc 6 ; plafond 4K). DURATION_6_8_10
+  // (6/8/10) reste un sous-ensemble valide pour les deux variantes. --
   "ltx-2-5-pro": {
     runwareModel: "lightricks:ltx@2.5-pro",
     supportsSourceImage: true,
@@ -311,7 +345,10 @@ export const STUDIO_VIDEO_MODELS: Record<string, StudioVideoModelConfig> = {
 
   // -- MiniMax — paysage uniquement (16:9), confirmé par la doc : pas de
   // 9:16 documenté, donc pas d'option "aspectRatio" proposée (ratioOption
-  // ne l'ajoute que si 2+ ratios existent). --
+  // ne l'ajoute que si 2+ ratios existent). Confiance haute — revérifié le
+  // 2026-09-16 sur https://runware.ai/docs/models/minimax-hailuo-2-3 et
+  // .../minimax-hailuo-02 : AIR, résolution 1080p et durées 6/10s (défaut 6)
+  // confirmés à l'identique pour les deux variantes. --
   "minimax-hailuo-2-3": {
     runwareModel: "minimax:4@1",
     supportsSourceImage: true,
@@ -331,7 +368,10 @@ export const STUDIO_VIDEO_MODELS: Record<string, StudioVideoModelConfig> = {
     buildTask: framesTask("minimax:3@1", { "16:9": { width: 1920, height: 1080 } }, "16:9"),
   },
 
-  // -- Alibaba --
+  // -- Alibaba — confiance haute pour wan27-video, vérifié le 2026-09-16 sur
+  // https://runware.ai/docs/models/alibaba-wan2-7 : AIR et les 3 résolutions
+  // (16:9 1280x720, 9:16 720x1280, 1:1 960x960) confirmés à l'identique ;
+  // durée doc 2-15s, DURATION_5_10 reste un sous-ensemble valide. --
   "wan27-video": {
     runwareModel: "alibaba:wan@2.7",
     supportsSourceImage: true,
@@ -345,7 +385,10 @@ export const STUDIO_VIDEO_MODELS: Record<string, StudioVideoModelConfig> = {
     buildTask: framesTask("alibaba:wan@2.7", { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 960, height: 960 } }, "16:9"),
   },
   "happyhorse-1-0": {
-    // Confiance moyenne (best-effort, résolutions calquées sur wan27-video).
+    // Confiance moyenne (best-effort, résolutions calquées sur wan27-video —
+    // recherché le 2026-09-16, aucune page de doc dédiée trouvée pour
+    // "happyhorse" sur runware.ai, donc non revérifiable directement ;
+    // wan27-video lui-même est maintenant confirmé haute confiance).
     runwareModel: "alibaba:happyhorse@1.0",
     supportsSourceImage: true,
     requiresSourceImage: false,
@@ -360,48 +403,59 @@ export const STUDIO_VIDEO_MODELS: Record<string, StudioVideoModelConfig> = {
 
   // -- Vidu --
   "vidu-q3": {
-    // Confiance moyenne — grille de résolutions par palier, on retient 720p.
+    // Confiance haute — vérifié le 2026-09-16 sur
+    // https://runware.ai/docs/models/vidu-q3 : AIR confirmé, palier 720p
+    // retenu, mais le carré 720p est 960x960 (pas 1080x1080) — corrigé.
+    // Durée doc : 1-16s, DURATION_5_10 (5/10) reste un sous-ensemble valide.
     runwareModel: "vidu:4@1",
-    supportsSourceImage: true,
-    requiresSourceImage: false,
-    resolutions: { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 1080, height: 1080 } },
-    defaultAspectRatio: "16:9",
-    options: [
-      ...ratioOption({ "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 1080, height: 1080 } }, "16:9"),
-      DURATION_5_10,
-    ],
-    buildTask: framesTask("vidu:4@1", { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 1080, height: 1080 } }, "16:9"),
-  },
-
-  // -- PixVerse — résolutions confirmées (doc officielle). --
-  "pixverse-v5-5": {
-    runwareModel: "pixverse:1@6",
     supportsSourceImage: true,
     requiresSourceImage: false,
     resolutions: { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 960, height: 960 } },
     defaultAspectRatio: "16:9",
     options: [
       ...ratioOption({ "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 960, height: 960 } }, "16:9"),
+      DURATION_5_10,
+    ],
+    buildTask: framesTask("vidu:4@1", { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 960, height: 960 } }, "16:9"),
+  },
+
+  // -- PixVerse — confiance haute, revérifié le 2026-09-16 sur
+  // https://runware.ai/docs/models/pixverse-v5-5 et .../pixverse-v6 : AIR et
+  // grille de résolutions confirmés, mais le carré 720p est 720x720, pas
+  // 960x960 (960x960 n'existe dans AUCUN palier PixVerse) — corrigé sur les
+  // 2 variantes. Durée doc : 1-15s (v6) / 5,8,10 selon résolution (v5.5) ;
+  // nos listes (5/8 et 5/8/10) restent valides. --
+  "pixverse-v5-5": {
+    runwareModel: "pixverse:1@6",
+    supportsSourceImage: true,
+    requiresSourceImage: false,
+    resolutions: { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 720, height: 720 } },
+    defaultAspectRatio: "16:9",
+    options: [
+      ...ratioOption({ "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 720, height: 720 } }, "16:9"),
       { key: "duration", label: "Durée", choices: ["5", "8"], default: "5", numeric: true },
     ],
-    buildTask: framesTask("pixverse:1@6", { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 960, height: 960 } }, "16:9"),
+    buildTask: framesTask("pixverse:1@6", { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 720, height: 720 } }, "16:9"),
   },
   "pixverse-v6": {
     runwareModel: "pixverse:1@8",
     supportsSourceImage: true,
     requiresSourceImage: false,
-    resolutions: { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 960, height: 960 } },
+    resolutions: { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 720, height: 720 } },
     defaultAspectRatio: "16:9",
     options: [
-      ...ratioOption({ "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 960, height: 960 } }, "16:9"),
+      ...ratioOption({ "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 720, height: 720 } }, "16:9"),
       { key: "duration", label: "Durée", choices: ["5", "8", "10"], default: "5", numeric: true },
     ],
-    buildTask: framesTask("pixverse:1@8", { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 960, height: 960 } }, "16:9"),
+    buildTask: framesTask("pixverse:1@8", { "16:9": { width: 1280, height: 720 }, "9:16": { width: 720, height: 1280 }, "1:1": { width: 720, height: 720 } }, "16:9"),
   },
 
   // -- Skywork --
   "skyreels-v4": {
-    // Confiance moyenne (doc officielle, 1 source).
+    // Confiance haute — revérifié le 2026-09-16 sur
+    // https://runware.ai/docs/models/skywork-skyreels-v4 : AIR et les 3
+    // résolutions 720p confirmés à l'identique ; durée doc 3-15s,
+    // DURATION_5_10 reste un sous-ensemble valide.
     runwareModel: "skywork:skyreels@v4",
     supportsSourceImage: true,
     requiresSourceImage: false,
@@ -416,7 +470,10 @@ export const STUDIO_VIDEO_MODELS: Record<string, StudioVideoModelConfig> = {
 
   // -- xAI --
   "grok-imagine-video": {
-    // Confiance moyenne (doc officielle, 1 source).
+    // Confiance haute — revérifié le 2026-09-16 sur
+    // https://runware.ai/docs/models/xai-grok-imagine-video : AIR et les 3
+    // résolutions 720p confirmés à l'identique ; durée doc 1-15s (défaut 6),
+    // DURATION_5_10 reste un sous-ensemble valide.
     runwareModel: "xai:grok-imagine@video",
     supportsSourceImage: true,
     requiresSourceImage: false,

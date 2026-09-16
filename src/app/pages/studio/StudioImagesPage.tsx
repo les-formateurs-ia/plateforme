@@ -8,6 +8,9 @@ import { GCard } from "@/app/components/common/GCard";
 import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
 import { VSelect } from "@/app/components/common/Select";
 import { cx } from "@/app/lib/cx";
+import { MediaGenerationPlaceholder } from "@/app/components/common/MediaGenerationPlaceholder";
+import { useMediaGenerations, type MediaGeneration } from "@/app/lib/useMediaGenerations";
+import { useGeneratedMedia } from "@/app/lib/useGeneratedMedia";
 import {
   STUDIO_MODELS, aspectRatioLabel, aspectRatioToCss, getMyGenerations, getStudioImageSignedUrl,
   uploadStudioSourceImage, requestImageGeneration, pollGenerationStatus,
@@ -16,26 +19,18 @@ import {
 
 const PROMPT_MAX_HEIGHT = 160;
 
-function GenerationCard({ gen, onOpen }: { gen: StudioImageGeneration; onOpen: () => void }) {
+function GenerationCard({ gen, onOpen, onRetry, retryDisabled }: { gen: MediaGeneration<StudioImageGeneration>; onOpen: () => void; onRetry: () => void; retryDisabled: boolean }) {
   const th = useTh();
-  const [url, setUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    if (gen.status === "ready" && gen.imagePath) {
-      getStudioImageSignedUrl(gen.imagePath).then((u) => { if (!cancelled) setUrl(u); }).catch(() => {});
-    }
-    return () => { cancelled = true; };
-  }, [gen.status, gen.imagePath]);
+  const media = useGeneratedMedia(gen.status === "ready" ? gen.imagePath : null, getStudioImageSignedUrl);
+  const error = gen.trackingError || (gen.status === "failed" ? gen.errorMessage || "La génération a échoué." : null) || media.error || (gen.status === "ready" && !gen.imagePath ? "Le média généré est indisponible." : null);
 
   return (
     <div onClick={gen.status === "ready" ? onOpen : undefined}
       className={cx("group relative rounded-3xl overflow-hidden transition-transform mb-4 break-inside-avoid", gen.status === "ready" && "cursor-pointer hover:scale-[1.01]")}
       style={{ aspectRatio: aspectRatioToCss(gen.aspectRatio), background: th.isDark ? "rgba(255,255,255,0.03)" : th.gradShadow(0.04), border: `1px solid ${th.sep}` }}>
-      {gen.status === "pending" && <div className="absolute inset-0 flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin" style={{ color: th.fg3 }} /></div>}
-      {gen.status === "failed" && <div className="absolute inset-0 flex items-center justify-center px-4"><p className="text-xs text-center" style={{ color: "#fbc2ad" }}>Échec</p></div>}
-      {gen.status === "ready" && url && (
-        <img src={url} alt={gen.prompt} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+      <MediaGenerationPlaceholder kind="image" ready={gen.status === "ready" && media.loaded && !error} error={error} onRetry={media.error ? media.retry : onRetry} retryDisabled={retryDisabled && !media.error} />
+      {gen.status === "ready" && media.url && (
+        <img key={media.url} src={media.url} onLoad={media.onLoad} onError={media.onError} alt={gen.prompt} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 motion-reduce:transition-none group-hover:scale-105" />
       )}
       {gen.status === "ready" && (
         <div className="absolute inset-x-0 bottom-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: "linear-gradient(180deg,rgba(10,10,16,0) 0%,rgba(10,10,16,0.8) 100%)" }}>
@@ -62,29 +57,12 @@ export function StudioImagesPage() {
   const [sourcePreview, setSourcePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const promptRef = useRef<HTMLTextAreaElement>(null);
-  const [generating, setGenerating] = useState(false);
-  const [generations, setGenerations] = useState<StudioImageGeneration[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { generations, generating, loading, historyError, start, retry } = useMediaGenerations(user?.id, getMyGenerations, pollGenerationStatus, (result) => ({ imagePath: result.imagePath }));
   const [detail, setDetail] = useState<StudioImageGeneration | null>(null);
   const [detailUrl, setDetailUrl] = useState<string | null>(null);
   const [sourcePreviewOpen, setSourcePreviewOpen] = useState(false);
   const [detailSourceUrl, setDetailSourceUrl] = useState<string | null>(null);
   const [detailSourceZoom, setDetailSourceZoom] = useState(false);
-
-  const load = async () => {
-    if (!user) return;
-    setLoading(true);
-    try {
-      setGenerations(await getMyGenerations(user.id));
-    } catch (err) {
-      console.error(err);
-      toast.error("Impossible de charger l'historique.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { void load(); }, [user]);
 
   useEffect(() => {
     const el = promptRef.current;
@@ -116,24 +94,14 @@ export function StudioImagesPage() {
 
   const handleGenerate = async () => {
     if (!user || !prompt.trim() || generating) return;
-    setGenerating(true);
-    try {
+    const draft: StudioImageGeneration = { id: crypto.randomUUID(), status: "pending", model: modelId, aspectRatio, prompt: prompt.trim(), sourceImagePath: null, imagePath: null, errorMessage: null, createdAt: new Date().toISOString() };
+    await start(draft, async () => {
       let sourceImagePath: string | undefined;
       if (sourceFile && model.supportsSourceImage) {
         sourceImagePath = await uploadStudioSourceImage(user.id, sourceFile);
       }
-      const id = await requestImageGeneration({ model: modelId, aspectRatio, prompt: prompt.trim(), sourceImagePath });
-      await load();
-      const result = await pollGenerationStatus(id);
-      await load();
-      if (result.status === "failed") toast.error(result.error || "La génération a échoué.");
-      else if (result.status === "ready") toast.success("Image générée.");
-    } catch (err) {
-      console.error(err);
-      toast.error(err instanceof Error ? err.message : "Impossible de générer cette image.");
-    } finally {
-      setGenerating(false);
-    }
+      return requestImageGeneration({ model: modelId, aspectRatio, prompt: draft.prompt, sourceImagePath });
+    });
   };
 
   const openDetail = async (gen: StudioImageGeneration) => {
@@ -169,12 +137,14 @@ export function StudioImagesPage() {
         <div>
           <h3 className="text-sm font-black mb-3" style={{ color: th.fg }}>Mes créations</h3>
           {loading && <p className="text-sm" style={{ color: th.fg3 }}>Chargement…</p>}
+          {historyError && <p role="alert" className="text-sm" style={{ color: th.fg2 }}>{historyError}</p>}
           {!loading && !generations.length && (
             <GCard><div className="p-8 text-center"><ImageIcon className="w-8 h-8 mx-auto mb-2" style={{ color: th.fg3 }} /><p className="text-sm" style={{ color: th.fg3 }}>Aucune création pour l'instant.</p></div></GCard>
           )}
           {!!generations.length && (
-            <div className="columns-2 sm:columns-3 xl:columns-4 gap-4">
-              {generations.map((gen) => <GenerationCard key={gen.id} gen={gen} onOpen={() => void openDetail(gen)} />)}
+            <div className="columns-1 sm:columns-3 xl:columns-4 gap-4">
+              {generations.map((gen) => <GenerationCard key={gen.clientKey ?? gen.id} gen={gen} onOpen={() => void openDetail(gen)} retryDisabled={generating}
+                onRetry={() => void retry(gen, () => requestImageGeneration({ model: gen.model, aspectRatio: gen.aspectRatio, prompt: gen.prompt, sourceImagePath: gen.sourceImagePath ?? undefined }))} />)}
             </div>
           )}
         </div>
@@ -227,7 +197,7 @@ export function StudioImagesPage() {
             />
             <ShimBtn sm onClick={handleGenerate} disabled={!prompt.trim() || generating}>
               <span className="flex items-center gap-1.5 whitespace-nowrap">
-                {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                {generating ? <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" /> : <Sparkles className="w-4 h-4" />}
                 {generating ? "Génération…" : "Générer"}
               </span>
             </ShimBtn>

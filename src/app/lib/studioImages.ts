@@ -110,16 +110,18 @@ export const STUDIO_MODELS: StudioModel[] = [
     label: "Nano Banana Pro (Gemini)",
     description: "Modèle image le plus avancé de Google (Gemini) — bon rendu photoréaliste et édition précise.",
     supportsSourceImage: true,
-    aspectRatios: COMMON_ASPECT_RATIOS,
-    defaultAspectRatio: "4:3",
+    // Presets fixes (pas de dimensions libres) — confirmé le 2026-09-16, cf.
+    // _shared/studio-models.ts.
+    aspectRatios: FIXED_PRESET_ASPECT_RATIOS,
+    defaultAspectRatio: "1:1",
   },
   {
     id: "nano-banana-2",
     label: "Nano Banana 2 (Gemini)",
     description: "Nouvelle génération Nano Banana (Google Gemini).",
     supportsSourceImage: true,
-    aspectRatios: COMMON_ASPECT_RATIOS,
-    defaultAspectRatio: "4:3",
+    aspectRatios: FIXED_PRESET_ASPECT_RATIOS,
+    defaultAspectRatio: "1:1",
   },
   {
     id: "recraft-v4-pro",
@@ -198,8 +200,10 @@ export const STUDIO_MODELS: StudioModel[] = [
     label: "Kling IMAGE 3.0",
     description: "Modèle image de KlingAI — texte seul ou à partir d'une image source (Image-to-Image).",
     supportsSourceImage: true,
-    aspectRatios: COMMON_ASPECT_RATIOS,
-    defaultAspectRatio: "4:3",
+    // Presets fixes (pas de dimensions libres) — confirmé le 2026-09-16, cf.
+    // _shared/studio-models.ts.
+    aspectRatios: FIXED_PRESET_ASPECT_RATIOS,
+    defaultAspectRatio: "1:1",
   },
   {
     id: "kling-image-o3",

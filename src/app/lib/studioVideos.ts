@@ -44,7 +44,9 @@ export const STUDIO_VIDEO_MODELS: StudioVideoModel[] = [
     description: "Texte seul ou animation d'une photo de référence (optionnelle).",
     supportsSourceImage: true,
     requiresSourceImage: false,
-    options: [RATIO_16_9_9_16, { key: "duration", label: "Durée", choices: ["5", "8"], default: "8" }],
+    // Runware n'accepte que 4/6/8s pour Veo 3.1 (erreur "Invalid value for
+    // 'duration' parameter" sur 5s) — corrigé le 2026-09-16.
+    options: [RATIO_16_9_9_16, { key: "duration", label: "Durée", choices: ["4", "6", "8"], default: "8" }],
   },
   {
     id: "veo-3-1-fast",
@@ -52,7 +54,9 @@ export const STUDIO_VIDEO_MODELS: StudioVideoModel[] = [
     description: "Version rapide de Veo 3.1 — texte seul ou animation d'une photo de référence (optionnelle).",
     supportsSourceImage: true,
     requiresSourceImage: false,
-    options: [RATIO_16_9_9_16, { key: "duration", label: "Durée", choices: ["5", "8"], default: "8" }],
+    // Doc Runware (google:3@3) confirme 4/6/7/8s — 7s ajouté le 2026-09-16
+    // (https://runware.ai/docs/models/google-veo-3-1-fast).
+    options: [RATIO_16_9_9_16, { key: "duration", label: "Durée", choices: ["4", "6", "7", "8"], default: "8" }],
   },
   {
     id: "kling",
@@ -84,7 +88,10 @@ export const STUDIO_VIDEO_MODELS: StudioVideoModel[] = [
     description: "Texte seul ou animation d'une photo de référence (optionnelle).",
     supportsSourceImage: true,
     requiresSourceImage: false,
-    options: [RATIO_16_9_9_16, DURATION_5_10],
+    // Le format carré (1:1) existe aussi pour ce modèle (confirmé
+    // 2026-09-16, https://runware.ai/docs/models/klingai-video-o1-pro) —
+    // ajouté (RATIO_16_9_9_16 -> RATIO_16_9_9_16_1_1).
+    options: [RATIO_16_9_9_16_1_1, DURATION_5_10],
   },
   {
     id: "kling-video-o1-standard",
@@ -92,7 +99,9 @@ export const STUDIO_VIDEO_MODELS: StudioVideoModel[] = [
     description: "Texte seul ou animation d'une photo de référence (optionnelle).",
     supportsSourceImage: true,
     requiresSourceImage: false,
-    options: [RATIO_16_9_9_16, DURATION_5_10],
+    // Idem kling-video-o1-pro : format carré confirmé
+    // (https://runware.ai/docs/models/klingai-video-o1-standard).
+    options: [RATIO_16_9_9_16_1_1, DURATION_5_10],
   },
   {
     id: "flux-video",
@@ -100,7 +109,10 @@ export const STUDIO_VIDEO_MODELS: StudioVideoModel[] = [
     description: "Texte uniquement.",
     supportsSourceImage: false,
     requiresSourceImage: false,
-    options: [RATIO_16_9_9_16_1_1, { key: "duration", label: "Durée", choices: ["5"], default: "5" }],
+    // Doc Runware (bfl:flux@3-video) autorise tout entier de 5 à 20s (ou
+    // "auto"), pas seulement 5s — choix élargi le 2026-09-16
+    // (https://runware.ai/docs/models/bfl-flux-3-video).
+    options: [RATIO_16_9_9_16_1_1, { key: "duration", label: "Durée", choices: ["5", "10", "15", "20"], default: "5" }],
   },
   {
     id: "sora-2",

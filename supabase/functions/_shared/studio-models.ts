@@ -132,13 +132,27 @@ export const STUDIO_MODELS: Record<string, StudioModelConfig> = {
   "flux2-klein-9b": { runwareModel: "runware:400@2", supportsSourceImage: true, buildTask: referenceImageTask("runware:400@2", { minSide: 128, maxSide: 2048, step: 16 }) },
   "flux2-klein-9b-base": { runwareModel: "runware:400@3", supportsSourceImage: true, buildTask: referenceImageTask("runware:400@3", { minSide: 128, maxSide: 2048, step: 16 }) },
 
-  // -- Google Gemini -- (bornes non documentées avec certitude, on laisse les
-  // dimensions communes telles quelles — nano-banana tourne ainsi depuis
-  // avant ce catalogue étendu ; si nano-banana-2 renvoie la même erreur
-  // "Invalid image pixels", remonter le message exact pour qu'on ajoute les
-  // bonnes bornes, comme fait pour Seedream 4.5 ci-dessous.)
-  "nano-banana": { runwareModel: "google:4@2", supportsSourceImage: true, buildTask: referenceImageTask("google:4@2") }, // Nano Banana Pro
-  "nano-banana-2": { runwareModel: "google:4@3", supportsSourceImage: true, buildTask: referenceImageTask("google:4@3") },
+  // -- Google Gemini -- Vérifié le 2026-09-16 (runware.ai/docs/models/google-
+  // nano-banana-pro et .../google-nano-banana-2) : PAS de dimensions libres —
+  // Runware n'accepte que des combinaisons largeur/hauteur fixes par palier
+  // (1K/2K/4K pour Nano Banana Pro ; 0.5K/1K/2K/4K pour Nano Banana 2), même
+  // format que Kling/Recraft/ImagineArt ci-dessous. Nos dimensions par défaut
+  // (~1024-1344px) ne correspondent à AUCUNE combinaison exacte du tableau
+  // (ex. 16:9 → 1344x768 chez nous vs 1376x768 documenté) : même risque
+  // d'erreur "Invalid image pixels" que Seedream 4.5. On bascule donc sur
+  // fixedPresetTask avec le palier 2K (16:9 documenté = 2752x1536, identique
+  // pour les deux modèles).
+  "nano-banana": {
+    // Nano Banana Pro.
+    runwareModel: "google:4@2",
+    supportsSourceImage: true,
+    buildTask: fixedPresetTask("google:4@2", { landscape: [2752, 1536], portrait: [1536, 2752], square: [2048, 2048] }, "referenceImages"),
+  },
+  "nano-banana-2": {
+    runwareModel: "google:4@3",
+    supportsSourceImage: true,
+    buildTask: fixedPresetTask("google:4@3", { landscape: [2752, 1536], portrait: [1536, 2752], square: [2048, 2048] }, "referenceImages"),
+  },
 
   // -- OpenAI --
   "gpt-image": {
@@ -152,11 +166,14 @@ export const STUDIO_MODELS: Record<string, StudioModelConfig> = {
     },
   },
   // GPT Image 2 — dimensions libres 16–3840px (16px), aire 655 360–8 294 400px².
+  // Confiance haute — revérifié le 2026-09-16 (runware.ai/docs/models/openai-
+  // gpt-image-2, corroboré par la doc OpenAI officielle) : bornes inchangées.
   "gpt-image-2": { runwareModel: "openai:gpt-image@2", supportsSourceImage: true, buildTask: referenceImageTask("openai:gpt-image@2", { minSide: 16, maxSide: 3840, minArea: 655360, maxArea: 8294400, step: 16 }) },
 
   // -- Alibaba --
   "z-image-turbo": { runwareModel: "runware:z-image@turbo", supportsSourceImage: true, buildTask: seedImageTask("runware:z-image@turbo", { minSide: 128, maxSide: 2048, step: 16 }) },
-  // Confiance faible (une seule source doc) — AIR à revalider.
+  // Confiance haute — revérifié le 2026-09-16 (runware.ai/docs/models/alibaba-
+  // z-image) : AIR et bornes (128-2048px par côté, step 16) confirmés inchangés.
   "z-image": { runwareModel: "runware:z-image@0", supportsSourceImage: true, buildTask: seedImageTask("runware:z-image@0", { minSide: 128, maxSide: 2048, step: 16 }) },
   "qwen-image-2512": { runwareModel: "alibaba:qwen-image@2512", supportsSourceImage: true, buildTask: seedImageTask("alibaba:qwen-image@2512", { minSide: 256, maxSide: 2048, step: 16 }) },
   // Dimensions libres 768–4096px, plafonnées à 2048px dès qu'une image de
@@ -179,7 +196,9 @@ export const STUDIO_MODELS: Record<string, StudioModelConfig> = {
   // dans finalizeRunwareResult, _shared/runware.ts). Pas d'image-to-image
   // documentée pour ces deux modèles. --
   "recraft-v4-pro": {
-    // Confiance faible (une seule source doc, AIR à revalider).
+    // Confiance haute — revérifié le 2026-09-16 (runware.ai/docs/models/
+    // recraft-v4-pro) : AIR et presets 2K (2688x1536 / 1536x2688 / 2048x2048)
+    // confirmés inchangés.
     runwareModel: "recraft:v4-pro@0",
     supportsSourceImage: false,
     buildTask: fixedPresetTask("recraft:v4-pro@0", { landscape: [2688, 1536], portrait: [1536, 2688], square: [2048, 2048] }, null),
@@ -216,18 +235,35 @@ export const STUDIO_MODELS: Record<string, StudioModelConfig> = {
   "imagineart-1-5-pro": {
     // Presets fixes 4K uniquement ; support image-to-image non documenté,
     // on ne l'active pas pour éviter un paramètre refusé par l'API.
+    // Confiance haute — revérifié le 2026-09-16 (runware.ai/docs/models/
+    // imagineart-1-5-pro) : presets (5120x2880 / 2880x5120 / 4096x4096)
+    // confirmés inchangés.
     runwareModel: "imagineart:1.5-pro@0",
     supportsSourceImage: false,
     buildTask: fixedPresetTask("imagineart:1.5-pro@0", { landscape: [5120, 2880], portrait: [2880, 5120], square: [4096, 4096] }, null),
   },
 
-  // -- KlingAI --
-  "kling-image": { runwareModel: "klingai:kling-image@3", supportsSourceImage: true, buildTask: referenceImageTask("klingai:kling-image@3") }, // Kling Image 3.0
+  // -- KlingAI -- Vérifié le 2026-09-16 (runware.ai/docs/models/klingai-image-
+  // 3-0 et .../klingai-image-o3) : les deux modèles n'ont PAS de dimensions
+  // libres, seulement des combinaisons fixes par palier (1K/2K/4K) — même
+  // constat que Nano Banana ci-dessus. kling-image utilisait jusqu'ici
+  // referenceImageTask sans contraintes (dimensions ~1024-1344px envoyées
+  // telles quelles, ne correspondant à aucune combinaison du tableau) ; on
+  // bascule sur fixedPresetTask, palier 2K (16:9 documenté = 2720x1536).
+  "kling-image": {
+    // Kling Image 3.0.
+    runwareModel: "klingai:kling-image@3",
+    supportsSourceImage: true,
+    buildTask: fixedPresetTask("klingai:kling-image@3", { landscape: [2720, 1536], portrait: [1536, 2720], square: [2048, 2048] }, "referenceImages"),
+  },
   "kling-image-o3": {
-    // Presets fixes par ratio (1K/2K/4K) — on prend le palier 2K.
+    // Presets fixes par ratio (1K/2K/4K) — on prend le palier 2K. Valeurs
+    // landscape/portrait corrigées le 2026-09-16 : le tableau officiel donne
+    // 2720x1536 pour le 16:9 en 2K (pas 2560x1440, qui ne figure dans aucun
+    // palier documenté — erreur du même type que Seedream 4.5).
     runwareModel: "klingai:kling-image@o3",
     supportsSourceImage: true,
-    buildTask: fixedPresetTask("klingai:kling-image@o3", { landscape: [2560, 1440], portrait: [1440, 2560], square: [2048, 2048] }, "referenceImages"),
+    buildTask: fixedPresetTask("klingai:kling-image@o3", { landscape: [2720, 1536], portrait: [1536, 2720], square: [2048, 2048] }, "referenceImages"),
   },
 };
 
@@ -263,6 +299,12 @@ export const MODEL_ASPECT_RATIOS: Record<string, string[]> = {
   "imagineart-1-5-pro": FIXED_PRESET_ASPECT_RATIOS,
   "kling-image-o3": FIXED_PRESET_ASPECT_RATIOS,
   "uni-1": FIXED_PRESET_ASPECT_RATIOS,
+  // Ajoutés le 2026-09-16 (cf. commentaires ci-dessus) : nano-banana(-2) et
+  // kling-image se sont avérés être des modèles à presets fixes, pas à
+  // dimensions libres.
+  "nano-banana": FIXED_PRESET_ASPECT_RATIOS,
+  "nano-banana-2": FIXED_PRESET_ASPECT_RATIOS,
+  "kling-image": FIXED_PRESET_ASPECT_RATIOS,
 };
 
 export function aspectRatiosForModel(modelId: string): string[] {
