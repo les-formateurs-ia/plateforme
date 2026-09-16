@@ -55,15 +55,41 @@ export function formatRunwareError(errors: RunwareErrorItem[]): string {
   return ERROR_MESSAGES[first.code] ?? first.message ?? "Erreur Runware inconnue.";
 }
 
+// Timeout par défaut sur l'appel HTTP Runware lui-même (pas le workflow
+// complet de génération) : sans lui, un fetch() qui ne reçoit jamais de
+// réponse (stall réseau côté Runware ou entre les deux) bloque la promesse
+// indéfiniment — le client (supabase.functions.invoke) n'a pas de timeout
+// par défaut non plus, donc l'UI reste bloquée sur "en cours" pour toujours
+// au lieu d'afficher une erreur avec bouton "Réessayer". Cas constaté le
+// 2026-09-16 sur le module musique (generate-studio-music), qui enchaîne un
+// appel Gemini + 2 soumissions Runware dans la même requête initiale — plus
+// de surface pour un stall que les modules image/vidéo (qui ne font qu'une
+// soumission). 30s est largement suffisant pour un appel qui répond
+// normalement en quelques secondes.
+const RUNWARE_CALL_TIMEOUT_MS = 30000;
+
 async function callRunware(apiKey: string, tasks: Record<string, unknown>[]): Promise<{ data: RunwareResultItem[]; errors: RunwareErrorItem[] }> {
   // includeCost: true fait revenir un champ `cost` (USD) par tâche dans la
   // réponse — appliqué ici uniformément (soumission ET polling getResponse)
   // plutôt que dans chacun des ~44 builders de modèles, cf. _shared/ai-budget.ts.
-  const resp = await fetch(RUNWARE_BASE_URL, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify(tasks.map((t) => ({ ...t, includeCost: true }))),
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), RUNWARE_CALL_TIMEOUT_MS);
+  let resp: Response;
+  try {
+    resp = await fetch(RUNWARE_BASE_URL, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify(tasks.map((t) => ({ ...t, includeCost: true }))),
+      signal: controller.signal,
+    });
+  } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") {
+      throw new Error("Runware n'a pas répondu à temps, réessaie.");
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeout);
+  }
   const text = await resp.text();
   let json: { data?: RunwareResultItem[]; errors?: RunwareErrorItem[] };
   try {

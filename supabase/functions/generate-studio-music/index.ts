@@ -81,17 +81,35 @@ Deno.serve(async (req) => {
     const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
     if (!geminiApiKey) return jsonResponse({ error: "GEMINI_API_KEY non configurée côté serveur." }, 500);
 
-    const geminiResp = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL}:generateContent`,
-      {
-        method: "POST",
-        headers: { "x-goog-api-key": geminiApiKey, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: buildMusicPrompt(trimmedPrompt, isInstrumental, rawLyrics) }] }],
-          generationConfig: { responseMimeType: "application/json" },
-        }),
-      },
-    );
+    // Timeout explicite : sans lui, un fetch() qui ne reçoit jamais de
+    // réponse (stall réseau) bloque cette requête indéfiniment — ni le
+    // client (supabase.functions.invoke) ni ce fetch n'ont de timeout par
+    // défaut, donc l'UI restait bloquée sur "en cours" pour toujours au lieu
+    // d'afficher une erreur avec bouton "Réessayer" (bug constaté le
+    // 2026-09-16, cf. RUNWARE_CALL_TIMEOUT_MS dans _shared/runware.ts pour le
+    // même correctif côté Runware).
+    const geminiController = new AbortController();
+    const geminiTimeout = setTimeout(() => geminiController.abort(), 45000);
+    let geminiResp: Response;
+    try {
+      geminiResp = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL}:generateContent`,
+        {
+          method: "POST",
+          headers: { "x-goog-api-key": geminiApiKey, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: buildMusicPrompt(trimmedPrompt, isInstrumental, rawLyrics) }] }],
+            generationConfig: { responseMimeType: "application/json" },
+          }),
+          signal: geminiController.signal,
+        },
+      );
+    } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") return jsonResponse({ error: "Gemini n'a pas répondu à temps, réessaie." }, 502);
+      throw err;
+    } finally {
+      clearTimeout(geminiTimeout);
+    }
     if (!geminiResp.ok) return jsonResponse({ error: `Gemini a échoué : ${await geminiResp.text()}` }, 502);
     const geminiJson = await geminiResp.json();
     const rawText = geminiJson?.candidates?.[0]?.content?.parts?.[0]?.text;
