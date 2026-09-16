@@ -12,6 +12,7 @@ import { SparkleGlow } from "@/app/components/common/SparkleGlow";
 import { CircleProgress } from "@/app/components/common/CircleProgress";
 import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
 import { cx } from "@/app/lib/cx";
+import { isStaff } from "@/app/lib/permissions";
 import { TUTOR_STYLES } from "@/app/data/mock";
 import {
   getDashboardStats, getPromptsCount, getRecentActivity, getAllBadges, getEarnedBadgeIds, getEnrolledSince, formatDuration,
@@ -38,6 +39,7 @@ function GoogleLogo({ className }: { className?: string }) {
 export function ProfilePage() {
   const th = useTh();
   const { user, role, signOut } = useAuth();
+  const staff = isStaff(role);
   const { profile, updateAvatar } = useProfile();
   const name = profile.name || "Alex Dubois";
   const [searchParams, setSearchParams] = useSearchParams();
@@ -117,7 +119,7 @@ export function ProfilePage() {
   const [enrolledSince, setEnrolledSince] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !role || staff) return;
     let cancelled = false;
     (async () => {
       try {
@@ -141,7 +143,7 @@ export function ProfilePage() {
       }
     })();
     return () => { cancelled = true; };
-  }, [user]);
+  }, [user, role, staff]);
 
   const certChapters = (stats?.sections ?? []).map((s) => {
     const pct = s.total > 0 ? Math.round((s.done / s.total) * 100) : 0;
@@ -164,7 +166,7 @@ export function ProfilePage() {
   return (
     <div className="relative flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-5">
       <SparkleGlow />
-      <GCard glow>
+      {!staff && <GCard glow>
         <div className="p-6 flex flex-col sm:flex-row items-center sm:items-center gap-6 text-center sm:text-left">
           <Avatar url={profile.avatarUrl} size={80} square />
           <div className="flex-1 min-w-0 w-full">
@@ -192,18 +194,18 @@ export function ProfilePage() {
             </div>
           </div>
         </div>
-      </GCard>
+      </GCard>}
 
-      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background: th.isDark ? "rgba(255,255,255,0.04)" : `${th.gradShadow(0.06)}`, border: `1px solid ${th.sep}` }}>
+      {!staff && <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background: th.isDark ? "rgba(255,255,255,0.04)" : `${th.gradShadow(0.06)}`, border: `1px solid ${th.sep}` }}>
         {(["overview", "badges", "settings"] as const).map(t => (
           <button key={t} onClick={() => setTab(t)} className="px-5 py-2 rounded-lg text-sm font-semibold transition-all"
             style={tab === t ? { background: th.isDark ? `${th.gradShadow(0.14)}` : "rgba(255,255,255,0.8)", color: th.navAC, border: `1px solid ${th.gradShadow(0.25)}` } : { color: th.fg3, background: "transparent", border: "1px solid transparent" }}>
             {t === "overview" ? "Vue d'ensemble" : t === "badges" ? "Badges" : "Préférences"}
           </button>
         ))}
-      </div>
+      </div>}
 
-      {tab === "overview" && (
+      {!staff && tab === "overview" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <GCard><div className="p-5">
             <div className="flex items-center gap-2 mb-4"><Trophy className="w-4 h-4 text-[#fbc2ad]" /><span className="text-sm font-black" style={{ color: th.fg }}>Progression certification</span></div>
@@ -243,7 +245,7 @@ export function ProfilePage() {
         </div>
       )}
 
-      {tab === "badges" && (
+      {!staff && tab === "badges" && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {allBadges.map(({ id, icon, name: label, description }) => {
             const done = earnedBadgeIds.has(id);
@@ -259,8 +261,9 @@ export function ProfilePage() {
         </div>
       )}
 
-      {tab === "settings" && (
+      {(staff || tab === "settings") && (
         <div className="space-y-5 max-w-xl">
+          {staff && <h2 className="text-xl font-black" style={{ color: th.fg }}>Préférences</h2>}
           {/* Photo de profil */}
           <GCard><div className="p-5 flex items-center gap-5">
             <div className="relative shrink-0">
@@ -268,6 +271,7 @@ export function ProfilePage() {
               <button
                 onClick={() => avatarInputRef.current?.click()}
                 disabled={avatarUploading}
+                aria-label="Modifier la photo de profil"
                 className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-full flex items-center justify-center transition-opacity hover:opacity-80 disabled:opacity-50"
                 style={{ background: "linear-gradient(135deg,#fbc2ad,#fceccd)", border: `2px solid ${th.card}` }}
               >
@@ -282,6 +286,10 @@ export function ProfilePage() {
               />
             </div>
             <div className="min-w-0">
+              {staff && <>
+                <div className="text-lg font-black" style={{ color: th.fg }}>{name}</div>
+                <div className="text-xs mb-2" style={{ color: th.fg3 }}>{role === "admin" ? "Administrateur" : "Formateur"}</div>
+              </>}
               <div className="text-sm font-bold mb-0.5" style={{ color: th.fg }}>Photo de profil</div>
               <div className="text-xs" style={{ color: th.fg3 }}>
                 {avatarUploading ? "Envoi en cours…" : "JPG, PNG ou GIF — 5 Mo maximum."}
@@ -291,12 +299,12 @@ export function ProfilePage() {
           </div></GCard>
 
           {/* Objectif professionnel — lecture seule, modifiable uniquement par un formateur/admin */}
-          <div>
+          {!staff && <div>
             <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Objectif professionnel</label>
             <div className="w-full rounded-xl px-4 py-3 text-sm" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
               <span style={{ color: currentObjective ? th.fg2 : th.fg3 }}>{currentObjective || "Non renseigné."}</span>
             </div>
-          </div>
+          </div>}
 
           {/* Téléphone — lecture seule, modifiable uniquement par un formateur/admin */}
           <div>
@@ -397,7 +405,7 @@ export function ProfilePage() {
           )}
 
           {/* Objectif professionnel */}
-          <div className="hidden">
+          {!staff && <div className="hidden">
             <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Objectif professionnel</label>
             <div className="w-full rounded-xl px-4 py-3 text-sm" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg2, lineHeight: 1.7, minHeight: 80 }}>
               {profile.goalFinal || profile.goal || <span style={{ color: th.fg3 }}>Non renseigné — complète ton profil lors de l'onboarding.</span>}
@@ -405,7 +413,7 @@ export function ProfilePage() {
             {profile.goalFinal && profile.goalFinal !== profile.goal && (
               <p className="text-[10px] mt-1.5 flex items-center gap-1" style={{ color: th.navAC }}><Sparkles className="w-3 h-3" />Reformulé par l'IA lors de l'inscription</p>
             )}
-          </div>
+          </div>}
 
           <GCard><div className="p-5 flex items-center justify-between">
             <div>
