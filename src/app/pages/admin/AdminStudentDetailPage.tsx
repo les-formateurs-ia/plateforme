@@ -275,23 +275,23 @@ export function AdminStudentDetailPage() {
             <div className="space-y-3 mb-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Prénom</label>
+                  <label className="block text-xs font-bold uppercase tracking-widest underline underline-offset-4 mb-1.5" style={{ color: th.fg3 }}>Prénom</label>
                   <input value={firstNameDraft} onChange={(e) => setFirstNameDraft(e.target.value)} className="w-full rounded-xl px-3.5 py-2.5 text-sm g-input" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Âge</label>
+                  <label className="block text-xs font-bold uppercase tracking-widest underline underline-offset-4 mb-1.5" style={{ color: th.fg3 }}>Âge</label>
                   <input value={ageDraft} onChange={(e) => setAgeDraft(e.target.value)} type="number" className="w-full rounded-xl px-3.5 py-2.5 text-sm g-input" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Email</label>
+                  <label className="block text-xs font-bold uppercase tracking-widest underline underline-offset-4 mb-1.5" style={{ color: th.fg3 }}>Email</label>
                   <input value={emailDraft} onChange={(e) => setEmailDraft(e.target.value)} type="email" className="w-full rounded-xl px-3.5 py-2.5 text-sm g-input" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Téléphone</label>
+                  <label className="block text-xs font-bold uppercase tracking-widest underline underline-offset-4 mb-1.5" style={{ color: th.fg3 }}>Téléphone</label>
                   <input value={phoneDraft} onChange={(e) => setPhoneDraft(e.target.value)} type="tel" className="w-full rounded-xl px-3.5 py-2.5 text-sm g-input" />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Profession</label>
+                  <label className="block text-xs font-bold uppercase tracking-widest underline underline-offset-4 mb-1.5" style={{ color: th.fg3 }}>Profession</label>
                   <input value={professionDraft} onChange={(e) => setProfessionDraft(e.target.value)} className="w-full rounded-xl px-3.5 py-2.5 text-sm g-input" />
                 </div>
               </div>
@@ -305,7 +305,7 @@ export function AdminStudentDetailPage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-5 gap-y-3 mb-4">
               {[["Prénom", profile.first_name || "Non renseigné"], ["Âge", onboarding?.age ? `${onboarding.age} ans` : "Non renseigné"], ["Email", profile.email], ["Téléphone", profile.phone || "Non renseigné"], ["Profession", onboarding?.profession || "Non renseignée"]].map(([label, val]) => (
                 <div key={label} className={label === "Profession" ? "min-w-0 sm:col-span-2" : "min-w-0"}>
-                  <label className="block text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>{label}</label>
+                  <label className="block text-xs font-bold uppercase tracking-widest underline underline-offset-4 mb-1.5" style={{ color: th.fg3 }}>{label}</label>
                   <p className="text-sm break-words" style={{ color: th.fg2 }}>{val}</p>
                 </div>
               ))}
@@ -315,7 +315,7 @@ export function AdminStudentDetailPage() {
           <div className="space-y-4 py-4 border-t" style={{ borderColor: th.sep }}>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
-              <label className="block text-xs font-bold uppercase tracking-widest" style={{ color: th.fg3 }}>Objectif professionnel</label>
+              <label className="block text-xs font-bold uppercase tracking-widest underline underline-offset-4" style={{ color: th.fg3 }}>Objectif professionnel</label>
               {!objectiveEditing && (
                 <button onClick={() => setObjectiveEditing(true)} className="text-xs font-semibold transition-colors hover:opacity-70" style={{ color: th.navAC }}>Modifier</button>
               )}
@@ -341,7 +341,7 @@ export function AdminStudentDetailPage() {
 
           <div className="min-w-0">
             <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
-              <label className="block text-xs font-bold uppercase tracking-widest" style={{ color: th.fg3 }}>Expérience professionnelle</label>
+              <label className="block text-xs font-bold uppercase tracking-widest underline underline-offset-4" style={{ color: th.fg3 }}>Expérience professionnelle</label>
               {!experienceEditing && (
                 <button onClick={() => setExperienceEditing(true)} className="text-xs font-semibold transition-colors hover:opacity-70" style={{ color: th.navAC }}>Modifier</button>
               )}
@@ -367,7 +367,7 @@ export function AdminStudentDetailPage() {
           </div>
 
           <div className="pt-4 border-t" style={{ borderColor: th.sep }}>
-            <label className="block text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Mode de pédagogie de l'IA</label>
+            <label className="block text-xs font-bold uppercase tracking-widest underline underline-offset-4 mb-1.5" style={{ color: th.fg3 }}>Mode de pédagogie de l'IA</label>
             <div className="max-w-xs">
               <VSelect
                 value={onboarding?.tutorPersona ?? ""}
@@ -399,6 +399,26 @@ export function AdminStudentDetailPage() {
         {admin && !formateurs.length && <p className="text-xs mt-3" style={{ color: th.fg3 }}>Aucun formateur pour l'instant.</p>}
       </div>
 
+      {staff && (
+        <div className="p-4 border-t" style={{ borderColor: th.sep }}>
+          <h3 className="text-sm font-black mb-3" style={{ color: th.fg }}>Attribuer une formation</h3>
+          <div className="space-y-2.5">
+            <div className="min-w-0">
+              <VSelect
+                value={templateToAssign}
+                onValueChange={setTemplateToAssign}
+                placeholder="Choisir une formation…"
+                options={templates.map((t) => ({ value: t.id, label: t.status === "draft" ? `${t.name} (brouillon)` : t.name }))}
+              />
+            </div>
+            <VBtn sm full onClick={assign} disabled={assigning || !templateToAssign}>
+              <span className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" />{assigning ? "Attribution…" : "Attribuer"}</span>
+            </VBtn>
+          </div>
+          {!templates.length && <p className="text-xs mt-3" style={{ color: th.fg3 }}>Aucune formation disponible pour l'instant.</p>}
+        </div>
+      )}
+
       <div className="p-4 border-t" style={{ borderColor: th.sep }}>
         <h3 className="text-sm font-black mb-3" style={{ color: th.fg }}>Formations attribuées</h3>
         <div className="space-y-3">
@@ -424,7 +444,7 @@ export function AdminStudentDetailPage() {
                     ]}
                   />
                 </div>
-                <VBtn sm full onClick={() => navigate(`${base}/instances/${inst.id}`)}>Personnaliser</VBtn>
+                <ShimBtn sm full onClick={() => navigate(`${base}/instances/${inst.id}`)}>Personnaliser</ShimBtn>
               </div>
             );
           })}
@@ -432,25 +452,6 @@ export function AdminStudentDetailPage() {
         </div>
       </div>
 
-      {staff && (
-        <div className="p-4 border-t" style={{ borderColor: th.sep }}>
-          <h3 className="text-sm font-black mb-3" style={{ color: th.fg }}>Attribuer une formation</h3>
-          <div className="space-y-2.5">
-            <div className="min-w-0">
-              <VSelect
-                value={templateToAssign}
-                onValueChange={setTemplateToAssign}
-                placeholder="Choisir une formation…"
-                options={templates.map((t) => ({ value: t.id, label: t.status === "draft" ? `${t.name} (brouillon)` : t.name }))}
-              />
-            </div>
-            <ShimBtn sm full onClick={assign} disabled={assigning || !templateToAssign}>
-              <span className="flex items-center justify-center gap-1.5"><Sparkles className="w-3.5 h-3.5" />{assigning ? "Attribution…" : "Attribuer"}</span>
-            </ShimBtn>
-          </div>
-          {!templates.length && <p className="text-xs mt-3" style={{ color: th.fg3 }}>Aucune formation disponible pour l'instant.</p>}
-        </div>
-      )}
       </GCard>
       </div>
 
