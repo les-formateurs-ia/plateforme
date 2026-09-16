@@ -63,7 +63,7 @@ export function ModelCard({ model, onOpenDetail, dense = false }: { model: AiMod
         </div>
 
         {!dense && (
-          <p className="w-full min-w-0 text-center text-sm leading-relaxed" style={{ color: th.fg2 }}>{model.description}</p>
+          <p className="w-full min-w-0 text-justify text-base leading-relaxed" style={{ color: th.fg2 }}>{model.description}</p>
         )}
 
         <div className="flex min-w-0 flex-col gap-1.5">

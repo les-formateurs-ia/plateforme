@@ -22,6 +22,7 @@ interface RunwareResultItem {
   taskType: string;
   imageURL?: string;
   videoURL?: string;
+  audioURL?: string;
   text?: string;
   cost?: number;
 }
@@ -81,7 +82,7 @@ export async function submitRunwareTask(apiKey: string, task: Record<string, unk
   const { data, errors } = await callRunware(apiKey, [{ ...task, taskUUID }]);
   if (errors.length) throw new Error(formatRunwareError(errors));
   const result = data[0];
-  const url = result?.imageURL ?? result?.videoURL;
+  const url = result?.imageURL ?? result?.videoURL ?? result?.audioURL;
   if (url) return { status: "ready", url, cost: result?.cost };
   return { status: "pending", taskUUID };
 }
@@ -92,7 +93,7 @@ export async function pollRunwareTask(apiKey: string, taskUUID: string): Promise
   const { data, errors } = await callRunware(apiKey, [{ taskType: "getResponse", taskUUID }]);
   if (errors.length) return { status: "failed", error: formatRunwareError(errors) };
   const result = data[0];
-  const url = result?.imageURL ?? result?.videoURL;
+  const url = result?.imageURL ?? result?.videoURL ?? result?.audioURL;
   if (url) return { status: "ready", url, cost: result?.cost };
   return { status: "pending" };
 }
@@ -140,6 +141,26 @@ export async function submitAndAwaitRunwareText(apiKey: string, task: Record<str
     delay = Math.min(delay * 1.5, 8000);
   }
   throw new Error("La génération de texte Runware prend plus de temps que prévu.");
+}
+
+// Télécharge un résultat Runware et l'upload tel quel dans le bucket/chemin
+// donné, sans mettre à jour de ligne ni de statut — utilisé par le module
+// musique (generate-studio-music / check-studio-music-status), qui gère deux
+// actifs indépendants (audio + pochette) par ligne et ne peut donc pas
+// réutiliser finalizeRunwareResult ci-dessous (pensé pour un seul actif par
+// ligne, qui marque directement la ligne "ready").
+// deno-lint-ignore no-explicit-any
+export async function uploadRunwareAsset(userClient: any, { bucket, path, url }: { bucket: string; path: string; url: string }): Promise<
+  { path: string } | { error: string }
+> {
+  try {
+    const { bytes, contentType } = await downloadBytes(url);
+    const { error } = await userClient.storage.from(bucket).upload(path, bytes, { contentType, upsert: true });
+    if (error) throw new Error(error.message);
+    return { path };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Erreur de téléchargement du média Runware." };
+  }
 }
 
 export async function downloadBytes(url: string): Promise<{ bytes: Uint8Array; contentType: string }> {

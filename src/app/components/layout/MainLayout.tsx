@@ -125,12 +125,12 @@ export function MainLayout() {
             // galerie précèdent les outils pédagogiques.
             if (id === "calendar" && isStaff(role)) {
               return [
-                <NavLink key="planning" to={`${staffBase}/planning`} onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
+                <NavLink key="planning" to={`${staffBase}/planning`} onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-[14px] font-medium text-left transition-all"
                   style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
                   <CalendarClock className="w-4 h-4 shrink-0" />{role === "admin" ? "Élèves & formateurs" : "Élèves"}
                 </NavLink>,
                 isAdmin(role) && (
-                  <NavLink key="incidents" to="/admin/incidents" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
+                  <NavLink key="incidents" to="/admin/incidents" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-[14px] font-medium text-left transition-all"
                     style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
                     <span className="relative shrink-0">
                       <Bug className="w-4 h-4" />
@@ -141,25 +141,25 @@ export function MainLayout() {
                     Incidents
                   </NavLink>
                 ),
-                <NavLink key={id} to="/planning" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
+                <NavLink key={id} to="/planning" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-[14px] font-medium text-left transition-all"
                   style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
                   <Icon className="w-4 h-4 shrink-0" />{label}
                 </NavLink>,
-                <NavLink key="gallery" to="/admin/ai-detection-gallery" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
+                <NavLink key="gallery" to="/admin/ai-detection-gallery" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-[14px] font-medium text-left transition-all"
                   style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
                   <ScanEye className="w-4 h-4 shrink-0" />Galerie Détection IA
                 </NavLink>,
               ];
             }
             return (
-              <NavLink key={id} to={path} end onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
+              <NavLink key={id} to={path} end onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-[14px] font-medium text-left transition-all"
                 style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
                 <Icon className="w-4 h-4 shrink-0" />{label}
               </NavLink>
             );
           })}
           {entrepriseMode && (
-            <NavLink to="/entreprise" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
+            <NavLink to="/entreprise" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-[14px] font-medium text-left transition-all"
               style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
               <Building2 className="w-4 h-4 shrink-0" />Entreprise
             </NavLink>
@@ -169,7 +169,7 @@ export function MainLayout() {
             if (!profileItem) return null;
             const { id, Icon, label, path } = profileItem;
             return (
-              <NavLink key={id} to={path} onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium text-left transition-all"
+              <NavLink key={id} to={path} onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-[14px] font-medium text-left transition-all"
                 style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
                 <Icon className="w-4 h-4 shrink-0" />{label}
               </NavLink>
@@ -190,7 +190,7 @@ export function MainLayout() {
                 <div className="text-[10px] mt-1" style={{ color: th.fg3 }}>{gen.done}/{gen.total} leçon{gen.total > 1 ? "s" : ""}</div>
               </div>
             )}
-            <NavLink to={`${staffBase}/courses`} onClick={() => setNavOpen(false)} className="w-full flex items-center gap-2.5 px-4 py-2.5 rounded-full text-sm font-semibold transition-all hover:opacity-90"
+            <NavLink to={`${staffBase}/courses`} onClick={() => setNavOpen(false)} className="w-full flex items-center gap-2.5 px-4 py-2.5 rounded-full text-[14px] font-semibold transition-all hover:opacity-90"
               style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff" }}>
               <Plus className="w-4 h-4 shrink-0" />
               Modifier les formations

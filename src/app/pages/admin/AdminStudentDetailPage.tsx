@@ -17,6 +17,7 @@ import { listCoachAssignableCards, assignFormateurToStudent, type PersonCard } f
 import { StudentMissionGallery } from "@/app/components/admin/StudentMissionGallery";
 import { StudentStudioGallery } from "@/app/components/admin/StudentStudioGallery";
 import { StudentStudioVideoGallery } from "@/app/components/admin/StudentStudioVideoGallery";
+import { StudentStudioMusicGallery } from "@/app/components/admin/StudentStudioMusicGallery";
 import {
   getStudentOnboarding, updateStudentObjective, updateStudentExperience, updateStudentTutorPersona,
   type StudentOnboardingInfo, type PedagogyStyle,
@@ -458,6 +459,7 @@ export function AdminStudentDetailPage() {
       {staff && <StudentMissionGallery studentId={profile.id} />}
       {staff && <StudentStudioGallery studentId={profile.id} />}
       {staff && <StudentStudioVideoGallery studentId={profile.id} />}
+      {staff && <StudentStudioMusicGallery studentId={profile.id} />}
     </div>
   );
 }

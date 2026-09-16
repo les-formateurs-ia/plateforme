@@ -21,7 +21,7 @@ export type SatisfactionQuestionType = "qcm" | "rating" | "text";
 export type StudioImageStatus = "pending" | "ready" | "failed";
 export type MissionSubmissionStatus = "draft" | "submitted";
 export type AiUsageMediaType = "image" | "video" | "audio" | "text";
-export type AiUsageSource = "studio_image" | "studio_video" | "battle_ground" | "reverse_prompt";
+export type AiUsageSource = "studio_image" | "studio_video" | "studio_music" | "battle_ground" | "reverse_prompt";
 
 export interface Database {
   public: {
@@ -152,6 +152,48 @@ export interface Database {
           completed_at?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["studio_video_generations"]["Insert"]>;
+        Relationships: never[];
+      };
+      studio_music_generations: {
+        Row: {
+          id: string;
+          user_id: string;
+          status: StudioImageStatus;
+          model: string;
+          prompt: string;
+          instrumental: boolean;
+          lyrics_input: string | null;
+          title: string | null;
+          lyrics_structured: string | null;
+          cover_prompt: string | null;
+          audio_path: string | null;
+          cover_image_path: string | null;
+          audio_external_id: string | null;
+          cover_external_id: string | null;
+          error_message: string | null;
+          created_at: string;
+          completed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          status?: StudioImageStatus;
+          model: string;
+          prompt: string;
+          instrumental?: boolean;
+          lyrics_input?: string | null;
+          title?: string | null;
+          lyrics_structured?: string | null;
+          cover_prompt?: string | null;
+          audio_path?: string | null;
+          cover_image_path?: string | null;
+          audio_external_id?: string | null;
+          cover_external_id?: string | null;
+          error_message?: string | null;
+          created_at?: string;
+          completed_at?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["studio_music_generations"]["Insert"]>;
         Relationships: never[];
       };
       ai_usage_events: {
