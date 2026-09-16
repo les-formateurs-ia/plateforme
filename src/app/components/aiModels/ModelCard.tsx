@@ -1,7 +1,8 @@
 import { ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router";
 import { useTh } from "@/app/theme/theme";
 import { GCard } from "@/app/components/common/GCard";
-import { VBtn } from "@/app/components/common/Buttons";
+import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
 import { AI_CATEGORIES, type AiModel } from "@/app/data/aiModels";
 
 export const LEVEL_COLORS: Record<string, string> = {
@@ -41,6 +42,8 @@ export function Pill({ children, color }: { children: string; color?: string }) 
 
 export function ModelCard({ model, onOpenDetail, dense = false }: { model: AiModel; onOpenDetail: () => void; dense?: boolean }) {
   const th = useTh();
+  const navigate = useNavigate();
+  const studioTarget = model.studioTarget;
   const category = AI_CATEGORIES.find((c) => c.id === model.category);
   const initials = model.name.replace(/[^A-Za-z0-9]/g, "").slice(0, 2).toUpperCase();
 
@@ -77,6 +80,13 @@ export function ModelCard({ model, onOpenDetail, dense = false }: { model: AiMod
           <VBtn sm full onClick={onOpenDetail}>
             <span className="inline-flex items-center gap-1.5 justify-center w-full">Découvrir la fiche<ArrowRight className="w-3.5 h-3.5" /></span>
           </VBtn>
+          {studioTarget ? (
+            <ShimBtn sm full onClick={() => navigate(`/studio/${studioTarget.path}?model=${encodeURIComponent(studioTarget.modelId)}`)}>
+              Essayer dans le studio
+            </ShimBtn>
+          ) : (
+            <VBtn sm full disabled>Non disponible en studio</VBtn>
+          )}
         </div>
       </div>
     </GCard>
