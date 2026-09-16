@@ -164,7 +164,7 @@ export function ProfilePage() {
   };
 
   return (
-    <div className="relative flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-5">
+    <div className="relative flex-1 min-w-0 overflow-x-hidden overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-5">
       <SparkleGlow />
       {!staff && <GCard glow>
         <div className="p-6 flex flex-col sm:flex-row items-center sm:items-center gap-6 text-center sm:text-left">
@@ -321,7 +321,7 @@ export function ProfilePage() {
                 {th.mode === "system" ? "Suit automatiquement le thème de ton appareil" : th.isDark ? "Mode sombre activé — ambiance dark glass" : "Mode clair activé — interface lumineuse"}
               </div>
             </div>
-            <div className="flex gap-1 p-1 rounded-xl shrink-0" style={{ background: th.isDark ? "rgba(255,255,255,0.04)" : `${th.gradShadow(0.06)}`, border: `1px solid ${th.sep}` }}>
+            <div className="flex flex-wrap gap-1 p-1 rounded-xl max-w-full" style={{ background: th.isDark ? "rgba(255,255,255,0.04)" : `${th.gradShadow(0.06)}`, border: `1px solid ${th.sep}` }}>
               {([
                 { mode: "light" as const, label: "Clair", Icon: Sun },
                 { mode: "dark" as const, label: "Sombre", Icon: Moon },
@@ -373,7 +373,7 @@ export function ProfilePage() {
               <div key={label}>
                 <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>{label}</label>
                 <div className="w-full rounded-xl px-4 py-3 text-sm" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
-                  <span style={{ color: th.fg2 }}>{val}</span>
+                  <span className="break-words" style={{ color: th.fg2 }}>{val}</span>
                 </div>
               </div>
             ))}
@@ -415,10 +415,10 @@ export function ProfilePage() {
             )}
           </div>}
 
-          <GCard><div className="p-5 flex items-center justify-between">
-            <div>
+          <GCard><div className="p-5 flex flex-wrap items-center justify-between gap-4">
+            <div className="min-w-0">
               <div className="text-sm font-bold mb-0.5" style={{ color: th.fg }}>Session</div>
-              <div className="text-xs" style={{ color: th.fg3 }}>Connecté·e en tant que {user?.email}</div>
+              <div className="text-xs break-words" style={{ color: th.fg3 }}>Connecté·e en tant que {user?.email}</div>
             </div>
             <button onClick={handleSignOut} className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80"
               style={{ background: "rgba(251,194,173,0.1)", border: "1px solid rgba(251,194,173,0.25)", color: "#fbc2ad" }}>

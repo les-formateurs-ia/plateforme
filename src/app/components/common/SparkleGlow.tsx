@@ -13,7 +13,7 @@ export function SparkleGlow({ size = 760, top = 40 }: { size?: number; top?: num
     <div
       aria-hidden
       className="absolute pointer-events-none"
-      style={{ top, left: "50%", transform: "translateX(-50%)", width: size, height: size, zIndex: -1 }}
+      style={{ top, left: "50%", transform: "translateX(-50%)", width: `min(${size}px, calc(100% - 32px))`, aspectRatio: "1", zIndex: -1 }}
     >
       <svg
         viewBox="0 0 100 100"
