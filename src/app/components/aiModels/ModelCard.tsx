@@ -49,7 +49,7 @@ export function ModelCard({ model, onOpenDetail, dense = false }: { model: AiMod
 
   return (
     <GCard className={dense ? "@container p-3.5" : "@container p-4 sm:p-6"}>
-      <div className={`grid grid-cols-1 items-center gap-5 @[560px]:grid-cols-2 @[1080px]:gap-6 ${dense ? "@[1080px]:grid-cols-[minmax(220px,1fr)_minmax(150px,0.8fr)_max-content_208px]" : "@[1080px]:grid-cols-[minmax(220px,1.2fr)_minmax(0,1.25fr)_minmax(150px,0.85fr)_max-content_208px]"}`}>
+      <div className={`grid grid-cols-1 items-center gap-5 @[560px]:grid-cols-2 @[1080px]:gap-6 ${dense ? "@[1080px]:grid-cols-[minmax(220px,1fr)_minmax(150px,0.8fr)_144px_208px]" : "@[1080px]:grid-cols-[minmax(220px,1.2fr)_minmax(0,340px)_minmax(150px,0.85fr)_144px_208px]"}`}>
         <div className="flex min-w-0 items-center gap-4">
           <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl shrink-0 flex items-center justify-center text-xs font-black text-white" style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})` }}>
             {initials}
@@ -63,7 +63,7 @@ export function ModelCard({ model, onOpenDetail, dense = false }: { model: AiMod
         </div>
 
         {!dense && (
-          <p className="text-sm leading-relaxed min-w-0 @[1080px]:max-w-[340px]" style={{ color: th.fg2 }}>{model.description}</p>
+          <p className="w-full min-w-0 text-center text-sm leading-relaxed" style={{ color: th.fg2 }}>{model.description}</p>
         )}
 
         <div className="flex min-w-0 flex-col gap-1.5">
@@ -72,7 +72,7 @@ export function ModelCard({ model, onOpenDetail, dense = false }: { model: AiMod
           <RatingBar label="Vitesse" value={model.speed} />
         </div>
 
-        <div className="flex flex-wrap items-center gap-1.5 @[1080px]:flex-col">
+        <div className="flex w-full flex-wrap items-center justify-center gap-1.5 @[1080px]:flex-col">
           <Pill>{model.priceBadge}</Pill>
           <Pill color={LEVEL_COLORS[model.levelBadge]}>{model.levelBadge}</Pill>
         </div>
