@@ -66,7 +66,7 @@ export function ModelCard({ model, onOpenDetail, dense = false }: { model: AiMod
           <p className="w-full min-w-0 text-justify text-[15px] leading-relaxed @[1280px]:-ml-20 @[1280px]:w-[calc(100%+80px)]" style={{ color: th.fg2 }}>{model.description}</p>
         )}
 
-        <div className="flex min-w-0 flex-col gap-1.5">
+        <div className="flex min-w-0 w-full max-w-[164px] justify-self-center flex-col gap-1.5">
           <RatingBar label="Raisonnement" value={model.reasoning} />
           <RatingBar label="Accès" value={model.access} />
           <RatingBar label="Vitesse" value={model.speed} />
