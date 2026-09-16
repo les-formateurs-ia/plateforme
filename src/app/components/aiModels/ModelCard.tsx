@@ -48,35 +48,35 @@ export function ModelCard({ model, onOpenDetail, dense = false }: { model: AiMod
   const initials = model.name.replace(/[^A-Za-z0-9]/g, "").slice(0, 2).toUpperCase();
 
   return (
-    <GCard className={dense ? "p-3.5" : "p-4 sm:p-5"}>
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-        <div className="flex items-start gap-3 sm:w-[210px] shrink-0">
-          <div className="w-10 h-10 rounded-xl shrink-0 flex items-center justify-center text-xs font-black text-white" style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})` }}>
+    <GCard className={dense ? "@container p-3.5" : "@container p-4 sm:p-6"}>
+      <div className={`grid grid-cols-1 items-center gap-5 @[560px]:grid-cols-2 @[1080px]:gap-6 ${dense ? "@[1080px]:grid-cols-[minmax(220px,1fr)_minmax(150px,0.8fr)_max-content_208px]" : "@[1080px]:grid-cols-[minmax(220px,1.2fr)_minmax(0,1.25fr)_minmax(150px,0.85fr)_max-content_208px]"}`}>
+        <div className="flex min-w-0 items-center gap-4">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl shrink-0 flex items-center justify-center text-xs font-black text-white" style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})` }}>
             {initials}
           </div>
           <div className="min-w-0">
-            <div className="font-bold text-sm truncate" style={{ color: th.fg }}>{model.name}</div>
+            <div className="font-bold text-sm break-words" style={{ color: th.fg }}>{model.name}</div>
             <div className="text-xs truncate" style={{ color: th.fg3 }}>{model.provider}</div>
-            <div className="text-xs font-medium mt-0.5 line-clamp-2" style={{ color: th.navAC }}>{model.tagline}</div>
+            <div className="text-xs font-medium mt-1" style={{ color: th.navAC }}>{model.tagline}</div>
             {dense && category && <Pill>{category.label}</Pill>}
           </div>
         </div>
 
         {!dense && (
-          <p className="text-sm flex-1 min-w-0" style={{ color: th.fg2 }}>{model.description}</p>
+          <p className="text-sm leading-relaxed min-w-0 @[1080px]:max-w-[340px]" style={{ color: th.fg2 }}>{model.description}</p>
         )}
 
-        <div className="flex flex-col gap-1.5 sm:w-[130px] shrink-0">
+        <div className="flex min-w-0 flex-col gap-1.5">
           <RatingBar label="Raisonnement" value={model.reasoning} />
           <RatingBar label="Accès" value={model.access} />
           <RatingBar label="Vitesse" value={model.speed} />
         </div>
 
-        <div className="flex flex-col items-stretch gap-2 sm:w-[160px] shrink-0">
-          <div className="flex flex-wrap gap-1.5 sm:justify-end">
-            <Pill>{model.priceBadge}</Pill>
-            <Pill color={LEVEL_COLORS[model.levelBadge]}>{model.levelBadge}</Pill>
-          </div>
+        <div className="flex flex-wrap items-center gap-1.5 @[1080px]:flex-col">
+          <Pill>{model.priceBadge}</Pill>
+          <Pill color={LEVEL_COLORS[model.levelBadge]}>{model.levelBadge}</Pill>
+        </div>
+        <div className="grid min-w-0 grid-cols-1 gap-2 @[560px]:col-span-2 @[560px]:grid-cols-2 @[1080px]:col-span-1 @[1080px]:grid-cols-1 [&_button]:min-w-0 @[220px]:[&_button]:whitespace-nowrap">
           <VBtn sm full onClick={onOpenDetail}>
             <span className="inline-flex items-center gap-1.5 justify-center w-full">Découvrir la fiche<ArrowRight className="w-3.5 h-3.5" /></span>
           </VBtn>

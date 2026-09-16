@@ -87,6 +87,18 @@ export function LessonPage() {
   const [platformAccessToken, setPlatformAccessToken] = useState<string | null>(null);
   const [platformAuthChecked, setPlatformAuthChecked] = useState(false);
   const [htmlIframeLoaded, setHtmlIframeLoaded] = useState(false);
+  const htmlIframeRef = useRef<HTMLIFrameElement>(null);
+  const [htmlIframeHeight, setHtmlIframeHeight] = useState(0);
+  useEffect(() => {
+    function onMessage(e: MessageEvent) {
+      if (e.source !== htmlIframeRef.current?.contentWindow) return;
+      const height = e.data?.__autoResizeHeight;
+      if (typeof height !== "number" || !Number.isFinite(height) || height <= 0) return;
+      setHtmlIframeHeight(Math.ceil(height));
+    }
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, []);
   const [agentStatus, setAgentStatus] = useState<"idle" | "connecting" | "connected">("idle");
   const [agentMode, setAgentMode] = useState<"listening" | "speaking">("listening");
   const [agentError, setAgentError] = useState<string | null>(null);
@@ -464,6 +476,7 @@ export function LessonPage() {
 
   useEffect(() => {
     setHtmlIframeLoaded(false);
+    setHtmlIframeHeight(0);
     setPlatformAuthChecked(false);
   }, [lesson?.customHtmlContent]);
 
@@ -806,7 +819,7 @@ export function LessonPage() {
           </div>
 
           {tab === "html" ? (
-            <div className="relative rounded-2xl overflow-hidden" style={{ height: "78vh", background: "#060410" }}>
+            <div className="relative rounded-2xl overflow-hidden" style={{ minHeight: "78vh", height: htmlEditing || !lesson.customHtmlContent ? "78vh" : undefined, background: "#060410" }}>
               {htmlEditing ? (
                 <div className="absolute inset-0 flex flex-col gap-3 p-5">
                   <textarea
@@ -843,13 +856,14 @@ export function LessonPage() {
                   )}
                   {platformAuthChecked && (
                     <iframe
+                      ref={htmlIframeRef}
                       key={lesson.customHtmlContent}
                       onLoad={() => setHtmlIframeLoaded(true)}
-                      srcDoc={platformAccessToken ? injectPlatformAuth(lesson.customHtmlContent, platformAccessToken) : lesson.customHtmlContent}
+                      srcDoc={injectAutoResize(platformAccessToken ? injectPlatformAuth(lesson.customHtmlContent, platformAccessToken) : lesson.customHtmlContent)}
                       sandbox="allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"
                       title={`${lesson.title} — HTML`}
-                      className="absolute inset-0 w-full h-full border-0 bg-white"
-                      style={{ opacity: htmlIframeLoaded ? 1 : 0 }}
+                      className="block w-full border-0 bg-white"
+                      style={{ height: htmlIframeHeight || 1, minHeight: "78vh", opacity: htmlIframeLoaded ? 1 : 0 }}
                     />
                   )}
                   {role === "admin" && (

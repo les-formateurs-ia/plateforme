@@ -42,10 +42,7 @@ export const mkCSS = (isDark: boolean, accentHex: string) => {
     border-color: rgba(${accent},0.5);
     box-shadow: 0 0 0 3px rgba(${accent},0.12);
   }
-  ::-webkit-scrollbar { width:4px; height:4px; }
-  ::-webkit-scrollbar-track { background:transparent; }
-  ::-webkit-scrollbar-thumb { background:rgba(${accent},0.2); border-radius:4px; }
-  .lesson-content-scroll { scrollbar-color: transparent transparent; }
-  .lesson-content-scroll::-webkit-scrollbar-thumb { background:transparent; }
+  * { scrollbar-width:none; }
+  ::-webkit-scrollbar { display:none; width:0; height:0; }
 `;
 };

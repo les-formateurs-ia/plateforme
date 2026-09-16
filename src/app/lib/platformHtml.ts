@@ -26,7 +26,7 @@ export function injectPlatformAuth(html: string, accessToken: string): string {
 // HTML autonome, pour qu'il se fonde dans le thème sombre/clair de la plateforme (un
 // <style>/background posé par le formateur passe après dans la cascade et prend le dessus).
 export function injectAutoResize(html: string): string {
-  const extras = `<style>html,body{margin:0;background:transparent;}</style>
+  const extras = `<style>html,body{margin:0;background:transparent;}*{scrollbar-width:none!important;}*::-webkit-scrollbar{display:none!important;width:0!important;height:0!important;}</style>
 <script>(function(){
   function post(){
     var h = Math.max(document.documentElement.scrollHeight, document.body ? document.body.scrollHeight : 0);
