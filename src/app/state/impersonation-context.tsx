@@ -75,7 +75,7 @@ export function ImpersonationProvider({ children }: { children: ReactNode }) {
       targetName,
     };
 
-    const { error } = await supabase.auth.verifyOtp({ email: ticket.email, token_hash: ticket.tokenHash, type: "email" });
+    const { error } = await supabase.auth.verifyOtp({ token_hash: ticket.tokenHash, type: "email" });
     if (error) {
       throw new Error(error.message);
     }
