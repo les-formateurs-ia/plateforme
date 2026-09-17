@@ -4,6 +4,7 @@ import { ThemeProvider, useTh } from "@/app/theme/theme";
 import { AuthProvider, useAuth } from "@/app/state/auth-context";
 import { isStaff, isAdmin } from "@/app/lib/permissions";
 import { ProfileProvider } from "@/app/state/profile-context";
+import { ImpersonationProvider } from "@/app/state/impersonation-context";
 import { BulkGenerationProvider } from "@/app/state/bulk-generation-context";
 import { Toaster } from "@/app/components/ui/sonner";
 import { Background } from "@/app/components/common/Background";
@@ -250,14 +251,16 @@ export default function App() {
   return (
     <AuthProvider>
       <ThemeProvider>
-        <ProfileProvider>
-          <BulkGenerationProvider>
-            <BrowserRouter>
-              <AppRoutes />
-            </BrowserRouter>
-            <Toaster />
-          </BulkGenerationProvider>
-        </ProfileProvider>
+        <ImpersonationProvider>
+          <ProfileProvider>
+            <BulkGenerationProvider>
+              <BrowserRouter>
+                <AppRoutes />
+              </BrowserRouter>
+              <Toaster />
+            </BulkGenerationProvider>
+          </ProfileProvider>
+        </ImpersonationProvider>
       </ThemeProvider>
     </AuthProvider>
   );

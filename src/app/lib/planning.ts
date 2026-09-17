@@ -7,6 +7,8 @@ export interface PersonCard {
   lastName: string | null;
   email: string;
   avatarUrl: string | null;
+  phone: string | null;
+  createdAt: string;
 }
 
 export interface StudentCard extends PersonCard {
@@ -19,7 +21,7 @@ export interface StudentCard extends PersonCard {
 // formateur ne voie que SES élèves, contrairement à l'admin qui les voit
 // tous (cf. 0024_student_formateur.sql).
 export async function listStudentCards(formateurId?: string): Promise<StudentCard[]> {
-  let studentsQuery = supabase.from("profiles").select("id, first_name, last_name, email, avatar_url, formateur_id").eq("role", "student").order("first_name");
+  let studentsQuery = supabase.from("profiles").select("id, first_name, last_name, email, avatar_url, formateur_id, phone, created_at").eq("role", "student").order("first_name");
   if (formateurId) studentsQuery = studentsQuery.eq("formateur_id", formateurId);
 
   const [{ data: students, error: studentsError }, { data: instances, error: instancesError }] = await Promise.all([
@@ -42,6 +44,8 @@ export async function listStudentCards(formateurId?: string): Promise<StudentCar
     lastName: s.last_name,
     email: s.email,
     avatarUrl: s.avatar_url,
+    phone: s.phone,
+    createdAt: s.created_at,
     activeFormationName: latestByStudent.get(s.id) ?? null,
     formateurId: s.formateur_id,
   }));
@@ -50,11 +54,11 @@ export async function listStudentCards(formateurId?: string): Promise<StudentCar
 export async function listFormateurCards(): Promise<PersonCard[]> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, first_name, last_name, email, avatar_url")
+    .select("id, first_name, last_name, email, avatar_url, phone, created_at")
     .eq("role", "formateur")
     .order("first_name");
   if (error) throw error;
-  return (data ?? []).map((p) => ({ id: p.id, firstName: p.first_name, lastName: p.last_name, email: p.email, avatarUrl: p.avatar_url }));
+  return (data ?? []).map((p) => ({ id: p.id, firstName: p.first_name, lastName: p.last_name, email: p.email, avatarUrl: p.avatar_url, phone: p.phone, createdAt: p.created_at }));
 }
 
 // Pour l'attribution "coach" d'un élève : un admin peut lui aussi être
@@ -63,11 +67,11 @@ export async function listFormateurCards(): Promise<PersonCard[]> {
 export async function listCoachAssignableCards(): Promise<PersonCard[]> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, first_name, last_name, email, avatar_url")
+    .select("id, first_name, last_name, email, avatar_url, phone, created_at")
     .in("role", ["formateur", "admin"])
     .order("first_name");
   if (error) throw error;
-  return (data ?? []).map((p) => ({ id: p.id, firstName: p.first_name, lastName: p.last_name, email: p.email, avatarUrl: p.avatar_url }));
+  return (data ?? []).map((p) => ({ id: p.id, firstName: p.first_name, lastName: p.last_name, email: p.email, avatarUrl: p.avatar_url, phone: p.phone, createdAt: p.created_at }));
 }
 
 // Un formateur (ou admin) peut suivre plusieurs élèves, un élève n'a qu'un

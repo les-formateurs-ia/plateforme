@@ -4,6 +4,7 @@ import { Plus, CalendarClock, Menu, X, Bug, Building2, ScanEye } from "lucide-re
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
+import { useImpersonation } from "@/app/state/impersonation-context";
 import { isStaff, isAdmin } from "@/app/lib/permissions";
 import { useStaffBasePath } from "@/app/lib/staffBase";
 import { Background } from "@/app/components/common/Background";
@@ -12,6 +13,7 @@ import { Avatar } from "@/app/components/common/Avatar";
 import { AiBudgetBar } from "@/app/components/common/AiBudgetBar";
 import { AI_BUDGET_CAP_USD } from "@/app/lib/aiUsage";
 import { NotificationBell } from "@/app/components/layout/NotificationBell";
+import { ImpersonationBanner } from "@/app/components/layout/ImpersonationBanner";
 import { useBulkGeneration } from "@/app/state/bulk-generation-context";
 import { ReportIncidentDialog } from "@/app/components/layout/ReportIncidentDialog";
 import { cx } from "@/app/lib/cx";
@@ -32,6 +34,7 @@ function readStoredStaffSpace(): "cpf" | "entreprise" {
 export function MainLayout() {
   const th = useTh();
   const { role, user, companyId } = useAuth();
+  const { isImpersonating } = useImpersonation();
   const staffBase = useStaffBasePath();
   const { profile } = useProfile();
   const name = profile.name.split(" ")[0] || "Alex";
@@ -85,7 +88,9 @@ export function MainLayout() {
   }, [location.pathname]);
 
   return (
-    <div className="flex h-screen overflow-x-hidden overflow-y-hidden" style={{ background: th.bg, fontFamily: "'Funnel Display',sans-serif" }}>
+    <div className="flex flex-col h-screen overflow-x-hidden overflow-y-hidden" style={{ background: th.bg, fontFamily: "'Funnel Display',sans-serif" }}>
+      <ImpersonationBanner />
+      <div className="flex flex-1 min-h-0 overflow-hidden">
       <Background />
 
       {navOpen && (
@@ -215,13 +220,14 @@ export function MainLayout() {
       </aside>
 
       <div className="flex-1 min-w-0 flex flex-col relative z-10 overflow-hidden">
-        <button className="fixed top-3 left-3 z-30 w-9 h-9 rounded-full flex items-center justify-center shrink-0 lg:hidden" style={{ background: th.card, border: `1px solid ${th.inputB}`, boxShadow: "0 6px 18px rgba(0,0,0,0.14)" }} onClick={() => setNavOpen(true)}>
+        <button className={cx("fixed left-3 z-30 w-9 h-9 rounded-full flex items-center justify-center shrink-0 lg:hidden", isImpersonating ? "top-[52px]" : "top-3")} style={{ background: th.card, border: `1px solid ${th.inputB}`, boxShadow: "0 6px 18px rgba(0,0,0,0.14)" }} onClick={() => setNavOpen(true)}>
           <Menu className="w-4 h-4" style={{ color: th.fg3 }} />
         </button>
 
         <div className="flex-1 min-h-0 flex flex-col overflow-hidden pt-10 lg:pt-0">
           <Outlet />
         </div>
+      </div>
       </div>
     </div>
   );

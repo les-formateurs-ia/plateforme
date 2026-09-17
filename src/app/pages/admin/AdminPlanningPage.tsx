@@ -4,10 +4,10 @@ import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
+import { useImpersonation } from "@/app/state/impersonation-context";
 import { GT } from "@/app/components/common/GT";
 import { GCard } from "@/app/components/common/GCard";
-import { Avatar } from "@/app/components/common/Avatar";
-import { VBtn, ShimBtn } from "@/app/components/common/Buttons";
+import { ShimBtn } from "@/app/components/common/Buttons";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/app/components/ui/dialog";
 import { listStudentCards, listFormateurCards, type StudentCard, type PersonCard } from "@/app/lib/planning";
 import { createStudent } from "@/app/lib/students";
@@ -19,35 +19,57 @@ const TABS: { id: PlanningTab; label: string }[] = [
   { id: "formateurs", label: "Formateurs" },
 ];
 
-function personName(p: PersonCard): string {
-  const full = [p.firstName, p.lastName].filter(Boolean).join(" ").trim();
-  return full || p.email;
+function formatRegistrationDate(iso: string): string {
+  return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(iso));
 }
 
-function PersonGrid({ people, loading, onClick, subtitle }: {
+function PersonTable({ people, loading, onClick, onImpersonate, impersonatingId }: {
   people: PersonCard[];
   loading: boolean;
   onClick?: (id: string) => void;
-  subtitle?: (p: PersonCard) => string;
+  onImpersonate: (id: string) => void;
+  impersonatingId: string | null;
 }) {
   const th = useTh();
   if (loading) return <p className="text-sm" style={{ color: th.fg3 }}>Chargement…</p>;
   if (!people.length) return <GCard><div className="p-8 text-center"><p className="text-sm" style={{ color: th.fg3 }}>Personne pour l'instant.</p></div></GCard>;
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-      {people.map((p) => (
-        <GCard key={p.id} onClick={onClick ? () => onClick(p.id) : undefined} className={onClick ? "hover:scale-[1.02] transition-transform" : undefined}>
-          <div className="p-4 flex flex-col items-center text-center gap-2.5">
-            <Avatar url={p.avatarUrl} size={72} square />
-            <div className="min-w-0 w-full">
-              <div className="text-sm font-bold truncate" style={{ color: th.fg }}>{personName(p)}</div>
-              {subtitle && (
-                <div className="text-xs truncate mt-0.5" style={{ color: th.fg3, opacity: 0.65 }}>{subtitle(p)}</div>
-              )}
-            </div>
-          </div>
-        </GCard>
-      ))}
+    <div className="rounded-2xl overflow-hidden overflow-x-auto" style={{ background: th.card, border: `1px solid ${th.inputB}` }}>
+      <table className="w-full text-sm" style={{ minWidth: 720 }}>
+        <thead>
+          <tr style={{ borderBottom: `1px solid ${th.sep}` }}>
+            <th className="text-left font-semibold px-5 py-3 text-xs uppercase tracking-wide" style={{ color: th.fg3 }}>Nom</th>
+            <th className="text-left font-semibold px-5 py-3 text-xs uppercase tracking-wide" style={{ color: th.fg3 }}>Prénom</th>
+            <th className="text-left font-semibold px-5 py-3 text-xs uppercase tracking-wide" style={{ color: th.fg3 }}>Email</th>
+            <th className="text-left font-semibold px-5 py-3 text-xs uppercase tracking-wide" style={{ color: th.fg3 }}>Téléphone</th>
+            <th className="text-left font-semibold px-5 py-3 text-xs uppercase tracking-wide" style={{ color: th.fg3 }}>Date d'inscription</th>
+            <th className="px-5 py-3" />
+          </tr>
+        </thead>
+        <tbody>
+          {people.map((p) => (
+            <tr
+              key={p.id}
+              onClick={onClick ? () => onClick(p.id) : undefined}
+              className={onClick ? "cursor-pointer transition-colors" : undefined}
+              style={{ borderBottom: `1px solid ${th.sep}` }}
+              onMouseEnter={(e) => { if (onClick) e.currentTarget.style.background = th.inputBg; }}
+              onMouseLeave={(e) => { if (onClick) e.currentTarget.style.background = "transparent"; }}
+            >
+              <td className="px-5 py-3.5 font-bold whitespace-nowrap" style={{ color: th.fg }}>{p.lastName || "—"}</td>
+              <td className="px-5 py-3.5 whitespace-nowrap" style={{ color: th.fg2 }}>{p.firstName || "—"}</td>
+              <td className="px-5 py-3.5 whitespace-nowrap" style={{ color: th.fg2 }}>{p.email}</td>
+              <td className="px-5 py-3.5 whitespace-nowrap" style={{ color: th.fg2 }}>{p.phone || "—"}</td>
+              <td className="px-5 py-3.5 whitespace-nowrap" style={{ color: th.fg3 }}>{formatRegistrationDate(p.createdAt)}</td>
+              <td className="px-5 py-3.5 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                <ShimBtn sm onClick={() => onImpersonate(p.id)} disabled={impersonatingId === p.id}>
+                  {impersonatingId === p.id ? "Connexion…" : "Se connecter en tant que"}
+                </ShimBtn>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -56,6 +78,7 @@ export function AdminPlanningPage() {
   const th = useTh();
   const navigate = useNavigate();
   const { user, role } = useAuth();
+  const { startImpersonation } = useImpersonation();
   const base = useStaffBasePath();
   // Un formateur ne voit que SES élèves (coach attitré, profiles.formateur_id)
   // et n'a pas d'onglet Formateurs — la gestion de l'ensemble du staff reste
@@ -76,6 +99,19 @@ export function AdminPlanningPage() {
   const [phone, setPhone] = useState("");
   const [experience, setExperience] = useState("");
   const [objective, setObjective] = useState("");
+  const [impersonatingId, setImpersonatingId] = useState<string | null>(null);
+
+  const handleImpersonate = async (id: string) => {
+    if (impersonatingId) return;
+    setImpersonatingId(id);
+    try {
+      await startImpersonation(id);
+      navigate("/", { replace: true });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Connexion impossible.");
+      setImpersonatingId(null);
+    }
+  };
 
   const loadStudents = async () => {
     if (!user) return;
@@ -170,15 +206,22 @@ export function AdminPlanningPage() {
 
       <div className="mt-2">
         {(!isAdmin || tab === "etudiants") && (
-          <PersonGrid
+          <PersonTable
             people={students}
             loading={loadingStudents}
             onClick={(id) => navigate(`${base}/planning/students/${id}`)}
-            subtitle={(p) => (p as StudentCard).activeFormationName || "—"}
+            onImpersonate={handleImpersonate}
+            impersonatingId={impersonatingId}
           />
         )}
         {isAdmin && tab === "formateurs" && (
-          <PersonGrid people={formateurs} loading={loadingFormateurs} onClick={(id) => navigate(`${base}/planning/formateurs/${id}`)} />
+          <PersonTable
+            people={formateurs}
+            loading={loadingFormateurs}
+            onClick={(id) => navigate(`${base}/planning/formateurs/${id}`)}
+            onImpersonate={handleImpersonate}
+            impersonatingId={impersonatingId}
+          />
         )}
       </div>
 

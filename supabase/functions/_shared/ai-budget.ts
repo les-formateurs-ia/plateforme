@@ -16,7 +16,7 @@ export async function checkAiBudget(userClient: any, userId: string): Promise<{ 
   const { data, error } = await userClient.from("profiles").select("spent_usd").eq("id", userId).single();
   if (error || !data) return { ok: false, error: "Impossible de vérifier le budget IA." };
   if ((data.spent_usd ?? 0) >= AI_BUDGET_CAP_USD) {
-    return { ok: false, error: `Budget IA de ${AI_BUDGET_CAP_USD.toFixed(2)} $ atteint pour ce compte — génération bloquée.` };
+    return { ok: false, error: "Vous avez atteint votre limite de crédits." };
   }
   return { ok: true };
 }
