@@ -154,6 +154,40 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["studio_video_generations"]["Insert"]>;
         Relationships: never[];
       };
+      studio_talkinghead_generations: {
+        Row: {
+          id: string;
+          user_id: string;
+          status: StudioImageStatus;
+          model: string;
+          script_text: string;
+          voice: string;
+          language: string;
+          source_image_path: string;
+          video_path: string | null;
+          external_request_id: string | null;
+          error_message: string | null;
+          created_at: string;
+          completed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          status?: StudioImageStatus;
+          model: string;
+          script_text: string;
+          voice: string;
+          language: string;
+          source_image_path: string;
+          video_path?: string | null;
+          external_request_id?: string | null;
+          error_message?: string | null;
+          created_at?: string;
+          completed_at?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["studio_talkinghead_generations"]["Insert"]>;
+        Relationships: never[];
+      };
       studio_music_generations: {
         Row: {
           id: string;

@@ -226,7 +226,7 @@ export async function finalizeRunwareResult(userClient: any, {
   bucket, pathPrefix, url, table, rowId, kind, usage,
 }: {
   bucket: string; pathPrefix: string; url: string; table: string; rowId: string; kind: "image" | "video";
-  usage: { userId: string; mediaType: "image" | "video"; model: string; cost: number | undefined; source: "studio_image" | "studio_video" };
+  usage: { userId: string; mediaType: "image" | "video"; model: string; cost: number | undefined; source: "studio_image" | "studio_video" | "studio_talkinghead" };
 }): Promise<
   { ok: true; path: string } | { ok: false; error: string }
 > {

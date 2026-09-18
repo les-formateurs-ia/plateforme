@@ -19,6 +19,7 @@ import { StudioPage } from "@/app/pages/studio/StudioPage";
 import { StudioImagesPage } from "@/app/pages/studio/StudioImagesPage";
 import { StudioVideosPage } from "@/app/pages/studio/StudioVideosPage";
 import { StudioMusicPage } from "@/app/pages/studio/StudioMusicPage";
+import { StudioTalkingHeadPage } from "@/app/pages/studio/StudioTalkingHeadPage";
 import { StudioToolPage } from "@/app/pages/studio/StudioToolPage";
 import { HubPage } from "@/app/pages/hub/HubPage";
 import { HubCategoryPage } from "@/app/pages/hub/HubCategoryPage";
@@ -196,6 +197,7 @@ function AppRoutes() {
         <Route path="studio/images" element={<StudioImagesPage />} />
         <Route path="studio/videos" element={<StudioVideosPage />} />
         <Route path="studio/musiques" element={<StudioMusicPage />} />
+        <Route path="studio/talking-head" element={<StudioTalkingHeadPage />} />
         <Route path="studio/:tool" element={<StudioToolPage />} />
         <Route path="hub" element={<HubPage />} />
         <Route path="hub/:category" element={<HubCategoryPage />} />
