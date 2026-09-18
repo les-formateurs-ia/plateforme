@@ -108,7 +108,7 @@ export function ModelDetailSheet({ model, open, onOpenChange }: { model: AiModel
                   <span className="inline-flex items-center gap-1.5 justify-center w-full">Essayer dans le studio<ArrowRight className="w-4 h-4" /></span>
                 </ShimBtn>
               ) : (
-                <VBtn full disabled>Non disponible en studio</VBtn>
+                <VBtn full disabled>bientôt disponible!</VBtn>
               )}
             </div>
           </div>

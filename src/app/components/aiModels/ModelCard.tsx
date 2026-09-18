@@ -85,7 +85,7 @@ export function ModelCard({ model, onOpenDetail, dense = false }: { model: AiMod
               Essayer dans le studio
             </ShimBtn>
           ) : (
-            <VBtn sm full disabled>Non disponible en studio</VBtn>
+            <VBtn sm full disabled>bientôt disponible!</VBtn>
           )}
         </div>
       </div>
