@@ -126,7 +126,7 @@ export function MainLayout() {
             // agent, RDV) hors-sujet, seul "Tableau de bord" (son espace
             // entreprise) et "Mon profil" restent pertinents.
             if ((id === "lessons" || id === "practice" || id === "studio" || id === "hub" || id === "agent" || id === "calendar") && companyId) return null;
-            // Staff : élèves, incidents (admin uniquement), rendez-vous et
+            // Staff : élèves, rendez-vous et
             // galerie précèdent les outils pédagogiques.
             if (id === "calendar" && isStaff(role)) {
               return [
@@ -134,18 +134,6 @@ export function MainLayout() {
                   style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
                   <CalendarClock className="w-4 h-4 shrink-0" />{role === "admin" ? "Élèves & formateurs" : "Élèves"}
                 </NavLink>,
-                isAdmin(role) && (
-                  <NavLink key="incidents" to="/admin/incidents" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-[14px] font-medium text-left transition-all"
-                    style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
-                    <span className="relative shrink-0">
-                      <Bug className="w-4 h-4" />
-                      {unreadIncidents > 0 && (
-                        <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full" style={{ background: "#fb7185" }} />
-                      )}
-                    </span>
-                    Incidents
-                  </NavLink>
-                ),
                 <NavLink key={id} to="/planning" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-[14px] font-medium text-left transition-all"
                   style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
                   <Icon className="w-4 h-4 shrink-0" />{label}
@@ -168,6 +156,18 @@ export function MainLayout() {
               style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
               <Building2 className="w-4 h-4 shrink-0" />Entreprise
             </NavLink>
+          )}
+          {isAdmin(role) && !entrepriseMode && !companyId && (
+            <NavLink key="incidents" to="/admin/incidents" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-[14px] font-medium text-left transition-all"
+              style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
+              <span className="relative shrink-0">
+                <Bug className="w-4 h-4" />
+                {unreadIncidents > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full" style={{ background: "#fb7185" }} />
+                      )}
+                    </span>
+                    Incidents
+                  </NavLink>
           )}
           {(() => {
             const profileItem = NAV_ITEMS.find(({ id }) => id === "profile");
