@@ -21,7 +21,7 @@ export type SatisfactionQuestionType = "qcm" | "rating" | "text";
 export type StudioImageStatus = "pending" | "ready" | "failed";
 export type MissionSubmissionStatus = "draft" | "submitted";
 export type AiUsageMediaType = "image" | "video" | "audio" | "text";
-export type AiUsageSource = "studio_image" | "studio_video" | "studio_music" | "battle_ground" | "reverse_prompt";
+export type AiUsageSource = "studio_image" | "studio_video" | "studio_music" | "studio_talkinghead" | "studio_tts" | "studio_doublage" | "battle_ground" | "reverse_prompt";
 
 export interface Database {
   public: {
@@ -186,6 +186,74 @@ export interface Database {
           completed_at?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["studio_talkinghead_generations"]["Insert"]>;
+        Relationships: never[];
+      };
+      studio_tts_generations: {
+        Row: {
+          id: string;
+          user_id: string;
+          status: StudioImageStatus;
+          model: string;
+          script_text: string;
+          voice: string;
+          language: string;
+          audio_path: string | null;
+          external_request_id: string | null;
+          error_message: string | null;
+          created_at: string;
+          completed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          status?: StudioImageStatus;
+          model: string;
+          script_text: string;
+          voice: string;
+          language: string;
+          audio_path?: string | null;
+          external_request_id?: string | null;
+          error_message?: string | null;
+          created_at?: string;
+          completed_at?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["studio_tts_generations"]["Insert"]>;
+        Relationships: never[];
+      };
+      studio_doublage_generations: {
+        Row: {
+          id: string;
+          user_id: string;
+          status: StudioImageStatus;
+          model: string;
+          script_text: string;
+          translated_text: string | null;
+          target_voice: string;
+          target_language: string;
+          source_video_path: string;
+          video_path: string | null;
+          external_request_id: string | null;
+          error_message: string | null;
+          created_at: string;
+          completed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          status?: StudioImageStatus;
+          model: string;
+          script_text: string;
+          translated_text?: string | null;
+          target_voice: string;
+          target_language: string;
+          source_video_path: string;
+          video_path?: string | null;
+          external_request_id?: string | null;
+          error_message?: string | null;
+          created_at?: string;
+          completed_at?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["studio_doublage_generations"]["Insert"]>;
         Relationships: never[];
       };
       studio_music_generations: {

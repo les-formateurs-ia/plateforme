@@ -89,32 +89,8 @@ export const STUDIO_TALKINGHEAD_MODELS: Record<string, StudioTalkingHeadModelCon
   },
 };
 
-// Voix MiniMax Speech 2.8 (audioInference) — ensemble restreint et sûr,
-// à élargir/revalider une fois le compte Runware crédité (cf. commentaire de
-// tête). Sourcé le 2026-09-18 sur https://runware.ai/docs/models/minimax-speech-2-8.
-export interface TalkingHeadVoice {
-  id: string;
-  label: string;
-  language: string; // code langue TTS (speech.language)
-}
-
-export const TTS_VOICES: TalkingHeadVoice[] = [
-  { id: "French_MaleNarrator", label: "Français — Narrateur (H)", language: "fr-FR" },
-  { id: "French_FemaleAnchor", label: "Français — Présentatrice (F)", language: "fr-FR" },
-  { id: "English_expressive_narrator", label: "Anglais — Narrateur expressif", language: "en-US" },
-  { id: "English_CalmWoman", label: "Anglais — Voix calme (F)", language: "en-US" },
-  { id: "Spanish_narrator", label: "Espagnol — Narrateur", language: "es-ES" },
-];
-
-export const DEFAULT_TTS_VOICE = TTS_VOICES[0].id;
-
-export const TTS_MODEL_ID = "minimax:speech@2.8";
-
-export function buildTtsTask({ text, voice, language }: { text: string; voice: string; language: string }): Record<string, unknown> {
-  return {
-    taskType: "audioInference",
-    model: TTS_MODEL_ID,
-    outputFormat: "MP3",
-    speech: { text, voice, language },
-  };
-}
+// Voix MiniMax Speech 2.8 : catalogue déplacé dans studio-tts-voices.ts le
+// 2026-09-19 (partagé désormais avec "Du texte à l'audio" et "Parlez
+// n'importe quelle langue") — ré-exporté ici pour ne rien casser côté
+// generate-studio-talkinghead/check-studio-talkinghead-status.
+export { TTS_VOICES, DEFAULT_TTS_VOICE, TTS_MODEL_ID, buildTtsTask, type TalkingHeadVoice } from "./studio-tts-voices.ts";

@@ -19,8 +19,8 @@ const STUDIO_MODULES = [
   { slug: "videos",       image: imgVideos,       title: "Imaginez vos vidéos",                    subtitle: "Text/Image-to-Video",              desc: "Transforme un texte ou une image en vidéo animée.",                restricted: false },
   { slug: "musiques",     image: imgMusiques,     title: "Concevez vos propres musiques",          subtitle: "Text-to-Music",                    desc: "Compose une bande originale unique pour tes créations.",           restricted: false },
   { slug: "talking-head", image: imgTalkingHead,  title: "Faites parler vos images",               subtitle: "Lip-sync / Talking Head",          desc: "Anime et synchronise les lèvres de tes visuels sur un discours.",  restricted: false },
-  { slug: "text-to-speech", image: imgTextToSpeech, title: "Du texte à l'audio",                   subtitle: "Text-to-Speech",                   desc: "Convertis instantanément un script écrit en voix naturelle.",      restricted: true },
-  { slug: "doublage",     image: imgDoublage,     title: "Parlez n'importe quelle langue",         subtitle: "Traduction & Doublage audio",      desc: "Traduis et double automatiquement l'audio de tes vidéos.",         restricted: true },
+  { slug: "text-to-speech", image: imgTextToSpeech, title: "Du texte à l'audio",                   subtitle: "Text-to-Speech",                   desc: "Convertis instantanément un script écrit en voix naturelle.",      restricted: false },
+  { slug: "doublage",     image: imgDoublage,     title: "Parlez n'importe quelle langue",         subtitle: "Traduction & Doublage audio",      desc: "Traduis et double automatiquement l'audio de tes vidéos.",         restricted: false },
   { slug: "face-swap",    image: imgFaceSwap,     title: "Prenez l'apparence de qui vous voulez",  subtitle: "Face Swap / Avatar",               desc: "Incarne un avatar ou échange de visage sur tes vidéos.",           restricted: true },
 ];
 

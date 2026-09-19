@@ -3,14 +3,17 @@ import { useTh } from "@/app/theme/theme";
 import "@/styles/media-generation.css";
 
 export function MediaGenerationPlaceholder({ kind, ready = false, error, onRetry, retryDisabled = false }: {
-  kind: "image" | "video" | "music";
+  kind: "image" | "video" | "music" | "audio";
   ready?: boolean;
   error?: string | null;
   onRetry: () => void;
   retryDisabled?: boolean;
 }) {
   const th = useTh();
-  const label = kind === "image" ? "Génération de l’image en cours…" : kind === "video" ? "Génération de la vidéo en cours…" : "Composition de la musique en cours…";
+  const label = kind === "image" ? "Génération de l’image en cours…"
+    : kind === "video" ? "Génération de la vidéo en cours…"
+    : kind === "audio" ? "Génération de la voix en cours…"
+    : "Composition de la musique en cours…";
   return (
     <div className={`media-generation ${ready ? "media-generation--ready" : ""} ${error ? "media-generation--error" : ""}`}
       style={{ background: th.card, color: th.fg }} aria-hidden={ready || undefined}>

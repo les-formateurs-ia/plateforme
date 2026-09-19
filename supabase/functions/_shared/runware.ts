@@ -225,19 +225,23 @@ export async function downloadBytes(url: string): Promise<{ bytes: Uint8Array; c
 export async function finalizeRunwareResult(userClient: any, {
   bucket, pathPrefix, url, table, rowId, kind, usage,
 }: {
-  bucket: string; pathPrefix: string; url: string; table: string; rowId: string; kind: "image" | "video";
-  usage: { userId: string; mediaType: "image" | "video"; model: string; cost: number | undefined; source: "studio_image" | "studio_video" | "studio_talkinghead" };
+  bucket: string; pathPrefix: string; url: string; table: string; rowId: string; kind: "image" | "video" | "audio";
+  usage: { userId: string; mediaType: "image" | "video" | "audio"; model: string; cost: number | undefined; source: "studio_image" | "studio_video" | "studio_talkinghead" | "studio_tts" | "studio_doublage" };
 }): Promise<
   { ok: true; path: string } | { ok: false; error: string }
 > {
   try {
     const { bytes, contentType } = await downloadBytes(url);
     // Recraft V4 Pro Vector renvoie du SVG (pas du PNG/JPG) — cf. studio-models.ts.
-    const ext = kind === "video" ? "mp4" : contentType.includes("svg") ? "svg" : contentType.includes("png") ? "png" : "jpg";
+    // MiniMax Speech 2.8 (Du texte à l'audio) renvoie du MP3 par défaut
+    // (outputFormat demandé dans buildTtsTask), WAV en repli si jamais.
+    const ext = kind === "video" ? "mp4"
+      : kind === "audio" ? (contentType.includes("wav") ? "wav" : "mp3")
+      : contentType.includes("svg") ? "svg" : contentType.includes("png") ? "png" : "jpg";
     const finalPath = `${pathPrefix}.${ext}`;
     const { error: uploadError } = await userClient.storage.from(bucket).upload(finalPath, bytes, { contentType, upsert: true });
     if (uploadError) throw new Error(uploadError.message);
-    const pathColumn = kind === "video" ? "video_path" : "image_path";
+    const pathColumn = kind === "video" ? "video_path" : kind === "audio" ? "audio_path" : "image_path";
     await userClient.from(table).update({ status: "ready", [pathColumn]: finalPath, completed_at: new Date().toISOString() }).eq("id", rowId);
     await recordAiUsage(userClient, usage);
     return { ok: true, path: finalPath };
