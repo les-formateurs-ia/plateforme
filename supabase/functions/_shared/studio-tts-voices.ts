@@ -35,11 +35,19 @@ export const DEFAULT_TTS_VOICE = TTS_VOICES[0].id;
 
 export const TTS_MODEL_ID = "minimax:speech@2.8";
 
-export function buildTtsTask({ text, voice, language }: { text: string; voice: string; language: string }): Record<string, unknown> {
+// "language" N'EST PAS un champ accepté par "speech" pour ce modèle — bug
+// constaté en direct le 2026-09-19 (502 sur les 3 modules TTS) : Runware
+// renvoie "Unsupported use of 'speech[language]' parameter... Allowed
+// values are: text, voice, speed, volume, pitch, emotion, tone". La langue
+// est déjà portée par le choix de voix (ex. "French_MaleNarrator") — pas
+// besoin de la répéter, corrigé en la retirant du payload envoyé à Runware
+// (le champ `language` reste dans TalkingHeadVoice/la ligne en base pour
+// l'UI et les prompts de traduction, juste plus transmis tel quel ici).
+export function buildTtsTask({ text, voice }: { text: string; voice: string }): Record<string, unknown> {
   return {
     taskType: "audioInference",
     model: TTS_MODEL_ID,
     outputFormat: "MP3",
-    speech: { text, voice, language },
+    speech: { text, voice },
   };
 }

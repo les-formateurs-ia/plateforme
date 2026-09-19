@@ -58,7 +58,7 @@ Deno.serve(async (req) => {
     // Étape 1 : texte -> voix (synchrone, la vidéo a besoin de l'URL audio).
     let ttsResult;
     try {
-      ttsResult = await submitAndAwaitRunware(apiKey, buildTtsTask({ text: trimmedScript, voice: selectedVoice.id, language: selectedLanguage }));
+      ttsResult = await submitAndAwaitRunware(apiKey, buildTtsTask({ text: trimmedScript, voice: selectedVoice.id }));
     } catch (err) {
       return jsonResponse({ error: err instanceof Error ? err.message : "La synthèse vocale a échoué." }, 502);
     }

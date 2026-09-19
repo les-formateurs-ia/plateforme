@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
 
     let submitted;
     try {
-      submitted = await submitRunwareTask(apiKey, buildTtsTask({ text: trimmedScript, voice: selectedVoice.id, language: selectedVoice.language }));
+      submitted = await submitRunwareTask(apiKey, buildTtsTask({ text: trimmedScript, voice: selectedVoice.id }));
     } catch (err) {
       return jsonResponse({ error: err instanceof Error ? err.message : "La synthèse vocale a échoué." }, 502);
     }
