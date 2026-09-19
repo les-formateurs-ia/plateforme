@@ -1,9 +1,10 @@
 // Module "Parlez n'importe quelle langue" (Le Studio) — traduction &
-// doublage vidéo (upload d'une vidéo + texte source -> traduction
-// intelligente -> voix -> lip-sync) via l'API Runware. Catalogue de modèles
-// et de voix côté client, à garder en phase avec
-// supabase/functions/_shared/studio-doublage-models.ts /
-// _shared/studio-tts-voices.ts.
+// doublage vidéo (upload d'une vidéo -> Gemini transcrit + traduit -> voix
+// -> lip-sync) via l'API Runware pour la génération, Gemini uniquement pour
+// "comprendre" ce qui est dit (Runware n'a aucune capacité de transcription
+// audio). L'élève choisit juste la langue d'origine et la langue cible,
+// aucune saisie manuelle de texte. Catalogue de modèles/langues côté
+// client, à garder en phase avec supabase/functions/_shared/studio-doublage-models.ts.
 import { supabase } from "@/app/lib/supabase/client";
 import type { StudioImageStatus } from "@/app/lib/supabase/database.types";
 
@@ -18,33 +19,31 @@ export const STUDIO_DOUBLAGE_MODELS: StudioDoublageModel[] = [
   { id: "lipsync-2-pro", label: "Sync Lipsync 2 Pro", description: "Qualité studio, préserve mieux les micro-expressions." },
 ];
 
-export interface DoublageVoice {
-  id: string;
+export interface DoublageLanguage {
+  code: string;
   label: string;
-  language: string;
 }
 
-export const DOUBLAGE_VOICES: DoublageVoice[] = [
-  { id: "French_MaleNarrator", label: "Français — Narrateur (H)", language: "fr-FR" },
-  { id: "French_FemaleAnchor", label: "Français — Présentatrice (F)", language: "fr-FR" },
-  { id: "English_expressive_narrator", label: "Anglais — Narrateur expressif", language: "en-US" },
-  { id: "English_CalmWoman", label: "Anglais — Voix calme (F)", language: "en-US" },
-  { id: "Spanish_narrator", label: "Espagnol — Narrateur", language: "es-ES" },
-  { id: "German_FriendlyMan", label: "Allemand — Voix amicale (H)", language: "de-DE" },
-  { id: "Italian_Narrator", label: "Italien — Narrateur", language: "it-IT" },
-  { id: "Portuguese_SentimentalLady", label: "Portugais — Voix expressive (F)", language: "pt-PT" },
-  { id: "Russian_ReliableMan", label: "Russe — Voix posée (H)", language: "ru-RU" },
+export const DOUBLAGE_LANGUAGES: DoublageLanguage[] = [
+  { code: "fr", label: "Français" },
+  { code: "en", label: "Anglais" },
+  { code: "es", label: "Espagnol" },
+  { code: "de", label: "Allemand" },
+  { code: "it", label: "Italien" },
+  { code: "pt", label: "Portugais" },
+  { code: "ru", label: "Russe" },
 ];
 
-export const SCRIPT_MAX_LENGTH = 1000;
+export const DEFAULT_SOURCE_LANGUAGE = "en";
+export const DEFAULT_TARGET_LANGUAGE = "fr";
 
 export interface StudioDoublageGeneration {
   id: string;
   status: StudioImageStatus;
   model: string;
-  scriptText: string;
+  scriptText: string | null;
   translatedText: string | null;
-  targetVoice: string;
+  sourceLanguage: string | null;
   targetLanguage: string;
   sourceVideoPath: string;
   videoPath: string | null;
@@ -53,8 +52,8 @@ export interface StudioDoublageGeneration {
 }
 
 function mapRow(row: {
-  id: string; status: StudioImageStatus; model: string; script_text: string; translated_text: string | null;
-  target_voice: string; target_language: string; source_video_path: string; video_path: string | null;
+  id: string; status: StudioImageStatus; model: string; script_text: string | null; translated_text: string | null;
+  source_language: string | null; target_language: string; source_video_path: string; video_path: string | null;
   error_message: string | null; created_at: string;
 }): StudioDoublageGeneration {
   return {
@@ -63,7 +62,7 @@ function mapRow(row: {
     model: row.model,
     scriptText: row.script_text,
     translatedText: row.translated_text,
-    targetVoice: row.target_voice,
+    sourceLanguage: row.source_language,
     targetLanguage: row.target_language,
     sourceVideoPath: row.source_video_path,
     videoPath: row.video_path,
@@ -72,7 +71,7 @@ function mapRow(row: {
   };
 }
 
-const DOUBLAGE_SELECT = "id, status, model, script_text, translated_text, target_voice, target_language, source_video_path, video_path, error_message, created_at";
+const DOUBLAGE_SELECT = "id, status, model, script_text, translated_text, source_language, target_language, source_video_path, video_path, error_message, created_at";
 
 export async function getMyDoublageGenerations(userId: string): Promise<StudioDoublageGeneration[]> {
   const { data, error } = await supabase
@@ -112,7 +111,7 @@ async function extractFunctionError(error: { message: string; context?: Response
 }
 
 export async function requestDoublageGeneration(params: {
-  model: string; script: string; sourceVideoPath: string; voice: string;
+  model: string; sourceVideoPath: string; sourceLanguage: string; targetLanguage: string;
 }): Promise<{ id: string; translatedText: string | null }> {
   const { data, error } = await supabase.functions.invoke("generate-studio-doublage", { body: params });
   if (error) throw new Error(await extractFunctionError(error));
@@ -127,12 +126,12 @@ export interface DoublageGenerationPollResult {
   error: string | null;
 }
 
-// Même rythme que le lip-sync avatar (pollTalkingHeadGenerationStatus) : le
-// rendu vient du même type de modèle Runware (videoInference), et se rajoute
-// ici la traduction + TTS déjà résolues avant l'insertion de la ligne.
+// Le rendu combine désormais transcription+traduction Gemini (variable
+// selon la longueur de la vidéo) puis lip-sync Runware — timeout un peu
+// plus généreux que la version précédente (texte saisi à la main).
 export async function pollDoublageGenerationStatus(
   generationId: string,
-  { intervalMs = 6000, timeoutMs = 300000 }: { intervalMs?: number; timeoutMs?: number } = {},
+  { intervalMs = 6000, timeoutMs = 360000 }: { intervalMs?: number; timeoutMs?: number } = {},
 ): Promise<DoublageGenerationPollResult> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {

@@ -226,8 +226,9 @@ export interface Database {
           user_id: string;
           status: StudioImageStatus;
           model: string;
-          script_text: string;
+          script_text: string | null; // legacy (saisie manuelle) — plus renseigné, transcrit par Gemini
           translated_text: string | null;
+          source_language: string | null;
           target_voice: string;
           target_language: string;
           source_video_path: string;
@@ -242,8 +243,9 @@ export interface Database {
           user_id: string;
           status?: StudioImageStatus;
           model: string;
-          script_text: string;
+          script_text?: string | null;
           translated_text?: string | null;
+          source_language?: string | null;
           target_voice: string;
           target_language: string;
           source_video_path: string;

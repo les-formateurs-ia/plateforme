@@ -1,9 +1,12 @@
 // Module "Parlez n'importe quelle langue" (Le Studio) — traduction &
-// doublage vidéo via l'API Runware (cf. src/app/lib/studioDoublage.ts).
+// doublage vidéo via l'API Runware pour la génération (voix + lip-sync),
+// Gemini pour transcrire/traduire ce qui est dit dans la vidéo uploadée
+// (Runware n'a aucune capacité de transcription audio, cf.
+// supabase/functions/_shared/gemini-video.ts). L'élève choisit juste la
+// vidéo, la langue d'origine et la langue cible — aucune saisie de texte.
 // Même charpente que StudioTalkingHeadPage.tsx (barre flottante en bas,
-// galerie en colonnes au-dessus) : upload une vidéo au lieu d'une photo,
-// et le texte fourni est traduit avant d'être doublé sur la vidéo.
-import { useEffect, useRef, useState } from "react";
+// galerie en colonnes au-dessus).
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { ArrowLeft, Eye, Languages, Loader2, Play, Upload, X } from "lucide-react";
@@ -17,13 +20,20 @@ import { MediaGenerationPlaceholder } from "@/app/components/common/MediaGenerat
 import { useMediaGenerations, type MediaGeneration } from "@/app/lib/useMediaGenerations";
 import { useGeneratedMedia } from "@/app/lib/useGeneratedMedia";
 import {
-  STUDIO_DOUBLAGE_MODELS, DOUBLAGE_VOICES, SCRIPT_MAX_LENGTH, getMyDoublageGenerations, getStudioDoublageSignedUrl,
-  uploadStudioDoublageSourceVideo, requestDoublageGeneration, pollDoublageGenerationStatus,
-  type StudioDoublageGeneration,
+  STUDIO_DOUBLAGE_MODELS, DOUBLAGE_LANGUAGES, DEFAULT_SOURCE_LANGUAGE, DEFAULT_TARGET_LANGUAGE,
+  getMyDoublageGenerations, getStudioDoublageSignedUrl, uploadStudioDoublageSourceVideo,
+  requestDoublageGeneration, pollDoublageGenerationStatus, type StudioDoublageGeneration,
 } from "@/app/lib/studioDoublage";
 
-const MAX_VIDEO_DURATION_S = 90;
-const MAX_VIDEO_SIZE_BYTES = 60 * 1024 * 1024;
+// Vidéo plus courte que le lip-sync avatar : le pipeline ajoute une étape
+// de transcription/traduction Gemini avant même d'arriver au rendu vidéo,
+// on garde donc une marge de temps confortable.
+const MAX_VIDEO_DURATION_S = 60;
+const MAX_VIDEO_SIZE_BYTES = 40 * 1024 * 1024;
+
+function languageLabel(code: string | null): string {
+  return DOUBLAGE_LANGUAGES.find((l) => l.code === code)?.label ?? code ?? "—";
+}
 
 function DoublageCard({ gen, onOpen, onRetry, retryDisabled }: { gen: MediaGeneration<StudioDoublageGeneration>; onOpen: () => void; onRetry: () => void; retryDisabled: boolean }) {
   const th = useTh();
@@ -45,7 +55,7 @@ function DoublageCard({ gen, onOpen, onRetry, retryDisabled }: { gen: MediaGener
       )}
       {gen.status === "ready" && (
         <div className="absolute inset-x-0 bottom-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: "linear-gradient(180deg,rgba(10,10,16,0) 0%,rgba(10,10,16,0.8) 100%)" }}>
-          <p className="text-xs text-white truncate">{gen.translatedText || gen.scriptText}</p>
+          <p className="text-xs text-white truncate">{gen.translatedText || `${languageLabel(gen.sourceLanguage)} → ${languageLabel(gen.targetLanguage)}`}</p>
         </div>
       )}
     </div>
@@ -57,23 +67,15 @@ export function StudioDoublagePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [modelId, setModelId] = useState(STUDIO_DOUBLAGE_MODELS[0].id);
-  const [voiceId, setVoiceId] = useState(DOUBLAGE_VOICES[0].id);
-  const [script, setScript] = useState("");
+  const [sourceLanguage, setSourceLanguage] = useState(DEFAULT_SOURCE_LANGUAGE);
+  const [targetLanguage, setTargetLanguage] = useState(DEFAULT_TARGET_LANGUAGE);
   const [sourceFile, setSourceFile] = useState<File | null>(null);
   const [sourcePreview, setSourcePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const scriptRef = useRef<HTMLTextAreaElement>(null);
   const { generations, generating, loading, historyError, start, retry } = useMediaGenerations(user?.id, getMyDoublageGenerations, pollDoublageGenerationStatus, (result) => ({ videoPath: result.videoPath }));
   const [detail, setDetail] = useState<StudioDoublageGeneration | null>(null);
   const [detailUrl, setDetailUrl] = useState<string | null>(null);
   const [sourcePreviewOpen, setSourcePreviewOpen] = useState(false);
-
-  useEffect(() => {
-    const el = scriptRef.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
-  }, [script]);
 
   const removeSourceVideo = () => {
     setSourceFile(null);
@@ -84,7 +86,7 @@ export function StudioDoublagePage() {
 
   const handleFileSelect = (file: File) => {
     if (!file.type.startsWith("video/")) { toast.error("Le fichier doit être une vidéo."); return; }
-    if (file.size > MAX_VIDEO_SIZE_BYTES) { toast.error("La vidéo ne doit pas dépasser 60 Mo."); return; }
+    if (file.size > MAX_VIDEO_SIZE_BYTES) { toast.error("La vidéo ne doit pas dépasser 40 Mo."); return; }
     const url = URL.createObjectURL(file);
     const probe = document.createElement("video");
     probe.preload = "metadata";
@@ -102,19 +104,17 @@ export function StudioDoublagePage() {
   };
 
   const handleGenerate = async () => {
-    if (!user || !script.trim() || !sourceFile || generating) return;
-    const voice = DOUBLAGE_VOICES.find((v) => v.id === voiceId) ?? DOUBLAGE_VOICES[0];
+    if (!user || !sourceFile || generating) return;
     const draft: StudioDoublageGeneration = {
-      id: crypto.randomUUID(), status: "pending", model: modelId, scriptText: script.trim(), translatedText: null, targetVoice: voice.id, targetLanguage: voice.language,
-      sourceVideoPath: "", videoPath: null, errorMessage: null, createdAt: new Date().toISOString(),
+      id: crypto.randomUUID(), status: "pending", model: modelId, scriptText: null, translatedText: null,
+      sourceLanguage, targetLanguage, sourceVideoPath: "", videoPath: null, errorMessage: null, createdAt: new Date().toISOString(),
     };
     await start(draft, async () => {
       const sourceVideoPath = await uploadStudioDoublageSourceVideo(user.id, sourceFile);
-      const result = await requestDoublageGeneration({ model: modelId, script: draft.scriptText, sourceVideoPath, voice: voice.id });
+      const result = await requestDoublageGeneration({ model: modelId, sourceVideoPath, sourceLanguage, targetLanguage });
       return result.id;
     });
     removeSourceVideo();
-    setScript("");
   };
 
   const openDetail = async (gen: StudioDoublageGeneration) => {
@@ -135,7 +135,7 @@ export function StudioDoublagePage() {
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif", color: th.fg }}>Parlez n'importe quelle langue</h2>
-            <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Upload une vidéo, écris ce qui y est dit, choisis la langue cible : le texte est traduit puis doublé en resynchronisant les lèvres. Le rendu prend en général 1 à 5 minutes.</p>
+            <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Upload une vidéo, choisis sa langue d'origine et la langue cible : l'IA transcrit, traduit et double automatiquement en resynchronisant les lèvres. Le rendu prend en général 1 à 5 minutes.</p>
           </div>
           <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-full shrink-0" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg2 }}>
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: generating ? th.fg3 : "#22c55e" }} />
@@ -153,7 +153,7 @@ export function StudioDoublagePage() {
           {!!generations.length && (
             <div className="columns-1 sm:columns-2 xl:columns-3 gap-4">
               {generations.map((gen) => <DoublageCard key={gen.clientKey ?? gen.id} gen={gen} onOpen={() => void openDetail(gen)} retryDisabled={generating}
-                onRetry={() => void retry(gen, () => requestDoublageGeneration({ model: gen.model, script: gen.scriptText, sourceVideoPath: gen.sourceVideoPath, voice: gen.targetVoice }).then((r) => r.id))} />)}
+                onRetry={() => void retry(gen, () => requestDoublageGeneration({ model: gen.model, sourceVideoPath: gen.sourceVideoPath, sourceLanguage: gen.sourceLanguage ?? DEFAULT_SOURCE_LANGUAGE, targetLanguage: gen.targetLanguage }).then((r) => r.id))} />)}
             </div>
           )}
         </div>
@@ -167,8 +167,12 @@ export function StudioDoublagePage() {
               <div className="w-[176px]"><VSelect sm value={modelId} onValueChange={setModelId} options={STUDIO_DOUBLAGE_MODELS.map((m) => ({ value: m.id, label: m.label }))} disabled={generating} /></div>
             </div>
             <div className="flex items-center gap-2">
+              <span className="text-xs font-bold shrink-0" style={{ color: th.fg3 }}>Langue d'origine</span>
+              <div className="w-[150px]"><VSelect sm value={sourceLanguage} onValueChange={setSourceLanguage} options={DOUBLAGE_LANGUAGES.map((l) => ({ value: l.code, label: l.label }))} disabled={generating} /></div>
+            </div>
+            <div className="flex items-center gap-2">
               <span className="text-xs font-bold shrink-0" style={{ color: th.fg3 }}>Langue cible</span>
-              <div className="w-[210px]"><VSelect sm value={voiceId} onValueChange={setVoiceId} options={DOUBLAGE_VOICES.map((v) => ({ value: v.id, label: v.label }))} disabled={generating} /></div>
+              <div className="w-[150px]"><VSelect sm value={targetLanguage} onValueChange={setTargetLanguage} options={DOUBLAGE_LANGUAGES.map((l) => ({ value: l.code, label: l.label }))} disabled={generating} /></div>
             </div>
             <div className="flex-1 min-w-0" />
             {sourcePreview ? (
@@ -190,22 +194,9 @@ export function StudioDoublagePage() {
             <input ref={fileInputRef} type="file" accept="video/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f); e.target.value = ""; }} />
           </div>
 
-          <div className="flex items-end gap-3 px-4 sm:px-5 py-3">
-            <Languages className="w-4 h-4 shrink-0 mb-1.5" style={{ color: th.fg3 }} />
-            <div className="flex-1 min-w-0">
-              <textarea
-                ref={scriptRef}
-                value={script}
-                onChange={(e) => setScript(e.target.value.slice(0, SCRIPT_MAX_LENGTH))}
-                rows={1}
-                disabled={generating}
-                placeholder="Écris ce qui est dit dans la vidéo — ce sera traduit automatiquement dans la langue cible…"
-                className="w-full bg-transparent outline-none text-sm resize-none py-1.5"
-                style={{ color: th.fg, maxHeight: 160, overflowY: "auto" }}
-              />
-              <p className="text-[11px] text-right" style={{ color: th.fg3 }}>{script.length}/{SCRIPT_MAX_LENGTH}</p>
-            </div>
-            <ShimBtn sm onClick={handleGenerate} disabled={!script.trim() || !sourceFile || generating}>
+          <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3">
+            <p className="text-xs" style={{ color: th.fg3 }}>L'IA écoute la vidéo, traduit et double automatiquement — rien d'autre à saisir.</p>
+            <ShimBtn sm onClick={handleGenerate} disabled={!sourceFile || generating}>
               <span className="flex items-center gap-1.5 whitespace-nowrap">
                 {generating ? <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" /> : <Languages className="w-4 h-4" />}
                 {generating ? "Génération…" : "Générer"}
@@ -234,16 +225,18 @@ export function StudioDoublagePage() {
             <div className="p-5 space-y-2">
               {detail.translatedText && (
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: th.fg3 }}>Texte traduit</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: th.fg3 }}>Texte doublé ({languageLabel(detail.targetLanguage)})</label>
                   <p className="text-sm" style={{ color: th.fg }}>{detail.translatedText}</p>
                 </div>
               )}
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: th.fg3 }}>Texte original</label>
-                <p className="text-sm" style={{ color: th.fg2 }}>{detail.scriptText}</p>
-              </div>
+              {detail.scriptText && (
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: th.fg3 }}>Texte original (saisi manuellement)</label>
+                  <p className="text-sm" style={{ color: th.fg2 }}>{detail.scriptText}</p>
+                </div>
+              )}
               <p className="text-xs" style={{ color: th.fg3 }}>
-                {STUDIO_DOUBLAGE_MODELS.find((m) => m.id === detail.model)?.label ?? detail.model} · {new Date(detail.createdAt).toLocaleString("fr-FR")}
+                {STUDIO_DOUBLAGE_MODELS.find((m) => m.id === detail.model)?.label ?? detail.model} · {languageLabel(detail.sourceLanguage)} → {languageLabel(detail.targetLanguage)} · {new Date(detail.createdAt).toLocaleString("fr-FR")}
               </p>
               <div className="pt-2"><VBtn sm onClick={() => setDetail(null)}>Fermer</VBtn></div>
             </div>

@@ -1,41 +1,37 @@
 // Module "Parlez n'importe quelle langue" (Le Studio) : pipeline en trois
 // étapes —
-//   1) le texte fourni par l'élève (ce qui est dit dans la vidéo) est
-//      traduit dans la langue cible via un LLM (textInference, Claude Opus 5
-//      via Runware — même chemin que Battle Ground), résolu de façon
-//      SYNCHRONE dans cette invocation ;
+//   1) Gemini (multimodal) écoute l'audio de la vidéo uploadée et transcrit
+//      + traduit directement vers la langue cible choisie par l'élève —
+//      Runware n'a AUCUNE capacité de transcription audio (confirmé sur sa
+//      doc/FAQ le 2026-09-19), Gemini est donc la seule brique hors Runware
+//      de ce module (cf. _shared/gemini-video.ts). L'élève ne saisit plus
+//      aucun texte à la main : juste la langue d'origine de la vidéo et la
+//      langue cible ;
 //   2) le texte traduit est converti en voix via MiniMax Speech 2.8
-//      (audioInference), également synchrone (submitAndAwaitRunware, même
-//      helper que Rétro-ingénierie/talking-head) ;
+//      (audioInference, Runware), synchrone ;
 //   3) la vidéo source uploadée + l'audio traduit sont soumis au modèle de
-//      lip-sync choisi (videoInference, asynchrone — suivi via
+//      lip-sync choisi (videoInference, Runware, asynchrone — suivi via
 //      external_request_id, comme generate-studio-talkinghead).
-// Pas de transcription automatique (Runware n'a pas de modèle
-// speech-to-text, cf. _shared/studio-doublage-models.ts) : l'élève fournit
-// le texte source, la "traduction intelligente" vient de l'étape 1.
 // Tourne avec le JWT de l'appelant (pas de service-role).
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
-import { TTS_VOICES, DEFAULT_TTS_VOICE, TTS_MODEL_ID, buildTtsTask } from "../_shared/studio-tts-voices.ts";
-import { STUDIO_DOUBLAGE_MODELS, DEFAULT_DOUBLAGE_MODEL, TRANSLATION_MODEL, buildTranslationPrompt } from "../_shared/studio-doublage-models.ts";
-import { submitAndAwaitRunware, submitAndAwaitRunwareText, submitRunwareTask, finalizeRunwareResult } from "../_shared/runware.ts";
+import { TTS_MODEL_ID, buildTtsTask } from "../_shared/studio-tts-voices.ts";
+import { STUDIO_DOUBLAGE_MODELS, DEFAULT_DOUBLAGE_MODEL, DOUBLAGE_LANGUAGES, DEFAULT_DOUBLAGE_LANGUAGE } from "../_shared/studio-doublage-models.ts";
+import { transcribeAndTranslateVideo } from "../_shared/gemini-video.ts";
+import { submitAndAwaitRunware, submitRunwareTask, finalizeRunwareResult } from "../_shared/runware.ts";
 import { checkAiBudget, recordAiUsage } from "../_shared/ai-budget.ts";
-
-const SCRIPT_MAX_LENGTH = 1000;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
 
   try {
-    const { model, script, sourceVideoPath, voice } = await req.json();
-    const trimmedScript = typeof script === "string" ? script.trim() : "";
-    if (!trimmedScript) return jsonResponse({ error: "Le texte prononcé dans la vidéo est obligatoire." }, 400);
-    if (trimmedScript.length > SCRIPT_MAX_LENGTH) return jsonResponse({ error: `Le texte est trop long (${SCRIPT_MAX_LENGTH} caractères maximum).` }, 400);
+    const { model, sourceVideoPath, sourceLanguage, targetLanguage } = await req.json();
     if (!sourceVideoPath) return jsonResponse({ error: "Une vidéo source est obligatoire." }, 400);
 
     const modelConfig = STUDIO_DOUBLAGE_MODELS[model] ?? STUDIO_DOUBLAGE_MODELS[DEFAULT_DOUBLAGE_MODEL];
     const modelId = STUDIO_DOUBLAGE_MODELS[model] ? model : DEFAULT_DOUBLAGE_MODEL;
-    const selectedVoice = TTS_VOICES.find((v) => v.id === voice) ?? TTS_VOICES.find((v) => v.id === DEFAULT_TTS_VOICE)!;
+    const sourceLang = DOUBLAGE_LANGUAGES.find((l) => l.code === sourceLanguage) ?? DOUBLAGE_LANGUAGES.find((l) => l.code === DEFAULT_DOUBLAGE_LANGUAGE)!;
+    const targetLang = DOUBLAGE_LANGUAGES.find((l) => l.code === targetLanguage) ?? DOUBLAGE_LANGUAGES.find((l) => l.code === DEFAULT_DOUBLAGE_LANGUAGE)!;
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) return jsonResponse({ error: "Non authentifié." }, 401);
@@ -52,45 +48,51 @@ Deno.serve(async (req) => {
     const budget = await checkAiBudget(userClient, userId);
     if (!budget.ok) return jsonResponse({ error: budget.error }, 402);
 
+    // Octets bruts pour Gemini (upload direct, pas de re-passage par une URL
+    // signée pour cette étape) + URL signée séparée pour Runware à l'étape 3
+    // (Runware va la récupérer lui-même côté serveur, pas d'octets à lui envoyer).
+    const { data: videoBlob, error: downloadError } = await userClient.storage.from("studio-doublage").download(sourceVideoPath);
+    if (downloadError || !videoBlob) return jsonResponse({ error: "Impossible de lire la vidéo fournie." }, 400);
+    const videoBytes = new Uint8Array(await videoBlob.arrayBuffer());
+    const videoMimeType = videoBlob.type || "video/mp4";
+
     const { data: signed, error: signError } = await userClient.storage
       .from("studio-doublage")
       .createSignedUrl(sourceVideoPath, 3600);
     if (signError || !signed?.signedUrl) return jsonResponse({ error: "Impossible de lire la vidéo fournie." }, 400);
     const sourceVideoUrl = signed.signedUrl;
 
-    const apiKey = Deno.env.get("RUNWARE_API_KEY");
-    if (!apiKey) return jsonResponse({ error: "Configuration Runware manquante." }, 500);
+    const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
+    if (!geminiApiKey) return jsonResponse({ error: "GEMINI_API_KEY non configurée côté serveur." }, 500);
+    const runwareApiKey = Deno.env.get("RUNWARE_API_KEY");
+    if (!runwareApiKey) return jsonResponse({ error: "Configuration Runware manquante." }, 500);
 
-    // Étape 1 : traduction intelligente vers la langue de la voix cible.
+    // Étape 1 : Gemini transcrit l'audio de la vidéo et traduit directement
+    // vers la langue cible (seule brique hors Runware de ce module).
     let translatedText: string;
     try {
-      const translation = await submitAndAwaitRunwareText(apiKey, {
-        taskType: "textInference",
-        model: TRANSLATION_MODEL,
-        messages: [{ role: "user", content: buildTranslationPrompt(trimmedScript, selectedVoice.languageLabel) }],
-        settings: { maxTokens: 1024 },
-      }, { timeoutMs: 45000 });
-      translatedText = translation.text.trim();
-      if (!translatedText) throw new Error("La traduction n'a renvoyé aucun texte.");
-      await recordAiUsage(userClient, { userId, mediaType: "text", model: TRANSLATION_MODEL, cost: translation.cost, source: "studio_doublage" });
+      translatedText = await transcribeAndTranslateVideo(geminiApiKey, {
+        bytes: videoBytes, mimeType: videoMimeType,
+        sourceLanguageLabel: sourceLang.label, targetLanguageLabel: targetLang.label,
+      });
     } catch (err) {
-      return jsonResponse({ error: err instanceof Error ? err.message : "La traduction a échoué." }, 502);
+      return jsonResponse({ error: err instanceof Error ? err.message : "La transcription/traduction a échoué." }, 502);
     }
 
-    // Étape 2 : texte traduit -> voix.
+    // Étape 2 : texte traduit -> voix (Runware).
     let ttsResult;
     try {
-      ttsResult = await submitAndAwaitRunware(apiKey, buildTtsTask({ text: translatedText, voice: selectedVoice.id }));
+      ttsResult = await submitAndAwaitRunware(runwareApiKey, buildTtsTask({ text: translatedText, voice: targetLang.voiceId }));
     } catch (err) {
       return jsonResponse({ error: err instanceof Error ? err.message : "La synthèse vocale a échoué." }, 502);
     }
     await recordAiUsage(userClient, { userId, mediaType: "audio", model: TTS_MODEL_ID, cost: ttsResult.cost, source: "studio_doublage" });
 
-    // Étape 3 : vidéo + audio traduit -> lip-sync (asynchrone, suivi côté client).
+    // Étape 3 : vidéo + audio traduit -> lip-sync (Runware, asynchrone).
     const lipsyncTask = modelConfig.buildTask({ videoUrl: sourceVideoUrl, audioUrl: ttsResult.url });
     let submitted;
     try {
-      submitted = await submitRunwareTask(apiKey, lipsyncTask);
+      submitted = await submitRunwareTask(runwareApiKey, lipsyncTask);
     } catch (err) {
       return jsonResponse({ error: err instanceof Error ? err.message : "Runware a refusé la demande." }, 502);
     }
@@ -101,10 +103,10 @@ Deno.serve(async (req) => {
         user_id: userId,
         status: "pending",
         model: modelId,
-        script_text: trimmedScript,
+        source_language: sourceLang.code,
         translated_text: translatedText,
-        target_voice: selectedVoice.id,
-        target_language: selectedVoice.language,
+        target_voice: targetLang.voiceId,
+        target_language: targetLang.code,
         source_video_path: sourceVideoPath,
         external_request_id: submitted.status === "pending" ? submitted.taskUUID : null,
       })
