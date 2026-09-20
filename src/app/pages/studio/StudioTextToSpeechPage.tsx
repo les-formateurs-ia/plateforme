@@ -3,9 +3,16 @@
 // Layout à deux volets (formulaire + galerie), même parti pris que
 // StudioMusicPage.tsx : pas de format/image à gérer, un panneau latéral
 // compact colle mieux qu'une barre flottante.
-import { useEffect, useRef, useState } from "react";
+//
+// Langue + voix séparées (2026-09-20) : le catalogue Runware complet (250
+// voix, 15 langues + voix spéciales, cf. studioTextToSpeech.ts) rend un seul
+// menu plat illisible — on choisit d'abord la langue, qui filtre la liste de
+// voix. Réglages expressifs (vitesse/hauteur/émotion/volume) repliés sous
+// "Réglages de la voix" : ce sont des champs avancés, pas la première chose
+// qu'un élève doit remplir pour juste générer un audio.
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { ArrowLeft, Download, Loader2, Volume2 } from "lucide-react";
+import { ArrowLeft, ChevronDown, Download, Loader2, Volume2 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { GCard } from "@/app/components/common/GCard";
@@ -15,11 +22,39 @@ import { MediaGenerationPlaceholder } from "@/app/components/common/MediaGenerat
 import { useMediaGenerations, type MediaGeneration } from "@/app/lib/useMediaGenerations";
 import { useGeneratedMedia } from "@/app/lib/useGeneratedMedia";
 import {
-  TTS_VOICES, SCRIPT_MAX_LENGTH, getMyTtsGenerations, getStudioTtsSignedUrl,
+  TTS_LANGUAGES, TTS_VOICES, TTS_EMOTIONS, TTS_SPEED_RANGE, TTS_VOLUME_RANGE, TTS_PITCH_RANGE,
+  DEFAULT_TTS_VOICE, SCRIPT_MAX_LENGTH, getMyTtsGenerations, getStudioTtsSignedUrl,
   requestTtsGeneration, pollTtsGenerationStatus, type StudioTtsGeneration,
 } from "@/app/lib/studioTextToSpeech";
 
 const PROMPT_MAX_HEIGHT = 160;
+const DEFAULT_LANGUAGE = TTS_LANGUAGES.find((g) => g.voices.some((v) => v.id === DEFAULT_TTS_VOICE))!.code;
+
+function Slider({ label, value, onChange, range, disabled, format }: {
+  label: string; value: number; onChange: (v: number) => void;
+  range: { min: number; max: number; step: number }; disabled: boolean; format: (v: number) => string;
+}) {
+  const th = useTh();
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1">
+        <label className="text-xs font-bold" style={{ color: th.fg }}>{label}</label>
+        <span className="text-xs font-semibold tabular-nums" style={{ color: th.fg3 }}>{format(value)}</span>
+      </div>
+      <input
+        type="range"
+        min={range.min}
+        max={range.max}
+        step={range.step}
+        value={value}
+        disabled={disabled}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="w-full disabled:opacity-50"
+        style={{ accentColor: th.navAC }}
+      />
+    </div>
+  );
+}
 
 function TtsCard({ gen, onRetry, retryDisabled }: { gen: MediaGeneration<StudioTtsGeneration>; onRetry: () => void; retryDisabled: boolean }) {
   const th = useTh();
@@ -27,6 +62,7 @@ function TtsCard({ gen, onRetry, retryDisabled }: { gen: MediaGeneration<StudioT
   const error = gen.trackingError || (gen.status === "failed" ? gen.errorMessage || "La génération a échoué." : null) || audio.error || (gen.status === "ready" && !gen.audioPath ? "Le média généré est indisponible." : null);
   const ready = gen.status === "ready" && audio.loaded && !error;
   const voiceLabel = TTS_VOICES.find((v) => v.id === gen.voice)?.label ?? gen.voice;
+  const emotionLabel = gen.emotion ? TTS_EMOTIONS.find((e) => e.id === gen.emotion)?.label : null;
 
   return (
     <div className="rounded-3xl overflow-hidden" style={{ background: th.card, border: `1px solid ${th.sep}`, boxShadow: "0 2px 10px rgba(0,0,0,0.18)" }}>
@@ -38,7 +74,15 @@ function TtsCard({ gen, onRetry, retryDisabled }: { gen: MediaGeneration<StudioT
       </div>
       <div className="p-4 space-y-2.5">
         <p className="text-sm line-clamp-3" style={{ color: th.fg }}>{gen.scriptText}</p>
-        <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg3 }}>{voiceLabel}</span>
+        <div className="flex flex-wrap gap-1.5">
+          <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg3 }}>{voiceLabel}</span>
+          {emotionLabel && (
+            <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg3 }}>{emotionLabel}</span>
+          )}
+          {gen.speed != null && gen.speed !== TTS_SPEED_RANGE.default && (
+            <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg3 }}>Vitesse ×{gen.speed}</span>
+          )}
+        </div>
         {gen.status === "ready" && (
           <div className="space-y-2 pt-1">
             {audio.url ? <audio key={audio.url} controls preload="metadata" src={audio.url} onLoadedMetadata={audio.onLoad} onError={audio.onError} className="w-full h-9" /> : <p className="text-xs" style={{ color: th.fg3 }}>Chargement du lecteur…</p>}
@@ -59,9 +103,19 @@ export function StudioTextToSpeechPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [script, setScript] = useState("");
-  const [voiceId, setVoiceId] = useState(TTS_VOICES[0].id);
+  const [languageCode, setLanguageCode] = useState(DEFAULT_LANGUAGE);
+  const [voiceId, setVoiceId] = useState(DEFAULT_TTS_VOICE);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [speed, setSpeed] = useState(TTS_SPEED_RANGE.default);
+  const [pitch, setPitch] = useState(TTS_PITCH_RANGE.default);
+  const [volume, setVolume] = useState(TTS_VOLUME_RANGE.default);
+  const [emotion, setEmotion] = useState<string>("auto");
   const scriptRef = useRef<HTMLTextAreaElement>(null);
   const { generations, generating, loading, historyError, start, retry } = useMediaGenerations(user?.id, getMyTtsGenerations, pollTtsGenerationStatus, (result) => ({ audioPath: result.audioPath }));
+
+  const currentLanguage = useMemo(() => TTS_LANGUAGES.find((g) => g.code === languageCode) ?? TTS_LANGUAGES[0], [languageCode]);
+  const voiceOptions = useMemo(() => currentLanguage.voices.map((v) => ({ value: v.id, label: v.label })), [currentLanguage]);
+  const isDefaultControls = speed === TTS_SPEED_RANGE.default && pitch === TTS_PITCH_RANGE.default && volume === TTS_VOLUME_RANGE.default && emotion === "auto";
 
   useEffect(() => {
     const el = scriptRef.current;
@@ -70,13 +124,28 @@ export function StudioTextToSpeechPage() {
     el.style.height = `${Math.min(el.scrollHeight, PROMPT_MAX_HEIGHT)}px`;
   }, [script]);
 
+  const handleLanguageChange = (code: string) => {
+    setLanguageCode(code);
+    const group = TTS_LANGUAGES.find((g) => g.code === code);
+    if (group && !group.voices.some((v) => v.id === voiceId)) setVoiceId(group.voices[0].id);
+  };
+
   const pendingCount = generations.filter((g) => g.status === "pending").length;
 
   const handleGenerate = async () => {
     if (!user || !script.trim() || generating) return;
-    const voice = TTS_VOICES.find((v) => v.id === voiceId) ?? TTS_VOICES[0];
-    const draft: StudioTtsGeneration = { id: crypto.randomUUID(), status: "pending", scriptText: script.trim(), voice: voice.id, language: voice.language, audioPath: null, errorMessage: null, createdAt: new Date().toISOString() };
-    await start(draft, () => requestTtsGeneration({ script: draft.scriptText, voice: draft.voice }));
+    const controls = {
+      speed: speed !== TTS_SPEED_RANGE.default ? speed : undefined,
+      pitch: pitch !== TTS_PITCH_RANGE.default ? pitch : undefined,
+      volume: volume !== TTS_VOLUME_RANGE.default ? volume : undefined,
+      emotion: emotion !== "auto" ? emotion : undefined,
+    };
+    const draft: StudioTtsGeneration = {
+      id: crypto.randomUUID(), status: "pending", scriptText: script.trim(), voice: voiceId, language: languageCode,
+      speed: controls.speed ?? null, pitch: controls.pitch ?? null, volume: controls.volume ?? null, emotion: controls.emotion ?? null,
+      audioPath: null, errorMessage: null, createdAt: new Date().toISOString(),
+    };
+    await start(draft, () => requestTtsGeneration({ script: draft.scriptText, voice: draft.voice, ...controls }));
     setScript("");
   };
 
@@ -109,9 +178,54 @@ export function StudioTextToSpeechPage() {
               <p className="text-[11px] text-right mt-1" style={{ color: th.fg3 }}>{script.length}/{SCRIPT_MAX_LENGTH}</p>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold mb-1.5" style={{ color: th.fg }}>Voix</label>
-              <VSelect value={voiceId} onValueChange={setVoiceId} options={TTS_VOICES.map((v) => ({ value: v.id, label: v.label }))} disabled={generating} />
+            <div className="grid grid-cols-2 gap-2.5">
+              <div>
+                <label className="block text-xs font-bold mb-1.5" style={{ color: th.fg }}>Langue</label>
+                <VSelect value={languageCode} onValueChange={handleLanguageChange} options={TTS_LANGUAGES.map((g) => ({ value: g.code, label: g.label }))} disabled={generating} sm />
+              </div>
+              <div>
+                <label className="block text-xs font-bold mb-1.5" style={{ color: th.fg }}>Voix</label>
+                <VSelect value={voiceId} onValueChange={setVoiceId} options={voiceOptions} disabled={generating} sm />
+              </div>
+            </div>
+
+            <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${th.inputB}` }}>
+              <button
+                type="button"
+                onClick={() => setShowAdvanced((v) => !v)}
+                className="w-full flex items-center justify-between px-3.5 py-2.5 text-xs font-bold transition-colors"
+                style={{ color: th.fg, background: th.inputBg }}
+              >
+                <span>Réglages de la voix{!isDefaultControls && <span style={{ color: th.navAC }}> · personnalisés</span>}</span>
+                <ChevronDown className="w-3.5 h-3.5 transition-transform" style={{ transform: showAdvanced ? "rotate(180deg)" : undefined, color: th.fg3 }} />
+              </button>
+              {showAdvanced && (
+                <div className="p-3.5 space-y-3.5">
+                  <div>
+                    <label className="block text-xs font-bold mb-1.5" style={{ color: th.fg }}>Émotion</label>
+                    <VSelect
+                      value={emotion}
+                      onValueChange={setEmotion}
+                      options={[{ value: "auto", label: "Automatique (selon le texte)" }, ...TTS_EMOTIONS.map((e) => ({ value: e.id, label: e.label }))]}
+                      disabled={generating}
+                      sm
+                    />
+                  </div>
+                  <Slider label="Vitesse" value={speed} onChange={setSpeed} range={TTS_SPEED_RANGE} disabled={generating} format={(v) => `×${v.toFixed(1)}`} />
+                  <Slider label="Tonalité (grave / aiguë)" value={pitch} onChange={setPitch} range={TTS_PITCH_RANGE} disabled={generating} format={(v) => (v > 0 ? `+${v}` : `${v}`)} />
+                  <Slider label="Volume" value={volume} onChange={setVolume} range={TTS_VOLUME_RANGE} disabled={generating} format={(v) => `×${v.toFixed(1)}`} />
+                  {!isDefaultControls && (
+                    <button
+                      type="button"
+                      onClick={() => { setSpeed(TTS_SPEED_RANGE.default); setPitch(TTS_PITCH_RANGE.default); setVolume(TTS_VOLUME_RANGE.default); setEmotion("auto"); }}
+                      className="text-xs font-semibold hover:opacity-70 transition-opacity"
+                      style={{ color: th.fg2 }}
+                    >
+                      Réinitialiser les réglages
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
             <ShimBtn full onClick={handleGenerate} disabled={!script.trim() || generating}>
@@ -141,8 +255,17 @@ export function StudioTextToSpeechPage() {
           )}
           {!!generations.length && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {generations.map((gen) => <TtsCard key={gen.clientKey ?? gen.id} gen={gen} retryDisabled={generating}
-                onRetry={() => void retry(gen, () => requestTtsGeneration({ script: gen.scriptText, voice: gen.voice }))} />)}
+              {generations.map((gen) => (
+                <TtsCard
+                  key={gen.clientKey ?? gen.id}
+                  gen={gen}
+                  retryDisabled={generating}
+                  onRetry={() => void retry(gen, () => requestTtsGeneration({
+                    script: gen.scriptText, voice: gen.voice,
+                    speed: gen.speed ?? undefined, pitch: gen.pitch ?? undefined, volume: gen.volume ?? undefined, emotion: gen.emotion ?? undefined,
+                  }))}
+                />
+              ))}
             </div>
           )}
         </div>

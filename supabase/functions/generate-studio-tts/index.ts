@@ -11,6 +11,14 @@ import { TTS_VOICES, DEFAULT_TTS_VOICE, TTS_MODEL_ID, buildTtsTask } from "../_s
 import { submitRunwareTask, finalizeRunwareResult } from "../_shared/runware.ts";
 import { checkAiBudget, recordAiUsage } from "../_shared/ai-budget.ts";
 
+// Un type invalide (ex. une chaîne au lieu d'un nombre) est simplement
+// ignoré plutôt que rejeté en 400 : buildTtsTask ramène de toute façon toute
+// valeur numérique hors bornes dans l'intervalle Runware/MiniMax (cf.
+// studio-tts-voices.ts), pas besoin de dupliquer cette validation ici.
+function readNumberParam(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
 // Plus généreux que "Faites parler vos images" (1000) : pas de rendu avatar
 // à synchroniser derrière, MiniMax Speech accepte jusqu'à 50 000 caractères
 // (cf. studio-doublage-models.ts pour les réserves sur ce catalogue) — on
@@ -21,12 +29,18 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
 
   try {
-    const { script, voice } = await req.json();
+    const { script, voice, speed, volume, pitch, emotion } = await req.json();
     const trimmedScript = typeof script === "string" ? script.trim() : "";
     if (!trimmedScript) return jsonResponse({ error: "Le texte à convertir est obligatoire." }, 400);
     if (trimmedScript.length > SCRIPT_MAX_LENGTH) return jsonResponse({ error: `Le texte est trop long (${SCRIPT_MAX_LENGTH} caractères maximum).` }, 400);
 
     const selectedVoice = TTS_VOICES.find((v) => v.id === voice) ?? TTS_VOICES.find((v) => v.id === DEFAULT_TTS_VOICE)!;
+    const controls = {
+      speed: readNumberParam(speed),
+      volume: readNumberParam(volume),
+      pitch: readNumberParam(pitch),
+      emotion: typeof emotion === "string" && emotion ? emotion : undefined,
+    };
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) return jsonResponse({ error: "Non authentifié." }, 401);
@@ -48,7 +62,7 @@ Deno.serve(async (req) => {
 
     let submitted;
     try {
-      submitted = await submitRunwareTask(apiKey, buildTtsTask({ text: trimmedScript, voice: selectedVoice.id }));
+      submitted = await submitRunwareTask(apiKey, buildTtsTask({ text: trimmedScript, voice: selectedVoice.id, ...controls }));
     } catch (err) {
       return jsonResponse({ error: err instanceof Error ? err.message : "La synthèse vocale a échoué." }, 502);
     }
@@ -62,6 +76,10 @@ Deno.serve(async (req) => {
         script_text: trimmedScript,
         voice: selectedVoice.id,
         language: selectedVoice.language,
+        speed: controls.speed ?? null,
+        volume: controls.volume ?? null,
+        pitch: controls.pitch ?? null,
+        emotion: controls.emotion ?? null,
         external_request_id: submitted.status === "pending" ? submitted.taskUUID : null,
       })
       .select("id")

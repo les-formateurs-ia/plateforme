@@ -197,6 +197,10 @@ export interface Database {
           script_text: string;
           voice: string;
           language: string;
+          speed: number | null;
+          volume: number | null;
+          pitch: number | null;
+          emotion: string | null;
           audio_path: string | null;
           external_request_id: string | null;
           error_message: string | null;
@@ -211,6 +215,10 @@ export interface Database {
           script_text: string;
           voice: string;
           language: string;
+          speed?: number | null;
+          volume?: number | null;
+          pitch?: number | null;
+          emotion?: string | null;
           audio_path?: string | null;
           external_request_id?: string | null;
           error_message?: string | null;

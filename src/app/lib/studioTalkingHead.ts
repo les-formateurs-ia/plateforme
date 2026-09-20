@@ -30,12 +30,19 @@ export interface TalkingHeadVoice {
   language: string;
 }
 
+// Corrigé le 2026-09-20 : "English_expressive_narrator" et "Spanish_narrator"
+// n'existaient pas dans le catalogue Runware réel (cf.
+// src/app/lib/studioTextToSpeech.ts, dont le catalogue complet a été
+// revérifié directement sur la doc à cette date) — remplacés par des ids
+// réels. Cette page garde volontairement une sélection courte (5 voix) plutôt
+// que le catalogue complet, l'avatar restant le point d'attention principal
+// ici.
 export const TTS_VOICES: TalkingHeadVoice[] = [
   { id: "French_MaleNarrator", label: "Français — Narrateur (H)", language: "fr-FR" },
   { id: "French_FemaleAnchor", label: "Français — Présentatrice (F)", language: "fr-FR" },
-  { id: "English_expressive_narrator", label: "Anglais — Narrateur expressif", language: "en-US" },
+  { id: "English_CaptivatingStoryteller", label: "Anglais — Narrateur expressif", language: "en-US" },
   { id: "English_CalmWoman", label: "Anglais — Voix calme (F)", language: "en-US" },
-  { id: "Spanish_narrator", label: "Espagnol — Narrateur", language: "es-ES" },
+  { id: "Spanish_Narrator", label: "Espagnol — Narrateur", language: "es-ES" },
 ];
 
 export const SCRIPT_MAX_LENGTH = 1000;

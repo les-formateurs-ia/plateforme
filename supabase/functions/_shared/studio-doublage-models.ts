@@ -62,10 +62,15 @@ export interface DoublageLanguage {
   voiceId: string; // voix MiniMax utilisée quand cette langue est la CIBLE
 }
 
+// Corrigé le 2026-09-20 : "English_expressive_narrator" et "Spanish_narrator"
+// n'existaient pas dans le catalogue Runware réel (cf. studio-tts-voices.ts,
+// dont le catalogue complet a été revérifié directement sur la doc à cette
+// date) — remplacés par des ids réels, mêmes réserves de non-vérification en
+// direct que le reste du catalogue.
 export const DOUBLAGE_LANGUAGES: DoublageLanguage[] = [
   { code: "fr", label: "Français", voiceId: "French_MaleNarrator" },
-  { code: "en", label: "Anglais", voiceId: "English_expressive_narrator" },
-  { code: "es", label: "Espagnol", voiceId: "Spanish_narrator" },
+  { code: "en", label: "Anglais", voiceId: "English_CaptivatingStoryteller" },
+  { code: "es", label: "Espagnol", voiceId: "Spanish_Narrator" },
   { code: "de", label: "Allemand", voiceId: "German_FriendlyMan" },
   { code: "it", label: "Italien", voiceId: "Italian_Narrator" },
   { code: "pt", label: "Portugais", voiceId: "Portuguese_SentimentalLady" },
