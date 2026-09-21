@@ -1,0 +1,29 @@
+/* Ordinary routes expose an overflow-y-auto root. On mobile, let the
+   document own their scroll so browser controls can collapse and the menu
+   clearance scrolls away. Only match the direct route root: chat, studio
+   workspaces and dialogs still need their independent bounded panels. */
+@media (width < 1024px) {
+  .main-layout:has(.main-layout-content > .overflow-y-auto) {
+    height: auto;
+    min-height: 100dvh;
+    overflow: clip;
+  }
+
+  .main-layout:has(.main-layout-content > .overflow-y-auto) :is(
+    .main-layout-body,
+    .main-layout-main,
+    .main-layout-content
+  ) {
+    overflow: visible;
+  }
+
+  .main-layout-content:has(> .overflow-y-auto) {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+
+  .main-layout-content > .overflow-y-auto {
+    overflow: visible;
+  }
+}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router";
 import { Plus, CalendarClock, Menu, X, Bug, Building2, ScanEye } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
@@ -64,6 +64,29 @@ export function MainLayout() {
 
   useEffect(() => { setNavOpen(false); }, [location.pathname]);
 
+  // Les pages mobiles défilent avec le document : une nouvelle route repart
+  // en haut, comme lors du montage de l'ancien conteneur défilant.
+  useLayoutEffect(() => {
+    if (window.matchMedia("(max-width: 1023px)").matches) {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!navOpen) return;
+    const mobile = window.matchMedia("(max-width: 1023px)");
+    const previousOverflow = document.body.style.overflow;
+    const syncScrollLock = () => {
+      document.body.style.overflow = mobile.matches ? "hidden" : previousOverflow;
+    };
+    syncScrollLock();
+    mobile.addEventListener("change", syncScrollLock);
+    return () => {
+      mobile.removeEventListener("change", syncScrollLock);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [navOpen]);
+
   // Pastille "nouveau signalement" à côté de l'onglet Incidents — se recharge
   // en temps réel (un incident notifie tous les admins, cf. trigger
   // notify_admins_of_incident) et se vide dès qu'on ouvre l'onglet
@@ -89,29 +112,17 @@ export function MainLayout() {
 
   return (
     <div
-      className="flex flex-col h-dvh overflow-x-hidden overflow-y-hidden"
+      className="main-layout flex flex-col h-dvh overflow-x-hidden overflow-y-hidden"
       style={{
         background: th.bg,
         fontFamily: "'Funnel Display',sans-serif",
-        // h-dvh (plutôt que h-screen/100vh) : suit la hauteur réelle visible,
-        // y compris quand la barre d'outils du navigateur/webview (Telegram
-        // in-app browser notamment) rétrécit dynamiquement l'écran — sans ça
-        // <body> (voir theme.css) devenait visible en bandes au-dessus/
-        // en-dessous de cette div, corrigé le 2026-09-21.
-        //
-        // Pas de paddingTop/Bottom safe-area ici (retiré le 2026-09-21,
-        // ajouté puis retiré le même jour) : chaque page a déjà son propre
-        // padding haut/bas (py-5 sm:py-6 etc.) — l'ajouter aussi ici créait un
-        // DOUBLE espace vide avant le contenu réel (cette div décale tout son
-        // contenu, PUIS la page rajoute son propre padding par-dessus). Seuls
-        // les éléments `fixed` (bouton hamburger, tiroir mobile ci-dessous)
-        // ont besoin de leur propre safe-area : ils ignorent le padding d'un
-        // ancêtre puisqu'ils sont positionnés par rapport au viewport, pas au
-        // flux normal — donc pas de doublon possible pour eux.
+        // Le bureau et les outils à panneaux gardent une hauteur bornée.
+        // mobile-layout.css laisse les pages ordinaires défiler avec le
+        // document pour que Safari puisse rétracter ses barres d'outils.
       }}
     >
       <ImpersonationBanner />
-      <div className="flex flex-1 min-h-0 overflow-hidden">
+      <div className="main-layout-body flex flex-1 min-h-0 overflow-hidden">
       <Background />
 
       {navOpen && (
@@ -253,21 +264,14 @@ export function MainLayout() {
         </div>
       </aside>
 
-      <div className="flex-1 min-w-0 flex flex-col relative z-10 overflow-hidden">
-        {/* fixed = position par rapport au viewport, donc ignore le paddingTop
-            (safe-area) posé sur le conteneur plus haut — il faut le rajouter
-            ici explicitement (calc), sinon le bouton passe sous l'encoche sur
-            mobile malgré le padding du parent. */}
-        <button className={cx("fixed left-3 z-30 w-9 h-9 rounded-full flex items-center justify-center shrink-0 lg:hidden", isImpersonating ? "top-[calc(env(safe-area-inset-top)+52px)]" : "top-[calc(env(safe-area-inset-top)+0.75rem)]")} style={{ background: th.card, border: `1px solid ${th.inputB}`, boxShadow: "0 6px 18px rgba(0,0,0,0.14)" }} onClick={() => setNavOpen(true)}>
+      <div className="main-layout-main flex-1 min-w-0 flex flex-col relative z-10 overflow-hidden">
+        {/* Seul le bouton flotte au-dessus de la page, sans bandeau opaque. */}
+        <button aria-label="Ouvrir le menu" aria-expanded={navOpen} className={cx("fixed left-3 z-30 w-9 h-9 rounded-full flex items-center justify-center shrink-0 lg:hidden", isImpersonating ? "top-[calc(env(safe-area-inset-top)+52px)]" : "top-[calc(env(safe-area-inset-top)+0.75rem)]")} style={{ background: th.card, border: `1px solid ${th.inputB}`, boxShadow: "0 6px 18px rgba(0,0,0,0.14)" }} onClick={() => setNavOpen(true)}>
           <Menu className="w-4 h-4" style={{ color: th.fg3 }} />
         </button>
 
-        {/* pt-[...] doit inclure la safe-area : le bouton hamburger (fixed,
-            juste au-dessus) a lui-même déjà cette safe-area dans son `top` —
-            sans elle ici, ce padding fixe de 2.5rem ne suffirait plus à le
-            dégager sur un écran avec encoche (le bouton serait descendu par
-            sa propre safe-area, mais pas ce padding). */}
-        <div className="flex-1 min-h-0 flex flex-col overflow-hidden pt-[calc(env(safe-area-inset-top)+2.5rem)] lg:pt-0">
+        {/* En défilement document, cet espace initial part avec le contenu. */}
+        <div className="main-layout-content flex-1 min-h-0 flex flex-col overflow-hidden pt-[calc(env(safe-area-inset-top)+2.5rem)] lg:pt-0">
           <Outlet />
         </div>
       </div>
