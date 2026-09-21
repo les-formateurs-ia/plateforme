@@ -120,9 +120,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // décalage avec le thème sombre choisi via th.* — visible sur mobile comme
   // des bandes sombres/claires incohérentes autour de l'app le temps que
   // MainLayout (qui, lui, utilise th.bg en style inline) couvre l'écran.
-  // Même correctif pour <meta name="theme-color"> : la couleur de la barre
-  // système/navigateur doit suivre le thème réellement choisi, pas seulement
-  // la préférence système figée dans le <meta> statique de index.html.
+  // Les meta theme-color suivent aussi le thème choisi. Leurs media queries
+  // dans index.html les limitent au bureau : sur mobile, on laisse le
+  // navigateur gérer la teinte et la transparence de ses propres barres.
   useLayoutEffect(() => {
     const root = document.documentElement;
     root.style.setProperty("--primary", value.navAC);

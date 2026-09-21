@@ -11,10 +11,11 @@
       <title>Site web e-learning IA</title>
       <meta name="description" content="Personalized AI-powered e-learning platform offering tailored lessons, interactive content, and dynamic dashboards to enhance user learning experiences." />
       <meta name="robots" content="noindex, nofollow" />
-      <!-- Valeur de secours avant le premier rendu React — src/app/theme/theme.tsx
-           la met ensuite à jour dynamiquement selon le thème clair/sombre choisi. -->
-      <meta name="theme-color" content="#F7F7FA" media="(prefers-color-scheme: light)" />
-      <meta name="theme-color" content="#0A0A10" media="(prefers-color-scheme: dark)" />
+      <!-- Sur mobile, laisser le navigateur composer ses barres avec la page
+           sans imposer une teinte unie. Sur bureau, theme.tsx synchronise
+           ces couleurs avec le thème choisi dans l'app. -->
+      <meta name="theme-color" content="#F7F7FA" media="(min-width: 1024px) and (prefers-color-scheme: light)" />
+      <meta name="theme-color" content="#0A0A10" media="(min-width: 1024px) and (prefers-color-scheme: dark)" />
       <!--
         Chargée ici (et pas via @import dans fonts.css) pour que le scanner de
         préchargement du navigateur la découvre dès le parsing du HTML, en

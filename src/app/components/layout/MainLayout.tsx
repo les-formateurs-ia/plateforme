@@ -138,8 +138,8 @@ export function MainLayout() {
       <aside className={cx(
         // border côté classes (pas inline) : lg: doit pouvoir retirer le
         // haut/bas sans que le style inline (non responsive) ne les réimpose.
-        "fixed left-0 z-40 flex flex-col w-[240px] shrink-0 overflow-hidden transition-transform duration-300 ease-out border border-l-0 rounded-tr-[28px] rounded-br-[28px] shadow-[0_20px_48px_rgba(0,0,0,0.22)] lg:static lg:z-auto lg:inset-y-0 lg:h-full lg:w-[232px] lg:border-t-0 lg:border-b-0 lg:rounded-none lg:shadow-none lg:translate-x-0",
-        navOpen ? "translate-x-0" : "-translate-x-full",
+        "fixed left-0 z-40 flex flex-col w-[240px] shrink-0 overflow-hidden transition-[transform,visibility] duration-300 ease-out border border-l-0 rounded-tr-[28px] rounded-br-[28px] shadow-[0_20px_48px_rgba(0,0,0,0.22)] lg:static lg:visible lg:z-auto lg:inset-y-0 lg:h-full lg:w-[232px] lg:border-t-0 lg:border-b-0 lg:rounded-none lg:shadow-none lg:translate-x-0",
+        navOpen ? "visible translate-x-0" : "invisible -translate-x-full",
       )} style={{
         background: th.sidebar,
         borderColor: th.sidebarB,

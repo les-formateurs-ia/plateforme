@@ -6,7 +6,9 @@
   .main-layout:has(.main-layout-content > .overflow-y-auto) {
     height: auto;
     min-height: 100dvh;
-    overflow: clip;
+    /* Horizontal clipping belongs to html/body. Keep this entire document
+       layer available for Safari's rendering beneath its browser controls. */
+    overflow: visible;
   }
 
   .main-layout:has(.main-layout-content > .overflow-y-auto) :is(
@@ -18,12 +20,14 @@
   }
 
   .main-layout-content:has(> .overflow-y-auto) {
-    padding-bottom: env(safe-area-inset-bottom, 0px);
     padding-left: env(safe-area-inset-left, 0px);
     padding-right: env(safe-area-inset-right, 0px);
   }
 
   .main-layout-content > .overflow-y-auto {
     overflow: visible;
+    /* Keep the last controls reachable within the scrolling page itself,
+       without adding a second empty strip below the page's own padding. */
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 0px));
   }
 }
