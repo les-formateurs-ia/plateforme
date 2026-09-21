@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useSearchParams } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { Trophy, CheckCircle, Lock, Award, Sparkles, Sun, Moon, Monitor, LogOut, Camera, CalendarClock, CalendarCheck2 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
@@ -38,6 +38,7 @@ function GoogleLogo({ className }: { className?: string }) {
 
 export function ProfilePage() {
   const th = useTh();
+  const navigate = useNavigate();
   const { user, role, signOut } = useAuth();
   const staff = isStaff(role);
   const { profile, updateAvatar } = useProfile();
@@ -230,7 +231,7 @@ export function ProfilePage() {
               })}
             </div>
             <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${th.sep}` }}>
-              <ShimBtn sm><span className="flex items-center gap-2"><Award className="w-4 h-4" />S'entraîner pour la soutenance</span></ShimBtn>
+              <ShimBtn sm onClick={() => navigate("/lessons")}><span className="flex items-center gap-2"><Award className="w-4 h-4" />S'entraîner pour la soutenance</span></ShimBtn>
             </div>
           </div></GCard>
 
