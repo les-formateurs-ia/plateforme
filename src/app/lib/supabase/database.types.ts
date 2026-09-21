@@ -26,6 +26,33 @@ export type AiUsageSource = "studio_image" | "studio_video" | "studio_music" | "
 export interface Database {
   public: {
     Tables: {
+      project_advisor_leads: {
+        Row: {
+          id: number;
+          request_id: string;
+          access_token_hash: string;
+          first_name: string;
+          last_name: string;
+          email: string;
+          profile: "entreprise" | "particulier";
+          sector: string;
+          need: string;
+          phone: string | null;
+          status: "new" | "callback_requested";
+          created_at: string;
+          callback_requested_at: string | null;
+          source: string;
+          privacy_notice_version: string;
+          contact_accepted_at: string;
+          analysis_status: "pending" | "processing" | "ready" | "failed";
+          analysis_attempts: number;
+          analysis_started_at: string | null;
+          analysis: unknown;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: never[];
+      };
       profiles: {
         Row: {
           id: string;

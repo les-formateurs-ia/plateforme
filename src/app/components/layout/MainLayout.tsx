@@ -183,6 +183,10 @@ export function MainLayout() {
                   style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
                   <Icon className="w-4 h-4 shrink-0" />{label}
                 </NavLink>,
+                isAdmin(role) ? <NavLink key="advisor-leads" to="/admin/project-advisor-leads" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-[14px] font-medium text-left transition-all"
+                  style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
+                  <Building2 className="w-4 h-4 shrink-0" />Demandes IA
+                </NavLink> : null,
                 <NavLink key="gallery" to="/admin/ai-detection-gallery" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-[14px] font-medium text-left transition-all"
                   style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
                   <ScanEye className="w-4 h-4 shrink-0" />Galerie Détection IA

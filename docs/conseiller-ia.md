@@ -47,8 +47,13 @@ La confirmation du rappel n'apparaît qu'après l'écriture en base. Une panne
 de l'IA ne supprime pas le contact et n'empêche pas la demande de rappel.
 Le bouton d'appel utilise **`tel:+33980874046`** (09 80 87 40 46).
 
-Il n'y a **aucune intégration CRM, notification automatique ou page admin**.
-L'équipe consulte et traite les demandes dans la base. Le délai annoncé de
+Les administrateurs consultent les demandes dans **Demandes IA**, entre
+Rendez-vous et Galerie Détection IA (`/admin/project-advisor-leads`). La table
+affiche les coordonnées, le profil, le secteur, le besoin et les demandes de
+rappel, avec un tiret pour les valeurs absentes. Le téléphone est renseigné
+lors de la demande de rappel. Les résultats sont paginés et actualisés toutes
+les 30 secondes ; un filtre permet de choisir Entreprise ou Particulier.
+Il n'y a **aucune intégration CRM ou notification automatique**. Le délai annoncé de
 24 heures suppose donc une prise en charge opérationnelle de ces demandes.
 
 ## Données et accès
@@ -56,8 +61,10 @@ L'équipe consulte et traite les demandes dans la base. Le délai annoncé de
 - `project_advisor_leads` : coordonnées, projet, analyse et demande de rappel.
 - `project_advisor_quotas` : compteurs techniques temporaires, sans IP/email
   en clair. Les compteurs de plus de deux jours sont nettoyés à l'utilisation.
-- RLS activée et privilèges révoqués pour `anon` et `authenticated`.
-  Aucun accès direct depuis le navigateur, même avec un compte élève.
+- RLS activée : aucun accès pour les visiteurs, élèves ou formateurs.
+  La migration `20260921141737_project_advisor_admin_read.sql` autorise les
+  administrateurs à lire uniquement les colonnes de contact et de projet.
+  Les jetons d'accès ne sont pas exposés et aucune écriture cliente n'est permise.
 - La fonction utilise le rôle serveur. Chaque visiteur détient seulement un
   jeton aléatoire pour SA soumission, conservé en mémoire, dont seule
   l'empreinte SHA-256 est enregistrée. Il expire après 24 heures.
