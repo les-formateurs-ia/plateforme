@@ -104,6 +104,16 @@ export function LessonPage() {
   const [agentError, setAgentError] = useState<string | null>(null);
   const [pttActive, setPttActive] = useState(false);
   const conversationRef = useRef<GeminiVoiceSession | null>(null);
+  // Filet contre une course : startAgentCall est async (token + getUserMedia
+  // + WebSocket peuvent prendre plus d'une seconde) — si le composant démonte
+  // pendant ce délai (navigation rapide vers une autre page), l'effet de
+  // cleanup ci-dessous (ligne ~600) tourne AVANT que conversationRef.current
+  // ne soit assigné, donc il ne voit rien à fermer. La session se termine
+  // quand même par arriver (micro ouvert + WebSocket connecté) mais sur un
+  // ref que plus personne ne lit ni ne nettoie — le micro reste capturé et le
+  // flux Gemini Live actif indéfiniment (visible côté OS comme une session
+  // audio active tant que l'onglet reste ouvert), corrigé le 2026-09-21.
+  const unmountedRef = useRef(false);
 
   type PodcastVariantState = { podcast: Podcast; audioUrl: string };
   const [podcastByVariant, setPodcastByVariant] = useState<Partial<Record<PodcastVariantId, PodcastVariantState>>>({});
@@ -543,6 +553,12 @@ export function LessonPage() {
           setAgentError(typeof message === "string" ? message : "Erreur de connexion à l'agent.");
         },
       });
+      if (unmountedRef.current) {
+        // Le composant a démonté pendant la connexion (cf. commentaire sur
+        // unmountedRef) : personne ne fermera ce flux sinon, on le fait ici.
+        void conversation.endSession();
+        return;
+      }
       conversationRef.current = conversation;
       // Micro coupé par défaut : conversation en push-to-talk, on ne capte
       // l'audio que pendant l'appui sur le bouton micro (cf. startPushToTalk).
@@ -597,7 +613,10 @@ export function LessonPage() {
   }, [tab]);
 
   useEffect(() => {
-    return () => { void conversationRef.current?.endSession(); };
+    return () => {
+      unmountedRef.current = true;
+      void conversationRef.current?.endSession();
+    };
   }, []);
 
   const startEditHtml = () => {

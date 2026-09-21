@@ -50,6 +50,12 @@ export function AgentPage() {
   const [agentError, setAgentError] = useState<string | null>(null);
   const [pttActive, setPttActive] = useState(false);
   const voiceRef = useRef<GeminiVoiceSession | null>(null);
+  // Filet contre une course démontage/connexion asynchrone — même correctif
+  // que LessonPage.tsx (cf. son commentaire détaillé sur unmountedRef) :
+  // startVoiceCall est async, si on démonte pendant l'attente, le cleanup ci-
+  // dessous (ligne ~108) tourne avant que voiceRef.current ne soit assigné et
+  // ne voit rien à fermer — le micro/WebSocket restait actif indéfiniment.
+  const unmountedRef = useRef(false);
   const chatEnd = useRef<HTMLDivElement>(null);
 
   const instanceNameById = useMemo(() => new Map(instances.map((i) => [i.id, i.name])), [instances]);
@@ -105,7 +111,10 @@ export function AgentPage() {
   }, [conversationId]);
 
   useEffect(() => {
-    return () => { void voiceRef.current?.endSession(); };
+    return () => {
+      unmountedRef.current = true;
+      void voiceRef.current?.endSession();
+    };
   }, []);
 
   useEffect(() => { chatEnd.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, sending]);
@@ -190,6 +199,10 @@ export function AgentPage() {
           setAgentError(typeof message === "string" ? message : "Erreur de connexion à l'agent.");
         },
       });
+      if (unmountedRef.current) {
+        void session.endSession();
+        return;
+      }
       voiceRef.current = session;
       session.setMicMuted(true);
     } catch (err) {
