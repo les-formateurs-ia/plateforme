@@ -25,6 +25,12 @@ Puis ouvre l'URL affichée par Vite dans le terminal.
 
 ## Structure
 
+Le widget public autonome **Conseiller Projet IA** se trouve dans
+`public/conseiller-ia.html`. Il est destiné à une iframe sur le site officiel,
+sans route ni menu dans l'espace apprenant. Voir
+[l'intégration et le fonctionnement](docs/conseiller-ia.md) et
+[le code iframe à copier](docs/conseiller-ia-embed.html).
+
 - `src/app/App.tsx` — racine : providers (thème, profil) + routes (`react-router`).
 - `src/app/pages/` — une page par route (onboarding, dashboard, leçons, pratique, planning, profil, leçon).
 - `src/app/components/layout/` — `MainLayout` (sidebar + topbar, `<Outlet/>`).

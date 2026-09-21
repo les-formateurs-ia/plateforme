@@ -1,0 +1,3 @@
+# Only this dedicated public widget endpoint accepts visitors without a login.
+[functions.project-advisor]
+verify_jwt = false

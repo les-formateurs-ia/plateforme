@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
+    "test:advisor": "node --test scripts/project-advisor.test.mjs",
     "test:media": "node --test scripts/media-generation.test.mjs",
     "build": "vite build",
     "dev": "vite",
