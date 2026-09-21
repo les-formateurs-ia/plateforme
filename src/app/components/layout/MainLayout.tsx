@@ -88,7 +88,23 @@ export function MainLayout() {
   }, [location.pathname]);
 
   return (
-    <div className="flex flex-col h-screen overflow-x-hidden overflow-y-hidden" style={{ background: th.bg, fontFamily: "'Funnel Display',sans-serif" }}>
+    <div
+      className="flex flex-col h-dvh overflow-x-hidden overflow-y-hidden"
+      style={{
+        background: th.bg,
+        fontFamily: "'Funnel Display',sans-serif",
+        // h-dvh (plutôt que h-screen/100vh) : suit la hauteur réelle visible,
+        // y compris quand la barre d'outils du navigateur/webview (Telegram
+        // in-app browser notamment) rétrécit dynamiquement l'écran — sans ça
+        // <body> (voir theme.css) devenait visible en bandes au-dessus/
+        // en-dessous de cette div, corrigé le 2026-09-21. paddingTop/Bottom :
+        // évite que la bordure de l'app (fond compris) passe sous l'encoche/
+        // la barre d'accueil ; sans effet sur desktop/navigateur classique où
+        // ces variables valent 0.
+        paddingTop: "env(safe-area-inset-top)",
+        paddingBottom: "env(safe-area-inset-bottom)",
+      }}
+    >
       <ImpersonationBanner />
       <div className="flex flex-1 min-h-0 overflow-hidden">
       <Background />
@@ -100,7 +116,7 @@ export function MainLayout() {
       <aside className={cx(
         "fixed inset-y-0 left-0 z-40 flex flex-col h-full w-[240px] shrink-0 transition-transform duration-300 ease-out lg:static lg:z-auto lg:w-[232px] lg:translate-x-0",
         navOpen ? "translate-x-0" : "-translate-x-full",
-      )} style={{ background: th.sidebar, borderRight: `1px solid ${th.sidebarB}` }}>
+      )} style={{ background: th.sidebar, borderRight: `1px solid ${th.sidebarB}`, paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}>
         <div className="px-6 py-6 flex items-center justify-between" style={{ borderBottom: `1px solid ${th.sidebarB}` }}>
           <Link to="/" onClick={() => setNavOpen(false)} className="transition-opacity hover:opacity-80" title={isStaff(role) ? "Changer d'espace (CPF / Entreprise)" : "Accueil"}>
             <Logo h={26} />
@@ -220,7 +236,11 @@ export function MainLayout() {
       </aside>
 
       <div className="flex-1 min-w-0 flex flex-col relative z-10 overflow-hidden">
-        <button className={cx("fixed left-3 z-30 w-9 h-9 rounded-full flex items-center justify-center shrink-0 lg:hidden", isImpersonating ? "top-[52px]" : "top-3")} style={{ background: th.card, border: `1px solid ${th.inputB}`, boxShadow: "0 6px 18px rgba(0,0,0,0.14)" }} onClick={() => setNavOpen(true)}>
+        {/* fixed = position par rapport au viewport, donc ignore le paddingTop
+            (safe-area) posé sur le conteneur plus haut — il faut le rajouter
+            ici explicitement (calc), sinon le bouton passe sous l'encoche sur
+            mobile malgré le padding du parent. */}
+        <button className={cx("fixed left-3 z-30 w-9 h-9 rounded-full flex items-center justify-center shrink-0 lg:hidden", isImpersonating ? "top-[calc(env(safe-area-inset-top)+52px)]" : "top-[calc(env(safe-area-inset-top)+0.75rem)]")} style={{ background: th.card, border: `1px solid ${th.inputB}`, boxShadow: "0 6px 18px rgba(0,0,0,0.14)" }} onClick={() => setNavOpen(true)}>
           <Menu className="w-4 h-4" style={{ color: th.fg3 }} />
         </button>
 

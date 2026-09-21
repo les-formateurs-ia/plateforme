@@ -45,7 +45,7 @@ export function CompanyWelcomePage() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4" style={{ background: th.bg, fontFamily: "'Funnel Display',sans-serif" }}>
+    <div className="relative min-h-dvh flex items-center justify-center p-4" style={{ background: th.bg, fontFamily: "'Funnel Display',sans-serif" }}>
       <Background />
       <div className="relative z-10 w-full max-w-[440px] fade-up">
         <div className="flex justify-center mb-10"><Logo h={30} /></div>

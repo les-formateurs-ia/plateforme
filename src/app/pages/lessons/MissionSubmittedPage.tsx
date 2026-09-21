@@ -31,7 +31,7 @@ export function MissionSubmittedPage() {
   }, [lessonId]);
 
   return (
-    <div className="relative flex h-screen items-center justify-center p-4" style={{ background: th.bg, fontFamily: "'Funnel Display',sans-serif" }}>
+    <div className="relative flex h-dvh items-center justify-center p-4" style={{ background: th.bg, fontFamily: "'Funnel Display',sans-serif" }}>
       <Background />
       <div className="relative z-10 max-w-md w-full rounded-2xl p-8 text-center" style={{ background: th.card, border: `1px solid ${th.sep}` }}>
         <PartyPopper className="w-10 h-10 mx-auto mb-4 text-[#6adeb1]" />

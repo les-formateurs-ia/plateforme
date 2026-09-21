@@ -159,7 +159,7 @@ export function StudioDoublagePage() {
         </div>
       </div>
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 px-4 sm:px-6 lg:px-8 pb-5 sm:pb-6 pt-2">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 px-4 sm:px-6 lg:px-8 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] sm:pb-[calc(env(safe-area-inset-bottom)+1.5rem)] pt-2">
         <div className="pointer-events-auto rounded-3xl overflow-hidden max-w-[96%] mx-auto" style={{ background: th.card, border: `1px solid ${th.sep}`, boxShadow: "0 2px 10px rgba(0,0,0,0.18)" }}>
           <div className="flex flex-wrap items-center gap-3 px-4 sm:px-5 py-3" style={{ borderBottom: `1px solid ${th.sep}` }}>
             <div className="flex items-center gap-2">

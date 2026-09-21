@@ -4,10 +4,17 @@
     <head>
       
       <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <!-- viewport-fit=cover : sans ça, l'app ne dessine pas sous l'encoche/la
+           barre d'accueil sur iOS et env(safe-area-inset-*) reste à 0 partout
+           (cf. MainLayout.tsx et theme.css pour l'usage de ces variables). -->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
       <title>Site web e-learning IA</title>
       <meta name="description" content="Personalized AI-powered e-learning platform offering tailored lessons, interactive content, and dynamic dashboards to enhance user learning experiences." />
       <meta name="robots" content="noindex, nofollow" />
+      <!-- Valeur de secours avant le premier rendu React — src/app/theme/theme.tsx
+           la met ensuite à jour dynamiquement selon le thème clair/sombre choisi. -->
+      <meta name="theme-color" content="#F7F7FA" media="(prefers-color-scheme: light)" />
+      <meta name="theme-color" content="#0A0A10" media="(prefers-color-scheme: dark)" />
       <!--
         Chargée ici (et pas via @import dans fonts.css) pour que le scanner de
         préchargement du navigateur la découvre dès le parsing du HTML, en

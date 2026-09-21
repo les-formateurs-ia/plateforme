@@ -112,6 +112,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // couleurs via des variables CSS (--primary, --ring, …) posées dans
   // theme.css, pas via th.* — on les met à jour ici pour qu'ils suivent
   // eux aussi l'accent du rôle courant.
+  //
+  // --background/--foreground/--card/... suivent le même principe, ajouté le
+  // 2026-09-21 : theme.css ne pose qu'un thème clair figé en variables CSS
+  // statiques (la classe .dark n'est jamais posée sur le document par cette
+  // app), donc <body> (qui applique bg-background en CSS pure) restait en
+  // décalage avec le thème sombre choisi via th.* — visible sur mobile comme
+  // des bandes sombres/claires incohérentes autour de l'app le temps que
+  // MainLayout (qui, lui, utilise th.bg en style inline) couvre l'écran.
+  // Même correctif pour <meta name="theme-color"> : la couleur de la barre
+  // système/navigateur doit suivre le thème réellement choisi, pas seulement
+  // la préférence système figée dans le <meta> statique de index.html.
   useLayoutEffect(() => {
     const root = document.documentElement;
     root.style.setProperty("--primary", value.navAC);
@@ -121,7 +132,24 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     root.style.setProperty("--sidebar-accent-foreground", value.navAC);
     root.style.setProperty("--ring", value.gradShadow(0.5));
     root.style.setProperty("--select-highlight", value.gradShadow(0.14));
-  }, [value.navAC]);
+
+    root.style.setProperty("--background", value.bg);
+    root.style.setProperty("--foreground", value.fg);
+    root.style.setProperty("--card", value.card);
+    root.style.setProperty("--card-foreground", value.fg);
+    root.style.setProperty("--popover", value.card);
+    root.style.setProperty("--popover-foreground", value.fg);
+    root.style.setProperty("--border", value.sep);
+    root.style.setProperty("--input", value.inputB);
+    root.style.setProperty("--input-background", value.inputBg);
+    root.style.setProperty("--muted", value.inputBg);
+    root.style.setProperty("--muted-foreground", value.fg3);
+    root.style.setProperty("--sidebar", value.sidebar);
+    root.style.setProperty("--sidebar-foreground", value.fg);
+    root.style.setProperty("--sidebar-border", value.sidebarB);
+
+    document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => meta.setAttribute("content", value.bg));
+  }, [value.navAC, value.isDark, value.bg, value.fg, value.card, value.sidebar, value.sidebarB, value.inputB, value.inputBg, value.fg3, value.sep]);
 
   return <ThemeCtx.Provider value={value}>{children}</ThemeCtx.Provider>;
 }

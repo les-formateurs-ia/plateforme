@@ -733,7 +733,7 @@ export function LessonPage() {
 
   if (lessonLoading || access === "checking") {
     return (
-      <div className="flex h-screen items-center justify-center" style={{ background: th.bg }}>
+      <div className="flex h-dvh items-center justify-center" style={{ background: th.bg }}>
         <span className="text-sm" style={{ color: th.fg3 }}>Chargement de la leçon…</span>
       </div>
     );
@@ -741,7 +741,7 @@ export function LessonPage() {
 
   if (lessonError || !lesson) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center gap-3" style={{ background: th.bg }}>
+      <div className="flex h-dvh flex-col items-center justify-center gap-3" style={{ background: th.bg }}>
         <span className="text-sm text-[#fbc2ad]">{lessonError ?? "Leçon introuvable."}</span>
         <VBtn onClick={goBack}>Retour aux leçons</VBtn>
       </div>
@@ -749,7 +749,7 @@ export function LessonPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden" style={{ background: th.bg, fontFamily: "'Funnel Display',sans-serif" }}>
+    <div className="flex flex-col h-dvh overflow-hidden" style={{ background: th.bg, fontFamily: "'Funnel Display',sans-serif" }}>
       <Background />
       <div className="relative z-10 shrink-0 flex items-center justify-between gap-3 px-4 sm:px-6 py-3" style={{ borderBottom: `1px solid ${th.sep}`, background: th.topbar, backdropFilter: "blur(24px)" }}>
         <div className="flex items-center gap-4 min-w-0">

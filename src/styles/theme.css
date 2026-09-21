@@ -43,8 +43,18 @@
 
 :root {
   --font-size: 16px;
-  --background: #08060F;
-  --foreground: #F2EBF9;
+  /* Valeurs de secours avant le premier rendu React uniquement — la classe
+     .dark n'est jamais posée sur <html>/<body> par l'app (le thème
+     clair/sombre est géré par src/app/theme/theme.tsx via des variables
+     inline, pas par cette classe) : :root est donc TOUJOURS le bloc actif,
+     y compris en thème sombre, une fois React monté. C'est theme.tsx qui
+     réécrit --background/--foreground (et les autres variables ci-dessous)
+     en direct selon le thème réellement choisi (clair/sombre/système) — corrigé
+     le 2026-09-21, ces deux valeurs étaient figées en quasi-noir en permanence,
+     ce qui apparaissait comme des bandes noires derrière l'app sur mobile
+     (body visible un instant avant/around le rendu, cf. MainLayout.tsx). */
+  --background: #F7F7FA;
+  --foreground: rgba(15,14,20,0.94);
   --card: rgba(255, 255, 255, 0.035);
   --card-foreground: #F2EBF9;
   --popover: #100B1E;
@@ -83,8 +93,8 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
+  --background: #0A0A10;
+  --foreground: rgba(255,255,255,0.94);
   --card: oklch(0.145 0 0);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.145 0 0);

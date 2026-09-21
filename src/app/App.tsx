@@ -62,7 +62,7 @@ import { CompanyWelcomePage } from "@/app/pages/entreprise/CompanyWelcomePage";
 function LoadingScreen() {
   const th = useTh();
   return (
-    <div className="relative min-h-screen flex items-center justify-center" style={{ background: th.bg }}>
+    <div className="relative min-h-dvh flex items-center justify-center" style={{ background: th.bg }}>
       <Background />
       <div className="relative z-10 text-sm" style={{ color: th.fg3 }}>Chargement…</div>
     </div>
