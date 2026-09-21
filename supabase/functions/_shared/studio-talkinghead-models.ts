@@ -92,5 +92,8 @@ export const STUDIO_TALKINGHEAD_MODELS: Record<string, StudioTalkingHeadModelCon
 // Voix MiniMax Speech 2.8 : catalogue déplacé dans studio-tts-voices.ts le
 // 2026-09-19 (partagé désormais avec "Du texte à l'audio" et "Parlez
 // n'importe quelle langue") — ré-exporté ici pour ne rien casser côté
-// generate-studio-talkinghead/check-studio-talkinghead-status.
+// generate-studio-talkinghead/check-studio-talkinghead-status. Ce fichier
+// partagé corrige déjà indépendamment le même bug speech.language que celui
+// trouvé ici le 2026-09-18 (cf. son propre commentaire), donc plus besoin
+// d'un buildTtsTask local.
 export { TTS_VOICES, DEFAULT_TTS_VOICE, TTS_MODEL_ID, buildTtsTask, type TalkingHeadVoice } from "./studio-tts-voices.ts";
