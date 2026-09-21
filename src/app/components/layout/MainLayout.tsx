@@ -113,10 +113,23 @@ export function MainLayout() {
         <div className="fixed inset-0 z-30 bg-black/50 lg:hidden" onClick={() => setNavOpen(false)} />
       )}
 
+      {/* Mobile (< lg) : "îlot" flottant — collé au bord gauche (coins gauches
+          carrés, invisibles car hors-écran/à fleur de bord) mais détaché du
+          haut et du bas (marge + safe-area) avec coins arrondis à droite
+          uniquement, comme un panneau qui flotte plutôt qu'un tiroir plein
+          écran. Desktop (lg:) inchangé : colonne statique pleine hauteur,
+          coins carrés, bord droit simple. */}
       <aside className={cx(
-        "fixed inset-y-0 left-0 z-40 flex flex-col h-full w-[240px] shrink-0 transition-transform duration-300 ease-out lg:static lg:z-auto lg:w-[232px] lg:translate-x-0",
+        // border côté classes (pas inline) : lg: doit pouvoir retirer le
+        // haut/bas sans que le style inline (non responsive) ne les réimpose.
+        "fixed left-0 z-40 flex flex-col w-[240px] shrink-0 overflow-hidden transition-transform duration-300 ease-out border border-l-0 rounded-tr-[28px] rounded-br-[28px] shadow-[0_20px_48px_rgba(0,0,0,0.22)] lg:static lg:z-auto lg:inset-y-0 lg:h-full lg:w-[232px] lg:border-t-0 lg:border-b-0 lg:rounded-none lg:shadow-none lg:translate-x-0",
         navOpen ? "translate-x-0" : "-translate-x-full",
-      )} style={{ background: th.sidebar, borderRight: `1px solid ${th.sidebarB}`, paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}>
+      )} style={{
+        background: th.sidebar,
+        borderColor: th.sidebarB,
+        top: "max(0.75rem, env(safe-area-inset-top))",
+        bottom: "max(0.75rem, env(safe-area-inset-bottom))",
+      }}>
         <div className="px-6 py-6 flex items-center justify-between" style={{ borderBottom: `1px solid ${th.sidebarB}` }}>
           <Link to="/" onClick={() => setNavOpen(false)} className="transition-opacity hover:opacity-80" title={isStaff(role) ? "Changer d'espace (CPF / Entreprise)" : "Accueil"}>
             <Logo h={26} />
