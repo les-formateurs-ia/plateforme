@@ -97,12 +97,17 @@ export function MainLayout() {
         // y compris quand la barre d'outils du navigateur/webview (Telegram
         // in-app browser notamment) rétrécit dynamiquement l'écran — sans ça
         // <body> (voir theme.css) devenait visible en bandes au-dessus/
-        // en-dessous de cette div, corrigé le 2026-09-21. paddingTop/Bottom :
-        // évite que la bordure de l'app (fond compris) passe sous l'encoche/
-        // la barre d'accueil ; sans effet sur desktop/navigateur classique où
-        // ces variables valent 0.
-        paddingTop: "env(safe-area-inset-top)",
-        paddingBottom: "env(safe-area-inset-bottom)",
+        // en-dessous de cette div, corrigé le 2026-09-21.
+        //
+        // Pas de paddingTop/Bottom safe-area ici (retiré le 2026-09-21,
+        // ajouté puis retiré le même jour) : chaque page a déjà son propre
+        // padding haut/bas (py-5 sm:py-6 etc.) — l'ajouter aussi ici créait un
+        // DOUBLE espace vide avant le contenu réel (cette div décale tout son
+        // contenu, PUIS la page rajoute son propre padding par-dessus). Seuls
+        // les éléments `fixed` (bouton hamburger, tiroir mobile ci-dessous)
+        // ont besoin de leur propre safe-area : ils ignorent le padding d'un
+        // ancêtre puisqu'ils sont positionnés par rapport au viewport, pas au
+        // flux normal — donc pas de doublon possible pour eux.
       }}
     >
       <ImpersonationBanner />
@@ -257,7 +262,12 @@ export function MainLayout() {
           <Menu className="w-4 h-4" style={{ color: th.fg3 }} />
         </button>
 
-        <div className="flex-1 min-h-0 flex flex-col overflow-hidden pt-10 lg:pt-0">
+        {/* pt-[...] doit inclure la safe-area : le bouton hamburger (fixed,
+            juste au-dessus) a lui-même déjà cette safe-area dans son `top` —
+            sans elle ici, ce padding fixe de 2.5rem ne suffirait plus à le
+            dégager sur un écran avec encoche (le bouton serait descendu par
+            sa propre safe-area, mais pas ce padding). */}
+        <div className="flex-1 min-h-0 flex flex-col overflow-hidden pt-[calc(env(safe-area-inset-top)+2.5rem)] lg:pt-0">
           <Outlet />
         </div>
       </div>
