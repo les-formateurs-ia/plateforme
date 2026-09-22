@@ -1,0 +1,11 @@
+﻿const fs = require('fs');
+let s = fs.readFileSync('tmp/redesign-advisor.py','utf8');
+s = s.replace(/^from pathlib import Path\r?\n/, 'const fs = require("fs");\n');
+s = s.replace("p = Path('public/conseiller-ia.html')", "const p = 'public/conseiller-ia.html'");
+s = s.replace("s = p.read_text(encoding='utf-8')", "let s = fs.readFileSync(p, 'utf8')");
+s = s.replace(/'''([\s\S]*?)'''|"""([\s\S]*?)"""/g, (_,a,b) => JSON.stringify(a ?? b));
+s = s.replace(/^start = /m,'let start = ').replace(/^end = /m,'let end = ').replace(/^css = /m,'let css = ').replace(/^pos = /m,'let pos = ');
+s = s.replaceAll('s.index(', 's.indexOf(').replaceAll('s[:start]', 's.slice(0,start)').replaceAll('s[end:]', 's.slice(end)').replaceAll('s[:pos]', 's.slice(0,pos)').replaceAll('s[pos:]', 's.slice(pos)');
+s = s.replace("p.write_text(s, encoding='utf-8')", "fs.writeFileSync(p, s, 'utf8')");
+fs.writeFileSync('tmp/redesign-advisor.cjs', s);
+require('./redesign-advisor.cjs');

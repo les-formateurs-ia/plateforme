@@ -34,6 +34,13 @@ l'hébergement ; une balise meta dans le HTML ne remplace pas `frame-ancestors`.
 
 ## Fonctionnement
 
+Le formulaire se déroule en trois écrans : choix Particulier / Entreprise
+(passage immédiat), secteur et description du projet, puis prénom, nom et
+email. « Revenir » conserve les réponses. Le dernier écran affiche l'accord
+de contact, accepté en cliquant sur « Analyser mon besoin ». Aucun envoi
+n'a lieu avant cette action. Le fond animé respecte la préférence de
+réduction des animations ; l'iframe ajuste sa hauteur à chaque écran.
+
 1. `submit` valide le contact, le profil, le secteur, le besoin et l'accord
    de contact, puis enregistre la ligne dans `project_advisor_leads`.
 2. L'HTML attend la confirmation de l'enregistrement avant d'appeler `analyze`.
