@@ -110,15 +110,14 @@
     }
     @media (max-width:380px) { .grid { grid-template-columns:1fr; } }
 
-    /* Soft animated canvas and translucent cards, shared by every step. */
+    /* Transparent embed canvas; the animated colors stay inside the form card. */
     :root { --ink:#302b4b; --muted:#77768e; --line:rgba(181,141,224,.22); --purple:#9562e8; --pink:#dfa7f1; --brand-gradient:linear-gradient(110deg,#dfa7f1 0%,#ab79ed 46%,#7954ff 100%); }
-    body { position:relative; isolation:isolate; padding:36px 28px 22px; background:#f8f7ff; }
-    body::before { content:""; position:fixed; z-index:-2; inset:-20%; pointer-events:none; background:radial-gradient(ellipse at 20% 25%,#ead7ff 0,transparent 45%),radial-gradient(ellipse at 85% 30%,#fbdcf3 0,transparent 42%),radial-gradient(ellipse at 65% 85%,#dcecff 0,transparent 48%); animation:aurora 18s ease-in-out infinite alternate; }
-    body::after { content:"✦"; position:absolute; top:10px; right:15px; color:#b58de0; font-size:30px; text-shadow:0 0 24px #dca5ef; pointer-events:none; animation:twinkle 5s ease-in-out infinite alternate; }
+    html,body { background:transparent; }
+    body { position:relative; padding:36px 28px 22px; }
+    .shell::before { content:""; position:absolute; z-index:-1; inset:-20%; pointer-events:none; background:linear-gradient(#ffffff65,#ffffff65),radial-gradient(ellipse at 20% 25%,#ead7ff 0,transparent 45%),radial-gradient(ellipse at 85% 30%,#fbdcf3 0,transparent 42%),radial-gradient(ellipse at 65% 85%,#dcecff 0,transparent 48%); animation:aurora 24s ease-in-out infinite alternate; }
     @keyframes aurora { to { transform:translate(5%,-4%) rotate(8deg) scale(1.08); } }
-    @keyframes twinkle { to { opacity:.45; transform:rotate(18deg) scale(.85); } }
     @keyframes appear { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-    .shell { max-width:920px; border:1.5px solid rgba(255,255,255,.95); border-radius:28px; background:linear-gradient(120deg,rgba(255,255,255,.64),rgba(255,255,255,.4)); box-shadow:0 15px 65px #ab83dd20,inset 0 0 24px #ffffff70; backdrop-filter:blur(22px); }
+    .shell { position:relative; isolation:isolate; max-width:920px; border:1.5px solid rgba(255,255,255,.95); border-radius:28px; background:#f8f7ff; box-shadow:0 15px 65px #302b4b0a,inset 0 0 24px #ffffff70; }
     .intro { padding:26px 30px 0; background:none; border:0; }
     .topline { display:flex; align-items:center; justify-content:space-between; gap:12px; }
     .eyebrow { display:inline-flex; padding:5px 12px; border-radius:999px; background:var(--brand-gradient); color:#fff; font-size:11px; font-weight:600; letter-spacing:0; text-transform:none; box-shadow:0 3px 14px #ad79e940; }
