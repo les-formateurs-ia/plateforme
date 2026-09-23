@@ -16,6 +16,7 @@ import {
 import { listCoachAssignableCards, assignFormateurToStudent, type PersonCard } from "@/app/lib/planning";
 import { StudentMissionGallery } from "@/app/components/admin/StudentMissionGallery";
 import { StudentAiBudgetCard } from "@/app/components/admin/StudentAiBudgetCard";
+import { ResetStudentStatsButton } from "@/app/components/admin/ResetStudentStatsButton";
 import { StudentStudioGallery } from "@/app/components/admin/StudentStudioGallery";
 import { StudentStudioVideoGallery } from "@/app/components/admin/StudentStudioVideoGallery";
 import { StudentStudioMusicGallery } from "@/app/components/admin/StudentStudioMusicGallery";
@@ -69,6 +70,8 @@ export function AdminStudentDetailPage() {
   const [ageDraft, setAgeDraft] = useState("");
   const [professionDraft, setProfessionDraft] = useState("");
   const [loading, setLoading] = useState(true);
+  // Incrémenté après "Réinitialiser les statistiques" pour recharger les blocs concernés.
+  const [statsResetCount, setStatsResetCount] = useState(0);
   const [assigning, setAssigning] = useState(false);
   const [assigningFormateur, setAssigningFormateur] = useState(false);
 
@@ -255,12 +258,13 @@ export function AdminStudentDetailPage() {
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <Link to={`${base}/planning`} className="flex items-center gap-1.5 text-sm w-fit transition-colors hover:opacity-70" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />Élèves</Link>
 
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         <Avatar url={profile.avatar_url} size={64} square />
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <h2 className="text-xl font-black truncate" style={{ color: th.fg }}><GT>{name}</GT></h2>
           <p className="text-sm truncate" style={{ color: th.fg3 }}>{profile.email}</p>
         </div>
+        {admin && <ResetStudentStatsButton studentId={profile.id} studentName={name} onReset={() => setStatsResetCount((n) => n + 1)} />}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
@@ -457,8 +461,8 @@ export function AdminStudentDetailPage() {
       </GCard>
       </div>
 
-      {staff && <StudentAiBudgetCard studentId={profile.id} canTopUp={admin} />}
-      {staff && <StudentMissionGallery studentId={profile.id} />}
+      {staff && <StudentAiBudgetCard key={`budget-${statsResetCount}`} studentId={profile.id} canTopUp={admin} />}
+      {staff && <StudentMissionGallery key={`missions-${statsResetCount}`} studentId={profile.id} />}
       {staff && <StudentStudioGallery studentId={profile.id} />}
       {staff && <StudentStudioVideoGallery studentId={profile.id} />}
       {staff && <StudentStudioMusicGallery studentId={profile.id} />}

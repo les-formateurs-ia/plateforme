@@ -70,3 +70,17 @@ export async function createStudent(input: CreateStudentInput): Promise<{ id: st
   if (data?.error) throw new Error(data.error);
   return data;
 }
+
+// "Réinitialiser les statistiques" — réservé à l'admin (vérifié côté SQL,
+// cf. migration 20260923190000_admin_reset_student_stats.sql pour la liste
+// exacte de ce qui est effacé / conservé). Les PDF des missions effacées sont
+// retirés du stockage ensuite ; un échec ici ne remet pas le reset en cause.
+export async function resetStudentStats(studentId: string): Promise<void> {
+  const { data, error } = await supabase.rpc("admin_reset_student_stats", { p_student_id: studentId });
+  if (error) throw new Error(error.message);
+  const pdfPaths = (data ?? []) as string[];
+  if (pdfPaths.length) {
+    const { error: storageError } = await supabase.storage.from("mission-pdfs").remove(pdfPaths);
+    if (storageError) console.warn("Suppression des PDF de mission incomplète :", storageError.message);
+  }
+}

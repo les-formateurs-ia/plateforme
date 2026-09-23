@@ -1679,6 +1679,10 @@ export interface Database {
         Args: { p_instance_id: string; p_name: string; p_slug: string };
         Returns: string;
       };
+      admin_reset_student_stats: {
+        Args: { p_student_id: string };
+        Returns: string[];
+      };
       admin_add_ai_credits: {
         Args: { p_user_id: string; p_amount: number };
         Returns: number;
