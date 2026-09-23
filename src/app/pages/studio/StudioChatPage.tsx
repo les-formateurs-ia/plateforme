@@ -43,7 +43,20 @@ function AttachmentChip({ name, mimeType, size, onRemove }: { name: string; mime
   );
 }
 
-const VIA_LABEL = { google: "Google direct", runware: "via Runware" } as const;
+function ProviderLogo({ provider, className }: { provider: ChatProvider; className: string }) {
+  const th = useTh();
+  const { logo, logoZoom, name } = CHAT_PROVIDERS[provider];
+  return (
+    <div
+      role="img"
+      aria-label={name}
+      className={`shrink-0 ${className}`}
+      style={{ background: `#fff url("${logo}") center / ${logoZoom} no-repeat`, border: `1px solid ${th.sep}` }}
+    />
+  );
+}
+
+const VIA_LABEL ={ google: "Google direct", runware: "via Runware" } as const;
 
 function fileList(files: ChatTraceStep["files"], modes: ChatTraceStep["files"][number]["mode"][]) {
   return files.filter((f) => modes.includes(f.mode)).map((f) => f.name).join(", ");
@@ -99,7 +112,7 @@ function MessageBubble({ msg, provider, trace }: { msg: ChatMessage; provider: C
   }
   return (
     <div className="flex gap-3">
-      <div className="w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-xs font-black text-white" style={{ background: config.gradient }}>{config.name[0]}</div>
+      <ProviderLogo provider={provider} className="w-8 h-8 rounded-full" />
       <div className="min-w-0 flex-1 space-y-1">
         <p className="text-[11px] font-semibold" style={{ color: th.fg3 }}>{msg.model ? modelLabel(provider, msg.model) : config.name}</p>
         <div className="break-words"><MarkdownText>{msg.content}</MarkdownText></div>
@@ -310,7 +323,7 @@ export function StudioChatPage({ provider }: { provider: ChatProvider }) {
             <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 sm:px-6 py-5 space-y-5">
               {messages.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center gap-3 px-4">
-                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-black text-white" style={{ background: config.gradient }}>{config.name[0]}</div>
+                  <ProviderLogo provider={provider} className="w-14 h-14 rounded-2xl" />
                   <p className="text-base font-bold" style={{ color: th.fg }}>Que veux-tu demander à {config.name} ?</p>
                   <p className="text-sm max-w-md" style={{ color: th.fg3 }}>Pose une question, demande un texte, analyse un document ou une image : tu parles directement au modèle {modelLabel(provider, model)}.</p>
                 </div>

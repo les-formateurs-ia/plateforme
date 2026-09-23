@@ -5,6 +5,9 @@
 // IMPORTANT : CHAT_PROVIDERS[*].models doit rester synchronisé avec
 // supabase/functions/_shared/studio-chat-models.ts.
 import { supabase } from "@/app/lib/supabase/client";
+import logoChatGPT from "@/imports/chatgpt_logo.png";
+import logoGemini from "@/imports/gemini_logo.png";
+import logoClaude from "@/imports/claude_logo.png";
 
 export type ChatProvider = "openai" | "gemini" | "anthropic";
 
@@ -15,6 +18,9 @@ export interface ChatProviderConfig {
   company: string;
   accent: string;
   gradient: string;
+  logo: string;
+  // Les PNG ont beaucoup de marge blanche (et pas la même) : zoom pour que le logo remplisse l'avatar.
+  logoZoom: string;
   defaultModel: string;
   models: { id: string; label: string }[];
 }
@@ -27,6 +33,8 @@ export const CHAT_PROVIDERS: Record<ChatProvider, ChatProviderConfig> = {
     company: "OpenAI",
     accent: "#10A37F",
     gradient: "#10A37F",
+    logo: logoChatGPT,
+    logoZoom: "auto 175%",
     defaultModel: "openai:gpt@5.5",
     models: [
       { id: "openai:gpt@5.5", label: "GPT-5.5" },
@@ -42,6 +50,8 @@ export const CHAT_PROVIDERS: Record<ChatProvider, ChatProviderConfig> = {
     company: "Google",
     accent: "#4285F4",
     gradient: "linear-gradient(135deg,#4285F4 0%,#9B72CB 55%,#D96570 100%)",
+    logo: logoGemini,
+    logoZoom: "auto 130%",
     defaultModel: "gemini-3.8-flash",
     models: [
       { id: "gemini-3.8-flash", label: "Gemini 3.8 Flash" },
@@ -57,6 +67,8 @@ export const CHAT_PROVIDERS: Record<ChatProvider, ChatProviderConfig> = {
     company: "Anthropic",
     accent: "#D97757",
     gradient: "#D97757",
+    logo: logoClaude,
+    logoZoom: "auto 155%",
     defaultModel: "anthropic:claude@opus-5",
     models: [
       { id: "anthropic:claude@fable-5", label: "Claude Fable 5" },
