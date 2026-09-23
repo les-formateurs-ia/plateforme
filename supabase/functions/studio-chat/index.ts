@@ -5,11 +5,14 @@
 //
 // Fichiers : uploadés par le client dans le bucket studio-chat, relus ici.
 // - Gemini : images et PDF envoyés nativement (inlineData).
-// - GPT / Claude (Runware) : images via inputs.images (data URI) ; PDF
-//   retranscrit une seule fois par Gemini puis mis en cache dans le message
-//   (extractedText) — Runware ne documente pas d'entrée PDF pour GPT, et on
-//   garde un seul chemin éprouvé pour les deux.
+// - GPT / Claude (Runware) : images via inputs.images (data URI).
+// - PDF : Claude le lit lui-même (inputs.documents) ; GPT n'a pas d'entrée
+//   PDF documentée chez Runware, donc Gemini le retranscrit une seule fois
+//   (mis en cache dans le message, extractedText). Même repli pour Claude si
+//   Runware refuse l'envoi natif.
 // - Fichiers texte : décodés et insérés dans le message pour tous.
+// Chaque réponse est tracée dans studio_chat_traces (lisible par l'admin
+// seulement) : quel modèle a traité quoi, et par quel fournisseur.
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { encodeBase64 } from "jsr:@std/encoding@1/base64";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
@@ -55,7 +58,25 @@ interface ChatMessage {
   attachments?: Attachment[];
 }
 
-const IMAGE_TYPES = new Set(["image/png", "image/jpeg", "image/webp", "image/gif"]);
+// Garder synchronisé avec ChatTraceStep dans src/app/lib/studioChat.ts.
+interface TraceFile {
+  name: string;
+  kind: AttachmentKind;
+  // natif = fichier lu directement par le modèle ; texte_extrait = PDF lu via sa
+  // retranscription Gemini ; cache = retranscription faite lors d'un tour précédent.
+  mode: "natif" | "texte" | "texte_extrait" | "cache" | "non_transmis";
+}
+
+interface TraceStep {
+  task: "extraction_pdf" | "reponse";
+  provider: ChatProvider;
+  model: string;
+  via: "google" | "runware";
+  files: TraceFile[];
+  note?: string;
+}
+
+const IMAGE_TYPES =new Set(["image/png", "image/jpeg", "image/webp", "image/gif"]);
 const TEXT_EXTENSIONS = new Set(["txt", "md", "csv", "json", "html", "htm", "xml", "yaml", "yml", "js", "ts", "tsx", "jsx", "py", "sql", "css", "log"]);
 
 function classify(name: string, mimeType: string): AttachmentKind | null {
@@ -190,25 +211,35 @@ Deno.serve(async (req) => {
     for (const msg of [...windowMessages].reverse()) {
       for (const att of msg.attachments ?? []) {
         if (loaded.size >= MAX_CONTEXT_FILES) break;
-        if (usesRunware && att.extractedText) continue;
+        // GPT ne lit jamais le PDF lui-même : inutile de le retélécharger une fois retranscrit.
+        if (provider === "openai" && att.extractedText) continue;
         loaded.set(att, await downloadAttachment(supabase, att));
       }
     }
 
     const geminiKey = Deno.env.get("GEMINI_API_KEY");
+    const decoder = new TextDecoder();
+    const steps: TraceStep[] = [];
     let reply: string;
     let cost: number | undefined;
 
     if (provider === "gemini") {
       if (!geminiKey) return jsonResponse({ error: "GEMINI_API_KEY non configurée côté serveur." }, 500);
-      const decoder = new TextDecoder();
+      const traceFiles: TraceFile[] = [];
       const contents = windowMessages.map((msg) => {
         const parts: Record<string, unknown>[] = [];
         for (const att of msg.attachments ?? []) {
           const bytes = loaded.get(att);
-          if (!bytes) parts.push({ text: droppedFileNote(att) });
-          else if (att.kind === "text") parts.push({ text: textFileBlock(att, decoder.decode(bytes)) });
-          else parts.push({ inlineData: { mimeType: att.mimeType, data: encodeBase64(bytes) } });
+          if (!bytes) {
+            parts.push({ text: droppedFileNote(att) });
+            traceFiles.push({ name: att.name, kind: att.kind, mode: "non_transmis" });
+          } else if (att.kind === "text") {
+            parts.push({ text: textFileBlock(att, decoder.decode(bytes)) });
+            traceFiles.push({ name: att.name, kind: att.kind, mode: "texte" });
+          } else {
+            parts.push({ inlineData: { mimeType: att.mimeType, data: encodeBase64(bytes) } });
+            traceFiles.push({ name: att.name, kind: att.kind, mode: "natif" });
+          }
         }
         parts.push({ text: msg.content });
         return { role: msg.role === "assistant" ? "model" : "user", parts };
@@ -218,44 +249,83 @@ Deno.serve(async (req) => {
         contents,
         generationConfig: { maxOutputTokens: MAX_OUTPUT_TOKENS },
       });
+      steps.push({ task: "reponse", provider: "gemini", model, via: "google", files: traceFiles });
     } else {
       const runwareKey = Deno.env.get("RUNWARE_API_KEY");
       if (!runwareKey) return jsonResponse({ error: "RUNWARE_API_KEY non configurée côté serveur." }, 500);
-      const decoder = new TextDecoder();
-      const images: string[] = [];
-      const messages: { role: "user" | "assistant"; content: string }[] = [];
-      for (const msg of windowMessages) {
-        const blocks: string[] = [];
-        for (const att of msg.attachments ?? []) {
-          const bytes = loaded.get(att);
-          if (!bytes && !att.extractedText) blocks.push(droppedFileNote(att));
-          else if (att.kind === "text") blocks.push(textFileBlock(att, decoder.decode(bytes!)));
-          else if (att.kind === "pdf") {
-            att.extractedText ??= await extractPdfText(geminiKey, bytes!);
-            blocks.push(textFileBlock(att, att.extractedText));
-          } else if (bytes) {
-            images.push(`data:${att.mimeType};base64,${encodeBase64(bytes)}`);
-            blocks.push(`[Image jointe n°${images.length} : ${att.name}]`);
-          } else {
-            blocks.push(droppedFileNote(att));
+
+      const buildTask = async (pdfNative: boolean) => {
+        const extractionSteps: TraceStep[] = [];
+        const images: string[] = [];
+        const documents: string[] = [];
+        const traceFiles: TraceFile[] = [];
+        const messages: { role: "user" | "assistant"; content: string }[] = [];
+        for (const msg of windowMessages) {
+          const blocks: string[] = [];
+          for (const att of msg.attachments ?? []) {
+            const bytes = loaded.get(att);
+            if (att.kind === "pdf" && pdfNative && bytes) {
+              documents.push(encodeBase64(bytes));
+              blocks.push(`[Document PDF joint n°${documents.length} : ${att.name}]`);
+              traceFiles.push({ name: att.name, kind: "pdf", mode: "natif" });
+            } else if (att.kind === "pdf" && (bytes || att.extractedText)) {
+              const cached = !!att.extractedText;
+              att.extractedText ??= await extractPdfText(geminiKey, bytes!);
+              extractionSteps.push({ task: "extraction_pdf", provider: "gemini", model: PDF_EXTRACTION_MODEL, via: "google", files: [{ name: att.name, kind: "pdf", mode: cached ? "cache" : "natif" }] });
+              blocks.push(textFileBlock(att, att.extractedText));
+              traceFiles.push({ name: att.name, kind: "pdf", mode: "texte_extrait" });
+            } else if (!bytes) {
+              blocks.push(droppedFileNote(att));
+              traceFiles.push({ name: att.name, kind: att.kind, mode: "non_transmis" });
+            } else if (att.kind === "text") {
+              blocks.push(textFileBlock(att, decoder.decode(bytes)));
+              traceFiles.push({ name: att.name, kind: "text", mode: "texte" });
+            } else {
+              images.push(`data:${att.mimeType};base64,${encodeBase64(bytes)}`);
+              blocks.push(`[Image jointe n°${images.length} : ${att.name}]`);
+              traceFiles.push({ name: att.name, kind: "image", mode: "natif" });
+            }
           }
+          blocks.push(msg.content);
+          messages.push({ role: msg.role, content: blocks.join("\n\n") });
         }
-        blocks.push(msg.content);
-        messages.push({ role: msg.role, content: blocks.join("\n\n") });
-      }
+        const inputs = { ...(images.length ? { images } : {}), ...(documents.length ? { documents } : {}) };
+        return {
+          task: {
+            taskType: "textInference",
+            model,
+            messages,
+            ...(Object.keys(inputs).length ? { inputs } : {}),
+            settings: { systemPrompt: buildSystemPrompt(provider, model), maxTokens: MAX_OUTPUT_TOKENS },
+          },
+          traceFiles,
+          extractionSteps,
+          hasNativeDocuments: documents.length > 0,
+        };
+      };
+
+      // Claude lit les PDF lui-même (inputs.documents) ; si Runware refuse,
+      // on retombe sur la retranscription Gemini, comme pour GPT.
+      let built = await buildTask(provider === "anthropic");
+      let fallbackNote: string | undefined;
       try {
-        const result = await submitAndAwaitRunwareText(runwareKey, {
-          taskType: "textInference",
-          model,
-          messages,
-          ...(images.length ? { inputs: { images } } : {}),
-          settings: { systemPrompt: buildSystemPrompt(provider, model), maxTokens: MAX_OUTPUT_TOKENS },
-        }, { timeoutMs: 120000 });
+        let result;
+        try {
+          result = await submitAndAwaitRunwareText(runwareKey, built.task, { timeoutMs: 120000 });
+        } catch (err) {
+          if (!built.hasNativeDocuments) throw err;
+          fallbackNote = `Envoi natif du PDF à Claude refusé par Runware (${err instanceof Error ? err.message : "erreur inconnue"}) — repli sur la retranscription Gemini.`;
+          console.warn("studio-chat:", fallbackNote);
+          built = await buildTask(false);
+          result = await submitAndAwaitRunwareText(runwareKey, built.task, { timeoutMs: 120000 });
+        }
         reply = result.text;
         cost = result.cost;
       } catch (err) {
         return jsonResponse({ error: err instanceof Error ? err.message : "Erreur Runware inconnue." }, 502);
       }
+      steps.push(...built.extractionSteps);
+      steps.push({ task: "reponse", provider, model, via: "runware", files: built.traceFiles, ...(fallbackNote ? { note: fallbackNote } : {}) });
       await recordAiUsage(supabase, { userId, mediaType: "text", model, cost, source: "studio_chat" });
     }
 
@@ -268,6 +338,10 @@ Deno.serve(async (req) => {
       : supabase.from("studio_chat_conversations").insert({ user_id: userId, provider, model, title: message.trim().slice(0, 80), messages: allMessages });
     const { data: saved, error: saveErr } = await query.select("id, provider, model, title, messages, created_at, updated_at").single();
     if (saveErr) return jsonResponse({ error: `Échec de l'enregistrement : ${saveErr.message}` }, 500);
+
+    // Best effort : la réponse est déjà enregistrée, une trace manquante ne doit pas la faire échouer.
+    const { error: traceErr } = await supabase.from("studio_chat_traces").insert({ conversation_id: saved.id, message_id: assistantMessage.id, user_id: userId, steps });
+    if (traceErr) console.error("studio_chat_traces insert failed:", traceErr.message);
 
     return jsonResponse({ conversation: saved });
   } catch (err) {

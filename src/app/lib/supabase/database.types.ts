@@ -317,6 +317,26 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["studio_chat_conversations"]["Insert"]>;
         Relationships: never[];
       };
+      studio_chat_traces: {
+        Row: {
+          id: string;
+          conversation_id: string;
+          message_id: string;
+          user_id: string;
+          steps: unknown;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          conversation_id: string;
+          message_id: string;
+          user_id: string;
+          steps: unknown;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["studio_chat_traces"]["Insert"]>;
+        Relationships: never[];
+      };
       studio_music_generations: {
         Row: {
           id: string;

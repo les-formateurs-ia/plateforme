@@ -25,8 +25,8 @@ export const CHAT_PROVIDERS: Record<ChatProvider, ChatProviderConfig> = {
     slug: "chatgpt",
     name: "ChatGPT",
     company: "OpenAI",
-    accent: "#10a37f",
-    gradient: "linear-gradient(135deg,#0d3b30 0%,#10a37f 55%,#7be0c3 100%)",
+    accent: "#10A37F",
+    gradient: "#10A37F",
     defaultModel: "openai:gpt@5.5",
     models: [
       { id: "openai:gpt@5.5", label: "GPT-5.5" },
@@ -40,8 +40,8 @@ export const CHAT_PROVIDERS: Record<ChatProvider, ChatProviderConfig> = {
     slug: "gemini",
     name: "Gemini",
     company: "Google",
-    accent: "#4f7df3",
-    gradient: "linear-gradient(135deg,#1a237e 0%,#4f7df3 50%,#b388ff 100%)",
+    accent: "#4285F4",
+    gradient: "linear-gradient(135deg,#4285F4 0%,#9B72CB 55%,#D96570 100%)",
     defaultModel: "gemini-3.8-flash",
     models: [
       { id: "gemini-3.8-flash", label: "Gemini 3.8 Flash" },
@@ -55,8 +55,8 @@ export const CHAT_PROVIDERS: Record<ChatProvider, ChatProviderConfig> = {
     slug: "claude",
     name: "Claude",
     company: "Anthropic",
-    accent: "#d97757",
-    gradient: "linear-gradient(135deg,#4a1f12 0%,#d97757 55%,#f3c7a8 100%)",
+    accent: "#D97757",
+    gradient: "#D97757",
     defaultModel: "anthropic:claude@opus-5",
     models: [
       { id: "anthropic:claude@fable-5", label: "Claude Fable 5" },
@@ -164,6 +164,26 @@ export async function listMyChatConversations(userId: string, provider: ChatProv
     .limit(50);
   if (error) throw error;
   return (data ?? []).map((row) => mapRow(row as unknown as Row));
+}
+
+// Garder synchronisé avec TraceStep dans supabase/functions/studio-chat/index.ts.
+export interface ChatTraceStep {
+  task: "extraction_pdf" | "reponse";
+  provider: ChatProvider;
+  model: string;
+  via: "google" | "runware";
+  files: { name: string; kind: "image" | "pdf" | "text"; mode: "natif" | "texte" | "texte_extrait" | "cache" | "non_transmis" }[];
+  note?: string;
+}
+
+// Lisible par l'admin uniquement (RLS) — renvoie {} pour tout autre rôle.
+export async function getChatTraces(conversationId: string): Promise<Record<string, ChatTraceStep[]>> {
+  const { data, error } = await supabase
+    .from("studio_chat_traces")
+    .select("message_id, steps")
+    .eq("conversation_id", conversationId);
+  if (error) throw error;
+  return Object.fromEntries((data ?? []).map((row) => [row.message_id, row.steps as ChatTraceStep[]]));
 }
 
 export async function deleteChatConversation(conversation: ChatConversation): Promise<void> {

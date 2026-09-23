@@ -12,8 +12,8 @@ import { VSelect } from "@/app/components/common/Select";
 import { MarkdownText } from "@/app/components/common/MarkdownText";
 import {
   CHAT_PROVIDERS, CHAT_MESSAGE_MAX_LENGTH, CHAT_MAX_FILES, CHAT_MAX_FILE_BYTES, CHAT_FILE_ACCEPT,
-  listMyChatConversations, sendChatMessage, uploadChatAttachment, deleteChatConversation, modelLabel,
-  type ChatProvider, type ChatConversation, type ChatMessage, type ChatAttachment,
+  listMyChatConversations, sendChatMessage, uploadChatAttachment, deleteChatConversation, modelLabel, getChatTraces,
+  type ChatProvider, type ChatConversation, type ChatMessage, type ChatAttachment, type ChatTraceStep,
 } from "@/app/lib/studioChat";
 
 const INPUT_MAX_HEIGHT = 200;
@@ -43,7 +43,44 @@ function AttachmentChip({ name, mimeType, size, onRemove }: { name: string; mime
   );
 }
 
-function MessageBubble({ msg, provider }: { msg: ChatMessage; provider: ChatProvider }) {
+const VIA_LABEL = { google: "Google direct", runware: "via Runware" } as const;
+
+function fileList(files: ChatTraceStep["files"], modes: ChatTraceStep["files"][number]["mode"][]) {
+  return files.filter((f) => modes.includes(f.mode)).map((f) => f.name).join(", ");
+}
+
+// Admin uniquement : quels modèles ont réellement traité la requête et ses fichiers.
+function TraceNote({ steps }: { steps: ChatTraceStep[] }) {
+  const th = useTh();
+  const response = steps.find((s) => s.task === "reponse");
+  const extractions = steps.filter((s) => s.task === "extraction_pdf");
+  if (!response) return null;
+  const extractedFiles = extractions.flatMap((s) => s.files.map((f) => (f.mode === "cache" ? `${f.name} (déjà retranscrit)` : f.name)));
+  const native = fileList(response.files, ["natif"]);
+  const asText = fileList(response.files, ["texte"]);
+  const dropped = fileList(response.files, ["non_transmis"]);
+  const responder = `${modelLabel(response.provider, response.model)} (${VIA_LABEL[response.via]})`;
+
+  return (
+    <div className="mt-2 rounded-xl px-3 py-2 text-[11px] leading-relaxed space-y-0.5" style={{ background: th.inputBg, border: `1px dashed ${th.inputB}`, color: th.fg3 }}>
+      <p className="font-bold uppercase tracking-wide text-[10px]">Trace admin</p>
+      {extractions.length === 0 ? (
+        <p>Traité entièrement par <strong style={{ color: th.fg2 }}>{responder}</strong>{response.files.length ? " — fichiers compris" : ""}.</p>
+      ) : (
+        <>
+          <p>PDF → texte : <strong style={{ color: th.fg2 }}>{modelLabel("gemini", extractions[0].model)} ({VIA_LABEL.google})</strong> — {extractedFiles.join(", ")}</p>
+          <p>Réponse : <strong style={{ color: th.fg2 }}>{responder}</strong>, à partir de la retranscription Gemini.</p>
+        </>
+      )}
+      {native && <p>Lu directement par le modèle : {native}</p>}
+      {asText && <p>Fichiers texte insérés dans le message : {asText}</p>}
+      {dropped && <p>Plus transmis (hors limite de contexte) : {dropped}</p>}
+      {response.note && <p style={{ color: "#f59e0b" }}>{response.note}</p>}
+    </div>
+  );
+}
+
+function MessageBubble({ msg, provider, trace }: { msg: ChatMessage; provider: ChatProvider; trace?: ChatTraceStep[] }) {
   const th = useTh();
   const config = CHAT_PROVIDERS[provider];
   if (msg.role === "user") {
@@ -66,6 +103,7 @@ function MessageBubble({ msg, provider }: { msg: ChatMessage; provider: ChatProv
       <div className="min-w-0 flex-1 space-y-1">
         <p className="text-[11px] font-semibold" style={{ color: th.fg3 }}>{msg.model ? modelLabel(provider, msg.model) : config.name}</p>
         <div className="break-words"><MarkdownText>{msg.content}</MarkdownText></div>
+        {trace && <TraceNote steps={trace} />}
       </div>
     </div>
   );
@@ -74,8 +112,10 @@ function MessageBubble({ msg, provider }: { msg: ChatMessage; provider: ChatProv
 export function StudioChatPage({ provider }: { provider: ChatProvider }) {
   const th = useTh();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
+  const isAdmin = role === "admin";
   const config = CHAT_PROVIDERS[provider];
+  const [traces, setTraces] = useState<Record<string, ChatTraceStep[]>>({});
 
   const [conversations, setConversations] = useState<ChatConversation[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
@@ -109,6 +149,14 @@ export function StudioChatPage({ provider }: { provider: ChatProvider }) {
       .catch((err) => setError(err instanceof Error ? err.message : "Impossible de charger l'historique."))
       .finally(() => setLoadingHistory(false));
   }, [user, provider, config.defaultModel]);
+
+  const activeUpdatedAt = active?.updatedAt;
+  useEffect(() => {
+    if (!isAdmin || !activeId) return;
+    getChatTraces(activeId)
+      .then((t) => setTraces((prev) => ({ ...prev, ...t })))
+      .catch((err) => console.error("studio_chat_traces:", err));
+  }, [isAdmin, activeId, activeUpdatedAt]);
 
   useEffect(() => {
     const el = inputRef.current;
@@ -267,7 +315,7 @@ export function StudioChatPage({ provider }: { provider: ChatProvider }) {
                   <p className="text-sm max-w-md" style={{ color: th.fg3 }}>Pose une question, demande un texte, analyse un document ou une image : tu parles directement au modèle {modelLabel(provider, model)}.</p>
                 </div>
               ) : (
-                messages.map((msg) => <MessageBubble key={msg.id} msg={msg} provider={provider} />)
+                messages.map((msg) => <MessageBubble key={msg.id} msg={msg} provider={provider} trace={isAdmin ? traces[msg.id] : undefined} />)
               )}
               {sending && (
                 <div className="flex items-center gap-2 text-sm" style={{ color: th.fg3 }}>
