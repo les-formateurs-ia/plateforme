@@ -11,14 +11,17 @@ import imgTextToSpeech from "@/imports/Du texte à l'audio.png";
 import imgDoublage from "@/imports/Parlez n'importe quelle langue.png";
 import imgFaceSwap from "@/imports/Prenez l'apparence de qui vous voulez.png";
 import { CHAT_PROVIDERS } from "@/app/lib/studioChat";
+import imgChatGPT from "@/imports/chatgpt_logo.png";
+import imgGemini from "@/imports/gemini_logo.png";
+import imgClaude from "@/imports/claude_logo.png";
 
 // `restricted` : modules pas encore prêts (intégration API à venir) —
 // visibles en aperçu (grisé, non cliquable) pour l'admin seulement, masqués
 // pour le formateur et l'élève.
-// Modules de chat : pas d'illustration dédiée, fond = dégradé aux couleurs du fournisseur.
+const CHAT_COVERS = { openai: imgChatGPT, gemini: imgGemini, anthropic: imgClaude };
 const CHAT_MODULES = (["openai", "gemini", "anthropic"] as const).map((id) => {
   const p = CHAT_PROVIDERS[id];
-  return { slug: p.slug, image: null, background: p.gradient, title: `Discutez avec ${p.name}`, subtitle: `Chat IA · ${p.company}`, desc: "", restricted: false };
+  return { slug: p.slug, image: CHAT_COVERS[id], title: `Discutez avec ${p.name}`, subtitle: `Chat IA · ${p.company}`, desc: "", restricted: false };
 });
 
 const STUDIO_MODULES: { slug: string; image: string | null; background?: string; title: string; subtitle: string; desc: string; restricted: boolean }[] = [
