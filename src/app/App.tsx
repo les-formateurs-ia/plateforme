@@ -193,11 +193,11 @@ function AppRoutes() {
         <Route path="practice/prompts/:sessionId" element={<PromptExercisePage />} />
         <Route path="practice/media" element={<MediaExerciseSessionsPage />} />
         <Route path="practice/media/:sessionId" element={<MediaExercisePage />} />
-        <Route path="practice/html" element={<HtmlExerciseSessionsPage />} />
-        <Route path="practice/html/:sessionId" element={<HtmlExercisePage />} />
+        <Route path="practice/html" element={<RequireAdmin><HtmlExerciseSessionsPage /></RequireAdmin>} />
+        <Route path="practice/html/:sessionId" element={<RequireAdmin><HtmlExercisePage /></RequireAdmin>} />
         <Route path="practice/battle-ground" element={<BattleGroundPage />} />
         <Route path="practice/reverse-prompting" element={<AiBudgetGate><ReversePromptingPage /></AiBudgetGate>} />
-        <Route path="practice/ai-detection" element={<AiDetectionPage />} />
+        <Route path="practice/ai-detection" element={<RequireAdmin><AiDetectionPage /></RequireAdmin>} />
         <Route path="studio" element={<StudioPage />} />
         <Route path="studio/chatgpt" element={<StudioChatPage key="openai" provider="openai" />} />
         <Route path="studio/gemini" element={<StudioChatPage key="gemini" provider="gemini" />} />
