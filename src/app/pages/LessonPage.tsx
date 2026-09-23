@@ -330,6 +330,9 @@ export function LessonPage() {
       setLessonLoading(true);
       setLessonError(null);
       setQuizStep(0); setSelected(null); setAnswers([]); setQuizResult(null); setRetaking(false); setTab("video");
+      // Le composant reste monté d'une leçon à l'autre ("Leçon suivante" depuis
+      // le QCM) : sans ça, la fenêtre du QCM restait ouverte sur la leçon suivante.
+      setShowQuizModal(false); setShowFinishConfirm(false);
       setPodcastByVariant({});
       setMindmap(null);
       setAvatarVideo(null); setAvatarVideoUrl(null);
