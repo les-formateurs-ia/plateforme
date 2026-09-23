@@ -1681,7 +1681,7 @@ export interface Database {
       };
       admin_reset_student_stats: {
         Args: { p_student_id: string };
-        Returns: string[];
+        Returns: { bucket: string; path: string }[];
       };
       admin_add_ai_credits: {
         Args: { p_user_id: string; p_amount: number };

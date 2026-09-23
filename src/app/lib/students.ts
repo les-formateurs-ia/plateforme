@@ -72,15 +72,19 @@ export async function createStudent(input: CreateStudentInput): Promise<{ id: st
 }
 
 // "Réinitialiser les statistiques" — réservé à l'admin (vérifié côté SQL,
-// cf. migration 20260923190000_admin_reset_student_stats.sql pour la liste
-// exacte de ce qui est effacé / conservé). Les PDF des missions effacées sont
-// retirés du stockage ensuite ; un échec ici ne remet pas le reset en cause.
+// cf. migration 20260923200000_admin_reset_student_stats_studio.sql pour la
+// liste exacte de ce qui est effacé / conservé). La fonction renvoie les
+// fichiers de l'élève (PDF de missions, médias du Studio), retirés ensuite
+// du stockage ; un échec ici ne remet pas le reset en cause.
 export async function resetStudentStats(studentId: string): Promise<void> {
   const { data, error } = await supabase.rpc("admin_reset_student_stats", { p_student_id: studentId });
   if (error) throw new Error(error.message);
-  const pdfPaths = (data ?? []) as string[];
-  if (pdfPaths.length) {
-    const { error: storageError } = await supabase.storage.from("mission-pdfs").remove(pdfPaths);
-    if (storageError) console.warn("Suppression des PDF de mission incomplète :", storageError.message);
+  const byBucket = new Map<string, string[]>();
+  for (const f of (data ?? []) as { bucket: string; path: string }[]) {
+    byBucket.set(f.bucket, [...(byBucket.get(f.bucket) ?? []), f.path]);
   }
+  await Promise.all([...byBucket].map(async ([bucket, paths]) => {
+    const { error: storageError } = await supabase.storage.from(bucket).remove(paths);
+    if (storageError) console.warn(`Suppression des fichiers ${bucket} incomplète :`, storageError.message);
+  }));
 }

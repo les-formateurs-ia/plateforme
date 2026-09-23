@@ -1,6 +1,6 @@
 // Fiche élève (admin) : remet le compte à zéro après un parcours de test,
 // avant de le confier au vrai élève. La liste affichée ici doit rester
-// alignée sur admin_reset_student_stats (migration 20260923190000).
+// alignée sur admin_reset_student_stats (migration 20260923200000).
 import { useState } from "react";
 import { toast } from "sonner";
 import { Check, RotateCcw, X } from "lucide-react";
@@ -13,6 +13,7 @@ const RESET_ITEMS = [
   "Les résultats des QCM et les badges obtenus",
   "Les missions enregistrées ou rendues (et leurs PDF)",
   "Les conversations avec l'Agent IA et sa mémoire de l'élève",
+  "Tout Le Studio : images, vidéos, musiques, voix, doublages, talking heads et conversations ChatGPT / Gemini / Claude",
   "La consommation de crédits IA (remise à 0 $)",
 ];
 
@@ -20,7 +21,7 @@ const KEPT_ITEMS = [
   "Le compte de l'élève et son profil",
   "Les formations personnalisées attribuées, leur contenu et leurs réglages",
   "Le plafond de crédits IA et l'historique des recharges",
-  "Le formateur, les rendez-vous, les exercices pratiques et les créations du Studio",
+  "Le formateur, les rendez-vous et les exercices pratiques",
 ];
 
 export function ResetStudentStatsButton({ studentId, studentName, onReset }: { studentId: string; studentName: string; onReset: () => void }) {
