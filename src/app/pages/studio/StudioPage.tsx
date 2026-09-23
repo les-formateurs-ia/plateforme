@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Lock } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { GT } from "@/app/components/common/GT";
@@ -11,6 +11,7 @@ import imgTextToSpeech from "@/imports/Du texte à l'audio.png";
 import imgDoublage from "@/imports/Parlez n'importe quelle langue.png";
 import imgFaceSwap from "@/imports/Prenez l'apparence de qui vous voulez.png";
 import { CHAT_PROVIDERS } from "@/app/lib/studioChat";
+import { AiBudgetExhaustedNotice, useAiBudgetExhausted } from "@/app/components/common/AiBudgetGate";
 import imgChatGPT from "@/imports/chatgpt_logo.png";
 import imgGemini from "@/imports/gemini_logo.png";
 import imgClaude from "@/imports/claude_logo.png";
@@ -41,6 +42,8 @@ export function StudioPage() {
   const { role } = useAuth();
   const isAdminRole = role === "admin";
   const visibleModules = STUDIO_MODULES.filter((m) => !m.restricted || isAdminRole);
+  // Tous les modules passent par Runware sauf le chat Gemini (appel Google direct).
+  const budgetExhausted = useAiBudgetExhausted();
 
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
@@ -49,8 +52,13 @@ export function StudioPage() {
         <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Discute avec ChatGPT, Gemini et Claude, et pratique la génération multimédia avec de vrais modèles d'IA — image, vidéo, musique, voix et avatar.</p>
       </div>
 
+      {budgetExhausted && <AiBudgetExhaustedNotice />}
+
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
-        {visibleModules.map(({ slug, image, background, title, subtitle, restricted }) => (
+        {visibleModules.map(({ slug, image, background, title, subtitle, restricted: notReady }) => {
+          const locked = budgetExhausted && slug !== CHAT_PROVIDERS.gemini.slug;
+          const restricted = notReady || locked;
+          return (
           <div key={slug} className={`relative w-full min-h-[220px] md:min-h-[260px] rounded-2xl overflow-hidden transition-transform ${restricted ? "opacity-45 cursor-default" : "group"}`}
             style={{ aspectRatio: "3 / 2" }}>
             {/* url() entre guillemets : certains fichiers (ex. "Du texte à l'audio.png") ont une
@@ -75,9 +83,15 @@ export function StudioPage() {
                   <ChevronRight size={16} />
                 </button>
               )}
+              {locked && !notReady && (
+                <span className="inline-flex items-center gap-2 self-start text-sm font-semibold px-4 py-2.5 rounded-full" style={{ background: "rgba(0,0,0,0.45)", color: "#fff" }}>
+                  <Lock size={14} />Crédits épuisés
+                </span>
+              )}
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

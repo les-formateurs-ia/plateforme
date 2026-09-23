@@ -10,13 +10,17 @@ import { useAuth } from "@/app/state/auth-context";
 import { GCard } from "@/app/components/common/GCard";
 import { VSelect } from "@/app/components/common/Select";
 import { MarkdownText } from "@/app/components/common/MarkdownText";
+import { AiBudgetExhaustedNotice, useAiBudgetExhausted } from "@/app/components/common/AiBudgetGate";
 import {
-  CHAT_PROVIDERS, CHAT_MESSAGE_MAX_LENGTH, CHAT_MAX_FILES, CHAT_MAX_FILE_BYTES, CHAT_FILE_ACCEPT,
-  listMyChatConversations, sendChatMessage, uploadChatAttachment, deleteChatConversation, modelLabel, getChatTraces,
+  CHAT_PROVIDERS, CHAT_MAX_FILES, CHAT_MAX_FILE_BYTES, CHAT_FILE_ACCEPT,
+  listMyChatConversations, sendChatMessage, checkChatStatus, uploadChatAttachment, deleteChatConversation, modelLabel, getChatTraces,
   type ChatProvider, type ChatConversation, type ChatMessage, type ChatAttachment, type ChatTraceStep,
 } from "@/app/lib/studioChat";
 
 const INPUT_MAX_HEIGHT = 200;
+const POLL_INTERVAL_MS = 3000;
+// Le serveur abandonne à 10 min (CHAT_REPLY_TIMEOUT_MS) ; marge pour recevoir son verdict.
+const POLL_CLIENT_DEADLINE_MS = 11 * 60 * 1000;
 
 function formatSize(bytes: number): string {
   return bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} Ko` : `${(bytes / 1024 / 1024).toFixed(1)} Mo`;
@@ -71,7 +75,8 @@ function TraceNote({ steps }: { steps: ChatTraceStep[] }) {
   const extractedFiles = extractions.flatMap((s) => s.files.map((f) => (f.mode === "cache" ? `${f.name} (déjà retranscrit)` : f.name)));
   const native = fileList(response.files, ["natif"]);
   const asText = fileList(response.files, ["texte"]);
-  const dropped = fileList(response.files, ["non_transmis"]);
+  const paged = fileList(response.files, ["pages_images"]);
+  const docx = fileList(response.files, ["texte_converti"]);
   const responder = `${modelLabel(response.provider, response.model)} (${VIA_LABEL[response.via]})`;
 
   return (
@@ -86,8 +91,9 @@ function TraceNote({ steps }: { steps: ChatTraceStep[] }) {
         </>
       )}
       {native && <p>Lu directement par le modèle : {native}</p>}
+      {paged && <p>PDF converti en images de pages dans le navigateur (sans IA), puis lu par le modèle comme un document : {paged}</p>}
+      {docx && <p>Word converti en texte dans le navigateur (sans IA) : {docx}</p>}
       {asText && <p>Fichiers texte insérés dans le message : {asText}</p>}
-      {dropped && <p>Plus transmis (hors limite de contexte) : {dropped}</p>}
       {response.note && <p style={{ color: "#f59e0b" }}>{response.note}</p>}
     </div>
   );
@@ -147,9 +153,61 @@ export function StudioChatPage({ provider }: { provider: ChatProvider }) {
   // une erreur ne les renvoie pas une deuxième fois dans le bucket.
   const uploadedRef = useRef<Map<File, ChatAttachment>>(new Map());
 
+  // Une promesse de suivi par conversation : handleSend et la reprise après
+  // rechargement de la page attendent le même polling, jamais deux en parallèle.
+  const pollsRef = useRef<Map<string, Promise<boolean>>>(new Map());
+  const aliveRef = useRef(true);
+  useEffect(() => () => { aliveRef.current = false; }, []);
+
   const active = conversations.find((c) => c.id === activeId) ?? null;
-  const sending = pending !== null;
-  const messages = [...(active?.messages ?? []), ...(pending ? [pending] : [])];
+  // Envoi local (upload + soumission) ou réponse GPT/Claude encore en cours côté serveur.
+  const sending = pending !== null || !!active?.pending;
+  // GPT/Claude passent par Runware : bloqués au-delà du plafond IA, Gemini (Google direct) reste ouvert.
+  const budgetExhausted = useAiBudgetExhausted();
+  const budgetLocked = provider !== "gemini" && budgetExhausted;
+  const composerDisabled = sending || budgetLocked;
+  const shownPending = active?.pending?.message ?? pending;
+  const messages = [...(active?.messages ?? []), ...(shownPending ? [shownPending] : [])];
+
+  const upsertConversation = (conv: ChatConversation) => setConversations((prev) => [conv, ...prev.filter((c) => c.id !== conv.id)]);
+
+  // Résout true quand la réponse est arrivée, false en cas d'échec (erreur affichée).
+  const waitForReply = (id: string): Promise<boolean> => {
+    const running = pollsRef.current.get(id);
+    if (running) return running;
+    const run = (async () => {
+      const deadline = Date.now() + POLL_CLIENT_DEADLINE_MS;
+      while (aliveRef.current && Date.now() < deadline) {
+        await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
+        let res;
+        try {
+          res = await checkChatStatus(id);
+        } catch {
+          continue;
+        }
+        if (!res.conversation) {
+          setConversations((prev) => prev.filter((c) => c.id !== id));
+          setActiveId((cur) => (cur === id ? null : cur));
+          setError(res.error ?? "La conversation est introuvable.");
+          return false;
+        }
+        upsertConversation(res.conversation);
+        if (res.error) {
+          setError(res.error);
+          return false;
+        }
+        if (!res.conversation.pending) return true;
+      }
+      return false;
+    })().finally(() => pollsRef.current.delete(id));
+    pollsRef.current.set(id, run);
+    return run;
+  };
+
+  useEffect(() => {
+    for (const c of conversations) if (c.pending) waitForReply(c.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversations]);
 
   useEffect(() => {
     setActiveId(null);
@@ -183,7 +241,7 @@ export function StudioChatPage({ provider }: { provider: ChatProvider }) {
   }, [messages.length, activeId]);
 
   const openConversation = (conv: ChatConversation | null) => {
-    if (sending) return;
+    if (pending) return;
     setActiveId(conv?.id ?? null);
     setModel(conv && config.models.some((m) => m.id === conv.model) ? conv.model : config.defaultModel);
     setError(null);
@@ -206,7 +264,7 @@ export function StudioChatPage({ provider }: { provider: ChatProvider }) {
 
   const handleSend = async () => {
     const text = input.trim();
-    if (!user || !text || sending) return;
+    if (!user || !text || composerDisabled) return;
     setError(null);
     setPending({
       id: "pending",
@@ -215,31 +273,42 @@ export function StudioChatPage({ provider }: { provider: ChatProvider }) {
       createdAt: new Date().toISOString(),
       attachments: files.map((f) => ({ path: f.name, name: f.name, mimeType: f.type, size: f.size })),
     });
+    const sentFiles = files;
+    let conv: ChatConversation;
     try {
       const attachments: ChatAttachment[] = [];
-      for (const file of files) {
+      for (const file of sentFiles) {
         let uploaded = uploadedRef.current.get(file);
         if (!uploaded) {
-          uploaded = await uploadChatAttachment(user.id, file);
+          uploaded = await uploadChatAttachment(user.id, file, provider);
           uploadedRef.current.set(file, uploaded);
         }
         attachments.push(uploaded);
       }
-      const conv = await sendChatMessage({ conversationId: activeId, provider, model, message: text, attachments });
-      setConversations((prev) => [conv, ...prev.filter((c) => c.id !== conv.id)]);
-      setActiveId(conv.id);
-      setInput("");
-      setFiles([]);
-      uploadedRef.current.clear();
+      conv = await sendChatMessage({ conversationId: activeId, provider, model, message: text, attachments });
     } catch (err) {
       setError(err instanceof Error ? err.message : "L'envoi a échoué.");
-    } finally {
       setPending(null);
+      return;
+    }
+    upsertConversation(conv);
+    setActiveId(conv.id);
+    setPending(null);
+    setInput("");
+    setFiles([]);
+
+    const ok = conv.pending ? await waitForReply(conv.id) : true;
+    if (ok) {
+      uploadedRef.current.clear();
+    } else if (aliveRef.current) {
+      // Échec après coup : on rend le message et ses fichiers pour réessayer.
+      setInput(text);
+      setFiles(sentFiles);
     }
   };
 
   const handleDelete = async (conv: ChatConversation) => {
-    if (sending || !window.confirm(`Supprimer la conversation « ${conv.title} » ?`)) return;
+    if (pending || conv.pending || !window.confirm(`Supprimer la conversation « ${conv.title} » ?`)) return;
     try {
       await deleteChatConversation(conv);
       setConversations((prev) => prev.filter((c) => c.id !== conv.id));
@@ -254,7 +323,7 @@ export function StudioChatPage({ provider }: { provider: ChatProvider }) {
       <button
         type="button"
         onClick={() => openConversation(null)}
-        disabled={sending}
+        disabled={pending !== null}
         className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80 disabled:opacity-50"
         style={{ background: config.gradient, color: "#fff" }}
       >
@@ -271,7 +340,7 @@ export function StudioChatPage({ provider }: { provider: ChatProvider }) {
             className="group flex items-center gap-1 rounded-xl transition-colors"
             style={{ background: conv.id === activeId ? th.navA : "transparent" }}
           >
-            <button type="button" onClick={() => openConversation(conv)} disabled={sending} className="flex-1 min-w-0 text-left px-3 py-2">
+            <button type="button" onClick={() => openConversation(conv)} disabled={pending !== null} className="flex-1 min-w-0 text-left px-3 py-2">
               <p className="text-sm truncate" style={{ color: th.fg }}>{conv.title}</p>
               <p className="text-[11px]" style={{ color: th.fg3 }}>{new Date(conv.updatedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })} · {modelLabel(provider, conv.model)}</p>
             </button>
@@ -338,6 +407,7 @@ export function StudioChatPage({ provider }: { provider: ChatProvider }) {
             </div>
 
             <div className="p-3 sm:p-4 space-y-2.5" style={{ borderTop: `1px solid ${th.sep}` }}>
+              {budgetLocked && <AiBudgetExhaustedNotice compact />}
               {error && (
                 <p className="text-xs px-3 py-2 rounded-xl" style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444" }}>{error}</p>
               )}
@@ -352,7 +422,7 @@ export function StudioChatPage({ provider }: { provider: ChatProvider }) {
                 <textarea
                   ref={inputRef}
                   value={input}
-                  onChange={(e) => setInput(e.target.value.slice(0, CHAT_MESSAGE_MAX_LENGTH))}
+                  onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
                       e.preventDefault();
@@ -366,7 +436,7 @@ export function StudioChatPage({ provider }: { provider: ChatProvider }) {
                     }
                   }}
                   rows={1}
-                  disabled={sending}
+                  disabled={composerDisabled}
                   placeholder={`Écris ton message à ${config.name}… (Entrée pour envoyer, Maj+Entrée pour aller à la ligne)`}
                   className="w-full bg-transparent px-4 pt-3 pb-1 text-sm outline-none resize-none"
                   style={{ color: th.fg, maxHeight: INPUT_MAX_HEIGHT, overflowY: "auto" }}
@@ -376,7 +446,7 @@ export function StudioChatPage({ provider }: { provider: ChatProvider }) {
                   <button
                     type="button"
                     onClick={() => fileRef.current?.click()}
-                    disabled={sending || files.length >= CHAT_MAX_FILES}
+                    disabled={composerDisabled || files.length >= CHAT_MAX_FILES}
                     className="p-2 rounded-full transition-opacity hover:opacity-70 disabled:opacity-40"
                     style={{ color: th.fg2 }}
                     aria-label="Joindre un fichier"
@@ -385,12 +455,12 @@ export function StudioChatPage({ provider }: { provider: ChatProvider }) {
                     <Paperclip className="w-4 h-4" />
                   </button>
                   <div className="w-[210px] max-w-[55%]">
-                    <VSelect value={model} onValueChange={setModel} options={config.models.map((m) => ({ value: m.id, label: m.label }))} disabled={sending} sm />
+                    <VSelect value={model} onValueChange={setModel} options={config.models.map((m) => ({ value: m.id, label: m.label }))} disabled={composerDisabled} sm />
                   </div>
                   <button
                     type="button"
                     onClick={handleSend}
-                    disabled={sending || !input.trim()}
+                    disabled={composerDisabled || !input.trim()}
                     className="ml-auto w-9 h-9 rounded-full flex items-center justify-center text-white transition-opacity disabled:opacity-40"
                     style={{ background: config.gradient }}
                     aria-label="Envoyer"

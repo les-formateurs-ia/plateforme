@@ -15,6 +15,7 @@ import {
 } from "@/app/lib/formationInstances";
 import { listCoachAssignableCards, assignFormateurToStudent, type PersonCard } from "@/app/lib/planning";
 import { StudentMissionGallery } from "@/app/components/admin/StudentMissionGallery";
+import { StudentAiBudgetCard } from "@/app/components/admin/StudentAiBudgetCard";
 import { StudentStudioGallery } from "@/app/components/admin/StudentStudioGallery";
 import { StudentStudioVideoGallery } from "@/app/components/admin/StudentStudioVideoGallery";
 import { StudentStudioMusicGallery } from "@/app/components/admin/StudentStudioMusicGallery";
@@ -456,6 +457,7 @@ export function AdminStudentDetailPage() {
       </GCard>
       </div>
 
+      {staff && <StudentAiBudgetCard studentId={profile.id} canTopUp={admin} />}
       {staff && <StudentMissionGallery studentId={profile.id} />}
       {staff && <StudentStudioGallery studentId={profile.id} />}
       {staff && <StudentStudioVideoGallery studentId={profile.id} />}

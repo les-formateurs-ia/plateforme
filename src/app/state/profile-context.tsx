@@ -2,8 +2,9 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import { supabase } from "@/app/lib/supabase/client";
 import { useAuth } from "@/app/state/auth-context";
 import type { Profile } from "@/app/types";
+import { AI_BUDGET_CAP_USD } from "@/app/lib/aiUsage";
 
-const EMPTY_PROFILE: Profile = { name: "", age: "", profession: "", phone: "", goal: "", goalFinal: "", style: "", tutor: "", avatarUrl: null, spentUsd: 0 };
+const EMPTY_PROFILE: Profile = { name: "", age: "", profession: "", phone: "", goal: "", goalFinal: "", style: "", tutor: "", avatarUrl: null, spentUsd: 0, budgetUsd: AI_BUDGET_CAP_USD };
 
 interface ProfileContextValue {
   profile: Profile;
@@ -39,7 +40,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     (async () => {
       try {
         const [{ data: p }, { data: o }] = await Promise.all([
-          supabase.from("profiles").select("first_name, avatar_url, phone, spent_usd").eq("id", user.id).maybeSingle(),
+          supabase.from("profiles").select("first_name, avatar_url, phone, spent_usd, ai_budget_usd").eq("id", user.id).maybeSingle(),
           supabase.from("student_onboarding").select("*").eq("user_id", user.id).maybeSingle(),
         ]);
         if (cancelled) return;
@@ -53,7 +54,8 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
           style: o?.learning_style ?? "",
           tutor: o?.ai_tutor_persona ?? "",
           avatarUrl: p?.avatar_url ?? null,
-          spentUsd: p?.spent_usd ?? 0,
+          spentUsd: Number(p?.spent_usd ?? 0),
+          budgetUsd: Number(p?.ai_budget_usd ?? AI_BUDGET_CAP_USD),
         });
       } catch (error) {
         console.warn("Unable to load profile details", error);
@@ -79,8 +81,13 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${user.id}` },
         (payload) => {
-          const spentUsd = (payload.new as { spent_usd?: number }).spent_usd;
-          if (typeof spentUsd === "number") setProfile((current) => ({ ...current, spentUsd }));
+          // numeric Postgres : nombre ou chaîne selon le canal, d'où Number().
+          const row = payload.new as { spent_usd?: number | string; ai_budget_usd?: number | string };
+          setProfile((current) => ({
+            ...current,
+            ...(row.spent_usd != null ? { spentUsd: Number(row.spent_usd) } : {}),
+            ...(row.ai_budget_usd != null ? { budgetUsd: Number(row.ai_budget_usd) } : {}),
+          }));
         },
       )
       .subscribe();

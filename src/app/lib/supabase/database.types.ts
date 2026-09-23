@@ -68,6 +68,7 @@ export interface Database {
           google_calendar_email: string | null;
           company_id: string | null;
           spent_usd: number;
+          ai_budget_usd: number;
           created_at: string;
         };
         Insert: {
@@ -84,6 +85,7 @@ export interface Database {
           google_calendar_email?: string | null;
           company_id?: string | null;
           spent_usd?: number;
+          ai_budget_usd?: number;
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
@@ -301,6 +303,7 @@ export interface Database {
           model: string;
           title: string;
           messages: unknown;
+          pending_task: unknown;
           created_at: string;
           updated_at: string;
         };
@@ -311,10 +314,23 @@ export interface Database {
           model: string;
           title: string;
           messages?: unknown;
+          pending_task?: unknown;
           created_at?: string;
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["studio_chat_conversations"]["Insert"]>;
+        Relationships: never[];
+      };
+      ai_budget_topups: {
+        Row: {
+          id: string;
+          user_id: string;
+          amount_usd: number;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: never;
+        Update: never;
         Relationships: never[];
       };
       studio_chat_traces: {
@@ -1658,6 +1674,10 @@ export interface Database {
       preview_formation_as_staff: {
         Args: { p_template_id: string };
         Returns: string;
+      };
+      admin_add_ai_credits: {
+        Args: { p_user_id: string; p_amount: number };
+        Returns: number;
       };
     };
   };

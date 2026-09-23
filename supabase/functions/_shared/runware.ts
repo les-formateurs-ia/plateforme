@@ -188,6 +188,30 @@ export async function submitAndAwaitRunwareText(apiKey: string, task: Record<str
   throw new Error("La génération de texte Runware prend plus de temps que prévu.");
 }
 
+// Variante en deux temps de submitAndAwaitRunwareText, pour les générations
+// qui dépassent la durée max d'une edge function (chat du Studio : jusqu'à
+// 10 min) — le client relance pollRunwareText via une autre invocation.
+export async function submitRunwareText(apiKey: string, task: Record<string, unknown>): Promise<
+  { status: "ready"; text: string; cost?: number } | { status: "pending"; taskUUID: string }
+> {
+  const taskUUID = (task.taskUUID as string | undefined) ?? crypto.randomUUID();
+  const { data, errors } = await callRunware(apiKey, [{ deliveryMethod: "async", ...task, taskUUID }]);
+  if (errors.length) throw new Error(formatRunwareError(errors));
+  const text = data[0]?.text;
+  if (text) return { status: "ready", text, cost: data[0]?.cost };
+  return { status: "pending", taskUUID };
+}
+
+export async function pollRunwareText(apiKey: string, taskUUID: string): Promise<
+  { status: "pending" } | { status: "ready"; text: string; cost?: number } | { status: "failed"; error: string }
+> {
+  const { data, errors } = await callRunware(apiKey, [{ taskType: "getResponse", taskUUID }]);
+  if (errors.length) return { status: "failed", error: formatRunwareError(errors) };
+  const text = data[0]?.text;
+  if (text) return { status: "ready", text, cost: data[0]?.cost };
+  return { status: "pending" };
+}
+
 // Télécharge un résultat Runware et l'upload tel quel dans le bucket/chemin
 // donné, sans mettre à jour de ligne ni de statut — utilisé par le module
 // musique (generate-studio-music / check-studio-music-status), qui gère deux

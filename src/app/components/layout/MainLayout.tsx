@@ -11,7 +11,6 @@ import { Background } from "@/app/components/common/Background";
 import { Logo } from "@/app/components/common/Logo";
 import { Avatar } from "@/app/components/common/Avatar";
 import { AiBudgetBar } from "@/app/components/common/AiBudgetBar";
-import { AI_BUDGET_CAP_USD } from "@/app/lib/aiUsage";
 import { NotificationBell } from "@/app/components/layout/NotificationBell";
 import { ImpersonationBanner } from "@/app/components/layout/ImpersonationBanner";
 import { useBulkGeneration } from "@/app/state/bulk-generation-context";
@@ -257,7 +256,7 @@ export function MainLayout() {
         </div>
         {role === "student" && (
           <div className="px-4 pt-1">
-            <AiBudgetBar spentUsd={profile.spentUsd} capUsd={AI_BUDGET_CAP_USD} size="sm" />
+            <AiBudgetBar spentUsd={profile.spentUsd} capUsd={profile.budgetUsd} size="sm" />
           </div>
         )}
         <div className="px-4 pb-4 pt-2">

@@ -1,7 +1,8 @@
-// Budget IA Runware par élève (plafond 50 $, cf. migration
-// 0071_ai_usage_budget.sql). Point d'entrée partagé par tous les edge
-// functions qui déclenchent un appel Runware (image/vidéo/texte) : le check
-// avant l'appel, la capture du coût après.
+// Budget IA Runware par élève : bloqué dès que spent_usd >= ai_budget_usd
+// (plafond personnel, 50 $ par défaut, rechargé par l'admin via
+// admin_add_ai_credits — cf. migration 20260923160000_ai_budget_topups.sql).
+// Point d'entrée partagé par tous les edge functions qui déclenchent un appel
+// Runware (image/vidéo/texte) : le check avant l'appel, la capture du coût après.
 export const AI_BUDGET_CAP_USD = 50;
 
 // Les identifiants de modèle Runware suivent la convention "provider:id@version"
@@ -13,9 +14,9 @@ export function deriveProvider(model: string): string {
 
 // deno-lint-ignore no-explicit-any
 export async function checkAiBudget(userClient: any, userId: string): Promise<{ ok: true } | { ok: false; error: string }> {
-  const { data, error } = await userClient.from("profiles").select("spent_usd").eq("id", userId).single();
+  const { data, error } = await userClient.from("profiles").select("spent_usd, ai_budget_usd").eq("id", userId).single();
   if (error || !data) return { ok: false, error: "Impossible de vérifier le budget IA." };
-  if ((data.spent_usd ?? 0) >= AI_BUDGET_CAP_USD) {
+  if (Number(data.spent_usd ?? 0) >= Number(data.ai_budget_usd ?? AI_BUDGET_CAP_USD)) {
     return { ok: false, error: "Vous avez atteint votre limite de crédits." };
   }
   return { ok: true };

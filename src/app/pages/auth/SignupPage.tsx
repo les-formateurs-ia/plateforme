@@ -15,6 +15,7 @@ import { VBtn, ShimBtn } from "@/app/components/common/Buttons";
 import { cx } from "@/app/lib/cx";
 import { LEARN_STYLES, TUTOR_STYLES } from "@/app/data/mock";
 import type { Profile } from "@/app/types";
+import { AI_BUDGET_CAP_USD } from "@/app/lib/aiUsage";
 
 const TOTAL_STEPS = 4;
 
@@ -33,7 +34,7 @@ export function SignupPage() {
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [accountError, setAccountError] = useState<string | null>(null);
 
-  const [p, setP] = useState<Profile>({ name: "", age: "", profession: "", phone: "", goal: "", goalFinal: "", style: "", tutor: "", avatarUrl: null, spentUsd: 0 });
+  const [p, setP] = useState<Profile>({ name: "", age: "", profession: "", phone: "", goal: "", goalFinal: "", style: "", tutor: "", avatarUrl: null, spentUsd: 0, budgetUsd: AI_BUDGET_CAP_USD });
   const [aiState, setAiState] = useState<"idle" | "loading" | "proposal">("idle");
   const [aiProposal, setAiProposal] = useState("");
   const [finishing, setFinishing] = useState(false);

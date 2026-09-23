@@ -24,6 +24,7 @@ import { StudioTextToSpeechPage } from "@/app/pages/studio/StudioTextToSpeechPag
 import { StudioDoublagePage } from "@/app/pages/studio/StudioDoublagePage";
 import { StudioToolPage } from "@/app/pages/studio/StudioToolPage";
 import { StudioChatPage } from "@/app/pages/studio/StudioChatPage";
+import { AiBudgetGate } from "@/app/components/common/AiBudgetGate";
 import { HubPage } from "@/app/pages/hub/HubPage";
 import { HubCategoryPage } from "@/app/pages/hub/HubCategoryPage";
 import { AgentPage } from "@/app/pages/agent/AgentPage";
@@ -195,18 +196,18 @@ function AppRoutes() {
         <Route path="practice/html" element={<HtmlExerciseSessionsPage />} />
         <Route path="practice/html/:sessionId" element={<HtmlExercisePage />} />
         <Route path="practice/battle-ground" element={<BattleGroundPage />} />
-        <Route path="practice/reverse-prompting" element={<ReversePromptingPage />} />
+        <Route path="practice/reverse-prompting" element={<AiBudgetGate><ReversePromptingPage /></AiBudgetGate>} />
         <Route path="practice/ai-detection" element={<AiDetectionPage />} />
         <Route path="studio" element={<StudioPage />} />
         <Route path="studio/chatgpt" element={<StudioChatPage key="openai" provider="openai" />} />
         <Route path="studio/gemini" element={<StudioChatPage key="gemini" provider="gemini" />} />
         <Route path="studio/claude" element={<StudioChatPage key="anthropic" provider="anthropic" />} />
-        <Route path="studio/images" element={<StudioImagesPage />} />
-        <Route path="studio/videos" element={<StudioVideosPage />} />
-        <Route path="studio/musiques" element={<StudioMusicPage />} />
-        <Route path="studio/talking-head" element={<StudioTalkingHeadPage />} />
-        <Route path="studio/text-to-speech" element={<StudioTextToSpeechPage />} />
-        <Route path="studio/doublage" element={<StudioDoublagePage />} />
+        <Route path="studio/images" element={<AiBudgetGate><StudioImagesPage /></AiBudgetGate>} />
+        <Route path="studio/videos" element={<AiBudgetGate><StudioVideosPage /></AiBudgetGate>} />
+        <Route path="studio/musiques" element={<AiBudgetGate><StudioMusicPage /></AiBudgetGate>} />
+        <Route path="studio/talking-head" element={<AiBudgetGate><StudioTalkingHeadPage /></AiBudgetGate>} />
+        <Route path="studio/text-to-speech" element={<AiBudgetGate><StudioTextToSpeechPage /></AiBudgetGate>} />
+        <Route path="studio/doublage" element={<AiBudgetGate><StudioDoublagePage /></AiBudgetGate>} />
         <Route path="studio/:tool" element={<StudioToolPage />} />
         <Route path="hub" element={<HubPage />} />
         <Route path="hub/:category" element={<HubCategoryPage />} />

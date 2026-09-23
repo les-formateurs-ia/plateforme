@@ -9,7 +9,7 @@ import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
 import { GCard } from "@/app/components/common/GCard";
 import { AiBudgetBar } from "@/app/components/common/AiBudgetBar";
-import { getMyAiUsageEvents, AI_BUDGET_CAP_USD, MEDIA_TYPE_LABELS, providerLabel, type AiUsageEvent } from "@/app/lib/aiUsage";
+import { getMyAiUsageEvents, MEDIA_TYPE_LABELS, providerLabel, type AiUsageEvent } from "@/app/lib/aiUsage";
 import type { AiUsageMediaType } from "@/app/lib/supabase/database.types";
 
 type Period = "7d" | "30d" | "all";
@@ -114,7 +114,7 @@ export function AiUsagePanel() {
     <div className="space-y-5">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="max-w-sm w-full">
-          <AiBudgetBar spentUsd={profile.spentUsd} capUsd={AI_BUDGET_CAP_USD} size="lg" />
+          <AiBudgetBar spentUsd={profile.spentUsd} capUsd={profile.budgetUsd} size="lg" />
         </div>
         <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background: th.isDark ? "rgba(255,255,255,0.04)" : `${th.gradShadow(0.06)}`, border: `1px solid ${th.sep}` }}>
           {PERIODS.map(({ id, label }) => (

@@ -9,6 +9,8 @@ export interface Profile {
   tutor: string;
   avatarUrl: string | null;
   spentUsd: number;
+  // Plafond IA personnel (profiles.ai_budget_usd), rechargeable par l'admin.
+  budgetUsd: number;
 }
 
 export interface ChatMsg {
