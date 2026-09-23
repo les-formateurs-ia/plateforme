@@ -22,7 +22,7 @@ export async function checkAiBudget(userClient: any, userId: string): Promise<{ 
 }
 
 type MediaType = "image" | "video" | "audio" | "text";
-type UsageSource = "studio_image" | "studio_video" | "studio_music" | "studio_talkinghead" | "studio_tts" | "studio_doublage" | "battle_ground" | "reverse_prompt";
+type UsageSource = "studio_image" | "studio_video" | "studio_music" | "studio_talkinghead" | "studio_tts" | "studio_doublage" | "studio_chat" | "battle_ground" | "reverse_prompt";
 
 // deno-lint-ignore no-explicit-any
 export async function recordAiUsage(userClient: any, params: { userId: string; mediaType: MediaType; model: string; cost: number | undefined; source: UsageSource }): Promise<void> {

@@ -10,11 +10,19 @@ import imgTalkingHead from "@/imports/Faites parler vos images.png";
 import imgTextToSpeech from "@/imports/Du texte à l'audio.png";
 import imgDoublage from "@/imports/Parlez n'importe quelle langue.png";
 import imgFaceSwap from "@/imports/Prenez l'apparence de qui vous voulez.png";
+import { CHAT_PROVIDERS } from "@/app/lib/studioChat";
 
 // `restricted` : modules pas encore prêts (intégration API à venir) —
 // visibles en aperçu (grisé, non cliquable) pour l'admin seulement, masqués
 // pour le formateur et l'élève.
-const STUDIO_MODULES = [
+// Modules de chat : pas d'illustration dédiée, fond = dégradé aux couleurs du fournisseur.
+const CHAT_MODULES = (["openai", "gemini", "anthropic"] as const).map((id) => {
+  const p = CHAT_PROVIDERS[id];
+  return { slug: p.slug, image: null, background: p.gradient, title: `Discutez avec ${p.name}`, subtitle: `Chat IA · ${p.company}`, desc: "", restricted: false };
+});
+
+const STUDIO_MODULES: { slug: string; image: string | null; background?: string; title: string; subtitle: string; desc: string; restricted: boolean }[] = [
+  ...CHAT_MODULES,
   { slug: "images",       image: imgImages,       title: "Créer vos images",                      subtitle: "Text-to-Image",                    desc: "Génère des visuels percutants à partir d'une simple description.", restricted: false },
   { slug: "videos",       image: imgVideos,       title: "Imaginez vos vidéos",                    subtitle: "Text/Image-to-Video",              desc: "Transforme un texte ou une image en vidéo animée.",                restricted: false },
   { slug: "musiques",     image: imgMusiques,     title: "Concevez vos propres musiques",          subtitle: "Text-to-Music",                    desc: "Compose une bande originale unique pour tes créations.",           restricted: false },
@@ -35,17 +43,17 @@ export function StudioPage() {
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div>
         <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif", color: th.fg }}><GT>Le Studio</GT></h2>
-        <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Pratique la génération multimédia avec de vrais modèles d'IA — image, vidéo, musique, voix et avatar.</p>
+        <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Discute avec ChatGPT, Gemini et Claude, et pratique la génération multimédia avec de vrais modèles d'IA — image, vidéo, musique, voix et avatar.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
-        {visibleModules.map(({ slug, image, title, subtitle, restricted }) => (
+        {visibleModules.map(({ slug, image, background, title, subtitle, restricted }) => (
           <div key={slug} className={`relative w-full min-h-[220px] md:min-h-[260px] rounded-2xl overflow-hidden transition-transform ${restricted ? "opacity-45 cursor-default" : "group"}`}
             style={{ aspectRatio: "3 / 2" }}>
             {/* url() entre guillemets : certains fichiers (ex. "Du texte à l'audio.png") ont une
                 apostrophe dans leur nom, invalide dans un url() CSS non quoté — sans les
                 guillemets, le navigateur rejette toute la déclaration et l'image disparaît. */}
-            <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: `url("${image}")`, backgroundSize: "cover", backgroundPosition: "center" }} />
+            <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105" style={image ? { backgroundImage: `url("${image}")`, backgroundSize: "cover", backgroundPosition: "center" } : { background }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(180deg,rgba(10,10,16,0.15) 0%,rgba(10,10,16,0.75) 100%)" }} />
             <div className="relative h-full flex flex-col justify-between gap-5 p-4 sm:p-3">
               <div>

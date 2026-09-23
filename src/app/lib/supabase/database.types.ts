@@ -21,7 +21,7 @@ export type SatisfactionQuestionType = "qcm" | "rating" | "text";
 export type StudioImageStatus = "pending" | "ready" | "failed";
 export type MissionSubmissionStatus = "draft" | "submitted";
 export type AiUsageMediaType = "image" | "video" | "audio" | "text";
-export type AiUsageSource = "studio_image" | "studio_video" | "studio_music" | "studio_talkinghead" | "studio_tts" | "studio_doublage" | "battle_ground" | "reverse_prompt";
+export type AiUsageSource = "studio_image" | "studio_video" | "studio_music" | "studio_talkinghead" | "studio_tts" | "studio_doublage" | "studio_chat" | "battle_ground" | "reverse_prompt";
 
 export interface Database {
   public: {
@@ -291,6 +291,30 @@ export interface Database {
           completed_at?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["studio_doublage_generations"]["Insert"]>;
+        Relationships: never[];
+      };
+      studio_chat_conversations: {
+        Row: {
+          id: string;
+          user_id: string;
+          provider: "openai" | "gemini" | "anthropic";
+          model: string;
+          title: string;
+          messages: unknown;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          provider: "openai" | "gemini" | "anthropic";
+          model: string;
+          title: string;
+          messages?: unknown;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["studio_chat_conversations"]["Insert"]>;
         Relationships: never[];
       };
       studio_music_generations: {

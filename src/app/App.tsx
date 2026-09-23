@@ -23,6 +23,7 @@ import { StudioTalkingHeadPage } from "@/app/pages/studio/StudioTalkingHeadPage"
 import { StudioTextToSpeechPage } from "@/app/pages/studio/StudioTextToSpeechPage";
 import { StudioDoublagePage } from "@/app/pages/studio/StudioDoublagePage";
 import { StudioToolPage } from "@/app/pages/studio/StudioToolPage";
+import { StudioChatPage } from "@/app/pages/studio/StudioChatPage";
 import { HubPage } from "@/app/pages/hub/HubPage";
 import { HubCategoryPage } from "@/app/pages/hub/HubCategoryPage";
 import { AgentPage } from "@/app/pages/agent/AgentPage";
@@ -197,6 +198,9 @@ function AppRoutes() {
         <Route path="practice/reverse-prompting" element={<ReversePromptingPage />} />
         <Route path="practice/ai-detection" element={<AiDetectionPage />} />
         <Route path="studio" element={<StudioPage />} />
+        <Route path="studio/chatgpt" element={<StudioChatPage key="openai" provider="openai" />} />
+        <Route path="studio/gemini" element={<StudioChatPage key="gemini" provider="gemini" />} />
+        <Route path="studio/claude" element={<StudioChatPage key="anthropic" provider="anthropic" />} />
         <Route path="studio/images" element={<StudioImagesPage />} />
         <Route path="studio/videos" element={<StudioVideosPage />} />
         <Route path="studio/musiques" element={<StudioMusicPage />} />
