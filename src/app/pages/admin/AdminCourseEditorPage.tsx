@@ -107,8 +107,8 @@ export function AdminCourseEditorPage() {
   };
 
   useEffect(() => {
-    if (isInstance && studentId) void loadStudentExercises(studentId);
-  }, [isInstance, studentId]);
+    if (isInstance && studentId && isAdmin(role)) void loadStudentExercises(studentId);
+  }, [isInstance, studentId, role]);
 
   const loadSections = async (id: string) => {
     if (isInstance) {
@@ -419,7 +419,8 @@ export function AdminCourseEditorPage() {
         <p className="text-xs" style={{ color: th.fg3 }}>Enregistre d'abord le cours pour pouvoir ajouter des modules.</p>
       )}
 
-      {courseId && isInstance && studentId && (
+      {/* "Exercices pour vous" : réservé à l'admin pour l'instant (masqué au formateur, comme le module côté Pratique IA). */}
+      {courseId && isInstance && studentId && isAdmin(role) && (
         <GCard><div className="p-6">
           <h3 className="text-sm font-black mb-4" style={{ color: th.fg }}>Exercices pour vous</h3>
           <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))" }}>
@@ -534,7 +535,7 @@ export function AdminCourseEditorPage() {
         </DialogContent>
       </Dialog>
 
-      {isInstance && studentId && (
+      {isInstance && studentId && isAdmin(role) && (
         <HtmlExerciseEditDialog
           open={exerciseDialogOpen}
           onOpenChange={setExerciseDialogOpen}
