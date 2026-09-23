@@ -300,6 +300,18 @@ export function AgentPage() {
               </div>
             </div>
           ))}
+          {sending && (
+            <div className="flex justify-start" role="status" aria-live="polite">
+              <div className="rounded-2xl px-4 py-3 flex items-center gap-2.5" style={{ background: th.card, border: `1px solid ${th.sep}`, borderRadius: "16px 16px 16px 4px" }}>
+                <span className="flex items-center gap-1" aria-hidden="true">
+                  {[0, 150, 300].map((delay) => (
+                    <span key={delay} className="w-2 h-2 rounded-full animate-bounce" style={{ background: th.navAC, animationDelay: `${delay}ms` }} />
+                  ))}
+                </span>
+                <span className="text-xs" style={{ color: th.fg3 }}>L'agent réfléchit…</span>
+              </div>
+            </div>
+          )}
           <div ref={chatEnd} />
         </div>
 

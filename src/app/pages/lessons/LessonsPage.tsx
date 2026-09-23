@@ -307,7 +307,7 @@ function FormationAccordion({ entry, open, onToggle }: { entry: CourseProgressEn
                           const state = s?.state ?? "locked";
                           const clickable = !editMode && state !== "locked";
                           return (
-                            <div key={lesson.id} className={cx("flex items-center gap-4 px-5 py-3 transition-colors", (clickable || editMode) && "cursor-pointer hover:opacity-80")}
+                            <div key={lesson.id} className={cx("flex items-start sm:items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3 transition-colors", (clickable || editMode) && "cursor-pointer hover:opacity-80")}
                               onClick={() => { if (editMode) toggleLesson(lesson.id); else if (clickable) goLesson(lesson.id); }}
                               style={i < mod.lessons.length - 1 ? { borderBottom: `1px solid ${th.sep}` } : {}}>
                               {editMode && (
@@ -316,11 +316,17 @@ function FormationAccordion({ entry, open, onToggle }: { entry: CourseProgressEn
                               <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: state === "completed" ? "rgba(106,222,177,0.12)" : state === "available" ? `${th.gradShadow(0.12)}` : "transparent", border: `1px solid ${state === "completed" ? "rgba(106,222,177,0.3)" : state === "available" ? `${th.gradShadow(0.35)}` : th.sep}` }}>
                                 {state === "completed" ? <CheckCircle className="w-3.5 h-3.5 text-[#6adeb1]" /> : state === "available" ? <Play className="w-3 h-3 ml-0.5" style={{ color: th.navAC }} /> : <Lock className="w-3 h-3" style={{ color: th.fg3 }} />}
                               </div>
-                              <span className="flex-1 text-sm truncate" style={{ color: state === "completed" ? "rgba(106,222,177,0.7)" : state === "available" ? th.navAC : th.fg3 }}>{lesson.title}</span>
-                              {state === "available" && !editMode && <span className="text-[10px] px-2 py-0.5 rounded-full font-bold shrink-0" style={{ background: `${th.gradShadow(0.1)}`, color: th.navAC, border: `1px solid ${th.gradShadow(0.25)}` }}>En cours</span>}
-                              <span className="text-xs font-mono shrink-0 flex items-center gap-1" style={{ color: th.fg3 }}>
-                                {lesson.durationMinutes ? <><Clock className="w-3 h-3" />{lesson.durationMinutes}min</> : "—"}
-                              </span>
+                              {/* Mobile first : titre sur toute la largeur, avec retour à la ligne ;
+                                  badge et durée passent dessous sur mobile, à droite à partir de sm. */}
+                              <div className="flex-1 min-w-0 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-4">
+                                <span className="text-sm leading-snug break-words sm:flex-1" style={{ color: state === "completed" ? "rgba(106,222,177,0.7)" : state === "available" ? th.navAC : th.fg3 }}>{lesson.title}</span>
+                                <div className="flex items-center gap-2 shrink-0">
+                                  {state === "available" && !editMode && <span className="text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ background: `${th.gradShadow(0.1)}`, color: th.navAC, border: `1px solid ${th.gradShadow(0.25)}` }}>En cours</span>}
+                                  <span className="text-xs font-mono flex items-center gap-1" style={{ color: th.fg3 }}>
+                                    {lesson.durationMinutes ? <><Clock className="w-3 h-3" />{lesson.durationMinutes}min</> : "—"}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
                           );
                         })}
