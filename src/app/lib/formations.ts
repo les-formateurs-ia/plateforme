@@ -58,3 +58,44 @@ export async function listTrashedFormations(): Promise<TrashedFormationRow[]> {
   if (error) throw error;
   return (data ?? []).map((r) => ({ id: r.id, name: r.name, description: r.description, deletedAt: r.deleted_at as string }));
 }
+
+// ── "Utiliser en tant que template" ─────────────────────────────────────────
+// Formations personnalisées des élèves (duplicatas, hors prévisualisations
+// staff) pouvant servir de base à un nouveau template.
+export interface StudentInstanceOption {
+  id: string;
+  name: string;
+  studentId: string;
+  studentName: string;
+  assignedAt: string;
+}
+
+export async function listStudentInstancesForTemplate(): Promise<StudentInstanceOption[]> {
+  const { data: instances, error } = await supabase
+    .from("formation_instances")
+    .select("id, name, user_id, assigned_at")
+    .eq("is_preview", false)
+    .order("assigned_at", { ascending: false });
+  if (error) throw error;
+  const userIds = [...new Set((instances ?? []).map((i) => i.user_id))];
+  if (!userIds.length) return [];
+  const { data: students, error: studentsError } = await supabase
+    .from("profiles")
+    .select("id, first_name, last_name, email")
+    .in("id", userIds)
+    .eq("role", "student");
+  if (studentsError) throw studentsError;
+  const names = new Map((students ?? []).map((s) => [s.id, [s.first_name, s.last_name].filter(Boolean).join(" ").trim() || s.email]));
+  return (instances ?? [])
+    .filter((i) => names.has(i.user_id))
+    .map((i) => ({ id: i.id, name: i.name, studentId: i.user_id, studentName: names.get(i.user_id)!, assignedAt: i.assigned_at }));
+}
+
+// Copie indépendante (nouveaux ids) de la structure et du contenu, sans
+// aucune donnée de l'élève — cf. migration 20260923170000. Réservé à l'admin
+// (vérifié côté SQL). Renvoie l'id du nouveau template, créé en brouillon.
+export async function createTemplateFromInstance(instanceId: string, name: string, slug: string): Promise<string> {
+  const { data, error } = await supabase.rpc("create_template_from_instance", { p_instance_id: instanceId, p_name: name, p_slug: slug });
+  if (error) throw new Error(error.message);
+  return data as string;
+}

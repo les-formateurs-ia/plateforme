@@ -15,6 +15,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { HtmlExerciseEditDialog } from "@/app/components/practice/HtmlExerciseEditDialog";
 import { listExercisesForStudent, type HtmlExerciseRow } from "@/app/lib/htmlExercises";
 import { useStaffBasePath } from "@/app/lib/staffBase";
+import { previewFormationAsStaff } from "@/app/lib/learning";
+import { toast } from "sonner";
+import { useAuth } from "@/app/state/auth-context";
+import { isAdmin } from "@/app/lib/permissions";
+import { TemplateFromStudentCard } from "@/app/components/admin/TemplateFromStudentCard";
 import { deleteLessonVideoFiles } from "@/app/lib/lessonVideos";
 import { useBulkGeneration } from "@/app/state/bulk-generation-context";
 import type { FormationStatus } from "@/app/lib/supabase/database.types";
@@ -53,6 +58,7 @@ export function AdminCourseEditorPage() {
   const routeId = routeInstanceId ?? routeCourseId;
   const isNew = !routeId;
 
+  const { role } = useAuth();
   const gen = useBulkGeneration();
   const [courseId, setCourseId] = useState<string | undefined>(routeId);
   const [course, setCourse] = useState<CourseForm>(EMPTY_COURSE);
@@ -80,11 +86,24 @@ export function AdminCourseEditorPage() {
   };
 
   // Un duplicata élève est déjà une vraie instance : on l'ouvre directement.
-  // (Pour un template, le bouton "œil" équivalent vit désormais dans la
-  // liste Gestion des formations — cf. AdminCoursesPage.)
-  const openPreview = () => {
-    if (!courseId) return;
-    window.open(`${base}/instances/${courseId}/preview`, "_blank", "noopener");
+  // Un template passe d'abord par preview_formation_as_staff (duplicata de
+  // prévisualisation du staff), comme l'œil de la liste Gestion des formations.
+  const [previewing, setPreviewing] = useState(false);
+  const openPreview = async () => {
+    if (!courseId || previewing) return;
+    if (isInstance) {
+      window.open(`${base}/instances/${courseId}/preview`, "_blank", "noopener");
+      return;
+    }
+    setPreviewing(true);
+    try {
+      const previewInstanceId = await previewFormationAsStaff(courseId);
+      window.open(`${base}/instances/${previewInstanceId}/preview`, "_blank", "noopener");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Impossible de générer la prévisualisation.");
+    } finally {
+      setPreviewing(false);
+    }
   };
 
   useEffect(() => {
@@ -305,12 +324,13 @@ export function AdminCourseEditorPage() {
 
   if (loading) return <div className="flex-1 flex items-center justify-center"><p className="text-sm" style={{ color: th.fg3 }}>Chargement…</p></div>;
 
-  // Sur "Personnaliser la formation" (isInstance), la carte infos passe en
-  // mode compact pour laisser toute la place aux modules — cf. demande
-  // utilisateur : trop de défilement pour atteindre les leçons.
-  const labelCls = isInstance ? "block text-[10px] font-bold uppercase tracking-widest mb-1.5" : "block text-xs font-bold uppercase tracking-widest mb-2";
-  const inputCls = isInstance ? "w-full rounded-lg px-3 py-2 text-sm g-input" : "w-full rounded-xl px-4 py-3 text-sm g-input";
-  const textareaCls = isInstance ? "w-full rounded-lg px-3 py-2 text-xs g-input resize-none overflow-hidden" : "w-full rounded-xl px-4 py-3 text-sm g-input resize-none overflow-hidden";
+  // Même mise en page pour un template et pour la formation personnalisée
+  // d'un élève : carte infos compacte à gauche, modules sur 2/3 à droite —
+  // cf. demande utilisateur : trop de défilement pour atteindre les leçons.
+  const labelCls = "block text-[10px] font-bold uppercase tracking-widest mb-1.5";
+  const inputCls = "w-full rounded-lg px-3 py-2 text-sm g-input";
+  const textareaCls = "w-full rounded-lg px-3 py-2 text-xs g-input resize-none overflow-hidden";
+  const pageTitle = isInstance ? "Personnaliser la formation" : isNew ? "Nouvelle formation" : "Modifier la formation";
 
   // Textarea qui grandit avec son contenu au lieu de scroller ou de couper le
   // texte — appelé au montage (ref) et à chaque frappe (onChange), pour que
@@ -327,35 +347,23 @@ export function AdminCourseEditorPage() {
         <Link to={backHref} className="flex items-center gap-1.5 text-sm transition-colors hover:opacity-70" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />{backLabel}</Link>
       </div>
 
-      {isInstance && (
-        <h1 className="text-xl sm:text-2xl font-black" style={{ color: th.fg }}><GT>Personnaliser la formation</GT></h1>
-      )}
+      <h1 className="text-xl sm:text-2xl font-black" style={{ color: th.fg }}><GT>{pageTitle}</GT></h1>
 
-      <div className={isInstance ? "space-y-6 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-6 lg:items-start" : "space-y-6"}>
+      <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-6 lg:items-start">
       <div className="space-y-4">
-      <GCard glow><div className={isInstance ? "p-4 space-y-3" : "p-6 space-y-4"}>
-        {isInstance ? (
-          courseId && (
-            <button type="button" onClick={openPreview}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold transition-all hover:opacity-80 active:scale-[0.98]"
-              style={{ background: th.gradShadow(0.12), border: `1px solid ${th.gradShadow(0.3)}`, color: th.navAC }}>
-              <Eye className="w-4 h-4" />Voir en tant qu'élève
-            </button>
-          )
-        ) : (
-          <h2 className="text-lg font-black" style={{ color: th.fg }}>
-            <GT>{isNew ? "Nouvelle formation" : "Informations du cours"}</GT>
-          </h2>
+      <GCard glow><div className="p-4 space-y-3">
+        {courseId && (
+          <button type="button" onClick={openPreview} disabled={previewing}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold transition-all hover:opacity-80 active:scale-[0.98] disabled:opacity-50"
+            style={{ background: th.gradShadow(0.12), border: `1px solid ${th.gradShadow(0.3)}`, color: th.navAC }}>
+            <Eye className="w-4 h-4" />{previewing ? "Préparation…" : "Voir en tant qu'élève"}
+          </button>
         )}
 
         <div>
           <label className={labelCls} style={{ color: th.fg3 }}>Nom</label>
-          {isInstance ? (
-            <textarea ref={autoGrow} value={course.name} onChange={(e) => { handleNameChange(e.target.value); autoGrow(e.target); }}
-              placeholder="Maîtriser l'IA Générative" rows={1} className={`${inputCls} resize-none overflow-hidden`} />
-          ) : (
-            <input value={course.name} onChange={(e) => handleNameChange(e.target.value)} placeholder="Maîtriser l'IA Générative" className={inputCls} />
-          )}
+          <textarea ref={autoGrow} value={course.name} onChange={(e) => { handleNameChange(e.target.value); autoGrow(e.target); }}
+            placeholder="Maîtriser l'IA Générative" rows={1} className={`${inputCls} resize-none overflow-hidden`} />
           {!isInstance && (!slugEditing ? (
             <p className="text-xs mt-1.5" style={{ color: th.fg3 }}>
               URL : <span className="font-mono">{course.slug || "…"}</span>{" "}
@@ -363,24 +371,24 @@ export function AdminCourseEditorPage() {
             </p>
           ) : (
             <input value={course.slug} onChange={(e) => { setSlugTouched(true); setCourse((c) => ({ ...c, slug: e.target.value })); }} placeholder="maitriser-ia-generative"
-              className="w-full mt-2 rounded-xl px-4 py-2 text-xs g-input font-mono" />
+              className="w-full mt-2 rounded-lg px-3 py-2 text-xs g-input font-mono" />
           ))}
         </div>
 
         <div>
           <label className={labelCls} style={{ color: th.fg3 }}>Description</label>
           <textarea ref={autoGrow} value={course.description} onChange={(e) => { setCourse((c) => ({ ...c, description: e.target.value })); autoGrow(e.target); }}
-            rows={isInstance ? 2 : 3} className={textareaCls} />
+            rows={2} className={textareaCls} />
         </div>
 
-        <div className={isInstance ? "grid grid-cols-1 gap-4" : "grid grid-cols-1 sm:grid-cols-2 gap-4"}>
+        <div className="grid grid-cols-1 gap-4">
           <div>
             <label className={labelCls} style={{ color: th.fg3 }}>Durée (min)</label>
             <input type="number" value={course.duration_minutes} onChange={(e) => setCourse((c) => ({ ...c, duration_minutes: e.target.value }))} className={inputCls} />
           </div>
           {!isInstance && (
             <div>
-              <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Statut</label>
+              <label className={labelCls} style={{ color: th.fg3 }}>Statut</label>
               <VSelect
                 value={course.status}
                 onValueChange={(v) => setCourse((c) => ({ ...c, status: v as CourseForm["status"] }))}
@@ -437,7 +445,15 @@ export function AdminCourseEditorPage() {
       )}
       </div>
 
-      <div className={isInstance ? "lg:col-span-2 space-y-6" : "space-y-6"}>
+      <div className="lg:col-span-2 space-y-6">
+
+      {isNew && !isInstance && !courseId && isAdmin(role) && (
+        <TemplateFromStudentCard
+          nameOverride={course.name}
+          slugify={slugify}
+          onCreated={(id) => { setCourseId(id); navigate(`${base}/courses/${id}`, { replace: true }); }}
+        />
+      )}
 
       {courseId && (
         <GCard><div className="p-6">
