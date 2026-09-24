@@ -269,7 +269,9 @@ export function LessonPage() {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [chatIn, setChatIn] = useState("");
   const [typing, setTyping] = useState(false);
-  const [assistantOpen, setAssistantOpen] = useState(true);
+  // Ouvert par défaut sur desktop (panneau latéral) ; fermé sur mobile, où il
+  // s'affiche en plein écran et masquerait la leçon.
+  const [assistantOpen, setAssistantOpen] = useState(() => typeof window === "undefined" || window.matchMedia("(min-width: 1024px)").matches);
   const chatEnd = useRef<HTMLDivElement>(null);
   const firstName = profile.name.split(" ")[0] || "Alex";
 
