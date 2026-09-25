@@ -133,6 +133,26 @@ test('thème clair : fond racine = fond du site, texte = notre sombre, contenu c
   assert.ok(E.contrast(t, T.bg) >= 4.5 && E.luminance(t) < 0.2);
 });
 
+test('couleurs sourdes des gabarits de leçon : ramenées à la charte, beiges restés neutres', () => {
+  // Palette réelle des leçons (--accent, --ok, --warn, --alert et leurs "-soft", --rule-2).
+  assert.equal(E.isNeutral(E.rgbToOklch(c('#1f4e46'))), false, 'vert sapin = couleur');
+  assert.equal(E.isNeutral(E.rgbToOklch(c('#efece5'))), true, 'beige de filet = neutre');
+  assert.equal(E.isNeutral(E.rgbToOklch(c('#334155'))), true, 'slate-700 = neutre');
+  for (const T of Object.values(THEMES)) {
+    const btn = E.mapColor(c('#1f4e46'), 'bg', ctx(T, { control: true }));
+    assert.ok(E.rgbToOklch(btn).C > 0.06 && hueDist(hue(btn), 170) < 20, 'bouton accent → menthe de la charte');
+    const okSoft = E.mapColor(c('#eef4ef'), 'bg', ctx(T));
+    assert.ok(E.rgbToOklch(okSoft).C >= 0.02, 'fond "correct" nettement teinté');
+    const border = E.mapColor(c('#2c6a48'), 'border', ctx(T, { srcBg: c('#eef4ef'), tgtBg: okSoft }));
+    const cr = E.contrast(border, okSoft);
+    // Clair : ton moyen (≈3:1) plutôt que presque noir ; sombre : pastel de la charte.
+    assert.ok(cr >= 1.5 && (T.dark || cr <= 3.3), `bordure colorée (${cr.toFixed(2)}) en ${T.dark ? 'sombre' : 'clair'}`);
+    const warn = textOn(T, '#8a6519', '#faf4e7'), err = textOn(T, '#963428', '#fbf1ef'), ok = textOn(T, '#2c6a48', '#eef4ef');
+    for (const x of [warn, err, ok]) assert.ok(x.cr >= 4.5);
+    assert.ok(hueDist(hue(warn.fg), hue(err.fg)) >= 25 && hueDist(hue(ok.fg), hue(warn.fg)) >= 25);
+  }
+});
+
 test('mapValue : dégradés, variables par rôle, alpha Tailwind, url() intactes', () => {
   const T = THEMES.dark;
   const vars = new Set(['--primary']);

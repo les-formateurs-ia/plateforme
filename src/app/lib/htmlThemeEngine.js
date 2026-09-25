@@ -238,9 +238,12 @@
   const isDarkColor = (c) => rgbToOklch(c).L < 0.6;
 
   // Couleur "neutre" (gris, blanc cassé, ardoise…) : seuil de chroma qui suit la
-  // luminosité — un bleu-50 (C≈0.014) reste bleu, un slate-50 (C≈0.003) est gris.
+  // luminosité — un bleu-50 (C≈0.014) reste bleu, un slate-50 (C≈0.003) est gris,
+  // un vert sapin sourd (#1f4e46, C≈0.053) reste une couleur. Beiges/crème et gris
+  // bleutés (slate) sont des neutres de mise en page très courants : seuil relevé.
   function isNeutral(lch) {
-    return lch.C < Math.max(0.006, 0.065 * (1 - Math.pow(2 * lch.L - 1, 2)));
+    const m = lch.h >= 60 && lch.h <= 110 ? 1.6 : lch.h >= 230 && lch.h <= 275 ? 1.3 : 1;
+    return lch.C < Math.max(0.006, 0.048 * (1 - Math.pow(2 * lch.L - 1, 2))) * m;
   }
 
   // ─── Charte graphique ───────────────────────────────────────────────────
@@ -365,16 +368,18 @@
   // Fonds colorés. Teintes très claires (fond d'alerte, surlignage) → teinte
   // douce de la charte, foncée en thème sombre ; aplats (boutons, badges,
   // en-têtes) → ton pastel de la charte, les écarts de nuance (hover…) conservés.
+  // Une couleur sourde du formateur (vert sapin, ocre…) remonte vers la saturation
+  // de la charte : on garde sa famille et sa nuance, pas son côté "terne".
   function mapChromaBg(lch, ctx) {
     const T = ctx.T;
     const h = mapHue(lch.h, lch.L), fam = famAt(h);
-    const rel = clamp(lch.C / 0.16, 0.2, 1.1);
+    const rel = clamp(lch.C / 0.16, 0.6, 1.1);
     let tint = !ctx.control && !ctx.fillMode && lch.L >= 0.87;
     if (ctx.gradTint !== undefined && !ctx.control && !ctx.fillMode) tint = ctx.gradTint;
     let L, C;
     if (tint) {
       if (T.dark) { L = T.bgL + 0.055 + (1 - Math.min(lch.L, 1)) * 0.55; C = clamp(lch.C * 1.6, 0.03, 0.065); }
-      else { L = Math.max(lch.L, 0.9); C = Math.min(Math.max(lch.C, 0.012), fam.C * 0.7); }
+      else { L = Math.max(lch.L, 0.9); C = clamp(lch.C * 2.2, 0.022, fam.C * 0.6); }
     } else {
       L = clamp(fam.L + (lch.L - 0.64) * 0.35, 0.5, 0.92);
       C = fam.C * rel;
@@ -428,10 +433,15 @@
     const lighter = flipped ? !srcLighter : srcLighter;
     // Texte blanc sur bouton vif devenu pastel : l'intention était "le plus
     // lisible possible", on vise 7:1 plutôt que le seul contraste d'origine.
-    const want = Math.max(contrast(c, ctx.srcBg), minCR, flipped && role === "fg" ? 7 : 0);
+    let want = Math.max(contrast(c, ctx.srcBg), minCR, flipped && role === "fg" ? 7 : 0);
     let h, C, fam = null;
     if (neutral) { h = NEUTRAL_H; C = Math.min(lch.C, 0.012); }
-    else { h = mapHue(lch.h, lch.L); fam = famAt(h); C = 0.15 * clamp(lch.C / 0.16, 0.25, 1); }
+    else {
+      h = mapHue(lch.h, lch.L); fam = famAt(h); C = 0.15 * clamp(lch.C / 0.16, 0.6, 1);
+      // Bordure / filet coloré : ton moyen de la charte (≈3:1) plutôt qu'une
+      // version presque noire de la couleur.
+      if (role === "border") want = Math.max(minCR, Math.min(want, 3));
+    }
     const pick = pickL(h, C, ctx.tgtBg, want, minCR, lighter, T);
     let L = pick.L;
     // Texte neutre poussé à l'extrême : exactement nos couleurs de texte.
@@ -439,6 +449,8 @@
     if (neutral && T.dark && L >= T.lightL - 1e-4) return Object.assign({}, T.text);
     // Accents colorés en thème sombre : tons pastel de la charte.
     if (fam && T.dark && pick.lighter) L = Math.max(L, fam.L - 0.02);
+    // Un doré foncé vire à l'olive : on le glisse vers l'ambre (toujours loin du corail).
+    if (fam && h > 66 && h < 96 && L < 0.66) h -= clamp((0.66 - L) / 0.12, 0, 1) * (h - 66);
     return oklchToRgb(L, C, h);
   }
 
