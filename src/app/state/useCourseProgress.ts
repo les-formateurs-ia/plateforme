@@ -48,7 +48,7 @@ export function useCourseProgress(instanceId?: string): CourseProgress {
         const progress = await getLessonProgressMap(user.id, lessons.map((l) => l.id));
         if (cancelled) return;
         setOutline(outlineData);
-        setLessonStates(computeLessonStates(lessons, progress));
+        setLessonStates(computeLessonStates(outlineData, progress));
       } catch (err) {
         console.error(err);
         if (!cancelled) setError("Impossible de charger votre progression.");

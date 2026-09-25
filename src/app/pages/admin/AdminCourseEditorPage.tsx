@@ -11,6 +11,7 @@ import { GT } from "@/app/components/common/GT";
 import { VBtn, ShimBtn } from "@/app/components/common/Buttons";
 import { SaveButton, type SaveButtonState } from "@/app/components/common/SaveButton";
 import { VSelect } from "@/app/components/common/Select";
+import { VSwitch } from "@/app/components/common/VSwitch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/app/components/ui/dialog";
 import { HtmlExerciseEditDialog } from "@/app/components/practice/HtmlExerciseEditDialog";
 import { listExercisesForStudent, type HtmlExerciseRow } from "@/app/lib/htmlExercises";
@@ -32,7 +33,9 @@ interface CourseForm {
   status: FormationStatus;
 }
 
-interface SectionRow { id: string; title: string; order_index: number; }
+// is_unlocked : duplicata élève uniquement (accès au module, cf.
+// 20260925130000_instance_section_access.sql) — absent sur un template.
+interface SectionRow { id: string; title: string; order_index: number; is_unlocked?: boolean; }
 interface LessonRow { id: string; section_id: string; title: string; duration_minutes: number | null; order_index: number; }
 
 const EMPTY_COURSE: CourseForm = {
@@ -80,6 +83,9 @@ export function AdminCourseEditorPage() {
   const [studentExercises, setStudentExercises] = useState<HtmlExerciseRow[]>([]);
   const [exerciseDialogOpen, setExerciseDialogOpen] = useState(false);
   const [editingExercise, setEditingExercise] = useState<HtmlExerciseRow | undefined>(undefined);
+  // Ouvrir/fermer un module : admin ou formateur attitré de l'élève — même
+  // règle que le trigger instance_sections_guard_access côté base.
+  const [canManageAccess, setCanManageAccess] = useState(false);
 
   const loadStudentExercises = async (id: string) => {
     setStudentExercises(await listExercisesForStudent(id));
@@ -110,9 +116,31 @@ export function AdminCourseEditorPage() {
     if (isInstance && studentId && isAdmin(role)) void loadStudentExercises(studentId);
   }, [isInstance, studentId, role]);
 
+  useEffect(() => {
+    if (!isInstance || !routeInstanceId) return;
+    let cancelled = false;
+    supabase.rpc("can_manage_instance_access", { p_instance_id: routeInstanceId }).then(({ data, error: rpcError }) => {
+      if (rpcError) console.error(rpcError);
+      if (!cancelled) setCanManageAccess(!!data);
+    });
+    return () => { cancelled = true; };
+  }, [isInstance, routeInstanceId]);
+
+  // Optimiste, puis retour arrière si la base refuse (droits, réseau).
+  const toggleSectionAccess = async (id: string, unlocked: boolean) => {
+    setSections((s) => s.map((sec) => (sec.id === id ? { ...sec, is_unlocked: unlocked } : sec)));
+    const { error: updateError } = await supabase.from("instance_sections").update({ is_unlocked: unlocked }).eq("id", id);
+    if (updateError) {
+      setSections((s) => s.map((sec) => (sec.id === id ? { ...sec, is_unlocked: !unlocked } : sec)));
+      toast.error(updateError.message || "Impossible de modifier l'accès au module.");
+      return;
+    }
+    toast.success(unlocked ? "Module ouvert à l'élève." : "Module fermé à l'élève. Sa progression est conservée.");
+  };
+
   const loadSections = async (id: string) => {
     if (isInstance) {
-      const { data: sectionRows } = await supabase.from("instance_sections").select("id, title, order_index").eq("instance_id", id).order("order_index");
+      const { data: sectionRows } = await supabase.from("instance_sections").select("id, title, order_index, is_unlocked").eq("instance_id", id).order("order_index");
       setSections(sectionRows ?? []);
       if (!sectionRows?.length) { setLessonsBySection({}); return; }
       const { data: lessonRows } = await supabase.from("instance_lessons").select("id, section_id, title, duration_minutes, order_index")
@@ -261,7 +289,7 @@ export function AdminCourseEditorPage() {
     if (isInstance) {
       const { data, error: insertError } = await supabase
         .from("instance_sections").insert({ instance_id: courseId, title: "Nouveau module", order_index: sections.length })
-        .select("id, title, order_index").single();
+        .select("id, title, order_index, is_unlocked").single();
       if (insertError || !data) { setError(insertError?.message ?? "Erreur inconnue"); return; }
       setSections((s) => [...s, data]);
       return;
@@ -462,6 +490,12 @@ export function AdminCourseEditorPage() {
             <h3 className="text-sm font-black" style={{ color: th.fg }}>Modules</h3>
             <VBtn sm onClick={addSection}><span className="flex items-center gap-1.5"><Plus className="w-3.5 h-3.5" />Ajouter un module</span></VBtn>
           </div>
+          {isInstance && (
+            <p className="text-xs mb-4 -mt-2" style={{ color: th.fg3 }}>
+              Interrupteur « Accès » : module ouvert ou fermé pour cet élève uniquement. Terminer un module n'ouvre pas le suivant ; fermer un module conserve la progression.
+              {!canManageAccess && " Seuls l'administrateur et le formateur attitré de l'élève peuvent modifier l'accès."}
+            </p>
+          )}
 
           <div className="space-y-2">
             {sections.map((section, index) => {
@@ -476,6 +510,13 @@ export function AdminCourseEditorPage() {
                       onBlur={(e) => persistSectionTitle(section.id, e.target.value)}
                       className="flex-1 min-w-[140px] bg-transparent text-sm font-semibold outline-none resize-none overflow-hidden leading-snug py-1" style={{ color: th.fg }} />
                     <div className="flex items-center gap-2 shrink-0 mt-1">
+                      {isInstance && (
+                        <label className="flex items-center gap-1.5 text-xs font-semibold shrink-0 mr-1" style={{ color: section.is_unlocked ? th.fg : th.fg3 }}
+                          title={canManageAccess ? undefined : "Réservé à l'administrateur et au formateur attitré de l'élève"}>
+                          Accès
+                          <VSwitch checked={!!section.is_unlocked} disabled={!canManageAccess} onCheckedChange={(v) => void toggleSectionAccess(section.id, v)} />
+                        </label>
+                      )}
                       <span className="text-xs shrink-0" style={{ color: th.fg3 }}>{lessons.length} leçon{lessons.length !== 1 ? "s" : ""}</span>
                       <button onClick={() => moveSection(index, -1)} disabled={index === 0} className="disabled:opacity-20"><ChevronUp className="w-4 h-4" style={{ color: th.fg3 }} /></button>
                       <button onClick={() => moveSection(index, 1)} disabled={index === sections.length - 1} className="disabled:opacity-20"><ChevronDown className="w-4 h-4" style={{ color: th.fg3 }} /></button>

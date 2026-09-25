@@ -986,6 +986,7 @@ export interface Database {
           instance_id: string;
           title: string;
           order_index: number;
+          is_unlocked: boolean;
           created_at: string;
         };
         Insert: {
@@ -993,6 +994,7 @@ export interface Database {
           instance_id: string;
           title: string;
           order_index: number;
+          is_unlocked?: boolean;
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["instance_sections"]["Insert"]>;
@@ -1686,6 +1688,18 @@ export interface Database {
       admin_add_ai_credits: {
         Args: { p_user_id: string; p_amount: number };
         Returns: number;
+      };
+      can_manage_instance_access: {
+        Args: { p_instance_id: string };
+        Returns: boolean;
+      };
+      get_instance_lesson_outline: {
+        Args: { p_instance_id: string };
+        Returns: { id: string; section_id: string; slug: string; title: string; duration_minutes: number | null; order_index: number }[];
+      };
+      is_instance_lesson_locked: {
+        Args: { p_lesson_id: string };
+        Returns: boolean;
       };
     };
   };

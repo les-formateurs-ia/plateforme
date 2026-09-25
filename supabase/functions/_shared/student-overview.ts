@@ -25,16 +25,10 @@ export async function buildStudentOverview(
 
   const courses: CourseOverview[] = [];
   for (const instance of instances ?? []) {
-    const { data: sections } = await supabase
-      .from("instance_sections").select("id").eq("instance_id", instance.id);
-    const sectionIds = (sections ?? []).map((s: { id: string }) => s.id);
-
-    let lessonIds: string[] = [];
-    if (sectionIds.length > 0) {
-      const { data: lessons } = await supabase
-        .from("instance_lessons").select("id").in("section_id", sectionIds);
-      lessonIds = (lessons ?? []).map((l: { id: string }) => l.id);
-    }
+    // Plan complet via RPC : instance_lessons est illisible pour l'élève dans
+    // un module fermé, ce qui fausserait le total de leçons.
+    const { data: lessons } = await supabase.rpc("get_instance_lesson_outline", { p_instance_id: instance.id });
+    const lessonIds: string[] = (lessons ?? []).map((l: { id: string }) => l.id);
 
     let completedLessons = 0;
     let averageQuizScore: number | null = null;

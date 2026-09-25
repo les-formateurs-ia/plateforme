@@ -44,7 +44,7 @@ export function useAllCourseProgress(): AllCourseProgress {
         if (cancelled) return;
         const entries: CourseProgressEntry[] = instances.reduce<CourseProgressEntry[]>((acc, instance, i) => {
           const outline = outlines[i];
-          if (outline) acc.push({ instance, outline, lessonStates: computeLessonStates(flattenLessons(outline), progress) });
+          if (outline) acc.push({ instance, outline, lessonStates: computeLessonStates(outline, progress) });
           return acc;
         }, []);
         setCourses(entries);

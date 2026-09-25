@@ -6,7 +6,7 @@ import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
 import { VBtn } from "@/app/components/common/Buttons";
 import { cx } from "@/app/lib/cx";
-import { formatDuration, type LessonWithState } from "@/app/lib/learning";
+import { formatDuration, isLessonCompleted, type LessonWithState } from "@/app/lib/learning";
 import { useCourseProgress } from "@/app/state/useCourseProgress";
 import { useStaffBasePath } from "@/app/lib/staffBase";
 
@@ -31,8 +31,9 @@ export function AdminFormationPreviewPage() {
   const { loading, outline, lessonStates: rawLessonStates } = useCourseProgress(routeId);
   // Le staff doit pouvoir sauter à n'importe quelle leçon pour la tester,
   // sans le déblocage progressif imposé aux élèves — seul "completed" reste
-  // affiché tel quel (utile pour voir ce qu'on a déjà testé).
-  const lessonStates: LessonWithState[] = rawLessonStates.map((s) => (s.state === "locked" ? { ...s, state: "available" as const } : s));
+  // affiché tel quel (utile pour voir ce qu'on a déjà testé). Un module fermé
+  // à l'élève garde son badge "Verrouillé" mais ses leçons restent ouvrables.
+  const lessonStates: LessonWithState[] = rawLessonStates.map((s) => (s.state === "locked" ? { ...s, state: isLessonCompleted(s) ? "completed" as const : "available" as const } : s));
 
   const [openSection, setOpenSection] = useState<string | null>(null);
   useEffect(() => {
@@ -99,9 +100,9 @@ export function AdminFormationPreviewPage() {
       <div className="space-y-3">
         {outline.sections.map((mod) => {
           const modStates = mod.lessons.map((l) => stateFor(l.id)).filter((s): s is LessonWithState => !!s);
-          const done = modStates.filter((s) => s.state === "completed").length;
+          const done = modStates.filter(isLessonCompleted).length;
           const total = mod.lessons.length;
-          const status: SectionStatus = total === 0 ? "locked" : done === total ? "complete" : modStates.some((s) => s.state !== "locked") ? "active" : "locked";
+          const status: SectionStatus = !mod.isUnlocked || total === 0 ? "locked" : done === total ? "complete" : modStates.some((s) => s.state !== "locked") ? "active" : "locked";
           const pct = total > 0 ? Math.round((done / total) * 100) : 0;
           const open = openSection === mod.id;
           const SC = {

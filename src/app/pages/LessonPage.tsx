@@ -20,7 +20,7 @@ import { cx } from "@/app/lib/cx";
 import type { ChatMsg } from "@/app/types";
 import {
   getLessonDetail, ensureLessonStarted, addTimeSpent, submitQuiz, flattenLessons, QUIZ_PASS_THRESHOLD,
-  updateLessonCustomHtml, type LessonDetail, type QuizAnswer,
+  updateLessonCustomHtml, isLessonCompleted, isLessonInLockedModule, type LessonDetail, type QuizAnswer,
 } from "@/app/lib/learning";
 import { getMyPodcasts, getPodcastSignedUrl, requestPodcastGeneration, pollForPodcast, type Podcast } from "@/app/lib/podcasts";
 import { PODCAST_FORMATS, type PodcastVariantId } from "@/app/lib/podcastFormats";
@@ -345,7 +345,18 @@ export function LessonPage() {
       try {
         const detail = await getLessonDetail(lessonId);
         if (cancelled) return;
-        if (!detail) { setLessonError("Cette leçon est introuvable."); return; }
+        if (!detail) {
+          // Lien direct vers une leçon d'un module fermé : la RLS la rend
+          // illisible, on explique pourquoi plutôt que « introuvable ».
+          if (await isLessonInLockedModule(lessonId)) {
+            if (cancelled) return;
+            toast.error("Ce module n'est pas encore ouvert — ton formateur te donnera l'accès.");
+            navigate("/lessons", { replace: true });
+            return;
+          }
+          if (!cancelled) setLessonError("Cette leçon est introuvable.");
+          return;
+        }
         setLesson(detail);
       } catch (err) {
         console.error(err);
@@ -370,7 +381,9 @@ export function LessonPage() {
     }
     if (state.state === "locked" && !isStaff(role)) {
       setAccess("denied");
-      toast.error("Cette leçon n'est pas encore débloquée — termine les précédentes d'abord.");
+      toast.error(state.moduleLocked
+        ? "Ce module n'est pas encore ouvert — ton formateur te donnera l'accès."
+        : "Cette leçon n'est pas encore débloquée — termine les précédentes d'abord.");
       navigate("/lessons", { replace: true });
       return;
     }
@@ -739,12 +752,16 @@ export function LessonPage() {
 
   const orderedLessons = course.outline ? flattenLessons(course.outline) : [];
   const currentIndex = orderedLessons.findIndex((l) => l.id === lessonId);
-  const nextLesson = currentIndex >= 0 ? orderedLessons[currentIndex + 1] : undefined;
+  const nextCandidate = currentIndex >= 0 ? orderedLessons[currentIndex + 1] : undefined;
+  // Pas de « Leçon suivante » vers un module fermé : terminer un module n'ouvre
+  // pas le suivant (le staff, lui, peut toujours naviguer).
+  const nextLessonModuleLocked = !!course.lessonStates.find((s) => s.lesson.id === nextCandidate?.id)?.moduleLocked;
+  const nextLesson = nextLessonModuleLocked && !isStaff(role) ? undefined : nextCandidate;
   const currentLessonState = course.lessonStates.find((s) => s.lesson.id === lessonId);
   const isCompleted = currentLessonState?.state === "completed" || !!quizResult?.passed;
 
   const totalLessons = course.lessonStates.length;
-  const completedCount = course.lessonStates.filter((s) => s.state === "completed").length;
+  const completedCount = course.lessonStates.filter(isLessonCompleted).length;
   const overallPct = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
 
   // Playground et Agent sont visibles par tous les rôles/profils — seule
