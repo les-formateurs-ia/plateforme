@@ -17,6 +17,7 @@ import { listCoachAssignableCards, assignFormateurToStudent, type PersonCard } f
 import { StudentMissionGallery } from "@/app/components/admin/StudentMissionGallery";
 import { StudentAiBudgetCard } from "@/app/components/admin/StudentAiBudgetCard";
 import { ResetStudentStatsButton } from "@/app/components/admin/ResetStudentStatsButton";
+import { GeneratePasswordLinkButton } from "@/app/components/admin/GeneratePasswordLinkButton";
 import { StudentStudioGallery } from "@/app/components/admin/StudentStudioGallery";
 import { StudentStudioVideoGallery } from "@/app/components/admin/StudentStudioVideoGallery";
 import { StudentStudioMusicGallery } from "@/app/components/admin/StudentStudioMusicGallery";
@@ -264,7 +265,12 @@ export function AdminStudentDetailPage() {
           <h2 className="text-xl font-black truncate" style={{ color: th.fg }}><GT>{name}</GT></h2>
           <p className="text-sm truncate" style={{ color: th.fg3 }}>{profile.email}</p>
         </div>
-        {admin && <ResetStudentStatsButton studentId={profile.id} studentName={name} onReset={() => setStatsResetCount((n) => n + 1)} />}
+        {admin && (
+          <div className="flex flex-wrap items-center gap-2">
+            <GeneratePasswordLinkButton studentId={profile.id} studentName={name} />
+            <ResetStudentStatsButton studentId={profile.id} studentName={name} onReset={() => setStatsResetCount((n) => n + 1)} />
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">

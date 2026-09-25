@@ -1,3 +1,7 @@
-# Only this dedicated public widget endpoint accepts visitors without a login.
+# Only these dedicated public endpoints accept visitors without a login.
 [functions.project-advisor]
+verify_jwt = false
+
+# The one-time password-setup token is the only credential (see the function).
+[functions.password-setup]
 verify_jwt = false

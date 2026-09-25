@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import {
   ChevronRight, ChevronLeft, Mic, Send,
   Sparkles, MessageSquare, CheckCircle, X,
-  Lightbulb, Monitor,
+  Lightbulb, Monitor, Loader2,
   Network, RotateCcw, Play, Brain, Zap, Clock, PartyPopper, BookOpen, Headphones, Wand2, Bot, Code, Upload, Pencil, AudioLines, Video,
   Phone, PhoneOff,
 } from "lucide-react";
@@ -738,14 +738,16 @@ export function LessonPage() {
   };
 
   const nextQuestionOrFinish = () => {
-    if (!currentQuestion || selected === null) return;
+    if (!currentQuestion || selected === null || submitting) return;
     const option = currentQuestion.options.find((o) => o.id === selected);
     const answer: QuizAnswer = { questionId: currentQuestion.id, selectedOptionId: selected, correct: !!option?.isCorrect };
     const nextAnswers = [...answers, answer];
-    setAnswers(nextAnswers);
-    setSelected(null);
     if (isLastQuestion) void finishQuiz(nextAnswers);
-    else setQuizStep((s) => s + 1);
+    else {
+      setAnswers(nextAnswers);
+      setSelected(null);
+      setQuizStep((s) => s + 1);
+    }
   };
 
   const retryQuiz = () => { setQuizStep(0); setSelected(null); setAnswers([]); setQuizResult(null); setRetaking(true); };
@@ -1251,6 +1253,12 @@ export function LessonPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.7)" }} onClick={() => setShowQuizModal(false)}>
           <div onClick={(e) => e.stopPropagation()} className="max-w-lg w-full max-h-[85vh] overflow-y-auto rounded-2xl" style={{ background: th.card, border: `1px solid ${th.sep}` }}>
             <div className="p-5">
+              {submitting ? (
+                <div className="flex min-h-48 items-center justify-center" role="status" aria-label="Chargement" aria-busy="true">
+                  <Loader2 className="w-8 h-8 animate-spin" style={{ color: th.navAC }} aria-hidden="true" />
+                </div>
+              ) : (
+                <>
               <div className="flex items-center gap-2.5 mb-4">
                 <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${th.gradShadow(0.1)}`, border: `1px solid ${th.gradShadow(0.2)}` }}><Brain className="w-4 h-4" style={{ color: th.navAC }} /></div>
                 <span className="text-sm font-black flex-1" style={{ color: th.fg }}>Quiz de la leçon</span>
@@ -1323,10 +1331,12 @@ export function LessonPage() {
                         </>
                       )}
                       <VBtn onClick={nextQuestionOrFinish} sm disabled={submitting}>
-                        {submitting ? "Envoi…" : isLastQuestion ? "Valider le quiz" : "Question suivante"}
+                        {isLastQuestion ? "Valider le quiz" : "Question suivante"}
                       </VBtn>
                     </div>
                   )}
+                </>
+              )}
                 </>
               )}
             </div>

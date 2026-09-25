@@ -1,8 +1,9 @@
 // Crée un compte élève depuis l'admin (fiche "Nouvel élève"), sans mot de
 // passe et donc sans email envoyé (auth.admin.createUser() n'envoie jamais
 // de mail, contrairement à inviteUserByEmail() utilisé pour les entreprises).
-// L'élève ne peut pas encore se connecter : un mot de passe/lien de
-// définition sera ajouté séparément (voir note produit). Nécessite la clé
+// L'élève ne peut pas encore se connecter : l'admin lui transmet ensuite un
+// lien "Définir votre mot de passe" (fiche élève → "Générer le lien", cf.
+// generate-password-link / password-setup). Nécessite la clé
 // service-role : la création d'un compte auth et l'écriture du profil ne
 // peuvent pas passer par une simple écriture RLS côté client.
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";

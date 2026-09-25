@@ -7,6 +7,8 @@
     "test:advisor": "node --test scripts/project-advisor.test.mjs",
     "test:media": "node --test scripts/media-generation.test.mjs",
     "test:html-theme": "node --test scripts/html-theme.test.mjs",
+    "test:password-setup": "node --test scripts/password-setup.test.mjs",
+    "e2e:password-setup": "node scripts/password-setup-e2e.mjs",
     "build": "vite build",
     "dev": "vite",
     "preview": "vite preview",

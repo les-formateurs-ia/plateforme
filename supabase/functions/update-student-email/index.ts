@@ -48,6 +48,10 @@ Deno.serve(async (req) => {
     const { error: profileError } = await serviceClient.from("profiles").update({ email: trimmedEmail }).eq("id", studentId);
     if (profileError) return jsonResponse({ error: profileError.message }, 500);
 
+    // Un lien "Définir votre mot de passe" en cours visait l'ancien email : on
+    // l'annule (password-setup le refuserait de toute façon).
+    await serviceClient.from("password_setup_tokens").delete().eq("user_id", studentId);
+
     return jsonResponse({ ok: true });
   } catch (err) {
     return jsonResponse({ error: err instanceof Error ? err.message : "Erreur inconnue." }, 500);
