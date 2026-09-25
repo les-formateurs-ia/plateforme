@@ -11,7 +11,7 @@ export function injectPlatformAuth(html: string, accessToken: string): string {
     supabaseAnonKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
     accessToken,
   }).replace(/</g, "\\u003c");
-  const script = `<script>window.__PLATFORM_AUTH__=${payload};</script>`;
+  const script = `<script data-platform-injected>window.__PLATFORM_AUTH__=${payload};</script>`;
   if (/<head[^>]*>/i.test(html)) return html.replace(/<head[^>]*>/i, (m) => `${m}\n${script}`);
   if (/<html[^>]*>/i.test(html)) return html.replace(/<html[^>]*>/i, (m) => `${m}\n${script}`);
   return script + html;
@@ -26,8 +26,8 @@ export function injectPlatformAuth(html: string, accessToken: string): string {
 // HTML autonome, pour qu'il se fonde dans le thème sombre/clair de la plateforme (un
 // <style>/background posé par le formateur passe après dans la cascade et prend le dessus).
 export function injectAutoResize(html: string): string {
-  const extras = `<style>html,body{margin:0;background:transparent;}*{scrollbar-width:none!important;}*::-webkit-scrollbar{display:none!important;width:0!important;height:0!important;}</style>
-<script>(function(){
+  const extras = `<style data-platform-injected>html,body{margin:0;background:transparent;}*{scrollbar-width:none!important;}*::-webkit-scrollbar{display:none!important;width:0!important;height:0!important;}</style>
+<script data-platform-injected>(function(){
   function post(){
     var h = Math.max(document.documentElement.scrollHeight, document.body ? document.body.scrollHeight : 0);
     parent.postMessage({ __autoResizeHeight: h }, "*");
@@ -51,7 +51,7 @@ export function injectAutoResize(html: string): string {
 // initiale) avant de sérialiser tout le document. En lecture seule (mission déjà
 // validée), désactive aussi tous les champs/boutons au chargement.
 export function injectMissionBridge(html: string, { readOnly }: { readOnly: boolean }): string {
-  const script = `<script>(function(){
+  const script = `<script data-platform-injected>(function(){
   function freezeFormState(root){
     root.querySelectorAll('input,textarea,select').forEach(function(el){
       if (el.tagName === 'SELECT') {
@@ -69,10 +69,20 @@ export function injectMissionBridge(html: string, { readOnly }: { readOnly: bool
       }
     });
   }
+  // On enregistre le document du formateur, pas son rendu adapté au thème de
+  // l'élève (cf. htmlThemeEngine.js) ni nos scripts injectés — sinon ils
+  // s'empileraient à chaque réouverture du brouillon et finiraient dans le PDF.
+  function cleanHtml(){
+    var themer = window.__lfiaHtmlTheme;
+    if (themer && themer.serializeClean) return themer.serializeClean();
+    var clone = document.documentElement.cloneNode(true);
+    clone.querySelectorAll('[data-platform-injected]').forEach(function(n){ n.remove(); });
+    return clone.outerHTML;
+  }
   window.addEventListener('message', function(e){
     if (!e.data || !e.data.__missionRequestSnapshot) return;
     freezeFormState(document);
-    parent.postMessage({ __missionSnapshotHtml: document.documentElement.outerHTML }, '*');
+    parent.postMessage({ __missionSnapshotHtml: cleanHtml() }, '*');
   });
   ${readOnly ? `
   function lockFields(){

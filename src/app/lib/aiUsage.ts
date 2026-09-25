@@ -92,7 +92,8 @@ export async function getStudentAiBudget(studentId: string): Promise<{ spentUsd:
   };
 }
 
-// Réservé à l'admin (vérifié dans la fonction SQL admin_add_ai_credits). Renvoie le nouveau plafond.
+// Réservé à l'admin (vérifié dans la fonction SQL admin_add_ai_credits). Montant négatif = retrait.
+// Renvoie le nouveau plafond.
 export async function addAiCredits(studentId: string, amountUsd: number): Promise<number> {
   const { data, error } = await supabase.rpc("admin_add_ai_credits", { p_user_id: studentId, p_amount: amountUsd });
   if (error) throw new Error(error.message);

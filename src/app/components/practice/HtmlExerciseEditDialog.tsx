@@ -14,6 +14,7 @@ import { isAdmin } from "@/app/lib/permissions";
 import { useStaffBasePath } from "@/app/lib/staffBase";
 import { listStudentCards, type PersonCard, type StudentCard } from "@/app/lib/planning";
 import { normalizeSmartQuotes } from "@/app/lib/platformHtml";
+import { useHtmlTheme } from "@/app/lib/useHtmlTheme";
 import {
   createHtmlExercise, updateHtmlExercise, deleteHtmlExercise, getExerciseAssignees, removeExerciseAssignee,
   type HtmlExerciseRow,
@@ -41,6 +42,8 @@ export function HtmlExerciseEditDialog({
   onSaved: () => void;
 }) {
   const th = useTh();
+  // Aperçu dans la modale : fond racine = fond de la modale (carte).
+  const htmlTheme = useHtmlTheme("card");
   const navigate = useNavigate();
   const staffBase = useStaffBasePath();
   const { user, role } = useAuth();
@@ -401,17 +404,18 @@ export function HtmlExerciseEditDialog({
           </div>
 
           <div className="min-w-0 space-y-3">
-            <div className="min-h-[360px] rounded-xl overflow-hidden relative" style={{ background: "#fff", border: `1px solid ${th.sep}` }}>
+            <div className="min-h-[360px] rounded-xl overflow-hidden relative" style={{ background: htmlTheme.background, border: `1px solid ${th.sep}` }}>
               {previewHtml ? (
                 <iframe
                   key={previewHtml}
-                  srcDoc={previewHtml}
+                  srcDoc={htmlTheme.withTheme(previewHtml)}
                   sandbox="allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"
                   title="Apercu HTML"
-                  className="absolute inset-0 w-full h-full border-0 bg-white"
+                  className="absolute inset-0 w-full h-full border-0"
+                  style={{ background: htmlTheme.background }}
                 />
               ) : (
-                <div className="absolute inset-0 flex items-center justify-center text-sm" style={{ color: "#64748b" }}>Apercu</div>
+                <div className="absolute inset-0 flex items-center justify-center text-sm" style={{ color: th.fg3 }}>Apercu</div>
               )}
             </div>
 

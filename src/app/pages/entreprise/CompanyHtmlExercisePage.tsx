@@ -6,10 +6,12 @@ import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
 import { supabase } from "@/app/lib/supabase/client";
 import { injectPlatformAuth } from "@/app/lib/platformHtml";
+import { useHtmlTheme } from "@/app/lib/useHtmlTheme";
 import { getCompanyHtmlExercise, type CompanyHtmlExerciseRow } from "@/app/lib/entreprise/companyHtmlExercises";
 
 export function CompanyHtmlExercisePage() {
   const th = useTh();
+  const htmlTheme = useHtmlTheme("page");
   const navigate = useNavigate();
   const { exerciseId } = useParams<{ exerciseId: string }>();
 
@@ -47,18 +49,18 @@ export function CompanyHtmlExercisePage() {
       {!loading && !exercise && <GCard><div className="p-8 text-center text-sm" style={{ color: th.fg3 }}>Exercice introuvable.</div></GCard>}
 
       {!loading && exercise && (
-        <div className="relative rounded-2xl overflow-hidden" style={{ height: "72vh", background: "#060410", border: `1px solid ${th.sep}` }}>
+        <div className="relative rounded-2xl overflow-hidden" style={{ height: "72vh", background: htmlTheme.background, border: `1px solid ${th.sep}` }}>
           {!iframeLoaded && (
-            <div className="absolute inset-0 flex items-center justify-center gap-2 text-sm bg-white" style={{ color: "#94a3b8" }}>Chargement de la page...</div>
+            <div className="absolute inset-0 flex items-center justify-center gap-2 text-sm" style={{ background: htmlTheme.background, color: th.fg3 }}>Chargement de la page...</div>
           )}
           <iframe
             key={exercise.id}
             onLoad={() => setIframeLoaded(true)}
-            srcDoc={accessToken ? injectPlatformAuth(exercise.htmlContent, accessToken) : exercise.htmlContent}
+            srcDoc={accessToken ? injectPlatformAuth(htmlTheme.withTheme(exercise.htmlContent), accessToken) : htmlTheme.withTheme(exercise.htmlContent)}
             sandbox="allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"
             title={exercise.name}
-            className="absolute inset-0 w-full h-full border-0 bg-white"
-            style={{ opacity: iframeLoaded ? 1 : 0 }}
+            className="absolute inset-0 w-full h-full border-0"
+            style={{ opacity: iframeLoaded ? 1 : 0, background: htmlTheme.background }}
           />
         </div>
       )}

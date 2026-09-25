@@ -9,6 +9,7 @@ import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
 import { VBtn, ShimBtn } from "@/app/components/common/Buttons";
 import { injectPlatformAuth, normalizeSmartQuotes } from "@/app/lib/platformHtml";
+import { useHtmlTheme } from "@/app/lib/useHtmlTheme";
 import { updateHtmlExerciseContent } from "@/app/lib/htmlExercises";
 import {
   listHtmlExerciseAttempts, saveHtmlExerciseAttempt, getExerciseBriefForSession,
@@ -19,6 +20,7 @@ const RED = "#e5484d";
 
 export function HtmlExercisePage() {
   const th = useTh();
+  const htmlTheme = useHtmlTheme("page");
   const navigate = useNavigate();
   const { user, role } = useAuth();
   const staff = isStaff(role);
@@ -168,7 +170,7 @@ export function HtmlExercisePage() {
       {!loading && loadError && <GCard><div className="p-6 text-sm" style={{ color: RED }}>{loadError}</div></GCard>}
 
       {!loading && !loadError && (
-        <div className="relative rounded-2xl overflow-hidden" style={{ height: "72vh", background: "#060410", border: `1px solid ${th.sep}` }}>
+        <div className="relative rounded-2xl overflow-hidden" style={{ height: "72vh", background: htmlTheme.background, border: `1px solid ${th.sep}` }}>
           {composing ? (
             <div className="absolute inset-0 flex flex-col gap-3 p-5">
               <textarea
@@ -197,7 +199,7 @@ export function HtmlExercisePage() {
           ) : renderedHtml ? (
             <>
               {!iframeLoaded && (
-                <div className="absolute inset-0 flex items-center justify-center gap-2 text-sm bg-white" style={{ color: "#94a3b8" }}>
+                <div className="absolute inset-0 flex items-center justify-center gap-2 text-sm" style={{ background: htmlTheme.background, color: th.fg3 }}>
                   Chargement de la page...
                 </div>
               )}
@@ -205,11 +207,11 @@ export function HtmlExercisePage() {
                 <iframe
                   key={`${current?.id ?? brief?.exerciseId ?? "html"}-${renderedHtml.length}`}
                   onLoad={() => setIframeLoaded(true)}
-                  srcDoc={platformAccessToken ? injectPlatformAuth(renderedHtml, platformAccessToken) : renderedHtml}
+                  srcDoc={platformAccessToken ? injectPlatformAuth(htmlTheme.withTheme(renderedHtml), platformAccessToken) : htmlTheme.withTheme(renderedHtml)}
                   sandbox="allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"
                   title={`Exercices pour vous - ${brief?.name ?? "HTML"}`}
-                  className="absolute inset-0 w-full h-full border-0 bg-white"
-                  style={{ opacity: iframeLoaded ? 1 : 0 }}
+                  className="absolute inset-0 w-full h-full border-0"
+                  style={{ opacity: iframeLoaded ? 1 : 0, background: htmlTheme.background }}
                 />
               )}
               {staff && (

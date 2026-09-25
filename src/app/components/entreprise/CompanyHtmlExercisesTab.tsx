@@ -12,9 +12,12 @@ import {
   toggleCompanyHtmlExerciseVisibility, deleteCompanyHtmlExercise,
   type CompanyHtmlExerciseRow,
 } from "@/app/lib/entreprise/companyHtmlExercises";
+import { useHtmlTheme } from "@/app/lib/useHtmlTheme";
 
 export function CompanyHtmlExercisesTab({ companyId }: { companyId: string }) {
   const th = useTh();
+  // Aperçu dans la modale : fond racine = fond de la modale (carte).
+  const htmlTheme = useHtmlTheme("card");
   const { user } = useAuth();
 
   const [exercises, setExercises] = useState<CompanyHtmlExerciseRow[]>([]);
@@ -151,11 +154,11 @@ export function CompanyHtmlExercisesTab({ companyId }: { companyId: string }) {
               </VBtn>
               {error && <p className="text-xs" style={{ color: "#fbc2ad" }}>{error}</p>}
             </div>
-            <div className="min-h-[320px] rounded-xl overflow-hidden relative" style={{ background: "#fff", border: `1px solid ${th.sep}` }}>
+            <div className="min-h-[320px] rounded-xl overflow-hidden relative" style={{ background: htmlTheme.background, border: `1px solid ${th.sep}` }}>
               {previewHtml ? (
-                <iframe key={previewHtml} srcDoc={previewHtml} sandbox="allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox" title="Aperçu" className="absolute inset-0 w-full h-full border-0 bg-white" />
+                <iframe key={previewHtml} srcDoc={htmlTheme.withTheme(previewHtml)} sandbox="allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox" title="Aperçu" className="absolute inset-0 w-full h-full border-0" style={{ background: htmlTheme.background }} />
               ) : (
-                <div className="absolute inset-0 flex items-center justify-center text-sm" style={{ color: "#64748b" }}>Aperçu</div>
+                <div className="absolute inset-0 flex items-center justify-center text-sm" style={{ color: th.fg3 }}>Aperçu</div>
               )}
             </div>
           </div>

@@ -29,6 +29,7 @@ import { findLatestConversationForInstance, getAgentMessages, sendAgentMessage, 
 import { getMyAvatarVideo, getAvatarVideoSignedUrl, requestAvatarVideoGeneration, pollAvatarVideoStatus, type AvatarVideo } from "@/app/lib/avatarVideos";
 import { startGeminiVoiceSession, type GeminiVoiceSession } from "@/app/lib/geminiVoice";
 import { injectPlatformAuth, injectAutoResize, injectMissionBridge, normalizeSmartQuotes } from "@/app/lib/platformHtml";
+import { useHtmlTheme } from "@/app/lib/useHtmlTheme";
 import { getMySubmission, saveMissionDraft, submitMission, type MissionSubmission } from "@/app/lib/missionSubmissions";
 import { MindmapView } from "@/app/components/lesson/MindmapView";
 
@@ -68,6 +69,9 @@ function stripCertificationMentions(html: string): string {
 
 export function LessonPage() {
   const th = useTh();
+  // Cours, Mission et Playground : HTML du formateur adapté à la charte et au thème,
+  // fond racine = fond de la page de leçon.
+  const htmlTheme = useHtmlTheme("page");
   const { profile } = useProfile();
   const { user, role } = useAuth();
   const navigate = useNavigate();
@@ -806,9 +810,9 @@ export function LessonPage() {
                   ref={missionIframeRef}
                   key={missionHtmlSource}
                   title={`${lesson.title} — Mission`}
-                  srcDoc={injectAutoResize(injectMissionBridge(missionHtmlSource, { readOnly: missionSubmission?.status === "submitted" }))}
+                  srcDoc={injectAutoResize(injectMissionBridge(htmlTheme.withTheme(missionHtmlSource), { readOnly: missionSubmission?.status === "submitted" }))}
                   sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
-                  style={{ width: "100%", height: missionIframeHeight, border: 0, display: "block", background: "#fff" }}
+                  style={{ width: "100%", height: missionIframeHeight, border: 0, display: "block", background: htmlTheme.background }}
                 />
               ) : (
                 <p className="text-sm py-10 text-center" style={{ color: th.fg3 }}>Contenu de la mission pas encore disponible.</p>
@@ -843,7 +847,7 @@ export function LessonPage() {
           </div>
 
           {tab === "html" ? (
-            <div className="relative rounded-2xl overflow-hidden" style={{ minHeight: "78vh", height: htmlEditing || !lesson.customHtmlContent ? "78vh" : undefined, background: "#060410" }}>
+            <div className="relative rounded-2xl overflow-hidden" style={{ minHeight: "78vh", height: htmlEditing || !lesson.customHtmlContent ? "78vh" : undefined, background: htmlTheme.background, border: `1px solid ${th.sep}` }}>
               {htmlEditing ? (
                 <div className="absolute inset-0 flex flex-col gap-3 p-5">
                   <textarea
@@ -874,7 +878,7 @@ export function LessonPage() {
               ) : lesson.customHtmlContent ? (
                 <>
                   {!htmlIframeLoaded && (
-                    <div className="absolute inset-0 flex items-center justify-center gap-2 text-sm bg-white" style={{ color: "#94a3b8" }}>
+                    <div className="absolute inset-0 flex items-center justify-center gap-2 text-sm" style={{ background: htmlTheme.background, color: th.fg3 }}>
                       Chargement de la page…
                     </div>
                   )}
@@ -883,16 +887,16 @@ export function LessonPage() {
                       ref={htmlIframeRef}
                       key={lesson.customHtmlContent}
                       onLoad={() => setHtmlIframeLoaded(true)}
-                      srcDoc={injectAutoResize(platformAccessToken ? injectPlatformAuth(lesson.customHtmlContent, platformAccessToken) : lesson.customHtmlContent)}
+                      srcDoc={injectAutoResize(platformAccessToken ? injectPlatformAuth(htmlTheme.withTheme(lesson.customHtmlContent), platformAccessToken) : htmlTheme.withTheme(lesson.customHtmlContent))}
                       sandbox="allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"
                       title={`${lesson.title} — HTML`}
-                      className="block w-full border-0 bg-white"
-                      style={{ height: htmlIframeHeight || 1, minHeight: "78vh", opacity: htmlIframeLoaded ? 1 : 0 }}
+                      className="block w-full border-0"
+                      style={{ height: htmlIframeHeight || 1, minHeight: "78vh", opacity: htmlIframeLoaded ? 1 : 0, background: htmlTheme.background }}
                     />
                   )}
                   {role === "admin" && (
                     <button onClick={startEditHtml} className="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg"
-                      style={{ background: "#fff", border: "1px solid rgba(15,14,20,0.12)", color: "#0f0e14" }}>
+                      style={{ background: th.card, border: `1px solid ${th.sep}`, color: th.fg }}>
                       <Pencil className="w-3 h-3" />Modifier
                     </button>
                   )}
@@ -1137,9 +1141,9 @@ export function LessonPage() {
                   ref={courseIframeRef}
                   key={lesson.id}
                   title={`${lesson.title} — Cours`}
-                  srcDoc={injectAutoResize(courseHtml)}
+                  srcDoc={injectAutoResize(htmlTheme.withTheme(courseHtml))}
                   sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
-                  style={{ width: "100%", height: courseIframeHeight, border: 0, display: "block" }}
+                  style={{ width: "100%", height: courseIframeHeight, border: 0, display: "block", background: htmlTheme.background }}
                 />
               </div>
             )}
