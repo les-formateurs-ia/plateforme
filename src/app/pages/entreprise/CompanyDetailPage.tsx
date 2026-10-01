@@ -1,35 +1,47 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { ArrowLeft, Eye, Users, ClipboardList, FileText, Code2, Star, Tag, type LucideIcon } from "lucide-react";
-import { useTh } from "@/app/theme/theme";
-import { GT } from "@/app/components/common/GT";
-import { VBtn } from "@/app/components/common/Buttons";
+import { Eye, Users, ClipboardList, FileText, Code2, Star, Tag, Award, BarChart3, Inbox, Building2, type LucideIcon } from "lucide-react";
 import { getCompany } from "@/app/lib/entreprise/companies";
+import { getCompanyOverview, type CompanyOverview } from "@/app/lib/entreprise/companyOverview";
+import { SectionTile, SectionGrid, SectionHeader, useSectionParam, sectionMorphName, type Hue, type TileBadge } from "@/app/components/entreprise/SectionTiles";
+import { HueProvider, GhostButton, PageHero } from "@/app/components/entreprise/EntrepriseKit";
 import { CompanyEmployeesTab } from "@/app/components/entreprise/CompanyEmployeesTab";
 import { CompanyPositioningTab } from "@/app/components/entreprise/CompanyPositioningTab";
 import { CompanyFilesTab } from "@/app/components/entreprise/CompanyFilesTab";
 import { CompanyHtmlExercisesTab } from "@/app/components/entreprise/CompanyHtmlExercisesTab";
 import { CompanySatisfactionTab } from "@/app/components/entreprise/CompanySatisfactionTab";
 import { CompanyCategoriesTab } from "@/app/components/entreprise/CompanyCategoriesTab";
+import { CompanyResultsTab } from "@/app/components/entreprise/CompanyResultsTab";
+import { CompanyStudentUploadsTab } from "@/app/components/entreprise/CompanyStudentUploadsTab";
 
-type TabId = "employees" | "positioning" | "files" | "html" | "satisfaction" | "categories";
+const SECTION_IDS = ["employees", "positioning", "files", "html", "validation", "satisfaction", "results", "uploads", "categories"] as const;
+type SectionId = typeof SECTION_IDS[number];
 
-const TABS: { id: TabId; label: string; Icon: LucideIcon }[] = [
-  { id: "employees", label: "Collaborateurs", Icon: Users },
-  { id: "positioning", label: "Positionnement", Icon: ClipboardList },
-  { id: "files", label: "Fichiers", Icon: FileText },
-  { id: "html", label: "Exercices HTML", Icon: Code2 },
-  { id: "satisfaction", label: "Satisfaction", Icon: Star },
-  { id: "categories", label: "Catégories", Icon: Tag },
+const plural = (n: number, word: string, pluralWord = `${word}s`) => `${n} ${n > 1 ? pluralWord : word}`;
+const countBadge = (n: number, word: string, pluralWord?: string): TileBadge =>
+  n ? { label: plural(n, word, pluralWord) } : { label: "Vide", tone: "muted" };
+
+const SECTIONS: { id: SectionId; label: string; desc: string; Icon: LucideIcon; hue: Hue; badge: (o: CompanyOverview) => TileBadge }[] = [
+  { id: "employees", label: "Collaborateurs", desc: "Liste des élèves, envoi des accès et mots de passe.", Icon: Users, hue: "violet",
+    badge: (o) => (o.employees ? { label: `${o.activated}/${o.employees} activés`, tone: o.activated === o.employees ? "done" : "default" } : { label: "Aucun", tone: "muted" }) },
+  { id: "positioning", label: "Positionnement", desc: "Quiz à passer avant la formation.", Icon: ClipboardList, hue: "blue", badge: (o) => countBadge(o.positioning, "quiz", "quiz") },
+  { id: "files", label: "Fichiers", desc: "Documents mis à disposition des élèves.", Icon: FileText, hue: "teal", badge: (o) => countBadge(o.files, "fichier") },
+  { id: "html", label: "Exercices HTML", desc: "Exercices interactifs de la formation.", Icon: Code2, hue: "pink", badge: (o) => countBadge(o.html, "exercice") },
+  { id: "validation", label: "Quiz de validation", desc: "Quiz de fin de formation pour valider les acquis.", Icon: Award, hue: "amber", badge: (o) => countBadge(o.validation, "quiz", "quiz") },
+  { id: "satisfaction", label: "Questionnaires", desc: "Questionnaires de satisfaction et retours.", Icon: Star, hue: "peach", badge: (o) => countBadge(o.surveys, "questionnaire") },
+  { id: "results", label: "Résultats", desc: "Scores, synthèses et exports CSV.", Icon: BarChart3, hue: "violet", badge: (o) => countBadge(o.results, "réponse") },
+  { id: "uploads", label: "Documents élèves", desc: "Fichiers envoyés par les élèves.", Icon: Inbox, hue: "teal", badge: (o) => countBadge(o.uploads, "reçu") },
+  { id: "categories", label: "Catégories", desc: "Catégories proposées pour les envois des élèves.", Icon: Tag, hue: "blue", badge: (o) => countBadge(o.categories, "catégorie") },
 ];
 
 export function CompanyDetailPage() {
-  const th = useTh();
   const navigate = useNavigate();
   const { companyId } = useParams<{ companyId: string }>();
+  const { section: sectionId, open, close } = useSectionParam(SECTION_IDS);
+  const section = SECTIONS.find((s) => s.id === sectionId) ?? null;
   const [name, setName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<TabId>("employees");
+  const [overview, setOverview] = useState<CompanyOverview | null>(null);
 
   useEffect(() => {
     if (!companyId) return;
@@ -42,57 +54,53 @@ export function CompanyDetailPage() {
     return () => { cancelled = true; };
   }, [companyId]);
 
+  // Rechargé à chaque retour sur la grille pour refléter ce qui vient d'être modifié.
+  useEffect(() => {
+    if (!companyId || section) return;
+    let cancelled = false;
+    getCompanyOverview(companyId)
+      .then((o) => { if (!cancelled) setOverview(o); })
+      .catch((err) => console.error(err)); // tuiles affichées sans compteurs
+    return () => { cancelled = true; };
+  }, [companyId, section]);
+
   if (!companyId) return null;
 
-  return (
-    <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <button onClick={() => navigate("/entreprise")} className="flex items-center gap-1.5 text-sm mb-2 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
-            <ArrowLeft className="w-4 h-4" />Entreprises
-          </button>
-          <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}>
-            <GT>{loading ? "Chargement…" : (name ?? "Entreprise introuvable")}</GT>
-          </h2>
-        </div>
-        {name && (
-          <VBtn onClick={() => navigate(`/entreprise/${companyId}/preview`)}>
-            <span className="flex items-center gap-2"><Eye className="w-4 h-4" />Aperçu élève</span>
-          </VBtn>
-        )}
+  const previewButton = name && (
+    <GhostButton Icon={Eye} onClick={() => navigate(`/entreprise/${companyId}/preview`)}>Aperçu élève</GhostButton>
+  );
+
+  if (name && section) {
+    return (
+      <div data-morph-scope="" className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
+        <SectionHeader morphName={sectionMorphName(section.id)} backLabel={name} onBack={close} label={section.label} desc={section.desc} Icon={section.Icon} hue={section.hue} actions={previewButton} />
+        <HueProvider hue={section.hue}>
+          {section.id === "employees" && <CompanyEmployeesTab companyId={companyId} />}
+          {section.id === "positioning" && <CompanyPositioningTab companyId={companyId} kind="positioning" />}
+          {section.id === "files" && <CompanyFilesTab companyId={companyId} />}
+          {section.id === "html" && <CompanyHtmlExercisesTab companyId={companyId} />}
+          {section.id === "validation" && <CompanyPositioningTab companyId={companyId} kind="validation" />}
+          {section.id === "satisfaction" && <CompanySatisfactionTab companyId={companyId} />}
+          {section.id === "results" && <CompanyResultsTab companyId={companyId} />}
+          {section.id === "uploads" && <CompanyStudentUploadsTab companyId={companyId} />}
+          {section.id === "categories" && <CompanyCategoriesTab companyId={companyId} />}
+        </HueProvider>
       </div>
+    );
+  }
+
+  return (
+    <div data-morph-scope="" className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-8">
+      <PageHero back={{ label: "Entreprises", onClick: () => navigate("/entreprise") }} eyebrow="Entreprise" Icon={Building2}
+        title={loading ? "Chargement…" : (name ?? "Entreprise introuvable")} desc={name ? "Choisissez une rubrique à gérer." : undefined} actions={previewButton} />
 
       {name && (
-        <div>
-          <div className="flex flex-wrap gap-2">
-            {TABS.map(({ id, label, Icon }) => {
-              const active = tab === id;
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => setTab(id)}
-                  className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 hover:opacity-90"
-                  style={active
-                    ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", boxShadow: `0 3px 12px ${th.gradShadow(0.32)}` }
-                    : { background: th.card, border: `1px solid ${th.sep}`, color: th.fg2 }}
-                >
-                  <Icon className="w-4 h-4 shrink-0" style={active ? { color: "#fff" } : { color: th.navAC }} />
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="mt-5">
-            {tab === "employees" && <CompanyEmployeesTab companyId={companyId} />}
-            {tab === "positioning" && <CompanyPositioningTab companyId={companyId} />}
-            {tab === "files" && <CompanyFilesTab companyId={companyId} />}
-            {tab === "html" && <CompanyHtmlExercisesTab companyId={companyId} />}
-            {tab === "satisfaction" && <CompanySatisfactionTab companyId={companyId} />}
-            {tab === "categories" && <CompanyCategoriesTab companyId={companyId} />}
-          </div>
-        </div>
+        <SectionGrid>
+          {SECTIONS.map((s, i) => (
+            <SectionTile key={s.id} morphName={sectionMorphName(s.id)} index={i} label={s.label} desc={s.desc} Icon={s.Icon} hue={s.hue}
+              badge={overview ? s.badge(overview) : undefined} onClick={() => open(s.id)} />
+          ))}
+        </SectionGrid>
       )}
     </div>
   );

@@ -1,19 +1,33 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Plus, Mail, Pencil, Trash2, Send } from "lucide-react";
-import { useTh } from "@/app/theme/theme";
+import { Plus, Mail, Pencil, Trash2, Send, Link2, Users, UserPlus } from "lucide-react";
 import { useAuth } from "@/app/state/auth-context";
 import { isAdmin } from "@/app/lib/permissions";
-import { GCard } from "@/app/components/common/GCard";
-import { VBtn, ShimBtn } from "@/app/components/common/Buttons";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/app/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter } from "@/app/components/ui/dialog";
+import {
+  ItemCard, ItemList, Toolbar, Initials, Pill, HueButton, GhostButton, IconAction, EmptyState, Loading, ErrorText, DialogHero,
+  type PillTone,
+} from "@/app/components/entreprise/EntrepriseKit";
+import { GeneratePasswordLinkButton } from "@/app/components/admin/GeneratePasswordLinkButton";
+import { SetStudentPasswordButton } from "@/app/components/admin/SetStudentPasswordButton";
 import {
   listCompanyEmployees, addCompanyEmployee, updateCompanyEmployee, deleteCompanyEmployee, sendCompanyInvites,
   type CompanyEmployeeRow,
 } from "@/app/lib/entreprise/companyEmployees";
 
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+}
+
+// profile_id est rempli dès l'envoi de l'invitation : seul
+// invite_accepted_at (mot de passe défini) signifie que le compte est utilisé.
+function accessStatus(e: CompanyEmployeeRow): { label: string; tone: PillTone } {
+  if (e.inviteAcceptedAt) return { label: "Compte activé", tone: "done" };
+  if (e.profileId) return { label: `Invitation envoyée${e.inviteSentAt ? ` le ${formatDate(e.inviteSentAt)}` : ""} — en attente`, tone: "warn" };
+  return { label: "Pas encore invité", tone: "muted" };
+}
+
 export function CompanyEmployeesTab({ companyId }: { companyId: string }) {
-  const th = useTh();
   const { role } = useAuth();
   const admin = isAdmin(role);
 
@@ -133,73 +147,61 @@ export function CompanyEmployeesTab({ companyId }: { companyId: string }) {
   };
 
   return (
-    <div className="space-y-4 pt-4">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <p className="text-sm" style={{ color: th.fg3 }}>{employees.length} collaborateur{employees.length > 1 ? "s" : ""}</p>
-        <div className="flex items-center gap-2">
-          <VBtn onClick={handleSendAll} disabled={!pending.length || sendingAll}>
-            <span className="flex items-center gap-2"><Send className="w-3.5 h-3.5" />{sendingAll ? "Envoi..." : `Envoyer les accès aux élèves (${pending.length})`}</span>
-          </VBtn>
-          {admin && (
-            <ShimBtn sm onClick={openCreate}>
-              <span className="flex items-center gap-2"><Plus className="w-3.5 h-3.5" />Ajouter</span>
-            </ShimBtn>
-          )}
-        </div>
-      </div>
+    <div className="space-y-5 pt-2">
+      <Toolbar summary={`${employees.length} collaborateur${employees.length > 1 ? "s" : ""}`}>
+        <GhostButton Icon={Send} onClick={handleSendAll} disabled={!pending.length || sendingAll}>
+          {sendingAll ? "Envoi..." : `Envoyer les accès (${pending.length})`}
+        </GhostButton>
+        {admin && <HueButton Icon={Plus} onClick={openCreate}>Ajouter</HueButton>}
+      </Toolbar>
 
-      {loading && <p className="text-sm" style={{ color: th.fg3 }}>Chargement…</p>}
+      {loading && <Loading />}
       {!loading && !employees.length && (
-        <GCard><div className="p-8 text-center text-sm" style={{ color: th.fg3 }}>Aucun collaborateur pour l'instant.</div></GCard>
+        <EmptyState Icon={Users} title="Aucun collaborateur pour l'instant"
+          hint={admin ? "Ajoutez les collaborateurs de l'entreprise, puis envoyez-leur leur accès." : "L'administrateur ajoute la liste des collaborateurs."}
+          action={admin ? <HueButton Icon={UserPlus} onClick={openCreate}>Ajouter un collaborateur</HueButton> : undefined} />
       )}
 
-      {!!employees.length && (
-        <GCard>
-          <div className="divide-y" style={{ borderColor: th.sep }}>
-            {employees.map((e) => (
-              <div key={e.id} className="p-4 flex items-center justify-between gap-3" style={{ borderColor: th.sep }}>
-                <div className="min-w-0">
-                  <div className="text-sm font-semibold truncate" style={{ color: th.fg }}>{e.firstName} {e.lastName}</div>
-                  <div className="text-xs truncate flex items-center gap-1.5 mt-0.5" style={{ color: th.fg3 }}><Mail className="w-3 h-3" />{e.email}</div>
-                  <div className="text-[11px] mt-1" style={{ color: e.profileId ? "#6adeb1" : th.fg3 }}>
-                    {e.profileId ? "Compte actif" : e.inviteSentAt ? "Invitation envoyée" : "Pas encore invité"}
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <VBtn sm onClick={() => void handleSendOne(e)} disabled={sendingIds.has(e.id) || !!e.profileId}>
-                    <Send className="w-3.5 h-3.5" />
-                  </VBtn>
-                  {admin && (
-                    <>
-                      <VBtn sm onClick={() => openEdit(e)}><Pencil className="w-3.5 h-3.5" /></VBtn>
-                      <button onClick={() => void handleDelete(e)} className="w-8 h-8 rounded-full flex items-center justify-center transition-opacity hover:opacity-70" style={{ color: "#fbc2ad" }}>
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </GCard>
-      )}
+      <ItemList>
+        {employees.map((e, i) => {
+          const status = accessStatus(e);
+          const fullName = `${e.firstName} ${e.lastName}`;
+          return (
+            <ItemCard key={e.id} index={i} leading={<Initials name={fullName} />} title={fullName}
+              subtitle={<span className="inline-flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" />{e.email}</span>}
+              pills={<Pill tone={status.tone}>{status.label}</Pill>}
+              actions={<>
+                {admin && e.profileId && !e.inviteAcceptedAt && (
+                  <GeneratePasswordLinkButton studentId={e.profileId} studentName={fullName}
+                    renderTrigger={({ onClick, disabled }) => <IconAction Icon={Link2} onClick={onClick} disabled={disabled} title="Générer un lien d'accès à transmettre" />} />
+                )}
+                {admin && e.profileId && <SetStudentPasswordButton studentId={e.profileId} studentName={fullName} email={e.email} />}
+                <IconAction Icon={Send} onClick={() => void handleSendOne(e)} disabled={sendingIds.has(e.id) || !!e.profileId}
+                  title={e.profileId ? "Accès déjà envoyé" : "Envoyer l'accès par email"} />
+                {admin && (
+                  <>
+                    <IconAction Icon={Pencil} onClick={() => openEdit(e)} title="Modifier" />
+                    <IconAction Icon={Trash2} tone="danger" onClick={() => void handleDelete(e)} title="Retirer de la liste" />
+                  </>
+                )}
+              </>} />
+          );
+        })}
+      </ItemList>
 
       <Dialog open={dialogOpen} onOpenChange={(v) => !saving && setDialogOpen(v)}>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{editing ? "Modifier le collaborateur" : "Nouveau collaborateur"}</DialogTitle>
-            <DialogDescription>Nom, prénom et email — l'accès pourra être envoyé ensuite.</DialogDescription>
-          </DialogHeader>
+          <DialogHero Icon={editing ? Pencil : UserPlus} title={editing ? "Modifier le collaborateur" : "Nouveau collaborateur"} desc="Nom, prénom et email — l'accès pourra être envoyé ensuite." />
           <div className="space-y-3">
             <input value={firstName} onChange={(e) => setFirstName(e.target.value)} autoFocus placeholder="Prénom" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
             <input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Nom" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
             <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="email@entreprise.com" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
           </div>
-          {error && <p className="text-xs" style={{ color: "#fbc2ad" }}>{error}</p>}
+          {error && <ErrorText>{error}</ErrorText>}
           <DialogFooter>
-            <ShimBtn onClick={handleSave} disabled={!firstName.trim() || !lastName.trim() || !email.trim() || saving}>
+            <HueButton onClick={handleSave} disabled={!firstName.trim() || !lastName.trim() || !email.trim() || saving}>
               {saving ? "Enregistrement..." : "Enregistrer"}
-            </ShimBtn>
+            </HueButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -3,7 +3,7 @@
 // sien (cf. src/app/lib/passwordSetup.ts). Le lien n'est affiché qu'ici, au
 // moment de sa création : la base n'en garde que le hash, il ne peut donc
 // pas être réaffiché — en générer un nouveau annule le précédent.
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { Check, Copy, Link2 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
@@ -15,7 +15,11 @@ function formatExpiry(iso: string): string {
   return new Date(iso).toLocaleString("fr-FR", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
 }
 
-export function GeneratePasswordLinkButton({ studentId, studentName }: { studentId: string; studentName: string }) {
+// renderTrigger : remplace le bouton par défaut (ex. bouton icône dans la
+// liste des collaborateurs entreprise), le dialogue reste le même.
+export function GeneratePasswordLinkButton({ studentId, studentName, renderTrigger }: {
+  studentId: string; studentName: string; renderTrigger?: (props: { onClick: () => void; disabled: boolean }) => ReactNode;
+}) {
   const th = useTh();
   const [generating, setGenerating] = useState(false);
   const [link, setLink] = useState<{ url: string; expiresAt: string } | null>(null);
@@ -46,7 +50,7 @@ export function GeneratePasswordLinkButton({ studentId, studentName }: { student
 
   return (
     <>
-      <button
+      {renderTrigger ? renderTrigger({ onClick: () => void generate(), disabled: generating }) : <button
         type="button"
         onClick={generate}
         disabled={generating}
@@ -54,7 +58,7 @@ export function GeneratePasswordLinkButton({ studentId, studentName }: { student
         style={{ background: th.navA, border: `1px solid ${th.gradShadow(0.35)}`, color: th.navAC }}
       >
         <Link2 className="w-4 h-4" />{generating ? "Génération…" : "Générer le lien"}
-      </button>
+      </button>}
 
       <Dialog open={!!link} onOpenChange={(v) => { if (!v) setLink(null); }}>
         <DialogContent className="sm:max-w-lg">

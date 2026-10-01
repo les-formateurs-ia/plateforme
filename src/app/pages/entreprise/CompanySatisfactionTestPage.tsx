@@ -1,17 +1,20 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { ArrowLeft, CheckCircle2, Star } from "lucide-react";
+import { Star, Check, Heart, Info, SearchX } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { isStaff } from "@/app/lib/permissions";
-import { GCard } from "@/app/components/common/GCard";
-import { GT } from "@/app/components/common/GT";
-import { ShimBtn } from "@/app/components/common/Buttons";
-import { cx } from "@/app/lib/cx";
+import { HueProvider, PageHero, Panel, ChoiceButton, LetterBadge, CompletionPanel, HueButton, EmptyState, Loading, HUES, DANGER } from "@/app/components/entreprise/EntrepriseKit";
+import { QuestionStepper } from "@/app/components/entreprise/QuestionStepper";
 import {
   getSatisfactionTestForTaking, submitSatisfactionResponse,
   type SatisfactionQuestionForStudent, type SatisfactionAnswer,
 } from "@/app/lib/entreprise/companySatisfaction";
+
+type AnswerValue = string | number | string[];
+
+const isEmpty = (v: AnswerValue | undefined) => v === undefined || v === "" || (Array.isArray(v) && !v.length);
+const needsFollowUp = (q: SatisfactionQuestionForStudent, v: AnswerValue | undefined) => q.type === "yes_no" && !!q.followUpOn && v === q.followUpOn;
 
 export function CompanySatisfactionTestPage() {
   const th = useTh();
@@ -22,11 +25,14 @@ export function CompanySatisfactionTestPage() {
   const { testId } = useParams<{ testId: string }>();
 
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState<string | null>(null);
   const [questions, setQuestions] = useState<SatisfactionQuestionForStudent[]>([]);
-  const [answers, setAnswers] = useState<Record<string, string | number>>({});
+  const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
+  const [details, setDetails] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [current, setCurrent] = useState(0);
 
   useEffect(() => {
     if (!testId) return;
@@ -37,6 +43,7 @@ export function CompanySatisfactionTestPage() {
         const result = await getSatisfactionTestForTaking(testId);
         if (cancelled) return;
         setTitle(result.title);
+        setDescription(result.description);
         setQuestions(result.questions);
       } finally {
         if (!cancelled) setLoading(false);
@@ -45,13 +52,21 @@ export function CompanySatisfactionTestPage() {
     return () => { cancelled = true; };
   }, [testId]);
 
-  const setAnswer = (questionId: string, value: string | number) => setAnswers((prev) => ({ ...prev, [questionId]: value }));
+  const setAnswer = (questionId: string, value: AnswerValue) => setAnswers((prev) => ({ ...prev, [questionId]: value }));
+  const toggleMulti = (questionId: string, optionId: string) => setAnswers((prev) => {
+    const current = Array.isArray(prev[questionId]) ? (prev[questionId] as string[]) : [];
+    return { ...prev, [questionId]: current.includes(optionId) ? current.filter((id) => id !== optionId) : [...current, optionId] };
+  });
 
   const handleSubmit = async () => {
     if (!user || !testId || submitting) return;
     setSubmitting(true);
     try {
-      const payload: SatisfactionAnswer[] = questions.map((q) => ({ questionId: q.id, type: q.type, value: answers[q.id] ?? "" }));
+      const payload: SatisfactionAnswer[] = questions.map((q) => {
+        const value = answers[q.id] ?? (q.allowMultiple ? [] : "");
+        const detail = needsFollowUp(q, value) ? details[q.id]?.trim() : undefined;
+        return { questionId: q.id, type: q.type, value, ...(detail ? { detail } : {}) };
+      });
       if (!isPreview) {
         if (!companyId) return;
         await submitSatisfactionResponse(testId, companyId, user.id, payload);
@@ -62,76 +77,117 @@ export function CompanySatisfactionTestPage() {
     }
   };
 
-  const allAnswered = questions.length > 0 && questions.every((q) => {
-    const v = answers[q.id];
-    return v !== undefined && v !== "";
-  });
+  // Une question obligatoire Oui/Non dont la réponse ouvre le champ texte
+  // exige aussi cette précision.
+  const isSatisfied = (q: SatisfactionQuestionForStudent) =>
+    !q.isRequired || (!isEmpty(answers[q.id]) && !(needsFollowUp(q, answers[q.id]) && !details[q.id]?.trim()));
+  const missing = questions.filter((q) => !isSatisfied(q));
+  const canSubmit = questions.length > 0 && missing.length === 0;
+
+  const goBack = () => (window.history.state?.idx > 0 ? navigate(-1) : navigate("/"));
+  const STAR = HUES.amber[0];
+  const q = questions[current];
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
-      <button onClick={() => navigate("/")} className="flex items-center gap-1.5 text-sm transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
-        <ArrowLeft className="w-4 h-4" />Retour
-      </button>
-      <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>{title || "Test de satisfaction"}</GT></h2>
+    <HueProvider hue="peach">
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
+        <PageHero back={{ label: "Retour", onClick: goBack }} eyebrow="Questionnaire" title={title || "Questionnaire"} Icon={Star}
+          desc={!done && questions.length ? `${questions.length} question${questions.length > 1 ? "s" : ""} · les questions marquées * sont obligatoires` : undefined} />
 
-      {loading && <p className="text-sm" style={{ color: th.fg3 }}>Chargement…</p>}
+        {loading && <Loading />}
 
-      {!loading && done && (
-        <GCard glow accent className="p-8 text-center">
-          <CheckCircle2 className="w-10 h-10 mx-auto mb-3" style={{ color: "#6adeb1" }} />
-          <p className="text-sm" style={{ color: th.fg3 }}>{isPreview ? "Aperçu — réponses non enregistrées." : "Merci pour ton retour !"}</p>
-        </GCard>
-      )}
+        {!loading && done && (
+          <CompletionPanel Icon={Heart} title="Merci pour ton retour !" message={isPreview ? "Aperçu — réponses non enregistrées." : "Tes réponses ont bien été envoyées."}>
+            <HueButton onClick={goBack}>Revenir à mon espace</HueButton>
+          </CompletionPanel>
+        )}
 
-      {!loading && !done && (
-        <div className="space-y-4">
-          {questions.map((q, i) => (
-            <GCard key={q.id} className="p-5">
-              <div className="text-sm font-semibold mb-3" style={{ color: th.fg }}>{i + 1}. {q.question}</div>
+        {!loading && !done && description && (
+          <Panel watermark={Info}>
+            <div className="p-5 sm:p-6 flex items-start gap-3">
+              <Info className="w-5 h-5 shrink-0 mt-0.5" style={{ color: HUES.peach[0] }} />
+              <p className="text-sm sm:text-base whitespace-pre-line" style={{ color: th.fg2 }}>{description}</p>
+            </div>
+          </Panel>
+        )}
 
-              {q.type === "qcm" && (
-                <div className="space-y-2">
-                  {q.options.map((o) => {
-                    const active = answers[q.id] === o.id;
-                    return (
-                      <button key={o.id} onClick={() => setAnswer(q.id, o.id)}
-                        className="w-full text-left px-4 py-2.5 rounded-xl text-sm transition-all"
-                        style={active
-                          ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 }
-                          : { background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg2 }}>
-                        {o.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+        {!loading && !done && !questions.length && <EmptyState Icon={SearchX} title="Ce questionnaire ne contient pas encore de question" />}
 
-              {q.type === "rating" && (
-                <div className="flex items-center gap-2">
-                  {[1, 2, 3, 4, 5].map((n) => (
-                    <button key={n} onClick={() => setAnswer(q.id, n)} className="p-1">
-                      <Star className={cx("w-7 h-7 transition-colors")} style={{ color: (answers[q.id] as number) >= n ? "#fbbf24" : th.fg3, fill: (answers[q.id] as number) >= n ? "#fbbf24" : "none" }} />
+        {!loading && !done && q && (
+          <QuestionStepper index={current} total={questions.length} answered={questions.map((x) => !isEmpty(answers[x.id]))} onJump={setCurrent}
+            question={q.question}
+            suffix={q.isRequired ? <span style={{ color: DANGER }}> *</span> : <span className="text-base font-semibold" style={{ color: th.fg3 }}> (facultatif)</span>}
+            hint={q.type === "qcm" ? (q.allowMultiple ? "Plusieurs réponses possibles." : "Une seule réponse.") : q.type === "rating" ? "Donne une note de 1 à 5." : undefined}
+            canNext={current === questions.length - 1 ? canSubmit : isSatisfied(q)}
+            submitting={submitting} submitLabel="Envoyer mes réponses" onSubmit={() => void handleSubmit()}>
+            {q.type === "qcm" && (
+              <div className="grid sm:grid-cols-2 gap-3">
+                {q.options.map((o, i) => {
+                  const value = answers[q.id];
+                  const active = q.allowMultiple ? Array.isArray(value) && value.includes(o.id) : value === o.id;
+                  const indicator = q.allowMultiple
+                    ? <span className="w-6 h-6 rounded-lg shrink-0 flex items-center justify-center" style={{ border: `2px solid ${active ? "#fff" : th.fg3}` }}>{active && <Check className="w-4 h-4" />}</span>
+                    : <LetterBadge letter={String.fromCharCode(65 + i)} active={active} />;
+                  return (
+                    <ChoiceButton key={o.id} big active={active} indicator={indicator}
+                      onClick={() => (q.allowMultiple ? toggleMulti(q.id, o.id) : setAnswer(q.id, o.id))}>
+                      {o.label}
+                    </ChoiceButton>
+                  );
+                })}
+              </div>
+            )}
+
+            {q.type === "rating" && (
+              <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                {[1, 2, 3, 4, 5].map((n) => {
+                  const on = (answers[q.id] as number) >= n;
+                  return (
+                    <button key={n} onClick={() => setAnswer(q.id, n)} aria-label={`Note ${n} sur 5`}
+                      className="w-14 h-14 sm:w-20 sm:h-20 rounded-3xl flex flex-col items-center justify-center gap-0.5 transition-all duration-200 hover:-translate-y-1"
+                      style={{ background: on ? "rgba(238,184,90,0.16)" : th.inputBg, border: `1px solid ${on ? "rgba(238,184,90,0.55)" : th.inputB}` }}>
+                      <Star className="w-7 h-7 sm:w-9 sm:h-9 transition-colors" style={{ color: on ? STAR : th.fg3, fill: on ? STAR : "none" }} />
+                      <span className="text-[11px] font-black tabular-nums" style={{ color: on ? STAR : th.fg3 }}>{n}</span>
                     </button>
+                  );
+                })}
+                {typeof answers[q.id] === "number" && <span className="ml-2 text-2xl font-black tabular-nums" style={{ color: th.fg }}>{answers[q.id]}/5</span>}
+              </div>
+            )}
+
+            {q.type === "yes_no" && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3 max-w-lg">
+                  {([["yes", "Oui"], ["no", "Non"]] as const).map(([value, label]) => (
+                    <ChoiceButton key={value} big active={answers[q.id] === value} onClick={() => setAnswer(q.id, value)}>
+                      <span className="w-full text-center text-lg">{label}</span>
+                    </ChoiceButton>
                   ))}
                 </div>
-              )}
+                {needsFollowUp(q, answers[q.id]) && (
+                  <textarea
+                    value={details[q.id] ?? ""}
+                    onChange={(e) => setDetails((prev) => ({ ...prev, [q.id]: e.target.value }))}
+                    rows={4}
+                    placeholder={q.followUpLabel || "Précise ta réponse..."}
+                    className="w-full rounded-2xl px-5 py-4 text-base g-input resize-none"
+                  />
+                )}
+              </div>
+            )}
 
-              {q.type === "text" && (
-                <textarea
-                  value={(answers[q.id] as string) ?? ""}
-                  onChange={(e) => setAnswer(q.id, e.target.value)}
-                  rows={3}
-                  placeholder="Ta réponse..."
-                  className="w-full rounded-xl px-4 py-2.5 text-sm g-input resize-none"
-                />
-              )}
-            </GCard>
-          ))}
-          {!!questions.length && (
-            <ShimBtn onClick={handleSubmit} disabled={!allAnswered || submitting}>{submitting ? "Envoi..." : "Envoyer mes réponses"}</ShimBtn>
-          )}
-        </div>
-      )}
-    </div>
+            {q.type === "text" && (
+              <textarea
+                value={(answers[q.id] as string) ?? ""}
+                onChange={(e) => setAnswer(q.id, e.target.value)}
+                rows={6}
+                placeholder="Ta réponse..."
+                className="w-full rounded-2xl px-5 py-4 text-base g-input resize-none"
+              />
+            )}
+          </QuestionStepper>
+        )}
+      </div>
+    </HueProvider>
   );
 }
