@@ -74,3 +74,12 @@ export async function sendCompanyInvites(employeeIds: string[]): Promise<SendInv
   if (error) throw error;
   return data as SendInvitesResult;
 }
+
+// Nom affiché d'un collaborateur à partir de son profile_id (= student_id
+// des tentatives, réponses et dépôts). Passe par company_employees, lisible
+// par tout le staff — profiles ne l'est pas pour un formateur.
+export function studentNameMap(employees: CompanyEmployeeRow[]): Map<string, string> {
+  const names = new Map<string, string>();
+  for (const e of employees) if (e.profileId) names.set(e.profileId, `${e.firstName} ${e.lastName}`.trim());
+  return names;
+}

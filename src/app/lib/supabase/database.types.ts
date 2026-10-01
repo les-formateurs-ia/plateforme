@@ -17,7 +17,8 @@ export type ExerciseVisibility = "global" | "private";
 export type AgentMessageModality = "text" | "voice";
 export type IncidentPage = "lecon" | "tableau_de_bord" | "outil_ia" | "exercice" | "autre";
 export type IncidentStatus = "a_traiter" | "corrige";
-export type SatisfactionQuestionType = "qcm" | "rating" | "text";
+export type SatisfactionQuestionType = "qcm" | "rating" | "text" | "yes_no";
+export type CompanyQuizKind = "positioning" | "validation";
 export type StudioImageStatus = "pending" | "ready" | "failed";
 export type MissionSubmissionStatus = "draft" | "submitted";
 export type AiUsageMediaType = "image" | "video" | "audio" | "text";
@@ -1419,6 +1420,7 @@ export interface Database {
           id: string;
           company_id: string;
           title: string;
+          kind: CompanyQuizKind;
           is_visible: boolean;
           created_by: string | null;
           created_at: string;
@@ -1428,6 +1430,7 @@ export interface Database {
           id?: string;
           company_id: string;
           title: string;
+          kind?: CompanyQuizKind;
           is_visible?: boolean;
           created_by?: string | null;
           created_at?: string;
@@ -1553,6 +1556,7 @@ export interface Database {
           id: string;
           company_id: string;
           title: string;
+          description: string | null;
           is_visible: boolean;
           created_by: string | null;
           created_at: string;
@@ -1562,6 +1566,7 @@ export interface Database {
           id?: string;
           company_id: string;
           title: string;
+          description?: string | null;
           is_visible?: boolean;
           created_by?: string | null;
           created_at?: string;
@@ -1576,6 +1581,10 @@ export interface Database {
           test_id: string;
           question: string;
           question_type: SatisfactionQuestionType;
+          is_required: boolean;
+          allow_multiple: boolean;
+          follow_up_on: "yes" | "no" | null;
+          follow_up_label: string | null;
           order_index: number;
         };
         Insert: {
@@ -1583,6 +1592,10 @@ export interface Database {
           test_id: string;
           question: string;
           question_type: SatisfactionQuestionType;
+          is_required?: boolean;
+          allow_multiple?: boolean;
+          follow_up_on?: "yes" | "no" | null;
+          follow_up_label?: string | null;
           order_index: number;
         };
         Update: Partial<Database["public"]["Tables"]["company_satisfaction_questions"]["Insert"]>;

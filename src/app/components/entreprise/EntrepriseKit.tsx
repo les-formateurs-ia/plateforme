@@ -1,0 +1,526 @@
+// Kit visuel de l'espace Entreprise — même langage que les tuiles de
+// rubrique (SectionTiles) : cartes arrondies à halo coloré, icônes en
+// pastille dégradée, survol qui soulève et colore la bordure. Chaque
+// rubrique a sa teinte (HUES), transmise aux composants par HueProvider :
+// un composant posé dans la rubrique "Quiz de validation" prend
+// automatiquement l'ambre, sans prop à faire descendre.
+import { createContext, useContext, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { ArrowLeft, Loader2, type LucideIcon } from "lucide-react";
+import { useTh, hexToRgb } from "@/app/theme/theme";
+import { GT } from "@/app/components/common/GT";
+import { VSwitch } from "@/app/components/common/VSwitch";
+import { DialogHeader, DialogTitle, DialogDescription } from "@/app/components/ui/dialog";
+import { cx } from "@/app/lib/cx";
+
+// Teintes pastel de la charte (violet / turquoise / pêche + dérivés).
+export const HUES = {
+  violet: ["#b58de0", "#dbacf0"],
+  teal: ["#78d5e2", "#6adeb1"],
+  peach: ["#f4a98c", "#fbc2ad"],
+  blue: ["#7fa8f0", "#a9c6f7"],
+  pink: ["#e48fbf", "#f3b7d6"],
+  amber: ["#eeb85a", "#f6d38e"],
+} as const;
+export type Hue = keyof typeof HUES;
+// Ordre de rotation quand une liste n'a pas de teinte métier (entreprises…).
+export const HUE_ORDER: Hue[] = ["violet", "teal", "blue", "peach", "pink", "amber"];
+
+export const SUCCESS = "#3fbf8f";
+export const DANGER = "#ef8a74";
+
+const HueCtx = createContext<Hue>("violet");
+
+export function HueProvider({ hue, children }: { hue: Hue; children: ReactNode }) {
+  return <HueCtx.Provider value={hue}>{children}</HueCtx.Provider>;
+}
+
+export function useHue(override?: Hue) {
+  const th = useTh();
+  const ctx = useContext(HueCtx);
+  const hue = override ?? ctx;
+  const [c1, c2] = HUES[hue];
+  const rgb = hexToRgb(c1);
+  return {
+    hue, c1, c2, rgb,
+    text: th.isDark ? c2 : c1,
+    gradient: `linear-gradient(135deg,${c1},${c2})`,
+    alpha: (a: number) => `rgba(${rgb},${a})`,
+  };
+}
+
+// ── Transitions ───────────────────────────────────────────────────────────
+
+// Transition "morph" entre deux vues, en JS pur (Web Animations, compatible
+// avec tous les navigateurs) : l'élément cliqué (tuile) et celui qui le
+// remplace (bandeau de titre) portent le même data-morph. Au clic,
+// runMorph() mesure la position de départ et efface le reste de la vue ;
+// au montage, useMorph() fait glisser la cible depuis cette position en la
+// dévoilant (clip-path) jusqu'à sa taille finale. Fonctionne aussi quand la
+// nouvelle vue est rendue en différé (navigation du routeur).
+const MORPH_MS = 300;
+const EXIT_MS = 120;
+const EASE = "cubic-bezier(0.2, 0.8, 0.2, 1)";
+
+let pendingMorph: { name: string; rect: DOMRect; at: number } | null = null;
+
+const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const takePending = (name?: string) =>
+  name && pendingMorph?.name === name && performance.now() - pendingMorph.at < 1500 ? pendingMorph : null;
+
+export function runMorph(name: string, update: () => void) {
+  const from = document.querySelector<HTMLElement>(`[data-morph="${CSS.escape(name)}"]`);
+  if (!from || reducedMotion()) { update(); return; }
+  pendingMorph = { name, rect: from.getBoundingClientRect(), at: performance.now() };
+  // Efface le reste de la vue (sauf l'élément cliqué et ce qui le contient).
+  const scope = from.closest("[data-morph-scope]") ?? document.body;
+  const others = Array.from(scope.querySelectorAll<HTMLElement>("[data-morph-fade]"))
+    .filter((el) => el !== from && !el.contains(from) && !from.contains(el));
+  others.forEach((el) => el.animate(
+    [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "scale(0.97)" }],
+    { duration: EXIT_MS, easing: "ease-out", fill: "forwards" },
+  ));
+  window.setTimeout(update, others.length ? EXIT_MS - 20 : 0);
+}
+
+// Cible d'un morph : à poser via ref + data-morph={name}. Renvoie aussi si
+// l'élément arrive par un morph (dans ce cas pas de fade-up d'entrée).
+export function useMorph<T extends HTMLElement>(name?: string) {
+  const ref = useRef<T>(null);
+  const [incoming] = useState(() => !!takePending(name));
+  useLayoutEffect(() => {
+    const pending = takePending(name);
+    const el = ref.current;
+    if (!pending || !el) return;
+    pendingMorph = null;
+    const to = el.getBoundingClientRect();
+    const from = pending.rect;
+    // Plus petite au départ : on ne montre que la zone de l'ancienne tuile
+    // (clip-path), qui s'ouvre jusqu'à la taille finale en glissant.
+    const right = Math.max(0, to.width - from.width);
+    const bottom = Math.max(0, to.height - from.height);
+    el.animate([
+      { transform: `translate(${from.left - to.left}px, ${from.top - to.top}px)`, clipPath: `inset(0px ${right}px ${bottom}px 0px round 24px)` },
+      { transform: "translate(0px, 0px)", clipPath: "inset(0px 0px 0px 0px round 24px)" },
+    ], { duration: MORPH_MS, easing: EASE });
+  }, [name]);
+  return { ref, incoming };
+}
+
+// ── Surfaces ──────────────────────────────────────────────────────────────
+
+// Carte de base : halo dans le coin, icône en filigrane optionnelle ;
+// interactive (onClick) = se soulève et prend la teinte au survol.
+export function Panel({ children, hue, watermark: Watermark, onClick, index, className, halo = true, morphName }: {
+  children: ReactNode; hue?: Hue; watermark?: LucideIcon; onClick?: () => void; index?: number; className?: string; halo?: boolean;
+  morphName?: string; // cible d'une transition (cf. runMorph)
+}) {
+  const morph = useMorph<HTMLDivElement>(morphName);
+  const th = useTh();
+  const h = useHue(hue);
+  const interactive = !!onClick;
+  const vars = {
+    "--kit-b0": th.sep,
+    "--kit-b1": h.alpha(0.55),
+    "--kit-s0": th.isDark ? "0 4px 18px rgba(0,0,0,0.28)" : "0 4px 18px rgba(15,14,20,0.06)",
+    "--kit-s1": `0 16px 36px ${h.alpha(th.isDark ? 0.2 : 0.26)}`,
+    background: th.card,
+    ...(index !== undefined ? { animationDelay: `${Math.min(index, 12) * 40}ms` } : {}),
+  } as CSSProperties;
+  return (
+    <div ref={morph.ref} data-morph={morphName} data-morph-fade="" style={vars} onClick={onClick}
+      role={interactive ? "button" : undefined} tabIndex={interactive ? 0 : undefined}
+      onKeyDown={interactive ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } } : undefined}
+      className={cx(
+        "group relative overflow-hidden rounded-3xl border transition-all duration-300 [border-color:var(--kit-b0)] [box-shadow:var(--kit-s0)]",
+        index !== undefined && !morph.incoming && "fade-up",
+        interactive && "cursor-pointer hover:-translate-y-0.5 hover:[border-color:var(--kit-b1)] hover:[box-shadow:var(--kit-s1)] focus-visible:outline-none focus-visible:[border-color:var(--kit-b1)]",
+        className,
+      )}>
+      {halo && (
+        <div className={cx("pointer-events-none absolute -top-16 -right-16 w-52 h-52 rounded-full blur-3xl transition-opacity duration-300", interactive ? "opacity-30 group-hover:opacity-60" : "opacity-25")}
+          style={{ background: `radial-gradient(circle, ${h.alpha(th.isDark ? 0.45 : 0.35)}, transparent 70%)` }} />
+      )}
+      {Watermark && (
+        <Watermark className="pointer-events-none absolute -bottom-6 -right-4 w-28 h-28 -rotate-12 transition-transform duration-500 group-hover:rotate-0 group-hover:scale-110"
+          style={{ color: h.c1, opacity: th.isDark ? 0.07 : 0.09 }} strokeWidth={1.4} />
+      )}
+      <div className="relative">{children}</div>
+    </div>
+  );
+}
+
+export function IconBadge({ Icon, hue, size = "md" }: { Icon: LucideIcon; hue?: Hue; size?: "sm" | "md" | "lg" | "xl" }) {
+  const h = useHue(hue);
+  const box = { sm: "w-9 h-9 rounded-xl", md: "w-11 h-11 rounded-2xl", lg: "w-14 h-14 rounded-2xl", xl: "w-14 h-14 sm:w-[4.5rem] sm:h-[4.5rem] rounded-3xl" }[size];
+  const icon = { sm: "w-4 h-4", md: "w-5 h-5", lg: "w-6 h-6", xl: "w-6 h-6 sm:w-8 sm:h-8" }[size];
+  return (
+    <div className={cx(box, "flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105")}
+      style={{ background: h.gradient, boxShadow: `0 ${size === "xl" ? 12 : 6}px ${size === "xl" ? 28 : 16}px ${h.alpha(size === "xl" ? 0.4 : 0.32)}` }}>
+      <Icon className={icon} style={{ color: "#fff" }} strokeWidth={2.2} />
+    </div>
+  );
+}
+
+// Initiales en pastille dégradée (collaborateurs).
+export function Initials({ name, hue }: { name: string; hue?: Hue }) {
+  const h = useHue(hue);
+  const letters = name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("") || "?";
+  return (
+    <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 text-sm font-black"
+      style={{ background: h.gradient, color: "#fff", boxShadow: `0 6px 16px ${h.alpha(0.32)}` }}>
+      {letters}
+    </div>
+  );
+}
+
+export type PillTone = "hue" | "solid" | "done" | "warn" | "danger" | "muted";
+
+export function Pill({ children, tone = "hue", hue, Icon }: { children: ReactNode; tone?: PillTone; hue?: Hue; Icon?: LucideIcon }) {
+  const th = useTh();
+  const h = useHue(hue);
+  const amber = HUES.amber[0];
+  const style: CSSProperties =
+    tone === "solid" ? { background: h.gradient, color: "#fff" }
+    : tone === "done" ? { background: "rgba(106,222,177,0.15)", color: SUCCESS }
+    : tone === "warn" ? { background: `rgba(${hexToRgb(amber)},0.16)`, color: th.isDark ? HUES.amber[1] : "#c48a1e" }
+    : tone === "danger" ? { background: "rgba(239,138,116,0.14)", color: DANGER }
+    : tone === "muted" ? { background: th.inputBg, color: th.fg3 }
+    : { background: h.alpha(th.isDark ? 0.16 : 0.12), color: h.text };
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold whitespace-nowrap" style={style}>
+      {Icon && <Icon className="w-3 h-3" />}{children}
+    </span>
+  );
+}
+
+// ── Boutons ───────────────────────────────────────────────────────────────
+
+export function HueButton({ children, onClick, disabled, hue, Icon, sm, full, type = "button" }: {
+  children: ReactNode; onClick?: () => void; disabled?: boolean; hue?: Hue; Icon?: LucideIcon; sm?: boolean; full?: boolean; type?: "button" | "submit";
+}) {
+  const h = useHue(hue);
+  return (
+    <button type={type} onClick={onClick} disabled={disabled}
+      className={cx(
+        "inline-flex items-center justify-center gap-2 rounded-full font-bold transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:pointer-events-none",
+        sm ? "px-4 py-2 text-sm" : "px-5 py-2.5 text-sm", full && "w-full",
+      )}
+      style={{ background: h.gradient, color: "#fff", boxShadow: `0 6px 18px ${h.alpha(0.35)}`, textShadow: "0 1px 2px rgba(0,0,0,0.15)" }}>
+      {Icon && <Icon className="w-4 h-4 shrink-0" />}{children}
+    </button>
+  );
+}
+
+export function GhostButton({ children, onClick, disabled, hue, Icon, sm, full }: {
+  children: ReactNode; onClick?: () => void; disabled?: boolean; hue?: Hue; Icon?: LucideIcon; sm?: boolean; full?: boolean;
+}) {
+  const th = useTh();
+  const h = useHue(hue);
+  return (
+    <button type="button" onClick={onClick} disabled={disabled}
+      style={{ background: th.inputBg, "--kit-b0": th.inputB, "--kit-b1": h.alpha(0.6), color: th.fg } as CSSProperties}
+      className={cx(
+        "inline-flex items-center justify-center gap-2 rounded-full font-semibold border transition-all duration-200 [border-color:var(--kit-b0)] hover:[border-color:var(--kit-b1)] disabled:opacity-50 disabled:pointer-events-none",
+        sm ? "px-4 py-2 text-sm" : "px-5 py-2.5 text-sm", full && "w-full",
+      )}>
+      {Icon && <Icon className="w-4 h-4 shrink-0" style={{ color: h.text }} />}{children}
+    </button>
+  );
+}
+
+// Bouton icône seul (éditer, supprimer, monter…) — toujours avec un title.
+export function IconAction({ Icon, onClick, title, tone = "default", disabled, hue }: {
+  Icon: LucideIcon; onClick: () => void; title: string; tone?: "default" | "danger"; disabled?: boolean; hue?: Hue;
+}) {
+  const th = useTh();
+  const h = useHue(hue);
+  const danger = tone === "danger";
+  return (
+    <button type="button" title={title} aria-label={title} disabled={disabled}
+      onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClick(); }}
+      style={{
+        background: th.inputBg,
+        "--kit-b0": th.inputB,
+        "--kit-b1": danger ? "rgba(239,138,116,0.6)" : h.alpha(0.6),
+        "--kit-bg1": danger ? "rgba(239,138,116,0.12)" : h.alpha(0.12),
+        color: danger ? DANGER : th.fg2,
+      } as CSSProperties}
+      className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border transition-all duration-200 [border-color:var(--kit-b0)] hover:[border-color:var(--kit-b1)] hover:[background:var(--kit-bg1)] disabled:opacity-30 disabled:pointer-events-none">
+      <Icon className="w-4 h-4" />
+    </button>
+  );
+}
+
+// Interrupteur "Visible / Masqué" des contenus proposés aux élèves.
+export function VisibilityToggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
+  const th = useTh();
+  return (
+    <label className="inline-flex items-center gap-2 rounded-full pl-3 pr-1 py-1 text-xs font-bold cursor-pointer select-none"
+      style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: checked ? SUCCESS : th.fg3 }}
+      onClick={(e) => e.stopPropagation()}>
+      {checked ? "Visible" : "Masqué"}
+      <VSwitch checked={checked} onCheckedChange={onChange} />
+    </label>
+  );
+}
+
+// ── Blocs de mise en page ─────────────────────────────────────────────────
+
+// Ligne d'élément (quiz, fichier, collaborateur…) dans une liste.
+export function ItemCard({ leading, Icon, title, subtitle, pills, actions, onClick, hue, index }: {
+  leading?: ReactNode; Icon?: LucideIcon; title: ReactNode; subtitle?: ReactNode; pills?: ReactNode; actions?: ReactNode;
+  onClick?: () => void; hue?: Hue; index?: number;
+}) {
+  const th = useTh();
+  return (
+    <Panel hue={hue} onClick={onClick} index={index}>
+      <div className="p-4 sm:p-5 flex flex-wrap items-center gap-x-4 gap-y-3">
+        {leading ?? (Icon && <IconBadge Icon={Icon} hue={hue} />)}
+        <div className="flex-1 min-w-[180px]">
+          <div className="text-base font-bold truncate" style={{ color: th.fg }}>{title}</div>
+          {subtitle && <div className="text-sm mt-0.5 truncate" style={{ color: th.fg3 }}>{subtitle}</div>}
+          {pills && <div className="flex flex-wrap items-center gap-1.5 mt-2">{pills}</div>}
+        </div>
+        {actions && <div className="flex items-center gap-2 shrink-0 flex-wrap" onClick={(e) => e.stopPropagation()}>{actions}</div>}
+      </div>
+    </Panel>
+  );
+}
+
+export function ItemList({ children }: { children: ReactNode }) {
+  return <div className="space-y-3">{children}</div>;
+}
+
+// Barre au-dessus d'une liste : résumé à gauche, actions à droite.
+export function Toolbar({ summary, children }: { summary?: ReactNode; children?: ReactNode }) {
+  const th = useTh();
+  return (
+    <div className="flex items-center justify-between gap-3 flex-wrap">
+      <div className="text-sm font-semibold" style={{ color: th.fg2 }}>{summary}</div>
+      {children && <div className="flex items-center gap-2 flex-wrap">{children}</div>}
+    </div>
+  );
+}
+
+export function KitHeading({ children, hue, right }: { children: ReactNode; hue?: Hue; right?: ReactNode }) {
+  const th = useTh();
+  const h = useHue(hue);
+  return (
+    <div className="flex items-center justify-between gap-3 mb-3">
+      <h4 className="flex items-center gap-2 text-xs font-black uppercase tracking-widest" style={{ color: th.fg2 }}>
+        <span className="w-1.5 h-4 rounded-full" style={{ background: h.gradient }} />{children}
+      </h4>
+      {right}
+    </div>
+  );
+}
+
+export function EmptyState({ Icon, title, hint, action, hue }: { Icon: LucideIcon; title: string; hint?: string; action?: ReactNode; hue?: Hue }) {
+  const th = useTh();
+  return (
+    <Panel hue={hue} watermark={Icon} className="fade-up">
+      <div className="px-6 py-10 flex flex-col items-center text-center gap-3">
+        <IconBadge Icon={Icon} hue={hue} size="lg" />
+        <div className="text-base font-bold" style={{ color: th.fg }}>{title}</div>
+        {hint && <p className="text-sm max-w-md" style={{ color: th.fg3 }}>{hint}</p>}
+        {action && <div className="mt-1">{action}</div>}
+      </div>
+    </Panel>
+  );
+}
+
+export function Loading({ label = "Chargement…", hue }: { label?: string; hue?: Hue }) {
+  const th = useTh();
+  const h = useHue(hue);
+  return (
+    <div className="flex items-center gap-2 py-6 text-sm" style={{ color: th.fg3 }}>
+      <Loader2 className="w-4 h-4 animate-spin" style={{ color: h.text }} />{label}
+    </div>
+  );
+}
+
+export function ErrorText({ children }: { children: ReactNode }) {
+  return <p className="text-sm rounded-xl px-3.5 py-2.5" style={{ background: "rgba(239,138,116,0.12)", color: DANGER }}>{children}</p>;
+}
+
+// Petite tuile de chiffre (résultats).
+export function StatTile({ label, value, color, hue }: { label: string; value: ReactNode; color?: string; hue?: Hue }) {
+  const th = useTh();
+  return (
+    <Panel hue={hue}>
+      <div className="px-4 py-3">
+        <div className="text-[10px] font-black uppercase tracking-widest" style={{ color: th.fg3 }}>{label}</div>
+        <div className="text-2xl font-black tabular-nums mt-0.5" style={{ color: color ?? th.fg, fontFamily: "'Funnel Display',sans-serif" }}>{value}</div>
+      </div>
+    </Panel>
+  );
+}
+
+export function BackButton({ label, onClick }: { label: string; onClick: () => void }) {
+  const th = useTh();
+  return (
+    <button onClick={onClick} className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-semibold transition-opacity hover:opacity-75"
+      style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg2 }}>
+      <ArrowLeft className="w-4 h-4" />{label}
+    </button>
+  );
+}
+
+// En-tête de page : bandeau pleine largeur aux couleurs de la rubrique —
+// grande pastille, sur-titre en pastille dégradée, titre en très gros, halo
+// et icône géante en filigrane, liseré dégradé en bas.
+// morphName : même nom que la tuile d'où l'on vient, qui glisse jusqu'ici (cf. runMorph).
+export function PageHero({ back, eyebrow, title, desc, Icon, hue, actions, morphName }: {
+  back?: { label: string; onClick: () => void }; eyebrow?: string; title: ReactNode; desc?: ReactNode; Icon: LucideIcon; hue?: Hue; actions?: ReactNode; morphName?: string;
+}) {
+  const th = useTh();
+  const h = useHue(hue);
+  const morph = useMorph<HTMLDivElement>(morphName);
+  return (
+    <div className={cx("space-y-4", !morph.incoming && "fade-up")}>
+      {back && <BackButton label={back.label} onClick={back.onClick} />}
+      <div ref={morph.ref} data-morph={morphName} data-morph-fade="" className="relative overflow-hidden rounded-[2rem] border" style={{ background: th.card, borderColor: th.sep, boxShadow: th.isDark ? "0 8px 28px rgba(0,0,0,0.3)" : "0 8px 28px rgba(15,14,20,0.06)" }}>
+        <div className="pointer-events-none absolute inset-0" style={{ background: `linear-gradient(115deg, ${h.alpha(th.isDark ? 0.2 : 0.14)} 0%, transparent 55%)` }} />
+        <div className="pointer-events-none absolute -top-24 -right-16 w-96 h-96 rounded-full blur-3xl opacity-60" style={{ background: `radial-gradient(circle, ${h.alpha(th.isDark ? 0.4 : 0.32)}, transparent 70%)` }} />
+        <Icon className="pointer-events-none absolute -bottom-14 right-4 sm:right-10 w-56 h-56 -rotate-12" style={{ color: h.c1, opacity: th.isDark ? 0.07 : 0.09 }} strokeWidth={1.2} />
+        <div className="relative px-5 py-5 sm:px-7 sm:py-7 flex items-center justify-between gap-5 flex-wrap">
+          <div className="flex items-center gap-4 sm:gap-6 min-w-0">
+            <IconBadge Icon={Icon} hue={hue} size="xl" />
+            <div className="min-w-0">
+              {eyebrow && <Pill tone="solid" hue={hue}>{eyebrow}</Pill>}
+              <h1 className="text-[1.7rem] sm:text-4xl lg:text-[2.6rem] font-black leading-[1.05] tracking-tight mt-2 break-words" style={{ color: th.fg, fontFamily: "'Funnel Display',sans-serif" }}>{title}</h1>
+              {desc && <p className="text-sm sm:text-base mt-2 max-w-2xl" style={{ color: th.fg2 }}>{desc}</p>}
+            </div>
+          </div>
+          {actions && <div className="flex items-center gap-2 flex-wrap">{actions}</div>}
+        </div>
+        <div className="absolute bottom-0 left-0 right-0 h-1" style={{ background: `linear-gradient(90deg,${h.c1},${h.c2})` }} />
+      </div>
+    </div>
+  );
+}
+
+// En-tête de fenêtre de dialogue aux couleurs de la rubrique.
+export function DialogHero({ Icon, title, desc, hue }: { Icon: LucideIcon; title: string; desc?: string; hue?: Hue }) {
+  return (
+    <DialogHeader>
+      <div className="flex items-center gap-3 text-left">
+        <IconBadge Icon={Icon} hue={hue} />
+        <div className="min-w-0">
+          <DialogTitle className="text-xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}>{title}</DialogTitle>
+          {desc && <DialogDescription className="mt-1">{desc}</DialogDescription>}
+        </div>
+      </div>
+    </DialogHeader>
+  );
+}
+
+// Encadré d'un sous-élément dans un formulaire (question d'un quiz…).
+export function SubCard({ children, hue }: { children: ReactNode; hue?: Hue }) {
+  const th = useTh();
+  const h = useHue(hue);
+  return (
+    <div className="relative rounded-2xl p-4 overflow-hidden" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
+      <div className="absolute left-0 top-0 bottom-0 w-1" style={{ background: h.gradient }} />
+      {children}
+    </div>
+  );
+}
+
+export function NumberBadge({ n, hue }: { n: number; hue?: Hue }) {
+  const h = useHue(hue);
+  return (
+    <span className="w-7 h-7 rounded-lg inline-flex items-center justify-center text-xs font-black shrink-0" style={{ background: h.gradient, color: "#fff" }}>{n}</span>
+  );
+}
+
+// Barre de progression / répartition (résultats).
+export function ProgressBar({ value, hue, height = 8 }: { value: number; hue?: Hue; height?: number }) {
+  const th = useTh();
+  const h = useHue(hue);
+  return (
+    <div className="rounded-full overflow-hidden" style={{ background: th.inputBg, height }}>
+      <div className="h-full rounded-full transition-all duration-700" style={{ width: `${Math.max(0, Math.min(100, value))}%`, background: `linear-gradient(90deg,${h.c1},${h.c2})` }} />
+    </div>
+  );
+}
+
+// Choix segmenté (format de réponse…) aux couleurs de la rubrique.
+export function HueSegmented<T extends string>({ value, onChange, options, hue }: {
+  value: T; onChange: (v: T) => void; options: { value: T; label: string }[]; hue?: Hue;
+}) {
+  const th = useTh();
+  const h = useHue(hue);
+  return (
+    <div className="inline-flex flex-wrap items-center gap-1 p-1 rounded-2xl" style={{ background: th.card, border: `1px solid ${th.inputB}` }}>
+      {options.map((o) => {
+        const active = o.value === value;
+        return (
+          <button key={o.value} type="button" onClick={() => onChange(o.value)}
+            className={cx("px-3 py-1.5 rounded-xl text-xs font-bold transition-all", !active && "hover:opacity-75")}
+            style={active ? { background: h.gradient, color: "#fff", boxShadow: `0 3px 10px ${h.alpha(0.3)}` } : { color: th.fg2 }}>
+            {o.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// Case à cocher libellée aux couleurs de la rubrique.
+export function HueCheckbox({ checked, onChange, children, hue }: { checked: boolean; onChange: (v: boolean) => void; children: ReactNode; hue?: Hue }) {
+  const th = useTh();
+  const h = useHue(hue);
+  return (
+    <label className="inline-flex items-center gap-2 text-xs font-semibold cursor-pointer select-none" style={{ color: th.fg2 }}>
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="w-4 h-4" style={{ accentColor: h.c1 }} />
+      {children}
+    </label>
+  );
+}
+
+// ── Passage d'un quiz / questionnaire (côté élève) ────────────────────────
+
+// Choix de réponse : contour neutre, dégradé de la rubrique une fois choisi.
+export function ChoiceButton({ active, onClick, children, indicator, big }: { active: boolean; onClick: () => void; children: ReactNode; indicator?: ReactNode; big?: boolean }) {
+  const th = useTh();
+  const h = useHue();
+  return (
+    <button type="button" onClick={onClick}
+      className={cx("w-full text-left rounded-2xl transition-all duration-200 flex items-center gap-3", big ? "px-5 py-4 text-base min-h-[64px]" : "px-4 py-3 text-sm", !active && "hover:-translate-y-0.5")}
+      style={active
+        ? { background: h.gradient, color: "#fff", fontWeight: 700, boxShadow: `0 8px 20px ${h.alpha(0.35)}`, border: "1px solid transparent" }
+        : { background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg, fontWeight: big ? 600 : undefined }}>
+      {indicator}{children}
+    </button>
+  );
+}
+
+// Lettre A/B/C… devant un choix de réponse.
+export function LetterBadge({ letter, active }: { letter: string; active: boolean }) {
+  const th = useTh();
+  const h = useHue();
+  return (
+    <span className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-black shrink-0"
+      style={active ? { background: "rgba(255,255,255,0.25)", color: "#fff" } : { background: h.alpha(th.isDark ? 0.18 : 0.12), color: h.text }}>
+      {letter}
+    </span>
+  );
+}
+
+// Écran de fin (score ou remerciement).
+export function CompletionPanel({ Icon, title, big, message, children }: { Icon: LucideIcon; title: string; big?: ReactNode; message: string; children?: ReactNode }) {
+  const th = useTh();
+  return (
+    <Panel watermark={Icon} className="fade-up">
+      <div className="px-6 py-12 flex flex-col items-center text-center gap-3">
+        <IconBadge Icon={Icon} size="lg" />
+        <div className="text-lg font-black" style={{ color: th.fg, fontFamily: "'Funnel Display',sans-serif" }}>{title}</div>
+        {big && <div className="text-5xl font-black tabular-nums" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>{big}</GT></div>}
+        <p className="text-sm max-w-md" style={{ color: th.fg3 }}>{message}</p>
+        {children}
+      </div>
+    </Panel>
+  );
+}
+
