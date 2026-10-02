@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "test:advisor": "node --test scripts/project-advisor.test.mjs",
+    "test:contact": "node --test scripts/contact-request.test.mjs",
     "test:media": "node --test scripts/media-generation.test.mjs",
     "build": "vite build",
     "dev": "vite",

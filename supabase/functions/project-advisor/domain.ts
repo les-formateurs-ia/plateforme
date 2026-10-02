@@ -32,7 +32,7 @@ export type Lead = Contact & {
   analysis: Analysis | null;
 };
 
-function text(value: unknown, label: string, min: number, max: number): string {
+export function text(value: unknown, label: string, min: number, max: number): string {
   if (typeof value !== "string") throw new PublicError(400, "VALIDATION", `${label} : champ obligatoire.`);
   const clean = value.trim().replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, "");
   if (clean.length < min || clean.length > max) {

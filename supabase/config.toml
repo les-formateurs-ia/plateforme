@@ -1,3 +1,7 @@
-# Only this dedicated public widget endpoint accepts visitors without a login.
+# Only these dedicated public endpoints accept visitors without a login.
 [functions.project-advisor]
+verify_jwt = false
+
+# Contact forms of the public site (les-formateurs-ia.fr/contact/…).
+[functions.contact-request]
 verify_jwt = false

@@ -30,18 +30,23 @@ export interface Database {
         Row: {
           id: number;
           request_id: string;
-          access_token_hash: string;
+          access_token_hash: string | null;
           first_name: string;
           last_name: string;
           email: string;
           profile: "entreprise" | "particulier";
-          sector: string;
-          need: string;
+          sector: string | null;
+          need: string | null;
           phone: string | null;
           status: "new" | "callback_requested";
           created_at: string;
           callback_requested_at: string | null;
-          source: string;
+          source: "conseiller-ia" | "contact-general" | "contact-entreprise" | "contact-particulier";
+          company: string | null;
+          challenges: string[] | null;
+          employment_status: string | null;
+          cpf_balance: string | null;
+          utm: Record<string, string> | null;
           privacy_notice_version: string;
           contact_accepted_at: string;
           analysis_status: "pending" | "processing" | "ready" | "failed";

@@ -20,7 +20,7 @@ type Dependencies = {
   now?: () => number;
 };
 
-async function readBody(req: Request): Promise<Record<string, unknown>> {
+export async function readBody(req: Request): Promise<Record<string, unknown>> {
   if (!req.headers.get("content-type")?.startsWith("application/json")) {
     throw new PublicError(415, "FORMAT", "Format de requête invalide.");
   }
