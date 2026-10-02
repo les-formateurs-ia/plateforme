@@ -7,8 +7,8 @@ import type { Database } from "@/app/lib/supabase/database.types";
 
 type Lead = Pick<Database["public"]["Tables"]["project_advisor_leads"]["Row"],
   "id" | "first_name" | "last_name" | "email" | "profile" | "sector" | "need" | "phone" | "status" | "created_at" | "callback_requested_at"
-  | "source" | "company" | "challenges" | "employment_status" | "cpf_balance" | "utm">;
-const columns = "id,first_name,last_name,email,profile,sector,need,phone,status,created_at,callback_requested_at,source,company,challenges,employment_status,cpf_balance,utm";
+  | "source" | "company" | "challenges" | "employment_status" | "cpf_balance">;
+const columns = "id,first_name,last_name,email,profile,sector,need,phone,status,created_at,callback_requested_at,source,company,challenges,employment_status,cpf_balance";
 const pageSize = 50;
 const display = (value: string | null | undefined) => value?.trim() || "—";
 const date = (value: string) => new Date(value).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" });
@@ -110,10 +110,10 @@ export function AdminProjectAdvisorLeadsPage() {
     {error ? <GCard className="p-5"><p role="alert">Impossible de charger les demandes. Cliquez sur Actualiser pour réessayer.</p></GCard> :
       <GCard>
         <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Tableau des demandes de projets IA" aria-busy={loading}>
-          <table className="w-full text-sm text-left min-w-[1350px]">
+          <table className="w-full text-sm text-left min-w-[1150px]">
             <caption className="sr-only">Coordonnées et projets des prospects</caption>
             <thead style={{ background: th.gradShadow(0.08), color: th.fg3 }}><tr>
-              {["Reçue le", "Origine", "Prénom", "Nom", "Profil", "Secteur d’activité", "Téléphone", "Email", "Besoin / rappel", "Campagne", "Source"].map(label => <th key={label} scope="col" className="px-4 py-3 whitespace-nowrap font-semibold">{label}</th>)}
+              {["Reçue le", "Origine", "Prénom", "Nom", "Profil", "Secteur d’activité", "Téléphone", "Email", "Besoin / rappel"].map(label => <th key={label} scope="col" className="px-4 py-3 whitespace-nowrap font-semibold">{label}</th>)}
             </tr></thead>
             <tbody>{rows.map(row => <tr key={row.id} style={{ borderTop: `1px solid ${th.sep}` }}>
               <td className="px-4 py-4 whitespace-nowrap">{date(row.created_at)}</td>
@@ -129,8 +129,6 @@ export function AdminProjectAdvisorLeadsPage() {
                   <ul className="mt-2 space-y-1">{answers(row).map((line, i) => <li key={i} className="whitespace-pre-wrap break-words">{line}</li>)}</ul>
                 </details>}
               </td>
-              <td className="px-4 py-4 text-xs" style={{ color: th.fg3 }}>{row.utm ? Object.values(row.utm).join(" · ") : "—"}</td>
-              <td className="px-4 py-4 whitespace-nowrap" style={{ color: th.fg3 }}>—</td>
             </tr>)}</tbody>
           </table>
           {!loading && rows.length === 0 && <p className="p-6 text-center" style={{ color: th.fg3 }}>Aucune demande pour le moment.</p>}
