@@ -7,7 +7,7 @@ import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
 import { VBtn } from "@/app/components/common/Buttons";
 import { cx } from "@/app/lib/cx";
-import { formatDuration, type LessonWithState } from "@/app/lib/learning";
+import { formatDuration, isLessonCompleted, type LessonWithState } from "@/app/lib/learning";
 import { useAllCourseProgress, type CourseProgressEntry } from "@/app/state/useAllCourseProgress";
 import { useAuth } from "@/app/state/auth-context";
 import { isStaff } from "@/app/lib/permissions";
@@ -108,7 +108,7 @@ function FormationAccordion({ entry, open, onToggle }: { entry: CourseProgressEn
 
   const stateFor = (lessonId: string) => lessonStates.find((s) => s.lesson.id === lessonId);
   const totalLessons = lessonStates.length;
-  const completedLessons = lessonStates.filter((s) => s.state === "completed").length;
+  const completedLessons = lessonStates.filter(isLessonCompleted).length;
   const overallPct = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
   const totalTimeSeconds = lessonStates.reduce((sum, s) => sum + (s.progress?.timeSpentSeconds ?? 0), 0);
   const scores = lessonStates.map((s) => s.progress?.bestQuizScore).filter((s): s is number => s != null);
@@ -258,9 +258,11 @@ function FormationAccordion({ entry, open, onToggle }: { entry: CourseProgressEn
             <div className="space-y-2">
               {outline.sections.map((mod) => {
                 const modStates = mod.lessons.map((l) => stateFor(l.id)).filter((s): s is LessonWithState => !!s);
-                const done = modStates.filter((s) => s.state === "completed").length;
+                const done = modStates.filter(isLessonCompleted).length;
                 const total = mod.lessons.length;
-                const status: SectionStatus = total === 0 ? "locked" : done === total ? "complete" : modStates.some((s) => s.state !== "locked") ? "active" : "locked";
+                // Module fermé par le formateur : cadenas, même s'il était déjà terminé
+                // (la progression reste affichée dans le compteur).
+                const status: SectionStatus = !mod.isUnlocked || total === 0 ? "locked" : done === total ? "complete" : modStates.some((s) => s.state !== "locked") ? "active" : "locked";
                 const pct = total > 0 ? Math.round((done / total) * 100) : 0;
                 const modOpen = editMode || openSection === mod.id;
                 const SC = {

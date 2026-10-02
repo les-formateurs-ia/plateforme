@@ -5,3 +5,7 @@ verify_jwt = false
 # Contact forms of the public site (les-formateurs-ia.fr/contact/…).
 [functions.contact-request]
 verify_jwt = false
+
+# The one-time password-setup token is the only credential (see the function).
+[functions.password-setup]
+verify_jwt = false

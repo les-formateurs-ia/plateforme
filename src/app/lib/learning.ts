@@ -18,6 +18,9 @@ export interface OutlineSection {
   id: string;
   title: string;
   orderIndex: number;
+  // Module ouvert à l'élève (instance_sections.is_unlocked) — ouvert/fermé à
+  // la main par l'admin ou le formateur, cf. 20260925130000_instance_section_access.sql.
+  isUnlocked: boolean;
   lessons: OutlineLesson[];
 }
 
@@ -62,20 +65,14 @@ export async function getCourseOutline(instanceId: string): Promise<CourseOutlin
 
   const { data: sectionRows, error: sectionsError } = await supabase
     .from("instance_sections")
-    .select("id, title, order_index")
+    .select("id, title, order_index, is_unlocked")
     .eq("instance_id", instanceId)
     .order("order_index", { ascending: true });
   if (sectionsError) throw sectionsError;
 
-  const sectionIds = (sectionRows ?? []).map((s) => s.id);
-  const { data: lessonRows, error: lessonsError } =
-    sectionIds.length > 0
-      ? await supabase
-          .from("instance_lessons")
-          .select("id, section_id, slug, title, duration_minutes, order_index")
-          .in("section_id", sectionIds)
-          .order("order_index", { ascending: true })
-      : { data: [], error: null };
+  // Pas de lecture directe d'instance_lessons : la RLS la cache dans un module
+  // fermé. Cette RPC ne renvoie que titres/durées, pour afficher le plan complet.
+  const { data: lessonRows, error: lessonsError } = await supabase.rpc("get_instance_lesson_outline", { p_instance_id: instanceId });
   if (lessonsError) throw lessonsError;
 
   return {
@@ -85,6 +82,7 @@ export async function getCourseOutline(instanceId: string): Promise<CourseOutlin
       id: s.id,
       title: s.title,
       orderIndex: s.order_index,
+      isUnlocked: s.is_unlocked,
       lessons: (lessonRows ?? [])
         .filter((l) => l.section_id === s.id)
         .map((l) => ({
@@ -150,19 +148,44 @@ export interface LessonWithState {
   lesson: OutlineLesson;
   progress: LessonProgressRow | null;
   state: LessonState;
+  // true si la leçon est verrouillée parce que son module est fermé (et pas
+  // seulement parce que la leçon précédente n'est pas terminée).
+  moduleLocked: boolean;
 }
 
-// Règle métier : les leçons se débloquent dans l'ordre. Une leçon est
-// accessible seulement si toutes celles qui la précèdent sont "completed".
-export function computeLessonStates(lessons: OutlineLesson[], progress: Map<string, LessonProgressRow>): LessonWithState[] {
-  let unlocked = true;
-  return lessons.map((lesson) => {
-    const p = progress.get(lesson.id) ?? null;
-    const completed = p?.status === "completed";
-    const state: LessonState = completed ? "completed" : unlocked ? "available" : "locked";
-    if (!completed) unlocked = false;
-    return { lesson, progress: p, state };
+// Règles métier :
+// - Un module fermé (isUnlocked = false) verrouille toutes ses leçons, même
+//   celles déjà terminées : leur contenu n'est plus lisible côté serveur.
+// - Dans un module ouvert, les leçons se débloquent dans l'ordre : une leçon
+//   est accessible seulement si les précédentes DU MÊME MODULE sont terminées.
+//   Terminer un module n'ouvre donc jamais le suivant.
+// L'ordre du résultat suit flattenLessons(outline).
+export function computeLessonStates(outline: CourseOutline, progress: Map<string, LessonProgressRow>): LessonWithState[] {
+  return outline.sections.flatMap((section) => {
+    let unlocked = true;
+    return section.lessons.map((lesson) => {
+      const p = progress.get(lesson.id) ?? null;
+      if (!section.isUnlocked) return { lesson, progress: p, state: "locked" as const, moduleLocked: true };
+      const completed = p?.status === "completed";
+      const state: LessonState = completed ? "completed" : unlocked ? "available" : "locked";
+      if (!completed) unlocked = false;
+      return { lesson, progress: p, state, moduleLocked: false };
+    });
   });
+}
+
+// Progression enregistrée, indépendante de l'accès : une leçon terminée dans
+// un module refermé compte toujours comme terminée (son state vaut "locked").
+export function isLessonCompleted(s: LessonWithState | undefined): boolean {
+  return s?.progress?.status === "completed";
+}
+
+// Lien direct vers une leçon que la RLS rend illisible : true si elle
+// appartient à l'élève connecté mais que son module est fermé.
+export async function isLessonInLockedModule(lessonId: string): Promise<boolean> {
+  const { data, error } = await supabase.rpc("is_instance_lesson_locked", { p_lesson_id: lessonId });
+  if (error) throw error;
+  return !!data;
 }
 
 export async function ensureLessonStarted(userId: string, lessonId: string): Promise<void> {

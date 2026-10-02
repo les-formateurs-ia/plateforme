@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import {
   ChevronRight, ChevronLeft, Mic, Send,
   Sparkles, MessageSquare, CheckCircle, X,
-  Lightbulb, Monitor,
+  Lightbulb, Monitor, Loader2,
   Network, RotateCcw, Play, Brain, Zap, Clock, PartyPopper, BookOpen, Headphones, Wand2, Bot, Code, Upload, Pencil, AudioLines, Video,
   Phone, PhoneOff,
 } from "lucide-react";
@@ -20,7 +20,7 @@ import { cx } from "@/app/lib/cx";
 import type { ChatMsg } from "@/app/types";
 import {
   getLessonDetail, ensureLessonStarted, addTimeSpent, submitQuiz, flattenLessons, QUIZ_PASS_THRESHOLD,
-  updateLessonCustomHtml, type LessonDetail, type QuizAnswer,
+  updateLessonCustomHtml, isLessonCompleted, isLessonInLockedModule, type LessonDetail, type QuizAnswer,
 } from "@/app/lib/learning";
 import { getMyPodcasts, getPodcastSignedUrl, requestPodcastGeneration, pollForPodcast, type Podcast } from "@/app/lib/podcasts";
 import { PODCAST_FORMATS, type PodcastVariantId } from "@/app/lib/podcastFormats";
@@ -29,6 +29,7 @@ import { findLatestConversationForInstance, getAgentMessages, sendAgentMessage, 
 import { getMyAvatarVideo, getAvatarVideoSignedUrl, requestAvatarVideoGeneration, pollAvatarVideoStatus, type AvatarVideo } from "@/app/lib/avatarVideos";
 import { startGeminiVoiceSession, type GeminiVoiceSession } from "@/app/lib/geminiVoice";
 import { injectPlatformAuth, injectAutoResize, injectMissionBridge, normalizeSmartQuotes } from "@/app/lib/platformHtml";
+import { useHtmlTheme } from "@/app/lib/useHtmlTheme";
 import { getMySubmission, saveMissionDraft, submitMission, type MissionSubmission } from "@/app/lib/missionSubmissions";
 import { MindmapView } from "@/app/components/lesson/MindmapView";
 
@@ -68,6 +69,9 @@ function stripCertificationMentions(html: string): string {
 
 export function LessonPage() {
   const th = useTh();
+  // Cours, Mission et Playground : HTML du formateur adapté à la charte et au thème,
+  // fond racine = fond de la page de leçon.
+  const htmlTheme = useHtmlTheme("page");
   const { profile } = useProfile();
   const { user, role } = useAuth();
   const navigate = useNavigate();
@@ -341,7 +345,18 @@ export function LessonPage() {
       try {
         const detail = await getLessonDetail(lessonId);
         if (cancelled) return;
-        if (!detail) { setLessonError("Cette leçon est introuvable."); return; }
+        if (!detail) {
+          // Lien direct vers une leçon d'un module fermé : la RLS la rend
+          // illisible, on explique pourquoi plutôt que « introuvable ».
+          if (await isLessonInLockedModule(lessonId)) {
+            if (cancelled) return;
+            toast.error("Ce module n'est pas encore ouvert — ton formateur te donnera l'accès.");
+            navigate("/lessons", { replace: true });
+            return;
+          }
+          if (!cancelled) setLessonError("Cette leçon est introuvable.");
+          return;
+        }
         setLesson(detail);
       } catch (err) {
         console.error(err);
@@ -366,7 +381,9 @@ export function LessonPage() {
     }
     if (state.state === "locked" && !isStaff(role)) {
       setAccess("denied");
-      toast.error("Cette leçon n'est pas encore débloquée — termine les précédentes d'abord.");
+      toast.error(state.moduleLocked
+        ? "Ce module n'est pas encore ouvert — ton formateur te donnera l'accès."
+        : "Cette leçon n'est pas encore débloquée — termine les précédentes d'abord.");
       navigate("/lessons", { replace: true });
       return;
     }
@@ -721,26 +738,32 @@ export function LessonPage() {
   };
 
   const nextQuestionOrFinish = () => {
-    if (!currentQuestion || selected === null) return;
+    if (!currentQuestion || selected === null || submitting) return;
     const option = currentQuestion.options.find((o) => o.id === selected);
     const answer: QuizAnswer = { questionId: currentQuestion.id, selectedOptionId: selected, correct: !!option?.isCorrect };
     const nextAnswers = [...answers, answer];
-    setAnswers(nextAnswers);
-    setSelected(null);
     if (isLastQuestion) void finishQuiz(nextAnswers);
-    else setQuizStep((s) => s + 1);
+    else {
+      setAnswers(nextAnswers);
+      setSelected(null);
+      setQuizStep((s) => s + 1);
+    }
   };
 
   const retryQuiz = () => { setQuizStep(0); setSelected(null); setAnswers([]); setQuizResult(null); setRetaking(true); };
 
   const orderedLessons = course.outline ? flattenLessons(course.outline) : [];
   const currentIndex = orderedLessons.findIndex((l) => l.id === lessonId);
-  const nextLesson = currentIndex >= 0 ? orderedLessons[currentIndex + 1] : undefined;
+  const nextCandidate = currentIndex >= 0 ? orderedLessons[currentIndex + 1] : undefined;
+  // Pas de « Leçon suivante » vers un module fermé : terminer un module n'ouvre
+  // pas le suivant (le staff, lui, peut toujours naviguer).
+  const nextLessonModuleLocked = !!course.lessonStates.find((s) => s.lesson.id === nextCandidate?.id)?.moduleLocked;
+  const nextLesson = nextLessonModuleLocked && !isStaff(role) ? undefined : nextCandidate;
   const currentLessonState = course.lessonStates.find((s) => s.lesson.id === lessonId);
   const isCompleted = currentLessonState?.state === "completed" || !!quizResult?.passed;
 
   const totalLessons = course.lessonStates.length;
-  const completedCount = course.lessonStates.filter((s) => s.state === "completed").length;
+  const completedCount = course.lessonStates.filter(isLessonCompleted).length;
   const overallPct = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
 
   // Playground et Agent sont visibles par tous les rôles/profils — seule
@@ -806,9 +829,9 @@ export function LessonPage() {
                   ref={missionIframeRef}
                   key={missionHtmlSource}
                   title={`${lesson.title} — Mission`}
-                  srcDoc={injectAutoResize(injectMissionBridge(missionHtmlSource, { readOnly: missionSubmission?.status === "submitted" }))}
+                  srcDoc={injectAutoResize(injectMissionBridge(htmlTheme.withTheme(missionHtmlSource), { readOnly: missionSubmission?.status === "submitted" }))}
                   sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
-                  style={{ width: "100%", height: missionIframeHeight, border: 0, display: "block", background: "#fff" }}
+                  style={{ width: "100%", height: missionIframeHeight, border: 0, display: "block", background: htmlTheme.background }}
                 />
               ) : (
                 <p className="text-sm py-10 text-center" style={{ color: th.fg3 }}>Contenu de la mission pas encore disponible.</p>
@@ -843,7 +866,7 @@ export function LessonPage() {
           </div>
 
           {tab === "html" ? (
-            <div className="relative rounded-2xl overflow-hidden" style={{ minHeight: "78vh", height: htmlEditing || !lesson.customHtmlContent ? "78vh" : undefined, background: "#060410" }}>
+            <div className="relative rounded-2xl overflow-hidden" style={{ minHeight: "78vh", height: htmlEditing || !lesson.customHtmlContent ? "78vh" : undefined, background: htmlTheme.background, border: `1px solid ${th.sep}` }}>
               {htmlEditing ? (
                 <div className="absolute inset-0 flex flex-col gap-3 p-5">
                   <textarea
@@ -874,7 +897,7 @@ export function LessonPage() {
               ) : lesson.customHtmlContent ? (
                 <>
                   {!htmlIframeLoaded && (
-                    <div className="absolute inset-0 flex items-center justify-center gap-2 text-sm bg-white" style={{ color: "#94a3b8" }}>
+                    <div className="absolute inset-0 flex items-center justify-center gap-2 text-sm" style={{ background: htmlTheme.background, color: th.fg3 }}>
                       Chargement de la page…
                     </div>
                   )}
@@ -883,16 +906,16 @@ export function LessonPage() {
                       ref={htmlIframeRef}
                       key={lesson.customHtmlContent}
                       onLoad={() => setHtmlIframeLoaded(true)}
-                      srcDoc={injectAutoResize(platformAccessToken ? injectPlatformAuth(lesson.customHtmlContent, platformAccessToken) : lesson.customHtmlContent)}
+                      srcDoc={injectAutoResize(platformAccessToken ? injectPlatformAuth(htmlTheme.withTheme(lesson.customHtmlContent), platformAccessToken) : htmlTheme.withTheme(lesson.customHtmlContent))}
                       sandbox="allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"
                       title={`${lesson.title} — HTML`}
-                      className="block w-full border-0 bg-white"
-                      style={{ height: htmlIframeHeight || 1, minHeight: "78vh", opacity: htmlIframeLoaded ? 1 : 0 }}
+                      className="block w-full border-0"
+                      style={{ height: htmlIframeHeight || 1, minHeight: "78vh", opacity: htmlIframeLoaded ? 1 : 0, background: htmlTheme.background }}
                     />
                   )}
                   {role === "admin" && (
                     <button onClick={startEditHtml} className="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg"
-                      style={{ background: "#fff", border: "1px solid rgba(15,14,20,0.12)", color: "#0f0e14" }}>
+                      style={{ background: th.card, border: `1px solid ${th.sep}`, color: th.fg }}>
                       <Pencil className="w-3 h-3" />Modifier
                     </button>
                   )}
@@ -1137,9 +1160,9 @@ export function LessonPage() {
                   ref={courseIframeRef}
                   key={lesson.id}
                   title={`${lesson.title} — Cours`}
-                  srcDoc={injectAutoResize(courseHtml)}
+                  srcDoc={injectAutoResize(htmlTheme.withTheme(courseHtml))}
                   sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
-                  style={{ width: "100%", height: courseIframeHeight, border: 0, display: "block" }}
+                  style={{ width: "100%", height: courseIframeHeight, border: 0, display: "block", background: htmlTheme.background }}
                 />
               </div>
             )}
@@ -1230,6 +1253,12 @@ export function LessonPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.7)" }} onClick={() => setShowQuizModal(false)}>
           <div onClick={(e) => e.stopPropagation()} className="max-w-lg w-full max-h-[85vh] overflow-y-auto rounded-2xl" style={{ background: th.card, border: `1px solid ${th.sep}` }}>
             <div className="p-5">
+              {submitting ? (
+                <div className="flex min-h-48 items-center justify-center" role="status" aria-label="Chargement" aria-busy="true">
+                  <Loader2 className="w-8 h-8 animate-spin" style={{ color: th.navAC }} aria-hidden="true" />
+                </div>
+              ) : (
+                <>
               <div className="flex items-center gap-2.5 mb-4">
                 <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${th.gradShadow(0.1)}`, border: `1px solid ${th.gradShadow(0.2)}` }}><Brain className="w-4 h-4" style={{ color: th.navAC }} /></div>
                 <span className="text-sm font-black flex-1" style={{ color: th.fg }}>Quiz de la leçon</span>
@@ -1302,10 +1331,12 @@ export function LessonPage() {
                         </>
                       )}
                       <VBtn onClick={nextQuestionOrFinish} sm disabled={submitting}>
-                        {submitting ? "Envoi…" : isLastQuestion ? "Valider le quiz" : "Question suivante"}
+                        {isLastQuestion ? "Valider le quiz" : "Question suivante"}
                       </VBtn>
                     </div>
                   )}
+                </>
+              )}
                 </>
               )}
             </div>

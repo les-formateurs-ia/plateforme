@@ -6,9 +6,8 @@ import { useAuth } from "@/app/state/auth-context";
 import { supabase } from "@/app/lib/supabase/client";
 import { Background } from "@/app/components/common/Background";
 import { Logo } from "@/app/components/common/Logo";
-import { GCard } from "@/app/components/common/GCard";
+import { Panel, IconBadge, HueButton, ErrorText } from "@/app/components/entreprise/EntrepriseKit";
 import { GT } from "@/app/components/common/GT";
-import { ShimBtn } from "@/app/components/common/Buttons";
 
 // Suite du lien d'invitation envoyé par le formateur (voir Edge Function
 // send-company-invite) : la session est déjà active à ce stade (supabase-js
@@ -49,8 +48,9 @@ export function CompanyWelcomePage() {
       <Background />
       <div className="relative z-10 w-full max-w-[440px] fade-up">
         <div className="flex justify-center mb-10"><Logo h={30} /></div>
-        <GCard glow>
+        <Panel watermark={KeyRound}>
           <form onSubmit={handleSubmit} className="p-6 sm:p-8 lg:p-10">
+            <div className="mb-5"><IconBadge Icon={KeyRound} size="lg" /></div>
             <h1 className="text-2xl font-black leading-tight mb-2" style={{ fontFamily: "'Funnel Display',sans-serif" }}>
               <GT>Bienvenue !</GT>
             </h1>
@@ -67,17 +67,15 @@ export function CompanyWelcomePage() {
               </div>
             </div>
 
-            {error && <p className="text-xs mt-3" style={{ color: "#fbc2ad" }}>{error}</p>}
+            {error && <div className="mt-3"><ErrorText>{error}</ErrorText></div>}
 
             <div className="pt-6">
-              <ShimBtn full disabled={loading}>
-                <span className="flex items-center justify-center gap-2.5">
-                  {loading ? "Enregistrement…" : <><KeyRound className="w-5 h-5" />Définir mon mot de passe</>}
-                </span>
-              </ShimBtn>
+              <HueButton type="submit" full Icon={loading ? undefined : KeyRound} disabled={loading}>
+                {loading ? "Enregistrement…" : "Définir mon mot de passe"}
+              </HueButton>
             </div>
           </form>
-        </GCard>
+        </Panel>
       </div>
     </div>
   );

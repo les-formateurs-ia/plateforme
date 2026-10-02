@@ -11,6 +11,8 @@ import { Background } from "@/app/components/common/Background";
 import { MainLayout } from "@/app/components/layout/MainLayout";
 import { LoginPage } from "@/app/pages/auth/LoginPage";
 import { SignupPage } from "@/app/pages/auth/SignupPage";
+import { SetPasswordPage } from "@/app/pages/auth/SetPasswordPage";
+import { PASSWORD_SETUP_PATH } from "@/app/lib/passwordSetup";
 import { LessonPage } from "@/app/pages/LessonPage";
 import { DashboardPage } from "@/app/pages/dashboard/DashboardPage";
 import { LessonsPage } from "@/app/pages/lessons/LessonsPage";
@@ -184,6 +186,8 @@ function AppRoutes() {
       <Route path="/login" element={<RedirectIfAuthenticated><LoginPage /></RedirectIfAuthenticated>} />
       <Route path="/signup" element={<SignupGuard><SignupPage /></SignupGuard>} />
       <Route path="/entreprise/welcome" element={<CompanyWelcomeGuard><CompanyWelcomePage /></CompanyWelcomeGuard>} />
+      {/* Public : le jeton du lien fait foi, pas la session (cf. SetPasswordPage). */}
+      <Route path={PASSWORD_SETUP_PATH} element={<SetPasswordPage />} />
       <Route path="/" element={<RequireAuth><RootGate /></RequireAuth>} />
       <Route element={<RequireAuth><MainLayout /></RequireAuth>}>
         <Route path="dashboard" element={<DashboardRoute />} />

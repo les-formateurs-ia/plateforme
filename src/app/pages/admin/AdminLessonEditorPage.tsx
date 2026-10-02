@@ -8,6 +8,7 @@ import { GT } from "@/app/components/common/GT";
 import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
 import { useStaffBasePath } from "@/app/lib/staffBase";
 import { deleteLessonVideoFiles } from "@/app/lib/lessonVideos";
+import { useHtmlTheme } from "@/app/lib/useHtmlTheme";
 
 interface QuizOptionDraft { id?: string; label: string; is_correct: boolean; }
 interface QuizQuestionDraft { id?: string; question: string; explanation: string; options: QuizOptionDraft[]; }
@@ -107,6 +108,8 @@ const QUIZ_CSV_TEMPLATE = [
 // différentes selon la route.
 export function AdminLessonEditorPage() {
   const th = useTh();
+  // Aperçu du Playground dans la GCard du formulaire : fond racine = fond de carte.
+  const htmlTheme = useHtmlTheme("card");
   const navigate = useNavigate();
   const base = useStaffBasePath();
   const location = useLocation();
@@ -471,8 +474,8 @@ export function AdminLessonEditorPage() {
           <textarea value={customHtml} onChange={(e) => setCustomHtml(e.target.value)} rows={10} placeholder="Colle ici le HTML du template (identique pour tous les élèves — la personnalisation se fait sur un duplicata)."
             className="w-full rounded-xl px-4 py-3 text-xs g-input resize-y font-mono" />
           {htmlPreviewOpen && customHtml.trim() && (
-            <iframe srcDoc={customHtml} sandbox="allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox" title="Aperçu du Playground"
-              className="w-full rounded-xl mt-2 bg-white" style={{ height: 420, border: `1px solid ${th.sep}` }} />
+            <iframe srcDoc={htmlTheme.withTheme(customHtml)} sandbox="allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox" title="Aperçu du Playground"
+              className="w-full rounded-xl mt-2" style={{ height: 420, border: `1px solid ${th.sep}`, background: htmlTheme.background }} />
           )}
           <p className="text-xs mt-1.5 flex items-center gap-1.5" style={{ color: th.fg3 }}><Code className="w-3 h-3" />Affiché aux élèves dans l'onglet "Playground" de la leçon.</p>
         </div>

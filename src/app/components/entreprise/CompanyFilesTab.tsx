@@ -1,11 +1,11 @@
 import { useEffect, useState, type ChangeEvent } from "react";
 import { toast } from "sonner";
-import { Upload, Trash2, Eye, FileText } from "lucide-react";
+import { Upload, Trash2, Eye, FileText, CloudUpload } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
-import { GCard } from "@/app/components/common/GCard";
-import { VBtn, ShimBtn } from "@/app/components/common/Buttons";
-import { VSwitch } from "@/app/components/common/VSwitch";
+import {
+  Panel, ItemCard, ItemList, Toolbar, Pill, HueButton, IconAction, VisibilityToggle, EmptyState, Loading, ErrorText, KitHeading, useHue,
+} from "@/app/components/entreprise/EntrepriseKit";
 import {
   listCompanyFiles, uploadCompanyFile, toggleCompanyFileVisibility, deleteCompanyFile, getCompanyFileDownloadUrl,
   type CompanyFileRow,
@@ -19,6 +19,7 @@ function formatSize(bytes: number | null): string {
 
 export function CompanyFilesTab({ companyId }: { companyId: string }) {
   const th = useTh();
+  const h = useHue();
   const { user } = useAuth();
 
   const [files, setFiles] = useState<CompanyFileRow[]>([]);
@@ -100,54 +101,45 @@ export function CompanyFilesTab({ companyId }: { companyId: string }) {
   };
 
   return (
-    <div className="space-y-4 pt-4">
-      <GCard>
-        <div className="p-4 space-y-3">
-          <h4 className="text-xs font-black uppercase tracking-widest" style={{ color: th.fg3 }}>Déposer un fichier</h4>
+    <div className="space-y-6 pt-2">
+      <Panel watermark={CloudUpload}>
+        <div className="p-5 sm:p-6 space-y-4">
+          <KitHeading>Déposer un fichier pour les élèves</KitHeading>
           <div className="grid sm:grid-cols-2 gap-3">
             <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nom du fichier" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
             <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description (optionnel)" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
           </div>
-          <div className="flex items-center gap-3 flex-wrap">
-            <label className="cursor-pointer">
-              <input type="file" className="hidden" onChange={handleFileChange} />
-              <span className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 hover:opacity-80"
-                style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(15,14,20,0.04)", border: `1px solid ${th.inputB}`, color: th.fg }}>
-                <Upload className="w-3.5 h-3.5" />{pendingFile ? pendingFile.name : "Choisir un fichier"}
-              </span>
-            </label>
-            <ShimBtn sm onClick={handleUpload} disabled={!pendingFile || !name.trim() || uploading}>{uploading ? "Envoi..." : "Déposer"}</ShimBtn>
-          </div>
-          {error && <p className="text-xs" style={{ color: "#fbc2ad" }}>{error}</p>}
+          <label className="block cursor-pointer">
+            <input type="file" className="hidden" onChange={handleFileChange} />
+            <span className="flex flex-col items-center justify-center gap-1.5 rounded-2xl px-4 py-6 text-sm font-semibold text-center transition-all duration-200 hover:opacity-85"
+              style={{ background: h.alpha(0.06), border: `1.5px dashed ${h.alpha(0.45)}`, color: th.fg }}>
+              <Upload className="w-5 h-5" style={{ color: h.text }} />
+              <span className="truncate max-w-full">{pendingFile ? pendingFile.name : "Cliquez pour choisir un fichier"}</span>
+              {pendingFile && <span className="text-xs font-normal" style={{ color: th.fg3 }}>{formatSize(pendingFile.size)}</span>}
+            </span>
+          </label>
+          {error && <ErrorText>{error}</ErrorText>}
+          <HueButton Icon={Upload} onClick={handleUpload} disabled={!pendingFile || !name.trim() || uploading}>{uploading ? "Envoi..." : "Déposer"}</HueButton>
         </div>
-      </GCard>
+      </Panel>
 
-      {loading && <p className="text-sm" style={{ color: th.fg3 }}>Chargement…</p>}
-      {!loading && !files.length && <GCard><div className="p-8 text-center text-sm" style={{ color: th.fg3 }}>Aucun fichier pour l'instant.</div></GCard>}
-
-      <div className="space-y-3">
-        {files.map((f) => (
-          <GCard key={f.id}>
-            <div className="p-4 flex items-center justify-between gap-3">
-              <div className="min-w-0 flex items-center gap-3">
-                <FileText className="w-4 h-4 shrink-0" style={{ color: th.fg3 }} />
-                <div className="min-w-0">
-                  <div className="text-sm font-semibold truncate" style={{ color: th.fg }}>{f.name}</div>
-                  <div className="text-xs mt-0.5" style={{ color: th.fg3 }}>{f.description || formatSize(f.fileSize)}</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 shrink-0">
-                <label className="flex items-center gap-2 text-xs font-semibold" style={{ color: th.fg3 }}>
-                  Afficher <VSwitch checked={f.isVisible} onCheckedChange={(v) => void handleToggle(f, v)} />
-                </label>
-                <VBtn sm onClick={() => void handleDownload(f)}><Eye className="w-3.5 h-3.5" /></VBtn>
-                <button onClick={() => void handleDelete(f)} className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-70" style={{ color: "#fbc2ad" }}>
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-          </GCard>
-        ))}
+      <div>
+        <Toolbar summary={`${files.length} fichier${files.length > 1 ? "s" : ""} déposé${files.length > 1 ? "s" : ""}`} />
+        <div className="mt-3">
+          {loading && <Loading />}
+          {!loading && !files.length && <EmptyState Icon={FileText} title="Aucun fichier pour l'instant" hint="Les fichiers déposés ici apparaissent chez les élèves une fois rendus visibles." />}
+          <ItemList>
+            {files.map((f, i) => (
+              <ItemCard key={f.id} index={i} Icon={FileText} title={f.name} subtitle={f.description ?? undefined}
+                pills={f.fileSize ? <Pill>{formatSize(f.fileSize)}</Pill> : undefined}
+                actions={<>
+                  <VisibilityToggle checked={f.isVisible} onChange={(v) => void handleToggle(f, v)} />
+                  <IconAction Icon={Eye} onClick={() => void handleDownload(f)} title="Ouvrir" />
+                  <IconAction Icon={Trash2} tone="danger" onClick={() => void handleDelete(f)} title="Supprimer" />
+                </>} />
+            ))}
+          </ItemList>
+        </div>
       </div>
     </div>
   );

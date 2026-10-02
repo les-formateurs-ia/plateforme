@@ -1,20 +1,23 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Plus, Trash2, Pencil, Eye } from "lucide-react";
+import { Plus, Trash2, Pencil, Eye, Code2 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
-import { GCard } from "@/app/components/common/GCard";
-import { VBtn, ShimBtn } from "@/app/components/common/Buttons";
-import { VSwitch } from "@/app/components/common/VSwitch";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/app/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter } from "@/app/components/ui/dialog";
+import {
+  ItemCard, ItemList, Toolbar, HueButton, GhostButton, IconAction, VisibilityToggle, EmptyState, Loading, ErrorText, DialogHero,
+} from "@/app/components/entreprise/EntrepriseKit";
 import {
   listCompanyHtmlExercises, createCompanyHtmlExercise, updateCompanyHtmlExercise,
   toggleCompanyHtmlExerciseVisibility, deleteCompanyHtmlExercise,
   type CompanyHtmlExerciseRow,
 } from "@/app/lib/entreprise/companyHtmlExercises";
+import { useHtmlTheme } from "@/app/lib/useHtmlTheme";
 
 export function CompanyHtmlExercisesTab({ companyId }: { companyId: string }) {
   const th = useTh();
+  // Aperçu dans la modale : fond racine = fond de la modale (carte).
+  const htmlTheme = useHtmlTheme("card");
   const { user } = useAuth();
 
   const [exercises, setExercises] = useState<CompanyHtmlExerciseRow[]>([]);
@@ -103,65 +106,51 @@ export function CompanyHtmlExercisesTab({ companyId }: { companyId: string }) {
   };
 
   return (
-    <div className="space-y-4 pt-4">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <p className="text-sm" style={{ color: th.fg3 }}>{exercises.length} exercice{exercises.length > 1 ? "s" : ""} HTML</p>
-        <ShimBtn sm onClick={openCreate}><span className="flex items-center gap-2"><Plus className="w-3.5 h-3.5" />Nouvel exercice</span></ShimBtn>
-      </div>
+    <div className="space-y-5 pt-2">
+      <Toolbar summary={`${exercises.length} exercice${exercises.length > 1 ? "s" : ""} HTML`}>
+        <HueButton Icon={Plus} onClick={openCreate}>Nouvel exercice</HueButton>
+      </Toolbar>
 
-      {loading && <p className="text-sm" style={{ color: th.fg3 }}>Chargement…</p>}
-      {!loading && !exercises.length && <GCard><div className="p-8 text-center text-sm" style={{ color: th.fg3 }}>Aucun exercice pour l'instant.</div></GCard>}
+      {loading && <Loading />}
+      {!loading && !exercises.length && (
+        <EmptyState Icon={Code2} title="Aucun exercice pour l'instant" hint="Collez le code HTML d'un exercice interactif : l'élève l'ouvrira tel quel."
+          action={<HueButton Icon={Plus} onClick={openCreate}>Nouvel exercice</HueButton>} />
+      )}
 
-      <div className="space-y-3">
-        {exercises.map((ex) => (
-          <GCard key={ex.id}>
-            <div className="p-4 flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <div className="text-sm font-semibold truncate" style={{ color: th.fg }}>{ex.name}</div>
-                {ex.description && <div className="text-xs mt-0.5 truncate" style={{ color: th.fg3 }}>{ex.description}</div>}
-              </div>
-              <div className="flex items-center gap-3 shrink-0">
-                <label className="flex items-center gap-2 text-xs font-semibold" style={{ color: th.fg3 }}>
-                  Afficher <VSwitch checked={ex.isVisible} onCheckedChange={(v) => void handleToggle(ex, v)} />
-                </label>
-                <VBtn sm onClick={() => openEdit(ex)}><Pencil className="w-3.5 h-3.5" /></VBtn>
-                <button onClick={() => void handleDelete(ex)} className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-70" style={{ color: "#fbc2ad" }}>
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-          </GCard>
+      <ItemList>
+        {exercises.map((ex, i) => (
+          <ItemCard key={ex.id} index={i} Icon={Code2} title={ex.name} subtitle={ex.description ?? undefined} onClick={() => openEdit(ex)}
+            actions={<>
+              <VisibilityToggle checked={ex.isVisible} onChange={(v) => void handleToggle(ex, v)} />
+              <IconAction Icon={Pencil} onClick={() => openEdit(ex)} title="Modifier" />
+              <IconAction Icon={Trash2} tone="danger" onClick={() => void handleDelete(ex)} title="Supprimer" />
+            </>} />
         ))}
-      </div>
+      </ItemList>
 
       <Dialog open={dialogOpen} onOpenChange={(v) => !saving && setDialogOpen(v)}>
         <DialogContent className="sm:max-w-5xl">
-          <DialogHeader>
-            <DialogTitle>{editing ? "Modifier l'exercice HTML" : "Nouvel exercice HTML"}</DialogTitle>
-            <DialogDescription>Colle le code HTML de l'exercice — l'élève l'ouvrira tel quel.</DialogDescription>
-          </DialogHeader>
+          <DialogHero Icon={Code2} title={editing ? "Modifier l'exercice HTML" : "Nouvel exercice HTML"} desc="Colle le code HTML de l'exercice — l'élève l'ouvrira tel quel." />
 
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.8fr)]">
             <div className="space-y-3 min-w-0">
               <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nom de l'exercice" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
               <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} placeholder="Consigne affichée à l'élève (optionnel)" className="w-full rounded-xl px-4 py-2.5 text-sm g-input resize-none" />
               <textarea value={html} onChange={(e) => setHtml(e.target.value)} rows={12} placeholder="Colle le code HTML ici..." className="w-full rounded-xl px-4 py-3 text-xs g-input resize-none font-mono" />
-              <VBtn sm onClick={() => setPreviewHtml(html)} disabled={!html.trim()}>
-                <span className="inline-flex items-center gap-1.5"><Eye className="w-3.5 h-3.5" />Aperçu</span>
-              </VBtn>
-              {error && <p className="text-xs" style={{ color: "#fbc2ad" }}>{error}</p>}
+              <GhostButton sm Icon={Eye} onClick={() => setPreviewHtml(html)} disabled={!html.trim()}>Aperçu</GhostButton>
+              {error && <ErrorText>{error}</ErrorText>}
             </div>
-            <div className="min-h-[320px] rounded-xl overflow-hidden relative" style={{ background: "#fff", border: `1px solid ${th.sep}` }}>
+            <div className="min-h-[320px] rounded-2xl overflow-hidden relative" style={{ background: htmlTheme.background, border: `1px solid ${th.sep}` }}>
               {previewHtml ? (
-                <iframe key={previewHtml} srcDoc={previewHtml} sandbox="allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox" title="Aperçu" className="absolute inset-0 w-full h-full border-0 bg-white" />
+                <iframe key={previewHtml} srcDoc={htmlTheme.withTheme(previewHtml)} sandbox="allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox allow-downloads" title="Aperçu" className="absolute inset-0 w-full h-full border-0" style={{ background: htmlTheme.background }} />
               ) : (
-                <div className="absolute inset-0 flex items-center justify-center text-sm" style={{ color: "#64748b" }}>Aperçu</div>
+                <div className="absolute inset-0 flex items-center justify-center text-sm" style={{ color: th.fg3 }}>Aperçu</div>
               )}
             </div>
           </div>
 
           <DialogFooter>
-            <ShimBtn onClick={handleSave} disabled={!name.trim() || !html.trim() || saving}>{saving ? "Enregistrement..." : "Enregistrer"}</ShimBtn>
+            <HueButton onClick={handleSave} disabled={!name.trim() || !html.trim() || saving}>{saving ? "Enregistrement..." : "Enregistrer"}</HueButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -1,9 +1,12 @@
-// Test de satisfaction d'une entreprise — questions mixtes (QCM / note 1-5 /
-// texte libre). Même principe de sauvegarde "supprime puis réinsère" que le
-// test de positionnement (lib/companyPositioning.ts).
+// Questionnaire (test de satisfaction) d'une entreprise — questions mixtes
+// (QCM à choix unique ou multiple / note 1-5 / Oui-Non avec texte
+// conditionnel / texte libre), chacune obligatoire ou facultative. Même
+// principe de sauvegarde sur place que le quiz (lib/companyPositioning.ts).
 import { supabase } from "@/app/lib/supabase/client";
+import type { SatisfactionQuestionType } from "@/app/lib/supabase/database.types";
 
-export type SatisfactionQuestionType = "qcm" | "rating" | "text";
+export type { SatisfactionQuestionType };
+export type YesNo = "yes" | "no";
 
 export interface SatisfactionTestRow {
   id: string;
@@ -18,6 +21,10 @@ export interface SatisfactionQuestionDraft {
   id?: string;
   question: string;
   type: SatisfactionQuestionType;
+  isRequired: boolean;
+  allowMultiple: boolean;       // seulement pour type === 'qcm'
+  followUpOn: YesNo | null;     // seulement pour type === 'yes_no'
+  followUpLabel: string;        // seulement pour type === 'yes_no'
   options: SatisfactionOptionDraft[]; // seulement pour type === 'qcm'
 }
 
@@ -41,10 +48,10 @@ export async function listSatisfactionTests(companyId: string): Promise<Satisfac
   return tests.map((t) => ({ id: t.id, companyId: t.company_id, title: t.title, isVisible: t.is_visible, questionCount: counts.get(t.id) ?? 0 }));
 }
 
-export async function createSatisfactionTest(companyId: string, title: string, createdBy: string): Promise<string> {
+export async function createSatisfactionTest(companyId: string, title: string, description: string | null, createdBy: string): Promise<string> {
   const { data, error } = await supabase
     .from("company_satisfaction_tests")
-    .insert({ company_id: companyId, title, created_by: createdBy })
+    .insert({ company_id: companyId, title, description, created_by: createdBy })
     .select("id")
     .single();
   if (error || !data) throw error ?? new Error("Erreur inconnue");
@@ -61,57 +68,115 @@ export async function deleteSatisfactionTest(testId: string): Promise<void> {
   if (error) throw error;
 }
 
-export async function renameSatisfactionTest(testId: string, title: string): Promise<void> {
-  const { error } = await supabase.from("company_satisfaction_tests").update({ title }).eq("id", testId);
+export async function updateSatisfactionTestHeader(testId: string, title: string, description: string | null): Promise<void> {
+  const { error } = await supabase.from("company_satisfaction_tests").update({ title, description }).eq("id", testId);
   if (error) throw error;
 }
 
-export async function getSatisfactionQuestions(testId: string): Promise<SatisfactionQuestionDraft[]> {
-  const { data: questionRows, error } = await supabase
+const QUESTION_COLUMNS = "id, question, question_type, is_required, allow_multiple, follow_up_on, follow_up_label, order_index";
+
+interface QuestionRow {
+  id: string; question: string; question_type: SatisfactionQuestionType; is_required: boolean;
+  allow_multiple: boolean; follow_up_on: YesNo | null; follow_up_label: string | null;
+}
+
+async function loadQuestionsWithOptions(testId: string): Promise<{ rows: QuestionRow[]; options: { id: string; question_id: string; label: string }[] }> {
+  const { data: rows, error } = await supabase
     .from("company_satisfaction_questions")
-    .select("id, question, question_type, order_index")
+    .select(QUESTION_COLUMNS)
     .eq("test_id", testId)
     .order("order_index");
   if (error) throw error;
-  if (!questionRows?.length) return [];
+  if (!rows?.length) return { rows: [], options: [] };
 
-  const { data: optionRows, error: optionsError } = await supabase
+  const { data: options, error: optionsError } = await supabase
     .from("company_satisfaction_options")
     .select("id, question_id, label, order_index")
-    .in("question_id", questionRows.map((q) => q.id))
+    .in("question_id", rows.map((q) => q.id))
     .order("order_index");
   if (optionsError) throw optionsError;
-
-  return questionRows.map((q) => ({
-    id: q.id,
-    question: q.question,
-    type: q.question_type as SatisfactionQuestionType,
-    options: (optionRows ?? []).filter((o) => o.question_id === q.id).map((o) => ({ id: o.id, label: o.label })),
-  }));
+  return { rows, options: options ?? [] };
 }
 
-export async function saveSatisfactionQuestions(testId: string, questions: SatisfactionQuestionDraft[]): Promise<void> {
-  const { error: deleteError } = await supabase.from("company_satisfaction_questions").delete().eq("test_id", testId);
-  if (deleteError) throw deleteError;
+export async function getSatisfactionTestForEditing(testId: string): Promise<{ description: string; questions: SatisfactionQuestionDraft[] }> {
+  const { data: test, error } = await supabase.from("company_satisfaction_tests").select("description").eq("id", testId).single();
+  if (error || !test) throw error ?? new Error("Questionnaire introuvable");
+  const { rows, options } = await loadQuestionsWithOptions(testId);
+  return {
+    description: test.description ?? "",
+    questions: rows.map((q) => ({
+      id: q.id,
+      question: q.question,
+      type: q.question_type,
+      isRequired: q.is_required,
+      allowMultiple: q.allow_multiple,
+      followUpOn: q.follow_up_on,
+      followUpLabel: q.follow_up_label ?? "",
+      options: options.filter((o) => o.question_id === q.id).map((o) => ({ id: o.id, label: o.label })),
+    })),
+  };
+}
 
-  for (let qIndex = 0; qIndex < questions.length; qIndex++) {
-    const q = questions[qIndex];
-    if (!q.question.trim()) continue;
-    const { data: questionRow, error: questionError } = await supabase
-      .from("company_satisfaction_questions")
-      .insert({ test_id: testId, question: q.question.trim(), question_type: q.type, order_index: qIndex })
-      .select("id")
-      .single();
-    if (questionError || !questionRow) throw questionError ?? new Error("Erreur questionnaire");
-    if (q.type === "qcm") {
-      const options = q.options.filter((o) => o.label.trim()).map((o, oIndex) => ({
-        question_id: questionRow.id, label: o.label.trim(), order_index: oIndex,
-      }));
-      if (options.length) {
-        const { error: optionsError } = await supabase.from("company_satisfaction_options").insert(options);
-        if (optionsError) throw optionsError;
-      }
+// Mise à jour sur place (id conservés) : les réponses déjà reçues pointent
+// vers ces id, la synthèse reste donc juste après une modification.
+export async function saveSatisfactionQuestions(testId: string, questions: SatisfactionQuestionDraft[]): Promise<void> {
+  const kept = questions.filter((q) => q.question.trim());
+
+  const { data: existing, error: existingError } = await supabase
+    .from("company_satisfaction_questions").select("id").eq("test_id", testId);
+  if (existingError) throw existingError;
+  const keptIds = new Set(kept.map((q) => q.id).filter(Boolean));
+  const removedIds = (existing ?? []).map((q) => q.id).filter((id) => !keptIds.has(id));
+  if (removedIds.length) {
+    const { error } = await supabase.from("company_satisfaction_questions").delete().in("id", removedIds);
+    if (error) throw error;
+  }
+
+  for (let qIndex = 0; qIndex < kept.length; qIndex++) {
+    const q = kept[qIndex];
+    const fields = {
+      question: q.question.trim(),
+      question_type: q.type,
+      is_required: q.isRequired,
+      allow_multiple: q.type === "qcm" && q.allowMultiple,
+      follow_up_on: q.type === "yes_no" ? q.followUpOn : null,
+      follow_up_label: q.type === "yes_no" && q.followUpOn ? (q.followUpLabel.trim() || null) : null,
+      order_index: qIndex,
+    };
+    let questionId = q.id;
+    if (questionId) {
+      const { error } = await supabase.from("company_satisfaction_questions").update(fields).eq("id", questionId);
+      if (error) throw error;
+    } else {
+      const { data, error } = await supabase
+        .from("company_satisfaction_questions").insert({ test_id: testId, ...fields }).select("id").single();
+      if (error || !data) throw error ?? new Error("Erreur questionnaire");
+      questionId = data.id;
     }
+    await saveQuestionOptions(questionId, q.type === "qcm" ? q.options : []);
+  }
+}
+
+async function saveQuestionOptions(questionId: string, options: SatisfactionOptionDraft[]): Promise<void> {
+  const kept = options.filter((o) => o.label.trim());
+
+  const { data: existing, error: existingError } = await supabase
+    .from("company_satisfaction_options").select("id").eq("question_id", questionId);
+  if (existingError) throw existingError;
+  const keptIds = new Set(kept.map((o) => o.id).filter(Boolean));
+  const removedIds = (existing ?? []).map((o) => o.id).filter((id) => !keptIds.has(id));
+  if (removedIds.length) {
+    const { error } = await supabase.from("company_satisfaction_options").delete().in("id", removedIds);
+    if (error) throw error;
+  }
+
+  for (let oIndex = 0; oIndex < kept.length; oIndex++) {
+    const o = kept[oIndex];
+    const fields = { label: o.label.trim(), order_index: oIndex };
+    const { error } = o.id
+      ? await supabase.from("company_satisfaction_options").update(fields).eq("id", o.id)
+      : await supabase.from("company_satisfaction_options").insert({ question_id: questionId, ...fields });
+    if (error) throw error;
   }
 }
 
@@ -157,41 +222,73 @@ export interface SatisfactionQuestionForStudent {
   id: string;
   question: string;
   type: SatisfactionQuestionType;
+  isRequired: boolean;
+  allowMultiple: boolean;
+  followUpOn: YesNo | null;
+  followUpLabel: string | null;
   options: { id: string; label: string }[];
 }
 
-export async function getSatisfactionTestForTaking(testId: string): Promise<{ title: string; questions: SatisfactionQuestionForStudent[] }> {
-  const { data: test, error: testError } = await supabase.from("company_satisfaction_tests").select("title").eq("id", testId).single();
+export async function getSatisfactionTestForTaking(testId: string): Promise<{ title: string; description: string | null; questions: SatisfactionQuestionForStudent[] }> {
+  const { data: test, error: testError } = await supabase.from("company_satisfaction_tests").select("title, description").eq("id", testId).single();
   if (testError || !test) throw testError ?? new Error("Test introuvable");
-
-  const { data: questionRows, error } = await supabase
-    .from("company_satisfaction_questions")
-    .select("id, question, question_type, order_index")
-    .eq("test_id", testId)
-    .order("order_index");
-  if (error) throw error;
-
-  const { data: optionRows, error: optionsError } = await supabase
-    .from("company_satisfaction_options")
-    .select("id, question_id, label, order_index")
-    .in("question_id", (questionRows ?? []).map((q) => q.id))
-    .order("order_index");
-  if (optionsError) throw optionsError;
-
+  const { rows, options } = await loadQuestionsWithOptions(testId);
   return {
     title: test.title,
-    questions: (questionRows ?? []).map((q) => ({
-      id: q.id, question: q.question, type: q.question_type as SatisfactionQuestionType,
-      options: (optionRows ?? []).filter((o) => o.question_id === q.id).map((o) => ({ id: o.id, label: o.label })),
+    description: test.description,
+    questions: rows.map((q) => ({
+      id: q.id, question: q.question, type: q.question_type, isRequired: q.is_required, allowMultiple: q.allow_multiple,
+      followUpOn: q.follow_up_on, followUpLabel: q.follow_up_label,
+      options: options.filter((o) => o.question_id === q.id).map((o) => ({ id: o.id, label: o.label })),
     })),
   };
 }
 
-export interface SatisfactionAnswer { questionId: string; type: SatisfactionQuestionType; value: string | number; }
+// value : id d'option (QCM simple), liste d'id (QCM multiple), 1-5 (note),
+// "yes"/"no" (Oui/Non), texte (texte libre) ; "" ou [] si non répondu.
+// detail : texte saisi dans le champ conditionnel d'une question Oui/Non.
+export interface SatisfactionAnswer {
+  questionId: string;
+  type: SatisfactionQuestionType;
+  value: string | number | string[];
+  detail?: string;
+}
 
 export async function submitSatisfactionResponse(testId: string, companyId: string, studentId: string, answers: SatisfactionAnswer[]): Promise<void> {
   const { error } = await supabase
     .from("company_satisfaction_responses")
     .insert({ test_id: testId, company_id: companyId, student_id: studentId, answers });
+  if (error) throw error;
+}
+
+// ── Staff : résultats ─────────────────────────────────────────────────────
+
+export interface SatisfactionResponseRow {
+  id: string;
+  testId: string;
+  studentId: string;
+  answers: SatisfactionAnswer[];
+  createdAt: string;
+}
+
+export async function listCompanySatisfactionResponses(companyId: string): Promise<SatisfactionResponseRow[]> {
+  const { data, error } = await supabase
+    .from("company_satisfaction_responses")
+    .select("id, test_id, student_id, answers, created_at")
+    .eq("company_id", companyId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map((r) => ({
+    id: r.id, testId: r.test_id, studentId: r.student_id, answers: (r.answers ?? []) as SatisfactionAnswer[], createdAt: r.created_at,
+  }));
+}
+
+export async function getSatisfactionQuestionsForResults(testId: string): Promise<SatisfactionQuestionForStudent[]> {
+  return (await getSatisfactionTestForTaking(testId)).questions;
+}
+
+// Supprime la réponse : l'élève peut alors répondre à nouveau.
+export async function deleteSatisfactionResponse(responseId: string): Promise<void> {
+  const { error } = await supabase.from("company_satisfaction_responses").delete().eq("id", responseId);
   if (error) throw error;
 }

@@ -11,7 +11,7 @@ import { CircleProgress } from "@/app/components/common/CircleProgress";
 import { VSelect } from "@/app/components/common/Select";
 import { useCourseProgress } from "@/app/state/useCourseProgress";
 import { useMyInstances } from "@/app/state/useMyInstances";
-import { getAllBadges, getEarnedBadgeIds, formatDuration, type BadgeRow } from "@/app/lib/learning";
+import { getAllBadges, getEarnedBadgeIds, formatDuration, isLessonCompleted, type BadgeRow } from "@/app/lib/learning";
 import { AiUsagePanel } from "@/app/pages/dashboard/AiUsagePanel";
 
 export function DashboardPage() {
@@ -44,7 +44,7 @@ export function DashboardPage() {
   }, [user]);
 
   const totalLessons = course.lessonStates.length;
-  const completedLessons = course.lessonStates.filter((s) => s.state === "completed").length;
+  const completedLessons = course.lessonStates.filter(isLessonCompleted).length;
   const completionPct = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
   const totalTimeSeconds = course.lessonStates.reduce((sum, s) => sum + (s.progress?.timeSpentSeconds ?? 0), 0);
   const scores = course.lessonStates.map((s) => s.progress?.bestQuizScore).filter((s): s is number => s != null);
@@ -131,7 +131,7 @@ export function DashboardPage() {
                     <div className="space-y-2.5">
                       {course.outline.sections.map((section) => {
                         const sectionStates = section.lessons.map((l) => course.lessonStates.find((s) => s.lesson.id === l.id));
-                        const done = sectionStates.filter((s) => s?.state === "completed").length;
+                        const done = sectionStates.filter(isLessonCompleted).length;
                         const active = sectionStates.some((s) => s?.state === "available");
                         const pct = section.lessons.length > 0 ? Math.round((done / section.lessons.length) * 100) : 0;
                         const allDone = section.lessons.length > 0 && done === section.lessons.length;
