@@ -1580,6 +1580,30 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["company_satisfaction_tests"]["Insert"]>;
         Relationships: never[];
       };
+      company_satisfaction_templates: {
+        Row: {
+          id: string;
+          title: string;
+          description: string | null;
+          questions: unknown[];
+          source_test_id: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          description?: string | null;
+          questions?: unknown[];
+          source_test_id?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["company_satisfaction_templates"]["Insert"]>;
+        Relationships: never[];
+      };
       company_satisfaction_questions: {
         Row: {
           id: string;
