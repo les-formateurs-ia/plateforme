@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router";
-import { Plus, CalendarClock, Menu, X, Bug, Building2, ScanEye, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { Plus, CalendarClock, Menu, X, Bug, Building2, ScanEye, LogOut } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
@@ -21,7 +21,6 @@ import { supabase } from "@/app/lib/supabase/client";
 import { countUnreadIncidentNotifications } from "@/app/lib/notifications";
 
 const STAFF_SPACE_KEY = "staffSpace";
-const SIDEBAR_COLLAPSED_KEY = "entrepriseSidebarCollapsed";
 
 function readStoredStaffSpace(): "cpf" | "entreprise" {
   try {
@@ -33,7 +32,7 @@ function readStoredStaffSpace(): "cpf" | "entreprise" {
 
 export function MainLayout() {
   const th = useTh();
-  const { role, user, companyId } = useAuth();
+  const { role, user, companyId, signOut } = useAuth();
   const { isImpersonating } = useImpersonation();
   const staffBase = useStaffBasePath();
   const { profile } = useProfile();
@@ -62,18 +61,10 @@ export function MainLayout() {
   }, [location.pathname]);
   const entrepriseMode = isStaff(role) && space === "entreprise";
 
-  // Espace Entreprise (staff ou collaborateur), sur ordinateur : la barre
-  // latérale peut être réduite pour laisser toute la largeur aux éditeurs.
-  // Choix mémorisé ; hors Entreprise elle reste toujours affichée.
-  const collapsible = entrepriseMode || !!companyId;
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
-    try { return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "1"; } catch { return false; }
-  });
-  const toggleSidebar = () => setSidebarCollapsed((v) => {
-    try { localStorage.setItem(SIDEBAR_COLLAPSED_KEY, v ? "0" : "1"); } catch { /* ignore */ }
-    return !v;
-  });
-  const collapsed = collapsible && sidebarCollapsed;
+  // Espace Entreprise (staff ou collaborateur) : pas de barre latérale,
+  // seulement un bandeau logo + Déconnexion. Le logo ramène sur "/" (choix
+  // CPF / Entreprise pour le staff, accueil pour un collaborateur).
+  const sidebarHidden = entrepriseMode || !!companyId;
 
   useEffect(() => { setNavOpen(false); }, [location.pathname]);
 
@@ -135,10 +126,10 @@ export function MainLayout() {
       }}
     >
       <ImpersonationBanner />
-      <div className="main-layout-body relative flex flex-1 min-h-0 overflow-hidden">
+      <div className="main-layout-body flex flex-1 min-h-0 overflow-hidden">
       <Background />
 
-      {navOpen && (
+      {navOpen && !sidebarHidden && (
         <div className="fixed inset-0 z-30 bg-black/50 lg:hidden" onClick={() => setNavOpen(false)} />
       )}
 
@@ -148,12 +139,12 @@ export function MainLayout() {
           uniquement, comme un panneau qui flotte plutôt qu'un tiroir plein
           écran. Desktop (lg:) inchangé : colonne statique pleine hauteur,
           coins carrés, bord droit simple. */}
+      {!sidebarHidden && (
       <aside className={cx(
         // border côté classes (pas inline) : lg: doit pouvoir retirer le
         // haut/bas sans que le style inline (non responsive) ne les réimpose.
         "fixed left-0 z-40 flex flex-col w-[240px] shrink-0 overflow-hidden transition-[transform,visibility] duration-300 ease-out border border-l-0 rounded-tr-[28px] rounded-br-[28px] shadow-[0_20px_48px_rgba(0,0,0,0.22)] lg:static lg:visible lg:z-auto lg:inset-y-0 lg:h-full lg:w-[232px] lg:border-t-0 lg:border-b-0 lg:rounded-none lg:shadow-none lg:translate-x-0",
         navOpen ? "visible translate-x-0" : "invisible -translate-x-full",
-        collapsed && "lg:hidden",
       )} style={{
         background: th.sidebar,
         borderColor: th.sidebarB,
@@ -281,24 +272,28 @@ export function MainLayout() {
           </Link>
         </div>
       </aside>
-
-      {collapsible && (
-        <button type="button" onClick={toggleSidebar}
-          aria-label={collapsed ? "Afficher la barre latérale" : "Réduire la barre latérale"} title={collapsed ? "Afficher la barre latérale" : "Réduire la barre latérale"}
-          className="hidden lg:flex absolute top-6 z-20 w-7 h-7 rounded-full items-center justify-center transition-all hover:scale-110"
-          style={{ left: collapsed ? 12 : 232 - 14, background: th.card, border: `1px solid ${th.inputB}`, boxShadow: "0 4px 12px rgba(0,0,0,0.12)", color: th.fg3 }}>
-          {collapsed ? <PanelLeftOpen className="w-3.5 h-3.5" /> : <PanelLeftClose className="w-3.5 h-3.5" />}
-        </button>
       )}
 
       <div className="main-layout-main flex-1 min-w-0 flex flex-col relative z-10 overflow-hidden">
         {/* Seul le bouton flotte au-dessus de la page, sans bandeau opaque. */}
+        {sidebarHidden ? (
+          <header className="shrink-0 flex items-center justify-between gap-3 px-4 sm:px-6 lg:px-8 pt-[calc(env(safe-area-inset-top)+0.75rem)] pb-1">
+            <Link to="/" className="transition-opacity hover:opacity-80" title={isStaff(role) ? "Changer d'espace (CPF / Entreprise)" : "Accueil"}>
+              <Logo h={22} />
+            </Link>
+            <button type="button" onClick={() => void signOut()} className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-opacity hover:opacity-70"
+              style={{ color: th.fg3, background: th.inputBg, border: `1px solid ${th.inputB}` }}>
+              <LogOut className="w-3.5 h-3.5" />Déconnexion
+            </button>
+          </header>
+        ) : (
         <button aria-label="Ouvrir le menu" aria-expanded={navOpen} className={cx("fixed left-3 z-30 w-9 h-9 rounded-full flex items-center justify-center shrink-0 lg:hidden", isImpersonating ? "top-[calc(env(safe-area-inset-top)+52px)]" : "top-[calc(env(safe-area-inset-top)+0.75rem)]")} style={{ background: th.card, border: `1px solid ${th.inputB}`, boxShadow: "0 6px 18px rgba(0,0,0,0.14)" }} onClick={() => setNavOpen(true)}>
           <Menu className="w-4 h-4" style={{ color: th.fg3 }} />
         </button>
+        )}
 
         {/* En défilement document, cet espace initial part avec le contenu. */}
-        <div className={cx("main-layout-content flex-1 min-h-0 flex flex-col overflow-hidden pt-[calc(env(safe-area-inset-top)+2.5rem)] lg:pt-0", collapsed && "lg:pl-8")}>
+        <div className={cx("main-layout-content flex-1 min-h-0 flex flex-col overflow-hidden lg:pt-0", !sidebarHidden && "pt-[calc(env(safe-area-inset-top)+2.5rem)]")}>
           <Outlet />
         </div>
       </div>

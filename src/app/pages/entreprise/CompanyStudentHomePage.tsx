@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
-import { Building2, ClipboardList, FileText, Code2, Star, Upload, Eye, Award, ArrowRight, PartyPopper, type LucideIcon } from "lucide-react";
+import { Building2, ClipboardList, FileText, Code2, Star, Upload, Eye, Award, type LucideIcon } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { SectionTile, SectionGrid, SectionHeader, useSectionParam, sectionMorphName, type Hue, type TileBadge } from "@/app/components/entreprise/SectionTiles";
 import {
-  HueProvider, PageHero, Panel, EmptyState, Loading, ProgressBar, SUCCESS,
+  HueProvider, PageHero, EmptyState, Loading,
 } from "@/app/components/entreprise/EntrepriseKit";
 import { getCompany } from "@/app/lib/entreprise/companies";
 import { listVisiblePositioningTests, type VisiblePositioningTest } from "@/app/lib/entreprise/companyPositioning";
@@ -32,11 +32,11 @@ type SectionId = typeof SECTION_IDS[number];
 
 const SECTION_META: Record<SectionId, { label: string; desc: string; Icon: LucideIcon; hue: Hue }> = {
   positioning: { label: "Positionnement", desc: "Fais le point sur ton niveau avant de commencer.", Icon: ClipboardList, hue: "blue" },
-  files: { label: "Fichiers", desc: "Les supports et documents de ta formation.", Icon: FileText, hue: "teal" },
+  files: { label: "Supports de cours", desc: "Les supports et documents de ta formation.", Icon: FileText, hue: "teal" },
   html: { label: "Exercices", desc: "Mets en pratique ce que tu apprends.", Icon: Code2, hue: "pink" },
   validation: { label: "Quiz de validation", desc: "Valide tes acquis en fin de formation.", Icon: Award, hue: "amber" },
   satisfaction: { label: "Questionnaires", desc: "Donne ton avis sur la formation.", Icon: Star, hue: "peach" },
-  uploads: { label: "Mes fichiers", desc: "Envoie tes productions à ton formateur.", Icon: Upload, hue: "violet" },
+  uploads: { label: "Espace de dépôt", desc: "Envoie tes productions à ton formateur.", Icon: Upload, hue: "violet" },
 };
 
 const plural = (n: number, word: string, pluralWord = `${word}s`) => `${n} ${n > 1 ? pluralWord : word}`;
@@ -139,15 +139,6 @@ export function CompanyStudentHome({ companyId, studentId, preview = false }: Co
     validation: !validation.length, satisfaction: !satisfaction.length, uploads: false,
   };
 
-  // Progression : tous les quiz et questionnaires visibles, dans l'ordre du parcours.
-  const tasks = [
-    ...positioning.map((t) => ({ ...t, path: `/entreprise/positioning/${t.id}` })),
-    ...validation.map((t) => ({ ...t, path: `/entreprise/positioning/${t.id}` })),
-    ...satisfaction.map((t) => ({ ...t, path: `/entreprise/satisfaction/${t.id}` })),
-  ];
-  const doneCount = tasks.filter((t) => t.done).length;
-  const nextTask = tasks.find((t) => !t.done);
-
   const previewBanner = preview && (
     <div className="flex items-center gap-2 rounded-xl px-4 py-3 text-sm" style={{ background: th.gradShadow(0.1), border: `1px solid ${th.gradShadow(0.3)}`, color: th.fg }}>
       <Eye className="w-4 h-4 shrink-0" style={{ color: th.navAC }} />
@@ -201,35 +192,6 @@ export function CompanyStudentHome({ companyId, studentId, preview = false }: Co
       {/* Même en-tête que la fiche entreprise côté formateur (CompanyDetailPage). */}
       <PageHero eyebrow="Entreprise" Icon={Building2} title={loading ? "Chargement…" : (companyName ?? "Mon espace entreprise")}
         desc={preview ? "Choisissez une rubrique pour voir son contenu." : "Choisis une rubrique pour accéder à ton contenu."} />
-
-      {/* Progression + prochaine action, entre l'en-tête et les encarts. */}
-      {!loading && tasks.length > 0 && (
-        <Panel className="fade-up">
-          <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="flex-1 min-w-0 space-y-2">
-              <div className="flex items-baseline justify-between text-sm">
-                <span className="font-semibold" style={{ color: th.fg2 }}>{preview ? "Progression" : "Ta progression"}</span>
-                <span className="font-black tabular-nums" style={{ color: th.fg }}>{doneCount}/{tasks.length}</span>
-              </div>
-              <ProgressBar value={(doneCount / tasks.length) * 100} height={10} />
-            </div>
-            {nextTask ? (
-              <button onClick={() => navigate(nextTask.path)} className="sm:w-72 shrink-0 flex items-center justify-between gap-3 rounded-2xl px-4 py-3 text-left transition-transform hover:-translate-y-0.5"
-                style={{ background: th.gradPrimary, color: "#fff", boxShadow: `0 8px 20px ${th.gradShadow(0.35)}` }}>
-                <span className="min-w-0">
-                  <span className="block text-[11px] font-black uppercase tracking-widest opacity-85">Prochaine étape</span>
-                  <span className="block text-sm font-bold truncate">{nextTask.title}</span>
-                </span>
-                <ArrowRight className="w-5 h-5 shrink-0" />
-              </button>
-            ) : (
-              <div className="flex items-center gap-2 text-sm font-semibold shrink-0" style={{ color: SUCCESS }}>
-                <PartyPopper className="w-4 h-4" />Bravo, tout est fait !
-              </div>
-            )}
-          </div>
-        </Panel>
-      )}
 
       {loading ? <Loading /> : (
         <SectionGrid>
