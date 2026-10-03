@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import type { Session, User } from "@supabase/supabase-js";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/app/lib/supabase/client";
 
 export type Role = "admin" | "formateur" | "student";
@@ -58,7 +58,9 @@ function translateAuthError(message: string) {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
+  // User conservé tel quel tant que c'est le même compte (voir onAuthStateChange).
+  const [user, setUser] = useState<User | null>(null);
+  const userIdRef = useRef<string | null>(null);
   const [role, setRole] = useState<Role | null>(null);
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [mustOnboard, setMustOnboard] = useState(true);
@@ -67,7 +69,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [themeMode, setThemeModeState] = useState<ThemeMode | null>(null);
 
   const resetAuthState = () => {
-    setSession(null);
+    userIdRef.current = null;
+    setUser(null);
     setRole(null);
     setCompanyId(null);
     setMustOnboard(true);
@@ -101,11 +104,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // getSession() here — running it alongside this listener was racing two
     // lock acquisitions on the same auth client and could leave the browser
     // profile's auth lock stuck (see client.ts for the matching fix).
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    //
+    // Supabase réémet SIGNED_IN / TOKEN_REFRESHED pour le même compte (retour
+    // sur l'onglet, rafraîchissement du jeton…). Repasser profileLoading à
+    // true démontait alors toute l'app derrière l'écran de chargement (cf.
+    // RequireAuth) : formulaire en cours perdu, page "rechargée". Pour le
+    // même utilisateur on ne recharge donc rien, et on garde le même objet
+    // user pour ne pas relancer les effets qui en dépendent.
+    const { data: sub } = supabase.auth.onAuthStateChange((event, newSession) => {
       clearTimeout(failSafe);
-      setSession(newSession);
       if (newSession) {
         setStatus("authenticated");
+        const sameUser = userIdRef.current === newSession.user.id;
+        userIdRef.current = newSession.user.id;
+        if (!sameUser || event === "USER_UPDATED") setUser(newSession.user);
+        if (sameUser) return;
         setProfileLoading(true);
         // Deferred: Supabase warns against awaiting inside this callback directly.
         setTimeout(() => {
@@ -147,14 +160,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const setThemeMode = async (mode: ThemeMode) => {
     setThemeModeState(mode);
-    const userId = session?.user.id;
+    const userId = user?.id;
     if (!userId) return;
     const { error } = await supabase.from("profiles").update({ theme_preference: mode }).eq("id", userId);
     if (error) console.warn("Unable to persist theme preference", error);
   };
 
   return (
-    <AuthContext.Provider value={{ status, user: session?.user ?? null, role, companyId, mustOnboard, profileLoading, themeMode, setThemeMode, signIn, signUp, signOut, markOnboarded }}>
+    <AuthContext.Provider value={{ status, user, role, companyId, mustOnboard, profileLoading, themeMode, setThemeMode, signIn, signUp, signOut, markOnboarded }}>
       {children}
     </AuthContext.Provider>
   );

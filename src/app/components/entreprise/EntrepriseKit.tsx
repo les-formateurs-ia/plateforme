@@ -229,8 +229,9 @@ export function GhostButton({ children, onClick, disabled, hue, Icon, sm, full }
 }
 
 // Bouton icône seul (éditer, supprimer, monter…) — toujours avec un title.
-export function IconAction({ Icon, onClick, title, tone = "default", disabled, hue }: {
-  Icon: LucideIcon; onClick: () => void; title: string; tone?: "default" | "danger"; disabled?: boolean; hue?: Hue;
+// active : état "activé" (icône et fond aux couleurs de la rubrique).
+export function IconAction({ Icon, onClick, title, tone = "default", disabled, hue, active }: {
+  Icon: LucideIcon; onClick: () => void; title: string; tone?: "default" | "danger"; disabled?: boolean; hue?: Hue; active?: boolean;
 }) {
   const th = useTh();
   const h = useHue(hue);
@@ -239,11 +240,11 @@ export function IconAction({ Icon, onClick, title, tone = "default", disabled, h
     <button type="button" title={title} aria-label={title} disabled={disabled}
       onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClick(); }}
       style={{
-        background: th.inputBg,
-        "--kit-b0": th.inputB,
+        background: active ? h.alpha(0.16) : th.inputBg,
+        "--kit-b0": active ? h.alpha(0.6) : th.inputB,
         "--kit-b1": danger ? "rgba(239,138,116,0.6)" : h.alpha(0.6),
         "--kit-bg1": danger ? "rgba(239,138,116,0.12)" : h.alpha(0.12),
-        color: danger ? DANGER : th.fg2,
+        color: danger ? DANGER : active ? h.text : th.fg2,
       } as CSSProperties}
       className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border transition-all duration-200 [border-color:var(--kit-b0)] hover:[border-color:var(--kit-b1)] hover:[background:var(--kit-bg1)] disabled:opacity-30 disabled:pointer-events-none">
       <Icon className="w-4 h-4" />
