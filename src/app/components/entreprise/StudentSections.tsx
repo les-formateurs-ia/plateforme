@@ -102,7 +102,7 @@ function FeaturedQuizTile({ test, Icon, kindLabel, intro, variant, index, onStar
   );
 }
 
-// ── Fichiers : chaque document présenté comme une feuille ─────────────────
+// ── Supports de cours : chaque document présenté comme une feuille ─────────────────
 
 function fileExtension(file: CompanyFileRow): string {
   const source = file.storagePath.split("/").pop() ?? file.name;
@@ -203,7 +203,7 @@ export function ExerciseTiles({ exercises, Icon, onOpen }: { exercises: CompanyH
   );
 }
 
-// ── Mes fichiers : catégorie obligatoire, puis envoi ──────────────────────
+// ── Espace de dépôt : catégorie obligatoire, puis envoi ──────────────────────
 
 const categoryMorphName = (id: string) => `kit-cat-${id}`;
 

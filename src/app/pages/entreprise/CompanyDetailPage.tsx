@@ -25,7 +25,7 @@ const SECTIONS: { id: SectionId; label: string; desc: string; Icon: LucideIcon; 
   { id: "employees", label: "Collaborateurs", desc: "Liste des élèves, envoi des accès et mots de passe.", Icon: Users, hue: "violet",
     badge: (o) => (o.employees ? { label: `${o.activated}/${o.employees} activés`, tone: o.activated === o.employees ? "done" : "default" } : { label: "Aucun", tone: "muted" }) },
   { id: "positioning", label: "Positionnement", desc: "Quiz à passer avant la formation.", Icon: ClipboardList, hue: "blue", badge: (o) => countBadge(o.positioning, "quiz", "quiz") },
-  { id: "files", label: "Fichiers", desc: "Documents mis à disposition des élèves.", Icon: FileText, hue: "teal", badge: (o) => countBadge(o.files, "fichier") },
+  { id: "files", label: "Supports de cours", desc: "Documents mis à disposition des élèves.", Icon: FileText, hue: "teal", badge: (o) => countBadge(o.files, "fichier") },
   { id: "html", label: "Exercices HTML", desc: "Exercices interactifs de la formation.", Icon: Code2, hue: "pink", badge: (o) => countBadge(o.html, "exercice") },
   { id: "validation", label: "Quiz de validation", desc: "Quiz de fin de formation pour valider les acquis.", Icon: Award, hue: "amber", badge: (o) => countBadge(o.validation, "quiz", "quiz") },
   { id: "satisfaction", label: "Questionnaires", desc: "Questionnaires de satisfaction et retours.", Icon: Star, hue: "peach", badge: (o) => countBadge(o.surveys, "questionnaire") },
