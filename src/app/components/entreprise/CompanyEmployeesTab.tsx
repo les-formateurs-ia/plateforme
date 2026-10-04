@@ -175,7 +175,7 @@ export function CompanyEmployeesTab({ companyId }: { companyId: string }) {
                   <GeneratePasswordLinkButton studentId={e.profileId} studentName={fullName}
                     renderTrigger={({ onClick, disabled }) => <IconAction Icon={Link2} onClick={onClick} disabled={disabled} title="Générer un lien d'accès à transmettre" />} />
                 )}
-                {admin && e.profileId && <SetStudentPasswordButton studentId={e.profileId} studentName={fullName} email={e.email} />}
+                {e.profileId && <SetStudentPasswordButton studentId={e.profileId} studentName={fullName} email={e.email} />}
                 <IconAction Icon={Send} onClick={() => void handleSendOne(e)} disabled={sendingIds.has(e.id) || !!e.profileId}
                   title={e.profileId ? "Accès déjà envoyé" : "Envoyer l'accès par email"} />
                 {admin && (

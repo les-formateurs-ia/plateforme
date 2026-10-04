@@ -46,9 +46,8 @@ export async function updateStudentEmail(studentId: string, email: string): Prom
   if (data?.error) throw new Error(data.error);
 }
 
-// Mot de passe défini à la main par l'admin — Edge Function service-role,
-// cf. supabase/functions/set-student-password (mêmes règles que
-// passwordPolicy.ts, revérifiées côté serveur).
+// Mot de passe défini à la main par l'admin ou un formateur — Edge Function
+// service-role, cf. supabase/functions/set-student-password (sans règle de complexité).
 export async function setStudentPassword(studentId: string, password: string): Promise<void> {
   const { data, error } = await supabase.functions.invoke("set-student-password", { body: { studentId, password } });
   if (error) throw new Error(await extractFunctionError(error));

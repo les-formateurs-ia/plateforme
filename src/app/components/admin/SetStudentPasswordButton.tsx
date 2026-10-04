@@ -1,16 +1,16 @@
-// Admin : définit à la main le mot de passe d'un élève (cf.
+// Admin / formateur : définit à la main le mot de passe d'un élève (cf.
 // supabase/functions/set-student-password), à lui transmettre ensuite.
 import { useState } from "react";
 import { toast } from "sonner";
-import { Check, Copy, Eye, EyeOff, KeyRound, Wand2, X } from "lucide-react";
+import { Copy, Eye, EyeOff, KeyRound, Wand2 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { Dialog, DialogContent, DialogFooter } from "@/app/components/ui/dialog";
-import { DialogHero, HueButton, GhostButton, IconAction, ErrorText, SUCCESS } from "@/app/components/entreprise/EntrepriseKit";
-import { PASSWORD_RULES, passwordProblem } from "@/app/lib/passwordPolicy";
+import { DialogHero, HueButton, GhostButton, IconAction, ErrorText } from "@/app/components/entreprise/EntrepriseKit";
+import { staffPasswordProblem } from "@/app/lib/passwordPolicy";
 import { setStudentPassword } from "@/app/lib/students";
 
 // 12 caractères sans ambiguïté de lecture (pas de 0/O, 1/l/I), avec au moins
-// une minuscule, une majuscule et un chiffre — conforme à PASSWORD_RULES.
+// une minuscule, une majuscule et un chiffre.
 function generatePassword(): string {
   const sets = ["abcdefghjkmnpqrstuvwxyz", "ABCDEFGHJKLMNPQRSTUVWXYZ", "23456789"];
   const all = sets.join("");
@@ -41,7 +41,7 @@ export function SetStudentPasswordButton({ studentId, studentName, email }: { st
   };
 
   const handleSave = async () => {
-    const problem = passwordProblem(password, email);
+    const problem = staffPasswordProblem(password);
     if (problem) { setError(problem); return; }
     setSaving(true);
     setError(null);
@@ -102,16 +102,6 @@ export function SetStudentPasswordButton({ studentId, studentName, email }: { st
                 </div>
                 <GhostButton sm Icon={Wand2} onClick={() => { setPassword(generatePassword()); setVisible(true); setError(null); }}>Générer</GhostButton>
               </div>
-              <ul className="space-y-1">
-                {PASSWORD_RULES.map((rule) => {
-                  const ok = rule.test(password);
-                  return (
-                    <li key={rule.label} className="flex items-center gap-2 text-xs" style={{ color: ok ? SUCCESS : th.fg3 }}>
-                      {ok ? <Check className="w-3.5 h-3.5" /> : <X className="w-3.5 h-3.5" />}{rule.label}
-                    </li>
-                  );
-                })}
-              </ul>
               {error && <ErrorText>{error}</ErrorText>}
               <DialogFooter>
                 <HueButton Icon={KeyRound} onClick={handleSave} disabled={!password || saving}>{saving ? "Enregistrement..." : "Enregistrer le mot de passe"}</HueButton>

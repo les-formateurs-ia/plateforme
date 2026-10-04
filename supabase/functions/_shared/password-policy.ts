@@ -27,3 +27,13 @@ export function passwordProblem(password: string, email: string): string | null 
   }
   return null;
 }
+
+// Mot de passe défini à la main par le staff (set-student-password) : pas de
+// règle de complexité, seulement les limites techniques de Supabase Auth.
+export function staffPasswordProblem(password: string): string | null {
+  if (!password) return "Choisis un mot de passe.";
+  if (new TextEncoder().encode(password).length > PASSWORD_MAX_BYTES) {
+    return `Mot de passe trop long (${PASSWORD_MAX_BYTES} caractères maximum, moins avec des accents).`;
+  }
+  return null;
+}
