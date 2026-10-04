@@ -13,11 +13,13 @@ export interface CompanyEmployeeRow {
   profileId: string | null;
   inviteSentAt: string | null;
   inviteAcceptedAt: string | null;
+  passwordSetManuallyAt: string | null;
 }
 
 function mapRow(row: {
   id: string; company_id: string; first_name: string; last_name: string; email: string;
   profile_id: string | null; invite_sent_at: string | null; invite_accepted_at: string | null;
+  password_set_manually_at: string | null;
 }): CompanyEmployeeRow {
   return {
     id: row.id,
@@ -28,13 +30,14 @@ function mapRow(row: {
     profileId: row.profile_id,
     inviteSentAt: row.invite_sent_at,
     inviteAcceptedAt: row.invite_accepted_at,
+    passwordSetManuallyAt: row.password_set_manually_at,
   };
 }
 
 export async function listCompanyEmployees(companyId: string): Promise<CompanyEmployeeRow[]> {
   const { data, error } = await supabase
     .from("company_employees")
-    .select("id, company_id, first_name, last_name, email, profile_id, invite_sent_at, invite_accepted_at")
+    .select("id, company_id, first_name, last_name, email, profile_id, invite_sent_at, invite_accepted_at, password_set_manually_at")
     .eq("company_id", companyId)
     .order("last_name", { ascending: true });
   if (error) throw error;
@@ -45,7 +48,7 @@ export async function addCompanyEmployee(companyId: string, firstName: string, l
   const { data, error } = await supabase
     .from("company_employees")
     .insert({ company_id: companyId, first_name: firstName, last_name: lastName, email })
-    .select("id, company_id, first_name, last_name, email, profile_id, invite_sent_at, invite_accepted_at")
+    .select("id, company_id, first_name, last_name, email, profile_id, invite_sent_at, invite_accepted_at, password_set_manually_at")
     .single();
   if (error || !data) throw error ?? new Error("Erreur inconnue");
   return mapRow(data);
