@@ -56,12 +56,20 @@ Deno.serve(async (req) => {
     const problem = staffPasswordProblem(password);
     if (problem) return jsonResponse({ error: problem }, 400);
 
-    const { error: updateErr } = await serviceClient.auth.admin.updateUserById(studentId, { password });
+    // Un collaborateur invité qui n'a jamais cliqué son lien a un email non
+    // confirmé : Supabase Auth refuserait la connexion ("Email not confirmed").
+    // Le staff lui transmet ses identifiants à la main, on confirme donc l'email.
+    const { error: updateErr } = await serviceClient.auth.admin.updateUserById(studentId, { password, email_confirm: true });
     if (updateErr) return jsonResponse({ error: updateErr.message }, 400);
 
     if (target.company_id) {
       const { error: onboardErr } = await serviceClient.from("profiles").update({ must_onboard: false }).eq("id", studentId);
       if (onboardErr) return jsonResponse({ error: onboardErr.message }, 500);
+      const { error: statusErr } = await serviceClient
+        .from("company_employees")
+        .update({ password_set_manually_at: new Date().toISOString() })
+        .eq("profile_id", studentId);
+      if (statusErr) return jsonResponse({ error: statusErr.message }, 500);
     }
 
     // Un lien "Définir votre mot de passe" en cours écraserait ce mot de passe : on l'annule.

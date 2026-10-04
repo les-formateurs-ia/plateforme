@@ -1402,6 +1402,7 @@ export interface Database {
           profile_id: string | null;
           invite_sent_at: string | null;
           invite_accepted_at: string | null;
+          password_set_manually_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -1414,6 +1415,7 @@ export interface Database {
           profile_id?: string | null;
           invite_sent_at?: string | null;
           invite_accepted_at?: string | null;
+          password_set_manually_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };

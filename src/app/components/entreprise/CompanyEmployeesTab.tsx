@@ -21,7 +21,9 @@ function formatDate(iso: string): string {
 
 // profile_id est rempli dès l'envoi de l'invitation : seul
 // invite_accepted_at (mot de passe défini) signifie que le compte est utilisé.
+// password_set_manually_at : mot de passe fixé par le staff (icône clé).
 function accessStatus(e: CompanyEmployeeRow): { label: string; tone: PillTone } {
+  if (e.passwordSetManuallyAt) return { label: "Mot de passe défini manuellement", tone: "done" };
   if (e.inviteAcceptedAt) return { label: "Compte activé", tone: "done" };
   if (e.profileId) return { label: `Invitation envoyée${e.inviteSentAt ? ` le ${formatDate(e.inviteSentAt)}` : ""} — en attente`, tone: "warn" };
   return { label: "Pas encore invité", tone: "muted" };
