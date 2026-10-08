@@ -3,6 +3,7 @@ import { Headphones, Pause, Play, RotateCcw, Wand2 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { NeuralField } from "@/app/components/particles/NeuralField";
 import { PODCAST_FORMATS, type PodcastFormatUi, type PodcastVariantId } from "@/app/lib/podcastFormats";
+import type { PodcastProgress } from "@/app/lib/podcasts";
 import { cx } from "@/app/lib/cx";
 
 // Onglet Podcast d'une leçon : les épisodes déjà générés, chacun avec un
@@ -12,10 +13,11 @@ import { cx } from "@/app/lib/cx";
 // au travail.
 const GRADS = ["var(--grad-violet)", "var(--grad-bleu)", "var(--grad-beige)"];
 
-export function LessonPodcast({ episodes, loading, generating, onGenerate, canRegenerate }: {
+export function LessonPodcast({ episodes, loading, generating, progress, onGenerate, canRegenerate }: {
   episodes: Partial<Record<PodcastVariantId, { audioUrl: string }>>;
   loading: boolean;
   generating: PodcastVariantId | null;
+  progress?: PodcastProgress | null;
   onGenerate: (id: PodcastVariantId) => void;
   canRegenerate: boolean;
 }) {
@@ -73,8 +75,16 @@ export function LessonPodcast({ episodes, loading, generating, onGenerate, canRe
                       <span className="block text-[16px] font-bold" style={{ color: th.fg }}>{f.label}</span>
                       <span className="block mt-1 text-sm leading-snug" style={{ color: th.fg2 }}>{f.hint}</span>
                       <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold" style={{ color: th.fg }}>
-                        {busy ? <><RotateCcw className="w-3.5 h-3.5 animate-spin" />Les animateurs enregistrent… (1 à 2 min)</> : <><Wand2 className="w-3.5 h-3.5" /><span className="ink-link">Générer cet épisode</span></>}
+                        {busy ? <><RotateCcw className="w-3.5 h-3.5 animate-spin" />{progressLabel(progress)}</> : <><Wand2 className="w-3.5 h-3.5" /><span className="ink-link">Générer cet épisode</span></>}
                       </span>
+                      {busy && (
+                        <>
+                          <span className="mt-3 block h-1.5 rounded-full overflow-hidden" style={{ background: th.navA }}>
+                            <span className="block h-full rounded-full transition-[width] duration-700" style={{ width: `${progressPct(progress)}%`, background: "var(--grad-iris)" }} />
+                          </span>
+                          <span className="mt-2 block text-xs" style={{ color: th.fg3 }}>Garde cette page ouverte pendant l'enregistrement.</span>
+                        </>
+                      )}
                     </span>
                   </span>
                 </button>
@@ -85,6 +95,21 @@ export function LessonPodcast({ episodes, loading, generating, onGenerate, canRe
       )}
     </div>
   );
+}
+
+// Avancement : écriture du script (≈10 %), enregistrement des morceaux
+// (10 → 90 %), assemblage (90 → 100 %).
+function progressPct(p?: PodcastProgress | null) {
+  if (!p) return 3;
+  if (p.step === "script") return 8;
+  if (p.step === "final") return 95;
+  return 10 + (p.total ? (p.done / p.total) * 80 : 0);
+}
+
+function progressLabel(p?: PodcastProgress | null) {
+  if (!p || p.step === "script") return "Écriture du script…";
+  if (p.step === "final") return "Montage de l'épisode…";
+  return `Les animateurs enregistrent… ${p.done}/${p.total}`;
 }
 
 const SPEEDS = [1, 1.25, 1.5, 2];

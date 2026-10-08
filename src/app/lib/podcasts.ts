@@ -49,43 +49,89 @@ async function extractFunctionError(error: { message: string; context?: Response
   return message;
 }
 
-// Génération en 2 étapes, chacune dans sa propre Edge Function : le script
-// (rapide, réponse directe) puis la synthèse audio (~1-2 min, tâche de fond).
-// Séparées car combinées elles dépassent le budget d'exécution d'une seule
-// invocation. Ne renvoie pas le résultat final : l'appelant doit relire
-// getMyPodcasts() pour savoir quand le podcast est prêt.
-export async function requestPodcastGeneration(lessonId: string, variant: PodcastVariantId): Promise<void> {
-  const scriptResult = await supabase.functions.invoke("generate-podcast-script", { body: { lessonId, variant } });
-  if (scriptResult.error) throw new Error(await extractFunctionError(scriptResult.error));
-  if (scriptResult.data?.error) throw new Error(scriptResult.data.error);
-  const script = scriptResult.data?.script;
-  if (!script) throw new Error("Le script du podcast n'a pas pu être généré.");
-  // Le serveur peut retomber sur un format par défaut si `variant` était invalide :
-  // on relaie ce format confirmé plutôt que celui envoyé, pour rester cohérent.
-  const confirmedVariant: PodcastVariantId = scriptResult.data?.variant ?? variant;
+export type PodcastProgress =
+  | { step: "script" }
+  | { step: "audio"; done: number; total: number }
+  | { step: "final" };
 
-  const audioResult = await supabase.functions.invoke("generate-podcast-audio", { body: { lessonId, script, variant: confirmedVariant } });
-  if (audioResult.error) throw new Error(await extractFunctionError(audioResult.error));
-  if (audioResult.data?.error) throw new Error(audioResult.data.error);
+// Même découpage que supabase/functions/_shared/podcast-utils.ts
+// (splitScriptIntoChunks) : quelques répliques par morceau, pour que chaque
+// synthèse tienne dans le budget CPU d'une Edge Function.
+function splitScriptIntoChunks(script: string, maxWordsPerChunk = 90): string[] {
+  const lines = script.split(/\n+/).map((l) => l.trim()).filter(Boolean);
+  const chunks: string[] = [];
+  let current: string[] = [];
+  let words = 0;
+  for (const line of lines) {
+    const n = line.split(/\s+/).length;
+    if (current.length && words + n > maxWordsPerChunk) { chunks.push(current.join("\n")); current = []; words = 0; }
+    current.push(line);
+    words += n;
+  }
+  if (current.length) chunks.push(current.join("\n"));
+  return chunks;
 }
 
-// Poll getMyPodcasts() jusqu'à apparition d'un résultat pour ce variant
-// postérieur à `sinceMs` (important pour une régénération : sans ce filtre,
-// on retomberait tout de suite sur l'ancien podcast au lieu d'attendre le
-// nouveau), ou jusqu'au timeout.
-export async function pollForPodcast(
-  userId: string,
-  lessonId: string,
-  variant: PodcastVariantId,
-  sinceMs: number,
-  { intervalMs = 5000, timeoutMs = 180000 }: { intervalMs?: number; timeoutMs?: number } = {},
-): Promise<Podcast | null> {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    const podcasts = await getMyPodcasts(userId, lessonId);
-    const match = podcasts.find((p) => p.variant === variant && new Date(p.createdAt).getTime() >= sinceMs);
-    if (match) return match;
-    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+async function invoke<T>(name: string, body: unknown): Promise<T> {
+  const res = await supabase.functions.invoke(name, { body });
+  if (res.error) throw new Error(await extractFunctionError(res.error));
+  if (res.data?.error) throw new Error(res.data.error);
+  return res.data as T;
+}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+// Un morceau, avec nouvelles tentatives espacées (Gemini TTS renvoie parfois
+// une erreur passagère ou une limite de débit).
+async function synthesizeChunk(lessonId: string, chunkIndex: number, chunkText: string, variant: PodcastVariantId) {
+  const delays = [2000, 5000, 10000];
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await invoke<{ sampleRate?: number; channels?: number }>("process-podcast-chunk", { lessonId, chunkIndex, chunkText, variant });
+    } catch (err) {
+      if (attempt >= delays.length) throw err;
+      await sleep(delays[attempt]);
+    }
   }
-  return null;
+}
+
+// Génération complète d'un podcast, orchestrée depuis le navigateur :
+// script → synthèse des morceaux (3 en parallèle) → assemblage.
+// Avant, generate-podcast-audio enchaînait les morceaux un par un dans une
+// tâche de fond côté serveur : pour un format long, la tâche dépassait la
+// limite de durée des Edge Functions et était interrompue sans erreur, et
+// l'élève voyait « la génération prend plus de temps que prévu ». Ici chaque
+// appel est court (une synthèse), la progression est réelle et une erreur
+// remonte avec son message. L'élève doit garder la page ouverte.
+export async function generatePodcast(lessonId: string, variant: PodcastVariantId, onProgress?: (p: PodcastProgress) => void): Promise<{ storagePath: string; variant: PodcastVariantId }> {
+  onProgress?.({ step: "script" });
+  const scriptData = await invoke<{ script?: string; variant?: PodcastVariantId }>("generate-podcast-script", { lessonId, variant });
+  const script = scriptData?.script;
+  if (!script) throw new Error("Le script du podcast n'a pas pu être généré.");
+  // Le serveur peut retomber sur un format par défaut si `variant` était invalide.
+  const confirmed: PodcastVariantId = scriptData.variant ?? variant;
+
+  const chunks = splitScriptIntoChunks(script);
+  let done = 0;
+  let sampleRate = 24000;
+  let channels = 1;
+  onProgress?.({ step: "audio", done, total: chunks.length });
+  const CONCURRENCY = 3;
+  let next = 0;
+  const worker = async () => {
+    while (next < chunks.length) {
+      const i = next++;
+      const r = await synthesizeChunk(lessonId, i, chunks[i], confirmed);
+      sampleRate = r?.sampleRate ?? sampleRate;
+      channels = r?.channels ?? channels;
+      onProgress?.({ step: "audio", done: ++done, total: chunks.length });
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, chunks.length) }, worker));
+
+  onProgress?.({ step: "final" });
+  const final = await invoke<{ storagePath: string; variant?: PodcastVariantId }>("finalize-podcast-audio", {
+    lessonId, chunkCount: chunks.length, sampleRate, channels, transcript: script, variant: confirmed,
+  });
+  return { storagePath: final.storagePath, variant: final.variant ?? confirmed };
 }

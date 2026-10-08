@@ -25,12 +25,9 @@ export const NeuralField = forwardRef<NeuralFieldHandle, NeuralFieldOptions & { 
 
     useEffect(() => { field.current?.setDark(!!dark); }, [dark]);
 
-    useEffect(() => {
-      if (!active) return;
-      field.current?.excite(0.6);
-      const id = window.setInterval(() => field.current?.excite(0.25), 700);
-      return () => window.clearInterval(id);
-    }, [active]);
+    // Activité soutenue, atteinte et relâchée en douceur (plus d'impulsions
+    // périodiques qui faisaient « pulser » le réseau en boucle).
+    useEffect(() => { field.current?.setActivity(active ? 0.6 : 0); }, [active]);
 
     useImperativeHandle(ref, () => ({ excite: (amount = 0.5) => field.current?.excite(amount) }), []);
 

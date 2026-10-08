@@ -17,7 +17,7 @@ import type { ChatMsg } from "@/app/types";
 import {
   getLessonDetail, ensureLessonStarted, addTimeSpent, submitQuiz, flattenLessons, QUIZ_PASS_THRESHOLD, updateLessonCustomHtml, isLessonCompleted, isLessonInLockedModule, type LessonDetail, type QuizAnswer,
 } from "@/app/lib/learning";
-import { getMyPodcasts, getPodcastSignedUrl, requestPodcastGeneration, pollForPodcast, type Podcast } from "@/app/lib/podcasts";
+import { getMyPodcasts, getPodcastSignedUrl, generatePodcast, type Podcast, type PodcastProgress } from "@/app/lib/podcasts";
 import { PODCAST_FORMATS, type PodcastVariantId } from "@/app/lib/podcastFormats";
 import { getMyMindmap, requestMindmapGeneration, type MindmapTree } from "@/app/lib/mindmaps";
 import { findLatestConversationForInstance, getAgentMessages, sendAgentMessage, ensureConversation, insertAgentVoiceMessage } from "@/app/lib/agentChat";
@@ -124,6 +124,14 @@ export function LessonPage() {
   const [podcastByVariant, setPodcastByVariant] = useState<Partial<Record<PodcastVariantId, PodcastVariantState>>>({});
   const [podcastLoading, setPodcastLoading] = useState(false);
   const [podcastGeneratingVariant, setPodcastGeneratingVariant] = useState<PodcastVariantId | null>(null);
+  const [podcastProgress, setPodcastProgress] = useState<PodcastProgress | null>(null);
+  // La génération est orchestrée par le navigateur : quitter la page l'interrompt.
+  useEffect(() => {
+    if (!podcastGeneratingVariant) return;
+    const warn = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [podcastGeneratingVariant]);
 
   const [avatarVideo, setAvatarVideo] = useState<AvatarVideo | null>(null);
   const [avatarVideoUrl, setAvatarVideoUrl] = useState<string | null>(null);
@@ -455,23 +463,19 @@ export function LessonPage() {
   const handleGeneratePodcast = async (variant: PodcastVariantId) => {
     if (!lessonId || !user) return;
     setPodcastGeneratingVariant(variant);
-    const startedAt = Date.now();
+    setPodcastProgress({ step: "script" });
     try {
-      await requestPodcastGeneration(lessonId, variant);
-      toast.info("Génération du podcast en cours — ça peut prendre 1 à 2 minutes.");
-      const result = await pollForPodcast(user.id, lessonId, variant, startedAt);
-      if (!result) {
-        toast.error("La génération prend plus de temps que prévu. Réessaie dans un instant.");
-        return;
-      }
-      const audioUrl = await getPodcastSignedUrl(result.storagePath);
-      setPodcastByVariant((prev) => ({ ...prev, [variant]: { podcast: result, audioUrl } }));
-      toast.success("Podcast généré avec succès.");
+      const { storagePath, variant: done } = await generatePodcast(lessonId, variant, setPodcastProgress);
+      const result: Podcast = { variant: done, storagePath, transcript: "", createdAt: new Date().toISOString() };
+      const audioUrl = await getPodcastSignedUrl(storagePath);
+      setPodcastByVariant((prev) => ({ ...prev, [done]: { podcast: result, audioUrl } }));
+      toast.success("Ton épisode est prêt !");
     } catch (err) {
       console.error(err);
       toast.error(err instanceof Error ? err.message : "Impossible de générer le podcast.");
     } finally {
       setPodcastGeneratingVariant(null);
+      setPodcastProgress(null);
     }
   };
 
@@ -953,7 +957,7 @@ export function LessonPage() {
           ) : (
           <>
           {tab === "podcast" ? (
-            <LessonPodcast episodes={podcastByVariant} loading={podcastLoading} generating={podcastGeneratingVariant}
+            <LessonPodcast episodes={podcastByVariant} loading={podcastLoading} generating={podcastGeneratingVariant} progress={podcastProgress}
               onGenerate={(id) => void handleGeneratePodcast(id)} canRegenerate={isStaff(role)} />
           ) : (
           <div className="relative rounded-[10px] overflow-hidden mb-5" style={{ paddingBottom: tab === "video" || tab === "customVideo" ? "56.25%" : "40%", background: "#000", border: `1px solid ${th.sep}` }}>

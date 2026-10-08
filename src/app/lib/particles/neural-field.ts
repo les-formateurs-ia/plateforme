@@ -38,6 +38,8 @@ export interface NeuralFieldOptions {
 
 export interface NeuralField {
   excite(amount: number): void;
+  /** Niveau d'activité soutenu (0…1), atteint en douceur : pour une IA qui travaille longtemps. */
+  setActivity(level: number): void;
   setDark(dark: boolean): void;
   destroy(): void;
 }
@@ -60,6 +62,11 @@ export function mountNeuralField(canvas: HTMLCanvasElement, options: NeuralField
   let W = 0, H = 0, linkDist = 56;
   let nodes: Node[] = [];
   let raf = 0, visible = true, energy = 0, signalTime = 0, lastNow = 0;
+  // Horloge du flux, intégrée image par image : changer de vitesse (activité)
+  // ne fait jamais sauter les nœuds, contrairement à t × vitesse.
+  let flowTime = 0;
+  // Activité soutenue (setActivity) et sa valeur lissée.
+  let activityTarget = 0, activity = 0;
   let pointer: { x: number; y: number } | null = null;
   const t0 = performance.now();
 
@@ -99,14 +106,17 @@ export function mountNeuralField(canvas: HTMLCanvasElement, options: NeuralField
     const t = reduced ? 4 : (now - t0) / 1000;
     const dt = lastNow ? Math.min(0.05, (now - lastNow) / 1000) : 0;
     lastNow = now;
-    signalTime += dt * (1 + energy * 1.8);
-    energy = energy < 0.01 ? 0 : energy * CALM;
-    const firing = FIRING + energy * (EXCITED_FIRING - FIRING);
+    activity += (activityTarget - activity) * (1 - Math.exp(-dt * 1.5));
+    energy = energy < 0.01 ? 0 : energy * Math.pow(CALM, dt * 60);
+    const level = Math.min(1, Math.max(energy, activity));
+    signalTime += dt * (1 + level * 1.8);
+    flowTime += dt * (1 + level * 0.6);
+    const firing = FIRING + level * (EXCITED_FIRING - FIRING);
     const introT = reduced ? 1 : clamp01((now - t0) / 1600);
     const bandY = H * (options.center ?? 0.5), bandH = H * bandShare, slope = W < 700 ? -0.04 : -0.1;
 
     for (const n of nodes) {
-      const uu = (((n.u + t * n.speed * flow * (1 + energy * 0.6)) % 1) + 1) % 1;
+      const uu = (((n.u + (reduced ? t : flowTime) * n.speed * flow) % 1) + 1) % 1;
       let x = (uu * 1.24 - 0.12) * W;
       const cy = bandY + (x - W / 2) * slope + Math.sin((x / W) * 5.2 + t * 0.5) * bandH * 0.12;
       let y = cy + n.v * bandH * 0.5 + Math.sin(t * 1.1 + n.phase) * bandH * 0.05;
@@ -229,6 +239,10 @@ export function mountNeuralField(canvas: HTMLCanvasElement, options: NeuralField
     excite(amount) {
       if (reduced) return;
       energy = Math.min(1, energy + amount);
+      kick();
+    },
+    setActivity(level) {
+      activityTarget = Math.max(0, Math.min(1, level));
       kick();
     },
     setDark(next) { dark = next; kick(); },
