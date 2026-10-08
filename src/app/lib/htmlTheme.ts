@@ -49,8 +49,11 @@ export function buildHtmlTheme(th: HtmlThemeSource, surface: HtmlSurface): HtmlT
     sep: th.sep,
     inputBg: th.inputBg,
     inputB: th.inputB,
-    accent1: th.grad1,
-    accent2: th.grad2,
+    // Accent du contenu : le violet de la charte. Les teintes d'interface
+    // (grad1/grad2) valent l'encre depuis la refonte, ce qui griserait les
+    // couleurs du formateur.
+    accent1: "#b58de0",
+    accent2: "#dbacf0",
   };
 }
 
@@ -58,6 +61,13 @@ export function buildHtmlTheme(th: HtmlThemeSource, surface: HtmlSurface): HtmlT
 // conteneur, donc pas de flash blanc en sombre) et contenu masqué. Filet de
 // sécurité si le moteur ne répond jamais : après 1,5 s, la page s'affiche telle
 // que le formateur l'a écrite, sur fond blanc.
+// Police de la charte pour le contenu qui n'en déclare pas (sinon le
+// navigateur retombe sur une police à empattements). En :where() : aucune
+// spécificité, le CSS du formateur garde toujours la main.
+const BRAND_FONT =
+  `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap">` +
+  `<style data-platform-injected="lfia-font">:where(html){font-family:'Funnel Display',system-ui,-apple-system,sans-serif}</style>`;
+
 const PRE_CSS =
   "html:not([data-lfia-ready]):not(#lfia-pre){background:transparent;animation:lfia-root 0s linear 1.5s forwards}" +
   "html:not([data-lfia-ready])>body{visibility:hidden;animation:lfia-show 0s linear 1.5s forwards}" +
@@ -67,6 +77,7 @@ export function injectHtmlThemeWith(engineSource: string, html: string, channel:
   const safeChannel = channel.replace(/[^a-z0-9]/gi, "");
   const extras =
     `<style data-platform-injected="lfia-pre">${PRE_CSS}</style>\n` +
+    `${BRAND_FONT}\n` +
     `<script data-platform-injected data-lfia-channel="${safeChannel}">${engineSource.replace(/<\/script/gi, "<\\/script")}</script>`;
   if (/<head[^>]*>/i.test(html)) return html.replace(/<head[^>]*>/i, (m) => `${m}\n${extras}`);
   if (/<html[^>]*>/i.test(html)) return html.replace(/<html[^>]*>/i, (m) => `${m}\n${extras}`);

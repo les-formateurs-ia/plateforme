@@ -432,3 +432,28 @@
   }
 }
 
+
+/* Accueil : l'anneau de progression se dessine, la frise du parcours se
+   remplit (avec ses étincelles, cf. HomeOverview). */
+.home-ring-arc {
+  animation: ring-draw 1400ms var(--ease-out-strong) 250ms both;
+}
+@keyframes ring-draw {
+  from {
+    stroke-dashoffset: var(--ring-c);
+  }
+}
+.journey-fill {
+  animation: journey-draw 1100ms var(--ease-out-strong) 450ms both;
+}
+@keyframes journey-draw {
+  from {
+    transform: scaleX(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-ring-arc,
+  .journey-fill {
+    animation: none;
+  }
+}

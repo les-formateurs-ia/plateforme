@@ -15,8 +15,9 @@ import { NotificationBell } from "@/app/components/layout/NotificationBell";
 import { ImpersonationBanner } from "@/app/components/layout/ImpersonationBanner";
 import { useBulkGeneration } from "@/app/state/bulk-generation-context";
 import { ReportIncidentDialog } from "@/app/components/layout/ReportIncidentDialog";
+import { CommandPalette, CommandTrigger } from "@/app/components/layout/CommandPalette";
 import { cx } from "@/app/lib/cx";
-import { NAV_ITEMS } from "@/app/data/mock";
+import { NAV_ITEMS, NAV_GROUP_LABELS } from "@/app/data/mock";
 import { supabase } from "@/app/lib/supabase/client";
 import { countUnreadIncidentNotifications } from "@/app/lib/notifications";
 
@@ -74,6 +75,7 @@ export function MainLayout() {
   // seulement un bandeau logo + Déconnexion. Le logo ramène sur "/" (choix
   // CPF / Entreprise pour le staff, accueil pour un collaborateur).
   const sidebarHidden = entrepriseMode || !!companyId;
+  const studentNav = !isStaff(role) && !companyId;
 
   useEffect(() => { setNavOpen(false); }, [location.pathname]);
 
@@ -135,6 +137,7 @@ export function MainLayout() {
       }}
     >
       <ImpersonationBanner />
+      <CommandPalette />
       <div className="main-layout-body flex flex-1 min-h-0 overflow-hidden">
       <Background />
 
@@ -173,10 +176,11 @@ export function MainLayout() {
             <X className="w-4 h-4" />
           </button>
         </div>
+        {studentNav && <div className="px-3 pt-4"><CommandTrigger /></div>}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {NAV_ITEMS.filter(({ id }) => id !== "profile")
             .sort((a, b) => isStaff(role) ? Number(b.id === "calendar") - Number(a.id === "calendar") : 0)
-            .map(({ id, Icon, label, path }) => {
+            .map(({ id, Icon, label, path, group }, index, items) => {
             // Espace Entreprise : seuls "Entreprise" et "Mon profil" restent
             // (ajoutés séparément plus bas) — tout le reste de cette liste
             // est un concept CPF (Pratique IA, Élèves, Rendez-vous...).
@@ -212,11 +216,19 @@ export function MainLayout() {
                 </NavLink>,
               ];
             }
+            // Élève CPF : la navigation est groupée par intention (apprendre,
+            // pratiquer, être accompagné), un sur-titre ouvre chaque groupe.
+            const groupStart = studentNav && group && items[index - 1]?.group !== group;
             return (
-              <NavLink key={id} to={path} end onClick={() => setNavOpen(false)} className={navItemClass}
-                style={navItemStyle}>
-                <Icon className="w-4 h-4 shrink-0" />{label}
-              </NavLink>
+              <div key={id}>
+                {groupStart && (
+                  <p className={cx("eyebrow px-3.5 pb-2", index === 0 ? "pt-1" : "pt-5")} style={{ color: th.fg3 }}>{NAV_GROUP_LABELS[group]}</p>
+                )}
+                <NavLink to={path} end onClick={() => setNavOpen(false)} className={navItemClass}
+                  style={navItemStyle}>
+                  <Icon className="w-4 h-4 shrink-0" />{label}
+                </NavLink>
+              </div>
             );
           })}
           {entrepriseMode && (
