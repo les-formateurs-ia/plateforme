@@ -7,6 +7,7 @@ import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
 import { VBtn } from "@/app/components/common/Buttons";
 import { cx } from "@/app/lib/cx";
+import { moduleProgress, nextLessonOf, MODULE_STATUS_LABEL } from "@/app/lib/journey";
 import { formatDuration, isLessonCompleted, type LessonWithState } from "@/app/lib/learning";
 import { useAllCourseProgress, type CourseProgressEntry } from "@/app/state/useAllCourseProgress";
 import { useAuth } from "@/app/state/auth-context";
@@ -43,6 +44,14 @@ export function LessonsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courses.length]);
 
+  // Lien vers un module (frise de l'accueil : /lessons#module-…) : on y
+  // descend une fois le parcours affiché.
+  useEffect(() => {
+    if (loading || !window.location.hash) return;
+    const t = window.setTimeout(() => document.getElementById(window.location.hash.slice(1))?.scrollIntoView({ behavior: "smooth", block: "start" }), 120);
+    return () => window.clearTimeout(t);
+  }, [loading, openIds.size]);
+
   const toggle = (id: string) => setOpenIds((prev) => {
     const next = new Set(prev);
     if (next.has(id)) next.delete(id); else next.add(id);
@@ -69,13 +78,16 @@ export function LessonsPage() {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
-      <div className="mb-6">
-        <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>Mes leçons</GT></h2>
-        <p className="text-[15px] sm:text-base mt-2 max-w-3xl leading-relaxed" style={{ color: th.fg2 }}>{courses.length} formation{courses.length > 1 ? "s" : ""} en cours</p>
+    <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-8">
+      <div className="mb-10 fade-up">
+        <p className="eyebrow" style={{ color: th.fg3 }}>Apprendre</p>
+        <h1 className="mt-2 text-[2rem] sm:text-[2.6rem] leading-[1.02] font-black" style={{ color: th.fg }}>Mes <GT>leçons</GT></h1>
+        <p className="text-[15px] sm:text-base mt-3 max-w-2xl leading-relaxed" style={{ color: th.fg2 }}>
+          Ton parcours module par module. Les leçons s'ouvrent dans l'ordre : chaque leçon validée débloque la suivante.
+        </p>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-16">
         {courses.map((entry) => (
           <FormationAccordion key={entry.instance.id} entry={entry} open={openIds.has(entry.instance.id)} onToggle={() => toggle(entry.instance.id)} />
         ))}
@@ -187,163 +199,131 @@ function FormationAccordion({ entry, open, onToggle }: { entry: CourseProgressEn
     setSelected(new Set());
   };
 
+  const modules = moduleProgress(outline, lessonStates);
+  const next = nextLessonOf(lessonStates);
+  const currentIdx = modules.findIndex((m) => m.status === "current");
+
   return (
-    <GCard>
-      <button className="w-full text-left" onClick={onToggle}>
-        <div className="px-5 py-4 flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: fsc.bg, border: `1px solid ${fsc.border}` }}>
-            {formationStatus === "complete" ? <CheckCircle className="w-5 h-5 text-[var(--success)]" /> : <GraduationCap className="w-5 h-5" style={{ color: fsc.text }} />}
+    <section className="fade-up" aria-labelledby={`course-${outline.instanceId}`}>
+      {/* En-tête de la formation : titre, progression, temps, et la reprise. */}
+      <div className="pb-7" style={{ borderBottom: `1px solid ${th.sep}` }}>
+        <button type="button" className="w-full text-left group" onClick={onToggle} aria-expanded={open}>
+          <p className="eyebrow" style={{ color: th.fg3 }}>
+            Formation · {outline.sections.length} module{outline.sections.length !== 1 ? "s" : ""} · {totalLessons} leçon{totalLessons !== 1 ? "s" : ""}
+          </p>
+          <div className="mt-2 flex items-start justify-between gap-4">
+            <h3 id={`course-${outline.instanceId}`} className="text-[1.45rem] sm:text-[1.8rem] font-black leading-tight" style={{ color: th.fg }}>{outline.instanceName}</h3>
+            <ChevronDown className="w-5 h-5 mt-2 shrink-0 transition-transform" style={{ color: th.fg3, transform: open ? "rotate(180deg)" : "none" }} />
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-bold mb-1" style={{ color: th.fg }}>{outline.instanceName}</div>
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className="text-xs" style={{ color: th.fg3 }}>{outline.sections.length} module{outline.sections.length !== 1 ? "s" : ""} · {completedLessons}/{totalLessons} leçons</span>
-              <div className="flex items-center gap-2">
-                <div className="w-20 h-1 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : `${th.gradShadow(0.1)}` }}>
-                  <div className="h-full rounded-full" style={{ width: `${overallPct}%`, background: formationStatus === "complete" ? "linear-gradient(90deg,#78d5e2,#6adeb1)" : th.iris }} />
-                </div>
-                <span className="text-[10px] font-bold" style={{ color: fsc.text }}>{overallPct}%</span>
-              </div>
+        </button>
+        <div className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-4">
+          <div className="flex items-center gap-3 min-w-[220px] flex-1 max-w-md">
+            <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: th.navA }}>
+              <div className="h-full rounded-full" style={{ width: `${overallPct}%`, background: th.iris }} />
             </div>
+            <span className="text-sm font-bold tabular-nums" style={{ color: th.fg }}>{overallPct}%</span>
           </div>
-          <ChevronDown className="w-4 h-4 shrink-0 transition-transform" style={{ color: th.fg3, transform: open ? "rotate(180deg)" : "none" }} />
+          <span className="text-sm tabular-nums" style={{ color: th.fg2 }}>{completedLessons}/{totalLessons} validées</span>
+          {successRate != null && <span className="text-sm tabular-nums" style={{ color: th.fg2 }}>{successRate}% aux quiz</span>}
+          {totalTimeSeconds > 0 && <span className="text-sm tabular-nums" style={{ color: th.fg2 }}>{formatDuration(totalTimeSeconds)} de formation</span>}
+          {next && !editMode && (
+            <button type="button" onClick={() => goLesson(next.lesson.id)}
+              className="sweep ml-auto inline-flex items-center gap-2 min-h-11 px-5 rounded-[2px] text-sm font-semibold"
+              style={{ background: th.ink, color: th.onInk }}>
+              <Play className="w-3.5 h-3.5" fill="currentColor" />{next.progress ? "Reprendre" : "Commencer"} : {next.lesson.title.length > 34 ? `${next.lesson.title.slice(0, 32)}…` : next.lesson.title}
+            </button>
+          )}
         </div>
-      </button>
+      </div>
 
       {open && (
-        <div style={{ borderTop: `1px solid ${th.sep}` }}>
-          <div className="p-5 space-y-5">
-            <div className="flex items-center justify-end gap-3 flex-wrap">
-              {isStaff(role) && !editMode && (
-                <button onClick={startEdit}
-                  className="shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-80"
-                  style={greenBtn}>
-                  <Pencil className="w-3.5 h-3.5" />Éditer
+        <div className="pt-6">
+          {isStaff(role) && (
+            <div className="flex items-center justify-end gap-3 flex-wrap mb-5">
+              {!editMode ? (
+                <button onClick={startEdit} className="sweep inline-flex items-center gap-2 px-4 min-h-9 rounded-[2px] text-sm font-semibold" style={{ border: `1px solid ${th.ink}`, color: th.fg }}>
+                  <Pencil className="w-3.5 h-3.5" />Générer du contenu IA
                 </button>
-              )}
-              {isStaff(role) && editMode && (
-                <div className="shrink-0 flex items-center gap-3">
+              ) : (
+                <>
                   <span className="text-xs font-semibold" style={{ color: th.fg3 }}>{selected.size} sélectionnée{selected.size > 1 ? "s" : ""}</span>
-                  <button onClick={cancelEdit} className="px-3.5 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-80" style={{ background: "transparent", border: `1px solid ${th.sep}`, color: th.fg3 }}>
-                    Annuler
-                  </button>
-                  <button onClick={openGenDialog} disabled={selected.size === 0}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-80 disabled:opacity-40 disabled:pointer-events-none"
-                    style={greenBtn}>
-                    Valider
-                  </button>
-                </div>
+                  <button onClick={cancelEdit} className="px-3.5 min-h-9 rounded-[2px] text-sm font-semibold" style={{ border: `1px solid ${th.inputB}`, color: th.fg2 }}>Annuler</button>
+                  <button onClick={openGenDialog} disabled={selected.size === 0} className="sweep inline-flex items-center gap-2 px-4 min-h-9 rounded-[2px] text-sm font-semibold disabled:opacity-40" style={{ background: th.ink, color: th.onInk }}>Valider</button>
+                </>
               )}
             </div>
+          )}
+          {editMode && (
+            <p className="mb-5 px-4 py-3 rounded-[4px] text-sm" style={{ border: `1px solid ${th.sep}`, color: th.fg2 }}>
+              Sélectionne les leçons pour lesquelles générer un contenu IA (mindmap ou podcast), puis clique sur <strong style={{ color: th.fg }}>Valider</strong>.
+            </p>
+          )}
 
-            {editMode && (
-              <div className="px-4 py-2.5 rounded-xl text-xs" style={{ background: "rgba(106,222,177,0.08)", border: "1px solid rgba(106,222,177,0.25)", color: th.fg3 }}>
-                Sélectionne les leçons pour lesquelles générer un contenu IA (mindmap, podcast ou vidéo avatar), puis clique sur <strong style={{ color: th.success }}>Valider</strong>.
-              </div>
-            )}
-
-            <div className="flex items-center gap-5 sm:gap-8 flex-wrap rounded-xl p-4" style={{ background: th.isDark ? "rgba(255,255,255,0.02)" : `${th.gradShadow(0.03)}`, border: `1px solid ${th.sep}` }}>
-              {[
-                { val: String(completedLessons), sub: "Leçons terminées" },
-                { val: successRate != null ? `${successRate}%` : "—", sub: "Taux de réussite" },
-                { val: formatDuration(totalTimeSeconds), sub: "Temps de pratique" },
-              ].map(({ val, sub }) => (
-                <div key={sub} className="text-center">
-                  <div className="text-xl font-black mb-0.5" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>{val}</GT></div>
-                  <div className="text-xs" style={{ color: th.fg3 }}>{sub}</div>
-                </div>
-              ))}
-            </div>
-
-            <div className="space-y-2">
-              {outline.sections.map((mod) => {
-                const modStates = mod.lessons.map((l) => stateFor(l.id)).filter((s): s is LessonWithState => !!s);
-                const done = modStates.filter(isLessonCompleted).length;
-                const total = mod.lessons.length;
-                // Module fermé par le formateur : cadenas, même s'il était déjà terminé
-                // (la progression reste affichée dans le compteur).
-                const status: SectionStatus = !mod.isUnlocked || total === 0 ? "locked" : done === total ? "complete" : modStates.some((s) => s.state !== "locked") ? "active" : "locked";
-                const pct = total > 0 ? Math.round((done / total) * 100) : 0;
-                const modOpen = editMode || openSection === mod.id;
-                const SC = {
-                  complete: { bg: "rgba(106,222,177,0.1)", text: "#6adeb1", border: "rgba(106,222,177,0.25)", label: "Validé ✓" },
-                  active: { bg: `${th.gradShadow(0.1)}`, text: `${th.grad2}`, border: `${th.gradShadow(0.3)}`, label: "En cours" },
-                  locked: { bg: "transparent", text: th.fg3, border: th.sep, label: "Verrouillé" },
-                };
-                const sc = SC[status];
-                const nextLesson = modStates.find((s) => s.state === "available");
-                return (
-                  <GCard key={mod.id}>
-                    <button className="w-full text-left" onClick={() => !editMode && setOpenSection(modOpen ? null : mod.id)}>
-                      <div className="px-5 py-4 flex items-center gap-4">
-                        <div className="w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0" style={{ background: sc.bg, border: `1px solid ${sc.border}` }}>
-                          {status === "locked" ? <Lock className="w-4 h-4" style={{ color: th.fg3 }} /> : status === "complete" ? <CheckCircle className="w-5 h-5 text-[var(--success)]" /> : <Play className="w-4 h-4" style={{ color: th.navAC }} />}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-sm font-bold" style={{ color: status === "locked" ? th.fg3 : th.fg }}>{mod.title}</span>
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-[2px] shrink-0" style={{ background: sc.bg, color: sc.text, border: `1px solid ${sc.border}` }}>{sc.label}</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <span className="text-xs" style={{ color: th.fg3 }}>{done}/{total} leçons</span>
-                            {status !== "locked" && total > 0 && (
-                              <div className="flex items-center gap-2">
-                                <div className="w-20 h-1 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : `${th.gradShadow(0.1)}` }}>
-                                  <div className="h-full rounded-full" style={{ width: `${pct}%`, background: status === "complete" ? "linear-gradient(90deg,#78d5e2,#6adeb1)" : th.iris }} />
-                                </div>
-                                <span className="text-[10px] font-bold" style={{ color: sc.text }}>{pct}%</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        {!editMode && <ChevronDown className="w-4 h-4 shrink-0 transition-transform" style={{ color: th.fg3, transform: modOpen ? "rotate(180deg)" : "none" }} />}
-                      </div>
-                    </button>
-                    {modOpen && (
-                      <div style={{ borderTop: `1px solid ${th.sep}` }}>
-                        {mod.lessons.length === 0 && (
-                          <div className="px-5 py-4 text-xs" style={{ color: th.fg3 }}>Aucune leçon dans ce module pour le moment.</div>
-                        )}
-                        {mod.lessons.map((lesson, i) => {
+          {/* Les modules en chapitres numérotés, sur un fil vertical qui passe au
+              dégradé iris jusqu'au module en cours. */}
+          <ol className="relative">
+            {modules.map((m, mi) => {
+              const reached = currentIdx >= 0 ? mi < currentIdx : m.status === "done";
+              const last = mi === modules.length - 1;
+              return (
+                <li key={m.section.id} id={`module-${m.section.id}`} className="relative grid grid-cols-[40px_minmax(0,1fr)] sm:grid-cols-[56px_minmax(0,1fr)] gap-x-3 sm:gap-x-5 scroll-mt-6">
+                  {!last && <span aria-hidden className="absolute left-[19px] sm:left-[27px] top-11 bottom-0 w-[2px]" style={{ background: reached ? "var(--grad-iris)" : th.sep }} />}
+                  <span className="relative z-10 w-10 h-10 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-sm sm:text-base font-black tabular-nums"
+                    style={m.status === "done" ? { background: "var(--grad-bleu)", color: "#000" }
+                      : m.status === "current" ? { background: th.ink, color: th.onInk }
+                      : { background: th.bg, color: m.status === "locked" ? th.fg3 : th.fg, border: `1px solid ${m.status === "locked" ? th.sep : th.inputB}` }}>
+                    {m.status === "done" ? <CheckCircle className="w-5 h-5" /> : m.status === "locked" ? <Lock className="w-4 h-4" /> : String(mi + 1).padStart(2, "0")}
+                  </span>
+                  <div className={cx("min-w-0", !last && "pb-10")}>
+                    <div className="pt-1.5 sm:pt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                      <h4 className="text-lg sm:text-xl font-black leading-snug" style={{ color: m.status === "locked" ? th.fg3 : th.fg }}>{m.section.title}</h4>
+                      <span className="eyebrow" style={{ color: m.status === "current" ? th.fg : th.fg3 }}>{MODULE_STATUS_LABEL[m.status]}</span>
+                    </div>
+                    <p className="mt-1 text-sm tabular-nums" style={{ color: th.fg3 }}>
+                      {m.done}/{m.total} leçon{m.total > 1 ? "s" : ""}{m.minutes ? ` · ${m.minutes} min` : ""}
+                    </p>
+                    {m.status === "locked" && !m.section.isUnlocked && (
+                      <p className="mt-2 text-sm" style={{ color: th.fg2 }}>Ton formateur ouvrira ce module le moment venu.</p>
+                    )}
+                    {m.section.lessons.length === 0 && (
+                      <p className="mt-3 text-sm" style={{ color: th.fg3 }}>Aucune leçon dans ce module pour le moment.</p>
+                    )}
+                    {m.section.lessons.length > 0 && (
+                      <ul className="mt-4 rounded-[6px] overflow-hidden" style={{ border: `1px solid ${th.sep}` }}>
+                        {m.section.lessons.map((lesson, i) => {
                           const s = stateFor(lesson.id);
                           const state = s?.state ?? "locked";
+                          const isNext = next?.lesson.id === lesson.id;
                           const clickable = !editMode && state !== "locked";
                           return (
-                            <div key={lesson.id} className={cx("flex items-start sm:items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3 transition-colors", (clickable || editMode) && "cursor-pointer hover:opacity-80")}
-                              onClick={() => { if (editMode) toggleLesson(lesson.id); else if (clickable) goLesson(lesson.id); }}
-                              style={i < mod.lessons.length - 1 ? { borderBottom: `1px solid ${th.sep}` } : {}}>
-                              {editMode && (
-                                <Checkbox checked={selected.has(lesson.id)} onCheckedChange={() => toggleLesson(lesson.id)} onClick={(e) => e.stopPropagation()} className="shrink-0" />
-                              )}
-                              <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: state === "completed" ? "rgba(106,222,177,0.12)" : state === "available" ? `${th.gradShadow(0.12)}` : "transparent", border: `1px solid ${state === "completed" ? "rgba(106,222,177,0.3)" : state === "available" ? `${th.gradShadow(0.35)}` : th.sep}` }}>
-                                {state === "completed" ? <CheckCircle className="w-3.5 h-3.5 text-[var(--success)]" /> : state === "available" ? <Play className="w-3 h-3 ml-0.5" style={{ color: th.navAC }} /> : <Lock className="w-3 h-3" style={{ color: th.fg3 }} />}
+                            <li key={lesson.id} style={i > 0 ? { borderTop: `1px solid ${th.sep}` } : undefined}>
+                              <div role={clickable || editMode ? "button" : undefined} tabIndex={clickable || editMode ? 0 : undefined}
+                                onKeyDown={(e) => { if (e.key === "Enter") { if (editMode) toggleLesson(lesson.id); else if (clickable) goLesson(lesson.id); } }}
+                                onClick={() => { if (editMode) toggleLesson(lesson.id); else if (clickable) goLesson(lesson.id); }}
+                                className={cx("group relative flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3.5 transition-colors", (clickable || editMode) && "cursor-pointer hover-fine:bg-[var(--hover-row)]")}
+                                style={{ ["--hover-row" as string]: th.navA, background: isNext && !editMode ? th.navA : undefined }}>
+                                {isNext && !editMode && <span aria-hidden className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ background: "var(--grad-iris)" }} />}
+                                {editMode && <Checkbox checked={selected.has(lesson.id)} onCheckedChange={() => toggleLesson(lesson.id)} onClick={(e) => e.stopPropagation()} className="shrink-0" />}
+                                <span className="w-6 h-6 rounded-full flex items-center justify-center shrink-0"
+                                  style={state === "completed" ? { background: "rgba(106,222,177,0.2)" } : isNext ? { background: th.ink, color: th.onInk } : { border: `1px solid ${th.sep}` }}>
+                                  {state === "completed" ? <CheckCircle className="w-3.5 h-3.5 text-[var(--success)]" /> : state === "locked" ? <Lock className="w-3 h-3" style={{ color: th.fg3 }} /> : <Play className="w-2.5 h-2.5 ml-0.5" fill="currentColor" style={{ color: isNext ? th.onInk : th.fg }} />}
+                                </span>
+                                <span className={cx("flex-1 min-w-0 text-[15px] leading-snug break-words", isNext && "font-bold")} style={{ color: state === "locked" ? th.fg3 : th.fg }}>{lesson.title}</span>
+                                {isNext && !editMode && <span className="hidden sm:inline eyebrow shrink-0" style={{ color: th.fg }}>{s?.progress ? "À reprendre" : "À suivre"}</span>}
+                                <span className="text-xs tabular-nums shrink-0 flex items-center gap-1" style={{ color: th.fg3 }}>
+                                  {lesson.durationMinutes ? <><Clock className="w-3 h-3" />{lesson.durationMinutes} min</> : "—"}
+                                </span>
                               </div>
-                              {/* Mobile first : titre sur toute la largeur, avec retour à la ligne ;
-                                  badge et durée passent dessous sur mobile, à droite à partir de sm. */}
-                              <div className="flex-1 min-w-0 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-4">
-                                <span className="text-sm leading-snug break-words sm:flex-1" style={{ color: state === "completed" ? "rgba(106,222,177,0.7)" : state === "available" ? th.navAC : th.fg3 }}>{lesson.title}</span>
-                                <div className="flex items-center gap-2 shrink-0">
-                                  {state === "available" && !editMode && <span className="text-[10px] px-2 py-0.5 rounded-[2px] font-bold" style={{ background: `${th.gradShadow(0.1)}`, color: th.navAC, border: `1px solid ${th.gradShadow(0.25)}` }}>En cours</span>}
-                                  <span className="text-xs font-mono flex items-center gap-1" style={{ color: th.fg3 }}>
-                                    {lesson.durationMinutes ? <><Clock className="w-3 h-3" />{lesson.durationMinutes}min</> : "—"}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
+                            </li>
                           );
                         })}
-                        {nextLesson && !editMode && (
-                          <div className="px-5 py-3" style={{ borderTop: `1px solid ${th.sep}` }}>
-                            <VBtn onClick={() => goLesson(nextLesson.lesson.id)} sm><span className="flex items-center gap-2"><Play className="w-3.5 h-3.5" />Reprendre le module</span></VBtn>
-                          </div>
-                        )}
-                      </div>
+                      </ul>
                     )}
-                  </GCard>
-                );
-              })}
-            </div>
-          </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
         </div>
       )}
 
@@ -412,6 +392,6 @@ function FormationAccordion({ entry, open, onToggle }: { entry: CourseProgressEn
           )}
         </DialogContent>
       </Dialog>
-    </GCard>
+    </section>
   );
 }

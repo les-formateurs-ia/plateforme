@@ -32,6 +32,9 @@ import { injectPlatformAuth, injectAutoResize, injectMissionBridge, normalizeSma
 import { useHtmlTheme } from "@/app/lib/useHtmlTheme";
 import { getMySubmission, saveMissionDraft, submitMission, type MissionSubmission } from "@/app/lib/missionSubmissions";
 import { MindmapView } from "@/app/components/lesson/MindmapView";
+import { LessonPager } from "@/app/components/lesson/LessonPager";
+import { GT } from "@/app/components/common/GT";
+import { burst, sparkLine } from "@/app/lib/particles/burst";
 
 const DEFAULT_AI = "Je suis ton Copilote IA. Pose-moi n'importe quelle question sur cette leçon ou sur comment l'appliquer à ton métier 👋";
 
@@ -266,6 +269,18 @@ export function LessonPage() {
   const [quizResult, setQuizResult] = useState<{ score: number; passed: boolean } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [retaking, setRetaking] = useState(false);
+  // Leçon validée : gerbe de particules depuis le score, et la progression
+  // de l'en-tête lâche ses étincelles.
+  const scoreRef = useRef<HTMLParagraphElement>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!quizResult?.passed) return;
+    const t = window.setTimeout(() => {
+      if (scoreRef.current) burst(scoreRef.current, { count: 90 });
+      if (progressRef.current) sparkLine(progressRef.current, 1);
+    }, 180);
+    return () => window.clearTimeout(t);
+  }, [quizResult?.passed]);
   const [showFinishConfirm, setShowFinishConfirm] = useState(false);
   const [showQuizModal, setShowQuizModal] = useState(false);
 
@@ -809,7 +824,7 @@ export function LessonPage() {
         <div className="flex items-center gap-3 sm:gap-4 shrink-0">
           <div className="hidden lg:flex items-center gap-2 text-xs" style={{ color: th.fg3 }}>
             Progression
-            <div className="w-28 h-1.5 rounded-full overflow-hidden" style={{ background: th.navA }}>
+            <div ref={progressRef} className="w-28 h-1.5 rounded-full overflow-hidden" style={{ background: th.navA }}>
               <div className="h-full rounded-full" style={{ width: `${overallPct}%`, background: th.iris }} />
             </div>
             <span className="font-bold" style={{ color: th.navAC }}>{overallPct}%</span>
@@ -1174,6 +1189,7 @@ export function LessonPage() {
           )}
           </>
           )}
+          <LessonPager lessons={orderedLessons} states={course.lessonStates} currentId={lessonId} nextLocked={!nextLesson || !isCompleted} />
         </div>
 
         {/* Copilot */}
@@ -1242,14 +1258,18 @@ export function LessonPage() {
 
       {showFinishConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.7)" }} onClick={() => setShowFinishConfirm(false)}>
-          <div onClick={(e) => e.stopPropagation()} className="max-w-sm w-full rounded-2xl overflow-hidden p-6 text-center" style={{ background: th.card, border: `1px solid ${th.sep}` }}>
-            <PartyPopper className="w-8 h-8 mx-auto mb-3 text-[var(--success)]" />
-            <p className="text-sm font-semibold mb-5" style={{ color: th.fg }}>
-              Félicitation pour cette leçon, testons maintenant tes connaissances pour vérifier si tu valides bien tous les acquis
+          <div onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="finish-title" className="relative max-w-md w-full rounded-[10px] overflow-hidden p-7 fade-up" style={{ background: th.card, border: `1px solid ${th.sep}` }}>
+            <div aria-hidden className="absolute inset-x-0 top-0 h-[3px]" style={{ background: th.iris }} />
+            <p className="eyebrow" style={{ color: th.fg3 }}>Fin de la leçon</p>
+            <h2 id="finish-title" className="mt-2 text-[1.6rem] font-black leading-tight" style={{ color: th.fg }}>Bien joué. Place au <GT>quiz</GT></h2>
+            <p className="mt-3 text-[15px] leading-relaxed" style={{ color: th.fg2 }}>
+              {lesson.questions.length > 0
+                ? <>{lesson.questions.length} question{lesson.questions.length > 1 ? "s" : ""} pour vérifier tes acquis. Il faut {QUIZ_PASS_THRESHOLD} % de bonnes réponses pour valider la leçon et débloquer la suivante.</>
+                : "Vérifions tes acquis avant de passer à la suite."}
             </p>
-            <div className="flex items-center justify-center gap-3">
-              <VBtn sm onClick={() => setShowFinishConfirm(false)}>Annuler</VBtn>
-              <ShimBtn sm onClick={() => { setShowFinishConfirm(false); setShowQuizModal(true); }}>Commencer le QCM</ShimBtn>
+            <div className="mt-7 flex items-center gap-3">
+              <ShimBtn onClick={() => { setShowFinishConfirm(false); setShowQuizModal(true); }}>Commencer le quiz</ShimBtn>
+              <button type="button" onClick={() => setShowFinishConfirm(false)} className="ink-link text-sm font-semibold" style={{ color: th.fg2 }}>Plus tard</button>
             </div>
           </div>
         </div>
@@ -1294,14 +1314,16 @@ export function LessonPage() {
               )}
 
               {lesson.questions.length > 0 && quizResult && (
-                <div className="rounded-xl p-5 text-center" style={{ background: quizResult.passed ? "rgba(106,222,177,0.08)" : "rgba(251,194,173,0.08)", border: `1px solid ${quizResult.passed ? "rgba(106,222,177,0.3)" : "rgba(251,194,173,0.3)"}` }}>
-                  {quizResult.passed ? <PartyPopper className="w-6 h-6 mx-auto mb-2 text-[var(--success)]" /> : <X className="w-6 h-6 mx-auto mb-2 text-[var(--danger)]" />}
-                  <p className="text-lg font-black mb-1" style={{ color: quizResult.passed ? "#6adeb1" : "#fbc2ad" }}>{quizResult.score}%</p>
-                  <p className="text-xs mb-4" style={{ color: th.fg3 }}>
-                    {quizResult.passed ? "Leçon validée — bravo !" : `Il faut au moins ${QUIZ_PASS_THRESHOLD}% pour valider cette leçon.`}
+                <div className="rounded-[6px] px-5 py-7 text-center" style={{ border: `1px solid ${th.sep}` }}>
+                  <p className="eyebrow" style={{ color: quizResult.passed ? th.success : th.danger }}>{quizResult.passed ? "Leçon validée" : "Pas encore"}</p>
+                  <p ref={scoreRef} className="mt-2 text-[3.2rem] leading-none font-black tabular-nums" style={{ color: th.fg }}>
+                    {quizResult.passed ? <GT>{quizResult.score}%</GT> : <>{quizResult.score}%</>}
+                  </p>
+                  <p className="text-sm mt-3 mb-5" style={{ color: th.fg2 }}>
+                    {quizResult.passed ? (nextLesson ? "Bravo ! La leçon suivante est débloquée." : "Bravo, c'était la dernière leçon de ce module.") : `Il faut au moins ${QUIZ_PASS_THRESHOLD} % pour valider cette leçon. Relis le cours, puis retente ta chance.`}
                   </p>
                   {quizResult.passed
-                    ? nextLesson && <VBtn onClick={() => navigate(`/lesson/${nextLesson.id}`)} sm><span className="flex items-center gap-2">Leçon suivante<ChevronRight className="w-3.5 h-3.5" /></span></VBtn>
+                    ? nextLesson && <ShimBtn onClick={() => navigate(`/lesson/${nextLesson.id}`)} sm><span className="flex items-center gap-2">Leçon suivante<ChevronRight className="w-3.5 h-3.5" /></span></ShimBtn>
                     : <VBtn onClick={retryQuiz} sm><span className="flex items-center gap-2"><RotateCcw className="w-3.5 h-3.5" />Réessayer le quiz</span></VBtn>}
                 </div>
               )}
@@ -1313,13 +1335,13 @@ export function LessonPage() {
                     {currentQuestion.options.map((opt, i) => {
                       let bg = th.isDark ? "rgba(255,255,255,0.03)" : th.inputBg, border = th.inputB, color = th.fg2;
                       if (selected !== null) {
-                        if (opt.isCorrect) { bg = "rgba(106,222,177,0.1)"; border = "rgba(106,222,177,0.35)"; color = "#6adeb1"; }
-                        else if (opt.id === selected) { bg = "rgba(251,194,173,0.1)"; border = "rgba(251,194,173,0.35)"; color = "#fbc2ad"; }
+                        if (opt.isCorrect) { bg = "rgba(106,222,177,0.14)"; border = "rgba(106,222,177,0.6)"; color = th.success; }
+                        else if (opt.id === selected) { bg = "rgba(251,194,173,0.14)"; border = "rgba(239,138,116,0.6)"; color = th.danger; }
                         else { bg = "transparent"; border = th.sep; color = th.fg3; }
                       }
                       return (
                         <button key={opt.id} onClick={() => selectOption(opt.id)}
-                          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-left transition-all"
+                          className="w-full flex items-center gap-3 px-4 py-3 rounded-[6px] text-sm text-left transition-colors hover-fine:[border-color:var(--ink)]!"
                           style={{ background: bg, border: `1px solid ${border}`, color }}>
                           <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : `${th.gradShadow(0.06)}` }}>
                             {selected !== null && opt.isCorrect ? <CheckCircle className="w-4 h-4 text-[var(--success)]" /> : selected !== null && opt.id === selected ? <X className="w-4 h-4 text-[var(--danger)]" /> : String.fromCharCode(65 + i)}
