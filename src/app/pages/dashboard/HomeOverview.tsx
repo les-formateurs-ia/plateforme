@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { ArrowRight, Bot, Check, Clock, Code2, Lock, Play, Sparkles, Target, Percent, CheckCircle, type LucideIcon } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { NeuralField } from "@/app/components/particles/NeuralField";
-import { SymbolCloud } from "@/app/components/particles/SymbolCloud";
+import { SymbolCard } from "@/app/components/common/SymbolCard";
 import { sparkLine } from "@/app/lib/particles/burst";
 import { formatDuration, type CourseOutline, type LessonWithState, type BadgeRow } from "@/app/lib/learning";
 import { moduleProgress, nextLessonOf, MODULE_STATUS_LABEL, type ModuleProgress } from "@/app/lib/journey";
@@ -217,20 +217,7 @@ function PracticeShortcuts() {
       <SectionHead id="practice-title" eyebrow="Continuer à pratiquer" title="Ce qu'on apprend, on le pratique" />
       <div className="grid gap-4 md:grid-cols-3">
         {PRACTICE.map(({ Icon, theme, title, desc, path, cta }) => (
-          <button key={path} type="button" onClick={() => navigate(path)} data-symbol-card
-            className="group relative overflow-hidden rounded-[10px] text-left flex flex-col transition-colors hover-fine:[border-color:var(--ink)]!"
-            style={{ border: `1px solid ${th.sep}`, background: th.card }}>
-            <div className="relative h-36" style={{ borderBottom: `1px solid ${th.sep}` }}>
-              <SymbolCloud Icon={Icon} theme={theme} dark={th.isDark} className="inset-0 w-full h-full" />
-            </div>
-            <div className="p-5 flex-1 flex flex-col">
-              <h3 className="text-xl font-black" style={{ color: th.fg }}>{title}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed flex-1" style={{ color: th.fg2 }}>{desc}</p>
-              <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold" style={{ color: th.fg }}>
-                <span className="ink-link">{cta}</span><ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </span>
-            </div>
-          </button>
+          <SymbolCard key={path} Icon={Icon} theme={theme} title={title} desc={desc} cta={cta} onClick={() => navigate(path)} />
         ))}
       </div>
     </section>

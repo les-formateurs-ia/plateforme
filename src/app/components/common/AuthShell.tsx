@@ -1,7 +1,8 @@
-import type { ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 import { useTh } from "@/app/theme/theme";
 import { Background } from "@/app/components/common/Background";
 import { Logo } from "@/app/components/common/Logo";
+import { NeuralField, type NeuralFieldHandle } from "@/app/components/particles/NeuralField";
 
 // Mise en page des écrans hors plateforme (connexion, inscription, mot de
 // passe, accueil entreprise, choix d'espace), dans la direction artistique
@@ -16,6 +17,8 @@ export function AuthShell({ children, width = 440, aside }: {
   aside?: { eyebrow?: string; title: ReactNode; lead?: ReactNode };
 }) {
   const th = useTh();
+  // Comme le formulaire du héros du site : chaque frappe active le réseau.
+  const field = useRef<NeuralFieldHandle>(null);
   const panel = aside ?? {
     eyebrow: "Plateforme de formation",
     title: "Se former à l'IA, à son rythme, jusqu'à la certification.",
@@ -25,15 +28,17 @@ export function AuthShell({ children, width = 440, aside }: {
     <div className="min-h-dvh grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]" style={{ background: th.bg, fontFamily: "'Funnel Display',sans-serif" }}>
       <Background />
       <aside className="relative hidden lg:flex flex-col justify-between overflow-hidden bg-black text-white px-12 xl:px-16 py-12" style={{ borderRight: th.isDark ? `1px solid ${th.sep}` : undefined }}>
-        <div className="text-white"><AuthLogoWhite /></div>
-        <div className="max-w-[30rem] py-16">
+        <NeuralField ref={field} dark density={3.4} band={0.32} center={0.76} />
+        <div aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(180deg,rgba(0,0,0,0.55) 0%,rgba(0,0,0,0.15) 40%,rgba(0,0,0,0.15) 70%,rgba(0,0,0,0.6) 100%)" }} />
+        <div className="relative text-white"><AuthLogoWhite /></div>
+        <div className="relative max-w-[30rem] py-16">
           {panel.eyebrow && <p className="eyebrow text-white/55">{panel.eyebrow}</p>}
           <p className="mt-5 text-[2.1rem] xl:text-[2.5rem] font-extrabold leading-[1.05] tracking-[-0.035em]" style={{ textWrap: "balance" }}>{panel.title}</p>
           {panel.lead && <p className="mt-5 text-base leading-relaxed text-white/65">{panel.lead}</p>}
         </div>
-        <BrandSignature />
+        <div className="relative"><BrandSignature /></div>
       </aside>
-      <main className="relative flex flex-col items-center justify-center px-5 py-10 sm:px-10">
+      <main className="relative flex flex-col items-center justify-center px-5 py-10 sm:px-10" onInput={() => field.current?.excite(0.12)}>
         <div className="relative z-10 w-full fade-up" style={{ maxWidth: width }}>
           <div className="lg:hidden flex justify-center mb-10"><Logo h={28} /></div>
           {children}

@@ -28,6 +28,8 @@ export interface NeuralFieldOptions {
   density?: number;
   /** Hauteur de la bande parcourue, en part de la hauteur (1 = toute la zone). */
   band?: number;
+  /** Centre vertical de la bande, en part de la hauteur (défaut 0,5). */
+  center?: number;
   /** Vitesse du flux (défaut 1). */
   speed?: number;
   /** Graine : la même composition à chaque visite. */
@@ -101,7 +103,7 @@ export function mountNeuralField(canvas: HTMLCanvasElement, options: NeuralField
     energy = energy < 0.01 ? 0 : energy * CALM;
     const firing = FIRING + energy * (EXCITED_FIRING - FIRING);
     const introT = reduced ? 1 : clamp01((now - t0) / 1600);
-    const bandY = H / 2, bandH = H * bandShare, slope = W < 700 ? -0.04 : -0.1;
+    const bandY = H * (options.center ?? 0.5), bandH = H * bandShare, slope = W < 700 ? -0.04 : -0.1;
 
     for (const n of nodes) {
       const uu = (((n.u + t * n.speed * flow * (1 + energy * 0.6)) % 1) + 1) % 1;
