@@ -8,7 +8,6 @@ import { useProfile } from "@/app/state/profile-context";
 import { connectGoogleCalendar, disconnectGoogleCalendar, getGoogleCalendarStatus } from "@/app/lib/availability";
 import { GCard } from "@/app/components/common/GCard";
 import { Avatar } from "@/app/components/common/Avatar";
-import { SparkleGlow } from "@/app/components/common/SparkleGlow";
 import { CircleProgress } from "@/app/components/common/CircleProgress";
 import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
 import { cx } from "@/app/lib/cx";
@@ -166,14 +165,13 @@ export function ProfilePage() {
 
   return (
     <div className="relative flex-1 min-w-0 overflow-x-hidden overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-5">
-      <SparkleGlow />
-      {!staff && <GCard glow>
+      {!staff && <GCard>
         <div className="p-6 flex flex-col sm:flex-row items-center sm:items-center gap-6 text-center sm:text-left">
           <Avatar url={profile.avatarUrl} size={80} square />
           <div className="flex-1 min-w-0 w-full">
             <div className="flex items-center justify-center sm:justify-start gap-3 mb-1 flex-wrap">
               <h2 className="text-xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif", color: th.fg }}>{name}</h2>
-              <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: `${th.gradShadow(0.1)}`, color: th.navAC, border: `1px solid ${th.gradShadow(0.25)}` }}>Apprenant IA Pro</span>
+              <span className="text-xs font-bold px-2 py-0.5 rounded-[2px]" style={{ color: th.fg2, border: `1px solid ${th.inputB}` }}>Apprenant IA Pro</span>
             </div>
             <p className="text-sm mb-3" style={{ color: th.fg3 }}>{profile.profession || "Chef de projet digital"}{enrolledSince && ` · En formation depuis ${formatEnrolledSince(enrolledSince)}`}</p>
             <div className="flex items-center justify-center sm:justify-start gap-6 flex-wrap">
@@ -197,10 +195,10 @@ export function ProfilePage() {
         </div>
       </GCard>}
 
-      {!staff && <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background: th.isDark ? "rgba(255,255,255,0.04)" : `${th.gradShadow(0.06)}`, border: `1px solid ${th.sep}` }}>
+      {!staff && <div role="tablist" className="flex flex-wrap gap-x-7" style={{ borderBottom: `1px solid ${th.sep}` }}>
         {(["overview", "badges", "settings"] as const).map(t => (
-          <button key={t} onClick={() => setTab(t)} className="px-5 py-2 rounded-lg text-sm font-semibold transition-all"
-            style={tab === t ? { background: th.isDark ? `${th.gradShadow(0.14)}` : "rgba(255,255,255,0.8)", color: th.navAC, border: `1px solid ${th.gradShadow(0.25)}` } : { color: th.fg3, background: "transparent", border: "1px solid transparent" }}>
+          <button key={t} onClick={() => setTab(t)} role="tab" aria-selected={tab === t} className="tab-link shrink-0 pt-1 pb-3 text-[15px] transition-colors"
+            style={{ color: tab === t ? th.fg : th.fg3 }}>
             {t === "overview" ? "Vue d'ensemble" : t === "badges" ? "Badges" : "Préférences"}
           </button>
         ))}
@@ -225,7 +223,7 @@ export function ProfilePage() {
                     </div>
                     <span className="text-xs font-bold" style={{ color: done ? "#6adeb1" : active ? th.navAC : th.fg3 }}>{pct}%</span>
                   </div>
-                  <div className="h-1 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.05)" : `${th.gradShadow(0.08)}` }}><div className="h-full rounded-full" style={{ width: `${pct}%`, background: done ? "linear-gradient(90deg,#78d5e2,#6adeb1)" : active ? `linear-gradient(90deg,${th.grad1},${th.grad2})` : "transparent" }} /></div>
+                  <div className="h-1 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.05)" : `${th.gradShadow(0.08)}` }}><div className="h-full rounded-full" style={{ width: `${pct}%`, background: done ? "linear-gradient(90deg,#78d5e2,#6adeb1)" : active ? th.iris : "transparent" }} /></div>
                 </div>
                 );
               })}
@@ -239,7 +237,7 @@ export function ProfilePage() {
             <div className="text-[10px] font-black uppercase tracking-widest mb-3" style={{ color: th.fg3 }}>Activité — 4 semaines</div>
             <div className="flex items-end gap-1 h-16">
               {activity.map(({ date, count }, i) => (
-                <div key={date} title={`${date} : ${count}`} className="flex-1 rounded-sm" style={{ height: `${Math.max(4, (count / maxActivity) * 100)}%`, background: i === activity.length - 1 ? `linear-gradient(to top,${th.grad1},${th.grad2})` : `${th.gradShadow(0.25)}`, opacity: count > 0 ? 1 : 0.25 }} />
+                <div key={date} title={`${date} : ${count}`} className="flex-1 rounded-sm" style={{ height: `${Math.max(4, (count / maxActivity) * 100)}%`, background: i === activity.length - 1 ? th.iris : `${th.gradShadow(0.25)}`, opacity: count > 0 ? 1 : 0.25 }} />
               ))}
             </div>
           </div></GCard>
@@ -273,7 +271,7 @@ export function ProfilePage() {
                 onClick={() => avatarInputRef.current?.click()}
                 disabled={avatarUploading}
                 aria-label="Modifier la photo de profil"
-                className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-full flex items-center justify-center transition-opacity hover:opacity-80 disabled:opacity-50"
+                className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-[4px] flex items-center justify-center transition-opacity hover:opacity-80 disabled:opacity-50"
                 style={{ background: "linear-gradient(135deg,#fbc2ad,#fceccd)", border: `2px solid ${th.card}` }}
               >
                 <Camera className="w-3.5 h-3.5 text-white" />
@@ -322,16 +320,16 @@ export function ProfilePage() {
                 {th.mode === "system" ? "Suit automatiquement le thème de ton appareil" : th.isDark ? "Mode sombre activé — ambiance dark glass" : "Mode clair activé — interface lumineuse"}
               </div>
             </div>
-            <div className="flex flex-wrap gap-1 p-1 rounded-xl max-w-full" style={{ background: th.isDark ? "rgba(255,255,255,0.04)" : `${th.gradShadow(0.06)}`, border: `1px solid ${th.sep}` }}>
+            <div className="flex flex-wrap gap-0.5 p-0.5 rounded-[4px] max-w-full" style={{ border: `1px solid ${th.inputB}` }}>
               {([
                 { mode: "light" as const, label: "Clair", Icon: Sun },
                 { mode: "dark" as const, label: "Sombre", Icon: Moon },
                 { mode: "system" as const, label: "Système", Icon: Monitor },
               ]).map(({ mode, label, Icon }) => (
                 <button key={mode} onClick={() => th.setThemeMode(mode)}
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-90"
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-[2px] text-xs font-semibold transition-colors hover:opacity-90"
                   style={th.mode === mode
-                    ? { background: th.isDark ? `${th.gradShadow(0.14)}` : "rgba(255,255,255,0.8)", color: th.navAC, border: `1px solid ${th.gradShadow(0.25)}` }
+                    ? { background: th.ink, color: th.onInk, border: "1px solid transparent" }
                     : { color: th.fg3, background: "transparent", border: "1px solid transparent" }}>
                   <Icon className="w-3.5 h-3.5" />{label}
                 </button>

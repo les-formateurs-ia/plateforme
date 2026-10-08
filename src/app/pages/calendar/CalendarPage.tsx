@@ -151,7 +151,7 @@ export function CalendarPage() {
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-5">
       <div>
-        <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Rendez-vous</GT></h2>
+        <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>Rendez-vous</GT></h2>
         <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Réserve un échange 1h avec ton expert — à partir de demain.</p>
       </div>
 
@@ -201,7 +201,7 @@ export function CalendarPage() {
                       <button
                         key={s.startTime}
                         onClick={() => setPending(s)}
-                        className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all hover:opacity-80"
+                        className="px-3 py-1.5 rounded-[2px] text-xs font-semibold transition-all hover:opacity-80"
                         style={{ border: `1px solid ${th.navAC}`, color: th.navAC }}
                       >
                         {s.startTime}–{s.endTime}

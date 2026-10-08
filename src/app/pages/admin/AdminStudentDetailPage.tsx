@@ -440,7 +440,7 @@ export function AdminStudentDetailPage() {
               <div key={inst.id} className="min-w-0 space-y-2.5">
                 <p className="text-sm font-semibold break-words" style={{ color: th.fg }}>{inst.name}</p>
                 <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0" style={{ background: sc.bg, color: sc.color, border: `1px solid ${sc.color}30` }}>{sc.label}</span>
+                <span className="text-[10px] font-bold px-2.5 py-1 rounded-[2px] shrink-0" style={{ background: sc.bg, color: sc.color, border: `1px solid ${sc.color}30` }}>{sc.label}</span>
                 {admin && <button onClick={() => remove(inst.id)} title="Retirer" aria-label={`Retirer ${inst.name}`} className="shrink-0 p-1"><X className="w-4 h-4" style={{ color: th.fg3 }} /></button>}
                 </div>
                 <div className="min-w-0">

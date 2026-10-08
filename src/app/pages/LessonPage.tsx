@@ -810,7 +810,7 @@ export function LessonPage() {
           <div className="hidden lg:flex items-center gap-2 text-xs" style={{ color: th.fg3 }}>
             Progression
             <div className="w-28 h-1.5 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.07)" : `${th.gradShadow(0.1)}` }}>
-              <div className="h-full rounded-full" style={{ width: `${overallPct}%`, background: `linear-gradient(90deg,${th.grad1},${th.grad2})` }} />
+              <div className="h-full rounded-full" style={{ width: `${overallPct}%`, background: th.iris }} />
             </div>
             <span className="font-bold" style={{ color: th.navAC }}>{overallPct}%</span>
           </div>
@@ -883,7 +883,7 @@ export function LessonPage() {
                   <div className="flex items-center gap-3 flex-wrap gap-y-2">
                     <label className="cursor-pointer">
                       <input type="file" accept=".txt,.docx" className="hidden" onChange={handleHtmlFileChange} />
-                      <span className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 hover:opacity-80"
+                      <span className="inline-flex items-center gap-1.5 rounded-[2px] px-4 py-2 text-sm font-semibold transition-all duration-200 hover:opacity-80"
                         style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(15,14,20,0.04)", border: `1px solid ${th.inputB}`, color: th.fg }}>
                         <Upload className="w-3.5 h-3.5" />Charger un fichier (.txt / .docx)
                       </span>
@@ -914,7 +914,7 @@ export function LessonPage() {
                     />
                   )}
                   {role === "admin" && (
-                    <button onClick={startEditHtml} className="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg"
+                    <button onClick={startEditHtml} className="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-[2px] px-3.5 py-2 text-xs font-semibold shadow-lg"
                       style={{ background: th.card, border: `1px solid ${th.sep}`, color: th.fg }}>
                       <Pencil className="w-3 h-3" />Modifier
                     </button>
@@ -965,7 +965,7 @@ export function LessonPage() {
                 <button
                   onClick={agentStatus === "idle" ? startAgentCall : endAgentCall}
                   disabled={agentStatus === "connecting"}
-                  className="flex items-center justify-center rounded-full transition-all duration-200 hover:opacity-90 active:scale-95 disabled:opacity-50"
+                  className="flex items-center justify-center rounded-[4px] transition-all duration-200 hover:opacity-90 active:scale-95 disabled:opacity-50"
                   style={{ width: 48, height: 48, background: agentStatus === "idle" ? "linear-gradient(135deg,#b58de0,#dbacf0)" : "#e5484d" }}
                   title={agentStatus === "idle" ? "Démarrer l'appel" : "Raccrocher"}
                 >
@@ -976,7 +976,7 @@ export function LessonPage() {
                   onPointerUp={stopPushToTalk}
                   onPointerCancel={stopPushToTalk}
                   disabled={agentStatus !== "connected"}
-                  className="flex items-center justify-center rounded-full transition-all duration-150 active:scale-95 disabled:opacity-30 select-none touch-none"
+                  className="flex items-center justify-center rounded-[4px] transition-all duration-150 active:scale-95 disabled:opacity-30 select-none touch-none"
                   style={{
                     width: 56, height: 56,
                     background: pttActive ? "linear-gradient(135deg,#2792dc,#9ce6e6)" : "rgba(255,255,255,0.08)",
@@ -1176,17 +1176,20 @@ export function LessonPage() {
         {/* Copilot */}
         {!lesson.isMission && (assistantOpen ? (
         <div className="fixed inset-0 z-30 bg-black/50 lg:bg-transparent p-4 lg:static lg:z-auto lg:p-0 lg:w-[27rem] lg:shrink-0 lg:py-6 lg:pr-6" onClick={(e) => { if (e.target === e.currentTarget) setAssistantOpen(false); }}>
-        <div className="h-full flex flex-col rounded-2xl overflow-hidden" style={{ background: `linear-gradient(165deg,${th.grad1},${th.grad2})`, border: "1px solid transparent", boxShadow: "0 12px 32px rgba(0,0,0,0.35)" }}>
+        {/* Panneau noir dans les deux thèmes (comme les sections sombres du site
+            public), signé d'un filet iris de la charte. */}
+        <div className="relative h-full flex flex-col rounded-[10px] overflow-hidden" style={{ background: "#000", border: `1px solid ${th.isDark ? "rgba(255,255,255,0.14)" : "#000"}`, boxShadow: "0 30px 60px -30px rgba(0,0,0,0.5)" }}>
+          <div aria-hidden className="absolute inset-x-0 top-0 h-[3px]" style={{ background: th.iris }} />
           <div className="shrink-0 px-5 py-4">
             <div className="flex items-center gap-2.5 mb-3">
               <Sparkles className="w-5 h-5 text-white shrink-0" />
               <div className="min-w-0 flex-1"><div className="text-base font-black text-white">Copilote IA</div><div className="text-[11px] truncate text-white/60">Ton formateur pour cette leçon</div></div>
               <span className="text-[10px] font-bold shrink-0 text-white/50">Bêta</span>
-              <button onClick={() => setAssistantOpen(false)} className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-colors hover:bg-white/10">
+              <button onClick={() => setAssistantOpen(false)} className="w-6 h-6 rounded-[4px] flex items-center justify-center shrink-0 transition-colors hover:bg-white/10">
                 <X className="w-4 h-4 text-white/70" />
               </button>
             </div>
-            <div className="rounded-xl px-3.5 py-3" style={{ background: "rgba(255,255,255,0.1)" }}>
+            <div className="rounded-[4px] px-3.5 py-3" style={{ border: "1px solid rgba(255,255,255,0.14)" }}>
               <p className="text-xs leading-relaxed text-white/85">💡 <strong>Pour {firstName} :</strong> Chaque concept → applique-le immédiatement en pratique.</p>
             </div>
           </div>
@@ -1195,7 +1198,7 @@ export function LessonPage() {
               <div key={i} className={cx("flex", m.role === "user" ? "justify-end" : "justify-start")}>
                 {m.role === "ai" && <div className="w-6 h-6 rounded-full flex items-center justify-center mr-2 mt-0.5 shrink-0" style={{ background: "rgba(255,255,255,0.15)" }}><Sparkles className="w-3 h-3 text-white" /></div>}
                 <div className="max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-line"
-                  style={m.role === "user" ? { background: "rgba(255,255,255,0.92)", color: `${th.grad1}`, fontWeight: 600, borderRadius: "16px 16px 4px 16px" } : { background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.9)", borderRadius: "16px 16px 16px 4px" }}>
+                  style={m.role === "user" ? { background: "#fff", color: "#000", fontWeight: 600, borderRadius: "12px 12px 2px 12px" } : { background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.9)", borderRadius: "12px 12px 12px 2px" }}>
                   {m.text}
                 </div>
               </div>
@@ -1207,8 +1210,8 @@ export function LessonPage() {
             <div className="text-[11px] font-bold mb-2.5 text-white/60">Actions rapides</div>
             <div className="space-y-2">
               {[{ Icon: MessageSquare, label: "Reformule simplement", cmd: "reformule simplement" }, { Icon: Lightbulb, label: "Exemple pour mon métier", cmd: "exemple concret métier" }, { Icon: Zap, label: "Crash test 2 min", cmd: "crash test" }].map(({ Icon, label, cmd }) => (
-                <button key={label} onClick={() => sendMsg(cmd)} className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left transition-colors hover:bg-white/15" style={{ background: "rgba(255,255,255,0.1)" }}>
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(255,255,255,0.15)" }}><Icon className="w-4 h-4 text-white" /></div>
+                <button key={label} onClick={() => sendMsg(cmd)} className="w-full flex items-center gap-3 px-3.5 py-3 rounded-[4px] text-left transition-colors hover-fine:bg-white/10" style={{ border: "1px solid rgba(255,255,255,0.14)" }}>
+                  <div className="w-8 h-8 rounded-[4px] flex items-center justify-center shrink-0" style={{ background: "rgba(255,255,255,0.1)" }}><Icon className="w-4 h-4 text-white" /></div>
                   <span className="text-sm font-semibold text-white">{label}</span>
                 </button>
               ))}
@@ -1217,19 +1220,19 @@ export function LessonPage() {
           <div className="px-5 pb-5 pt-1 shrink-0">
             <div className="flex gap-2">
               <input value={chatIn} onChange={e => setChatIn(e.target.value)} onKeyDown={e => e.key === "Enter" && !typing && sendMsg(chatIn)} placeholder="Pose ta question…"
-                className="flex-1 rounded-full px-4 py-2.5 text-sm text-white placeholder-white/40 outline-none" style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.15)" }} />
-              <button onClick={() => sendMsg(chatIn)} disabled={!chatIn.trim() || typing} className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 disabled:opacity-30" style={{ background: "#fff" }}>
-                <Send className="w-4 h-4" style={{ color: `${th.grad1}` }} />
+                className="flex-1 rounded-[4px] px-4 py-2.5 text-sm text-white placeholder-white/40 outline-none focus:border-white" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.2)" }} />
+              <button onClick={() => sendMsg(chatIn)} disabled={!chatIn.trim() || typing} aria-label="Envoyer" className="sweep w-10 h-10 rounded-[2px] flex items-center justify-center shrink-0 disabled:opacity-30" style={{ background: "#fff", color: "#000" }}>
+                <Send className="w-4 h-4" />
               </button>
             </div>
           </div>
         </div>
         </div>
         ) : (
-          <button onClick={() => setAssistantOpen(true)}
-            className="absolute right-6 top-20 z-20 w-11 h-11 rounded-full flex items-center justify-center shrink-0"
-            style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, boxShadow: `0 4px 16px ${th.gradShadow(0.4)}` }}>
-            <Sparkles className="w-5 h-5 text-white" />
+          <button onClick={() => setAssistantOpen(true)} aria-label="Ouvrir le copilote IA"
+            className="sweep absolute right-6 top-20 z-20 w-11 h-11 rounded-[2px] flex items-center justify-center shrink-0"
+            style={{ background: th.ink, color: th.onInk }}>
+            <Sparkles className="w-5 h-5" />
           </button>
         ))}
       </div>
@@ -1263,11 +1266,11 @@ export function LessonPage() {
                 <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${th.gradShadow(0.1)}`, border: `1px solid ${th.gradShadow(0.2)}` }}><Brain className="w-4 h-4" style={{ color: th.navAC }} /></div>
                 <span className="text-sm font-black flex-1" style={{ color: th.fg }}>Quiz de la leçon</span>
                 {lesson.questions.length > 0 && !quizResult && (retaking || currentLessonState?.state !== "completed") && (
-                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0" style={{ background: `${th.gradShadow(0.06)}`, color: th.navAC, border: `1px solid ${th.gradShadow(0.15)}` }}>
+                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-[2px] shrink-0" style={{ background: `${th.gradShadow(0.06)}`, color: th.navAC, border: `1px solid ${th.gradShadow(0.15)}` }}>
                     Question {quizStep + 1}/{lesson.questions.length}
                   </span>
                 )}
-                <button onClick={() => setShowQuizModal(false)} className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
+                <button onClick={() => setShowQuizModal(false)} className="w-6 h-6 rounded-[4px] flex items-center justify-center shrink-0 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
                   <X className="w-4 h-4" />
                 </button>
               </div>

@@ -96,7 +96,7 @@ function ImageDialog({ open, onOpenChange, image, onSaved }: {
             </div>
             <label className="cursor-pointer">
               <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
-              <span className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 hover:opacity-80"
+              <span className="inline-flex items-center gap-1.5 rounded-[2px] px-4 py-2 text-sm font-semibold transition-all duration-200 hover:opacity-80"
                 style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(15,14,20,0.04)", border: `1px solid ${th.inputB}`, color: th.fg }}>
                 {isEditing ? "Remplacer l'image" : "Choisir une image"}
               </span>
@@ -110,8 +110,8 @@ function ImageDialog({ open, onOpenChange, image, onSaved }: {
                 const active = isAi === v;
                 return (
                   <button key={String(v)} type="button" onClick={() => setIsAi(v)}
-                    className="px-4 py-1.5 rounded-full text-xs font-bold transition-all"
-                    style={active ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff" } : { color: th.fg2, background: "transparent" }}>
+                    className="px-4 py-1.5 rounded-[2px] text-xs font-bold transition-all"
+                    style={active ? { background: th.ink, color: th.onInk } : { color: th.fg2, background: "transparent" }}>
                     {label}
                   </button>
                 );
@@ -173,7 +173,7 @@ export function AdminAiDetectionGalleryPage() {
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <h2 className="text-2xl font-black flex items-center gap-2" style={{ fontFamily: "'Funnel Display',sans-serif" }}><ScanEye className="w-5 h-5" /><GT>Galerie Détection Image IA</GT></h2>
+          <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black flex items-center gap-2" style={{ color: th.fg }}><ScanEye className="w-5 h-5" /><GT>Galerie Détection Image IA</GT></h2>
           <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Gère les images du quiz "Réelle ou générée par IA ?" côté élève.</p>
         </div>
         <ShimBtn sm onClick={openCreate}><span className="flex items-center gap-1.5"><Plus className="w-3.5 h-3.5" />Ajouter une image</span></ShimBtn>
@@ -191,7 +191,7 @@ export function AdminAiDetectionGalleryPage() {
             <GCard key={img.id}>
               <div className="relative" style={{ aspectRatio: "1/1", background: "#000" }}>
                 <img src={img.imageUrl} className="w-full h-full object-cover" />
-                <span className="absolute top-2 left-2 text-[10px] font-bold px-2 py-1 rounded-full"
+                <span className="absolute top-2 left-2 text-[10px] font-bold px-2 py-1 rounded-[2px]"
                   style={{ background: img.isAi ? "rgba(251,194,173,0.9)" : "rgba(106,222,177,0.9)", color: "#06121c" }}>
                   {img.isAi ? "IA" : "Réelle"}
                 </span>

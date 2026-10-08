@@ -60,7 +60,7 @@ export function ReversePromptingPage() {
           <button onClick={() => navigate("/practice")} className="flex items-center gap-1.5 text-sm mb-2 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
             <ArrowLeft className="w-4 h-4" />Exercez-vous !
           </button>
-          <h2 className="text-2xl font-black flex items-center gap-2" style={{ fontFamily: "'Funnel Display',sans-serif" }}><Target className="w-5 h-5" /><GT>Rétro-ingénierie</GT></h2>
+          <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black flex items-center gap-2" style={{ color: th.fg }}><Target className="w-5 h-5" /><GT>Rétro-ingénierie</GT></h2>
           <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Devine le prompt qui a généré cette image, et compare ton résultat.</p>
         </div>
         <VBtn sm onClick={startNewSession} disabled={loadingSession}><span className="flex items-center gap-1.5"><RotateCcw className="w-3.5 h-3.5" />Nouvel essai</span></VBtn>

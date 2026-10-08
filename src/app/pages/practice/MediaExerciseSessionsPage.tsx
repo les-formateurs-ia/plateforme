@@ -87,7 +87,7 @@ export function MediaExerciseSessionsPage() {
         <button onClick={() => navigate("/practice")} className="flex items-center gap-1.5 text-sm mb-2 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
           <ArrowLeft className="w-4 h-4" />Exercez-vous !
         </button>
-        <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Génération images & vidéos</GT></h2>
+        <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>Génération images & vidéos</GT></h2>
         <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Reprends un historique existant ou lance un nouveau test.</p>
       </div>
 
@@ -100,8 +100,8 @@ export function MediaExerciseSessionsPage() {
             className="group relative overflow-hidden rounded-2xl flex flex-col items-center justify-center gap-3 text-center transition-all duration-300 hover:scale-[1.02] disabled:opacity-60"
             style={{ aspectRatio: "1/1", background: th.isDark ? `${th.gradShadow(0.06)}` : `${th.gradShadow(0.05)}`, border: `1.5px dashed ${th.gradShadow(0.4)}` }}>
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `radial-gradient(circle at 50% 30%, ${th.gradShadow(0.18)}, transparent 70%)` }} />
-            <div className="relative w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110" style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, boxShadow: `0 6px 20px ${th.gradShadow(0.4)}` }}>
-              <Plus className="w-5 h-5 text-white" />
+            <div className="relative w-12 h-12 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110" style={{ background: th.ink, color: th.onInk }}>
+              <Plus className="w-5 h-5" />
             </div>
             <div className="relative">
               <div className="text-sm font-black" style={{ color: th.fg }}>Nouveau test</div>
@@ -122,23 +122,23 @@ export function MediaExerciseSessionsPage() {
                     ? <Video className="w-8 h-8 relative drop-shadow-lg" style={{ color: "rgba(255,255,255,0.92)" }} />
                     : <ImageIcon className="w-8 h-8 relative drop-shadow-lg" style={{ color: "rgba(255,255,255,0.92)" }} />}
 
-                  <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide backdrop-blur-sm" style={{ background: "rgba(0,0,0,0.28)", color: "#fff" }}>
+                  <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-[2px] text-[9px] font-bold uppercase tracking-wide backdrop-blur-sm" style={{ background: "rgba(0,0,0,0.28)", color: "#fff" }}>
                     {s.mode === "video" ? "Vidéo" : "Image"}
                   </div>
                   {tone && (
-                    <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-black backdrop-blur-sm" style={{ background: "rgba(0,0,0,0.28)", color: "#fff" }}>
+                    <div className="absolute top-2 right-2 px-2 py-0.5 rounded-[2px] text-[10px] font-black backdrop-blur-sm" style={{ background: "rgba(0,0,0,0.28)", color: "#fff" }}>
                       {s.lastScore}/20
                     </div>
                   )}
 
                   <div className="absolute inset-0 flex items-start justify-end p-2 gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button onClick={(e) => { e.stopPropagation(); setEditingSession(s); }}
-                      className="w-7 h-7 rounded-full flex items-center justify-center backdrop-blur-sm transition-opacity hover:opacity-80"
+                      className="w-7 h-7 rounded-[4px] flex items-center justify-center backdrop-blur-sm transition-opacity hover:opacity-80"
                       style={{ background: "rgba(0,0,0,0.35)" }} title="Renommer">
                       <Pencil className="w-3.5 h-3.5 text-white" />
                     </button>
                     <button onClick={(e) => handleDelete(e, s.sessionId)} disabled={deletingId === s.sessionId}
-                      className="w-7 h-7 rounded-full flex items-center justify-center backdrop-blur-sm transition-opacity hover:opacity-80 disabled:opacity-40"
+                      className="w-7 h-7 rounded-[4px] flex items-center justify-center backdrop-blur-sm transition-opacity hover:opacity-80 disabled:opacity-40"
                       style={{ background: "rgba(0,0,0,0.35)" }} title="Supprimer">
                       <Trash2 className="w-3.5 h-3.5" style={{ color: "#ffb4b4" }} />
                     </button>

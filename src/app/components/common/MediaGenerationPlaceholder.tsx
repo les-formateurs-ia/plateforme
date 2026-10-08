@@ -22,7 +22,7 @@ export function MediaGenerationPlaceholder({ kind, ready = false, error, onRetry
         {error ? <AlertCircle className="w-6 h-6 shrink-0" aria-hidden="true" /> : <Sparkles className="w-6 h-6 shrink-0" aria-hidden="true" />}
         <p className={error ? "" : "media-generation__pulse"}>{error || label}</p>
         {error && <button type="button" disabled={retryDisabled} onClick={(event) => { event.stopPropagation(); onRetry(); }}
-          className="inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-[2px] border px-3 py-2 text-xs font-semibold disabled:opacity-50"
           style={{ borderColor: th.inputB, background: th.inputBg, color: th.fg }}>
           <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />Réessayer
         </button>}

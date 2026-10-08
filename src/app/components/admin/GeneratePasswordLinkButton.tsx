@@ -54,7 +54,7 @@ export function GeneratePasswordLinkButton({ studentId, studentName, renderTrigg
         type="button"
         onClick={generate}
         disabled={generating}
-        className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-opacity hover:opacity-80 disabled:opacity-60"
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-[2px] text-sm font-semibold transition-opacity hover:opacity-80 disabled:opacity-60"
         style={{ background: th.navA, border: `1px solid ${th.gradShadow(0.35)}`, color: th.navAC }}
       >
         <Link2 className="w-4 h-4" />{generating ? "Génération…" : "Générer le lien"}

@@ -48,7 +48,7 @@ function MusicCard({ gen, onOpen, onRetry, retryDisabled }: { gen: MediaGenerati
         {gen.status === "ready" && (
           <div className="absolute inset-x-0 bottom-0 p-3" style={{ background: "linear-gradient(180deg,rgba(10,10,16,0) 0%,rgba(10,10,16,0.85) 100%)" }}>
             <p className="text-sm font-bold text-white truncate">{gen.title || "Sans titre"}</p>
-            <span className="inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,0.18)", color: "#fff" }}>
+            <span className="inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded-[2px]" style={{ background: "rgba(255,255,255,0.18)", color: "#fff" }}>
               {gen.instrumental ? "Instrumental" : "Chanson"}
             </span>
           </div>
@@ -118,7 +118,7 @@ export function StudioMusicPage() {
       </button>
 
       <div>
-        <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif", color: th.fg }}>Concevez vos propres musiques</h2>
+        <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}>Concevez vos propres musiques</h2>
         <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Décris l'ambiance souhaitée et laisse l'IA composer pour toi (Text-to-Music).</p>
       </div>
 
@@ -175,9 +175,9 @@ export function StudioMusicPage() {
         <div>
           <div className="flex items-center gap-2 mb-3">
             <h3 className="text-sm font-black" style={{ color: th.fg }}>Vos créations musicales</h3>
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg3 }}>{generations.length}</span>
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-[2px]" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg3 }}>{generations.length}</span>
             {pendingCount > 0 && (
-              <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg3 }}>
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-[2px]" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg3 }}>
                 <Loader2 className="w-3 h-3 animate-spin motion-reduce:animate-none" />{pendingCount} en cours
               </span>
             )}

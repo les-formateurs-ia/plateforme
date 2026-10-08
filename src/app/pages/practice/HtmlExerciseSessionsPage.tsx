@@ -61,8 +61,8 @@ function CreateTile({ onClick }: { onClick: () => void }) {
       className="group relative overflow-hidden rounded-2xl flex flex-col items-center justify-center gap-3 text-center transition-all duration-300 hover:scale-[1.02]"
       style={{ aspectRatio: "1/1", background: th.isDark ? `${th.gradShadow(0.06)}` : `${th.gradShadow(0.05)}`, border: `1.5px dashed ${th.gradShadow(0.4)}` }}>
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `radial-gradient(circle at 50% 30%, ${th.gradShadow(0.18)}, transparent 70%)` }} />
-      <div className="relative w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110" style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, boxShadow: `0 6px 20px ${th.gradShadow(0.4)}` }}>
-        <Plus className="w-5 h-5 text-white" />
+      <div className="relative w-12 h-12 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110" style={{ background: th.ink, color: th.onInk }}>
+        <Plus className="w-5 h-5" />
       </div>
       <div className="relative text-sm font-black" style={{ color: th.fg }}>Nouvel exercice</div>
     </button>
@@ -124,9 +124,9 @@ function AdminHtmlExercisesView() {
           {([["global", "Globales"], ["private", "Privees"]] as const).map(([id, label]) => {
             const active = tab === id;
             return (
-              <button key={id} onClick={() => setTab(id)} className="px-7 py-3 rounded-full text-sm font-bold transition-all"
+              <button key={id} onClick={() => setTab(id)} className="px-7 py-3 rounded-[2px] text-sm font-bold transition-all"
                 style={active
-                  ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", boxShadow: `0 2px 12px ${th.gradShadow(0.35)}` }
+                  ? { background: th.ink, color: th.onInk, boxShadow: "none" }
                   : { color: th.fg2, background: "transparent" }}>
                 {label}
               </button>
@@ -160,7 +160,7 @@ function AdminHtmlExercisesView() {
               <div className="relative flex-1 overflow-hidden" style={{ background: "#0c0c13" }}>
                 <HtmlPreview html={ex.htmlContent} />
                 <button type="button" onClick={(event) => { event.stopPropagation(); openEdit(ex); }}
-                  className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center shadow-lg transition-opacity hover:opacity-85"
+                  className="absolute top-2 right-2 w-8 h-8 rounded-[4px] flex items-center justify-center shadow-lg transition-opacity hover:opacity-85"
                   style={{ background: th.card, border: `1px solid ${th.sep}`, color: th.fg }}
                   title="Modifier">
                   <Pencil className="w-3.5 h-3.5" />
@@ -339,7 +339,7 @@ export function HtmlExerciseSessionsPage() {
         <button onClick={() => navigate("/practice")} className="flex items-center gap-1.5 text-sm mb-2 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
           <ArrowLeft className="w-4 h-4" />Exercez-vous !
         </button>
-        <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Exercices pour vous</GT></h2>
+        <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>Exercices pour vous</GT></h2>
         <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>
           {staff ? "Cree, modifie et ouvre les exercices HTML proposes aux eleves." : "Ouvre les exercices HTML attribues par ton formateur."}
         </p>

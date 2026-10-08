@@ -16,7 +16,7 @@ export function VSwitch({ checked, onCheckedChange, disabled }: {
       aria-checked={checked}
       disabled={disabled}
       onClick={() => !disabled && onCheckedChange(!checked)}
-      className="relative inline-flex items-center shrink-0 rounded-full transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+      className="relative inline-flex items-center shrink-0 rounded-[4px] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
       style={{
         width: 40, height: 24, padding: 2,
         background: checked ? th.ink : (th.isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.16)"),

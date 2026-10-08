@@ -382,7 +382,7 @@ export function AdminCourseEditorPage() {
       <GCard glow><div className="p-4 space-y-3">
         {courseId && (
           <button type="button" onClick={openPreview} disabled={previewing}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold transition-all hover:opacity-80 active:scale-[0.98] disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[2px] text-sm font-semibold transition-all hover:opacity-80 active:scale-[0.98] disabled:opacity-50"
             style={{ background: th.gradShadow(0.12), border: `1px solid ${th.gradShadow(0.3)}`, color: th.navAC }}>
             <Eye className="w-4 h-4" />{previewing ? "Préparation…" : "Voir en tant qu'élève"}
           </button>
@@ -455,8 +455,8 @@ export function AdminCourseEditorPage() {
             <button onClick={() => { setEditingExercise(undefined); setExerciseDialogOpen(true); }}
               className="group relative overflow-hidden rounded-2xl flex flex-col items-center justify-center gap-2 text-center transition-all duration-300 hover:scale-[1.02]"
               style={{ aspectRatio: "1/1", background: th.isDark ? `${th.gradShadow(0.06)}` : `${th.gradShadow(0.05)}`, border: `1.5px dashed ${th.gradShadow(0.4)}` }}>
-              <div className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110" style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, boxShadow: `0 6px 20px ${th.gradShadow(0.4)}` }}>
-                <Plus className="w-4 h-4 text-white" />
+              <div className="w-10 h-10 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110" style={{ background: th.ink, color: th.onInk }}>
+                <Plus className="w-4 h-4" />
               </div>
               <div className="text-xs font-black" style={{ color: th.fg }}>Nouvel exercice</div>
             </button>
@@ -569,7 +569,7 @@ export function AdminCourseEditorPage() {
           <div className="flex flex-col gap-2 pt-2">
             <ShimBtn full onClick={publishAndGenerate}>Publier et générer</ShimBtn>
             <VBtn full onClick={publishWithoutGeneration}>Publier sans génération</VBtn>
-            <button type="button" onClick={cancelPublish} className="w-full px-4 py-2.5 rounded-full text-sm font-semibold transition-opacity hover:opacity-70" style={{ color: th.fg3 }}>
+            <button type="button" onClick={cancelPublish} className="w-full px-4 py-2.5 rounded-[2px] text-sm font-semibold transition-opacity hover:opacity-70" style={{ color: th.fg3 }}>
               Annuler
             </button>
           </div>

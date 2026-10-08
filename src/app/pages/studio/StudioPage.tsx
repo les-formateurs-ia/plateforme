@@ -48,7 +48,7 @@ export function StudioPage() {
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div>
-        <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif", color: th.fg }}><GT>Le Studio</GT></h2>
+        <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>Le Studio</GT></h2>
         <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Discute avec ChatGPT, Gemini et Claude, et pratique la génération multimédia avec de vrais modèles d'IA — image, vidéo, musique, voix et avatar.</p>
       </div>
 
@@ -68,13 +68,13 @@ export function StudioPage() {
             <div className="absolute inset-0" style={{ background: "linear-gradient(180deg,rgba(10,10,16,0.15) 0%,rgba(10,10,16,0.75) 100%)" }} />
             <div className="relative h-full flex flex-col justify-between gap-5 p-4 sm:p-3">
               <div>
-                <span className="inline-block text-xs sm:text-[13px] font-semibold px-3 sm:px-4 py-1 rounded-full mb-3 self-start" style={{ background: "rgba(255,255,255,0.18)", color: "#fff", backdropFilter: "blur(4px)" }}>{subtitle}</span>
+                <span className="inline-block text-xs sm:text-[13px] font-semibold px-3 sm:px-4 py-1 rounded-[2px] mb-3 self-start" style={{ background: "rgba(255,255,255,0.18)", color: "#fff", backdropFilter: "blur(4px)" }}>{subtitle}</span>
                 <h3 className="font-black text-white leading-tight break-words max-w-[92%] sm:max-w-[78%] text-[20px] min-[381px]:text-[22px] sm:text-[30px] lg:text-[34px]">{title}</h3>
               </div>
               {!restricted && (
                 <button
                   onClick={() => navigate(`/studio/${slug}`)}
-                  className="inline-flex items-center gap-2 self-start text-sm sm:text-base font-semibold px-4 sm:px-6 py-2.5 sm:py-3 rounded-full transition-colors"
+                  className="inline-flex items-center gap-2 self-start text-sm sm:text-base font-semibold px-4 sm:px-6 py-2.5 sm:py-3 rounded-[2px] transition-colors"
                   style={{ background: "rgba(255,255,255,0.18)", color: "#fff", backdropFilter: "blur(4px)" }}
                   onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.3)")}
                   onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.18)")}
@@ -84,7 +84,7 @@ export function StudioPage() {
                 </button>
               )}
               {locked && !notReady && (
-                <span className="inline-flex items-center gap-2 self-start text-sm font-semibold px-4 py-2.5 rounded-full" style={{ background: "rgba(0,0,0,0.45)", color: "#fff" }}>
+                <span className="inline-flex items-center gap-2 self-start text-sm font-semibold px-4 py-2.5 rounded-[2px]" style={{ background: "rgba(0,0,0,0.45)", color: "#fff" }}>
                   <Lock size={14} />Crédits épuisés
                 </span>
               )}

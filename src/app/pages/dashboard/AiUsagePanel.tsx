@@ -116,10 +116,10 @@ export function AiUsagePanel() {
         <div className="max-w-sm w-full">
           <AiBudgetBar spentUsd={profile.spentUsd} capUsd={profile.budgetUsd} size="lg" />
         </div>
-        <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background: th.isDark ? "rgba(255,255,255,0.04)" : `${th.gradShadow(0.06)}`, border: `1px solid ${th.sep}` }}>
+        <div className="flex gap-0.5 p-0.5 rounded-[4px] w-fit" style={{ border: `1px solid ${th.inputB}` }}>
           {PERIODS.map(({ id, label }) => (
-            <button key={id} onClick={() => setPeriod(id)} className="px-4 py-2 rounded-lg text-xs font-semibold transition-all"
-              style={period === id ? { background: th.isDark ? `${th.gradShadow(0.14)}` : "rgba(255,255,255,0.8)", color: th.navAC, border: `1px solid ${th.gradShadow(0.25)}` } : { color: th.fg3, background: "transparent", border: "1px solid transparent" }}>
+            <button key={id} onClick={() => setPeriod(id)} className="px-4 py-2 rounded-[2px] text-xs font-semibold transition-colors"
+              style={period === id ? { background: th.ink, color: th.onInk, border: "1px solid transparent" } : { color: th.fg3, background: "transparent", border: "1px solid transparent" }}>
               {label}
             </button>
           ))}

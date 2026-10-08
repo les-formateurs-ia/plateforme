@@ -77,7 +77,7 @@ export function BattleGroundPage() {
         <button onClick={() => navigate("/practice")} className="flex items-center gap-1.5 text-sm mb-2 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
           <ArrowLeft className="w-4 h-4" />Exercez-vous !
         </button>
-        <h2 className="text-2xl font-black flex items-center gap-2" style={{ fontFamily: "'Funnel Display',sans-serif" }}><Swords className="w-5 h-5" /><GT>Battle Ground</GT></h2>
+        <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black flex items-center gap-2" style={{ color: th.fg }}><Swords className="w-5 h-5" /><GT>Battle Ground</GT></h2>
         <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Un seul prompt, plusieurs IA — compare leurs réponses côte à côte.</p>
       </div>
 
@@ -100,7 +100,7 @@ export function BattleGroundPage() {
                 <button key={id} type="button" onClick={() => toggleModel(id)} disabled={submitting}
                   className="px-3.5 py-2 rounded-xl text-xs font-semibold transition-all disabled:opacity-50"
                   style={active
-                    ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff" }
+                    ? { background: th.ink, color: th.onInk }
                     : { background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg3 }}>
                   {label}
                 </button>

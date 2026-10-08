@@ -105,7 +105,7 @@ export function AdminCoursesPage() {
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Gestion des formations</GT></h2>
+          <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>Gestion des formations</GT></h2>
           <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Modèles de formation — à attribuer aux élèves depuis la fiche élève.</p>
         </div>
         <div className="flex items-center gap-2">
@@ -136,7 +136,7 @@ export function AdminCoursesPage() {
               <div className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <h3 className="text-sm font-black" style={{ color: th.fg }}>{c.name}</h3>
-                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0" style={{ background: sc.bg, color: sc.color, border: `1px solid ${sc.color}30` }}>{sc.label}</span>
+                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-[2px] shrink-0" style={{ background: sc.bg, color: sc.color, border: `1px solid ${sc.color}30` }}>{sc.label}</span>
                 </div>
                 <p className="text-xs leading-relaxed mb-4 line-clamp-2" style={{ color: th.fg3 }}>{c.description || "Pas de description."}</p>
                 <div className="flex items-center gap-4 text-xs" style={{ color: th.fg3 }}>

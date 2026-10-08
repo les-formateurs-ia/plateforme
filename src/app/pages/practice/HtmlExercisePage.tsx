@@ -162,7 +162,7 @@ export function HtmlExercisePage() {
         <button onClick={() => navigate("/practice/html")} className="flex items-center gap-1.5 text-sm mb-2 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
           <ArrowLeft className="w-4 h-4" />Exercices pour vous
         </button>
-        <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>{brief?.name ?? "Exercices pour vous"}</GT></h2>
+        <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>{brief?.name ?? "Exercices pour vous"}</GT></h2>
         <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>{brief?.description || "Exercice HTML interactif."}</p>
       </div>
 
@@ -185,7 +185,7 @@ export function HtmlExercisePage() {
               <div className="flex items-center gap-3 flex-wrap gap-y-2">
                 <label className="cursor-pointer">
                   <input type="file" accept=".txt,.html,.htm,.docx" className="hidden" onChange={handleFileChange} />
-                  <span className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 hover:opacity-80"
+                  <span className="inline-flex items-center gap-1.5 rounded-[2px] px-4 py-2 text-sm font-semibold transition-all duration-200 hover:opacity-80"
                     style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(15,14,20,0.04)", border: `1px solid ${th.inputB}`, color: th.fg }}>
                     <Upload className="w-3.5 h-3.5" />Charger un fichier
                   </span>
@@ -215,7 +215,7 @@ export function HtmlExercisePage() {
                 />
               )}
               {staff && (
-                <button onClick={startEdit} className="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg"
+                <button onClick={startEdit} className="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-[2px] px-3.5 py-2 text-xs font-semibold shadow-lg"
                   style={{ background: th.card, border: `1px solid ${th.sep}`, color: th.fg }}>
                   <Pencil className="w-3 h-3" />Modifier
                 </button>
@@ -235,13 +235,13 @@ export function HtmlExercisePage() {
         <div className="flex items-center justify-end">
           <div className="flex items-center gap-3">
             <button onClick={() => setViewIndex((i) => Math.max(0, i - 1))} disabled={viewIndex === 0}
-              className="w-8 h-8 rounded-full flex items-center justify-center disabled:opacity-30 transition-opacity hover:opacity-80"
+              className="w-8 h-8 rounded-[4px] flex items-center justify-center disabled:opacity-30 transition-opacity hover:opacity-80"
               style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
               <ChevronLeft className="w-4 h-4" style={{ color: th.fg }} />
             </button>
             <span className="text-xs font-semibold" style={{ color: th.fg3 }}>{viewIndex + 1} / {attempts.length}</span>
             <button onClick={() => setViewIndex((i) => Math.min(attempts.length - 1, i + 1))} disabled={viewIndex === attempts.length - 1}
-              className="w-8 h-8 rounded-full flex items-center justify-center disabled:opacity-30 transition-opacity hover:opacity-80"
+              className="w-8 h-8 rounded-[4px] flex items-center justify-center disabled:opacity-30 transition-opacity hover:opacity-80"
               style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
               <ChevronRight className="w-4 h-4" style={{ color: th.fg }} />
             </button>

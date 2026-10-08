@@ -30,7 +30,7 @@ export function PracticePage2() {
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div>
-        <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Exercez-vous !</GT></h2>
+        <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>Exercez-vous !</GT></h2>
         <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>{COUNT_WORDS[availableCount] ?? availableCount} ateliers pratiques pour affûter ton regard sur l'IA générative</p>
       </div>
 
@@ -40,7 +40,7 @@ export function PracticePage2() {
             <div className="p-6 flex flex-col" style={{ minHeight: 220 }}>
               <div className="flex items-start justify-between mb-4">
                 <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl" style={{ background: glow, border: `1px solid ${color}22` }}>{emoji}</div>
-                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full" style={{ background: `${color}14`, color, border: `1px solid ${color}30` }}>{tag}</span>
+                <span className="text-[10px] font-bold px-2.5 py-1 rounded-[2px]" style={{ background: `${color}14`, color, border: `1px solid ${color}30` }}>{tag}</span>
               </div>
               <h4 className="text-sm font-black mb-2" style={{ color: th.fg }}>{title}</h4>
               <p className="text-xs leading-relaxed flex-1" style={{ color: th.fg3 }}>{desc}</p>

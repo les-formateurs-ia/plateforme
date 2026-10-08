@@ -64,7 +64,7 @@ function FeaturedQuizTile({ test, Icon, kindLabel, intro, variant, index, onStar
           </div>
           {!test.done && (
             <div className="pt-2">
-              <span className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-base font-bold transition-transform duration-200 group-hover:-translate-y-0.5"
+              <span className="inline-flex items-center gap-2 rounded-[2px] px-6 py-3 text-base font-bold transition-transform duration-200 group-hover:-translate-y-0.5"
                 style={{ background: h.gradient, color: "#fff", boxShadow: `0 10px 26px ${h.alpha(0.4)}`, textShadow: "0 1px 2px rgba(0,0,0,0.15)" }}>
                 Commencer<ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
               </span>

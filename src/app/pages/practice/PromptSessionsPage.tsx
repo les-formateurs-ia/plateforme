@@ -81,7 +81,7 @@ export function PromptSessionsPage() {
         <button onClick={() => navigate("/practice")} className="flex items-center gap-1.5 text-sm mb-2 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
           <ArrowLeft className="w-4 h-4" />Exercez-vous !
         </button>
-        <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Exercices prompts</GT></h2>
+        <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>Exercices prompts</GT></h2>
         <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Écris un prompt, l'IA le note sur 20 et t'explique précisément quoi corriger.</p>
       </div>
 
@@ -89,8 +89,8 @@ export function PromptSessionsPage() {
         className="w-full group relative overflow-hidden rounded-2xl p-5 flex items-center gap-4 text-left transition-all duration-300 hover:scale-[1.005] disabled:opacity-60"
         style={{ background: `linear-gradient(120deg,${th.gradShadow(0.16)},rgba(219,172,240,0.06) 60%)`, border: `1px solid ${th.gradShadow(0.3)}` }}>
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `linear-gradient(120deg,${th.gradShadow(0.1)},transparent 70%)` }} />
-        <div className="relative w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 shadow-lg" style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, boxShadow: `0 4px 16px ${th.gradShadow(0.4)}` }}>
-          <Plus className="w-5 h-5 text-white" />
+        <div className="relative w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style={{ background: th.ink, color: th.onInk }}>
+          <Plus className="w-5 h-5" />
         </div>
         <div className="relative min-w-0 flex-1">
           <div className="text-sm font-black" style={{ color: th.fg }}>Nouveau test</div>
@@ -117,19 +117,19 @@ export function PromptSessionsPage() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-sm font-black truncate" style={{ color: th.fg }}>{s.name || `Test n°${s.ordinal}`}</span>
-                      {tone && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0" style={{ color: tone.color, background: tone.bg }}>{s.lastScore}/20</span>}
+                      {tone && <span className="text-[10px] font-bold px-2 py-0.5 rounded-[2px] shrink-0" style={{ color: tone.color, background: tone.bg }}>{s.lastScore}/20</span>}
                     </div>
                     {s.preview && <p className="text-xs truncate mt-0.5" style={{ color: th.fg3 }}>{s.preview}</p>}
                     <p className="text-[11px] mt-1" style={{ color: th.fg3 }}>{formatDate(s.createdAt)} · {s.attemptCount} tentative{s.attemptCount > 1 ? "s" : ""}</p>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button onClick={(e) => { e.stopPropagation(); setEditingSession(s); }}
-                      className="w-8 h-8 rounded-full flex items-center justify-center transition-opacity hover:opacity-80"
+                      className="w-8 h-8 rounded-[4px] flex items-center justify-center transition-opacity hover:opacity-80"
                       style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(15,14,20,0.04)" }} title="Renommer">
                       <Pencil className="w-3.5 h-3.5" style={{ color: th.fg3 }} />
                     </button>
                     <button onClick={(e) => handleDelete(e, s.sessionId)} disabled={deletingId === s.sessionId}
-                      className="w-8 h-8 rounded-full flex items-center justify-center transition-opacity hover:opacity-80 disabled:opacity-40"
+                      className="w-8 h-8 rounded-[4px] flex items-center justify-center transition-opacity hover:opacity-80 disabled:opacity-40"
                       style={{ background: "rgba(229,72,77,0.1)" }} title="Supprimer">
                       <Trash2 className="w-3.5 h-3.5" style={{ color: RED }} />
                     </button>

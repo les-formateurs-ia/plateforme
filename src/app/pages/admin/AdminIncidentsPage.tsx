@@ -78,7 +78,7 @@ export function AdminIncidentsPage() {
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div>
-        <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Incidents techniques</GT></h2>
+        <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>Incidents techniques</GT></h2>
         <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Bugs signalés par les utilisateurs depuis l'assistance technique.</p>
       </div>
 
@@ -98,10 +98,10 @@ export function AdminIncidentsPage() {
             <GCard key={incident.id}><div className="p-5">
               <div className="flex items-start justify-between gap-3 mb-2 flex-wrap">
                 <div className="flex items-center gap-2.5 flex-wrap">
-                  <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : `${th.gradShadow(0.06)}`, color: th.navAC, border: `1px solid ${th.navAC}30` }}>
+                  <span className="text-[11px] font-bold px-2.5 py-1 rounded-[2px]" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : `${th.gradShadow(0.06)}`, color: th.navAC, border: `1px solid ${th.navAC}30` }}>
                     {INCIDENT_PAGE_LABEL[incident.page]}
                   </span>
-                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-full" style={{ background: sc.bg, color: sc.color, border: `1px solid ${sc.color}30` }}>
+                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-[2px]" style={{ background: sc.bg, color: sc.color, border: `1px solid ${sc.color}30` }}>
                     {INCIDENT_STATUS_LABEL[incident.status]}
                   </span>
                 </div>
@@ -119,7 +119,7 @@ export function AdminIncidentsPage() {
                     onClick={() => handleDelete(incident)}
                     disabled={deletingId === incident.id || updatingId === incident.id}
                     title="Supprimer l'incident"
-                    className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:opacity-80 disabled:opacity-50 shrink-0"
+                    className="w-8 h-8 rounded-[4px] flex items-center justify-center transition-colors hover:opacity-80 disabled:opacity-50 shrink-0"
                     style={{ background: "rgba(251,194,173,0.1)", border: "1px solid rgba(251,194,173,0.25)", color: "#fbc2ad" }}
                   >
                     <Trash2 className="w-3.5 h-3.5" />

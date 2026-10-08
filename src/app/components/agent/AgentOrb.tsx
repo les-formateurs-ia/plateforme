@@ -41,7 +41,7 @@ export function AgentOrb({ status, mode = "listening", active = false, size, chi
         style={{
           borderRadius: "50%",
           animation: speaking ? "agent-orb-wobble 2.6s ease-in-out infinite" : "agent-orb-idle 3.4s ease-in-out infinite",
-          boxShadow: `0 4px 20px ${th.gradShadow(0.35)}`,
+          boxShadow: "none",
         }}
       >
         <div className="absolute inset-0" style={{ background: "linear-gradient(135deg,#b58de0,#dbacf0)" }} />

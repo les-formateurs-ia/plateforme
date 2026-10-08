@@ -47,49 +47,43 @@ export function SectionTile({ label, desc, Icon, hue, badge, step, index, disabl
   const rgb = hexToRgb(c1);
   const tone = badge?.tone ?? "default";
   const morph = useMorph<HTMLButtonElement>(morphName);
+  // Badges : "todo" à l'encre (action attendue), "done" en vert, le reste
+  // en filet neutre — la teinte de la rubrique reste sur la pastille.
   const badgeStyle: CSSProperties =
-    tone === "todo" ? { background: `linear-gradient(135deg,${c1},${c2})`, color: "#fff" }
-    : tone === "done" ? { background: "rgba(106,222,177,0.15)", color: "#3fbf8f" }
-    : tone === "muted" ? { background: th.inputBg, color: th.fg3 }
-    : { background: `rgba(${rgb},${th.isDark ? 0.16 : 0.12})`, color: th.isDark ? c2 : c1 };
+    tone === "todo" ? { background: th.ink, color: th.onInk, borderColor: th.ink }
+    : tone === "done" ? { background: "rgba(106,222,177,0.18)", color: th.isDark ? "#6adeb1" : "#1f7a57", borderColor: "transparent" }
+    : tone === "muted" ? { color: th.fg3, borderColor: th.sep }
+    : { background: `rgba(${rgb},${th.isDark ? 0.22 : 0.18})`, color: th.fg, borderColor: "transparent" };
 
+  // Carte plate à filet fin (site public) : au survol le filet passe à
+  // l'encre et un liseré au dégradé de la rubrique se déploie en bas.
   const vars = {
     "--tile-b0": th.sep,
-    "--tile-b1": `rgba(${rgb},0.55)`,
-    "--tile-s0": th.isDark ? "0 4px 18px rgba(0,0,0,0.28)" : "0 4px 18px rgba(15,14,20,0.06)",
-    "--tile-s1": `0 18px 40px rgba(${rgb},${th.isDark ? 0.22 : 0.28})`,
+    "--tile-b1": th.ink,
     animationDelay: `${index * 45}ms`,
     background: th.card,
   } as CSSProperties;
 
   return (
     <button ref={morph.ref} data-morph={morphName} data-morph-fade="" type="button" onClick={onClick} disabled={disabled} style={vars}
-      className={`${morph.incoming ? "" : "fade-up "}group relative overflow-hidden rounded-3xl text-left p-5 min-h-[190px] flex flex-col border transition-all duration-300 [border-color:var(--tile-b0)] [box-shadow:var(--tile-s0)] hover:-translate-y-1 hover:[border-color:var(--tile-b1)] hover:[box-shadow:var(--tile-s1)] focus-visible:outline-none focus-visible:[border-color:var(--tile-b1)] disabled:opacity-55 disabled:pointer-events-none`}>
-      {/* Halo coloré + icône en filigrane */}
-      <div className="pointer-events-none absolute -top-20 -right-20 w-64 h-64 rounded-full blur-3xl opacity-40 transition-opacity duration-300 group-hover:opacity-70"
-        style={{ background: `radial-gradient(circle, rgba(${rgb},${th.isDark ? 0.45 : 0.35}), transparent 70%)` }} />
-      <Icon className="pointer-events-none absolute -bottom-7 -right-5 w-36 h-36 transition-transform duration-500 -rotate-12 group-hover:rotate-0 group-hover:scale-110"
-        style={{ color: c1, opacity: th.isDark ? 0.08 : 0.1 }} strokeWidth={1.4} />
-
+      className={`${morph.incoming ? "" : "fade-up "}group relative overflow-hidden rounded-[10px] text-left p-5 min-h-[190px] flex flex-col border transition-colors duration-200 [border-color:var(--tile-b0)] hover-fine:[border-color:var(--tile-b1)] focus-visible:[border-color:var(--tile-b1)] disabled:opacity-55 disabled:pointer-events-none`}>
       <div className="relative flex items-start justify-between gap-3">
-        <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105"
-          style={{ background: `linear-gradient(135deg,${c1},${c2})`, boxShadow: `0 8px 20px rgba(${rgb},0.35)` }}>
-          <Icon className="w-5 h-5" style={{ color: "#fff" }} strokeWidth={2.2} />
+        <div className="w-12 h-12 rounded-[6px] flex items-center justify-center shrink-0" style={{ background: `linear-gradient(135deg,${c1},${c2})` }}>
+          <Icon className="w-5 h-5" style={{ color: "#000" }} strokeWidth={2} />
         </div>
-        {badge && <span className="rounded-full px-3 py-1 text-xs font-bold whitespace-nowrap" style={badgeStyle}>{badge.label}</span>}
+        {badge && <span className="rounded-[2px] border px-2 py-0.5 text-xs font-bold whitespace-nowrap" style={badgeStyle}>{badge.label}</span>}
       </div>
 
-      <div className="relative mt-auto pt-5">
-        {step !== undefined && <div className="text-[11px] font-black uppercase tracking-widest mb-1" style={{ color: th.isDark ? c2 : c1 }}>Étape {step}</div>}
-        <h3 className="text-lg font-black leading-tight" style={{ color: th.fg, fontFamily: "'Funnel Display',sans-serif" }}>{label}</h3>
-        <p className="text-sm mt-1.5 leading-snug" style={{ color: th.fg3 }}>{desc}</p>
-        <div className="flex items-center gap-1.5 mt-3 text-sm font-bold" style={{ color: th.isDark ? c2 : c1 }}>
-          {cta}<ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1.5" />
+      <div className="relative mt-auto pt-6">
+        {step !== undefined && <div className="eyebrow mb-1.5" style={{ color: th.fg3 }}>Étape {step}</div>}
+        <h3 className="text-xl font-black leading-tight" style={{ color: th.fg }}>{label}</h3>
+        <p className="text-sm mt-1.5 leading-snug" style={{ color: th.fg2 }}>{desc}</p>
+        <div className="flex items-center gap-1.5 mt-4 text-sm font-bold" style={{ color: th.fg }}>
+          <span className="ink-link">{cta}</span><ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
         </div>
       </div>
 
-      {/* Liseré bas qui se déploie au survol */}
-      <div className="absolute bottom-0 left-0 h-1 w-full origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"
+      <div className="absolute bottom-0 left-0 h-[3px] w-full origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"
         style={{ background: `linear-gradient(90deg,${c1},${c2})` }} />
     </button>
   );

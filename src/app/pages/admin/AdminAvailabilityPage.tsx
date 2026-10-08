@@ -248,7 +248,7 @@ export function AdminAvailabilityPage() {
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div>
-        <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Rendez-vous</GT></h2>
+        <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>Rendez-vous</GT></h2>
         <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Déclare tes disponibilités, les élèves réservent directement dessus.</p>
       </div>
 
@@ -260,13 +260,13 @@ export function AdminAvailabilityPage() {
               <h3 className="text-sm font-black" style={{ color: th.fg }}>Mes disponibilités</h3>
             </div>
             <div className="flex items-center gap-2">
-              <button onClick={() => setWeekStart((w) => addDays(w, -7))} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ border: `1px solid ${th.sep}`, color: th.fg2 }}>
+              <button onClick={() => setWeekStart((w) => addDays(w, -7))} className="w-8 h-8 rounded-[4px] flex items-center justify-center" style={{ border: `1px solid ${th.sep}`, color: th.fg2 }}>
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <span className="text-xs font-semibold min-w-[150px] text-center" style={{ color: th.fg2 }}>
                 {weekStart.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })} – {weekEnd.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}
               </span>
-              <button onClick={() => setWeekStart((w) => addDays(w, 7))} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ border: `1px solid ${th.sep}`, color: th.fg2 }}>
+              <button onClick={() => setWeekStart((w) => addDays(w, 7))} className="w-8 h-8 rounded-[4px] flex items-center justify-center" style={{ border: `1px solid ${th.sep}`, color: th.fg2 }}>
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -317,7 +317,7 @@ export function AdminAvailabilityPage() {
                             className="h-4 border transition-colors"
                             style={{
                               borderColor: th.isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
-                              background: isBooked ? "rgba(148,163,184,0.35)" : isSelected ? `linear-gradient(135deg,${th.grad1},${th.grad2})` : "transparent",
+                              background: isBooked ? "rgba(148,163,184,0.35)" : isSelected ? th.ink : "transparent",
                               cursor: isBooked ? "not-allowed" : "pointer",
                             }}
                           />

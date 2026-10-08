@@ -48,7 +48,7 @@ export function ResetStudentStatsButton({ studentId, studentName, onReset }: { s
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-opacity hover:opacity-80"
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-[2px] text-sm font-semibold transition-opacity hover:opacity-80"
         style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.3)", color: "#ef4444" }}
       >
         <RotateCcw className="w-4 h-4" />Réinitialiser les statistiques
@@ -83,10 +83,10 @@ export function ResetStudentStatsButton({ studentId, studentName, onReset }: { s
           </div>
 
           <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2">
-            <button type="button" onClick={() => setOpen(false)} disabled={resetting} className="px-4 py-2.5 rounded-full text-sm font-semibold transition-opacity hover:opacity-70 disabled:opacity-40" style={{ color: th.fg2 }}>
+            <button type="button" onClick={() => setOpen(false)} disabled={resetting} className="px-4 py-2.5 rounded-[2px] text-sm font-semibold transition-opacity hover:opacity-70 disabled:opacity-40" style={{ color: th.fg2 }}>
               Annuler
             </button>
-            <button type="button" onClick={confirm} disabled={resetting} className="px-4 py-2.5 rounded-full text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60" style={{ background: "#ef4444" }}>
+            <button type="button" onClick={confirm} disabled={resetting} className="px-4 py-2.5 rounded-[2px] text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60" style={{ background: "#ef4444" }}>
               {resetting ? "Réinitialisation…" : "Confirmer la réinitialisation"}
             </button>
           </div>

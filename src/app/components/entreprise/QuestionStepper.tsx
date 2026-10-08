@@ -41,7 +41,7 @@ export function QuestionStepper({ index, total, answered, onJump, question, suff
         {/* Progression */}
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-black uppercase tracking-widest" style={{ background: h.gradient, color: "#fff" }}>
+            <span className="inline-flex items-center rounded-[2px] px-3 py-1 text-xs font-black uppercase tracking-widest" style={{ background: h.gradient, color: "#fff" }}>
               Question {index + 1} sur {total}
             </span>
             <span className="text-xs font-bold tabular-nums" style={{ color: th.fg3 }}>{answeredCount}/{total} répondue{answeredCount > 1 ? "s" : ""}</span>

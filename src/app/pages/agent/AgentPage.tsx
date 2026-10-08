@@ -233,7 +233,7 @@ export function AgentPage() {
         <div className="p-4 shrink-0 space-y-3">
           <h2 className="text-lg font-black flex items-center gap-2" style={{ color: th.fg }}><Bot className="w-5 h-5" style={{ color: th.navAC }} /><GT>Mon Agent IA</GT></h2>
           <button onClick={startNewConversation} className="w-full flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-opacity hover:opacity-90"
-            style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff" }}>
+            style={{ background: th.ink, color: th.onInk }}>
             <Plus className="w-4 h-4" />Nouvelle conversation
           </button>
         </div>
@@ -293,7 +293,7 @@ export function AgentPage() {
             <div key={m.id} className={cx("flex", m.role === "user" ? "justify-end" : "justify-start")}>
               <div className="max-w-[85%] sm:max-w-[70%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-line flex items-start gap-2"
                 style={m.role === "user"
-                  ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", borderRadius: "16px 16px 4px 16px" }
+                  ? { background: th.ink, color: th.onInk, borderRadius: "16px 16px 4px 16px" }
                   : { background: th.card, border: `1px solid ${th.sep}`, color: th.fg, borderRadius: "16px 16px 16px 4px" }}>
                 {m.modality === "voice" && <AudioLines className="w-3.5 h-3.5 shrink-0 mt-0.5 opacity-60" />}
                 <span>{m.content}</span>
@@ -327,27 +327,27 @@ export function AgentPage() {
               {agentStatus === "connected" && (
                 <button onPointerDown={(e) => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); startPushToTalk(); }}
                   onPointerUp={stopPushToTalk} onPointerCancel={stopPushToTalk}
-                  className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95 select-none touch-none"
+                  className="w-9 h-9 rounded-[4px] flex items-center justify-center shrink-0 transition-all active:scale-95 select-none touch-none"
                   style={{ background: pttActive ? "linear-gradient(135deg,#2792dc,#9ce6e6)" : th.inputBg, border: `1px solid ${th.inputB}` }}>
                   <Mic className="w-4 h-4" style={{ color: pttActive ? "#06121c" : th.fg }} />
                 </button>
               )}
-              <button onClick={endVoiceCall} className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: "#e5484d" }}>
+              <button onClick={endVoiceCall} className="w-9 h-9 rounded-[4px] flex items-center justify-center shrink-0" style={{ background: "#e5484d" }}>
                 <PhoneOff className="w-4 h-4 text-white" />
               </button>
             </GCard>
           )}
           <div className="flex items-center gap-2">
             <button onClick={startVoiceCall} disabled={agentStatus !== "idle"} title="Démarrer un appel vocal"
-              className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 transition-opacity hover:opacity-90 disabled:opacity-40"
+              className="w-11 h-11 rounded-[4px] flex items-center justify-center shrink-0 transition-opacity hover:opacity-90 disabled:opacity-40"
               style={{ background: "linear-gradient(135deg,#2792dc,#9ce6e6)" }}>
               <Phone className="w-4 h-4 text-white" />
             </button>
             <input value={textInput} onChange={(e) => setTextInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && !sending && sendText()}
-              placeholder="Écris à ton agent…" className="flex-1 rounded-full px-4 py-3 text-sm g-input" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg }} />
-            <button onClick={sendText} disabled={!textInput.trim() || sending} className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 disabled:opacity-30"
-              style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})` }}>
-              <Send className="w-4 h-4 text-white" />
+              placeholder="Écris à ton agent…" className="flex-1 rounded-[4px] px-4 py-3 text-sm g-input" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg }} />
+            <button onClick={sendText} disabled={!textInput.trim() || sending} className="w-11 h-11 rounded-[4px] flex items-center justify-center shrink-0 disabled:opacity-30"
+              style={{ background: th.ink, color: th.onInk }}>
+              <Send className="w-4 h-4" />
             </button>
           </div>
         </div>

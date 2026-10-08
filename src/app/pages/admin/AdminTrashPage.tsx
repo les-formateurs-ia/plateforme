@@ -65,7 +65,7 @@ export function AdminTrashPage() {
       <Link to="/admin/courses" className="flex items-center gap-1.5 text-sm w-fit transition-colors hover:opacity-70" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />Formations</Link>
 
       <div>
-        <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Corbeille</GT></h2>
+        <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>Corbeille</GT></h2>
         <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>La suppression définitive est irréversible.</p>
       </div>
 

@@ -65,7 +65,7 @@ export function DashboardPage() {
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="text-2xl font-black mb-0.5 capitalize" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Bienvenue {firstName} 👋</GT></h2>
+          <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black mb-0.5 capitalize" style={{ color: th.fg }}><GT>Bienvenue {firstName} 👋</GT></h2>
           <p className="text-sm" style={{ color: th.fg3 }}>Tes statistiques et ta progression en temps réel</p>
         </div>
         {tab === "overview" && instances.length > 1 && (
@@ -80,10 +80,10 @@ export function DashboardPage() {
         )}
       </div>
 
-      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background: th.isDark ? "rgba(255,255,255,0.04)" : `${th.gradShadow(0.06)}`, border: `1px solid ${th.sep}` }}>
+      <div role="tablist" className="flex flex-wrap gap-x-7" style={{ borderBottom: `1px solid ${th.sep}` }}>
         {(["overview", "usage"] as const).map((t) => (
-          <button key={t} onClick={() => setTab(t)} className="px-5 py-2 rounded-lg text-sm font-semibold transition-all"
-            style={tab === t ? { background: th.isDark ? `${th.gradShadow(0.14)}` : "rgba(255,255,255,0.8)", color: th.navAC, border: `1px solid ${th.gradShadow(0.25)}` } : { color: th.fg3, background: "transparent", border: "1px solid transparent" }}>
+          <button key={t} onClick={() => setTab(t)} role="tab" aria-selected={tab === t} className="tab-link shrink-0 pt-1 pb-3 text-[15px] transition-colors"
+            style={{ color: tab === t ? th.fg : th.fg3 }}>
             {t === "overview" ? "Vue d'ensemble" : "Mon utilisation IA"}
           </button>
         ))}
@@ -145,7 +145,7 @@ export function DashboardPage() {
                             {!allDone && active && (
                               <div className="flex items-center gap-2 shrink-0">
                                 <div className="w-16 h-1 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : `${th.gradShadow(0.1)}` }}>
-                                  <div className="h-full rounded-full" style={{ width: `${pct}%`, background: `linear-gradient(90deg,${th.grad1},${th.grad2})` }} />
+                                  <div className="h-full rounded-full" style={{ width: `${pct}%`, background: th.iris }} />
                                 </div>
                                 <span className="text-[10px] font-bold" style={{ color: th.navAC }}>{pct}%</span>
                               </div>

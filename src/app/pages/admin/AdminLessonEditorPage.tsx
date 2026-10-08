@@ -498,7 +498,7 @@ export function AdminLessonEditorPage() {
             <button type="button" onClick={downloadQuizCsvTemplate} className="text-xs font-semibold hover:opacity-70" style={{ color: th.fg3 }}>Modèle CSV</button>
             <input ref={quizFileInputRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => e.target.files?.[0] && handleQuizCsvImport(e.target.files[0])} />
             <button type="button" onClick={() => quizFileInputRef.current?.click()}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all hover:opacity-80"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-[2px] text-xs font-semibold transition-all hover:opacity-80"
               style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg }}>
               <Upload className="w-3.5 h-3.5" />Importer un CSV
             </button>

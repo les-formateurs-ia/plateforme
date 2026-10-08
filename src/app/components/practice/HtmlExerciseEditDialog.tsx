@@ -335,7 +335,7 @@ export function HtmlExerciseEditDialog({
                   <div className="mt-2 flex items-center gap-2 flex-wrap">
                     <label className="cursor-pointer">
                       <input type="file" accept=".txt,.html,.htm,.docx" className="hidden" onChange={handleFileChange} />
-                      <span className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 hover:opacity-80"
+                      <span className="inline-flex items-center gap-1.5 rounded-[2px] px-4 py-2 text-sm font-semibold transition-all duration-200 hover:opacity-80"
                         style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(15,14,20,0.04)", border: `1px solid ${th.inputB}`, color: th.fg }}>
                         <Upload className="w-3.5 h-3.5" />Charger un fichier
                       </span>
@@ -353,9 +353,9 @@ export function HtmlExerciseEditDialog({
                       const active = visibility === v;
                       return (
                         <button key={v} type="button" onClick={() => setVisibility(v)}
-                          className="px-4 py-1.5 rounded-full text-xs font-bold transition-all"
+                          className="px-4 py-1.5 rounded-[2px] text-xs font-bold transition-all"
                           style={active
-                            ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff" }
+                            ? { background: th.ink, color: th.onInk }
                             : { color: th.fg2, background: "transparent" }}>
                           {label}
                         </button>
@@ -452,7 +452,7 @@ export function HtmlExerciseEditDialog({
                         {mine && (
                           <button type="button" onClick={() => void handleRemoveAssignee(s.id)} disabled={removingId === s.id}
                             title="Retirer l'accès à cet exercice"
-                            className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center shadow disabled:opacity-50"
+                            className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-[4px] flex items-center justify-center shadow disabled:opacity-50"
                             style={{ background: "#e5484d", color: "#fff" }}>
                             <X className="w-3 h-3" />
                           </button>

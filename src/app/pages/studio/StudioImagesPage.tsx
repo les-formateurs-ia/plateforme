@@ -125,10 +125,10 @@ export function StudioImagesPage() {
 
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif", color: th.fg }}>Créer vos images</h2>
+            <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}>Créer vos images</h2>
             <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Génère des visuels avec de vrais modèles d'IA (Text-to-Image / Image-to-Image).</p>
           </div>
-          <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-full shrink-0" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg2 }}>
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-[2px] shrink-0" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg2 }}>
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: generating ? th.fg3 : "#22c55e" }} />
             {generating ? "Génération en cours…" : "Génération disponible"}
           </span>
@@ -169,12 +169,12 @@ export function StudioImagesPage() {
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: "rgba(0,0,0,0.35)" }}>
                     <Eye className="w-4 h-4 text-white" />
                   </div>
-                  <button onClick={(e) => { e.stopPropagation(); removeSourceImage(); }} disabled={generating} className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center" style={{ background: "rgba(0,0,0,0.7)" }}>
+                  <button onClick={(e) => { e.stopPropagation(); removeSourceImage(); }} disabled={generating} className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-[4px] flex items-center justify-center" style={{ background: "rgba(0,0,0,0.7)" }}>
                     <X className="w-3 h-3 text-white" />
                   </button>
                 </div>
               ) : (
-                <button onClick={() => fileInputRef.current?.click()} disabled={generating} className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold transition-all hover:opacity-80 disabled:opacity-50 shrink-0"
+                <button onClick={() => fileInputRef.current?.click()} disabled={generating} className="flex items-center gap-1.5 px-3.5 py-2 rounded-[2px] text-xs font-semibold transition-all hover:opacity-80 disabled:opacity-50 shrink-0"
                   style={{ background: th.inputBg, border: `1px dashed ${th.inputB}`, color: th.fg2 }}>
                   <Upload className="w-3.5 h-3.5" />Ajouter une image
                 </button>

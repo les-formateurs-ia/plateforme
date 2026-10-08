@@ -398,3 +398,33 @@
   border-radius: 2px;
   background: var(--nav-mark, transparent);
 }
+
+/* Onglets : la navigation du site public — le libellé actif passe en gras
+   et garde un soulignement au dégradé iris. */
+.tab-link {
+  position: relative;
+  font-weight: 600;
+}
+.tab-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--grad-iris);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 260ms var(--ease-out-strong);
+}
+.tab-link[aria-selected='true'] {
+  font-weight: 700;
+}
+.tab-link[aria-selected='true']::after {
+  transform: scaleX(1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .tab-link:hover {
+    color: var(--ink) !important;
+  }
+}

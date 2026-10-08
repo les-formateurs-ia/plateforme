@@ -91,7 +91,7 @@ export function PromptExercisePage() {
         <button onClick={() => navigate("/practice/prompts")} className="flex items-center gap-1.5 text-sm mb-2 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
           <ArrowLeft className="w-4 h-4" />Historique des tentatives
         </button>
-        <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Exercices prompts</GT></h2>
+        <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>Exercices prompts</GT></h2>
         <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Écris un prompt, l'IA le note sur 20 et t'explique précisément quoi corriger.</p>
       </div>
 
@@ -193,13 +193,13 @@ export function PromptExercisePage() {
             {attempts.length > 1 && (
               <div className="flex items-center gap-3">
                 <button onClick={() => setViewIndex((i) => Math.max(0, i - 1))} disabled={viewIndex === 0}
-                  className="w-8 h-8 rounded-full flex items-center justify-center disabled:opacity-30 transition-opacity hover:opacity-80"
+                  className="w-8 h-8 rounded-[4px] flex items-center justify-center disabled:opacity-30 transition-opacity hover:opacity-80"
                   style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
                   <ChevronLeft className="w-4 h-4" style={{ color: th.fg }} />
                 </button>
                 <span className="text-xs font-semibold" style={{ color: th.fg3 }}>{viewIndex + 1} / {attempts.length}</span>
                 <button onClick={() => setViewIndex((i) => Math.min(attempts.length - 1, i + 1))} disabled={viewIndex === attempts.length - 1}
-                  className="w-8 h-8 rounded-full flex items-center justify-center disabled:opacity-30 transition-opacity hover:opacity-80"
+                  className="w-8 h-8 rounded-[4px] flex items-center justify-center disabled:opacity-30 transition-opacity hover:opacity-80"
                   style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
                   <ChevronRight className="w-4 h-4" style={{ color: th.fg }} />
                 </button>

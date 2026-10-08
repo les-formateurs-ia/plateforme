@@ -71,7 +71,7 @@ export function LessonsPage() {
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Mes leçons</GT></h2>
+        <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>Mes leçons</GT></h2>
         <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>{courses.length} formation{courses.length > 1 ? "s" : ""} en cours</p>
       </div>
 
@@ -200,7 +200,7 @@ function FormationAccordion({ entry, open, onToggle }: { entry: CourseProgressEn
               <span className="text-xs" style={{ color: th.fg3 }}>{outline.sections.length} module{outline.sections.length !== 1 ? "s" : ""} · {completedLessons}/{totalLessons} leçons</span>
               <div className="flex items-center gap-2">
                 <div className="w-20 h-1 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : `${th.gradShadow(0.1)}` }}>
-                  <div className="h-full rounded-full" style={{ width: `${overallPct}%`, background: formationStatus === "complete" ? "linear-gradient(90deg,#78d5e2,#6adeb1)" : `linear-gradient(90deg,${th.grad1},${th.grad2})` }} />
+                  <div className="h-full rounded-full" style={{ width: `${overallPct}%`, background: formationStatus === "complete" ? "linear-gradient(90deg,#78d5e2,#6adeb1)" : th.iris }} />
                 </div>
                 <span className="text-[10px] font-bold" style={{ color: fsc.text }}>{overallPct}%</span>
               </div>
@@ -282,14 +282,14 @@ function FormationAccordion({ entry, open, onToggle }: { entry: CourseProgressEn
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-sm font-bold" style={{ color: status === "locked" ? th.fg3 : th.fg }}>{mod.title}</span>
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0" style={{ background: sc.bg, color: sc.text, border: `1px solid ${sc.border}` }}>{sc.label}</span>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-[2px] shrink-0" style={{ background: sc.bg, color: sc.text, border: `1px solid ${sc.border}` }}>{sc.label}</span>
                           </div>
                           <div className="flex items-center gap-3">
                             <span className="text-xs" style={{ color: th.fg3 }}>{done}/{total} leçons</span>
                             {status !== "locked" && total > 0 && (
                               <div className="flex items-center gap-2">
                                 <div className="w-20 h-1 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : `${th.gradShadow(0.1)}` }}>
-                                  <div className="h-full rounded-full" style={{ width: `${pct}%`, background: status === "complete" ? "linear-gradient(90deg,#78d5e2,#6adeb1)" : `linear-gradient(90deg,${th.grad1},${th.grad2})` }} />
+                                  <div className="h-full rounded-full" style={{ width: `${pct}%`, background: status === "complete" ? "linear-gradient(90deg,#78d5e2,#6adeb1)" : th.iris }} />
                                 </div>
                                 <span className="text-[10px] font-bold" style={{ color: sc.text }}>{pct}%</span>
                               </div>
@@ -323,7 +323,7 @@ function FormationAccordion({ entry, open, onToggle }: { entry: CourseProgressEn
                               <div className="flex-1 min-w-0 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-4">
                                 <span className="text-sm leading-snug break-words sm:flex-1" style={{ color: state === "completed" ? "rgba(106,222,177,0.7)" : state === "available" ? th.navAC : th.fg3 }}>{lesson.title}</span>
                                 <div className="flex items-center gap-2 shrink-0">
-                                  {state === "available" && !editMode && <span className="text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ background: `${th.gradShadow(0.1)}`, color: th.navAC, border: `1px solid ${th.gradShadow(0.25)}` }}>En cours</span>}
+                                  {state === "available" && !editMode && <span className="text-[10px] px-2 py-0.5 rounded-[2px] font-bold" style={{ background: `${th.gradShadow(0.1)}`, color: th.navAC, border: `1px solid ${th.gradShadow(0.25)}` }}>En cours</span>}
                                   <span className="text-xs font-mono flex items-center gap-1" style={{ color: th.fg3 }}>
                                     {lesson.durationMinutes ? <><Clock className="w-3 h-3" />{lesson.durationMinutes}min</> : "—"}
                                   </span>

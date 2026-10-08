@@ -20,7 +20,7 @@ export function RatingBar({ label, value }: { label: string; value: number }) {
         <span className="font-semibold shrink-0" style={{ color: th.fg2 }}>{value}/5</span>
       </div>
       <div className="h-1.5 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.08)" : "rgba(15,14,20,0.06)" }}>
-        <div className="h-full rounded-full" style={{ width: `${(value / 5) * 100}%`, background: `linear-gradient(90deg,${th.grad1},${th.grad2})` }} />
+        <div className="h-full rounded-full" style={{ width: `${(value / 5) * 100}%`, background: th.iris }} />
       </div>
     </div>
   );
@@ -30,7 +30,7 @@ export function Pill({ children, color }: { children: string; color?: string }) 
   const th = useTh();
   return (
     <span
-      className="inline-block text-[10px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap"
+      className="inline-block text-[10px] font-bold px-2.5 py-1 rounded-[2px] whitespace-nowrap"
       style={color
         ? { background: `${color}1f`, color, border: `1px solid ${color}55` }
         : { background: th.inputBg, color: th.fg2, border: `1px solid ${th.inputB}` }}
@@ -51,7 +51,7 @@ export function ModelCard({ model, onOpenDetail, dense = false }: { model: AiMod
     <GCard className={dense ? "@container p-3.5" : "@container p-4 sm:p-6"}>
       <div className={`grid grid-cols-1 items-center gap-5 @[560px]:grid-cols-2 @[1080px]:gap-6 ${dense ? "@[1080px]:grid-cols-[minmax(220px,1fr)_minmax(150px,0.8fr)_144px_208px]" : "@[1080px]:grid-cols-[minmax(220px,1.2fr)_minmax(0,340px)_minmax(150px,0.85fr)_144px_208px]"}`}>
         <div className={`flex min-w-0 items-center gap-4 ${dense ? "" : "@[1280px]:pr-20"}`}>
-          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl shrink-0 flex items-center justify-center text-xs font-black text-white" style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})` }}>
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl shrink-0 flex items-center justify-center text-xs font-black" style={{ background: th.ink, color: th.onInk }}>
             {initials}
           </div>
           <div className="min-w-0">

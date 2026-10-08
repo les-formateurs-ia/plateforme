@@ -79,7 +79,7 @@ export function StudentMissionGallery({ studentId }: { studentId: string }) {
                 <div className="text-xs" style={{ color: th.fg3 }}>{sub.submittedAt ? new Date(sub.submittedAt).toLocaleString("fr-FR") : ""}</div>
               </div>
               {!sub.viewedAt && (
-                <span className="text-[10px] font-bold px-2 py-1 rounded-full shrink-0" style={{ background: "rgba(251,194,173,0.15)", color: "#fbc2ad", border: "1px solid rgba(251,194,173,0.3)" }}>
+                <span className="text-[10px] font-bold px-2 py-1 rounded-[2px] shrink-0" style={{ background: "rgba(251,194,173,0.15)", color: "#fbc2ad", border: "1px solid rgba(251,194,173,0.3)" }}>
                   Nouveau
                 </span>
               )}

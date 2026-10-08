@@ -103,7 +103,7 @@ export function SignupPage() {
                 {[1, 2, 3, 4].map(i => (
                   <div key={i} className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300"
-                      style={{ background: i < step ? `linear-gradient(135deg,${th.grad1},${th.grad2})` : i === step ? `${th.gradShadow(0.12)}` : "transparent", border: i === step ? `1px solid ${th.gradShadow(0.4)}` : "1px solid " + th.sep, color: i < step ? "#08060F" : i === step ? th.navAC : th.fg3, boxShadow: i === step ? `0 0 16px ${th.gradShadow(0.25)}` : "none" }}>
+                      style={{ background: i < step ? th.ink : "transparent", border: i <= step ? `1px solid ${th.ink}` : "1px solid " + th.sep, color: i < step ? th.onInk : i === step ? th.fg : th.fg3 }}>
                       {i < step ? <CheckCircle className="w-3.5 h-3.5" /> : i}
                     </div>
                     {i < 4 && <div className="w-8 h-px" style={{ background: i < step ? `${th.gradShadow(0.5)}` : th.sep }} />}

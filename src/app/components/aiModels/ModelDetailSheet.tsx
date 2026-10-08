@@ -34,7 +34,7 @@ export function ModelDetailSheet({ model, open, onOpenChange }: { model: AiModel
           <div className="flex flex-col h-full overflow-y-auto">
             <SheetHeader className="p-5 sm:p-6 pb-4 text-left" style={{ borderBottom: `1px solid ${th.sep}` }}>
               <div className="flex items-start gap-3">
-                <div className="w-12 h-12 rounded-2xl shrink-0 flex items-center justify-center text-sm font-black text-white" style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})` }}>
+                <div className="w-12 h-12 rounded-2xl shrink-0 flex items-center justify-center text-sm font-black" style={{ background: th.ink, color: th.onInk }}>
                   {model.name.replace(/[^A-Za-z0-9]/g, "").slice(0, 2).toUpperCase()}
                 </div>
                 <div className="min-w-0">

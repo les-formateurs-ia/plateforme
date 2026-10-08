@@ -19,7 +19,7 @@ export function HubPage() {
             <button
               key={id}
               onClick={() => navigate(`/hub/${id}`)}
-              className="flex items-center gap-2 px-5 py-3 rounded-full text-sm font-semibold transition-all hover:opacity-85 active:scale-[0.98]"
+              className="flex items-center gap-2 px-5 py-3 rounded-[2px] text-sm font-semibold transition-all hover:opacity-85 active:scale-[0.98]"
               style={{ background: th.card, border: `1px solid ${th.sep}`, color: th.fg }}
             >
               <Icon className="w-4 h-4 shrink-0" style={{ color: th.navAC }} />

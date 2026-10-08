@@ -88,10 +88,10 @@ export function AdminProjectAdvisorLeadsPage() {
     return () => { window.clearInterval(timer); window.removeEventListener("focus", update); };
   }, []);
 
-  const buttonClass = "px-4 py-2 rounded-full text-sm font-semibold border disabled:opacity-40";
+  const buttonClass = "px-4 py-2 rounded-[2px] text-sm font-semibold border disabled:opacity-40";
   return <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6" style={{ color: th.fg }}>
     <div>
-      <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Demandes de projets IA</GT></h2>
+      <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>Demandes de projets IA</GT></h2>
       <p className="text-sm mt-2" style={{ color: th.fg3 }}>Les demandes du conseiller IA et des pages contact du site, de la plus récente à la plus ancienne. Actualisation automatique toutes les 30 secondes.</p>
     </div>
     <div className="flex flex-wrap items-center gap-3">
@@ -119,7 +119,7 @@ export function AdminProjectAdvisorLeadsPage() {
               <td className="px-4 py-4 whitespace-nowrap">{date(row.created_at)}</td>
               <td className="px-4 py-4 whitespace-nowrap">{SOURCES[row.source] ?? row.source}</td>
               <td className="px-4 py-4">{display(row.first_name)}</td><td className="px-4 py-4">{display(row.last_name)}</td>
-              <td className="px-4 py-4"><span className="inline-block rounded-full px-3 py-1 text-xs font-bold" style={{ background: th.gradShadow(0.15), color: th.fg }}>{row.profile === "entreprise" ? "Entreprise" : row.profile === "particulier" ? "Particulier" : "—"}</span></td>
+              <td className="px-4 py-4"><span className="inline-block rounded-[2px] px-3 py-1 text-xs font-bold" style={{ background: th.gradShadow(0.15), color: th.fg }}>{row.profile === "entreprise" ? "Entreprise" : row.profile === "particulier" ? "Particulier" : "—"}</span></td>
               <td className="px-4 py-4 break-words max-w-52">{display(row.sector)}</td>
               <td className="px-4 py-4 whitespace-nowrap">{row.phone?.trim() ? <a className="underline" href={`tel:${row.phone}`}>{row.phone}</a> : "—"}</td>
               <td className="px-4 py-4 break-all">{row.email?.trim() ? <a className="underline" href={`mailto:${row.email}`}>{row.email}</a> : "—"}</td>
