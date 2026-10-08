@@ -1,15 +1,10 @@
 import { useNavigate } from "react-router";
-import { ChevronRight, Lock } from "lucide-react";
+import { Image as ImageIcon, Clapperboard, Music, Speech, AudioLines, Languages, ScanFace, type LucideIcon } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { GT } from "@/app/components/common/GT";
-import imgImages from "@/imports/Créer vos images.png";
-import imgVideos from "@/imports/Imaginez vos vidéos.png";
-import imgMusiques from "@/imports/Concevez vos propres musiques.png";
-import imgTalkingHead from "@/imports/Faites parler vos images.png";
-import imgTextToSpeech from "@/imports/Du texte à l'audio.png";
-import imgDoublage from "@/imports/Parlez n'importe quelle langue.png";
-import imgFaceSwap from "@/imports/Prenez l'apparence de qui vous voulez.png";
+import { SymbolCard } from "@/app/components/common/SymbolCard";
+import { SectionHead } from "@/app/components/common/SectionHead";
 import { CHAT_PROVIDERS } from "@/app/lib/studioChat";
 import { AiBudgetExhaustedNotice, useAiBudgetExhausted } from "@/app/components/common/AiBudgetGate";
 import imgChatGPT from "@/imports/chatgpt_logo.png";
@@ -19,21 +14,28 @@ import imgClaude from "@/imports/claude_logo.png";
 // `restricted` : modules pas encore prêts (intégration API à venir) —
 // visibles en aperçu (grisé, non cliquable) pour l'admin seulement, masqués
 // pour le formateur et l'élève.
-const CHAT_COVERS = { openai: imgChatGPT, gemini: imgGemini, anthropic: imgClaude };
-const CHAT_MODULES = (["openai", "gemini", "anthropic"] as const).map((id) => {
+// Chaque module est illustré en particules : le logo du fournisseur pour les
+// chats, une icône pour les outils de création.
+const CHAT_LOGOS = { openai: imgChatGPT, gemini: imgGemini, anthropic: imgClaude };
+const CHAT_THEMES = { openai: "bleu", gemini: "violet", anthropic: "beige" } as const;
+type StudioModule = { slug: string; group: "chat" | "create"; Icon?: LucideIcon; image?: string; theme: "violet" | "bleu" | "beige"; title: string; subtitle: string; desc: string; restricted: boolean };
+const CHAT_MODULES: StudioModule[] = (["openai", "gemini", "anthropic"] as const).map((id) => {
   const p = CHAT_PROVIDERS[id];
-  return { slug: p.slug, image: CHAT_COVERS[id], title: `Discutez avec ${p.name}`, subtitle: `Chat IA · ${p.company}`, desc: "", restricted: false };
+  return {
+    slug: p.slug, group: "chat", image: CHAT_LOGOS[id], theme: CHAT_THEMES[id], title: p.name, subtitle: `Chat IA · ${p.company}`,
+    desc: `Discute librement avec ${p.name}, joins tes fichiers et compare les modèles.`, restricted: false,
+  };
 });
 
-const STUDIO_MODULES: { slug: string; image: string | null; background?: string; title: string; subtitle: string; desc: string; restricted: boolean }[] = [
+const STUDIO_MODULES: StudioModule[] = [
   ...CHAT_MODULES,
-  { slug: "images",       image: imgImages,       title: "Créer vos images",                      subtitle: "Text-to-Image",                    desc: "Génère des visuels percutants à partir d'une simple description.", restricted: false },
-  { slug: "videos",       image: imgVideos,       title: "Imaginez vos vidéos",                    subtitle: "Text/Image-to-Video",              desc: "Transforme un texte ou une image en vidéo animée.",                restricted: false },
-  { slug: "musiques",     image: imgMusiques,     title: "Concevez vos propres musiques",          subtitle: "Text-to-Music",                    desc: "Compose une bande originale unique pour tes créations.",           restricted: false },
-  { slug: "talking-head", image: imgTalkingHead,  title: "Faites parler vos images",               subtitle: "Lip-sync / Talking Head",          desc: "Anime et synchronise les lèvres de tes visuels sur un discours.",  restricted: false },
-  { slug: "text-to-speech", image: imgTextToSpeech, title: "Du texte à l'audio",                   subtitle: "Text-to-Speech",                   desc: "Convertis instantanément un script écrit en voix naturelle.",      restricted: false },
-  { slug: "doublage",     image: imgDoublage,     title: "Parlez n'importe quelle langue",         subtitle: "Traduction & Doublage audio",      desc: "Traduis et double automatiquement l'audio de tes vidéos.",         restricted: false },
-  { slug: "face-swap",    image: imgFaceSwap,     title: "Prenez l'apparence de qui vous voulez",  subtitle: "Face Swap / Avatar",               desc: "Incarne un avatar ou échange de visage sur tes vidéos.",           restricted: true },
+  { slug: "images",         group: "create", Icon: ImageIcon,    theme: "violet", title: "Images",                  subtitle: "Text-to-Image",               desc: "Génère des visuels percutants à partir d'une simple description.", restricted: false },
+  { slug: "videos",         group: "create", Icon: Clapperboard, theme: "bleu",   title: "Vidéos",                  subtitle: "Text/Image-to-Video",         desc: "Transforme un texte ou une image en vidéo animée.",                restricted: false },
+  { slug: "musiques",       group: "create", Icon: Music,        theme: "beige",  title: "Musique",                 subtitle: "Text-to-Music",               desc: "Compose une bande originale unique pour tes créations.",           restricted: false },
+  { slug: "talking-head",   group: "create", Icon: Speech,       theme: "violet", title: "Faire parler une image",  subtitle: "Lip-sync · Talking head",     desc: "Anime un portrait et synchronise ses lèvres sur un discours.",     restricted: false },
+  { slug: "text-to-speech", group: "create", Icon: AudioLines,   theme: "bleu",   title: "Du texte à la voix",      subtitle: "Text-to-Speech",              desc: "Convertis un script écrit en voix naturelle, en un clic.",         restricted: false },
+  { slug: "doublage",       group: "create", Icon: Languages,    theme: "beige",  title: "Doublage",                subtitle: "Traduction & doublage audio", desc: "Traduis et double automatiquement l'audio de tes vidéos.",         restricted: false },
+  { slug: "face-swap",      group: "create", Icon: ScanFace,     theme: "violet", title: "Face swap",               subtitle: "Face swap · Avatar",          desc: "Incarne un avatar ou échange un visage sur tes vidéos.",           restricted: true },
 ];
 
 export function StudioPage() {
@@ -45,52 +47,36 @@ export function StudioPage() {
   // Tous les modules passent par Runware sauf le chat Gemini (appel Google direct).
   const budgetExhausted = useAiBudgetExhausted();
 
+  const section = (group: StudioModule["group"], eyebrow: string, title: string) => (
+    <section aria-labelledby={`studio-${group}`} className="fade-up">
+      <SectionHead id={`studio-${group}`} eyebrow={eyebrow} title={title} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        {visibleModules.filter((m) => m.group === group).map(({ slug, Icon, image, theme, title: name, subtitle, desc, restricted: notReady }) => {
+          const locked = budgetExhausted && slug !== CHAT_PROVIDERS.gemini.slug;
+          return (
+            <SymbolCard key={slug} Icon={Icon} image={image} theme={theme} eyebrow={subtitle} title={name} desc={desc}
+              cta={notReady ? "Bientôt disponible" : locked ? "Crédits épuisés" : group === "chat" ? "Discuter" : "Créer"}
+              disabled={notReady || locked} onClick={() => navigate(`/studio/${slug}`)} />
+          );
+        })}
+      </div>
+    </section>
+  );
+
   return (
-    <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
-      <div>
-        <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>Le Studio</GT></h2>
-        <p className="text-base mt-2 max-w-3xl" style={{ color: th.fg2 }}>Discute avec ChatGPT, Gemini et Claude, et pratique la génération multimédia avec de vrais modèles d'IA — image, vidéo, musique, voix et avatar.</p>
+    <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-8 space-y-12">
+      <div className="fade-up">
+        <p className="eyebrow" style={{ color: th.fg3 }}>Pratiquer</p>
+        <h1 className="mt-2 text-[2rem] sm:text-[2.6rem] leading-[1.02] font-black" style={{ color: th.fg }}>Le <GT>Studio</GT></h1>
+        <p className="text-[15px] sm:text-base mt-3 max-w-2xl leading-relaxed" style={{ color: th.fg2 }}>
+          Discute avec ChatGPT, Gemini et Claude, et crée avec de vrais modèles d'IA : image, vidéo, musique, voix et avatar.
+        </p>
       </div>
 
       {budgetExhausted && <AiBudgetExhaustedNotice />}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
-        {visibleModules.map(({ slug, image, background, title, subtitle, restricted: notReady }) => {
-          const locked = budgetExhausted && slug !== CHAT_PROVIDERS.gemini.slug;
-          const restricted = notReady || locked;
-          return (
-          <div key={slug} className={`relative w-full min-h-[220px] md:min-h-[260px] rounded-[10px] overflow-hidden transition-transform ${restricted ? "opacity-45 cursor-default" : "group"}`}
-            style={{ aspectRatio: "3 / 2" }}>
-            {/* url() entre guillemets : certains fichiers (ex. "Du texte à l'audio.png") ont une
-                apostrophe dans leur nom, invalide dans un url() CSS non quoté — sans les
-                guillemets, le navigateur rejette toute la déclaration et l'image disparaît. */}
-            <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105" style={image ? { backgroundImage: `url("${image}")`, backgroundSize: "cover", backgroundPosition: "center" } : { background }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(180deg,rgba(0,0,0,0.25) 0%,rgba(0,0,0,0.78) 100%)" }} />
-            <div className="relative h-full flex flex-col justify-between gap-5 p-4 sm:p-3">
-              <div>
-                <span className="eyebrow inline-block mb-2.5 self-start" style={{ color: "rgba(255,255,255,0.78)" }}>{subtitle}</span>
-                <h3 className="font-black text-white leading-tight break-words max-w-[92%] sm:max-w-[78%] text-[20px] min-[381px]:text-[22px] sm:text-[30px] lg:text-[34px]">{title}</h3>
-              </div>
-              {!restricted && (
-                <button
-                  onClick={() => navigate(`/studio/${slug}`)}
-                  className="sweep inline-flex items-center gap-2 self-start text-sm sm:text-base font-semibold px-4 sm:px-5 min-h-10 sm:min-h-11 rounded-[2px]"
-                  style={{ background: "#fff", color: "#000" }}
-                >
-                  Créer maintenant
-                  <ChevronRight size={16} />
-                </button>
-              )}
-              {locked && !notReady && (
-                <span className="inline-flex items-center gap-2 self-start text-sm font-semibold px-4 py-2.5 rounded-[2px]" style={{ background: "rgba(0,0,0,0.45)", color: "#fff" }}>
-                  <Lock size={14} />Crédits épuisés
-                </span>
-              )}
-            </div>
-          </div>
-          );
-        })}
-      </div>
+      {section("chat", "Discuter", "Les grands modèles, côte à côte")}
+      {section("create", "Créer", "Image, vidéo, son : à toi de jouer")}
     </div>
   );
 }

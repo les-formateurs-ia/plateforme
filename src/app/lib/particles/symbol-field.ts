@@ -32,28 +32,53 @@ interface Dot {
 
 /** Dessine le SVG sur un canvas 160 × 160 et tire `count` points parmi ses pixels pleins. */
 export async function sampleSvg(svgMarkup: string, count: number, rnd: () => number): Promise<Array<[number, number]>> {
-  const S = 160;
   // Trait épaissi pour que l'icône se lise en particules.
   const svg = svgMarkup
-    .replace(/stroke-width="[^"]*"/g, 'stroke-width="2.4"')
+    .replace(/stroke-width="[^"]*"/g, 'stroke-width="2.3"')
     .replace(/currentColor/g, '#fff')
-    .replace(/<svg([^>]*)>/, (_m, attrs: string) => `<svg${attrs.replace(/\s(width|height)="[^"]*"/g, '')} width="${S}" height="${S}">`);
+    .replace(/<svg([^>]*)>/, (_m, attrs: string) => `<svg${attrs.replace(/\s(width|height)="[^"]*"/g, '')} width="320" height="320">`);
+  return sampleImage(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`, count, rnd, 'alpha');
+}
+
+/**
+ * Tire `count` points dans la forme d'une image : pixels opaques ('alpha', icônes SVG) ou
+ * pixels colorés sur fond gris ou blanc ('saturation', logos sur fond uni). La forme est
+ * recentrée et agrandie pour remplir la boîte (0,06 → 0,94), en gardant ses proportions.
+ */
+export async function sampleImage(src: string, count: number, rnd: () => number, mode: 'alpha' | 'saturation'): Promise<Array<[number, number]>> {
+  const S = 200;
   const img = new Image();
-  img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  img.src = src;
   await img.decode();
   const c = document.createElement('canvas');
   c.width = c.height = S;
   const g = c.getContext('2d', { willReadFrequently: true })!;
-  g.drawImage(img, 16, 16, S - 32, S - 32);
+  const k = Math.min(S / img.naturalWidth, S / img.naturalHeight);
+  const w = img.naturalWidth * k, h = img.naturalHeight * k;
+  g.drawImage(img, (S - w) / 2, (S - h) / 2, w, h);
   const data = g.getImageData(0, 0, S, S).data;
+  const hit = (i: number) => {
+    if (mode === 'alpha') return data[i + 3] > 120;
+    const r = data[i], gg = data[i + 1], b = data[i + 2];
+    const max = Math.max(r, gg, b), min = Math.min(r, gg, b);
+    return data[i + 3] > 120 && max > 40 && (max - min) / max > 0.3;
+  };
   const filled: Array<[number, number]> = [];
+  let x0 = S, y0 = S, x1 = 0, y1 = 0;
   for (let y = 0; y < S; y += 2) {
-    for (let x = 0; x < S; x += 2) if (data[(y * S + x) * 4 + 3] > 120) filled.push([x / S, y / S]);
+    for (let x = 0; x < S; x += 2) {
+      if (!hit((y * S + x) * 4)) continue;
+      filled.push([x, y]);
+      if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+    }
   }
   if (!filled.length) return Array.from({ length: count }, () => [0.5, 0.5]);
+  const span = Math.max(x1 - x0, y1 - y0, 1);
+  const scale = 0.88 / span;
+  const ox = 0.5 - ((x0 + x1) / 2) * scale, oy = 0.5 - ((y0 + y1) / 2) * scale;
   return Array.from({ length: count }, () => {
     const [x, y] = filled[Math.floor(rnd() * filled.length)];
-    return [x + (rnd() - 0.5) * 0.012, y + (rnd() - 0.5) * 0.012];
+    return [ox + (x + rnd() * 2) * scale, oy + (y + rnd() * 2) * scale];
   });
 }
 
@@ -62,13 +87,23 @@ export interface SymbolField {
   destroy(): void;
 }
 
-export function mountSymbolField(card: HTMLElement, canvas: HTMLCanvasElement, svgMarkup: string,
-  { colors = SYMBOL_THEMES.violet, links = true, dark = false }: { colors?: [string, string]; links?: boolean; dark?: boolean } = {}): SymbolField {
+export type ShapeSource = { svg: string } | { image: string };
+
+export function mountSymbolField(card: HTMLElement, canvas: HTMLCanvasElement, shape: ShapeSource,
+  { colors = SYMBOL_THEMES.violet, links = true, dark = false, rest = 'cloud' }: {
+    colors?: [string, string]; links?: boolean; dark?: boolean;
+    /** Au repos : nuage qui se forme au survol ('cloud', site public), ou illustration déjà formée qui s'anime au survol ('symbol'). */
+    rest?: 'cloud' | 'symbol';
+  } = {}): SymbolField {
+  const key = 'svg' in shape ? shape.svg : shape.image;
   const ctx = canvas.getContext('2d')!;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const touch = matchMedia('(hover: none)').matches;
   const [c1, c2] = colors.map(hex) as [RGB, RGB];
-  let W = 0, H = 0, raf = 0, p = 0, target = 0, visible = true, hovering = false, held = false, destroyed = false;
+  let W = 0, H = 0, raf = 0, p = 0, target = rest === 'symbol' ? 1 : 0, visible = true, hovering = false, held = false, destroyed = false;
+  // Survol en mode 'symbol' : liens et points plus vifs tant que le pointeur reste.
+  let hot = 0;
+  let pulseTimer = 0;
   let dots: Dot[] = [];
   let pointer: { x: number; y: number } | null = null;
   const t0 = performance.now();
@@ -82,11 +117,11 @@ export function mountSymbolField(card: HTMLElement, canvas: HTMLCanvasElement, s
     canvas.height = Math.round(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     if (dots.length) return;
-    const rnd = seeded(svgMarkup.length * 131 + 7);
-    const box = Math.min(W, H) * 0.78;
-    const count = Math.round(Math.max(70, Math.min(160, (box * box) / 110)));
-    const fine = Math.max(0.6, Math.min(1, box / 180));
-    const points = await sampleSvg(svgMarkup, count, rnd);
+    const rnd = seeded(key.length * 131 + 7);
+    const box = Math.min(W, H) * (rest === 'symbol' ? 0.86 : 0.78);
+    const count = Math.round(Math.max(90, Math.min(rest === 'symbol' ? 420 : 160, (box * box) / (rest === 'symbol' ? 40 : 110))));
+    const fine = Math.max(0.6, Math.min(1, box / 180)) * (rest === 'symbol' ? 0.8 : 1);
+    const points = 'svg' in shape ? await sampleSvg(shape.svg, count, rnd) : await sampleImage(shape.image, count, rnd, 'saturation');
     if (destroyed) return;
     dots = points.map(([sx, sy]) => {
       const a = rnd() * Math.PI * 2, d = Math.sqrt(rnd());
@@ -109,7 +144,8 @@ export function mountSymbolField(card: HTMLElement, canvas: HTMLCanvasElement, s
   function frame(now: number) {
     const t = reduced ? 0 : (now - t0) / 1000;
     p += (target - p) * (reduced ? 1 : APPROACH);
-    const box = Math.min(W, H) * 0.78;
+    hot += ((hovering ? 1 : 0) - hot) * 0.1;
+    const box = Math.min(W, H) * (rest === 'symbol' ? 0.86 : 0.78);
     const bx = (W - box) / 2, by = (H - box) / 2;
     const rx = W * 0.42, ry = H * 0.36;
     if (reduced) ctx.clearRect(0, 0, W, H);
@@ -140,7 +176,7 @@ export function mountSymbolField(card: HTMLElement, canvas: HTMLCanvasElement, s
       d.ox += (tx - d.ox) * 0.18; d.oy += (ty - d.oy) * 0.18;
       x += d.ox; y += d.oy;
       ctx.globalAlpha = (dark ? 0.4 : 0.6) + (dark ? 0.6 : 0.4) * e;
-      const size = d.size * (0.85 + 0.35 * e);
+      const size = d.size * (0.85 + 0.35 * e) * (1 + hot * 0.25);
       if (!reduced && !Number.isNaN(d.px) && Math.hypot(x - d.px, y - d.py) < 40) {
         ctx.strokeStyle = `rgb(${d.color})`;
         ctx.lineWidth = size * 1.4;
@@ -158,18 +194,18 @@ export function mountSymbolField(card: HTMLElement, canvas: HTMLCanvasElement, s
         if (e < 0.3) continue;
         for (const j of d.near) {
           const n = dots[j];
-          ctx.globalAlpha = (e - 0.3) * 0.5;
+          ctx.globalAlpha = (e - 0.3) * (0.5 + hot * 0.4);
           ctx.strokeStyle = `rgb(${d.color})`;
           ctx.beginPath(); ctx.moveTo(d.px, d.py); ctx.lineTo(n.px, n.py); ctx.stroke();
         }
       }
     }
-    if (p > 0.02 && dark) {
+    if (p > 0.02 && (dark || hot > 0.05)) {
       ctx.globalCompositeOperation = 'lighter';
       for (const d of dots) {
         const e = easeInOut(clamp01((p - d.delay * 0.3) / 0.7));
         if (e < 0.05) continue;
-        ctx.globalAlpha = e * 0.16;
+        ctx.globalAlpha = e * (dark ? 0.16 + hot * 0.14 : hot * 0.22);
         ctx.drawImage(glowSprite(d.color), d.px - 7, d.py - 7, 14, 14);
       }
     }
@@ -183,7 +219,18 @@ export function mountSymbolField(card: HTMLElement, canvas: HTMLCanvasElement, s
     if (visible && !reduced && !destroyed) raf = requestAnimationFrame(loop);
   };
   function kick() { if (!raf && !destroyed) raf = requestAnimationFrame(loop); }
-  const update = () => { target = hovering || held ? 1 : 0; kick(); };
+  const update = () => {
+    if (rest === 'symbol') {
+      // L'illustration est formée au repos ; au survol elle se disperse un
+      // instant puis se reforme (dispersion et regroupement, pas un fondu).
+      if (hovering && !reduced) {
+        target = 0.3;
+        window.clearTimeout(pulseTimer);
+        pulseTimer = window.setTimeout(() => { target = 1; kick(); }, 240);
+      } else target = 1;
+    } else target = hovering || held ? 1 : 0;
+    kick();
+  };
   const assemble = (on: boolean) => { hovering = on; update(); };
   const onEnter = () => assemble(true);
   const onLeave = () => { pointer = null; if (!card.contains(document.activeElement)) assemble(false); };
@@ -200,7 +247,7 @@ export function mountSymbolField(card: HTMLElement, canvas: HTMLCanvasElement, s
   void build();
   seen.observe(card);
   ro.observe(canvas);
-  if (touch) centred.observe(card);
+  if (touch && rest === 'cloud') centred.observe(card);
   card.addEventListener('pointerenter', onEnter);
   card.addEventListener('pointerleave', onLeave);
   card.addEventListener('focusin', onEnter);
@@ -212,6 +259,7 @@ export function mountSymbolField(card: HTMLElement, canvas: HTMLCanvasElement, s
     destroy() {
       destroyed = true;
       cancelAnimationFrame(raf);
+      window.clearTimeout(pulseTimer);
       seen.disconnect(); centred.disconnect(); ro.disconnect();
       card.removeEventListener('pointerenter', onEnter);
       card.removeEventListener('pointerleave', onLeave);

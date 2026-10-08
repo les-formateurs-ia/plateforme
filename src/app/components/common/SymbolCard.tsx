@@ -4,12 +4,13 @@ import { useTh } from "@/app/theme/theme";
 import { SymbolCloud } from "@/app/components/particles/SymbolCloud";
 import { cx } from "@/app/lib/cx";
 
-// Carte d'entrée vers un espace ou un atelier (accueil, exercices…) : en haut,
-// un nuage de particules qui dessine l'icône au survol (cartes de formation du
-// site public) ; en bas, sur-titre, titre, description et appel à l'action.
-export function SymbolCard({ Icon, theme, eyebrow, title, desc, cta, onClick, disabled, footnote, height = 144 }: {
-  Icon: LucideIcon; theme: "violet" | "bleu" | "beige"; eyebrow?: string; title: string; desc: string; cta: string;
-  onClick: () => void; disabled?: boolean; footnote?: ReactNode; height?: number;
+// Carte d'entrée vers un espace ou un atelier (accueil, exercices, studio) : en
+// haut, une illustration en particules — l'icône ou le logo dessinés au repos,
+// qui se dispersent et se reforment au survol ; en bas, sur-titre, titre,
+// description et appel à l'action.
+export function SymbolCard({ Icon, image, theme, eyebrow, title, desc, cta, onClick, disabled, footnote, height = 176, rest = "symbol" }: {
+  Icon?: LucideIcon; image?: string; theme: "violet" | "bleu" | "beige"; eyebrow?: string; title: string; desc: string; cta: string;
+  onClick: () => void; disabled?: boolean; footnote?: ReactNode; height?: number; rest?: "cloud" | "symbol";
 }) {
   const th = useTh();
   return (
@@ -17,7 +18,7 @@ export function SymbolCard({ Icon, theme, eyebrow, title, desc, cta, onClick, di
       className={cx("group relative overflow-hidden rounded-[10px] text-left flex flex-col transition-colors", disabled ? "opacity-50 cursor-default" : "hover-fine:[border-color:var(--ink)]!")}
       style={{ border: `1px solid ${th.sep}`, background: th.card }}>
       <div className="relative" style={{ height, borderBottom: `1px solid ${th.sep}` }}>
-        <SymbolCloud Icon={Icon} theme={theme} dark={th.isDark} className="inset-0 w-full h-full" />
+        <SymbolCloud Icon={Icon} image={image} theme={theme} dark={th.isDark} rest={rest} className="inset-[12px] w-[calc(100%-24px)] h-[calc(100%-24px)]" />
       </div>
       <div className="p-5 flex-1 flex flex-col">
         {eyebrow && <p className="eyebrow mb-2" style={{ color: th.fg3 }}>{eyebrow}</p>}
