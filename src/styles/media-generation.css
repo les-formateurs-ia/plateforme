@@ -22,6 +22,7 @@
   will-change: transform;
 }
 .media-generation__message {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;

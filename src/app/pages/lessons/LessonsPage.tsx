@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
-import { Lock, ChevronDown, CheckCircle, Play, Clock, Pencil, Loader2, XCircle, Network, Headphones, GraduationCap } from "lucide-react";
+import { Lock, ChevronDown, CheckCircle, Play, Clock, Pencil, Loader2, XCircle, Network, Headphones } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
-import { VBtn } from "@/app/components/common/Buttons";
+
 import { cx } from "@/app/lib/cx";
 import { moduleProgress, nextLessonOf, MODULE_STATUS_LABEL } from "@/app/lib/journey";
-import { formatDuration, isLessonCompleted, type LessonWithState } from "@/app/lib/learning";
+import { formatDuration, isLessonCompleted } from "@/app/lib/learning";
 import { useAllCourseProgress, type CourseProgressEntry } from "@/app/state/useAllCourseProgress";
 import { useAuth } from "@/app/state/auth-context";
 import { isStaff } from "@/app/lib/permissions";
@@ -228,9 +228,10 @@ function FormationAccordion({ entry, open, onToggle }: { entry: CourseProgressEn
           {totalTimeSeconds > 0 && <span className="text-sm tabular-nums" style={{ color: th.fg2 }}>{formatDuration(totalTimeSeconds)} de formation</span>}
           {next && !editMode && (
             <button type="button" onClick={() => goLesson(next.lesson.id)}
-              className="sweep ml-auto inline-flex items-center gap-2 min-h-11 px-5 rounded-[2px] text-sm font-semibold"
+              className="sweep w-full sm:w-auto sm:ml-auto inline-flex items-center justify-center gap-2 min-h-11 px-5 rounded-[2px] text-sm font-semibold whitespace-nowrap"
               style={{ background: th.ink, color: th.onInk }}>
-              <Play className="w-3.5 h-3.5" fill="currentColor" />{next.progress ? "Reprendre" : "Commencer"} : {next.lesson.title.length > 34 ? `${next.lesson.title.slice(0, 32)}…` : next.lesson.title}
+              <Play className="w-3.5 h-3.5" fill="currentColor" />{next.progress ? "Reprendre" : "Commencer"}
+              <span className="hidden sm:inline">: {next.lesson.title.length > 34 ? `${next.lesson.title.slice(0, 32)}…` : next.lesson.title}</span>
             </button>
           )}
         </div>

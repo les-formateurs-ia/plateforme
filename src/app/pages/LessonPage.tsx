@@ -2,11 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 import {
-  ChevronRight, ChevronLeft, Mic, Send,
-  Sparkles, MessageSquare, CheckCircle, X,
-  Lightbulb, Monitor, Loader2,
-  Network, RotateCcw, Play, Brain, Zap, Clock, PartyPopper, BookOpen, Headphones, Wand2, Bot, Code, Upload, Pencil, AudioLines, Video,
-  Phone, PhoneOff,
+  ChevronRight, ChevronLeft, Mic, Send, Sparkles, MessageSquare, CheckCircle, X, Lightbulb, Monitor, Loader2, Network, RotateCcw, Play, Brain, Zap, Clock, BookOpen, Headphones, Wand2, Bot, Code, Upload, Pencil, AudioLines, Video, Phone, PhoneOff,
 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { supabase } from "@/app/lib/supabase/client";
@@ -19,8 +15,7 @@ import { VBtn, ShimBtn } from "@/app/components/common/Buttons";
 import { cx } from "@/app/lib/cx";
 import type { ChatMsg } from "@/app/types";
 import {
-  getLessonDetail, ensureLessonStarted, addTimeSpent, submitQuiz, flattenLessons, QUIZ_PASS_THRESHOLD,
-  updateLessonCustomHtml, isLessonCompleted, isLessonInLockedModule, type LessonDetail, type QuizAnswer,
+  getLessonDetail, ensureLessonStarted, addTimeSpent, submitQuiz, flattenLessons, QUIZ_PASS_THRESHOLD, updateLessonCustomHtml, isLessonCompleted, isLessonInLockedModule, type LessonDetail, type QuizAnswer,
 } from "@/app/lib/learning";
 import { getMyPodcasts, getPodcastSignedUrl, requestPodcastGeneration, pollForPodcast, type Podcast } from "@/app/lib/podcasts";
 import { PODCAST_FORMATS, type PodcastVariantId } from "@/app/lib/podcastFormats";

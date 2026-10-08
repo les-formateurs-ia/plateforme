@@ -8,6 +8,7 @@ import { useProfile } from "@/app/state/profile-context";
 import { useMyInstances } from "@/app/state/useMyInstances";
 import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
+import { NeuralField } from "@/app/components/particles/NeuralField";
 import { AgentOrb } from "@/app/components/agent/AgentOrb";
 import { cx } from "@/app/lib/cx";
 import {
@@ -27,6 +28,14 @@ function formatRelative(iso: string): string {
   if (days < 7) return `il y a ${days} j`;
   return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short" }).format(new Date(iso));
 }
+
+// Premières questions proposées quand la conversation est vide.
+const AGENT_STARTERS = [
+  "Résume ma dernière leçon",
+  "Donne-moi un exercice de prompt",
+  "Comment utiliser l'IA dans mon métier ?",
+  "Où en suis-je dans ma formation ?",
+];
 
 export function AgentPage() {
   const th = useTh();
@@ -143,8 +152,8 @@ export function AgentPage() {
     navigate("/agent");
   };
 
-  const sendText = async () => {
-    const question = textInput.trim();
+  const sendText = async (override?: string) => {
+    const question = (override ?? textInput).trim();
     if (!question || sending || !user) return;
     setSending(true);
     setTextInput("");
@@ -231,8 +240,8 @@ export function AgentPage() {
       {/* Sidebar conversations */}
       <div className="w-full max-w-[300px] shrink-0 hidden md:flex flex-col border-r overflow-hidden" style={{ borderColor: th.sep }}>
         <div className="p-4 shrink-0 space-y-3">
-          <h2 className="text-lg font-black flex items-center gap-2" style={{ color: th.fg }}><Bot className="w-5 h-5" style={{ color: th.navAC }} /><GT>Mon Agent IA</GT></h2>
-          <button onClick={startNewConversation} className="w-full flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-opacity hover:opacity-90"
+          <h2 className="text-lg font-black flex items-center gap-2" style={{ color: th.fg }}><Bot className="w-5 h-5" />Mon Agent IA</h2>
+          <button onClick={startNewConversation} className="sweep w-full flex items-center gap-2 rounded-[2px] px-3.5 min-h-10 text-sm font-semibold"
             style={{ background: th.ink, color: th.onInk }}>
             <Plus className="w-4 h-4" />Nouvelle conversation
           </button>
@@ -278,15 +287,37 @@ export function AgentPage() {
         <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-5 space-y-3">
           {messagesLoading && <p className="text-sm text-center" style={{ color: th.fg3 }}>Chargement…</p>}
           {!messagesLoading && messages.length === 0 && (
-            <div className="h-full flex flex-col items-center justify-center gap-4 text-center py-10">
-              {agentStatus === "idle" ? (
-                <AgentOrb status="idle" size={64}><Sparkles className="w-6 h-6 text-white" style={{ opacity: 0.9 }} /></AgentOrb>
-              ) : (
-                <AgentOrb status={agentStatus} mode={agentMode} active={pttActive} size={96} />
-              )}
-              <p className="text-sm max-w-sm" style={{ color: th.fg3 }}>
-                Pose une question par écrit ou lance un appel vocal — ton agent connaît ta progression sur toutes tes formations et se souvient de vos échanges précédents.
-              </p>
+            <div className="relative h-full min-h-[420px] flex flex-col items-center justify-center gap-5 text-center py-10 overflow-hidden">
+              {/* Le réseau de la marque, qui s'active pendant l'appel vocal. */}
+              <NeuralField dark={th.isDark} density={3} band={0.5} center={0.42} active={agentStatus !== "idle"} className="opacity-70" />
+              {/* Voile : le texte reste lisible au-dessus du réseau. */}
+              <div aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(ellipse 46% 42% at 50% 50%, ${th.bg} 40%, transparent 100%)` }} />
+              <div className="relative flex flex-col items-center gap-5">
+                {agentStatus === "idle" ? (
+                  <AgentOrb status="idle" size={64}><Sparkles className="w-6 h-6 text-white" style={{ opacity: 0.9 }} /></AgentOrb>
+                ) : (
+                  <AgentOrb status={agentStatus} mode={agentMode} active={pttActive} size={96} />
+                )}
+                <div>
+                  <p className="eyebrow" style={{ color: th.fg3 }}>Ton agent IA</p>
+                  <p className="mt-2 text-[1.5rem] sm:text-[1.9rem] font-black leading-tight max-w-md" style={{ color: th.fg }}>Une question ? <GT>Demande-moi.</GT></p>
+                  <p className="mt-3 text-[15px] max-w-md leading-relaxed" style={{ color: th.fg2 }}>
+                    Par écrit ou par la voix : je connais ta progression sur toutes tes formations et je me souviens de nos échanges.
+                  </p>
+                </div>
+                {/* Questions pour démarrer (comme la démo de l'agent sur le site public). */}
+                {agentStatus === "idle" && (
+                  <div className="flex flex-wrap justify-center gap-2 max-w-lg">
+                    {AGENT_STARTERS.map((q) => (
+                      <button key={q} type="button" disabled={sending} onClick={() => void sendText(q)}
+                        className="px-3.5 py-2 rounded-full text-sm font-semibold transition-colors hover-fine:[border-color:var(--ink)]! disabled:opacity-50"
+                        style={{ border: `1px solid ${th.inputB}`, color: th.fg, background: th.bg }}>
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
           {messages.map((m) => (
@@ -346,7 +377,7 @@ export function AgentPage() {
             </button>
             <input value={textInput} onChange={(e) => setTextInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && !sending && sendText()}
               placeholder="Écris à ton agent…" className="flex-1 rounded-[4px] px-4 py-3 text-sm g-input" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg }} />
-            <button onClick={sendText} disabled={!textInput.trim() || sending} className="w-11 h-11 rounded-[4px] flex items-center justify-center shrink-0 disabled:opacity-30"
+            <button onClick={() => void sendText()} disabled={!textInput.trim() || sending} className="w-11 h-11 rounded-[4px] flex items-center justify-center shrink-0 disabled:opacity-30"
               style={{ background: th.ink, color: th.onInk }}>
               <Send className="w-4 h-4" />
             </button>

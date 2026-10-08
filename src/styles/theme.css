@@ -457,3 +457,28 @@
     animation: none;
   }
 }
+
+/* Changement de page : le contenu arrive net depuis un léger flou (le
+   « reveal » du site public). Seul l'état de départ est appliqué
+   (backwards) : une fois l'animation finie, aucun transform ne reste sur la
+   page, ce qui casserait les modales en position fixe. */
+.main-layout-content > * {
+  animation: page-in 460ms var(--ease-out-strong) backwards;
+}
+@keyframes page-in {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(8px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .main-layout-content > * {
+    animation: page-fade 200ms ease backwards;
+  }
+  @keyframes page-fade {
+    from {
+      opacity: 0;
+    }
+  }
+}

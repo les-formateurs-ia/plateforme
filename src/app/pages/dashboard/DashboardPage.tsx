@@ -1,24 +1,19 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
-import { Clock, Target, Award, CheckCircle, Lock, Play, Percent } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
 import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
-import { ShimBtn } from "@/app/components/common/Buttons";
-import { CircleProgress } from "@/app/components/common/CircleProgress";
 import { VSelect } from "@/app/components/common/Select";
 import { useCourseProgress } from "@/app/state/useCourseProgress";
 import { useMyInstances } from "@/app/state/useMyInstances";
-import { getAllBadges, getEarnedBadgeIds, formatDuration, isLessonCompleted, type BadgeRow } from "@/app/lib/learning";
+import { getAllBadges, getEarnedBadgeIds, isLessonCompleted, type BadgeRow } from "@/app/lib/learning";
 import { AiUsagePanel } from "@/app/pages/dashboard/AiUsagePanel";
 import { HomeOverview } from "@/app/pages/dashboard/HomeOverview";
 import { frenchDate, greeting } from "@/app/lib/journey";
 
 export function DashboardPage() {
   const th = useTh();
-  const navigate = useNavigate();
   const { user } = useAuth();
   const { profile } = useProfile();
   const { instances, selectedId, setSelectedId } = useMyInstances();
