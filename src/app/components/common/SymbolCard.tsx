@@ -1,18 +1,17 @@
 import type { ReactNode } from "react";
-import { ArrowRight, Lock, type LucideIcon } from "lucide-react";
+import { ArrowRight, Lock } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
-import { SymbolCloud } from "@/app/components/particles/SymbolCloud";
+import { ToolDemo, type DemoKind } from "@/app/components/common/ToolDemo";
 import { cx } from "@/app/lib/cx";
 
 // Carte d'entrée vers un espace ou un atelier (accueil, exercices, studio) : en
-// haut, une illustration en particules — l'icône ou le logo dessinés au repos,
-// qui se dispersent et se reforment au survol ; en bas, sur-titre, titre,
-// description et appel à l'action.
-const THEME_WASH = { violet: "rgba(181,141,224,0.13)", bleu: "rgba(120,213,226,0.15)", beige: "rgba(251,194,173,0.18)" } as const;
+// haut, une mini-démo de l'outil (ToolDemo) sur un voile pastel ; en bas,
+// sur-titre, titre, description et appel à l'action.
+const THEME_WASH = { violet: "rgba(181,141,224,0.22)", bleu: "rgba(120,213,226,0.24)", beige: "rgba(251,194,173,0.28)" } as const;
 
-export function SymbolCard({ Icon, image, theme, eyebrow, title, desc, cta, onClick, disabled, footnote, height = 176, rest = "symbol" }: {
-  Icon?: LucideIcon; image?: string; theme: "violet" | "bleu" | "beige"; eyebrow?: string; title: string; desc: string; cta: string;
-  onClick: () => void; disabled?: boolean; footnote?: ReactNode; height?: number; rest?: "cloud" | "symbol";
+export function SymbolCard({ demo, logo, demoLabel, theme, eyebrow, title, desc, cta, onClick, disabled, footnote, height = 188 }: {
+  demo: DemoKind; logo?: string; demoLabel?: string; theme: "violet" | "bleu" | "beige"; eyebrow?: string; title: string; desc: string; cta: string;
+  onClick: () => void; disabled?: boolean; footnote?: ReactNode; height?: number;
 }) {
   const th = useTh();
   return (
@@ -22,8 +21,8 @@ export function SymbolCard({ Icon, image, theme, eyebrow, title, desc, cta, onCl
       {/* Illustration sur un voile pastel très léger, aux couleurs de la tuile. */}
       {/* w-full : Safari n'étire pas les enfants d'un <button> en flex colonne ;
           sans contenu propre, la zone retombait à 0 px de large. */}
-      <div className="relative w-full overflow-hidden" style={{ height, borderBottom: `1px solid ${th.sep}`, background: `radial-gradient(ellipse 55% 70% at 50% 50%, ${THEME_WASH[theme]}, transparent 75%)` }}>
-        <SymbolCloud Icon={Icon} image={image} theme={theme} dark={th.isDark} rest={rest} className="inset-3" />
+      <div className="relative w-full overflow-hidden" style={{ height, borderBottom: `1px solid ${th.sep}`, background: `radial-gradient(ellipse 75% 90% at 50% 60%, ${THEME_WASH[theme]}, transparent 80%)` }}>
+        <ToolDemo kind={demo} logo={logo} label={demoLabel ?? title} />
       </div>
       <div className="w-full p-5 flex-1 flex flex-col">
         {eyebrow && <p className="eyebrow mb-2" style={{ color: th.fg3 }}>{eyebrow}</p>}

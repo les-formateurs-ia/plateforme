@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router";
-import { Image as ImageIcon, Clapperboard, Music, Speech, AudioLines, Languages, ScanFace, type LucideIcon } from "lucide-react";
+
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { GT } from "@/app/components/common/GT";
 import { SymbolCard } from "@/app/components/common/SymbolCard";
+import type { DemoKind } from "@/app/components/common/ToolDemo";
 import { SectionHead } from "@/app/components/common/SectionHead";
 import { CHAT_PROVIDERS } from "@/app/lib/studioChat";
 import { AiBudgetExhaustedNotice, useAiBudgetExhausted } from "@/app/components/common/AiBudgetGate";
@@ -18,24 +19,24 @@ import imgClaude from "@/imports/claude_logo.png";
 // chats, une icône pour les outils de création.
 const CHAT_LOGOS = { openai: imgChatGPT, gemini: imgGemini, anthropic: imgClaude };
 const CHAT_THEMES = { openai: "bleu", gemini: "violet", anthropic: "beige" } as const;
-type StudioModule = { slug: string; group: "chat" | "create"; Icon?: LucideIcon; image?: string; theme: "violet" | "bleu" | "beige"; title: string; subtitle: string; desc: string; restricted: boolean };
+type StudioModule = { slug: string; group: "chat" | "create"; demo: DemoKind; logo?: string; theme: "violet" | "bleu" | "beige"; title: string; subtitle: string; desc: string; restricted: boolean };
 const CHAT_MODULES: StudioModule[] = (["openai", "gemini", "anthropic"] as const).map((id) => {
   const p = CHAT_PROVIDERS[id];
   return {
-    slug: p.slug, group: "chat", image: CHAT_LOGOS[id], theme: CHAT_THEMES[id], title: p.name, subtitle: `Chat IA · ${p.company}`,
+    slug: p.slug, group: "chat", demo: "chat", logo: CHAT_LOGOS[id], theme: CHAT_THEMES[id], title: p.name, subtitle: `Chat IA · ${p.company}`,
     desc: `Discute librement avec ${p.name}, joins tes fichiers et compare les modèles.`, restricted: false,
   };
 });
 
 const STUDIO_MODULES: StudioModule[] = [
   ...CHAT_MODULES,
-  { slug: "images",         group: "create", Icon: ImageIcon,    theme: "violet", title: "Images",                  subtitle: "Text-to-Image",               desc: "Génère des visuels percutants à partir d'une simple description.", restricted: false },
-  { slug: "videos",         group: "create", Icon: Clapperboard, theme: "bleu",   title: "Vidéos",                  subtitle: "Text/Image-to-Video",         desc: "Transforme un texte ou une image en vidéo animée.",                restricted: false },
-  { slug: "musiques",       group: "create", Icon: Music,        theme: "beige",  title: "Musique",                 subtitle: "Text-to-Music",               desc: "Compose une bande originale unique pour tes créations.",           restricted: false },
-  { slug: "talking-head",   group: "create", Icon: Speech,       theme: "violet", title: "Faire parler une image",  subtitle: "Lip-sync · Talking head",     desc: "Anime un portrait et synchronise ses lèvres sur un discours.",     restricted: false },
-  { slug: "text-to-speech", group: "create", Icon: AudioLines,   theme: "bleu",   title: "Du texte à la voix",      subtitle: "Text-to-Speech",              desc: "Convertis un script écrit en voix naturelle, en un clic.",         restricted: false },
-  { slug: "doublage",       group: "create", Icon: Languages,    theme: "beige",  title: "Doublage",                subtitle: "Traduction & doublage audio", desc: "Traduis et double automatiquement l'audio de tes vidéos.",         restricted: false },
-  { slug: "face-swap",      group: "create", Icon: ScanFace,     theme: "violet", title: "Face swap",               subtitle: "Face swap · Avatar",          desc: "Incarne un avatar ou échange un visage sur tes vidéos.",           restricted: true },
+  { slug: "images",         group: "create", demo: "images",    theme: "violet", title: "Images",                  subtitle: "Text-to-Image",               desc: "Génère des visuels percutants à partir d'une simple description.", restricted: false },
+  { slug: "videos",         group: "create", demo: "videos", theme: "bleu",   title: "Vidéos",                  subtitle: "Text/Image-to-Video",         desc: "Transforme un texte ou une image en vidéo animée.",                restricted: false },
+  { slug: "musiques",       group: "create", demo: "music",        theme: "beige",  title: "Musique",                 subtitle: "Text-to-Music",               desc: "Compose une bande originale unique pour tes créations.",           restricted: false },
+  { slug: "talking-head",   group: "create", demo: "talking-head",       theme: "violet", title: "Faire parler une image",  subtitle: "Lip-sync · Talking head",     desc: "Anime un portrait et synchronise ses lèvres sur un discours.",     restricted: false },
+  { slug: "text-to-speech", group: "create", demo: "tts",   theme: "bleu",   title: "Du texte à la voix",      subtitle: "Text-to-Speech",              desc: "Convertis un script écrit en voix naturelle, en un clic.",         restricted: false },
+  { slug: "doublage",       group: "create", demo: "doublage",    theme: "beige",  title: "Doublage",                subtitle: "Traduction & doublage audio", desc: "Traduis et double automatiquement l'audio de tes vidéos.",         restricted: false },
+  { slug: "face-swap",      group: "create", demo: "face-swap",     theme: "violet", title: "Face swap",               subtitle: "Face swap · Avatar",          desc: "Incarne un avatar ou échange un visage sur tes vidéos.",           restricted: true },
 ];
 
 export function StudioPage() {
@@ -51,10 +52,10 @@ export function StudioPage() {
     <section aria-labelledby={`studio-${group}`} className="fade-up">
       <SectionHead id={`studio-${group}`} eyebrow={eyebrow} title={title} />
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-        {visibleModules.filter((m) => m.group === group).map(({ slug, Icon, image, theme, title: name, subtitle, desc, restricted: notReady }) => {
+        {visibleModules.filter((m) => m.group === group).map(({ slug, demo, logo, theme, title: name, subtitle, desc, restricted: notReady }) => {
           const locked = budgetExhausted && slug !== CHAT_PROVIDERS.gemini.slug;
           return (
-            <SymbolCard key={slug} Icon={Icon} image={image} theme={theme} eyebrow={subtitle} title={name} desc={desc}
+            <SymbolCard key={slug} demo={demo} logo={logo} theme={theme} eyebrow={subtitle} title={name} desc={desc}
               cta={notReady ? "Bientôt disponible" : locked ? "Crédits épuisés" : group === "chat" ? "Discuter" : "Créer"}
               disabled={notReady || locked} onClick={() => navigate(`/studio/${slug}`)} />
           );

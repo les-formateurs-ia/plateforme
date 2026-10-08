@@ -4,6 +4,7 @@ import { ArrowRight, Bot, Check, Clock, Code2, Lock, Play, Sparkles, Target, Per
 import { useTh } from "@/app/theme/theme";
 import { NeuralField } from "@/app/components/particles/NeuralField";
 import { SymbolCard } from "@/app/components/common/SymbolCard";
+import type { DemoKind } from "@/app/components/common/ToolDemo";
 import { sparkLine } from "@/app/lib/particles/burst";
 import { formatDuration, type CourseOutline, type LessonWithState, type BadgeRow } from "@/app/lib/learning";
 import { moduleProgress, nextLessonOf, MODULE_STATUS_LABEL, type ModuleProgress } from "@/app/lib/journey";
@@ -204,10 +205,10 @@ function KeyFigures({ figures }: { figures: { Icon: LucideIcon; value: string; u
 
 // ── Pratique ───────────────────────────────────────────────────────────────
 
-const PRACTICE: { Icon: LucideIcon; theme: "violet" | "bleu" | "beige"; title: string; desc: string; path: string; cta: string }[] = [
-  { Icon: Code2, theme: "violet", title: "Exercices", desc: "Écris des prompts, compare les modèles, devine l'image : l'IA te corrige.", path: "/practice", cta: "S'entraîner" },
-  { Icon: Sparkles, theme: "bleu", title: "Le Studio", desc: "Image, vidéo, musique, voix : crée avec de vrais modèles d'IA.", path: "/studio", cta: "Créer" },
-  { Icon: Bot, theme: "beige", title: "Mon Agent IA", desc: "Une question sur une leçon ou ton métier ? Ton agent connaît ton parcours.", path: "/agent", cta: "Discuter" },
+const PRACTICE: { demo: DemoKind; theme: "violet" | "bleu" | "beige"; title: string; desc: string; path: string; cta: string }[] = [
+  { demo: "prompts", theme: "violet", title: "Exercices", desc: "Écris des prompts, compare les modèles, devine l'image : l'IA te corrige.", path: "/practice", cta: "S'entraîner" },
+  { demo: "images", theme: "bleu", title: "Le Studio", desc: "Image, vidéo, musique, voix : crée avec de vrais modèles d'IA.", path: "/studio", cta: "Créer" },
+  { demo: "agent", theme: "beige", title: "Mon Agent IA", desc: "Une question sur une leçon ou ton métier ? Ton agent connaît ton parcours.", path: "/agent", cta: "Discuter" },
 ];
 
 function PracticeShortcuts() {
@@ -217,8 +218,8 @@ function PracticeShortcuts() {
     <section aria-labelledby="practice-title" className="fade-up" style={{ animationDelay: "200ms" }}>
       <SectionHead id="practice-title" eyebrow="Continuer à pratiquer" title="Ce qu'on apprend, on le pratique" />
       <div className="grid gap-4 md:grid-cols-3">
-        {PRACTICE.map(({ Icon, theme, title, desc, path, cta }) => (
-          <SymbolCard key={path} Icon={Icon} theme={theme} title={title} desc={desc} cta={cta} onClick={() => navigate(path)} />
+        {PRACTICE.map(({ demo, theme, title, desc, path, cta }) => (
+          <SymbolCard key={path} demo={demo} theme={theme} title={title} desc={desc} cta={cta} onClick={() => navigate(path)} />
         ))}
       </div>
     </section>
