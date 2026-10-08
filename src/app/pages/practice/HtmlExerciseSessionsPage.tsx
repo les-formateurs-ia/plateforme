@@ -58,10 +58,9 @@ function CreateTile({ onClick }: { onClick: () => void }) {
   const th = useTh();
   return (
     <button onClick={onClick}
-      className="group relative overflow-hidden rounded-2xl flex flex-col items-center justify-center gap-3 text-center transition-all duration-300"
-      style={{ aspectRatio: "1/1", background: th.isDark ? `${th.gradShadow(0.06)}` : `${th.gradShadow(0.05)}`, border: `1.5px dashed ${th.gradShadow(0.4)}` }}>
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `radial-gradient(circle at 50% 30%, ${th.gradShadow(0.18)}, transparent 70%)` }} />
-      <div className="relative w-12 h-12 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110" style={{ background: th.ink, color: th.onInk }}>
+      className="group relative overflow-hidden rounded-[10px] flex flex-col items-center justify-center gap-3 text-center transition-colors duration-200 hover-fine:[border-color:var(--ink)]!"
+      style={{ aspectRatio: "1/1", border: `1px dashed ${th.inputB}` }}>
+      <div className="relative w-12 h-12 rounded-[4px] flex items-center justify-center" style={{ background: th.ink, color: th.onInk }}>
         <Plus className="w-5 h-5" />
       </div>
       <div className="relative text-sm font-black" style={{ color: th.fg }}>Nouvel exercice</div>
@@ -340,7 +339,7 @@ export function HtmlExerciseSessionsPage() {
           <ArrowLeft className="w-4 h-4" />Exercez-vous !
         </button>
         <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>Exercices pour vous</GT></h2>
-        <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>
+        <p className="text-[15px] sm:text-base mt-2 max-w-3xl leading-relaxed" style={{ color: th.fg2 }}>
           {staff ? "Cree, modifie et ouvre les exercices HTML proposes aux eleves." : "Ouvre les exercices HTML attribues par ton formateur."}
         </p>
       </div>

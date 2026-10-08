@@ -135,7 +135,7 @@ export function StudioDoublagePage() {
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}>Parlez n'importe quelle langue</h2>
-            <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Upload une vidéo, choisis sa langue d'origine et la langue cible : l'IA transcrit, traduit et double automatiquement en resynchronisant les lèvres. Le rendu prend en général 1 à 5 minutes.</p>
+            <p className="text-[15px] sm:text-base mt-2 max-w-3xl leading-relaxed" style={{ color: th.fg2 }}>Upload une vidéo, choisis sa langue d'origine et la langue cible : l'IA transcrit, traduit et double automatiquement en resynchronisant les lèvres. Le rendu prend en général 1 à 5 minutes.</p>
           </div>
           <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-[2px] shrink-0" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg2 }}>
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: generating ? th.fg3 : "#22c55e" }} />

@@ -146,7 +146,7 @@ export function TagManagerDialog({ open, onOpenChange, onChanged }: {
                   <>
                     <span className="flex-1 text-sm font-semibold truncate" style={{ color: th.fg }}>{tag.name}</span>
                     <button onClick={() => startEdit(tag)} disabled={busyId === tag.id} className="hover:opacity-70"><Pencil className="w-3.5 h-3.5" style={{ color: th.fg3 }} /></button>
-                    <button onClick={() => handleDelete(tag)} disabled={busyId === tag.id} className="hover:opacity-70"><Trash2 className="w-3.5 h-3.5" style={{ color: "#fbc2ad" }} /></button>
+                    <button onClick={() => handleDelete(tag)} disabled={busyId === tag.id} className="hover:opacity-70"><Trash2 className="w-3.5 h-3.5" style={{ color: th.danger }} /></button>
                   </>
                 )}
               </div>

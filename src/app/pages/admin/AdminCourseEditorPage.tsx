@@ -440,7 +440,7 @@ export function AdminCourseEditorPage() {
           )}
         </div>
 
-        {error && <p className="text-xs" style={{ color: "#fbc2ad" }}>{error}</p>}
+        {error && <p className="text-xs" style={{ color: th.danger }}>{error}</p>}
       </div></GCard>
 
       {!courseId && (
@@ -453,9 +453,9 @@ export function AdminCourseEditorPage() {
           <h3 className="text-sm font-black mb-4" style={{ color: th.fg }}>Exercices pour vous</h3>
           <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))" }}>
             <button onClick={() => { setEditingExercise(undefined); setExerciseDialogOpen(true); }}
-              className="group relative overflow-hidden rounded-2xl flex flex-col items-center justify-center gap-2 text-center transition-all duration-300"
-              style={{ aspectRatio: "1/1", background: th.isDark ? `${th.gradShadow(0.06)}` : `${th.gradShadow(0.05)}`, border: `1.5px dashed ${th.gradShadow(0.4)}` }}>
-              <div className="w-10 h-10 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110" style={{ background: th.ink, color: th.onInk }}>
+              className="group relative overflow-hidden rounded-[10px] flex flex-col items-center justify-center gap-2 text-center transition-colors duration-200 hover-fine:[border-color:var(--ink)]!"
+              style={{ aspectRatio: "1/1", border: `1px dashed ${th.inputB}` }}>
+              <div className="w-10 h-10 rounded-[4px] flex items-center justify-center" style={{ background: th.ink, color: th.onInk }}>
                 <Plus className="w-4 h-4" />
               </div>
               <div className="text-xs font-black" style={{ color: th.fg }}>Nouvel exercice</div>
@@ -520,7 +520,7 @@ export function AdminCourseEditorPage() {
                       <span className="text-xs shrink-0" style={{ color: th.fg3 }}>{lessons.length} leçon{lessons.length !== 1 ? "s" : ""}</span>
                       <button onClick={() => moveSection(index, -1)} disabled={index === 0} className="disabled:opacity-20"><ChevronUp className="w-4 h-4" style={{ color: th.fg3 }} /></button>
                       <button onClick={() => moveSection(index, 1)} disabled={index === sections.length - 1} className="disabled:opacity-20"><ChevronDown className="w-4 h-4" style={{ color: th.fg3 }} /></button>
-                      <button onClick={() => deleteSection(section.id)}><Trash2 className="w-4 h-4" style={{ color: "#fbc2ad" }} /></button>
+                      <button onClick={() => deleteSection(section.id)}><Trash2 className="w-4 h-4" style={{ color: th.danger }} /></button>
                       <button onClick={() => setExpanded((m) => ({ ...m, [section.id]: !isOpen }))}>
                         <ChevronRightIcon className="w-4 h-4 transition-transform" style={{ color: th.fg3, transform: isOpen ? "rotate(90deg)" : "none" }} />
                       </button>
@@ -533,7 +533,7 @@ export function AdminCourseEditorPage() {
                         <div key={lesson.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5" style={{ borderBottom: `1px solid ${th.sep}` }}>
                           <button onClick={() => navigate(`${lessonsBase}/${lesson.id}`)} className="flex-1 min-w-[140px] text-left text-sm break-words hover:opacity-70" style={{ color: th.fg2 }}>{lesson.title}</button>
                           <span className="text-xs font-mono shrink-0" style={{ color: th.fg3 }}>{lesson.duration_minutes ? `${lesson.duration_minutes} min` : "—"}</span>
-                          <button onClick={() => deleteLesson(section.id, lesson.id)} className="shrink-0"><Trash2 className="w-3.5 h-3.5" style={{ color: "#fbc2ad" }} /></button>
+                          <button onClick={() => deleteLesson(section.id, lesson.id)} className="shrink-0"><Trash2 className="w-3.5 h-3.5" style={{ color: th.danger }} /></button>
                         </div>
                       ))}
                       <div className="px-4 py-2.5">

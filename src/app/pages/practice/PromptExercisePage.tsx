@@ -92,7 +92,7 @@ export function PromptExercisePage() {
           <ArrowLeft className="w-4 h-4" />Historique des tentatives
         </button>
         <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>Exercices prompts</GT></h2>
-        <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Écris un prompt, l'IA le note sur 20 et t'explique précisément quoi corriger.</p>
+        <p className="text-[15px] sm:text-base mt-2 max-w-3xl leading-relaxed" style={{ color: th.fg2 }}>Écris un prompt, l'IA le note sur 20 et t'explique précisément quoi corriger.</p>
       </div>
 
       {loading && (
@@ -168,7 +168,7 @@ export function PromptExercisePage() {
 
           {current.missing.length > 0 && (
             <GCard><div className="p-6 space-y-4">
-              <h3 className="text-sm font-black flex items-center gap-2" style={{ color: th.fg }}><AlertTriangle className="w-4 h-4" style={{ color: "#fbc2ad" }} />Ce qu'il manque</h3>
+              <h3 className="text-sm font-black flex items-center gap-2" style={{ color: th.fg }}><AlertTriangle className="w-4 h-4" style={{ color: th.danger }} />Ce qu'il manque</h3>
               <div className="space-y-4">
                 {current.missing.map((m, i) => (
                   <div key={i} className="flex gap-3">

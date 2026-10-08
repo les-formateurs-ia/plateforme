@@ -207,7 +207,7 @@ export function ProfilePage() {
       {!staff && tab === "overview" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <GCard><div className="p-5">
-            <div className="flex items-center gap-2 mb-4"><Trophy className="w-4 h-4 text-[#fbc2ad]" /><span className="text-sm font-black" style={{ color: th.fg }}>Progression certification</span></div>
+            <div className="flex items-center gap-2 mb-4"><Trophy className="w-4 h-4 text-[var(--danger)]" /><span className="text-sm font-black" style={{ color: th.fg }}>Progression certification</span></div>
             <div className="space-y-3">
               {certChapters.length === 0 && <p className="text-xs" style={{ color: th.fg3 }}>Aucun module pour l'instant.</p>}
               {certChapters.map(({ title, pct, done }, i) => {
@@ -217,7 +217,7 @@ export function ProfilePage() {
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0" style={{ background: done ? "rgba(106,222,177,0.15)" : active ? `${th.gradShadow(0.12)}` : "transparent", border: `1px solid ${done ? "rgba(106,222,177,0.4)" : active ? `${th.gradShadow(0.3)}` : th.sep}` }}>
-                        {done ? <CheckCircle className="w-2.5 h-2.5 text-[#6adeb1]" /> : active ? <div className="w-1.5 h-1.5 rounded-full" style={{ background: th.navAC }} /> : <Lock className="w-2 h-2" style={{ color: th.fg3 }} />}
+                        {done ? <CheckCircle className="w-2.5 h-2.5 text-[var(--success)]" /> : active ? <div className="w-1.5 h-1.5 rounded-full" style={{ background: th.navAC }} /> : <Lock className="w-2 h-2" style={{ color: th.fg3 }} />}
                       </div>
                       <span className="text-xs" style={{ color: done ? "rgba(106,222,177,0.8)" : active ? th.navAC : th.fg3 }}>{title}</span>
                     </div>
@@ -252,7 +252,7 @@ export function ProfilePage() {
               <GCard key={id}><div className={cx("p-5 text-center", !done && "opacity-40")} title={description ?? undefined}>
                 <span className={cx("text-4xl block mb-3", !done && "grayscale")}>{icon ?? "🏅"}</span>
                 <div className="text-sm font-bold mb-1" style={{ color: done ? th.fg : th.fg3 }}>{label}</div>
-                {done ? <span className="text-[10px] font-bold text-[#6adeb1]">Obtenu ✓</span> : <span className="text-[10px] flex items-center justify-center gap-1" style={{ color: th.fg3 }}><Lock className="w-3 h-3" />Non débloqué</span>}
+                {done ? <span className="text-[10px] font-bold text-[var(--success)]">Obtenu ✓</span> : <span className="text-[10px] flex items-center justify-center gap-1" style={{ color: th.fg3 }}><Lock className="w-3 h-3" />Non débloqué</span>}
               </div></GCard>
             );
           })}
@@ -293,7 +293,7 @@ export function ProfilePage() {
               <div className="text-xs" style={{ color: th.fg3 }}>
                 {avatarUploading ? "Envoi en cours…" : "JPG, PNG ou GIF — 5 Mo maximum."}
               </div>
-              {avatarError && <p className="text-xs mt-1" style={{ color: "#fbc2ad" }}>{avatarError}</p>}
+              {avatarError && <p className="text-xs mt-1" style={{ color: th.danger }}>{avatarError}</p>}
             </div>
           </div></GCard>
 
@@ -344,7 +344,7 @@ export function ProfilePage() {
           {role === "admin" && (
             <GCard><div className="p-5 flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-3 min-w-0">
-                {googleConnected ? <CalendarCheck2 className="w-5 h-5 shrink-0" style={{ color: "#6adeb1" }} /> : <CalendarClock className="w-5 h-5 shrink-0" style={{ color: th.fg3 }} />}
+                {googleConnected ? <CalendarCheck2 className="w-5 h-5 shrink-0" style={{ color: th.success }} /> : <CalendarClock className="w-5 h-5 shrink-0" style={{ color: th.fg3 }} />}
                 <div className="min-w-0">
                   <div className="text-sm font-bold mb-0.5" style={{ color: th.fg }}>Google Calendar de la plateforme</div>
                   <div className="text-xs truncate" style={{ color: th.fg3 }}>
@@ -420,7 +420,7 @@ export function ProfilePage() {
               <div className="text-xs break-words" style={{ color: th.fg3 }}>Connecté·e en tant que {user?.email}</div>
             </div>
             <button onClick={handleSignOut} className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80"
-              style={{ background: "rgba(251,194,173,0.1)", border: "1px solid rgba(251,194,173,0.25)", color: "#fbc2ad" }}>
+              style={{ background: "rgba(251,194,173,0.1)", border: "1px solid rgba(251,194,173,0.25)", color: th.danger }}>
               <LogOut className="w-4 h-4" />Se déconnecter
             </button>
           </div></GCard>

@@ -29,7 +29,7 @@ const GEN_TYPES: { id: GenType; label: string; hint: string; Icon: typeof Networ
   { id: "podcast", label: "Podcast", hint: "Dialogue audio à deux voix", Icon: Headphones },
 ];
 
-const greenBtn = { background: "rgba(106,222,177,0.12)", border: "1px solid rgba(106,222,177,0.35)", color: "#6adeb1" };
+const greenBtn = { background: "rgba(106,222,177,0.12)", border: "1px solid rgba(106,222,177,0.35)", color: "var(--success)" };
 
 export function LessonsPage() {
   const th = useTh();
@@ -54,7 +54,7 @@ export function LessonsPage() {
   }
 
   if (errorMsg) {
-    return <div className="flex-1 flex items-center justify-center"><span className="text-sm text-[#fbc2ad]">{errorMsg}</span></div>;
+    return <div className="flex-1 flex items-center justify-center"><span className="text-sm text-[var(--danger)]">{errorMsg}</span></div>;
   }
 
   if (!courses.length) {
@@ -72,7 +72,7 @@ export function LessonsPage() {
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
       <div className="mb-6">
         <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>Mes leçons</GT></h2>
-        <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>{courses.length} formation{courses.length > 1 ? "s" : ""} en cours</p>
+        <p className="text-[15px] sm:text-base mt-2 max-w-3xl leading-relaxed" style={{ color: th.fg2 }}>{courses.length} formation{courses.length > 1 ? "s" : ""} en cours</p>
       </div>
 
       <div className="space-y-4">
@@ -192,7 +192,7 @@ function FormationAccordion({ entry, open, onToggle }: { entry: CourseProgressEn
       <button className="w-full text-left" onClick={onToggle}>
         <div className="px-5 py-4 flex items-center gap-4">
           <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: fsc.bg, border: `1px solid ${fsc.border}` }}>
-            {formationStatus === "complete" ? <CheckCircle className="w-5 h-5 text-[#6adeb1]" /> : <GraduationCap className="w-5 h-5" style={{ color: fsc.text }} />}
+            {formationStatus === "complete" ? <CheckCircle className="w-5 h-5 text-[var(--success)]" /> : <GraduationCap className="w-5 h-5" style={{ color: fsc.text }} />}
           </div>
           <div className="flex-1 min-w-0">
             <div className="text-sm font-bold mb-1" style={{ color: th.fg }}>{outline.instanceName}</div>
@@ -238,7 +238,7 @@ function FormationAccordion({ entry, open, onToggle }: { entry: CourseProgressEn
 
             {editMode && (
               <div className="px-4 py-2.5 rounded-xl text-xs" style={{ background: "rgba(106,222,177,0.08)", border: "1px solid rgba(106,222,177,0.25)", color: th.fg3 }}>
-                Sélectionne les leçons pour lesquelles générer un contenu IA (mindmap, podcast ou vidéo avatar), puis clique sur <strong style={{ color: "#6adeb1" }}>Valider</strong>.
+                Sélectionne les leçons pour lesquelles générer un contenu IA (mindmap, podcast ou vidéo avatar), puis clique sur <strong style={{ color: th.success }}>Valider</strong>.
               </div>
             )}
 
@@ -277,7 +277,7 @@ function FormationAccordion({ entry, open, onToggle }: { entry: CourseProgressEn
                     <button className="w-full text-left" onClick={() => !editMode && setOpenSection(modOpen ? null : mod.id)}>
                       <div className="px-5 py-4 flex items-center gap-4">
                         <div className="w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0" style={{ background: sc.bg, border: `1px solid ${sc.border}` }}>
-                          {status === "locked" ? <Lock className="w-4 h-4" style={{ color: th.fg3 }} /> : status === "complete" ? <CheckCircle className="w-5 h-5 text-[#6adeb1]" /> : <Play className="w-4 h-4" style={{ color: th.navAC }} />}
+                          {status === "locked" ? <Lock className="w-4 h-4" style={{ color: th.fg3 }} /> : status === "complete" ? <CheckCircle className="w-5 h-5 text-[var(--success)]" /> : <Play className="w-4 h-4" style={{ color: th.navAC }} />}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
@@ -316,7 +316,7 @@ function FormationAccordion({ entry, open, onToggle }: { entry: CourseProgressEn
                                 <Checkbox checked={selected.has(lesson.id)} onCheckedChange={() => toggleLesson(lesson.id)} onClick={(e) => e.stopPropagation()} className="shrink-0" />
                               )}
                               <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: state === "completed" ? "rgba(106,222,177,0.12)" : state === "available" ? `${th.gradShadow(0.12)}` : "transparent", border: `1px solid ${state === "completed" ? "rgba(106,222,177,0.3)" : state === "available" ? `${th.gradShadow(0.35)}` : th.sep}` }}>
-                                {state === "completed" ? <CheckCircle className="w-3.5 h-3.5 text-[#6adeb1]" /> : state === "available" ? <Play className="w-3 h-3 ml-0.5" style={{ color: th.navAC }} /> : <Lock className="w-3 h-3" style={{ color: th.fg3 }} />}
+                                {state === "completed" ? <CheckCircle className="w-3.5 h-3.5 text-[var(--success)]" /> : state === "available" ? <Play className="w-3 h-3 ml-0.5" style={{ color: th.navAC }} /> : <Lock className="w-3 h-3" style={{ color: th.fg3 }} />}
                               </div>
                               {/* Mobile first : titre sur toute la largeur, avec retour à la ligne ;
                                   badge et durée passent dessous sur mobile, à droite à partir de sm. */}
@@ -393,8 +393,8 @@ function FormationAccordion({ entry, open, onToggle }: { entry: CourseProgressEn
                   const st = genStatuses[id] ?? "pending";
                   return (
                     <div key={id} className="flex items-center gap-3 px-3 py-2 rounded-lg" style={{ background: th.isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)" }}>
-                      {st === "done" && <CheckCircle className="w-4 h-4 shrink-0 text-[#6adeb1]" />}
-                      {st === "error" && <XCircle className="w-4 h-4 shrink-0 text-[#fbc2ad]" />}
+                      {st === "done" && <CheckCircle className="w-4 h-4 shrink-0 text-[var(--success)]" />}
+                      {st === "error" && <XCircle className="w-4 h-4 shrink-0 text-[var(--danger)]" />}
                       {st === "running" && <Loader2 className="w-4 h-4 shrink-0 animate-spin" style={{ color: th.navAC }} />}
                       {st === "pending" && <div className="w-4 h-4 shrink-0 rounded-full" style={{ border: `1px solid ${th.sep}` }} />}
                       <span className="flex-1 text-xs truncate" style={{ color: th.fg }}>{lesson?.title ?? id}</span>

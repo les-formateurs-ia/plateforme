@@ -119,7 +119,7 @@ export function StudioMusicPage() {
 
       <div>
         <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}>Concevez vos propres musiques</h2>
-        <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Décris l'ambiance souhaitée et laisse l'IA composer pour toi (Text-to-Music).</p>
+        <p className="text-[15px] sm:text-base mt-2 max-w-3xl leading-relaxed" style={{ color: th.fg2 }}>Décris l'ambiance souhaitée et laisse l'IA composer pour toi (Text-to-Music).</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-5 items-start">

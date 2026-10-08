@@ -42,11 +42,6 @@ function FeaturedQuizTile({ test, Icon, kindLabel, intro, variant, index, onStar
   const minutes = Math.max(1, Math.round(test.questionCount * 0.75));
   return (
     <Panel index={index} onClick={test.done ? undefined : onStart} halo={false}>
-      {/* Grand halo + icône géante en filigrane, comme les tuiles mais en plus ample. */}
-      <div className="pointer-events-none absolute -top-32 -right-24 w-[28rem] h-[28rem] rounded-full blur-3xl opacity-50 transition-opacity duration-300 group-hover:opacity-80"
-        style={{ background: `radial-gradient(circle, ${h.alpha(th.isDark ? 0.45 : 0.35)}, transparent 70%)` }} />
-      <Icon className="pointer-events-none absolute -bottom-16 right-6 w-72 h-72 -rotate-12 transition-transform duration-500 group-hover:rotate-0 group-hover:scale-105"
-        style={{ color: h.c1, opacity: th.isDark ? 0.07 : 0.09 }} strokeWidth={1.2} />
 
       <div className="relative min-h-[280px] p-6 sm:p-8 flex flex-col lg:flex-row lg:items-center gap-7">
         <div className="flex-1 min-w-0 flex flex-col gap-4">

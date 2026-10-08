@@ -96,6 +96,9 @@
   --ink: #000000;
   --on-ink: #ffffff;
   --role: #b58de0;
+  --success: #1f7a57;
+  --danger: #b4442b;
+  --info: #17707d;
 }
 
 .dark {

@@ -23,10 +23,10 @@ interface FormationRow {
 }
 
 const STATUS_LABEL: Record<string, { label: string; color: string; bg: string }> = {
-  draft: { label: "Brouillon", color: "#fbc2ad", bg: "rgba(251,194,173,0.1)" },
-  published: { label: "Publié", color: "#6adeb1", bg: "rgba(106,222,177,0.1)" },
+  draft: { label: "Brouillon", color: "var(--danger)", bg: "rgba(251,194,173,0.1)" },
+  published: { label: "Publié", color: "var(--success)", bg: "rgba(106,222,177,0.1)" },
   archived: { label: "Archivé", color: "#94A3B8", bg: "rgba(148,163,184,0.1)" },
-  generating: { label: "Génération…", color: "#78d5e2", bg: "rgba(120,213,226,0.1)" },
+  generating: { label: "Génération…", color: "var(--info)", bg: "rgba(120,213,226,0.1)" },
 };
 
 export function AdminCoursesPage() {
@@ -106,7 +106,7 @@ export function AdminCoursesPage() {
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>Gestion des formations</GT></h2>
-          <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Modèles de formation — à attribuer aux élèves depuis la fiche élève.</p>
+          <p className="text-[15px] sm:text-base mt-2 max-w-3xl leading-relaxed" style={{ color: th.fg2 }}>Modèles de formation — à attribuer aux élèves depuis la fiche élève.</p>
         </div>
         <div className="flex items-center gap-2">
           {admin && (
@@ -136,7 +136,7 @@ export function AdminCoursesPage() {
               <div className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <h3 className="text-sm font-black" style={{ color: th.fg }}>{c.name}</h3>
-                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-[2px] shrink-0" style={{ background: sc.bg, color: sc.color, border: `1px solid ${sc.color}30` }}>{sc.label}</span>
+                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-[2px] shrink-0" style={{ background: sc.bg, color: sc.color, border: "1px solid transparent" }}>{sc.label}</span>
                 </div>
                 <p className="text-xs leading-relaxed mb-4 line-clamp-2" style={{ color: th.fg3 }}>{c.description || "Pas de description."}</p>
                 <div className="flex items-center gap-4 text-xs" style={{ color: th.fg3 }}>

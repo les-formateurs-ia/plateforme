@@ -249,7 +249,7 @@ export function AdminAvailabilityPage() {
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div>
         <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>Rendez-vous</GT></h2>
-        <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Déclare tes disponibilités, les élèves réservent directement dessus.</p>
+        <p className="text-[15px] sm:text-base mt-2 max-w-3xl leading-relaxed" style={{ color: th.fg2 }}>Déclare tes disponibilités, les élèves réservent directement dessus.</p>
       </div>
 
       <GCard>
@@ -355,7 +355,7 @@ export function AdminAvailabilityPage() {
                         {new Date(`${b.slotDate}T00:00:00`).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} · {b.startTime}–{b.endTime}
                       </div>
                       {b.proposedDate && (
-                        <div className="text-[11px] mt-1 font-semibold" style={{ color: "#fbc2ad" }}>
+                        <div className="text-[11px] mt-1 font-semibold" style={{ color: th.danger }}>
                           Proposition envoyée : {b.proposedDate} à {b.proposedStartTime} (en attente de réponse)
                         </div>
                       )}
@@ -410,7 +410,7 @@ export function AdminAvailabilityPage() {
                     </div>
                   </div>
                   {b.bilanFilledAt ? (
-                    <button onClick={() => openBilan(b)} className="text-xs font-semibold flex items-center gap-1.5 shrink-0 hover:opacity-80" style={{ color: "#6adeb1" }}>
+                    <button onClick={() => openBilan(b)} className="text-xs font-semibold flex items-center gap-1.5 shrink-0 hover:opacity-80" style={{ color: th.success }}>
                       <ClipboardCheck className="w-3.5 h-3.5" />Bilan envoyé
                       <Eye className="w-3.5 h-3.5 ml-1" />
                     </button>
@@ -470,7 +470,7 @@ export function AdminAvailabilityPage() {
                 disabled={submittingBilan || deletingBilan}
                 title="Supprimer le bilan"
                 className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-colors hover:opacity-80 disabled:opacity-50"
-                style={{ background: "rgba(251,194,173,0.1)", border: "1px solid rgba(251,194,173,0.25)", color: "#fbc2ad" }}
+                style={{ background: "rgba(251,194,173,0.1)", border: "1px solid rgba(251,194,173,0.25)", color: th.danger }}
               >
                 <Trash2 className="w-4 h-4" />
               </button>

@@ -789,7 +789,7 @@ export function LessonPage() {
   if (lessonError || !lesson) {
     return (
       <div className="flex h-dvh flex-col items-center justify-center gap-3" style={{ background: th.bg }}>
-        <span className="text-sm text-[#fbc2ad]">{lessonError ?? "Leçon introuvable."}</span>
+        <span className="text-sm text-[var(--danger)]">{lessonError ?? "Leçon introuvable."}</span>
         <VBtn onClick={goBack}>Retour aux leçons</VBtn>
       </div>
     );
@@ -838,7 +838,7 @@ export function LessonPage() {
               )}
 
               {missionSubmission?.status === "submitted" ? (
-                <div className="mt-5 rounded-2xl p-4 text-center text-sm font-semibold" style={{ background: "rgba(106,222,177,0.08)", border: "1px solid rgba(106,222,177,0.3)", color: "#6adeb1" }}>
+                <div className="mt-5 rounded-2xl p-4 text-center text-sm font-semibold" style={{ background: "rgba(106,222,177,0.08)", border: "1px solid rgba(106,222,177,0.3)", color: th.success }}>
                   Mission envoyée — en attente de ton formateur.
                 </div>
               ) : (
@@ -876,7 +876,7 @@ export function LessonPage() {
                     className="flex-1 w-full rounded-xl px-4 py-3 text-xs g-input resize-none font-mono"
                     style={{ minHeight: 0 }}
                   />
-                  {htmlFileError && <p className="text-xs text-[#fbc2ad]">{htmlFileError}</p>}
+                  {htmlFileError && <p className="text-xs text-[var(--danger)]">{htmlFileError}</p>}
                   <p className="text-[11px] leading-relaxed" style={{ color: th.fg3 }}>
                     Pour appeler l'IA sans exposer de clé : dans ce HTML, lis <code>window.__PLATFORM_AUTH__</code> (<code>supabaseUrl</code>, <code>supabaseAnonKey</code>, <code>accessToken</code>) et fais un POST JSON vers <code>{"{supabaseUrl}"}/functions/v1/ai-proxy</code> avec les headers <code>apikey</code> (=supabaseAnonKey) et <code>Authorization: Bearer {"{accessToken}"}</code>, et un corps <code>{"{ contents: [...] }"}</code> (format Gemini). La clé Gemini reste côté serveur.
                   </p>
@@ -959,7 +959,7 @@ export function LessonPage() {
                   : "Prêt à discuter"}
               </p>
 
-              {agentError && <p className="text-xs text-[#fbc2ad] text-center max-w-sm">{agentError}</p>}
+              {agentError && <p className="text-xs text-[var(--danger)] text-center max-w-sm">{agentError}</p>}
 
               <div className="flex items-center gap-4 shrink-0">
                 <button
@@ -1122,7 +1122,7 @@ export function LessonPage() {
                       ) : avatarVideo?.status === "pending" ? (
                         <p className="text-sm text-white/60">Génération en cours…</p>
                       ) : avatarVideo?.status === "failed" ? (
-                        <p className="text-sm text-[#fbc2ad]">{avatarVideo.error ?? "Échec de la génération."}</p>
+                        <p className="text-sm text-[var(--danger)]">{avatarVideo.error ?? "Échec de la génération."}</p>
                       ) : (
                         <>
                           <p className="text-sm text-white/60">Pas encore de vidéo personnalisée pour cette leçon.</p>
@@ -1240,7 +1240,7 @@ export function LessonPage() {
       {showFinishConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.7)" }} onClick={() => setShowFinishConfirm(false)}>
           <div onClick={(e) => e.stopPropagation()} className="max-w-sm w-full rounded-2xl overflow-hidden p-6 text-center" style={{ background: th.card, border: `1px solid ${th.sep}` }}>
-            <PartyPopper className="w-8 h-8 mx-auto mb-3 text-[#6adeb1]" />
+            <PartyPopper className="w-8 h-8 mx-auto mb-3 text-[var(--success)]" />
             <p className="text-sm font-semibold mb-5" style={{ color: th.fg }}>
               Félicitation pour cette leçon, testons maintenant tes connaissances pour vérifier si tu valides bien tous les acquis
             </p>
@@ -1281,8 +1281,8 @@ export function LessonPage() {
 
               {lesson.questions.length > 0 && !quizResult && !retaking && currentLessonState?.state === "completed" && (
                 <div className="rounded-xl p-5 text-center" style={{ background: "rgba(106,222,177,0.08)", border: "1px solid rgba(106,222,177,0.3)" }}>
-                  <CheckCircle className="w-6 h-6 mx-auto mb-2 text-[#6adeb1]" />
-                  <p className="text-sm font-semibold mb-1" style={{ color: "#6adeb1" }}>Leçon déjà validée</p>
+                  <CheckCircle className="w-6 h-6 mx-auto mb-2 text-[var(--success)]" />
+                  <p className="text-sm font-semibold mb-1" style={{ color: th.success }}>Leçon déjà validée</p>
                   <p className="text-xs mb-4" style={{ color: th.fg3 }}>
                     {currentLessonState.progress?.bestQuizScore != null ? `Meilleur score : ${currentLessonState.progress.bestQuizScore}%` : ""}
                   </p>
@@ -1292,7 +1292,7 @@ export function LessonPage() {
 
               {lesson.questions.length > 0 && quizResult && (
                 <div className="rounded-xl p-5 text-center" style={{ background: quizResult.passed ? "rgba(106,222,177,0.08)" : "rgba(251,194,173,0.08)", border: `1px solid ${quizResult.passed ? "rgba(106,222,177,0.3)" : "rgba(251,194,173,0.3)"}` }}>
-                  {quizResult.passed ? <PartyPopper className="w-6 h-6 mx-auto mb-2 text-[#6adeb1]" /> : <X className="w-6 h-6 mx-auto mb-2 text-[#fbc2ad]" />}
+                  {quizResult.passed ? <PartyPopper className="w-6 h-6 mx-auto mb-2 text-[var(--success)]" /> : <X className="w-6 h-6 mx-auto mb-2 text-[var(--danger)]" />}
                   <p className="text-lg font-black mb-1" style={{ color: quizResult.passed ? "#6adeb1" : "#fbc2ad" }}>{quizResult.score}%</p>
                   <p className="text-xs mb-4" style={{ color: th.fg3 }}>
                     {quizResult.passed ? "Leçon validée — bravo !" : `Il faut au moins ${QUIZ_PASS_THRESHOLD}% pour valider cette leçon.`}
@@ -1319,7 +1319,7 @@ export function LessonPage() {
                           className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-left transition-all"
                           style={{ background: bg, border: `1px solid ${border}`, color }}>
                           <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : `${th.gradShadow(0.06)}` }}>
-                            {selected !== null && opt.isCorrect ? <CheckCircle className="w-4 h-4 text-[#6adeb1]" /> : selected !== null && opt.id === selected ? <X className="w-4 h-4 text-[#fbc2ad]" /> : String.fromCharCode(65 + i)}
+                            {selected !== null && opt.isCorrect ? <CheckCircle className="w-4 h-4 text-[var(--success)]" /> : selected !== null && opt.id === selected ? <X className="w-4 h-4 text-[var(--danger)]" /> : String.fromCharCode(65 + i)}
                           </span>{opt.label}
                         </button>
                       );
@@ -1329,7 +1329,7 @@ export function LessonPage() {
                     <div className="rounded-xl p-4" style={{ background: "rgba(106,222,177,0.07)", border: "1px solid rgba(106,222,177,0.2)" }}>
                       {currentQuestion.explanation && (
                         <>
-                          <div className="flex items-center gap-1.5 mb-2 text-xs font-bold text-[#78d5e2]"><Lightbulb className="w-3.5 h-3.5" />Explication</div>
+                          <div className="flex items-center gap-1.5 mb-2 text-xs font-bold text-[var(--info)]"><Lightbulb className="w-3.5 h-3.5" />Explication</div>
                           <p className="text-xs leading-relaxed mb-3" style={{ color: th.fg2 }}>{currentQuestion.explanation}</p>
                         </>
                       )}

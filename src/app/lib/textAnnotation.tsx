@@ -6,7 +6,8 @@ import type { ReactNode } from "react";
 import type { Th } from "@/app/theme/theme";
 
 export const ANNOTATION_RED = "#e5484d";
-export const ANNOTATION_GREEN = "#6adeb1";
+// Vert lisible sur fond clair comme sur fond sombre (contraste ≥ 4,5:1).
+export const ANNOTATION_GREEN = "#1f8a62";
 
 export interface AnnotationSource { excerpt: string; suggestion: string; explanation: string }
 export interface LocatedCorrection extends AnnotationSource { index: number; start: number; end: number; anchored: boolean }
@@ -63,6 +64,6 @@ export function renderAnnotatedText(text: string, anchored: LocatedCorrection[],
 
 export function scoreTone(score: number): { color: string; bg: string } {
   if (score >= 16) return { color: ANNOTATION_GREEN, bg: "rgba(106,222,177,0.12)" };
-  if (score >= 10) return { color: "#fbc2ad", bg: "rgba(251,194,173,0.12)" };
+  if (score >= 10) return { color: "#c2652f", bg: "rgba(251,194,173,0.12)" };
   return { color: ANNOTATION_RED, bg: "rgba(229,72,77,0.12)" };
 }

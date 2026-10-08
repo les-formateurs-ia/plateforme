@@ -63,7 +63,7 @@ export function StudentAiBudgetCard({ studentId, canTopUp }: { studentId: string
       <div className="p-4 sm:p-5 space-y-4">
         <div className="flex items-center justify-between gap-3">
           <h3 className="text-sm font-black" style={{ color: th.fg }}>Crédits IA (Runware)</h3>
-          {exhausted && <span className="text-[10px] font-bold px-2.5 py-1 rounded-[2px]" style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.3)" }}>Épuisés — modèles bloqués</span>}
+          {exhausted && <span className="text-[10px] font-bold px-2.5 py-1 rounded-[2px]" style={{ background: "rgba(239,68,68,0.1)", color: th.danger, border: "1px solid rgba(239,68,68,0.3)" }}>Épuisés — modèles bloqués</span>}
         </div>
 
         <AiBudgetBar spentUsd={budget.spentUsd} capUsd={budget.budgetUsd} size="lg" />
@@ -114,7 +114,7 @@ export function StudentAiBudgetCard({ studentId, canTopUp }: { studentId: string
               {budget.topups.map((t) => (
                 <li key={t.id} className="flex justify-between text-xs" style={{ color: th.fg2 }}>
                   <span>{new Date(t.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}</span>
-                  <span className="font-semibold" style={t.amountUsd < 0 ? { color: "#ef4444" } : undefined}>
+                  <span className="font-semibold" style={t.amountUsd < 0 ? { color: th.danger } : undefined}>
                     {t.amountUsd < 0 ? "−" : "+"}{Math.abs(t.amountUsd).toFixed(2)} $
                   </span>
                 </li>

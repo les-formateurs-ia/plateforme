@@ -78,7 +78,7 @@ export function BattleGroundPage() {
           <ArrowLeft className="w-4 h-4" />Exercez-vous !
         </button>
         <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black flex items-center gap-2" style={{ color: th.fg }}><Swords className="w-5 h-5" /><GT>Battle Ground</GT></h2>
-        <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Un seul prompt, plusieurs IA — compare leurs réponses côte à côte.</p>
+        <p className="text-[15px] sm:text-base mt-2 max-w-3xl leading-relaxed" style={{ color: th.fg2 }}>Un seul prompt, plusieurs IA — compare leurs réponses côte à côte.</p>
       </div>
 
       <GCard><div className="p-6 space-y-4">

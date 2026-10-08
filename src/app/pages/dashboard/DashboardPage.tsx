@@ -138,10 +138,10 @@ export function DashboardPage() {
                         return (
                           <div key={section.id} className="flex items-center gap-3">
                             <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background: allDone ? "rgba(106,222,177,0.15)" : active ? `${th.gradShadow(0.12)}` : `${th.gradShadow(0.04)}`, border: `1px solid ${allDone ? "rgba(106,222,177,0.4)" : active ? `${th.gradShadow(0.3)}` : th.sep}` }}>
-                              {allDone ? <CheckCircle className="w-3 h-3 text-[#6adeb1]" /> : active ? <div className="w-1.5 h-1.5 rounded-full" style={{ background: `${th.grad1}` }} /> : <Lock className="w-2.5 h-2.5" style={{ color: th.fg3 }} />}
+                              {allDone ? <CheckCircle className="w-3 h-3 text-[var(--success)]" /> : active ? <div className="w-1.5 h-1.5 rounded-full" style={{ background: `${th.grad1}` }} /> : <Lock className="w-2.5 h-2.5" style={{ color: th.fg3 }} />}
                             </div>
                             <span className="text-xs flex-1 truncate" style={{ color: allDone ? "rgba(106,222,177,0.8)" : active ? th.navAC : th.fg3 }}>{section.title}</span>
-                            {allDone && <span className="text-[10px] font-bold text-[#6adeb1] shrink-0">100%</span>}
+                            {allDone && <span className="text-[10px] font-bold text-[var(--success)] shrink-0">100%</span>}
                             {!allDone && active && (
                               <div className="flex items-center gap-2 shrink-0">
                                 <div className="w-16 h-1 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : `${th.gradShadow(0.1)}` }}>

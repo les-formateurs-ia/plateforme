@@ -152,7 +152,7 @@ export function CalendarPage() {
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-5">
       <div>
         <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>Rendez-vous</GT></h2>
-        <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Réserve un échange 1h avec ton expert — à partir de demain.</p>
+        <p className="text-[15px] sm:text-base mt-2 max-w-3xl leading-relaxed" style={{ color: th.fg2 }}>Réserve un échange 1h avec ton expert — à partir de demain.</p>
       </div>
 
       {checkedAssignment && !assignedFormateurId && (

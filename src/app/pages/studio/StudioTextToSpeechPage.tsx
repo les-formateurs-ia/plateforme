@@ -157,7 +157,7 @@ export function StudioTextToSpeechPage() {
 
       <div>
         <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}>Du texte à l'audio</h2>
-        <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Convertis instantanément un script écrit en voix naturelle (Text-to-Speech).</p>
+        <p className="text-[15px] sm:text-base mt-2 max-w-3xl leading-relaxed" style={{ color: th.fg2 }}>Convertis instantanément un script écrit en voix naturelle (Text-to-Speech).</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-5 items-start">

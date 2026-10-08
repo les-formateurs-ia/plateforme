@@ -74,7 +74,7 @@ export function AdminFormationPreviewPage() {
       <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>{outline.instanceName}</GT></h2>
-          <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>{outline.sections.length} modules · {totalLessons} leçons</p>
+          <p className="text-[15px] sm:text-base mt-2 max-w-3xl leading-relaxed" style={{ color: th.fg2 }}>{outline.sections.length} modules · {totalLessons} leçons</p>
         </div>
       </div>
 
@@ -117,7 +117,7 @@ export function AdminFormationPreviewPage() {
               <button className="w-full text-left" onClick={() => setOpenSection(open ? null : mod.id)}>
                 <div className="px-5 py-4 flex items-center gap-4">
                   <div className="w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0" style={{ background: sc.bg, border: `1px solid ${sc.border}` }}>
-                    {status === "locked" ? <Lock className="w-4 h-4" style={{ color: th.fg3 }} /> : status === "complete" ? <CheckCircle className="w-5 h-5 text-[#6adeb1]" /> : <Play className="w-4 h-4" style={{ color: th.navAC }} />}
+                    {status === "locked" ? <Lock className="w-4 h-4" style={{ color: th.fg3 }} /> : status === "complete" ? <CheckCircle className="w-5 h-5 text-[var(--success)]" /> : <Play className="w-4 h-4" style={{ color: th.navAC }} />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
@@ -153,7 +153,7 @@ export function AdminFormationPreviewPage() {
                         onClick={() => { if (clickable) goLesson(lesson.id); }}
                         style={i < mod.lessons.length - 1 ? { borderBottom: `1px solid ${th.sep}` } : {}}>
                         <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: state === "completed" ? "rgba(106,222,177,0.12)" : state === "available" ? `${th.gradShadow(0.12)}` : "transparent", border: `1px solid ${state === "completed" ? "rgba(106,222,177,0.3)" : state === "available" ? `${th.gradShadow(0.35)}` : th.sep}` }}>
-                          {state === "completed" ? <CheckCircle className="w-3.5 h-3.5 text-[#6adeb1]" /> : state === "available" ? <Play className="w-3 h-3 ml-0.5" style={{ color: th.navAC }} /> : <Lock className="w-3 h-3" style={{ color: th.fg3 }} />}
+                          {state === "completed" ? <CheckCircle className="w-3.5 h-3.5 text-[var(--success)]" /> : state === "available" ? <Play className="w-3 h-3 ml-0.5" style={{ color: th.navAC }} /> : <Lock className="w-3 h-3" style={{ color: th.fg3 }} />}
                         </div>
                         {/* Même disposition mobile first que LessonsPage. */}
                         <div className="flex-1 min-w-0 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-4">

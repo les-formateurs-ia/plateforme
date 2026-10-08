@@ -126,7 +126,7 @@ export function StudioImagesPage() {
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}>Créer vos images</h2>
-            <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Génère des visuels avec de vrais modèles d'IA (Text-to-Image / Image-to-Image).</p>
+            <p className="text-[15px] sm:text-base mt-2 max-w-3xl leading-relaxed" style={{ color: th.fg2 }}>Génère des visuels avec de vrais modèles d'IA (Text-to-Image / Image-to-Image).</p>
           </div>
           <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-[2px] shrink-0" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg2 }}>
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: generating ? th.fg3 : "#22c55e" }} />

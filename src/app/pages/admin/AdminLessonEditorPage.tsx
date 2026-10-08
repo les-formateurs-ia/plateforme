@@ -433,7 +433,7 @@ export function AdminLessonEditorPage() {
               <Upload className="w-4 h-4" />{uploading ? "Envoi…" : videoUrl ? "Remplacer la vidéo" : "Choisir un fichier vidéo"}
             </button>
             {videoUrl && (
-              <button type="button" onClick={handleRemoveVideo} className="flex items-center gap-1.5 text-xs font-semibold hover:opacity-70" style={{ color: "#fbc2ad" }}>
+              <button type="button" onClick={handleRemoveVideo} className="flex items-center gap-1.5 text-xs font-semibold hover:opacity-70" style={{ color: th.danger }}>
                 <Trash2 className="w-3.5 h-3.5" />Supprimer la vidéo
               </button>
             )}
@@ -453,7 +453,7 @@ export function AdminLessonEditorPage() {
               <Upload className="w-4 h-4" />{uploadingCustomVideo ? "Envoi…" : customVideoUrl ? "Remplacer la vidéo" : "Choisir un fichier vidéo"}
             </button>
             {customVideoUrl && (
-              <button type="button" onClick={handleRemoveCustomVideo} className="flex items-center gap-1.5 text-xs font-semibold hover:opacity-70" style={{ color: "#fbc2ad" }}>
+              <button type="button" onClick={handleRemoveCustomVideo} className="flex items-center gap-1.5 text-xs font-semibold hover:opacity-70" style={{ color: th.danger }}>
                 <Trash2 className="w-3.5 h-3.5" />Supprimer la vidéo personnalisée
               </button>
             )}
@@ -515,7 +515,7 @@ export function AdminLessonEditorPage() {
               <div className="flex items-start gap-2 mb-3">
                 <input value={q.question} onChange={(e) => updateQuestion(qIndex, { question: e.target.value })} placeholder="Intitulé de la question"
                   className="flex-1 rounded-xl px-3 py-2 text-sm g-input" />
-                <button onClick={() => removeQuestion(qIndex)}><Trash2 className="w-4 h-4" style={{ color: "#fbc2ad" }} /></button>
+                <button onClick={() => removeQuestion(qIndex)}><Trash2 className="w-4 h-4" style={{ color: th.danger }} /></button>
               </div>
               <div className="space-y-2 mb-3">
                 {q.options.map((o, oIndex) => (
@@ -542,7 +542,7 @@ export function AdminLessonEditorPage() {
         </div>
       </div></GCard>
 
-      {error && <p className="text-xs" style={{ color: "#fbc2ad" }}>{error}</p>}
+      {error && <p className="text-xs" style={{ color: th.danger }}>{error}</p>}
       <ShimBtn onClick={save} disabled={saving}>{saving ? "Enregistrement…" : "Enregistrer la leçon"}</ShimBtn>
     </div>
   );

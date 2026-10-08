@@ -63,7 +63,7 @@ export function ModelDetailSheet({ model, open, onOpenChange }: { model: AiModel
                 <ul className="space-y-2">
                   {model.strengths.map((s) => (
                     <li key={s} className="flex items-start gap-2 text-sm" style={{ color: th.fg2 }}>
-                      <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" style={{ color: "#22c55e" }} />
+                      <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" style={{ color: th.success }} />
                       <span>{s}</span>
                     </li>
                   ))}
@@ -75,7 +75,7 @@ export function ModelDetailSheet({ model, open, onOpenChange }: { model: AiModel
                 <ul className="space-y-2">
                   {model.weaknesses.map((w) => (
                     <li key={w} className="flex items-start gap-2 text-sm" style={{ color: th.fg2 }}>
-                      <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" style={{ color: "#fb7185" }} />
+                      <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" style={{ color: th.danger }} />
                       <span>{w}</span>
                     </li>
                   ))}
@@ -96,7 +96,7 @@ export function ModelDetailSheet({ model, open, onOpenChange }: { model: AiModel
                 <div className="rounded-xl p-3.5 flex items-start gap-2" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
                   <p className="text-sm flex-1 italic" style={{ color: th.fg2 }}>« {model.promptIdea} »</p>
                   <button onClick={copyPrompt} className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-opacity hover:opacity-70" style={{ color: th.fg3 }} title="Copier le prompt">
-                    {copied ? <Check className="w-3.5 h-3.5" style={{ color: "#22c55e" }} /> : <Copy className="w-3.5 h-3.5" />}
+                    {copied ? <Check className="w-3.5 h-3.5" style={{ color: th.success }} /> : <Copy className="w-3.5 h-3.5" />}
                   </button>
                 </div>
               </div>

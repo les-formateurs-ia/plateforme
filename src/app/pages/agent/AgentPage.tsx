@@ -293,8 +293,9 @@ export function AgentPage() {
             <div key={m.id} className={cx("flex", m.role === "user" ? "justify-end" : "justify-start")}>
               <div className="max-w-[85%] sm:max-w-[70%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-line flex items-start gap-2"
                 style={m.role === "user"
-                  ? { background: th.ink, color: th.onInk, borderRadius: "16px 16px 4px 16px" }
-                  : { background: th.card, border: `1px solid ${th.sep}`, color: th.fg, borderRadius: "16px 16px 16px 4px" }}>
+                  ? { background: th.ink, color: th.onInk, borderRadius: "12px 12px 2px 12px" }
+                  // Réponse de l'agent cerclée du dégradé iris (démo de la plateforme sur le site public).
+                  : { background: `linear-gradient(${th.card},${th.card}) padding-box, ${th.iris} border-box`, border: "1.5px solid transparent", color: th.fg, borderRadius: "12px 12px 12px 2px" }}>
                 {m.modality === "voice" && <AudioLines className="w-3.5 h-3.5 shrink-0 mt-0.5 opacity-60" />}
                 <span>{m.content}</span>
               </div>
@@ -302,7 +303,7 @@ export function AgentPage() {
           ))}
           {sending && (
             <div className="flex justify-start" role="status" aria-live="polite">
-              <div className="rounded-2xl px-4 py-3 flex items-center gap-2.5" style={{ background: th.card, border: `1px solid ${th.sep}`, borderRadius: "16px 16px 16px 4px" }}>
+              <div className="px-4 py-3 flex items-center gap-2.5" style={{ background: `linear-gradient(${th.card},${th.card}) padding-box, ${th.iris} border-box`, border: "1.5px solid transparent", borderRadius: "12px 12px 12px 2px" }}>
                 <span className="flex items-center gap-1" aria-hidden="true">
                   {[0, 150, 300].map((delay) => (
                     <span key={delay} className="w-2 h-2 rounded-full animate-bounce" style={{ background: th.navAC, animationDelay: `${delay}ms` }} />
@@ -315,7 +316,7 @@ export function AgentPage() {
           <div ref={chatEnd} />
         </div>
 
-        {agentError && <div className="px-4 sm:px-6 pb-1 text-xs shrink-0" style={{ color: "#fbc2ad" }}>{agentError}</div>}
+        {agentError && <div className="px-4 sm:px-6 pb-1 text-xs shrink-0" style={{ color: th.danger }}>{agentError}</div>}
 
         <div className="shrink-0 px-4 sm:px-6 pb-5 pt-2 space-y-2.5">
           {(agentStatus !== "idle") && (

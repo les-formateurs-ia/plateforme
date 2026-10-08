@@ -17,12 +17,12 @@ export function PracticePage2() {
   // visibles en aperçu (grisé, non cliquable) pour l'admin seulement, masqués
   // pour le formateur et l'élève. Les routes sont aussi réservées à l'admin (App.tsx).
   const BLOCKS = [
-    { emoji: "⚔️", title: "Battle Ground", desc: "Envoie un même prompt à plusieurs IA (Gemini, GPT-4o, Claude) et compare leurs réponses côte à côte.", tag: "Comparaison de modèles", path: "/practice/battle-ground", color: "#fbc2ad", glow: "rgba(251,194,173,0.12)", restricted: false },
-    { emoji: "🎯", title: "Rétro-ingénierie", desc: "Une image cible est générée automatiquement. À toi de deviner le prompt qui a permis de la créer.", tag: "Reverse Prompting", path: "/practice/reverse-prompting", color: "#78d5e2", glow: "rgba(120,213,226,0.12)", restricted: false },
-    { emoji: "🕵️", title: "Détection Image IA", desc: "Réelle ou générée par IA ? Devine et découvre l'explication derrière chaque image.", tag: "Vrai ou Faux", path: "/practice/ai-detection", color: "#6adeb1", glow: "rgba(106,222,177,0.12)", restricted: true },
+    { emoji: "⚔️", title: "Battle Ground", desc: "Envoie un même prompt à plusieurs IA (Gemini, GPT-4o, Claude) et compare leurs réponses côte à côte.", tag: "Comparaison de modèles", path: "/practice/battle-ground", color: th.danger, glow: "rgba(251,194,173,0.12)", restricted: false },
+    { emoji: "🎯", title: "Rétro-ingénierie", desc: "Une image cible est générée automatiquement. À toi de deviner le prompt qui a permis de la créer.", tag: "Reverse Prompting", path: "/practice/reverse-prompting", color: th.info, glow: "rgba(120,213,226,0.12)", restricted: false },
+    { emoji: "🕵️", title: "Détection Image IA", desc: "Réelle ou générée par IA ? Devine et découvre l'explication derrière chaque image.", tag: "Vrai ou Faux", path: "/practice/ai-detection", color: th.success, glow: "rgba(106,222,177,0.12)", restricted: true },
     { emoji: "✨", title: "Exercices pour vous", desc: "Bac à sable HTML/JS — colle du code et vois-le tourner en direct, exactement comme le Playground d'une leçon.", tag: "Playground", path: "/practice/html", color: `${th.grad2}`, glow: `${th.gradShadow(0.12)}`, restricted: true },
-    { emoji: "🎨", title: "Génération images & vidéos", desc: "Entraînement à la rédaction de prompts pour générateurs d'image et de vidéo IA — comparaison avant/après correction.", tag: "IA · Image & Vidéo", path: "/practice/media", color: "#fbc2ad", glow: "rgba(251,194,173,0.12)", restricted: false },
-    { emoji: "⚡", title: "Exercices prompts", desc: "Entraînement exclusif à la rédaction de prompts professionnels. Aucun QCM — pratique pure.", tag: "20 exercices", path: "/practice/prompts", color: "#6adeb1", glow: "rgba(106,222,177,0.12)", restricted: false },
+    { emoji: "🎨", title: "Génération images & vidéos", desc: "Entraînement à la rédaction de prompts pour générateurs d'image et de vidéo IA — comparaison avant/après correction.", tag: "IA · Image & Vidéo", path: "/practice/media", color: th.danger, glow: "rgba(251,194,173,0.12)", restricted: false },
+    { emoji: "⚡", title: "Exercices prompts", desc: "Entraînement exclusif à la rédaction de prompts professionnels. Aucun QCM — pratique pure.", tag: "20 exercices", path: "/practice/prompts", color: th.success, glow: "rgba(106,222,177,0.12)", restricted: false },
   ];
   const visibleBlocks = BLOCKS.filter((b) => !b.restricted || isAdminRole);
   const availableCount = visibleBlocks.filter((b) => !b.restricted).length;
@@ -31,7 +31,7 @@ export function PracticePage2() {
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div>
         <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>Exercez-vous !</GT></h2>
-        <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>{COUNT_WORDS[availableCount] ?? availableCount} ateliers pratiques pour affûter ton regard sur l'IA générative</p>
+        <p className="text-[15px] sm:text-base mt-2 max-w-3xl leading-relaxed" style={{ color: th.fg2 }}>{COUNT_WORDS[availableCount] ?? availableCount} ateliers pratiques pour affûter ton regard sur l'IA générative</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">

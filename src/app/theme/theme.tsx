@@ -68,6 +68,13 @@ function mkTh(isDark: boolean, role: Role | null = null) {
     role:     g1,
     roleGrad: `linear-gradient(135deg,${g1},${g2})`,
     iris:     IRIS,
+    // Couleurs à sens fixe, lisibles sur le fond : tons profonds en clair
+    // (les pastels de la charte n'ont pas le contraste nécessaire sur blanc),
+    // pastels en sombre.
+    success: isDark ? "#6adeb1" : "#1f7a57",
+    danger:  isDark ? "#fbc2ad" : "#b4442b",
+    warn:    isDark ? "#f6d38e" : "#8a5a00",
+    info:    isDark ? "#78d5e2" : "#17707d",
     // Historique : la plupart des fonds d'action s'écrivaient
     // linear-gradient(135deg, grad1, grad2) — les deux teintes valent
     // désormais l'encre, ce qui donne un aplat noir (blanc en sombre).
@@ -157,6 +164,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     root.style.setProperty("--ring", value.ink);
     root.style.setProperty("--select-highlight", value.gradShadow(value.isDark ? 0.1 : 0.05));
     root.style.setProperty("--role", value.role);
+    root.style.setProperty("--success", value.success);
+    root.style.setProperty("--danger", value.danger);
+    root.style.setProperty("--info", value.info);
     root.style.setProperty("--ink", value.ink);
     root.style.setProperty("--on-ink", value.onInk);
     root.style.setProperty("--switch-background", value.gradShadow(0.2));

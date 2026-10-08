@@ -66,7 +66,7 @@ export function AdminTrashPage() {
 
       <div>
         <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>Corbeille</GT></h2>
-        <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>La suppression définitive est irréversible.</p>
+        <p className="text-[15px] sm:text-base mt-2 max-w-3xl leading-relaxed" style={{ color: th.fg2 }}>La suppression définitive est irréversible.</p>
       </div>
 
       {loading && <p className="text-sm" style={{ color: th.fg3 }}>Chargement…</p>}
@@ -89,7 +89,7 @@ export function AdminTrashPage() {
             </VBtn>
             <button type="button" onClick={() => destroy(item.id)} disabled={busyId === item.id}
               className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl transition-opacity hover:opacity-70 disabled:opacity-40"
-              style={{ color: "#ef4444" }} title="Supprimer définitivement">
+              style={{ color: th.danger }} title="Supprimer définitivement">
               <Trash2 className="w-3.5 h-3.5" />Supprimer définitivement
             </button>
           </div></GCard>

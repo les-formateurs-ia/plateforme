@@ -28,12 +28,11 @@ export function QuestionStepper({ index, total, answered, onJump, question, suff
   const reachable = (i: number) => answered[i] || i === (firstOpen === -1 ? total - 1 : firstOpen) || i <= index;
 
   return (
-    <div className="relative overflow-hidden rounded-[2rem] border fade-up"
-      style={{ background: th.card, borderColor: th.sep, boxShadow: th.isDark ? "0 10px 32px rgba(0,0,0,0.32)" : "0 10px 32px rgba(15,14,20,0.07)" }}>
-      <div className="pointer-events-none absolute -top-32 -right-24 w-[30rem] h-[30rem] rounded-full blur-3xl opacity-50" style={{ background: `radial-gradient(circle, ${h.alpha(th.isDark ? 0.38 : 0.28)}, transparent 70%)` }} />
+    <div className="relative overflow-hidden rounded-[10px] border fade-up"
+      style={{ background: th.card, borderColor: th.sep }}>
       {/* Grand numéro en filigrane */}
       <div className="pointer-events-none absolute -bottom-10 right-4 sm:right-10 text-[11rem] sm:text-[15rem] font-black leading-none tabular-nums select-none"
-        style={{ color: h.c1, opacity: th.isDark ? 0.07 : 0.09, fontFamily: "'Funnel Display',sans-serif" }}>
+        style={{ color: th.fg, opacity: th.isDark ? 0.06 : 0.04 }}>
         {String(index + 1).padStart(2, "0")}
       </div>
 

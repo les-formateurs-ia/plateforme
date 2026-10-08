@@ -82,14 +82,13 @@ export function PromptSessionsPage() {
           <ArrowLeft className="w-4 h-4" />Exercez-vous !
         </button>
         <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>Exercices prompts</GT></h2>
-        <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Écris un prompt, l'IA le note sur 20 et t'explique précisément quoi corriger.</p>
+        <p className="text-[15px] sm:text-base mt-2 max-w-3xl leading-relaxed" style={{ color: th.fg2 }}>Écris un prompt, l'IA le note sur 20 et t'explique précisément quoi corriger.</p>
       </div>
 
       <button onClick={startNewSession} disabled={creating}
-        className="w-full group relative overflow-hidden rounded-2xl p-5 flex items-center gap-4 text-left transition-all duration-300 hover:scale-[1.005] disabled:opacity-60"
-        style={{ background: `linear-gradient(120deg,${th.gradShadow(0.16)},rgba(219,172,240,0.06) 60%)`, border: `1px solid ${th.ink}` }}>
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `linear-gradient(120deg,${th.gradShadow(0.1)},transparent 70%)` }} />
-        <div className="relative w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style={{ background: th.ink, color: th.onInk }}>
+        className="w-full group relative overflow-hidden rounded-[10px] p-5 flex items-center gap-4 text-left transition-colors duration-200 hover-fine:[border-color:var(--ink)]! disabled:opacity-60"
+        style={{ background: th.card, border: `1px dashed ${th.inputB}` }}>
+        <div className="relative w-11 h-11 rounded-[4px] flex items-center justify-center shrink-0" style={{ background: th.ink, color: th.onInk }}>
           <Plus className="w-5 h-5" />
         </div>
         <div className="relative min-w-0 flex-1">

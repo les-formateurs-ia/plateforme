@@ -35,8 +35,8 @@ import { TUTOR_STYLES } from "@/app/data/mock";
 interface StudentProfile { id: string; first_name: string | null; last_name: string | null; email: string; phone: string | null; avatar_url: string | null; formateur_id: string | null; }
 
 const STATUS_LABEL: Record<EnrollmentStatus, { label: string; color: string; bg: string }> = {
-  active: { label: "Active", color: "#6adeb1", bg: "rgba(106,222,177,0.1)" },
-  paused: { label: "En pause", color: "#fbc2ad", bg: "rgba(251,194,173,0.1)" },
+  active: { label: "Active", color: "var(--success)", bg: "rgba(106,222,177,0.1)" },
+  paused: { label: "En pause", color: "var(--danger)", bg: "rgba(251,194,173,0.1)" },
   completed: { label: "Terminée", color: "#94A3B8", bg: "rgba(148,163,184,0.1)" },
 };
 
@@ -307,7 +307,7 @@ export function AdminStudentDetailPage() {
                   <input value={professionDraft} onChange={(e) => setProfessionDraft(e.target.value)} className="w-full rounded-xl px-3.5 py-2.5 text-sm g-input" />
                 </div>
               </div>
-              {infoError && <p className="text-xs" style={{ color: "#fbc2ad" }}>{infoError}</p>}
+              {infoError && <p className="text-xs" style={{ color: th.danger }}>{infoError}</p>}
               <div className="flex items-center gap-2">
                 <ShimBtn sm onClick={saveInfo} disabled={infoSaving}>{infoSaving ? "Enregistrement…" : "Enregistrer"}</ShimBtn>
                 <VBtn sm onClick={cancelInfoEdit} disabled={infoSaving}>Annuler</VBtn>
@@ -440,7 +440,7 @@ export function AdminStudentDetailPage() {
               <div key={inst.id} className="min-w-0 space-y-2.5">
                 <p className="text-sm font-semibold break-words" style={{ color: th.fg }}>{inst.name}</p>
                 <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] font-bold px-2.5 py-1 rounded-[2px] shrink-0" style={{ background: sc.bg, color: sc.color, border: `1px solid ${sc.color}30` }}>{sc.label}</span>
+                <span className="text-[10px] font-bold px-2.5 py-1 rounded-[2px] shrink-0" style={{ background: sc.bg, color: sc.color, border: "1px solid transparent" }}>{sc.label}</span>
                 {admin && <button onClick={() => remove(inst.id)} title="Retirer" aria-label={`Retirer ${inst.name}`} className="shrink-0 p-1"><X className="w-4 h-4" style={{ color: th.fg3 }} /></button>}
                 </div>
                 <div className="min-w-0">

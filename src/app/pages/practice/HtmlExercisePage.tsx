@@ -163,7 +163,7 @@ export function HtmlExercisePage() {
           <ArrowLeft className="w-4 h-4" />Exercices pour vous
         </button>
         <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>{brief?.name ?? "Exercices pour vous"}</GT></h2>
-        <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>{brief?.description || "Exercice HTML interactif."}</p>
+        <p className="text-[15px] sm:text-base mt-2 max-w-3xl leading-relaxed" style={{ color: th.fg2 }}>{brief?.description || "Exercice HTML interactif."}</p>
       </div>
 
       {loading && <GCard><div className="p-8 text-center text-sm" style={{ color: th.fg3 }}>Chargement...</div></GCard>}
@@ -180,7 +180,7 @@ export function HtmlExercisePage() {
                 className="flex-1 w-full rounded-xl px-4 py-3 text-xs g-input resize-none font-mono"
                 style={{ minHeight: 0 }}
               />
-              {fileError && <p className="text-xs text-[#fbc2ad]">{fileError}</p>}
+              {fileError && <p className="text-xs text-[var(--danger)]">{fileError}</p>}
               {saveError && <p className="text-xs" style={{ color: RED }}>{saveError}</p>}
               <div className="flex items-center gap-3 flex-wrap gap-y-2">
                 <label className="cursor-pointer">

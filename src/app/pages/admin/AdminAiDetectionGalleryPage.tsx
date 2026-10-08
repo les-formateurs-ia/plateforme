@@ -132,7 +132,7 @@ function ImageDialog({ open, onOpenChange, image, onSaved }: {
         <DialogFooter className="flex items-center sm:justify-between gap-2">
           {isEditing ? (
             <VBtn sm onClick={handleDelete} disabled={busy}>
-              <span className="flex items-center gap-1.5" style={{ color: "#fbc2ad" }}><Trash2 className="w-3.5 h-3.5" />{deleting ? "Suppression…" : "Supprimer"}</span>
+              <span className="flex items-center gap-1.5" style={{ color: th.danger }}><Trash2 className="w-3.5 h-3.5" />{deleting ? "Suppression…" : "Supprimer"}</span>
             </VBtn>
           ) : <span />}
           <div className="flex items-center gap-2">
@@ -174,7 +174,7 @@ export function AdminAiDetectionGalleryPage() {
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black flex items-center gap-2" style={{ color: th.fg }}><ScanEye className="w-5 h-5" /><GT>Galerie Détection Image IA</GT></h2>
-          <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Gère les images du quiz "Réelle ou générée par IA ?" côté élève.</p>
+          <p className="text-[15px] sm:text-base mt-2 max-w-3xl leading-relaxed" style={{ color: th.fg2 }}>Gère les images du quiz "Réelle ou générée par IA ?" côté élève.</p>
         </div>
         <ShimBtn sm onClick={openCreate}><span className="flex items-center gap-1.5"><Plus className="w-3.5 h-3.5" />Ajouter une image</span></ShimBtn>
       </div>

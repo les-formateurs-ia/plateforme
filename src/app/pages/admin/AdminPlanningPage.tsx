@@ -173,7 +173,7 @@ export function AdminPlanningPage() {
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>{isAdmin ? "Élèves & formateurs" : "Élèves"}</GT></h2>
-          <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>{isAdmin ? "Gère les élèves et les formateurs de la plateforme." : "Tes élèves."}</p>
+          <p className="text-[15px] sm:text-base mt-2 max-w-3xl leading-relaxed" style={{ color: th.fg2 }}>{isAdmin ? "Gère les élèves et les formateurs de la plateforme." : "Tes élèves."}</p>
         </div>
         {(!isAdmin || tab === "etudiants") && (
           <ShimBtn sm onClick={openCreate}>
@@ -241,7 +241,7 @@ export function AdminPlanningPage() {
             <textarea value={experience} onChange={(e) => setExperience(e.target.value)} rows={4} placeholder="Expérience professionnelle (optionnel)" className="w-full rounded-xl px-4 py-2.5 text-sm g-input resize-none" />
             <textarea value={objective} onChange={(e) => setObjective(e.target.value)} rows={4} placeholder="Objectif professionnel (optionnel)" className="w-full rounded-xl px-4 py-2.5 text-sm g-input resize-none" />
           </div>
-          {createError && <p className="text-xs" style={{ color: "#fbc2ad" }}>{createError}</p>}
+          {createError && <p className="text-xs" style={{ color: th.danger }}>{createError}</p>}
           <DialogFooter>
             <ShimBtn onClick={handleCreateStudent} disabled={!firstName.trim() || !email.trim() || creating}>
               {creating ? "Création…" : "Créer l'élève"}
