@@ -482,3 +482,12 @@
     }
   }
 }
+
+/* Créneau de rendez-vous : passe à l'encre au survol (WeekBoard). */
+@media (hover: hover) and (pointer: fine) {
+  .slot-btn:hover {
+    background: var(--slot-hover);
+    color: var(--slot-hover-fg) !important;
+    border-color: var(--slot-hover) !important;
+  }
+}

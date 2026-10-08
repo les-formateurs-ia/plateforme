@@ -8,6 +8,9 @@ import { GT } from "@/app/components/common/GT";
 import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
 import { SuccessCheck } from "@/app/components/common/SuccessCheck";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/app/components/ui/dialog";
+import { SectionHead } from "@/app/components/common/SectionHead";
+import { WeekBoard } from "@/app/pages/calendar/WeekBoard";
+import { cx } from "@/app/lib/cx";
 import {
   listAvailableSlotsForBooking, listMyBookingsAsStudent, bookSlot, changeBooking, cancelBooking, syncMeetEvent,
   acceptReschedule, declineReschedule, getAssignedFormateurId, getFormateurName, getBilanAttachmentUrl,
@@ -81,14 +84,6 @@ export function CalendarPage() {
     if (activeBooking?.status === "confirmed" && !activeBooking.meetLink) void syncMeetEvent(activeBooking.id);
   }, [activeBooking?.id, activeBooking?.status, activeBooking?.meetLink]);
 
-  const byDay = useMemo(() => {
-    const map = new Map<string, ExpertAvailableSlot[]>();
-    for (const s of slots) {
-      if (!map.has(s.slotDate)) map.set(s.slotDate, []);
-      map.get(s.slotDate)!.push(s);
-    }
-    return map;
-  }, [slots]);
 
   const confirmBooking = async () => {
     if (!user || !pending) return;
@@ -149,113 +144,95 @@ export function CalendarPage() {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-5">
-      <div>
-        <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>Rendez-vous</GT></h2>
-        <p className="text-[15px] sm:text-base mt-2 max-w-3xl leading-relaxed" style={{ color: th.fg2 }}>Réserve un échange 1h avec ton expert — à partir de demain.</p>
+    <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-8 space-y-10">
+      <div className="fade-up">
+        <p className="eyebrow" style={{ color: th.fg3 }}>Être accompagné</p>
+        <h1 className="mt-2 text-[2rem] sm:text-[2.6rem] leading-[1.02] font-black" style={{ color: th.fg }}><GT>Rendez-vous</GT></h1>
+        <p className="text-[15px] sm:text-base mt-3 max-w-2xl leading-relaxed" style={{ color: th.fg2 }}>
+          {formateurName ? <>Un échange en visio avec <strong style={{ color: th.fg }}>{formateurName}</strong>, ton formateur, pour faire le point et avancer sur ton projet.</> : "Un échange en visio avec ton formateur, pour faire le point et avancer sur ton projet."}
+        </p>
       </div>
 
+      {/* Ce qu'il faut savoir avant de réserver. */}
+      <ul className="grid sm:grid-cols-3 fade-up" style={{ borderTop: `1px solid ${th.sep}`, borderBottom: `1px solid ${th.sep}`, animationDelay: "60ms" }}>
+        {[
+          { Icon: Clock, grad: "var(--grad-violet)", title: "Environ 1 heure", text: "Le temps de faire le point et de répondre à tes questions." },
+          { Icon: Video, grad: "var(--grad-bleu)", title: "Sur Google Meet", text: "Tu reçois l'invitation par e-mail dès la réservation, avec le lien pour te connecter." },
+          { Icon: CalendarIcon, grad: "var(--grad-beige)", title: "Dès demain", text: "Un rendez-vous à la fois ; tu peux le déplacer ou l'annuler ici." },
+        ].map(({ Icon, grad, title, text }, i) => (
+          <li key={title} className={cx("flex gap-3.5 py-5 sm:px-5", i > 0 && "sm:border-l border-t sm:border-t-0")} style={{ borderColor: th.sep, paddingLeft: i === 0 ? 0 : undefined }}>
+            <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ background: grad }}><Icon className="w-4 h-4" style={{ color: "#000" }} /></span>
+            <span>
+              <span className="block text-[15px] font-bold" style={{ color: th.fg }}>{title}</span>
+              <span className="block mt-0.5 text-sm leading-relaxed" style={{ color: th.fg2 }}>{text}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+
       {checkedAssignment && !assignedFormateurId && (
-        <GCard><div className="p-8 text-center"><p className="text-sm" style={{ color: th.fg3 }}>Aucun formateur ne vous a encore été attribué — revenez un peu plus tard.</p></div></GCard>
+        <GCard><div className="p-8 text-center"><p className="text-[15px]" style={{ color: th.fg2 }}>Aucun formateur ne t'a encore été attribué. Reviens un peu plus tard.</p></div></GCard>
       )}
 
       {activeBooking?.proposedDate && (
-        <GCard accent>
-          <div className="p-5">
-            <div className="flex items-center gap-2 mb-2">
-              <RefreshCw className="w-4 h-4" style={{ color: th.navAC }} />
-              <h3 className="text-sm font-black" style={{ color: th.fg }}>Votre formateur propose un nouveau créneau</h3>
+        <div className="relative rounded-[10px] p-6 overflow-hidden fade-up" style={{ border: `1px solid ${th.ink}` }}>
+          <div aria-hidden className="absolute inset-x-0 top-0 h-[3px]" style={{ background: th.iris }} />
+          <p className="eyebrow flex items-center gap-2" style={{ color: th.fg }}><RefreshCw className="w-3.5 h-3.5" />Nouveau créneau proposé</p>
+          <p className="mt-3 text-[15px] leading-relaxed" style={{ color: th.fg2 }}>
+            Ton formateur propose de déplacer le rendez-vous du {formatDay(activeBooking.slotDate)} à {activeBooking.startTime} au{" "}
+            <strong style={{ color: th.fg }}>{formatDay(activeBooking.proposedDate)} à {activeBooking.proposedStartTime}</strong>.
+          </p>
+          <div className="mt-5 flex items-center gap-3">
+            <ShimBtn sm onClick={() => respondToProposal(true)} disabled={respondingToProposal}><span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5" />Accepter</span></ShimBtn>
+            <VBtn sm onClick={() => respondToProposal(false)} disabled={respondingToProposal}><span className="flex items-center gap-1.5"><XIcon className="w-3.5 h-3.5" />Garder mon créneau</span></VBtn>
+          </div>
+        </div>
+      )}
+
+      {activeBooking && (
+        <section aria-labelledby="next-rdv" className="relative overflow-hidden rounded-[10px] bg-black text-white p-6 sm:p-8 fade-up" style={{ border: th.isDark ? `1px solid ${th.sep}` : undefined }}>
+          <div aria-hidden className="absolute inset-x-0 top-0 h-[3px]" style={{ background: th.iris }} />
+          <p className="eyebrow text-white/60">{activeBooking.status === "confirmed" ? "Ton prochain rendez-vous" : "Rendez-vous en attente de confirmation"}</p>
+          <div className="mt-3 flex flex-wrap items-end justify-between gap-6">
+            <div>
+              <p id="next-rdv" className="text-[1.7rem] sm:text-[2.2rem] font-extrabold leading-tight tracking-[-0.03em] first-letter:uppercase">{formatDay(activeBooking.slotDate)}</p>
+              <p className="mt-1 text-lg text-white/75 tabular-nums">à {activeBooking.startTime} · avec {activeBooking.formateurName} · environ 1 h</p>
             </div>
-            <p className="text-xs mb-4" style={{ color: th.fg3 }}>
-              Déplacer votre rendez-vous du {formatDay(activeBooking.slotDate)} ({activeBooking.startTime}–{activeBooking.endTime}) au{" "}
-              <strong style={{ color: th.fg }}>{formatDay(activeBooking.proposedDate)} de {activeBooking.proposedStartTime} à {activeBooking.proposedEndTime}</strong> ?
-            </p>
-            <div className="flex items-center gap-2">
-              <ShimBtn sm onClick={() => respondToProposal(true)} disabled={respondingToProposal}><span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5" />Accepter</span></ShimBtn>
-              <VBtn sm onClick={() => respondToProposal(false)} disabled={respondingToProposal}><span className="flex items-center gap-1.5"><XIcon className="w-3.5 h-3.5" />Refuser</span></VBtn>
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+              {activeBooking.meetLink ? (
+                <a href={activeBooking.meetLink} target="_blank" rel="noreferrer" className="sweep inline-flex items-center gap-2 min-h-11 px-5 rounded-[2px] bg-white text-black text-sm font-semibold">
+                  <Video className="w-4 h-4" />Rejoindre le Meet
+                </a>
+              ) : (
+                <span className="text-sm text-white/60">Le lien Google Meet arrive par e-mail.</span>
+              )}
+              <button type="button" onClick={() => handleCancel(activeBooking)} className="ink-link text-sm font-semibold text-white/75 hover-fine:text-white">Annuler le rendez-vous</button>
             </div>
           </div>
-        </GCard>
+          <p className="mt-5 text-sm text-white/55">Pour le déplacer, choisis simplement un autre créneau ci-dessous.</p>
+        </section>
       )}
 
       {assignedFormateurId && (
-        <GCard>
-          <div className="p-5">
-            <h3 className="text-sm font-black mb-1" style={{ color: th.fg }}>
-              Disponibilités de votre expert {formateurName}
-            </h3>
-            {activeBooking && (
-              <p className="text-xs mb-4" style={{ color: th.fg3 }}>
-                Vous avez déjà un rendez-vous en cours — choisissez un créneau ci-dessous pour le déplacer (vous ne pouvez en avoir qu'un seul à la fois).
-              </p>
-            )}
-            {byDay.size === 0 && (
-              <p className="text-xs mt-2" style={{ color: th.fg3 }}>Aucun créneau disponible pour l'instant.</p>
-            )}
-            <div className="space-y-4 mt-3">
-              {[...byDay.entries()].map(([date, daySlots]) => (
-                <div key={date}>
-                  <div className="text-xs font-bold capitalize mb-2" style={{ color: th.fg2 }}>{formatDay(date)}</div>
-                  <div className="flex flex-wrap gap-2">
-                    {daySlots.map((s) => (
-                      <button
-                        key={s.startTime}
-                        onClick={() => setPending(s)}
-                        className="px-3 py-1.5 rounded-[2px] text-xs font-semibold transition-all hover:opacity-80"
-                        style={{ border: `1px solid ${th.navAC}`, color: th.navAC }}
-                      >
-                        {s.startTime}–{s.endTime}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </GCard>
+        <section aria-labelledby="slots-title" className="fade-up" style={{ animationDelay: "120ms" }}>
+          <SectionHead id="slots-title" eyebrow="Disponibilités" title={activeBooking ? "Choisir un autre créneau" : "Choisis ton créneau"} />
+          <WeekBoard slots={slots} activeBooking={activeBooking} onPick={setPending} />
+        </section>
       )}
 
-      <GCard><div className="p-5">
-        <h3 className="text-sm font-black mb-4" style={{ color: th.fg }}>Mes rendez-vous</h3>
-        {!activeBooking && (
-          <p className="text-xs" style={{ color: th.fg3 }}>Aucun rendez-vous prévu pour l'instant.</p>
-        )}
-        {activeBooking && (
-          <div className="rounded-xl p-4 flex items-center justify-between gap-3 flex-wrap" style={{ border: `1px solid ${th.sep}` }}>
-            <div>
-              <div className="text-sm font-semibold" style={{ color: th.fg }}>{activeBooking.formateurName}</div>
-              <div className="text-xs mt-0.5 flex items-center gap-1.5" style={{ color: th.fg3 }}>
-                <CalendarIcon className="w-3.5 h-3.5" style={{ color: th.navAC }} />
-                {formatDay(activeBooking.slotDate)} · {activeBooking.startTime}–{activeBooking.endTime}
-              </div>
-              {activeBooking.meetLink && (
-                <a href={activeBooking.meetLink} target="_blank" rel="noreferrer" className="text-xs mt-1.5 flex items-center gap-1.5 font-semibold hover:opacity-80" style={{ color: th.navAC }}>
-                  <Video className="w-3.5 h-3.5" />Rejoindre le Meet
-                </a>
-              )}
-            </div>
-            <VBtn sm onClick={() => handleCancel(activeBooking)}>
-              <span className="flex items-center gap-1.5"><XCircle className="w-3.5 h-3.5" />Annuler</span>
-            </VBtn>
-          </div>
-        )}
-      </div></GCard>
-
       {pastBookings.length > 0 && (
-        <GCard><div className="p-5">
-          <h3 className="text-sm font-black mb-4 flex items-center gap-2" style={{ color: th.fg }}>
-            <ClipboardList className="w-4 h-4" style={{ color: th.navAC }} />Bilans de vos rendez-vous
-          </h3>
-          <div className="space-y-3">
+        <section aria-labelledby="bilans-title">
+          <SectionHead id="bilans-title" eyebrow="Après tes rendez-vous" title="Les bilans de ton formateur" />
+          <div className="grid gap-4 md:grid-cols-2">
             {pastBookings.map((b) => (
-              <div key={b.id} className="rounded-xl p-4" style={{ border: `1px solid ${th.sep}` }}>
-                <div className="text-sm font-semibold" style={{ color: th.fg }}>{b.formateurName}</div>
-                <div className="text-xs mt-0.5" style={{ color: th.fg3 }}>{formatDay(b.slotDate)} · {b.startTime}–{b.endTime}</div>
+              <article key={b.id} className="rounded-[10px] p-5" style={{ border: `1px solid ${th.sep}` }}>
+                <p className="eyebrow first-letter:uppercase" style={{ color: th.fg3 }}>{formatDay(b.slotDate)} · {b.startTime}</p>
+                <p className="mt-1.5 text-[17px] font-bold" style={{ color: th.fg }}>{b.formateurName}</p>
                 {b.bilanFilledAt ? (
-                  <div className="mt-3 space-y-2">
-                    <div><span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: th.fg3 }}>Sujet</span><p className="text-xs mt-0.5" style={{ color: th.fg2 }}>{b.bilanSujet}</p></div>
-                    <div><span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: th.fg3 }}>Point fort</span><p className="text-xs mt-0.5" style={{ color: th.fg2 }}>{b.bilanPointFort}</p></div>
-                    <div><span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: th.fg3 }}>Next step</span><p className="text-xs mt-0.5" style={{ color: th.fg2 }}>{b.bilanNextStep}</p></div>
+                  <dl className="mt-4 space-y-3">
+                    {[["Sujet", b.bilanSujet], ["Point fort", b.bilanPointFort], ["Prochaine étape", b.bilanNextStep]].map(([label, value]) => (
+                      <div key={label}><dt className="eyebrow" style={{ color: th.fg3 }}>{label}</dt><dd className="mt-1 text-sm leading-relaxed" style={{ color: th.fg2 }}>{value}</dd></div>
+                    ))}
                     {b.bilanAttachmentPath && (
                       <button
                         onClick={async () => {
@@ -266,20 +243,19 @@ export function CalendarPage() {
                             toast.error("Impossible d'ouvrir la pièce jointe.");
                           }
                         }}
-                        className="text-xs font-semibold flex items-center gap-1.5 hover:opacity-80"
-                        style={{ color: th.navAC }}
+                        className="inline-flex items-center gap-1.5 text-sm font-semibold" style={{ color: th.fg }}
                       >
-                        <Paperclip className="w-3.5 h-3.5" />{b.bilanAttachmentName ?? "Télécharger le PDF"}
+                        <Paperclip className="w-3.5 h-3.5" /><span className="ink-link">{b.bilanAttachmentName ?? "Télécharger le PDF"}</span>
                       </button>
                     )}
-                  </div>
+                  </dl>
                 ) : (
-                  <p className="text-xs mt-2 italic" style={{ color: th.fg3 }}>En attente du bilan de votre formateur.</p>
+                  <p className="mt-3 text-sm" style={{ color: th.fg3 }}>Ton formateur rédige le bilan de ce rendez-vous.</p>
                 )}
-              </div>
+              </article>
             ))}
           </div>
-        </div></GCard>
+        </section>
       )}
 
       <Dialog open={!!pending} onOpenChange={(open) => !open && setPending(null)}>
@@ -290,7 +266,7 @@ export function CalendarPage() {
               {pending && (
                 <span className="flex items-center gap-1.5 mt-1" style={{ color: th.fg2 }}>
                   <Clock className="w-3.5 h-3.5" />
-                  Avec {pending.formateurName}, le {formatDay(pending.slotDate)} de {pending.startTime} à {pending.endTime}.
+                  Avec {pending.formateurName}, le {formatDay(pending.slotDate)} à {pending.startTime} (environ 1 h). Tu recevras l'invitation Google Meet par e-mail.
                 </span>
               )}
             </DialogDescription>
@@ -306,7 +282,7 @@ export function CalendarPage() {
             <DialogTitle>Rendez-vous confirmé !</DialogTitle>
             {justBooked && (
               <DialogDescription className="text-center">
-                Votre rendez-vous du <strong style={{ color: th.fg }}>{formatDay(justBooked.date)}</strong> de <strong style={{ color: th.fg }}>{justBooked.start} à {justBooked.end}</strong> est confirmé. Le lien de la visio vous a été envoyé par email, ainsi qu'à votre formateur.
+                Rendez-vous le <strong style={{ color: th.fg }}>{formatDay(justBooked.date)}</strong> à <strong style={{ color: th.fg }}>{justBooked.start}</strong>, pour environ 1 h. L'invitation Google Meet t'a été envoyée par e-mail, ainsi qu'à ton formateur.
               </DialogDescription>
             )}
             <ShimBtn sm onClick={() => setJustBooked(null)}>Parfait</ShimBtn>
