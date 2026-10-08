@@ -14,16 +14,24 @@ function readStoredMode(): ThemeMode {
   }
 }
 
-// Dégradé d'accent principal par rôle — student garde le violet historique
-// de la marque, formateur/admin ont chacun leur propre couleur d'interface
-// (demande explicite : uniquement l'accent principal — boutons/CTA/états
-// actifs/navigation — jamais les couleurs à sens fixe : succès en vert,
-// alerte en corail, appel vocal en bleu, qui restent inchangées).
+// Direction artistique alignée sur le site public (repo site/, charte
+// graphique Les Formateurs IA) : noir sur blanc, filets fins, boutons noirs
+// à angles nets ; les dégradés de la charte sont réservés aux moments forts
+// (surligneur des titres, survol des boutons, progression).
+//
+// Chaque rôle garde sa teinte de la charte, mais seulement comme repère
+// discret (pastille, filet de l'onglet actif) pour savoir dans quel espace on
+// est — jamais sur les boutons ni les états actifs, qui restent à l'encre.
+// Les couleurs à sens fixe (succès en vert, alerte en corail, appel vocal en
+// bleu) restent inchangées.
 const ROLE_GRADIENTS: Record<"student" | "formateur" | "admin", readonly [string, string]> = {
   student:   ["#b58de0", "#dbacf0"],
   formateur: ["#78d5e2", "#6adeb1"],
   admin:     ["#fbc2ad", "#fceccd"],
 };
+
+// Les trois dégradés de la charte d'un seul geste (--grad-iris du site).
+export const IRIS = "linear-gradient(100deg,#b58de0,#dbacf0 30%,#78d5e2 60%,#6adeb1 75%,#fbc2ad)";
 
 export function hexToRgb(hex: string): string {
   const n = parseInt(hex.slice(1), 16);
@@ -32,32 +40,43 @@ export function hexToRgb(hex: string): string {
 
 function mkTh(isDark: boolean, role: Role | null = null) {
   const [g1, g2] = ROLE_GRADIENTS[role ?? "student"];
-  const g1Rgb = hexToRgb(g1);
+  // Encre : noir sur fond blanc, blanc sur fond noir (le pied de page du site).
+  const ink = isDark ? "#FFFFFF" : "#000000";
+  const inkRgb = isDark ? "255,255,255" : "0,0,0";
   return {
-    bg:      isDark ? "#0A0A10" : "#F7F7FA",
-    fg:      isDark ? "rgba(255,255,255,0.94)" : "rgba(15,14,20,0.94)",
-    fg2:     isDark ? "rgba(255,255,255,0.62)" : "rgba(15,14,20,0.6)",
-    fg3:     isDark ? "rgba(255,255,255,0.4)"  : "rgba(15,14,20,0.42)",
-    card:    isDark ? "#131319"                : "#FFFFFF",
-    cardGrd: isDark ? "#131319"                : "#FFFFFF",
-    sidebar:  isDark ? "#0C0C13" : "#FFFFFF",
-    sidebarB: isDark ? "rgba(255,255,255,0.07)" : "rgba(15,14,20,0.08)",
-    inputBg:  isDark ? "rgba(255,255,255,0.05)" : "rgba(15,14,20,0.03)",
-    inputB:   isDark ? "rgba(255,255,255,0.1)"  : "rgba(15,14,20,0.1)",
-    sep:      isDark ? "rgba(255,255,255,0.07)" : "rgba(15,14,20,0.08)",
-    topbar:   isDark ? "#0A0A10" : "#F7F7FA",
+    bg:      isDark ? "#000000" : "#FFFFFF",
+    fg:      ink,
+    fg2:     isDark ? "rgba(255,255,255,0.68)" : "#4D4D4D",
+    fg3:     isDark ? "rgba(255,255,255,0.52)" : "#6E6E6E",
+    card:    isDark ? "#0F0F0F"                : "#FFFFFF",
+    cardGrd: isDark ? "#0F0F0F"                : "#FFFFFF",
+    sidebar:  isDark ? "#000000" : "#FFFFFF",
+    sidebarB: isDark ? "rgba(255,255,255,0.12)" : "#E6E6E6",
+    inputBg:  isDark ? "rgba(255,255,255,0.04)" : "#FFFFFF",
+    inputB:   isDark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.16)",
+    sep:      isDark ? "rgba(255,255,255,0.12)" : "#E6E6E6",
+    topbar:   isDark ? "#000000" : "#FFFFFF",
     grid:     "transparent",
-    navA:     `rgba(${g1Rgb},${isDark ? 0.16 : 0.1})`,
-    navAB:    `rgba(${g1Rgb},${isDark ? 0.16 : 0.1})`,
-    navAC:    isDark ? g2 : g1,
-    // Dégradé d'accent brut — la plupart des boutons/badges l'utilisent en
-    // 135deg, mais quelques barres/graphes ont besoin des teintes seules
-    // (angle différent) : grad1/grad2 exposent les teintes, gradPrimary la
-    // forme 135deg la plus courante.
-    grad1:       g1,
-    grad2:       g2,
-    gradPrimary: `linear-gradient(135deg,${g1},${g2})`,
-    gradShadow:  (alpha: number) => `rgba(${g1Rgb},${alpha})`,
+    navA:     `rgba(${inkRgb},${isDark ? 0.08 : 0.04})`,
+    navAB:    `rgba(${inkRgb},${isDark ? 0.08 : 0.04})`,
+    navAC:    ink,
+    // Remplissage des actions principales (boutons, états actifs) et son
+    // texte : l'encre, comme les boutons du site.
+    ink,
+    onInk:   isDark ? "#000000" : "#FFFFFF",
+    // Repère du rôle courant (pastille, filet actif) et dégradé de la charte.
+    role:     g1,
+    roleGrad: `linear-gradient(135deg,${g1},${g2})`,
+    iris:     IRIS,
+    // Historique : la plupart des fonds d'action s'écrivaient
+    // linear-gradient(135deg, grad1, grad2) — les deux teintes valent
+    // désormais l'encre, ce qui donne un aplat noir (blanc en sombre).
+    grad1:       ink,
+    grad2:       ink,
+    gradPrimary: ink,
+    // Teintes d'état (sélection, survol, bordure active) : l'encre en
+    // transparence, plus la couleur du rôle.
+    gradShadow:  (alpha: number) => `rgba(${inkRgb},${alpha})`,
     orbA:    "transparent",
     orbB:    "transparent",
     isDark,
@@ -125,13 +144,23 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // navigateur gérer la teinte et la transparence de ses propres barres.
   useLayoutEffect(() => {
     const root = document.documentElement;
-    root.style.setProperty("--primary", value.navAC);
-    root.style.setProperty("--accent", value.navAC);
-    root.style.setProperty("--secondary-foreground", value.navAC);
-    root.style.setProperty("--sidebar-primary", value.navAC);
-    root.style.setProperty("--sidebar-accent-foreground", value.navAC);
-    root.style.setProperty("--ring", value.gradShadow(0.5));
-    root.style.setProperty("--select-highlight", value.gradShadow(0.14));
+    root.style.setProperty("--primary", value.ink);
+    root.style.setProperty("--primary-foreground", value.onInk);
+    root.style.setProperty("--accent", value.navA);
+    root.style.setProperty("--accent-foreground", value.fg);
+    root.style.setProperty("--secondary", value.navA);
+    root.style.setProperty("--secondary-foreground", value.fg);
+    root.style.setProperty("--sidebar-primary", value.ink);
+    root.style.setProperty("--sidebar-primary-foreground", value.onInk);
+    root.style.setProperty("--sidebar-accent", value.navA);
+    root.style.setProperty("--sidebar-accent-foreground", value.fg);
+    root.style.setProperty("--ring", value.ink);
+    root.style.setProperty("--select-highlight", value.gradShadow(value.isDark ? 0.1 : 0.05));
+    root.style.setProperty("--role", value.role);
+    root.style.setProperty("--ink", value.ink);
+    root.style.setProperty("--on-ink", value.onInk);
+    root.style.setProperty("--switch-background", value.gradShadow(0.2));
+    root.dataset.theme = value.isDark ? "dark" : "light";
 
     root.style.setProperty("--background", value.bg);
     root.style.setProperty("--foreground", value.fg);
@@ -149,7 +178,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     root.style.setProperty("--sidebar-border", value.sidebarB);
 
     document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => meta.setAttribute("content", value.bg));
-  }, [value.navAC, value.isDark, value.bg, value.fg, value.card, value.sidebar, value.sidebarB, value.inputB, value.inputBg, value.fg3, value.sep]);
+  }, [value.navAC, value.role, value.isDark, value.bg, value.fg, value.card, value.sidebar, value.sidebarB, value.inputB, value.inputBg, value.fg3, value.sep]);
 
   return <ThemeCtx.Provider value={value}>{children}</ThemeCtx.Provider>;
 }

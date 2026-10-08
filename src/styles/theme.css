@@ -43,53 +43,59 @@
 
 :root {
   --font-size: 16px;
-  /* Valeurs de secours avant le premier rendu React uniquement — la classe
+  /* Valeurs de secours avant le premier rendu React uniquement : la classe
      .dark n'est jamais posée sur <html>/<body> par l'app (le thème
-     clair/sombre est géré par src/app/theme/theme.tsx via des variables
-     inline, pas par cette classe) : :root est donc TOUJOURS le bloc actif,
-     y compris en thème sombre, une fois React monté. C'est theme.tsx qui
-     réécrit --background/--foreground (et les autres variables ci-dessous)
-     en direct selon le thème réellement choisi (clair/sombre/système) — corrigé
-     le 2026-09-21, ces deux valeurs étaient figées en quasi-noir en permanence,
-     ce qui apparaissait comme des bandes noires derrière l'app sur mobile
-     (body visible un instant avant/around le rendu, cf. MainLayout.tsx). */
-  --background: #F7F7FA;
-  --foreground: rgba(15,14,20,0.94);
-  --card: rgba(255, 255, 255, 0.035);
-  --card-foreground: #F2EBF9;
-  --popover: #100B1E;
-  --popover-foreground: #F2EBF9;
-  --primary: #dbacf0;
-  --primary-foreground: #08060F;
-  --secondary: rgba(219, 172, 240, 0.08);
-  --secondary-foreground: #dbacf0;
-  --muted: rgba(255, 255, 255, 0.06);
-  --muted-foreground: rgba(242, 235, 249, 0.45);
-  --accent: #dbacf0;
-  --accent-foreground: #08060F;
-  --destructive: #fbc2ad;
-  --destructive-foreground: #08060F;
-  --border: rgba(219, 172, 240, 0.12);
-  --input: rgba(255, 255, 255, 0.05);
-  --input-background: rgba(255, 255, 255, 0.05);
-  --switch-background: rgba(219, 172, 240, 0.3);
+     clair/sombre est géré par src/app/theme/theme.tsx, qui réécrit ces
+     variables en direct selon le thème choisi). Direction artistique du site
+     public : noir sur blanc, filets #e6e6e6, angles nets. */
+  --background: #ffffff;
+  --foreground: #000000;
+  --card: #ffffff;
+  --card-foreground: #000000;
+  --popover: #ffffff;
+  --popover-foreground: #000000;
+  --primary: #000000;
+  --primary-foreground: #ffffff;
+  --secondary: rgba(0, 0, 0, 0.04);
+  --secondary-foreground: #000000;
+  --muted: rgba(0, 0, 0, 0.04);
+  --muted-foreground: #6e6e6e;
+  --accent: rgba(0, 0, 0, 0.04);
+  --accent-foreground: #000000;
+  --destructive: #e5484d;
+  --destructive-foreground: #ffffff;
+  --border: #e6e6e6;
+  --input: rgba(0, 0, 0, 0.16);
+  --input-background: #ffffff;
+  --switch-background: rgba(0, 0, 0, 0.2);
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: rgba(219, 172, 240, 0.5);
-  --chart-1: #dbacf0;
+  --ring: #000000;
+  --chart-1: #b58de0;
   --chart-2: #6adeb1;
   --chart-3: #fbc2ad;
   --chart-4: #78d5e2;
-  --chart-5: #fbc2ad;
-  --radius: 1rem;
-  --sidebar: rgba(255, 255, 255, 0.03);
-  --sidebar-foreground: #F2EBF9;
-  --sidebar-primary: #dbacf0;
-  --sidebar-primary-foreground: #08060F;
-  --sidebar-accent: rgba(219, 172, 240, 0.08);
-  --sidebar-accent-foreground: #dbacf0;
-  --sidebar-border: rgba(219, 172, 240, 0.1);
-  --sidebar-ring: rgba(219, 172, 240, 0.4);
+  --chart-5: #dbacf0;
+  /* Angles nets de la charte : 2px (boutons) → 10px (grandes cartes). */
+  --radius: 0.375rem;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #000000;
+  --sidebar-primary: #000000;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(0, 0, 0, 0.04);
+  --sidebar-accent-foreground: #000000;
+  --sidebar-border: #e6e6e6;
+  --sidebar-ring: #000000;
+
+  /* Charte graphique (identique au site public). */
+  --grad-violet: linear-gradient(135deg, #dbacf0, #b58de0);
+  --grad-bleu: linear-gradient(135deg, #78d5e2, #6adeb1);
+  --grad-beige: linear-gradient(135deg, #fbc2ad, #fceccd);
+  --grad-iris: linear-gradient(100deg, #b58de0, #dbacf0 30%, #78d5e2 60%, #6adeb1 75%, #fbc2ad);
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ink: #000000;
+  --on-ink: #ffffff;
+  --role: #b58de0;
 }
 
 .dark {
@@ -183,10 +189,14 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  /* Échelle d'arrondis resserrée (site public) : sm 2px · md 4px · lg 6px ·
+     xl 8px · 2xl 10px · 3xl 12px. rounded-full reste réservé aux cercles. */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 2px);
+  --radius-2xl: calc(var(--radius) + 4px);
+  --radius-3xl: calc(var(--radius) + 6px);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -205,6 +215,14 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Funnel Display', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Focus clavier visible, à l'encre (site public). */
+  :focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
   }
 
   /**
@@ -216,22 +234,28 @@
     font-size: var(--font-size);
   }
 
+  /* Titres serrés et denses, comme ceux du site public. */
   h1 {
     font-size: var(--text-2xl);
     font-weight: var(--font-weight-medium);
-    line-height: 1.5;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
   }
 
   h2 {
     font-size: var(--text-xl);
     font-weight: var(--font-weight-medium);
-    line-height: 1.5;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
   }
 
   h3 {
     font-size: var(--text-lg);
     font-weight: var(--font-weight-medium);
-    line-height: 1.5;
+    line-height: 1.3;
+    letter-spacing: -0.015em;
   }
 
   h4 {
@@ -257,4 +281,120 @@
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
   }
+}
+
+/* ------------------------------------------------------------------------
+   Direction artistique du site public (site/src/styles/global.css)
+   ------------------------------------------------------------------------ */
+
+/* Survol réservé aux vrais pointeurs : pas de survol collant après un tap. */
+@custom-variant hover-fine {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      @slot;
+    }
+  }
+}
+
+/* La graisse 900 n'existe pas dans Funnel Display (300–800) : font-black
+   retombe sur l'extra-gras de la charte, avec l'approche serrée du site. */
+.font-black {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+/* Survol des boutons, identique sur tout le site public : le dégradé iris
+   de la charte apparaît, le libellé passe au noir, une légère pulsation.
+   Un appui réduit un peu le bouton. */
+.sweep {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transition:
+    transform 160ms var(--ease-out-strong),
+    color 240ms ease,
+    border-color 240ms ease,
+    opacity 200ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.sweep::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--btn-sweep, var(--grad-iris));
+  opacity: 0;
+  transition: opacity 240ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .sweep:not(:disabled):hover {
+    color: #000 !important;
+    border-color: transparent !important;
+    animation: btn-pulse 380ms var(--ease-out-strong);
+  }
+  .sweep:not(:disabled):hover::before {
+    opacity: 1;
+  }
+}
+@keyframes btn-pulse {
+  35% {
+    transform: scale(1.035);
+  }
+}
+.sweep:not(:disabled):active {
+  transform: scale(0.97);
+}
+@media (prefers-reduced-motion: reduce) {
+  .sweep:not(:disabled):hover {
+    animation: none;
+  }
+  .sweep:not(:disabled):active {
+    transform: none;
+  }
+}
+
+/* Surligneur de la charte : le dégradé iris passe sous le mot, le texte
+   reste à l'encre. En sombre, un filet plus fin pour garder la lisibilité. */
+.hl {
+  color: inherit;
+  background: var(--grad-iris) 0 88% / 100% 0.36em no-repeat;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  padding-inline: 0.04em;
+}
+[data-theme='dark'] .hl {
+  background-position: 0 96%;
+  background-size: 100% 0.14em;
+}
+
+/* Lien souligné qui se dessine au survol (navigation du site). */
+.ink-link {
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+  transition: background-size 200ms var(--ease-out-strong);
+}
+@media (hover: hover) and (pointer: fine) {
+  .ink-link:hover {
+    background-size: 100% 1px;
+  }
+}
+
+/* Petit libellé de section en capitales (site public). */
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Navigation latérale : filet vertical de l'onglet actif, à la couleur du
+   rôle (--nav-mark, posée par MainLayout seulement sur l'onglet actif). */
+.nav-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 9px;
+  bottom: 9px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--nav-mark, transparent);
 }

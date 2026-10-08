@@ -17,12 +17,12 @@ export function AiBudgetBar({ spentUsd, capUsd, size = "sm" }: { spentUsd: numbe
   const large = size === "lg";
 
   return (
-    <div className={large ? "rounded-2xl p-5" : "rounded-xl px-3 py-2.5"} style={{ background: th.isDark ? "rgba(255,255,255,0.05)" : "rgba(15,14,20,0.03)", border: `1px solid ${th.inputB}` }}>
+    <div className={large ? "rounded-[10px] p-5" : "rounded-[4px] px-3 py-2.5"} style={{ background: th.card, border: `1px solid ${th.sep}` }}>
       <div className="flex items-center justify-between gap-2 mb-1.5">
         <span className={large ? "text-sm font-semibold" : "text-[11px] font-semibold truncate"} style={{ color: th.fg2 }}>Budget IA Runware</span>
         <span className={large ? "text-sm font-bold shrink-0" : "text-[11px] font-bold shrink-0"} style={{ color }}>{pct.toFixed(2)}%</span>
       </div>
-      <div className={large ? "h-2.5 rounded-full overflow-hidden" : "h-1.5 rounded-full overflow-hidden"} style={{ background: th.isDark ? "rgba(255,255,255,0.08)" : "rgba(15,14,20,0.06)" }}>
+      <div className={large ? "h-2.5 rounded-full overflow-hidden" : "h-1.5 rounded-full overflow-hidden"} style={{ background: th.navA }}>
         <div className="h-full rounded-full transition-all duration-300" style={{ width: `${pct}%`, background: color }} />
       </div>
       <div className={large ? "text-xs mt-2" : "text-[10px] mt-1"} style={{ color: th.fg3 }}>{spentUsd.toFixed(2)} $ / {capUsd.toFixed(2)} $</div>

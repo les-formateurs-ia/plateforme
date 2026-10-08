@@ -31,16 +31,20 @@ export const mkCSS = (isDark: boolean, accentHex: string) => {
   }
   .fade-up { animation: fade-up 0.4s ease both; }
   .g-input {
-    background: ${isDark ? "rgba(255,255,255,0.05)" : "rgba(15,14,20,0.03)"};
-    border: 1px solid ${isDark ? "rgba(255,255,255,0.1)" : "rgba(15,14,20,0.1)"};
-    color: ${isDark ? "rgba(255,255,255,0.9)" : "rgba(15,14,20,0.9)"};
+    background: ${isDark ? "rgba(255,255,255,0.04)" : "#fff"};
+    border: 1px solid ${isDark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.16)"};
+    color: ${isDark ? "#fff" : "#000"};
     transition: border-color 0.2s, box-shadow 0.2s;
   }
-  .g-input::placeholder { color: ${isDark ? "rgba(255,255,255,0.3)" : "rgba(15,14,20,0.3)"}; }
+  .g-input::placeholder { color: ${isDark ? "rgba(255,255,255,0.38)" : "rgba(0,0,0,0.38)"}; }
+  @media (hover: hover) and (pointer: fine) {
+    .g-input:hover:not(:focus):not(:disabled) { border-color: ${isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"}; }
+  }
+  /* Focus à l'encre, comme les champs du site public. */
   .g-input:focus {
     outline: none;
-    border-color: rgba(${accent},0.5);
-    box-shadow: 0 0 0 3px rgba(${accent},0.12);
+    border-color: rgb(${accent});
+    box-shadow: 0 0 0 1px rgb(${accent});
   }
   * { scrollbar-width:none; }
   ::-webkit-scrollbar { display:none; width:0; height:0; }
