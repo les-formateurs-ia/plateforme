@@ -6,13 +6,15 @@
 // blanc) ni sur les boutons. La teinte est transmise par HueProvider : un
 // composant posé dans la rubrique "Quiz de validation" prend
 // automatiquement l'ambre, sans prop à faire descendre.
-import { createContext, useContext, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { ArrowLeft, Loader2, type LucideIcon } from "lucide-react";
 import { useTh, hexToRgb } from "@/app/theme/theme";
 import { GT } from "@/app/components/common/GT";
 import { VSwitch } from "@/app/components/common/VSwitch";
 import { DialogHeader, DialogTitle, DialogDescription } from "@/app/components/ui/dialog";
 import { cx } from "@/app/lib/cx";
+import { NeuralField } from "@/app/components/particles/NeuralField";
+import { burst } from "@/app/lib/particles/burst";
 
 // Teintes pastel de la charte (violet / turquoise / pêche + dérivés).
 export const HUES = {
@@ -504,9 +506,18 @@ export function LetterBadge({ letter, active }: { letter: string; active: boolea
 // Écran de fin (score ou remerciement).
 export function CompletionPanel({ Icon, title, big, message, children }: { Icon: LucideIcon; title: string; big?: ReactNode; message: string; children?: ReactNode }) {
   const th = useTh();
+  // Fin du quiz : une gerbe de particules part du résultat, sur le réseau de la marque.
+  const centerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const t = window.setTimeout(() => { if (centerRef.current) burst(centerRef.current, { count: 80 }); }, 250);
+    return () => window.clearTimeout(t);
+  }, []);
   return (
     <Panel watermark={Icon} className="fade-up">
-      <div className="px-6 py-12 flex flex-col items-center text-center gap-3">
+      <div aria-hidden className="absolute inset-0 pointer-events-none" style={{ maskImage: "radial-gradient(ellipse 70% 80% at 50% 50%,transparent 30%,#000 75%)", WebkitMaskImage: "radial-gradient(ellipse 70% 80% at 50% 50%,transparent 30%,#000 75%)", opacity: 0.7 }}>
+        <NeuralField dark={th.isDark} density={2.4} band={0.95} active />
+      </div>
+      <div ref={centerRef} className="relative px-6 py-12 flex flex-col items-center text-center gap-3">
         <IconBadge Icon={Icon} size="lg" />
         <div className="text-lg font-black" style={{ color: th.fg, fontFamily: "'Funnel Display',sans-serif" }}>{title}</div>
         {big && <div className="text-5xl font-black tabular-nums" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>{big}</GT></div>}

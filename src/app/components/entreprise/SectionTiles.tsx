@@ -4,7 +4,7 @@
 // flèche (ou le retour du navigateur) ramène à la grille.
 import type { CSSProperties, ReactNode } from "react";
 import { useSearchParams } from "react-router";
-import { ArrowRight, type LucideIcon } from "lucide-react";
+import { ArrowRight, ChevronRight, type LucideIcon } from "lucide-react";
 import { useTh, hexToRgb } from "@/app/theme/theme";
 import { HUES, PageHero, runMorph, useMorph, type Hue } from "@/app/components/entreprise/EntrepriseKit";
 
@@ -85,6 +85,41 @@ export function SectionTile({ label, desc, Icon, hue, badge, step, index, disabl
 
       <div className="absolute bottom-0 left-0 h-[3px] w-full origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"
         style={{ background: `linear-gradient(90deg,${c1},${c2})` }} />
+    </button>
+  );
+}
+
+// Rubrique en ligne (accueil collaborateur, rangé par étapes de la
+// formation) : pastille de la rubrique, intitulé, état, flèche. Même
+// transition d'ouverture que la tuile (morphName).
+export function SectionRow({ label, desc, Icon, hue, badge, disabled, onClick, morphName, index = 0 }: {
+  label: string; desc: string; Icon: LucideIcon; hue: Hue; badge?: TileBadge; disabled?: boolean; onClick: () => void; morphName?: string; index?: number;
+}) {
+  const th = useTh();
+  const [c1, c2] = HUES[hue];
+  const rgb = hexToRgb(c1);
+  const tone = badge?.tone ?? "default";
+  const morph = useMorph<HTMLButtonElement>(morphName);
+  const badgeStyle: CSSProperties =
+    tone === "todo" ? { background: th.ink, color: th.onInk, borderColor: th.ink }
+    : tone === "done" ? { background: "rgba(106,222,177,0.18)", color: th.success, borderColor: "transparent" }
+    : tone === "muted" ? { color: th.fg3, borderColor: th.sep }
+    : { background: `rgba(${rgb},${th.isDark ? 0.22 : 0.18})`, color: th.fg, borderColor: "transparent" };
+  return (
+    <button ref={morph.ref} data-morph={morphName} data-morph-fade="" type="button" onClick={onClick} disabled={disabled}
+      className={`${morph.incoming ? "" : "fade-up "}group relative w-full overflow-hidden rounded-[8px] text-left flex items-center gap-4 p-4 border transition-colors duration-200 [border-color:var(--row-b0)] hover-fine:enabled:[border-color:var(--ink)] focus-visible:[border-color:var(--ink)] disabled:opacity-55 disabled:cursor-default`}
+      style={{ background: th.card, ["--row-b0" as string]: th.sep, animationDelay: `${index * 45}ms` } as CSSProperties}>
+      <span className="w-11 h-11 rounded-[6px] flex items-center justify-center shrink-0" style={{ background: `linear-gradient(135deg,${c1},${c2})` }}>
+        <Icon className="w-5 h-5" style={{ color: "#000" }} strokeWidth={2} />
+      </span>
+      <span className="flex-1 min-w-0">
+        <span className="flex items-center gap-2 flex-wrap">
+          <span className="text-[16px] font-bold leading-snug" style={{ color: th.fg }}>{label}</span>
+          {badge && <span className="rounded-[2px] border px-1.5 py-px text-[11px] font-bold whitespace-nowrap" style={badgeStyle}>{badge.label}</span>}
+        </span>
+        <span className="block mt-0.5 text-sm leading-snug" style={{ color: th.fg2 }}>{desc}</span>
+      </span>
+      {!disabled && <ChevronRight className="w-4 h-4 shrink-0 transition-transform group-hover:translate-x-0.5" style={{ color: th.fg3 }} />}
     </button>
   );
 }

@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
-import { Building2, ClipboardList, FileText, Code2, Star, Upload, Eye, Award, type LucideIcon } from "lucide-react";
+import { ArrowRight, ClipboardList, FileText, Code2, Star, Upload, Eye, Award, type LucideIcon } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
-import { SectionTile, SectionGrid, SectionHeader, useSectionParam, sectionMorphName, type Hue, type TileBadge } from "@/app/components/entreprise/SectionTiles";
-import {
-  HueProvider, PageHero, EmptyState, Loading,
-} from "@/app/components/entreprise/EntrepriseKit";
+import { SectionRow, SectionHeader, useSectionParam, sectionMorphName, type Hue, type TileBadge } from "@/app/components/entreprise/SectionTiles";
+import { HueProvider, EmptyState, Loading } from "@/app/components/entreprise/EntrepriseKit";
+import { NeuralField } from "@/app/components/particles/NeuralField";
+import { SectionHead } from "@/app/components/common/SectionHead";
+import { useProfile } from "@/app/state/profile-context";
 import { getCompany } from "@/app/lib/entreprise/companies";
 import { listVisiblePositioningTests, type VisiblePositioningTest } from "@/app/lib/entreprise/companyPositioning";
 import { listVisibleCompanyFiles, getCompanyFileDownloadUrl, type CompanyFileRow } from "@/app/lib/entreprise/companyFiles";
@@ -52,6 +53,8 @@ export function CompanyStudentHome({ companyId, studentId, preview = false }: Co
   const th = useTh();
   const navigate = useNavigate();
   const { section, open, close } = useSectionParam(SECTION_IDS);
+  const { profile } = useProfile();
+  const firstName = profile.name.split(" ")[0] || "";
 
   const [companyName, setCompanyName] = useState<string | null>(null);
   const [positioning, setPositioning] = useState<VisiblePositioningTest[]>([]);
@@ -185,24 +188,94 @@ export function CompanyStudentHome({ companyId, studentId, preview = false }: Co
     );
   }
 
+  // Ce qui reste à faire (tests et questionnaires), dans l'ordre de la formation.
+  const tasks = [
+    ...positioning.map((t) => ({ section: "positioning" as const, done: t.done })),
+    ...validation.map((t) => ({ section: "validation" as const, done: t.done })),
+    ...satisfaction.map((t) => ({ section: "satisfaction" as const, done: t.done })),
+  ];
+  const doneCount = tasks.filter((t) => t.done).length;
+  const nextTask = tasks.find((t) => !t.done)?.section ?? null;
+  const nextSection: SectionId | null = nextTask ?? (files.length ? "files" : exercises.length ? "html" : null);
+  const NEXT_COPY: Record<SectionId, { eyebrow: string; title: string; cta: string }> = {
+    positioning: { eyebrow: "Pour commencer", title: "Fais le point sur ton niveau", cta: "Passer le test de positionnement" },
+    files: { eyebrow: "Pendant la formation", title: "Tes supports de cours t'attendent", cta: "Voir les supports" },
+    html: { eyebrow: "Pendant la formation", title: "Mets en pratique ce que tu apprends", cta: "Ouvrir les exercices" },
+    validation: { eyebrow: "Fin de formation", title: "Valide tes acquis", cta: "Passer le quiz de validation" },
+    satisfaction: { eyebrow: "Dernière étape", title: "Dis-nous ce que tu en as pensé", cta: "Répondre au questionnaire" },
+    uploads: { eyebrow: "Pendant la formation", title: "Envoie tes productions", cta: "Ouvrir l'espace de dépôt" },
+  };
+  const next = nextSection ? NEXT_COPY[nextSection] : null;
+
+  // La formation en trois temps : chaque rubrique trouve sa place.
+  const PHASES: { n: string; title: string; desc: string; ids: SectionId[] }[] = [
+    { n: "01", title: "Avant", desc: "Fais le point pour adapter la formation.", ids: ["positioning"] },
+    { n: "02", title: "Pendant", desc: "Les supports, la pratique, tes productions.", ids: ["files", "html", "uploads"] },
+    { n: "03", title: "Après", desc: "Valide tes acquis et donne ton avis.", ids: ["validation", "satisfaction"] },
+  ];
+
   return (
-    <div data-morph-scope="" className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-8">
+    <div data-morph-scope="" className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-10">
       {previewBanner}
 
-      {/* Même en-tête que la fiche entreprise côté formateur (CompanyDetailPage). */}
-      <PageHero eyebrow="Entreprise" Icon={Building2} title={loading ? "Chargement…" : (companyName ?? "Mon espace entreprise")}
-        desc={preview ? "Choisissez une rubrique pour voir son contenu." : "Choisis une rubrique pour accéder à ton contenu."} />
+      {/* Panneau noir au réseau de la marque : où en est le collaborateur, et la suite. */}
+      <section className="relative overflow-hidden rounded-[10px] bg-black text-white fade-up" style={{ border: th.isDark ? `1px solid ${th.sep}` : undefined }}>
+        <NeuralField dark density={3.6} band={0.9} />
+        <div aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(90deg,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0.6) 45%,rgba(0,0,0,0.05) 80%)" }} />
+        <div className="relative grid gap-8 p-6 sm:p-9 lg:p-11 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+          <div className="max-w-2xl">
+            <p className="eyebrow text-white/60">Espace entreprise{companyName ? ` · ${companyName}` : ""}</p>
+            <h1 className="mt-4 text-[2rem] sm:text-[2.7rem] font-extrabold leading-[1.02] tracking-[-0.035em]">
+              {loading ? "Chargement…" : preview ? "Aperçu de l'espace collaborateur" : `Bonjour ${firstName}`}
+            </h1>
+            <p className="mt-4 text-base text-white/65 leading-relaxed">
+              {next ? <><span className="text-white/90 font-semibold">{next.eyebrow} :</span> {next.title.charAt(0).toLowerCase() + next.title.slice(1)}.</> : "Ton formateur publiera bientôt le contenu de ta formation."}
+            </p>
+            {next && nextSection && (
+              <button type="button" onClick={() => open(nextSection)}
+                className="sweep mt-8 inline-flex items-center gap-2.5 min-h-[50px] px-6 rounded-[2px] bg-white text-black text-base font-semibold">
+                {next.cta}<ArrowRight className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+          {tasks.length > 0 && (
+            <div className="lg:text-right">
+              <p className="text-[3.2rem] sm:text-[4rem] leading-none font-extrabold tracking-[-0.04em] tabular-nums">{doneCount}<span className="text-white/45 text-[0.5em]">/{tasks.length}</span></p>
+              <p className="mt-2 text-sm text-white/60">test{tasks.length > 1 ? "s" : ""} et questionnaire{tasks.length > 1 ? "s" : ""} faits</p>
+              <div className="mt-4 h-1.5 w-full lg:w-56 lg:ml-auto rounded-full overflow-hidden bg-white/15">
+                <div className="h-full rounded-full" style={{ width: `${(doneCount / tasks.length) * 100}%`, background: th.iris }} />
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
 
       {loading ? <Loading /> : (
-        <SectionGrid>
-          {SECTION_IDS.map((id, i) => {
-            const meta = SECTION_META[id];
-            return (
-              <SectionTile key={id} morphName={sectionMorphName(id)} index={i} label={meta.label} desc={meta.desc} Icon={meta.Icon} hue={meta.hue}
-                badge={badges[id]} disabled={isEmpty[id]} onClick={() => open(id)} />
-            );
-          })}
-        </SectionGrid>
+        <section aria-labelledby="phases-title">
+          <SectionHead id="phases-title" eyebrow="Ta formation" title="En trois temps" />
+          <ol className="grid gap-8 lg:gap-6 lg:grid-cols-3">
+            {PHASES.map((phase, pi) => (
+              <li key={phase.n} className="fade-up" style={{ animationDelay: `${80 + pi * 70}ms` }}>
+                <div className="flex items-center gap-3 pb-4 mb-4" style={{ borderBottom: `1px solid ${th.sep}` }}>
+                  <span className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-black tabular-nums" style={{ background: th.ink, color: th.onInk }}>{phase.n}</span>
+                  <span>
+                    <span className="block text-lg font-black leading-tight" style={{ color: th.fg }}>{phase.title}</span>
+                    <span className="block text-sm" style={{ color: th.fg2 }}>{phase.desc}</span>
+                  </span>
+                </div>
+                <div className="space-y-2.5">
+                  {phase.ids.map((id, i) => {
+                    const meta = SECTION_META[id];
+                    return (
+                      <SectionRow key={id} morphName={sectionMorphName(id)} index={pi * 3 + i} label={meta.label} desc={meta.desc} Icon={meta.Icon} hue={meta.hue}
+                        badge={badges[id]} disabled={isEmpty[id]} onClick={() => open(id)} />
+                    );
+                  })}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
       )}
     </div>
   );
