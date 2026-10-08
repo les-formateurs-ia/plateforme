@@ -76,7 +76,7 @@ export function AiDetectionPage() {
       )}
 
       {!loading && !loadError && current && (
-        <GCard glow><div className="p-6 space-y-5">
+        <GCard><div className="p-6 space-y-5">
           <div className="text-xs font-bold" style={{ color: th.fg3 }}>Image {index + 1} / {images.length}</div>
           <img src={current.imageUrl} className="w-full rounded-xl bg-black mx-auto" style={{ maxWidth: 480, aspectRatio: "1/1", objectFit: "cover" }} />
 

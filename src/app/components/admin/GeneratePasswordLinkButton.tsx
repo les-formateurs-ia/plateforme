@@ -77,7 +77,7 @@ export function GeneratePasswordLinkButton({ studentId, studentName, renderTrigg
                   value={link.url}
                   onFocus={(e) => e.currentTarget.select()}
                   aria-label="Lien à transmettre à l'élève"
-                  className="flex-1 min-w-0 rounded-xl px-3.5 py-2.5 text-xs g-input"
+                  className="flex-1 min-w-0 rounded-[4px] px-3.5 py-2.5 text-xs g-input"
                 />
                 <ShimBtn sm onClick={copy}>
                   <span className="flex items-center gap-1.5">{copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}{copied ? "Copié" : "Copier"}</span>

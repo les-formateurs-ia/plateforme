@@ -88,7 +88,7 @@ export function BattleGroundPage() {
           onChange={(e) => setPrompt(e.target.value)}
           rows={5}
           placeholder="Ex : Explique la différence entre le machine learning et le deep learning en 3 phrases."
-          className="w-full rounded-xl px-4 py-3 text-sm g-input resize-y"
+          className="w-full rounded-[4px] px-4 py-3 text-sm g-input resize-y"
           style={{ minHeight: 110 }}
         />
         <div>

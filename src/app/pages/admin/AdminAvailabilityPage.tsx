@@ -376,11 +376,11 @@ export function AdminAvailabilityPage() {
                   <div className="mt-3 pt-3 flex items-end gap-2 flex-wrap" style={{ borderTop: `1px solid ${th.sep}` }}>
                     <div>
                       <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Nouvelle date</label>
-                      <input type="date" min={tomorrowISO()} value={proposalDraft.date} onChange={(e) => setProposalDraft((d) => ({ ...d, date: e.target.value }))} className="rounded-xl px-3 py-2 text-sm g-input" />
+                      <input type="date" min={tomorrowISO()} value={proposalDraft.date} onChange={(e) => setProposalDraft((d) => ({ ...d, date: e.target.value }))} className="rounded-[4px] px-3 py-2 text-sm g-input" />
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Heure de début</label>
-                      <input type="time" step={900} value={proposalDraft.time} onChange={(e) => setProposalDraft((d) => ({ ...d, time: e.target.value }))} className="rounded-xl px-3 py-2 text-sm g-input" />
+                      <input type="time" step={900} value={proposalDraft.time} onChange={(e) => setProposalDraft((d) => ({ ...d, time: e.target.value }))} className="rounded-[4px] px-3 py-2 text-sm g-input" />
                     </div>
                     <ShimBtn sm onClick={() => sendProposal(b)} disabled={sendingProposal}>{sendingProposal ? "Envoi…" : "Envoyer la proposition"}</ShimBtn>
                   </div>
@@ -435,15 +435,15 @@ export function AdminAvailabilityPage() {
           <div className="space-y-3">
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Sujet du rendez-vous</label>
-              <textarea value={bilanDraft.sujet} onChange={(e) => setBilanDraft((d) => ({ ...d, sujet: e.target.value }))} rows={2} className="w-full rounded-xl px-3 py-2 text-sm g-input resize-none" />
+              <textarea value={bilanDraft.sujet} onChange={(e) => setBilanDraft((d) => ({ ...d, sujet: e.target.value }))} rows={2} className="w-full rounded-[4px] px-3 py-2 text-sm g-input resize-none" />
             </div>
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Point fort</label>
-              <textarea value={bilanDraft.pointFort} onChange={(e) => setBilanDraft((d) => ({ ...d, pointFort: e.target.value }))} rows={2} className="w-full rounded-xl px-3 py-2 text-sm g-input resize-none" />
+              <textarea value={bilanDraft.pointFort} onChange={(e) => setBilanDraft((d) => ({ ...d, pointFort: e.target.value }))} rows={2} className="w-full rounded-[4px] px-3 py-2 text-sm g-input resize-none" />
             </div>
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Next step</label>
-              <textarea value={bilanDraft.nextStep} onChange={(e) => setBilanDraft((d) => ({ ...d, nextStep: e.target.value }))} rows={2} className="w-full rounded-xl px-3 py-2 text-sm g-input resize-none" />
+              <textarea value={bilanDraft.nextStep} onChange={(e) => setBilanDraft((d) => ({ ...d, nextStep: e.target.value }))} rows={2} className="w-full rounded-[4px] px-3 py-2 text-sm g-input resize-none" />
             </div>
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Pièce jointe (PDF)</label>
@@ -451,7 +451,7 @@ export function AdminAvailabilityPage() {
                 type="file"
                 accept="application/pdf"
                 onChange={(e) => setBilanFile(e.target.files?.[0] ?? null)}
-                className="w-full text-xs g-input rounded-xl px-3 py-2"
+                className="w-full text-xs g-input rounded-[4px] px-3 py-2"
               />
               {(bilanFile ?? bilanTarget?.bilanAttachmentName) && (
                 <p className="text-xs mt-1.5 flex items-center gap-1.5" style={{ color: th.fg3 }}>

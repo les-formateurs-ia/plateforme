@@ -65,7 +65,7 @@ function TtsCard({ gen, onRetry, retryDisabled }: { gen: MediaGeneration<StudioT
   const emotionLabel = gen.emotion ? TTS_EMOTIONS.find((e) => e.id === gen.emotion)?.label : null;
 
   return (
-    <div className="rounded-3xl overflow-hidden" style={{ background: th.card, border: `1px solid ${th.sep}`, boxShadow: "0 2px 10px rgba(0,0,0,0.18)" }}>
+    <div className="rounded-3xl overflow-hidden" style={{ background: th.card, border: `1px solid ${th.sep}` }}>
       <div className="relative w-full" style={{ minHeight: 96 }}>
         <div className="absolute inset-0 flex items-center justify-center" style={{ background: th.isDark ? "rgba(255,255,255,0.03)" : th.gradShadow(0.06) }}>
           <Volume2 className="w-7 h-7" style={{ color: th.fg3 }} />

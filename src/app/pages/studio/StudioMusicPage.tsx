@@ -34,7 +34,7 @@ function MusicCard({ gen, onOpen, onRetry, retryDisabled }: { gen: MediaGenerati
   const ready = gen.status === "ready" && audio.loaded && (!gen.coverImagePath || cover.loaded) && !error;
 
   return (
-    <div className="rounded-3xl overflow-hidden" style={{ background: th.card, border: `1px solid ${th.sep}`, boxShadow: "0 2px 10px rgba(0,0,0,0.18)" }}>
+    <div className="rounded-3xl overflow-hidden" style={{ background: th.card, border: `1px solid ${th.sep}` }}>
       <div className="relative w-full cursor-pointer" style={{ aspectRatio: "1 / 1" }} onClick={gen.status === "ready" ? onOpen : undefined}>
         {coverUrl ? (
           <img key={coverUrl} src={coverUrl} onLoad={cover.onLoad} onError={cover.onError} alt={gen.title ?? gen.prompt} className="absolute inset-0 w-full h-full object-cover" />

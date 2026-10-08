@@ -144,7 +144,7 @@ export function MediaExercisePage() {
             onChange={(e) => setDraft(e.target.value)}
             rows={8}
             placeholder="Décris l'image ou la vidéo que tu voudrais générer…"
-            className="w-full rounded-xl px-4 py-3 text-sm g-input resize-y"
+            className="w-full rounded-[4px] px-4 py-3 text-sm g-input resize-y"
             style={{ minHeight: 160 }}
           />
           <div>
@@ -176,7 +176,7 @@ export function MediaExercisePage() {
 
       {!loading && !loadError && !composing && current && tone && (
         <>
-          <GCard glow><div className="p-6 space-y-4">
+          <GCard><div className="p-6 space-y-4">
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div>
                 <div className="text-[10px] font-black uppercase tracking-widest mb-1 flex items-center gap-1.5" style={{ color: th.navAC }}>

@@ -379,7 +379,7 @@ export function AdminLessonEditorPage() {
         <Link to={coursesBase} className="flex items-center gap-1.5 text-sm w-fit transition-colors hover:opacity-70" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />Cours</Link>
       </div>
 
-      <GCard glow><div className="p-6 space-y-4">
+      <GCard><div className="p-6 space-y-4">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <h2 className="text-lg font-black" style={{ color: th.fg }}><GT>{isNew ? "Nouvelle leçon" : "Éditer la leçon"}</GT></h2>
           <label className="flex items-center gap-2 cursor-pointer select-none px-3 py-2 rounded-xl" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
@@ -396,7 +396,7 @@ export function AdminLessonEditorPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="sm:col-span-2">
             <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Titre</label>
-            <input value={title} onChange={(e) => handleTitleChange(e.target.value)} placeholder="Les bases du prompting" className="w-full rounded-xl px-4 py-3 text-sm g-input" />
+            <input value={title} onChange={(e) => handleTitleChange(e.target.value)} placeholder="Les bases du prompting" className="w-full rounded-[4px] px-4 py-3 text-sm g-input" />
             {!slugEditing ? (
               <p className="text-xs mt-1.5" style={{ color: th.fg3 }}>
                 Identifiant : <span className="font-mono">{slug || "…"}</span>{" "}
@@ -404,19 +404,19 @@ export function AdminLessonEditorPage() {
               </p>
             ) : (
               <input value={slug} onChange={(e) => { setSlugTouched(true); setSlug(e.target.value); }}
-                className="w-full mt-2 rounded-xl px-4 py-2 text-xs g-input font-mono" />
+                className="w-full mt-2 rounded-[4px] px-4 py-2 text-xs g-input font-mono" />
             )}
           </div>
           <div>
             <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Durée (min)</label>
-            <input type="number" value={durationMinutes} onChange={(e) => setDurationMinutes(e.target.value)} className="w-full rounded-xl px-4 py-3 text-sm g-input" />
+            <input type="number" value={durationMinutes} onChange={(e) => setDurationMinutes(e.target.value)} className="w-full rounded-[4px] px-4 py-3 text-sm g-input" />
           </div>
         </div>
 
         <div>
           <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Contenu du cours (HTML)</label>
           <textarea value={referenceContent} onChange={(e) => setReferenceContent(e.target.value)} rows={14}
-            className="w-full rounded-xl px-4 py-3 text-sm g-input resize-y font-mono" placeholder="<h2>Objectif</h2>&#10;<p>...</p>&#10;&#10;<h3>Théorie</h3>&#10;<p>...</p>" />
+            className="w-full rounded-[4px] px-4 py-3 text-sm g-input resize-y font-mono" placeholder="<h2>Objectif</h2>&#10;<p>...</p>&#10;&#10;<h3>Théorie</h3>&#10;<p>...</p>" />
           <p className="text-xs mt-1.5" style={{ color: th.fg3 }}>Contenu fixe affiché à tous les élèves — sert de base à la personnalisation IA (Étape 2). HTML complet (balises, style, tableaux, script…), rendu à l'identique comme l'onglet Playground.</p>
         </div>
 
@@ -472,7 +472,7 @@ export function AdminLessonEditorPage() {
             )}
           </div>
           <textarea value={customHtml} onChange={(e) => setCustomHtml(e.target.value)} rows={10} placeholder="Colle ici le HTML du template (identique pour tous les élèves — la personnalisation se fait sur un duplicata)."
-            className="w-full rounded-xl px-4 py-3 text-xs g-input resize-y font-mono" />
+            className="w-full rounded-[4px] px-4 py-3 text-xs g-input resize-y font-mono" />
           {htmlPreviewOpen && customHtml.trim() && (
             <iframe srcDoc={htmlTheme.withTheme(customHtml)} sandbox="allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox" title="Aperçu du Playground"
               className="w-full rounded-xl mt-2" style={{ height: 420, border: `1px solid ${th.sep}`, background: htmlTheme.background }} />
@@ -482,12 +482,12 @@ export function AdminLessonEditorPage() {
 
         <div>
           <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Prompt de référence (contenu IA — texte, podcast, mindmap)</label>
-          <textarea value={aiContentPrompt} onChange={(e) => setAiContentPrompt(e.target.value)} rows={3} className="w-full rounded-xl px-4 py-3 text-sm g-input resize-none" />
+          <textarea value={aiContentPrompt} onChange={(e) => setAiContentPrompt(e.target.value)} rows={3} className="w-full rounded-[4px] px-4 py-3 text-sm g-input resize-none" />
         </div>
 
         <div>
           <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Prompt de référence (exercice pratique)</label>
-          <textarea value={practicalExercisePrompt} onChange={(e) => setPracticalExercisePrompt(e.target.value)} rows={3} className="w-full rounded-xl px-4 py-3 text-sm g-input resize-none" />
+          <textarea value={practicalExercisePrompt} onChange={(e) => setPracticalExercisePrompt(e.target.value)} rows={3} className="w-full rounded-[4px] px-4 py-3 text-sm g-input resize-none" />
         </div>
       </div></GCard>
 
@@ -514,7 +514,7 @@ export function AdminLessonEditorPage() {
             <div key={qIndex} className="rounded-xl p-4" style={{ border: `1px solid ${th.sep}` }}>
               <div className="flex items-start gap-2 mb-3">
                 <input value={q.question} onChange={(e) => updateQuestion(qIndex, { question: e.target.value })} placeholder="Intitulé de la question"
-                  className="flex-1 rounded-xl px-3 py-2 text-sm g-input" />
+                  className="flex-1 rounded-[4px] px-3 py-2 text-sm g-input" />
                 <button onClick={() => removeQuestion(qIndex)}><Trash2 className="w-4 h-4" style={{ color: th.danger }} /></button>
               </div>
               <div className="space-y-2 mb-3">
@@ -524,14 +524,14 @@ export function AdminLessonEditorPage() {
                       <CheckCircle className="w-4 h-4 shrink-0" style={{ color: o.is_correct ? "#6adeb1" : th.fg3 }} />
                     </button>
                     <input value={o.label} onChange={(e) => updateOptionLabel(qIndex, oIndex, e.target.value)} placeholder={`Réponse ${oIndex + 1}`}
-                      className="flex-1 rounded-lg px-3 py-2 text-xs g-input" />
+                      className="flex-1 rounded-[4px] px-3 py-2 text-xs g-input" />
                     <button onClick={() => removeOption(qIndex, oIndex)}><Trash2 className="w-3.5 h-3.5" style={{ color: th.fg3 }} /></button>
                   </div>
                 ))}
                 <button onClick={() => addOption(qIndex)} className="text-xs font-semibold hover:opacity-70" style={{ color: th.navAC }}>+ Ajouter une réponse</button>
               </div>
               <textarea value={q.explanation} onChange={(e) => updateQuestion(qIndex, { explanation: e.target.value })} placeholder="Explication IA affichée après réponse (optionnel)"
-                rows={2} className="w-full rounded-xl px-3 py-2 text-xs g-input resize-none" />
+                rows={2} className="w-full rounded-[4px] px-3 py-2 text-xs g-input resize-none" />
             </div>
           ))}
           {!questions.length && <p className="text-xs" style={{ color: th.fg3 }}>Aucune question pour l'instant.</p>}

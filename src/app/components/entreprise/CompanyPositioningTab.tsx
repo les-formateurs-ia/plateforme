@@ -177,7 +177,7 @@ export function CompanyPositioningTab({ companyId, kind }: { companyId: string; 
           <DialogHero Icon={KindIcon} title={editingId ? "Modifier le quiz" : `Nouveau ${singular.toLowerCase()}`}
             desc={`${KIND_DESCRIPTION[kind]} Cochez la bonne réponse de chaque question.`} />
 
-          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Titre du quiz" className="w-full rounded-xl px-4 py-3 text-base font-semibold g-input" />
+          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Titre du quiz" className="w-full rounded-[4px] px-4 py-3 text-base font-semibold g-input" />
 
           <div className="mt-2">
             <KitHeading right={
@@ -200,7 +200,7 @@ export function CompanyPositioningTab({ companyId, kind }: { companyId: string; 
                   <QuestionCardHeader index={qIndex} count={questions.items.length}
                     onMove={(delta) => questions.move(qIndex, delta)} onRemove={() => questions.remove(qIndex)} />
                   <input value={q.question} onChange={(e) => questions.update(qIndex, { question: e.target.value })} placeholder="Intitulé de la question"
-                    className="w-full rounded-xl px-3.5 py-2.5 text-sm font-semibold g-input mb-3" />
+                    className="w-full rounded-[4px] px-3.5 py-2.5 text-sm font-semibold g-input mb-3" />
                   <div className="space-y-2 mb-3">
                     {q.options.map((o, oIndex) => (
                       <div key={oIndex} className="flex items-center gap-2">
@@ -209,7 +209,7 @@ export function CompanyPositioningTab({ companyId, kind }: { companyId: string; 
                           {o.isCorrect ? <CheckCircle2 className="w-5 h-5" style={{ color: SUCCESS }} /> : <Circle className="w-5 h-5" style={{ color: th.fg3 }} />}
                         </button>
                         <input value={o.label} onChange={(e) => updateOptions(qIndex, (opts) => opts.map((x, j) => (j === oIndex ? { ...x, label: e.target.value } : x)))}
-                          placeholder={`Réponse ${oIndex + 1}`} className="flex-1 rounded-lg px-3 py-2 text-sm g-input"
+                          placeholder={`Réponse ${oIndex + 1}`} className="flex-1 rounded-[4px] px-3 py-2 text-sm g-input"
                           style={o.isCorrect ? { borderColor: "rgba(106,222,177,0.55)" } : undefined} />
                         <IconAction Icon={Trash2} onClick={() => updateOptions(qIndex, (opts) => opts.filter((_, j) => j !== oIndex))} title="Supprimer la réponse" />
                       </div>
@@ -218,7 +218,7 @@ export function CompanyPositioningTab({ companyId, kind }: { companyId: string; 
                       className="inline-flex items-center gap-1 text-sm font-semibold hover:opacity-70" style={{ color: h.text }}><Plus className="w-3.5 h-3.5" />Ajouter une réponse</button>
                   </div>
                   <textarea value={q.explanation} onChange={(e) => questions.update(qIndex, { explanation: e.target.value })} placeholder="Explication affichée après réponse (optionnel)"
-                    rows={2} className="w-full rounded-xl px-3 py-2 text-xs g-input resize-none" />
+                    rows={2} className="w-full rounded-[4px] px-3 py-2 text-xs g-input resize-none" />
                 </SubCard>
               </div>
             ))}

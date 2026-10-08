@@ -60,7 +60,7 @@ export function CompanyCategoriesTab({ companyId }: { companyId: string }) {
           <KitHeading>Nouvelle catégorie</KitHeading>
           <p className="text-sm" style={{ color: th.fg3 }}>Catégories proposées aux collaborateurs quand ils envoient un fichier. Les fichiers reçus sont dans la rubrique Documents élèves.</p>
           <div className="flex items-center gap-2 flex-wrap">
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex. Photo Générée" className="flex-1 min-w-[200px] rounded-xl px-4 py-2.5 text-sm g-input" onKeyDown={(e) => e.key === "Enter" && void handleCreate()} />
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex. Photo Générée" className="flex-1 min-w-[200px] rounded-[4px] px-4 py-2.5 text-sm g-input" onKeyDown={(e) => e.key === "Enter" && void handleCreate()} />
             <HueButton Icon={Plus} onClick={handleCreate} disabled={!name.trim() || saving}>Ajouter</HueButton>
           </div>
         </div>

@@ -62,7 +62,7 @@ export function ReportIncidentDialog() {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Qu'est-ce qui ne fonctionne pas ?"
               rows={4}
-              className="w-full rounded-xl px-3.5 py-2.5 text-sm g-input resize-none"
+              className="w-full rounded-[4px] px-3.5 py-2.5 text-sm g-input resize-none"
             />
           </div>
         </div>

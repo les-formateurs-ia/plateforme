@@ -269,7 +269,7 @@ export function AgentPage() {
           <div className="shrink-0 px-4 sm:px-6 py-3 flex items-center gap-2 flex-wrap" style={{ borderBottom: `1px solid ${th.sep}` }}>
             <span className="text-xs shrink-0" style={{ color: th.fg3 }}>Nouvelle conversation à propos de :</span>
             <select value={draftProjectId ?? instances[0]?.id ?? ""} onChange={(e) => setDraftProjectId(e.target.value || null)}
-              className="text-sm rounded-lg px-2.5 py-1.5 g-input" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg }}>
+              className="text-sm rounded-[4px] px-2.5 py-1.5 g-input" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg }}>
               {instances.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
             </select>
           </div>

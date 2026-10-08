@@ -379,7 +379,7 @@ export function AdminCourseEditorPage() {
 
       <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-6 lg:items-start">
       <div className="space-y-4">
-      <GCard glow><div className="p-4 space-y-3">
+      <GCard><div className="p-4 space-y-3">
         {courseId && (
           <button type="button" onClick={openPreview} disabled={previewing}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[2px] text-sm font-semibold transition-all hover:opacity-80 active:scale-[0.98] disabled:opacity-50"
@@ -399,7 +399,7 @@ export function AdminCourseEditorPage() {
             </p>
           ) : (
             <input value={course.slug} onChange={(e) => { setSlugTouched(true); setCourse((c) => ({ ...c, slug: e.target.value })); }} placeholder="maitriser-ia-generative"
-              className="w-full mt-2 rounded-lg px-3 py-2 text-xs g-input font-mono" />
+              className="w-full mt-2 rounded-[4px] px-3 py-2 text-xs g-input font-mono" />
           ))}
         </div>
 

@@ -170,7 +170,7 @@ export function CompanySatisfactionTestPage() {
                     onChange={(e) => setDetails((prev) => ({ ...prev, [q.id]: e.target.value }))}
                     rows={4}
                     placeholder={q.followUpLabel || "Précise ta réponse..."}
-                    className="w-full rounded-2xl px-5 py-4 text-base g-input resize-none"
+                    className="w-full rounded-[4px] px-5 py-4 text-base g-input resize-none"
                   />
                 )}
               </div>
@@ -182,7 +182,7 @@ export function CompanySatisfactionTestPage() {
                 onChange={(e) => setAnswer(q.id, e.target.value)}
                 rows={6}
                 placeholder="Ta réponse..."
-                className="w-full rounded-2xl px-5 py-4 text-base g-input resize-none"
+                className="w-full rounded-[4px] px-5 py-4 text-base g-input resize-none"
               />
             )}
           </QuestionStepper>

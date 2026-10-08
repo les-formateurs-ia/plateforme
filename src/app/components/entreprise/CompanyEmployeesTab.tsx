@@ -195,9 +195,9 @@ export function CompanyEmployeesTab({ companyId }: { companyId: string }) {
         <DialogContent>
           <DialogHero Icon={editing ? Pencil : UserPlus} title={editing ? "Modifier le collaborateur" : "Nouveau collaborateur"} desc="Nom, prénom et email — l'accès pourra être envoyé ensuite." />
           <div className="space-y-3">
-            <input value={firstName} onChange={(e) => setFirstName(e.target.value)} autoFocus placeholder="Prénom" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
-            <input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Nom" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
-            <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="email@entreprise.com" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
+            <input value={firstName} onChange={(e) => setFirstName(e.target.value)} autoFocus placeholder="Prénom" className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input" />
+            <input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Nom" className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input" />
+            <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="email@entreprise.com" className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input" />
           </div>
           {error && <ErrorText>{error}</ErrorText>}
           <DialogFooter>

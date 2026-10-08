@@ -134,9 +134,9 @@ export function CompanyHtmlExercisesTab({ companyId }: { companyId: string }) {
 
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.8fr)]">
             <div className="space-y-3 min-w-0">
-              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nom de l'exercice" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
-              <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} placeholder="Consigne affichée à l'élève (optionnel)" className="w-full rounded-xl px-4 py-2.5 text-sm g-input resize-none" />
-              <textarea value={html} onChange={(e) => setHtml(e.target.value)} rows={12} placeholder="Colle le code HTML ici..." className="w-full rounded-xl px-4 py-3 text-xs g-input resize-none font-mono" />
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nom de l'exercice" className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input" />
+              <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} placeholder="Consigne affichée à l'élève (optionnel)" className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input resize-none" />
+              <textarea value={html} onChange={(e) => setHtml(e.target.value)} rows={12} placeholder="Colle le code HTML ici..." className="w-full rounded-[4px] px-4 py-3 text-xs g-input resize-none font-mono" />
               <GhostButton sm Icon={Eye} onClick={() => setPreviewHtml(html)} disabled={!html.trim()}>Aperçu</GhostButton>
               {error && <ErrorText>{error}</ErrorText>}
             </div>

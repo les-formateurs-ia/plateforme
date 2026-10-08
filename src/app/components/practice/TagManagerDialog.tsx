@@ -115,7 +115,7 @@ export function TagManagerDialog({ open, onOpenChange, onChanged }: {
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") void handleCreate(); }}
             placeholder="Nouveau tag..."
-            className="flex-1 rounded-xl px-4 py-2.5 text-sm g-input"
+            className="flex-1 rounded-[4px] px-4 py-2.5 text-sm g-input"
           />
           <ShimBtn sm onClick={handleCreate} disabled={!newName.trim() || creating}>
             <span className="flex items-center gap-1"><Plus className="w-3.5 h-3.5" />Ajouter</span>
@@ -137,7 +137,7 @@ export function TagManagerDialog({ open, onOpenChange, onChanged }: {
                       onChange={(e) => setEditingName(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter") void handleRename(tag.id); if (e.key === "Escape") setEditingId(null); }}
                       autoFocus
-                      className="flex-1 rounded-lg px-2.5 py-1.5 text-sm g-input"
+                      className="flex-1 rounded-[4px] px-2.5 py-1.5 text-sm g-input"
                     />
                     <button onClick={() => handleRename(tag.id)} disabled={busyId === tag.id || !editingName.trim()} className="text-xs font-semibold hover:opacity-70" style={{ color: th.navAC }}>OK</button>
                     <button onClick={() => setEditingId(null)} className="hover:opacity-70"><X className="w-3.5 h-3.5" style={{ color: th.fg3 }} /></button>

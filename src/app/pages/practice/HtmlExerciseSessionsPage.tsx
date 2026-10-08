@@ -155,7 +155,7 @@ function AdminHtmlExercisesView() {
           {filteredExercises.map((ex) => (
             <div key={ex.id} onClick={() => openExercise(ex)}
               className="group relative overflow-hidden rounded-2xl cursor-pointer flex flex-col transition-all duration-300"
-              style={{ aspectRatio: "1/1", background: th.card, border: `1px solid ${th.sep}`, boxShadow: "0 4px 18px rgba(0,0,0,0.16)", opacity: opening && opening !== ex.id ? 0.5 : 1 }}>
+              style={{ aspectRatio: "1/1", background: th.card, border: `1px solid ${th.sep}`, opacity: opening && opening !== ex.id ? 0.5 : 1 }}>
               <div className="relative flex-1 overflow-hidden" style={{ background: "#0c0c13" }}>
                 <HtmlPreview html={ex.htmlContent} />
                 <button type="button" onClick={(event) => { event.stopPropagation(); openEdit(ex); }}
@@ -200,7 +200,7 @@ function StudentExerciseGrid({ exercises, opening, onOpen }: { exercises: Visibl
       {exercises.map((ex) => (
         <div key={ex.exerciseId} onClick={() => onOpen(ex)}
           className="group relative overflow-hidden rounded-2xl cursor-pointer flex flex-col transition-all duration-300"
-          style={{ aspectRatio: "1/1", background: th.card, border: `1px solid ${th.sep}`, boxShadow: "0 4px 18px rgba(0,0,0,0.16)", opacity: opening && opening !== ex.exerciseId ? 0.5 : 1 }}>
+          style={{ aspectRatio: "1/1", background: th.card, border: `1px solid ${th.sep}`, opacity: opening && opening !== ex.exerciseId ? 0.5 : 1 }}>
           <div className="relative flex-1 overflow-hidden" style={{ background: "#0c0c13" }}>
             <HtmlPreview html={ex.previewHtml} />
             <div className="absolute inset-0" style={{ boxShadow: "inset 0 -24px 20px -20px rgba(0,0,0,0.35)" }} />

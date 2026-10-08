@@ -109,7 +109,7 @@ export function PromptSessionsPage() {
             return (
               <div key={s.sessionId} onClick={() => navigate(`/practice/prompts/${s.sessionId}`)}
                 className="group relative overflow-hidden rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.004]"
-                style={{ background: th.card, border: `1px solid ${th.sep}`, boxShadow: "0 2px 10px rgba(0,0,0,0.18)" }}>
+                style={{ background: th.card, border: `1px solid ${th.sep}` }}>
                 <div className="absolute left-0 top-0 bottom-0 w-1" style={{ background: tone ? tone.color : th.sep, opacity: tone ? 0.7 : 0.3 }} />
                 <div className="pl-6 pr-4 py-4 flex items-center gap-4">
                   <Sparkles className="w-4 h-4 shrink-0" style={{ color: th.navAC, opacity: 0.6 }} />

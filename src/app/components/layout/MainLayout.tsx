@@ -263,7 +263,7 @@ export function MainLayout() {
                 <div className="text-[10px] mt-1" style={{ color: th.fg3 }}>{gen.done}/{gen.total} leçon{gen.total > 1 ? "s" : ""}</div>
               </div>
             )}
-            <NavLink to={`${staffBase}/courses`} onClick={() => setNavOpen(false)} className="sweep w-full flex items-center justify-center gap-2.5 px-4 min-h-10 rounded-[2px] text-[14px] font-semibold"
+            <NavLink to={`${staffBase}/courses`} onClick={() => setNavOpen(false)} className="sweep w-full flex items-center justify-center gap-2 px-3 min-h-10 rounded-[2px] text-[13px] font-semibold whitespace-nowrap"
               style={{ background: th.ink, color: th.onInk }}>
               <Plus className="w-4 h-4 shrink-0" />
               Modifier les formations

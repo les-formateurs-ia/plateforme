@@ -315,11 +315,11 @@ export function HtmlExerciseEditDialog({
               <>
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.navAC }}>Nom</label>
-                  <input value={name} onChange={(e) => setName(e.target.value)} autoFocus placeholder="Ex. Landing page SaaS" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
+                  <input value={name} onChange={(e) => setName(e.target.value)} autoFocus placeholder="Ex. Landing page SaaS" className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.navAC }}>Consigne affichee a l'eleve</label>
-                  <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} placeholder="Ce que l'eleve doit faire dans cet exercice..." className="w-full rounded-xl px-4 py-2.5 text-sm g-input resize-none" />
+                  <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} placeholder="Ce que l'eleve doit faire dans cet exercice..." className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input resize-none" />
                 </div>
 
                 <div>
@@ -329,7 +329,7 @@ export function HtmlExerciseEditDialog({
                     onChange={(e) => setHtmlDraft(e.target.value)}
                     rows={12}
                     placeholder="Colle le code HTML ici (Ctrl+V)..."
-                    className="w-full rounded-xl px-4 py-3 text-xs g-input resize-none font-mono"
+                    className="w-full rounded-[4px] px-4 py-3 text-xs g-input resize-none font-mono"
                   />
                   {fileError && <p className="text-xs mt-2 text-[var(--danger)]">{fileError}</p>}
                   <div className="mt-2 flex items-center gap-2 flex-wrap">

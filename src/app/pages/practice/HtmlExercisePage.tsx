@@ -177,7 +177,7 @@ export function HtmlExercisePage() {
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 placeholder="Colle le HTML ici (Ctrl+V)..."
-                className="flex-1 w-full rounded-xl px-4 py-3 text-xs g-input resize-none font-mono"
+                className="flex-1 w-full rounded-[4px] px-4 py-3 text-xs g-input resize-none font-mono"
                 style={{ minHeight: 0 }}
               />
               {fileError && <p className="text-xs text-[var(--danger)]">{fileError}</p>}

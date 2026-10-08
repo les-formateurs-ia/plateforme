@@ -49,7 +49,7 @@ export function SessionEditDialog({
             <input
               value={name} onChange={(e) => setName(e.target.value)} autoFocus
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void handleSave(); } }}
-              placeholder="Ex. Landing page SaaS" className="w-full rounded-xl px-4 py-2.5 text-sm g-input"
+              placeholder="Ex. Landing page SaaS" className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input"
             />
           </div>
           {withDescription && (
@@ -57,7 +57,7 @@ export function SessionEditDialog({
               <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Description</label>
               <textarea
                 value={description} onChange={(e) => setDescription(e.target.value)} rows={3}
-                placeholder="À quoi sert cette page ?" className="w-full rounded-xl px-4 py-2.5 text-sm g-input resize-none"
+                placeholder="À quoi sert cette page ?" className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input resize-none"
               />
             </div>
           )}

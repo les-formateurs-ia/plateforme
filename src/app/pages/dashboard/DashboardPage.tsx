@@ -55,10 +55,11 @@ export function DashboardPage() {
   const nextLessonIndex = nextSection ? nextSection.lessons.findIndex((l) => l.id === nextLesson?.lesson.id) : -1;
 
   const KPIS = [
-    { Icon: Clock, val: formatDuration(totalTimeSeconds), unit: "", sub: "Temps d'apprentissage", accent: "#78d5e2", glow: "rgba(106,222,177,0.15)" },
-    { Icon: Target, val: String(completionPct), unit: "%", sub: "Complétion parcours", accent: "#6adeb1", glow: "rgba(106,222,177,0.15)" },
-    { Icon: CheckCircle, val: String(completedLessons), unit: `/${totalLessons}`, sub: "Leçons terminées", accent: `${th.grad2}`, glow: `${th.gradShadow(0.15)}` },
-    { Icon: Percent, val: avgScore != null ? String(avgScore) : "—", unit: avgScore != null ? "%" : "", sub: "Score moyen aux quiz", accent: "#fbc2ad", glow: "rgba(251,194,173,0.15)" },
+    // Chiffres à l'encre ; les dégradés de la charte restent sur la pastille.
+    { Icon: Clock, val: formatDuration(totalTimeSeconds), unit: "", sub: "Temps d'apprentissage", grad: "var(--grad-bleu)" },
+    { Icon: Target, val: String(completionPct), unit: "%", sub: "Complétion parcours", grad: "var(--grad-violet)" },
+    { Icon: CheckCircle, val: String(completedLessons), unit: `/${totalLessons}`, sub: "Leçons terminées", grad: "var(--grad-bleu)" },
+    { Icon: Percent, val: avgScore != null ? String(avgScore) : "—", unit: avgScore != null ? "%" : "", sub: "Score moyen aux quiz", grad: "var(--grad-beige)" },
   ];
 
   return (
@@ -66,7 +67,7 @@ export function DashboardPage() {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black mb-0.5 capitalize" style={{ color: th.fg }}><GT>Bienvenue {firstName} 👋</GT></h2>
-          <p className="text-sm" style={{ color: th.fg3 }}>Tes statistiques et ta progression en temps réel</p>
+          <p className="text-[15px] sm:text-base mt-2 leading-relaxed" style={{ color: th.fg2 }}>Tes statistiques et ta progression en temps réel</p>
         </div>
         {tab === "overview" && instances.length > 1 && (
           <div className="w-full sm:w-96 max-w-full shrink-0">
@@ -101,18 +102,18 @@ export function DashboardPage() {
       ) : (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {KPIS.map(({ Icon, val, unit, sub, accent, glow }) => (
+            {KPIS.map(({ Icon, val, unit, sub, grad }) => (
               <GCard key={sub}><div className="p-5">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style={{ background: glow, border: `1px solid ${accent}25` }}><Icon className="w-5 h-5" style={{ color: accent }} /></div>
-                <div className="flex items-baseline gap-1 mb-0.5"><span className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif", color: th.fg }}>{val}</span><span className="text-sm font-semibold" style={{ color: accent }}>{unit}</span></div>
-                <div className="text-xs" style={{ color: th.fg3 }}>{sub}</div>
+                <div className="w-9 h-9 rounded-full flex items-center justify-center mb-5" style={{ background: grad }}><Icon className="w-4 h-4" style={{ color: "#000" }} /></div>
+                <div className="flex items-baseline gap-1 mb-1"><span className="text-[2.1rem] leading-none font-black tabular-nums" style={{ color: th.fg }}>{val}</span><span className="text-base font-bold" style={{ color: th.fg2 }}>{unit}</span></div>
+                <div className="text-sm" style={{ color: th.fg2 }}>{sub}</div>
               </div></GCard>
             ))}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
             <div className="lg:col-span-2 space-y-5">
-              <GCard glow><div className="p-6">
+              <GCard><div className="p-6">
                 <div className="flex items-start gap-6 flex-wrap sm:flex-nowrap">
                   <div className="relative shrink-0">
                     <CircleProgress pct={completionPct} size={92} />
@@ -137,14 +138,14 @@ export function DashboardPage() {
                         const allDone = section.lessons.length > 0 && done === section.lessons.length;
                         return (
                           <div key={section.id} className="flex items-center gap-3">
-                            <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background: allDone ? "rgba(106,222,177,0.15)" : active ? `${th.gradShadow(0.12)}` : `${th.gradShadow(0.04)}`, border: `1px solid ${allDone ? "rgba(106,222,177,0.4)" : active ? `${th.gradShadow(0.3)}` : th.sep}` }}>
+                            <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background: allDone ? "rgba(106,222,177,0.18)" : "transparent", border: `1px solid ${allDone ? "transparent" : active ? th.ink : th.sep}` }}>
                               {allDone ? <CheckCircle className="w-3 h-3 text-[var(--success)]" /> : active ? <div className="w-1.5 h-1.5 rounded-full" style={{ background: `${th.grad1}` }} /> : <Lock className="w-2.5 h-2.5" style={{ color: th.fg3 }} />}
                             </div>
-                            <span className="text-xs flex-1 truncate" style={{ color: allDone ? "rgba(106,222,177,0.8)" : active ? th.navAC : th.fg3 }}>{section.title}</span>
+                            <span className="text-xs flex-1 truncate" style={{ color: allDone ? th.success : active ? th.fg : th.fg3, fontWeight: active ? 600 : undefined }}>{section.title}</span>
                             {allDone && <span className="text-[10px] font-bold text-[var(--success)] shrink-0">100%</span>}
                             {!allDone && active && (
                               <div className="flex items-center gap-2 shrink-0">
-                                <div className="w-16 h-1 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : `${th.gradShadow(0.1)}` }}>
+                                <div className="w-16 h-1 rounded-full overflow-hidden" style={{ background: th.navA }}>
                                   <div className="h-full rounded-full" style={{ width: `${pct}%`, background: th.iris }} />
                                 </div>
                                 <span className="text-[10px] font-bold" style={{ color: th.navAC }}>{pct}%</span>
@@ -170,7 +171,7 @@ export function DashboardPage() {
                 <div className="flex items-center gap-2 mb-4"><Award className="w-4 h-4" style={{ color: th.navAC }} /><span className="text-sm font-bold" style={{ color: th.fg }}>Badges obtenus</span></div>
                 <div className="space-y-2">
                   {badges.filter((b) => earnedIds.has(b.id)).map((b) => (
-                    <div key={b.id} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl" style={{ background: th.inputBg, border: `1px solid ${th.sep}` }}>
+                    <div key={b.id} className="flex items-center gap-2.5 px-3 py-2.5 rounded-[4px]" style={{ border: `1px solid ${th.sep}` }}>
                       <span className="text-lg">{b.icon}</span><span className="text-xs font-medium" style={{ color: th.fg2 }}>{b.name}</span>
                     </div>
                   ))}

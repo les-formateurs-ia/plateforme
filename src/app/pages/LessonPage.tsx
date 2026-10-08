@@ -798,9 +798,9 @@ export function LessonPage() {
   return (
     <div className="flex flex-col h-dvh overflow-hidden" style={{ background: th.bg, fontFamily: "'Funnel Display',sans-serif" }}>
       <Background />
-      <div className="relative z-10 shrink-0 flex items-center justify-between gap-3 px-4 sm:px-6 py-3" style={{ borderBottom: `1px solid ${th.sep}`, background: th.topbar, backdropFilter: "blur(24px)" }}>
+      <div className="relative z-10 shrink-0 flex items-center justify-between gap-3 px-4 sm:px-6 py-3" style={{ borderBottom: `1px solid ${th.sep}`, background: th.topbar }}>
         <div className="flex items-center gap-4 min-w-0">
-          <button onClick={goBack} className="flex items-center gap-1.5 text-sm shrink-0 transition-colors hover:opacity-70" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />Mes leçons</button>
+          <button onClick={goBack} className="group flex items-center gap-1.5 text-sm font-semibold shrink-0 transition-colors hover-fine:text-[var(--ink)]" style={{ color: th.fg2 }}><ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" /><span className="ink-link">Mes leçons</span></button>
           <div className="w-px h-4 shrink-0 hidden sm:block" style={{ background: th.sep }} />
           <div className="hidden sm:flex items-center min-w-0">
             <span className="text-xs shrink-0" style={{ color: th.fg3 }}>{lesson.sectionTitle}</span><span className="text-xs mx-1 shrink-0" style={{ color: th.fg3 }}>›</span><span className="text-xs font-medium truncate" style={{ color: th.fg }}>{lesson.title}</span>
@@ -809,7 +809,7 @@ export function LessonPage() {
         <div className="flex items-center gap-3 sm:gap-4 shrink-0">
           <div className="hidden lg:flex items-center gap-2 text-xs" style={{ color: th.fg3 }}>
             Progression
-            <div className="w-28 h-1.5 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.07)" : `${th.gradShadow(0.1)}` }}>
+            <div className="w-28 h-1.5 rounded-full overflow-hidden" style={{ background: th.navA }}>
               <div className="h-full rounded-full" style={{ width: `${overallPct}%`, background: th.iris }} />
             </div>
             <span className="font-bold" style={{ color: th.navAC }}>{overallPct}%</span>
@@ -820,7 +820,8 @@ export function LessonPage() {
 
       <div className="flex-1 flex overflow-hidden relative z-10">
         <div className="lesson-content-scroll flex-1 min-w-0 overflow-y-auto px-4 sm:px-8 lg:px-16 py-5 sm:py-6">
-          <h1 className="text-xl sm:text-2xl font-black mb-4" style={{ color: th.fg }}>{lesson.title}</h1>
+          {lesson.sectionTitle && <p className="eyebrow mb-2" style={{ color: th.fg3 }}>{lesson.sectionTitle}</p>}
+          <h1 className="text-[1.75rem] sm:text-[2.3rem] leading-[1.06] font-black mb-6 max-w-4xl" style={{ color: th.fg }}>{lesson.title}</h1>
 
           {lesson.isMission ? (
             <div className="pb-4">
@@ -838,7 +839,7 @@ export function LessonPage() {
               )}
 
               {missionSubmission?.status === "submitted" ? (
-                <div className="mt-5 rounded-2xl p-4 text-center text-sm font-semibold" style={{ background: "rgba(106,222,177,0.08)", border: "1px solid rgba(106,222,177,0.3)", color: th.success }}>
+                <div className="mt-5 rounded-[6px] p-4 text-center text-sm font-semibold" style={{ background: "rgba(106,222,177,0.12)", color: th.success }}>
                   Mission envoyée — en attente de ton formateur.
                 </div>
               ) : (
@@ -850,14 +851,15 @@ export function LessonPage() {
             </div>
           ) : (
           <>
-          <div className="flex shrink-0 mb-4 rounded-2xl overflow-x-auto" style={{ background: th.card, border: `1px solid ${th.sep}` }}>
+          {/* Onglets soulignés (navigation du site public), actions à droite. */}
+          <div className="flex items-center shrink-0 mb-5 gap-x-6 overflow-x-auto overflow-y-hidden" role="tablist" style={{ borderBottom: `1px solid ${th.sep}` }}>
             {TABS.map(({ id, Icon, label }) => (
-              <button key={id} onClick={() => setTab(id)} className="flex items-center gap-2 px-3.5 sm:px-5 py-3.5 text-sm font-semibold transition-all border-b-2 -mb-px shrink-0 whitespace-nowrap"
-                style={{ borderColor: tab === id ? th.navAC : "transparent", color: tab === id ? th.navAC : th.fg3 }}>
+              <button key={id} role="tab" aria-selected={tab === id} onClick={() => setTab(id)} className="tab-link flex items-center gap-2 pt-2 pb-3 text-sm shrink-0 whitespace-nowrap transition-colors"
+                style={{ color: tab === id ? th.fg : th.fg3 }}>
                 <Icon className="w-3.5 h-3.5" />{label}
               </button>
             ))}
-            <div className="ml-auto flex items-center gap-3 pr-3 sm:pr-5 shrink-0">
+            <div className="ml-auto flex items-center gap-3 pb-2 pl-4 shrink-0">
               {lesson.durationMinutes && (
                 <span className="hidden sm:flex items-center gap-1.5 text-xs shrink-0 whitespace-nowrap" style={{ color: th.fg3 }}><Clock className="w-3.5 h-3.5" />{lesson.durationMinutes} min</span>
               )}
@@ -873,7 +875,7 @@ export function LessonPage() {
                     value={htmlDraft}
                     onChange={(e) => setHtmlDraft(e.target.value)}
                     placeholder="Colle le HTML ici (Ctrl+V)…"
-                    className="flex-1 w-full rounded-xl px-4 py-3 text-xs g-input resize-none font-mono"
+                    className="flex-1 w-full rounded-[4px] px-4 py-3 text-xs g-input resize-none font-mono"
                     style={{ minHeight: 0 }}
                   />
                   {htmlFileError && <p className="text-xs text-[var(--danger)]">{htmlFileError}</p>}
@@ -883,8 +885,8 @@ export function LessonPage() {
                   <div className="flex items-center gap-3 flex-wrap gap-y-2">
                     <label className="cursor-pointer">
                       <input type="file" accept=".txt,.docx" className="hidden" onChange={handleHtmlFileChange} />
-                      <span className="inline-flex items-center gap-1.5 rounded-[2px] px-4 py-2 text-sm font-semibold transition-all duration-200 hover:opacity-80"
-                        style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(15,14,20,0.04)", border: `1px solid ${th.inputB}`, color: th.fg }}>
+                      <span className="sweep inline-flex items-center gap-1.5 rounded-[2px] px-4 min-h-9 text-sm font-semibold"
+                        style={{ border: `1px solid ${th.ink}`, color: th.fg }}>
                         <Upload className="w-3.5 h-3.5" />Charger un fichier (.txt / .docx)
                       </span>
                     </label>
@@ -914,8 +916,8 @@ export function LessonPage() {
                     />
                   )}
                   {role === "admin" && (
-                    <button onClick={startEditHtml} className="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-[2px] px-3.5 py-2 text-xs font-semibold shadow-lg"
-                      style={{ background: th.card, border: `1px solid ${th.sep}`, color: th.fg }}>
+                    <button onClick={startEditHtml} className="sweep absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-[2px] px-3.5 min-h-9 text-xs font-semibold"
+                      style={{ background: th.card, border: `1px solid ${th.ink}`, color: th.fg }}>
                       <Pencil className="w-3 h-3" />Modifier
                     </button>
                   )}
@@ -933,7 +935,7 @@ export function LessonPage() {
               )}
             </div>
           ) : tab === "agent" ? (
-            <div className="relative rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-6 p-8" style={{ height: "78vh", background: "#060410", border: `1px solid ${th.sep}` }}>
+            <div className="relative rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-6 p-8" style={{ height: "78vh", background: "#000", border: `1px solid ${th.sep}` }}>
               <div className="relative flex items-center justify-center shrink-0" style={{ width: 180, height: 180 }}>
                 {agentStatus === "connected" && agentMode === "speaking" && (
                   <>
@@ -965,11 +967,12 @@ export function LessonPage() {
                 <button
                   onClick={agentStatus === "idle" ? startAgentCall : endAgentCall}
                   disabled={agentStatus === "connecting"}
-                  className="flex items-center justify-center rounded-[4px] transition-all duration-200 hover:opacity-90 active:scale-95 disabled:opacity-50"
-                  style={{ width: 48, height: 48, background: agentStatus === "idle" ? "linear-gradient(135deg,#b58de0,#dbacf0)" : "#e5484d" }}
+                  className={cx("flex items-center justify-center rounded-[2px] disabled:opacity-50", agentStatus === "idle" ? "sweep" : "transition-opacity hover-fine:opacity-90")}
+                  style={{ width: 48, height: 48, background: agentStatus === "idle" ? "#fff" : "#e5484d", color: agentStatus === "idle" ? "#000" : "#fff" }}
                   title={agentStatus === "idle" ? "Démarrer l'appel" : "Raccrocher"}
+                  aria-label={agentStatus === "idle" ? "Démarrer l'appel" : "Raccrocher"}
                 >
-                  {agentStatus === "idle" ? <Phone className="w-5 h-5 text-white" /> : <PhoneOff className="w-5 h-5 text-white" />}
+                  {agentStatus === "idle" ? <Phone className="w-5 h-5" /> : <PhoneOff className="w-5 h-5" />}
                 </button>
                 <button
                   onPointerDown={(e) => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); startPushToTalk(); }}
@@ -991,7 +994,7 @@ export function LessonPage() {
             </div>
           ) : (
           <>
-          <div className="relative rounded-2xl overflow-hidden mb-5" style={{ paddingBottom: "40%", background: "#060410", border: `1px solid ${th.sep}` }}>
+          <div className="relative rounded-2xl overflow-hidden mb-5" style={{ paddingBottom: "40%", background: "#000", border: `1px solid ${th.sep}` }}>
             <div className="absolute inset-0 overflow-hidden">
               {tab === "video" && lesson.videoUrl && (
                 <video src={lesson.videoUrl} controls className="absolute inset-0 w-full h-full bg-black" />

@@ -233,13 +233,13 @@ export function AdminPlanningPage() {
           </DialogHeader>
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
-              <input value={firstName} onChange={(e) => setFirstName(e.target.value)} autoFocus placeholder="Prénom" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
-              <input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Nom" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
+              <input value={firstName} onChange={(e) => setFirstName(e.target.value)} autoFocus placeholder="Prénom" className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input" />
+              <input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Nom" className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input" />
             </div>
-            <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="email@exemple.com" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
-            <input value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" placeholder="Téléphone (optionnel)" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
-            <textarea value={experience} onChange={(e) => setExperience(e.target.value)} rows={4} placeholder="Expérience professionnelle (optionnel)" className="w-full rounded-xl px-4 py-2.5 text-sm g-input resize-none" />
-            <textarea value={objective} onChange={(e) => setObjective(e.target.value)} rows={4} placeholder="Objectif professionnel (optionnel)" className="w-full rounded-xl px-4 py-2.5 text-sm g-input resize-none" />
+            <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="email@exemple.com" className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input" />
+            <input value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" placeholder="Téléphone (optionnel)" className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input" />
+            <textarea value={experience} onChange={(e) => setExperience(e.target.value)} rows={4} placeholder="Expérience professionnelle (optionnel)" className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input resize-none" />
+            <textarea value={objective} onChange={(e) => setObjective(e.target.value)} rows={4} placeholder="Objectif professionnel (optionnel)" className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input resize-none" />
           </div>
           {createError && <p className="text-xs" style={{ color: th.danger }}>{createError}</p>}
           <DialogFooter>

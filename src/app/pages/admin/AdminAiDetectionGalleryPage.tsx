@@ -123,7 +123,7 @@ function ImageDialog({ open, onOpenChange, image, onSaved }: {
             <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.navAC }}>Explication</label>
             <textarea value={explanation} onChange={(e) => setExplanation(e.target.value)} rows={4}
               placeholder="Ex : Regarde le reflet dans les yeux et la déformation des doigts…"
-              className="w-full rounded-xl px-4 py-3 text-sm g-input resize-none" />
+              className="w-full rounded-[4px] px-4 py-3 text-sm g-input resize-none" />
           </div>
 
           {error && <p className="text-xs" style={{ color: RED }}>{error}</p>}

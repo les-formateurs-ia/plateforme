@@ -71,7 +71,7 @@ export function ReversePromptingPage() {
 
       {!loadingSession && !sessionError && session && (
         <>
-          <GCard glow><div className="p-5 space-y-3">
+          <GCard><div className="p-5 space-y-3">
             <h3 className="text-xs font-black uppercase tracking-widest" style={{ color: th.navAC }}>Image cible</h3>
             <img src={session.targetImageUrl ?? undefined} className="w-full rounded-xl bg-black mx-auto" style={{ maxWidth: 480, aspectRatio: "1/1", objectFit: "cover" }} />
           </div></GCard>
@@ -83,7 +83,7 @@ export function ReversePromptingPage() {
               onChange={(e) => setPrompt(e.target.value)}
               rows={4}
               placeholder="Décris ce que tu vois pour tenter de reproduire l'image…"
-              className="w-full rounded-xl px-4 py-3 text-sm g-input resize-y"
+              className="w-full rounded-[4px] px-4 py-3 text-sm g-input resize-y"
               style={{ minHeight: 100 }}
             />
             {submitError && <p className="text-xs" style={{ color: RED }}>{submitError}</p>}

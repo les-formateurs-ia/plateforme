@@ -114,7 +114,7 @@ export function MediaExerciseSessionsPage() {
             return (
               <div key={s.sessionId} onClick={() => navigate(`/practice/media/${s.sessionId}`)}
                 className="group relative overflow-hidden rounded-2xl cursor-pointer flex flex-col transition-all duration-300"
-                style={{ aspectRatio: "1/1", background: th.card, border: `1px solid ${th.sep}`, boxShadow: "0 4px 18px rgba(0,0,0,0.16)" }}>
+                style={{ aspectRatio: "1/1", background: th.card, border: `1px solid ${th.sep}` }}>
                 <div className="relative flex-1 flex items-center justify-center overflow-hidden" style={{ background: gradient }}>
                   <div className="absolute inset-0 opacity-40 mix-blend-overlay" style={{ background: "radial-gradient(circle at 30% 20%, rgba(255,255,255,0.5), transparent 60%)" }} />
                   {s.mode === "video"

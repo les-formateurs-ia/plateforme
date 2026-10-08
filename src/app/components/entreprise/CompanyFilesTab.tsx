@@ -106,8 +106,8 @@ export function CompanyFilesTab({ companyId }: { companyId: string }) {
         <div className="p-5 sm:p-6 space-y-4">
           <KitHeading>Déposer un fichier pour les élèves</KitHeading>
           <div className="grid sm:grid-cols-2 gap-3">
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nom du fichier" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
-            <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description (optionnel)" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nom du fichier" className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input" />
+            <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description (optionnel)" className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input" />
           </div>
           <label className="block cursor-pointer">
             <input type="file" className="hidden" onChange={handleFileChange} />

@@ -256,9 +256,9 @@ export function CompanySatisfactionTab({ companyId }: { companyId: string }) {
               ? "Modèle réutilisable dans toutes les entreprises. Les questionnaires déjà créés à partir de lui ne sont pas modifiés."
               : "QCM, note de 1 à 5, Oui / Non ou texte libre."} />
 
-          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Titre du questionnaire" className="w-full rounded-xl px-4 py-3 text-base font-semibold g-input" />
+          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Titre du questionnaire" className="w-full rounded-[4px] px-4 py-3 text-base font-semibold g-input" />
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder={DESCRIPTION_PLACEHOLDER}
-            rows={3} className="w-full rounded-xl px-4 py-2.5 text-sm g-input resize-y" />
+            rows={3} className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input resize-y" />
 
           <div className="mt-2"><KitHeading>Questions ({questions.items.length})</KitHeading></div>
 
@@ -269,7 +269,7 @@ export function CompanySatisfactionTab({ companyId }: { companyId: string }) {
                   <QuestionCardHeader index={qIndex} count={questions.items.length}
                     onMove={(delta) => questions.move(qIndex, delta)} onRemove={() => questions.remove(qIndex)} />
                   <input value={q.question} onChange={(e) => questions.update(qIndex, { question: e.target.value })} placeholder="Intitulé de la question"
-                    className="w-full rounded-xl px-3.5 py-2.5 text-sm font-semibold g-input mb-3" />
+                    className="w-full rounded-[4px] px-3.5 py-2.5 text-sm font-semibold g-input mb-3" />
 
                   <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
                     <HueSegmented value={q.type} onChange={(v) => setType(qIndex, v)}
@@ -282,7 +282,7 @@ export function CompanySatisfactionTab({ companyId }: { companyId: string }) {
                       {q.options.map((o, oIndex) => (
                         <div key={oIndex} className="flex items-center gap-2">
                           <input value={o.label} onChange={(e) => updateOptions(qIndex, (opts) => opts.map((x, j) => (j === oIndex ? { ...x, label: e.target.value } : x)))}
-                            placeholder={`Réponse ${oIndex + 1}`} className="flex-1 rounded-lg px-3 py-2 text-sm g-input" />
+                            placeholder={`Réponse ${oIndex + 1}`} className="flex-1 rounded-[4px] px-3 py-2 text-sm g-input" />
                           <IconAction Icon={Trash2} onClick={() => updateOptions(qIndex, (opts) => opts.filter((_, j) => j !== oIndex))} title="Supprimer la réponse" />
                         </div>
                       ))}
@@ -303,7 +303,7 @@ export function CompanySatisfactionTab({ companyId }: { companyId: string }) {
                       </div>
                       {q.followUpOn && (
                         <input value={q.followUpLabel} onChange={(e) => questions.update(qIndex, { followUpLabel: e.target.value })}
-                          placeholder="Libellé du champ texte (ex. Précisez pourquoi)" className="w-full rounded-lg px-3 py-2 text-sm g-input" />
+                          placeholder="Libellé du champ texte (ex. Précisez pourquoi)" className="w-full rounded-[4px] px-3 py-2 text-sm g-input" />
                       )}
                     </div>
                   )}

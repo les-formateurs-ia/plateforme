@@ -93,7 +93,7 @@ export function SetStudentPasswordButton({ studentId, studentName, email }: { st
                     value={password} onChange={(e) => { setPassword(e.target.value); setError(null); }}
                     onKeyDown={(e) => e.key === "Enter" && void handleSave()}
                     placeholder="Nouveau mot de passe" aria-label="Nouveau mot de passe"
-                    className="w-full rounded-xl pl-4 pr-10 py-2.5 text-sm g-input"
+                    className="w-full rounded-[4px] pl-4 pr-10 py-2.5 text-sm g-input"
                   />
                   <button type="button" onClick={() => setVisible((v) => !v)} title={visible ? "Masquer" : "Afficher"}
                     className="absolute right-3 top-1/2 -translate-y-1/2 hover:opacity-70" style={{ color: th.fg3 }}>
