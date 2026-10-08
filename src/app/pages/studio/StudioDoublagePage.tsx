@@ -17,6 +17,7 @@ import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
 import { VSelect } from "@/app/components/common/Select";
 import { cx } from "@/app/lib/cx";
 import { MediaGenerationPlaceholder } from "@/app/components/common/MediaGenerationPlaceholder";
+import { MediaThumbVideo } from "@/app/components/common/MediaThumbVideo";
 import { useMediaGenerations, type MediaGeneration } from "@/app/lib/useMediaGenerations";
 import { useGeneratedMedia } from "@/app/lib/useGeneratedMedia";
 import {
@@ -46,7 +47,7 @@ function DoublageCard({ gen, onOpen, onRetry, retryDisabled }: { gen: MediaGener
       style={{ aspectRatio: "16 / 9", background: th.isDark ? "rgba(255,255,255,0.03)" : th.gradShadow(0.04), border: `1px solid ${th.sep}` }}>
       <MediaGenerationPlaceholder kind="video" ready={gen.status === "ready" && media.loaded && !error} error={error} onRetry={media.error ? media.retry : onRetry} retryDisabled={retryDisabled && !media.error} />
       {gen.status === "ready" && media.url && (
-        <video key={media.url} src={media.url} onLoadedData={media.onLoad} onError={media.onError} muted playsInline preload="auto" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 motion-reduce:transition-none group-hover:scale-105" />
+        <MediaThumbVideo url={media.url} onReady={media.onLoad} onError={media.onError} className="transition-transform duration-500 motion-reduce:transition-none group-hover:scale-105" />
       )}
       {gen.status === "ready" && (
         <span className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "rgba(10,10,16,0.55)", backdropFilter: "blur(4px)" }}>
@@ -209,7 +210,7 @@ export function StudioDoublagePage() {
       {sourcePreviewOpen && sourcePreview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.7)" }} onClick={() => setSourcePreviewOpen(false)}>
           <div onClick={(e) => e.stopPropagation()} className="max-w-lg w-full rounded-2xl overflow-hidden" style={{ background: th.card, border: `1px solid ${th.sep}` }}>
-            <video src={sourcePreview} controls autoPlay className="w-full max-h-[70vh]" style={{ background: "#000" }} />
+            <video src={sourcePreview} controls autoPlay playsInline className="w-full max-h-[70vh]" style={{ background: "#000" }} />
             <div className="p-5 space-y-2">
               <p className="text-sm" style={{ color: th.fg }}>Vidéo source utilisée pour le doublage.</p>
               <div className="pt-2"><VBtn sm onClick={() => setSourcePreviewOpen(false)}>Fermer</VBtn></div>
@@ -221,7 +222,7 @@ export function StudioDoublagePage() {
       {detail && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.7)" }} onClick={() => setDetail(null)}>
           <div onClick={(e) => e.stopPropagation()} className="max-w-lg w-full rounded-2xl overflow-hidden max-h-[85vh] overflow-y-auto" style={{ background: th.card, border: `1px solid ${th.sep}` }}>
-            {detailUrl && <video src={detailUrl} controls autoPlay className="w-full max-h-[60vh]" style={{ background: "#000" }} />}
+            {detailUrl && <video src={detailUrl} controls autoPlay playsInline className="w-full max-h-[60vh]" style={{ background: "#000" }} />}
             <div className="p-5 space-y-2">
               {detail.translatedText && (
                 <div>

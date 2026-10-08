@@ -33,7 +33,11 @@ export function SymbolCloud({ Icon, image, theme = "violet", dark = false, rest 
     <>
       {/* L'icône n'est rendue que pour être sérialisée en SVG, jamais affichée. */}
       {Icon && <span ref={iconRef} hidden><Icon /></span>}
-      <canvas ref={canvasRef} aria-hidden className={cx("pointer-events-none absolute", className)} />
+      {/* Le canvas remplit un bloc positionné : Safari n'étire pas un canvas
+          positionné en absolu par ses bords (largeur calculée à 0). */}
+      <div aria-hidden className={cx("pointer-events-none absolute", className)}>
+        <canvas ref={canvasRef} className="block w-full h-full" />
+      </div>
     </>
   );
 }

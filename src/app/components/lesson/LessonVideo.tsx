@@ -26,14 +26,23 @@ function FileVideo({ src, title }: { src: string; title: string }) {
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
   const [started, setStarted] = useState(false);
 
-  useEffect(() => { setState("loading"); setStarted(false); }, [src]);
+  useEffect(() => {
+    setState("loading");
+    setStarted(false);
+    // Safari (et tout iOS) ne charge rien tant que la lecture n'est pas
+    // demandée : aucun événement n'arrive, on ne bloque pas sur le chargement.
+    const t = window.setTimeout(() => setState((s) => (s === "loading" ? "ready" : s)), 2500);
+    return () => window.clearTimeout(t);
+  }, [src]);
 
   const extension = src.split("?")[0].split(".").pop()?.toLowerCase();
   const play = () => {
     const v = ref.current;
     if (!v) return;
     setStarted(true);
-    v.play().catch(() => setState("error"));
+    // Un refus de lecture automatique n'est pas une erreur de fichier : les
+    // contrôles natifs restent là pour relancer.
+    v.play().catch((err: unknown) => { if (!(err instanceof DOMException && err.name === "NotAllowedError")) setState("error"); });
   };
 
   return (
@@ -41,7 +50,7 @@ function FileVideo({ src, title }: { src: string; title: string }) {
       <video
         ref={ref}
         key={src}
-        src={`${src}#t=0.1`}
+        src={`${src}#t=0.001`}
         title={title}
         controls={started}
         preload="metadata"
@@ -49,8 +58,13 @@ function FileVideo({ src, title }: { src: string; title: string }) {
         className="absolute inset-0 w-full h-full object-contain"
         onLoadedData={() => setState("ready")}
         onLoadedMetadata={() => setState((s) => (s === "loading" ? "ready" : s))}
-        onError={() => setState("error")}
+        onError={(e) => {
+          // Trace utile au diagnostic (code MediaError : 2 réseau, 3 décodage, 4 format non pris en charge).
+          console.warn("Vidéo de leçon illisible", { code: e.currentTarget.error?.code, message: e.currentTarget.error?.message, url: src.split("?")[0] });
+          setState("error");
+        }}
         onPlay={() => setStarted(true)}
+        onPlaying={() => setState("ready")}
       />
       {/* Avant la première lecture : grand bouton, au-dessus de la miniature. */}
       {!started && state !== "error" && (

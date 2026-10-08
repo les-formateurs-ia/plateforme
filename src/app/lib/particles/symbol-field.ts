@@ -119,8 +119,8 @@ export function mountSymbolField(card: HTMLElement, canvas: HTMLCanvasElement, s
     if (dots.length) return;
     const rnd = seeded(key.length * 131 + 7);
     const box = Math.min(W, H) * (rest === 'symbol' ? 0.86 : 0.78);
-    const count = Math.round(Math.max(90, Math.min(rest === 'symbol' ? 420 : 160, (box * box) / (rest === 'symbol' ? 40 : 110))));
-    const fine = Math.max(0.6, Math.min(1, box / 180)) * (rest === 'symbol' ? 0.8 : 1);
+    const count = Math.round(rest === 'symbol' ? Math.max(120, Math.min(230, (box * box) / 95)) : Math.max(70, Math.min(160, (box * box) / 110)));
+    const fine = Math.max(0.6, Math.min(1, box / 180));
     const points = 'svg' in shape ? await sampleSvg(shape.svg, count, rnd) : await sampleImage(shape.image, count, rnd, 'saturation');
     if (destroyed) return;
     dots = points.map(([sx, sy]) => {
@@ -128,7 +128,14 @@ export function mountSymbolField(card: HTMLElement, canvas: HTMLCanvasElement, s
       return {
         cx: Math.cos(a) * d, cy: Math.sin(a) * d, sx, sy,
         phase: rnd() * Math.PI * 2, speed: 0.4 + rnd() * 0.8, delay: rnd(),
-        size: (1.1 + rnd() * 1.3) * fine * (dark ? 1 : 1.25), color: dark ? mixRGB(c1, c2, rnd()) : mixRGB(mixRGB(c1, c2, rnd()), DEEPEN, 0.22), px: NaN, py: NaN, ox: 0, oy: 0, near: [],
+        // Illustration : points fins, quelques-uns plus gros et plus doux, teinte en dégradé
+        // le long de la forme ; nuage : tailles et teintes du site public.
+        size: rest === 'symbol' ? (rnd() < 0.08 ? 2.2 + rnd() * 1.2 : 0.7 + rnd() * 1.1) * fine : (1.1 + rnd() * 1.3) * fine * (dark ? 1 : 1.25),
+        color: (() => {
+          const base = rest === 'symbol' ? mixRGB(c1, c2, clamp01((sx + sy) / 2 + (rnd() - 0.5) * 0.25)) : mixRGB(c1, c2, rnd());
+          return dark ? base : mixRGB(base, DEEPEN, rest === 'symbol' ? 0.12 : 0.22);
+        })(),
+        px: NaN, py: NaN, ox: 0, oy: 0, near: [],
       };
     });
     if (links) {
@@ -141,11 +148,64 @@ export function mountSymbolField(card: HTMLElement, canvas: HTMLCanvasElement, s
     kick();
   }
 
+  // Illustration au repos : rendu doux (pas de traînées), halo léger autour de
+  // chaque point, liens presque invisibles, respiration lente.
+  function frameSymbol(now: number) {
+    const t = reduced ? 0 : (now - t0) / 1000;
+    p += (target - p) * (reduced ? 1 : 0.06);
+    hot += ((hovering ? 1 : 0) - hot) * 0.08;
+    const box = Math.min(W, H) * 0.84;
+    const bx = (W - box) / 2, by = (H - box) / 2;
+    const breathe = 1 + Math.sin(t * 0.8) * 0.012;
+    ctx.clearRect(0, 0, W, H);
+    for (const d of dots) {
+      const e = easeInOut(clamp01((p - d.delay * 0.35) / 0.65));
+      const cloudX = W / 2 + d.cx * W * 0.44, cloudY = H / 2 + d.cy * H * 0.4;
+      const symX = W / 2 + (bx + d.sx * box - W / 2) * breathe + Math.sin(t * d.speed * 1.4 + d.phase) * 1.1;
+      const symY = H / 2 + (by + d.sy * box - H / 2) * breathe + Math.cos(t * d.speed * 1.2 + d.phase) * 1.1;
+      const bow = Math.sin(Math.PI * e) * 30 * (d.delay - 0.5);
+      let x = cloudX + (symX - cloudX) * e + bow, y = cloudY + (symY - cloudY) * e - bow * 0.6;
+      let tx = 0, ty = 0;
+      if (pointer) {
+        const dx = x - pointer.x, dy = y - pointer.y, dist = Math.hypot(dx, dy);
+        if (dist < PUSH_RADIUS && dist > 0.1) { const k = (1 - dist / PUSH_RADIUS) ** 2 * PUSH; tx = (dx / dist) * k; ty = (dy / dist) * k; }
+      }
+      d.ox += (tx - d.ox) * 0.15; d.oy += (ty - d.oy) * 0.15;
+      d.px = x + d.ox; d.py = y + d.oy;
+    }
+    if (links) {
+      ctx.lineWidth = 0.6;
+      for (const d of dots) {
+        for (const j of d.near) {
+          const n = dots[j];
+          ctx.globalAlpha = (dark ? 0.22 : 0.16) + hot * 0.22;
+          ctx.strokeStyle = `rgb(${d.color})`;
+          ctx.beginPath(); ctx.moveTo(d.px, d.py); ctx.lineTo(n.px, n.py); ctx.stroke();
+        }
+      }
+    }
+    // Halos : sur fond sombre en lumière additive, sur fond clair en voile très léger.
+    ctx.globalCompositeOperation = dark ? 'lighter' : 'source-over';
+    for (const d of dots) {
+      const g = d.size * (dark ? 6 : 5) * (1 + hot * 0.3);
+      ctx.globalAlpha = (dark ? 0.32 : 0.2) + hot * 0.12;
+      ctx.drawImage(glowSprite(d.color), d.px - g / 2, d.py - g / 2, g, g);
+    }
+    ctx.globalCompositeOperation = 'source-over';
+    for (const d of dots) {
+      ctx.globalAlpha = d.size > 2 ? 0.55 : 0.9;
+      ctx.fillStyle = `rgb(${d.color})`;
+      ctx.beginPath(); ctx.arc(d.px, d.py, d.size * (1 + hot * 0.15), 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
   function frame(now: number) {
+    if (rest === 'symbol') { frameSymbol(now); return; }
     const t = reduced ? 0 : (now - t0) / 1000;
     p += (target - p) * (reduced ? 1 : APPROACH);
     hot += ((hovering ? 1 : 0) - hot) * 0.1;
-    const box = Math.min(W, H) * (rest === 'symbol' ? 0.86 : 0.78);
+    const box = Math.min(W, H) * 0.78;
     const bx = (W - box) / 2, by = (H - box) / 2;
     const rx = W * 0.42, ry = H * 0.36;
     if (reduced) ctx.clearRect(0, 0, W, H);
