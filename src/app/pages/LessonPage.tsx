@@ -28,6 +28,7 @@ import { useHtmlTheme } from "@/app/lib/useHtmlTheme";
 import { getMySubmission, saveMissionDraft, submitMission, type MissionSubmission } from "@/app/lib/missionSubmissions";
 import { MindmapView } from "@/app/components/lesson/MindmapView";
 import { LessonPager } from "@/app/components/lesson/LessonPager";
+import { LessonVideo } from "@/app/components/lesson/LessonVideo";
 import { GT } from "@/app/components/common/GT";
 import { burst, sparkLine } from "@/app/lib/particles/burst";
 
@@ -1004,10 +1005,10 @@ export function LessonPage() {
             </div>
           ) : (
           <>
-          <div className="relative rounded-2xl overflow-hidden mb-5" style={{ paddingBottom: "40%", background: "#000", border: `1px solid ${th.sep}` }}>
+          <div className="relative rounded-[10px] overflow-hidden mb-5" style={{ paddingBottom: tab === "video" || tab === "customVideo" ? "56.25%" : "40%", background: "#000", border: `1px solid ${th.sep}` }}>
             <div className="absolute inset-0 overflow-hidden">
               {tab === "video" && lesson.videoUrl && (
-                <video src={lesson.videoUrl} controls className="absolute inset-0 w-full h-full bg-black" />
+                <LessonVideo src={lesson.videoUrl} title={lesson.title} />
               )}
               {tab === "video" && !lesson.videoUrl && (
                 <>
@@ -1021,7 +1022,7 @@ export function LessonPage() {
                 </>
               )}
               {tab === "customVideo" && lesson.customVideoUrl && (
-                <video src={lesson.customVideoUrl} controls className="absolute inset-0 w-full h-full bg-black" />
+                <LessonVideo src={lesson.customVideoUrl} title={`${lesson.title} (vidéo personnalisée)`} />
               )}
               {tab === "mindmap" && (
                 <div className="absolute inset-0" style={{ background: "#101017" }}>

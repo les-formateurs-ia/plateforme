@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useLocation, Link } from "react-router";
 import { ChevronLeft, Upload, Plus, Trash2, CheckCircle, Eye, Code } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
+import { checkVideoFile } from "@/app/components/lesson/LessonVideo";
 import { supabase } from "@/app/lib/supabase/client";
 import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
@@ -204,6 +205,10 @@ export function AdminLessonEditorPage() {
 
   const handleFileSelect = async (file: File) => {
     if (!courseId || !sectionId) return;
+    // Un format illisible (souvent un .mov en HEVC) donnait côté élève une
+    // vidéo sans miniature qui ne démarre pas : on prévient avant l'envoi.
+    const warning = await checkVideoFile(file);
+    if (warning && !window.confirm(`${warning}\n\nEnvoyer quand même ?`)) return;
     setUploading(true);
     setError(null);
     const previousUrl = videoUrl;
@@ -221,6 +226,10 @@ export function AdminLessonEditorPage() {
 
   const handleCustomVideoFileSelect = async (file: File) => {
     if (!courseId || !sectionId) return;
+    // Un format illisible (souvent un .mov en HEVC) donnait côté élève une
+    // vidéo sans miniature qui ne démarre pas : on prévient avant l'envoi.
+    const warning = await checkVideoFile(file);
+    if (warning && !window.confirm(`${warning}\n\nEnvoyer quand même ?`)) return;
     setUploadingCustomVideo(true);
     setError(null);
     const previousUrl = customVideoUrl;
@@ -423,9 +432,9 @@ export function AdminLessonEditorPage() {
         <div>
           <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Vidéo</label>
           {videoUrl && (
-            <video src={videoUrl} controls className="w-full max-w-md rounded-xl mb-3 bg-black" style={{ aspectRatio: "16/9" }} />
+            <video src={`${videoUrl}#t=0.1`} preload="metadata" playsInline controls className="w-full max-w-md rounded-[6px] mb-3 bg-black" style={{ aspectRatio: "16/9" }} />
           )}
-          <input ref={fileInputRef} type="file" accept="video/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])} />
+          <input ref={fileInputRef} type="file" accept="video/mp4,video/webm,video/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])} />
           <div className="flex items-center gap-3 flex-wrap gap-y-2">
             <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80 disabled:opacity-50"
@@ -443,7 +452,7 @@ export function AdminLessonEditorPage() {
         <div>
           <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Vidéo personnalisée (optionnelle)</label>
           {customVideoUrl && (
-            <video src={customVideoUrl} controls className="w-full max-w-md rounded-xl mb-3 bg-black" style={{ aspectRatio: "16/9" }} />
+            <video src={`${customVideoUrl}#t=0.1`} preload="metadata" playsInline controls className="w-full max-w-md rounded-[6px] mb-3 bg-black" style={{ aspectRatio: "16/9" }} />
           )}
           <input ref={customVideoFileInputRef} type="file" accept="video/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleCustomVideoFileSelect(e.target.files[0])} />
           <div className="flex items-center gap-3 flex-wrap gap-y-2">
