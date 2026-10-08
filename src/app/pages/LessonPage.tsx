@@ -29,6 +29,8 @@ import { getMySubmission, saveMissionDraft, submitMission, type MissionSubmissio
 import { MindmapView } from "@/app/components/lesson/MindmapView";
 import { LessonPager } from "@/app/components/lesson/LessonPager";
 import { LessonVideo } from "@/app/components/lesson/LessonVideo";
+import { LessonPodcast } from "@/app/components/lesson/LessonPodcast";
+import { LessonVoiceAgent } from "@/app/components/lesson/LessonVoiceAgent";
 import { GT } from "@/app/components/common/GT";
 import { burst, sparkLine } from "@/app/lib/particles/burst";
 
@@ -946,65 +948,14 @@ export function LessonPage() {
               )}
             </div>
           ) : tab === "agent" ? (
-            <div className="relative rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-6 p-8" style={{ height: "78vh", background: "#000", border: `1px solid ${th.sep}` }}>
-              <div className="relative flex items-center justify-center shrink-0" style={{ width: 180, height: 180 }}>
-                {agentStatus === "connected" && agentMode === "speaking" && (
-                  <>
-                    <span className="absolute rounded-full" style={{ inset: 0, background: "linear-gradient(135deg,#2792dc,#9ce6e6)", animation: "agent-orb-ring 1.8s ease-out infinite" }} />
-                    <span className="absolute rounded-full" style={{ inset: 0, background: "linear-gradient(135deg,#2792dc,#9ce6e6)", animation: "agent-orb-ring 1.8s ease-out infinite", animationDelay: "0.6s" }} />
-                  </>
-                )}
-                <div className="relative rounded-full" style={{
-                  width: 140, height: 140,
-                  background: "linear-gradient(135deg,#2792dc,#9ce6e6)",
-                  boxShadow: "0 0 60px rgba(39,146,220,0.45)",
-                  transform: agentStatus === "connected" && agentMode === "speaking" ? "scale(1.16)" : "scale(1)",
-                  transition: "transform 450ms cubic-bezier(0.34,1.56,0.64,1)",
-                  animation: agentStatus === "connecting" ? "agent-orb-idle 1s ease-in-out infinite"
-                    : agentStatus === "idle" ? "agent-orb-idle 3.5s ease-in-out infinite"
-                    : "none",
-                }} />
-              </div>
-
-              <p className="text-sm -mt-2" style={{ color: th.fg3 }}>
-                {agentStatus === "connecting" ? "Connexion…"
-                  : agentStatus === "connected" ? (agentMode === "speaking" ? "L'agent parle…" : pttActive ? "Je t'écoute…" : "Maintiens le micro pour parler")
-                  : "Prêt à discuter"}
-              </p>
-
-              {agentError && <p className="text-xs text-[var(--danger)] text-center max-w-sm">{agentError}</p>}
-
-              <div className="flex items-center gap-4 shrink-0">
-                <button
-                  onClick={agentStatus === "idle" ? startAgentCall : endAgentCall}
-                  disabled={agentStatus === "connecting"}
-                  className={cx("flex items-center justify-center rounded-[2px] disabled:opacity-50", agentStatus === "idle" ? "sweep" : "transition-opacity hover-fine:opacity-90")}
-                  style={{ width: 48, height: 48, background: agentStatus === "idle" ? "#fff" : "#e5484d", color: agentStatus === "idle" ? "#000" : "#fff" }}
-                  title={agentStatus === "idle" ? "Démarrer l'appel" : "Raccrocher"}
-                  aria-label={agentStatus === "idle" ? "Démarrer l'appel" : "Raccrocher"}
-                >
-                  {agentStatus === "idle" ? <Phone className="w-5 h-5" /> : <PhoneOff className="w-5 h-5" />}
-                </button>
-                <button
-                  onPointerDown={(e) => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); startPushToTalk(); }}
-                  onPointerUp={stopPushToTalk}
-                  onPointerCancel={stopPushToTalk}
-                  disabled={agentStatus !== "connected"}
-                  className="flex items-center justify-center rounded-[4px] transition-all duration-150 active:scale-95 disabled:opacity-30 select-none touch-none"
-                  style={{
-                    width: 56, height: 56,
-                    background: pttActive ? "linear-gradient(135deg,#2792dc,#9ce6e6)" : "rgba(255,255,255,0.08)",
-                    border: `1px solid ${pttActive ? "transparent" : "rgba(255,255,255,0.15)"}`,
-                    boxShadow: pttActive ? "0 0 24px rgba(39,146,220,0.5)" : "none",
-                  }}
-                  title="Maintenir appuyé pour parler (push-to-talk)"
-                >
-                  <Mic className="w-5 h-5" style={{ color: pttActive ? "#06121c" : "#fff" }} />
-                </button>
-              </div>
-            </div>
+            <LessonVoiceAgent status={agentStatus} mode={agentMode} ptt={pttActive} error={agentError}
+              onStart={() => void startAgentCall()} onEnd={() => void endAgentCall()} onPttStart={startPushToTalk} onPttStop={stopPushToTalk} />
           ) : (
           <>
+          {tab === "podcast" ? (
+            <LessonPodcast episodes={podcastByVariant} loading={podcastLoading} generating={podcastGeneratingVariant}
+              onGenerate={(id) => void handleGeneratePodcast(id)} canRegenerate={isStaff(role)} />
+          ) : (
           <div className="relative rounded-[10px] overflow-hidden mb-5" style={{ paddingBottom: tab === "video" || tab === "customVideo" ? "56.25%" : "40%", background: "#000", border: `1px solid ${th.sep}` }}>
             <div className="absolute inset-0 overflow-hidden">
               {tab === "video" && lesson.videoUrl && (
@@ -1057,64 +1008,6 @@ export function LessonPage() {
                   )}
                 </div>
               )}
-              {tab === "podcast" && (() => {
-                const generatedVariants = Object.keys(podcastByVariant) as PodcastVariantId[];
-                const remainingFormats = PODCAST_FORMATS.filter((f) => !generatedVariants.includes(f.id));
-                return (
-                  <div className="absolute inset-0 overflow-y-auto p-6" style={{ background: "#101017" }}>
-                    <div className="max-w-md w-full mx-auto space-y-4">
-                      {podcastLoading && (
-                        <div className="text-center pt-6"><Headphones className="w-6 h-6 mx-auto mb-2 text-white/30" /><p className="text-sm text-white/60">Chargement…</p></div>
-                      )}
-
-                      {!podcastLoading && generatedVariants.map((variantId) => {
-                        const format = PODCAST_FORMATS.find((f) => f.id === variantId);
-                        const entry = podcastByVariant[variantId];
-                        if (!format || !entry) return null;
-                        const isGeneratingThis = podcastGeneratingVariant === variantId;
-                        return (
-                          <div key={variantId} className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)" }}>
-                            <div className="flex items-center gap-2 mb-2">
-                              <format.Icon className="w-4 h-4 text-white/50 shrink-0" />
-                              <span className="text-sm font-semibold text-white">{format.label}</span>
-                              {isStaff(role) && (
-                                <button onClick={() => handleGeneratePodcast(variantId)} disabled={podcastGeneratingVariant !== null}
-                                  className="ml-auto flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all hover:opacity-80 disabled:opacity-50 shrink-0"
-                                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff" }}>
-                                  <Wand2 className="w-3 h-3" />{isGeneratingThis ? "Génération…" : "Régénérer"}
-                                </button>
-                              )}
-                            </div>
-                            <audio src={entry.audioUrl} controls className="w-full" />
-                          </div>
-                        );
-                      })}
-
-                      {!podcastLoading && remainingFormats.length > 0 && (
-                        <div>
-                          <p className="text-sm text-white/60 mb-3 text-center">
-                            {generatedVariants.length === 0 ? "Choisis un format de podcast pour cette leçon :" : "Générer un autre format :"}
-                          </p>
-                          <div className="space-y-2">
-                            {remainingFormats.map(({ id, label, hint, Icon }) => (
-                              <button key={id} onClick={() => handleGeneratePodcast(id)} disabled={podcastGeneratingVariant !== null}
-                                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all hover:opacity-80 disabled:opacity-50"
-                                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.12)" }}>
-                                <Icon className="w-4 h-4 shrink-0 text-white/60" />
-                                <div className="min-w-0 flex-1">
-                                  <div className="text-sm font-semibold text-white">{label}</div>
-                                  <div className="text-xs text-white/40">{hint}</div>
-                                </div>
-                                {podcastGeneratingVariant === id && <span className="text-[11px] text-white/50 shrink-0">Génération…</span>}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })()}
               {tab === "avatar" && (
                 avatarVideoUrl ? (
                   <div className="absolute inset-0">
@@ -1156,6 +1049,7 @@ export function LessonPage() {
               )}
             </div>
           </div>
+          )}
 
           <div className="space-y-5">
             {courseHtml && (
