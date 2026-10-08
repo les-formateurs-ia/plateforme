@@ -32,7 +32,7 @@ export function StudioToolPage() {
 
       <GCard>
         <div className="p-8 sm:p-12 flex flex-col items-center text-center gap-4" style={{ minHeight: 320 }}>
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: th.gradShadow(0.14), border: `1px solid ${th.gradShadow(0.3)}` }}>
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: th.gradShadow(0.14), border: `1px solid ${th.ink}` }}>
             <Icon className="w-7 h-7" style={{ color: th.navAC }} />
           </div>
           <div>

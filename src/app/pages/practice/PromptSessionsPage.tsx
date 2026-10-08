@@ -87,7 +87,7 @@ export function PromptSessionsPage() {
 
       <button onClick={startNewSession} disabled={creating}
         className="w-full group relative overflow-hidden rounded-2xl p-5 flex items-center gap-4 text-left transition-all duration-300 hover:scale-[1.005] disabled:opacity-60"
-        style={{ background: `linear-gradient(120deg,${th.gradShadow(0.16)},rgba(219,172,240,0.06) 60%)`, border: `1px solid ${th.gradShadow(0.3)}` }}>
+        style={{ background: `linear-gradient(120deg,${th.gradShadow(0.16)},rgba(219,172,240,0.06) 60%)`, border: `1px solid ${th.ink}` }}>
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `linear-gradient(120deg,${th.gradShadow(0.1)},transparent 70%)` }} />
         <div className="relative w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style={{ background: th.ink, color: th.onInk }}>
           <Plus className="w-5 h-5" />

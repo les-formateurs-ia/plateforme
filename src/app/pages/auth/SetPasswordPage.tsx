@@ -3,9 +3,7 @@ import { useLocation, useNavigate, Link } from "react-router";
 import { Check, Eye, EyeOff, KeyRound, LinkIcon, X } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
-import { Background } from "@/app/components/common/Background";
-import { Logo } from "@/app/components/common/Logo";
-import { GCard } from "@/app/components/common/GCard";
+import { AuthShell } from "@/app/components/common/AuthShell";
 import { GT } from "@/app/components/common/GT";
 import { ShimBtn } from "@/app/components/common/Buttons";
 import { PASSWORD_RULES, passwordProblem } from "@/app/lib/passwordPolicy";
@@ -73,59 +71,56 @@ export function SetPasswordPage() {
   const mismatch = confirm.length > 0 && password !== confirm;
 
   return (
-    <div className="relative min-h-dvh flex items-center justify-center p-4" style={{ background: th.bg, fontFamily: "'Funnel Display',sans-serif" }}>
-      <Background />
-      <div className="relative z-10 w-full max-w-[440px] fade-up">
-        <div className="flex justify-center mb-10"><Logo h={30} /></div>
-        <GCard glow>
+    <AuthShell>
+        <div>
           {linkState.kind === "loading" && (
-            <p className="p-6 sm:p-8 lg:p-10 text-sm text-center" style={{ color: th.fg3 }}>Vérification du lien…</p>
+            <p className="text-sm" style={{ color: th.fg3 }}>Vérification du lien…</p>
           )}
 
           {linkState.kind === "invalid" && (
-            <div className="p-6 sm:p-8 lg:p-10">
-              <div className="w-11 h-11 rounded-full flex items-center justify-center mb-4" style={{ background: "rgba(251,194,173,0.12)" }}>
-                <LinkIcon className="w-5 h-5" style={{ color: "#fbc2ad" }} />
+            <div className="">
+              <div className="w-11 h-11 rounded-[6px] flex items-center justify-center mb-5" style={{ background: "var(--grad-beige)" }}>
+                <LinkIcon className="w-5 h-5" style={{ color: "#000" }} />
               </div>
-              <h1 className="text-2xl font-black leading-tight mb-2"><GT>Lien invalide ou expiré</GT></h1>
+              <h1 className="text-[2.1rem] sm:text-[2.5rem] font-black leading-[1.02] mb-3"><GT>Lien invalide ou expiré</GT></h1>
               <p className="text-sm leading-relaxed" style={{ color: th.fg2 }}>
                 Ce lien n'est plus valable : il a peut-être expiré, déjà servi, ou été remplacé par un lien plus récent.
               </p>
               <p className="text-sm leading-relaxed mt-3" style={{ color: th.fg2 }}>
                 Contacte ton administrateur pour recevoir un nouveau lien.
               </p>
-              <p className="text-xs mt-6" style={{ color: th.fg3 }}>
-                Tu as déjà défini ton mot de passe ? <Link to="/login" style={{ color: th.navAC }} className="font-semibold hover:opacity-80">Se connecter</Link>
+              <p className="text-sm mt-6 pt-6" style={{ color: th.fg2, borderTop: `1px solid ${th.sep}` }}>
+                Tu as déjà défini ton mot de passe ? <Link to="/login" className="ink-link font-semibold" style={{ color: th.fg, backgroundSize: "100% 1px" }}>Se connecter</Link>
               </p>
             </div>
           )}
 
           {linkState.kind === "unavailable" && (
-            <div className="p-6 sm:p-8 lg:p-10">
-              <h1 className="text-2xl font-black leading-tight mb-2"><GT>Un instant…</GT></h1>
+            <div className="">
+              <h1 className="text-[2.1rem] sm:text-[2.5rem] font-black leading-[1.02] mb-3"><GT>Un instant…</GT></h1>
               <p className="text-sm mb-6" style={{ color: th.fg2 }}>{linkState.message}</p>
               <ShimBtn full onClick={() => setReloadCount((n) => n + 1)}>Réessayer</ShimBtn>
             </div>
           )}
 
           {linkState.kind === "ready" && (
-            <form onSubmit={handleSubmit} className="p-6 sm:p-8 lg:p-10" noValidate>
-              <h1 className="text-2xl font-black leading-tight mb-2 break-words">
+            <form onSubmit={handleSubmit} className="" noValidate>
+              <h1 className="text-[2.1rem] sm:text-[2.5rem] font-black leading-[1.02] mb-3 break-words">
                 <GT>{linkState.firstName ? `Bonjour ${linkState.firstName} !` : "Bonjour !"}</GT>
               </h1>
-              <p className="text-sm mb-6" style={{ color: th.fg3 }}>
+              <p className="text-base mb-8" style={{ color: th.fg2 }}>
                 Choisis ton mot de passe personnel : il remplacera celui qui t'a été fourni. Ton profil et ta progression sont conservés.
               </p>
 
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="sp-email" className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Adresse e-mail</label>
-                  <input id="sp-email" type="email" readOnly aria-readonly="true" autoComplete="username" value={linkState.email} className="w-full rounded-xl px-4 py-3 text-sm g-input cursor-not-allowed" style={{ opacity: 0.7 }} />
+                  <label htmlFor="sp-email" className="block text-sm font-semibold mb-2" style={{ color: th.fg }}>Adresse e-mail</label>
+                  <input id="sp-email" type="email" readOnly aria-readonly="true" autoComplete="username" value={linkState.email} className="w-full rounded-[4px] px-4 py-3 text-base g-input cursor-not-allowed" style={{ opacity: 0.7 }} />
                 </div>
                 <div>
-                  <label htmlFor="sp-password" className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Nouveau mot de passe</label>
+                  <label htmlFor="sp-password" className="block text-sm font-semibold mb-2" style={{ color: th.fg }}>Nouveau mot de passe</label>
                   <div className="relative">
-                    <input id="sp-password" type={showPassword ? "text" : "password"} required autoComplete="new-password" autoFocus value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••••" className="w-full rounded-xl pl-4 pr-11 py-3 text-sm g-input" />
+                    <input id="sp-password" type={showPassword ? "text" : "password"} required autoComplete="new-password" autoFocus value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••••" className="w-full rounded-[4px] pl-4 pr-11 py-3 text-base g-input" />
                     <button type="button" onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:opacity-70" style={{ color: th.fg3 }}>
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -135,7 +130,7 @@ export function SetPasswordPage() {
                       const ok = rule.test(password);
                       return (
                         <li key={rule.label} className="flex items-center gap-1.5 text-xs" style={{ color: ok ? th.fg2 : th.fg3 }}>
-                          {ok ? <Check className="w-3.5 h-3.5 shrink-0" style={{ color: "#22c55e" }} /> : <X className="w-3.5 h-3.5 shrink-0" style={{ opacity: 0.6 }} />}
+                          {ok ? <Check className="w-3.5 h-3.5 shrink-0" style={{ color: th.isDark ? "#6adeb1" : "#1f7a57" }} /> : <X className="w-3.5 h-3.5 shrink-0" style={{ opacity: 0.6 }} />}
                           {rule.label}
                         </li>
                       );
@@ -143,13 +138,13 @@ export function SetPasswordPage() {
                   </ul>
                 </div>
                 <div>
-                  <label htmlFor="sp-confirm" className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Confirmer le mot de passe</label>
-                  <input id="sp-confirm" type={showPassword ? "text" : "password"} required autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="••••••••••" className="w-full rounded-xl px-4 py-3 text-sm g-input" />
-                  {mismatch && <p className="text-xs mt-1.5" style={{ color: "#fbc2ad" }}>Les deux mots de passe ne correspondent pas.</p>}
+                  <label htmlFor="sp-confirm" className="block text-sm font-semibold mb-2" style={{ color: th.fg }}>Confirmer le mot de passe</label>
+                  <input id="sp-confirm" type={showPassword ? "text" : "password"} required autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="••••••••••" className="w-full rounded-[4px] px-4 py-3 text-base g-input" />
+                  {mismatch && <p className="text-xs mt-1.5" style={{ color: th.isDark ? "#fbc2ad" : "#b4442b" }}>Les deux mots de passe ne correspondent pas.</p>}
                 </div>
               </div>
 
-              {error && <p role="alert" className="text-xs mt-3" style={{ color: "#fbc2ad" }}>{error}</p>}
+              {error && <p role="alert" className="text-sm mt-4 rounded-[4px] px-3.5 py-2.5" style={{ background: "rgba(239,138,116,0.12)", color: th.isDark ? "#fbc2ad" : "#b4442b" }}>{error}</p>}
 
               <div className="pt-6">
                 <ShimBtn full disabled={saving}>
@@ -160,8 +155,7 @@ export function SetPasswordPage() {
               </div>
             </form>
           )}
-        </GCard>
-      </div>
-    </div>
+        </div>
+    </AuthShell>
   );
 }

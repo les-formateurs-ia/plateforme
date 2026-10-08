@@ -383,7 +383,7 @@ export function AdminCourseEditorPage() {
         {courseId && (
           <button type="button" onClick={openPreview} disabled={previewing}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[2px] text-sm font-semibold transition-all hover:opacity-80 active:scale-[0.98] disabled:opacity-50"
-            style={{ background: th.gradShadow(0.12), border: `1px solid ${th.gradShadow(0.3)}`, color: th.navAC }}>
+            style={{ background: th.gradShadow(0.12), border: `1px solid ${th.ink}`, color: th.navAC }}>
             <Eye className="w-4 h-4" />{previewing ? "Préparation…" : "Voir en tant qu'élève"}
           </button>
         )}
@@ -453,7 +453,7 @@ export function AdminCourseEditorPage() {
           <h3 className="text-sm font-black mb-4" style={{ color: th.fg }}>Exercices pour vous</h3>
           <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))" }}>
             <button onClick={() => { setEditingExercise(undefined); setExerciseDialogOpen(true); }}
-              className="group relative overflow-hidden rounded-2xl flex flex-col items-center justify-center gap-2 text-center transition-all duration-300 hover:scale-[1.02]"
+              className="group relative overflow-hidden rounded-2xl flex flex-col items-center justify-center gap-2 text-center transition-all duration-300"
               style={{ aspectRatio: "1/1", background: th.isDark ? `${th.gradShadow(0.06)}` : `${th.gradShadow(0.05)}`, border: `1.5px dashed ${th.gradShadow(0.4)}` }}>
               <div className="w-10 h-10 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110" style={{ background: th.ink, color: th.onInk }}>
                 <Plus className="w-4 h-4" />
@@ -462,7 +462,7 @@ export function AdminCourseEditorPage() {
             </button>
             {studentExercises.map((ex) => (
               <div key={ex.id} onClick={() => { setEditingExercise(ex); setExerciseDialogOpen(true); }}
-                className="cursor-pointer rounded-2xl p-3 flex flex-col transition-all duration-300 hover:scale-[1.02]"
+                className="cursor-pointer rounded-2xl p-3 flex flex-col transition-all duration-300"
                 style={{ aspectRatio: "1/1", background: th.card, border: `1px solid ${th.sep}` }}>
                 <div className="text-xs font-black mb-1" style={{ color: th.fg }}>{ex.name}</div>
                 <div className="text-[11px] leading-relaxed flex-1 overflow-hidden" style={{ color: th.fg3 }}>{ex.description || "Pas de consigne."}</div>

@@ -58,7 +58,7 @@ function CreateTile({ onClick }: { onClick: () => void }) {
   const th = useTh();
   return (
     <button onClick={onClick}
-      className="group relative overflow-hidden rounded-2xl flex flex-col items-center justify-center gap-3 text-center transition-all duration-300 hover:scale-[1.02]"
+      className="group relative overflow-hidden rounded-2xl flex flex-col items-center justify-center gap-3 text-center transition-all duration-300"
       style={{ aspectRatio: "1/1", background: th.isDark ? `${th.gradShadow(0.06)}` : `${th.gradShadow(0.05)}`, border: `1.5px dashed ${th.gradShadow(0.4)}` }}>
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `radial-gradient(circle at 50% 30%, ${th.gradShadow(0.18)}, transparent 70%)` }} />
       <div className="relative w-12 h-12 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110" style={{ background: th.ink, color: th.onInk }}>
@@ -155,7 +155,7 @@ function AdminHtmlExercisesView() {
           <CreateTile onClick={openCreate} />
           {filteredExercises.map((ex) => (
             <div key={ex.id} onClick={() => openExercise(ex)}
-              className="group relative overflow-hidden rounded-2xl cursor-pointer flex flex-col transition-all duration-300 hover:scale-[1.02]"
+              className="group relative overflow-hidden rounded-2xl cursor-pointer flex flex-col transition-all duration-300"
               style={{ aspectRatio: "1/1", background: th.card, border: `1px solid ${th.sep}`, boxShadow: "0 4px 18px rgba(0,0,0,0.16)", opacity: opening && opening !== ex.id ? 0.5 : 1 }}>
               <div className="relative flex-1 overflow-hidden" style={{ background: "#0c0c13" }}>
                 <HtmlPreview html={ex.htmlContent} />
@@ -200,7 +200,7 @@ function StudentExerciseGrid({ exercises, opening, onOpen }: { exercises: Visibl
     <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(190px, 1fr))" }}>
       {exercises.map((ex) => (
         <div key={ex.exerciseId} onClick={() => onOpen(ex)}
-          className="group relative overflow-hidden rounded-2xl cursor-pointer flex flex-col transition-all duration-300 hover:scale-[1.02]"
+          className="group relative overflow-hidden rounded-2xl cursor-pointer flex flex-col transition-all duration-300"
           style={{ aspectRatio: "1/1", background: th.card, border: `1px solid ${th.sep}`, boxShadow: "0 4px 18px rgba(0,0,0,0.16)", opacity: opening && opening !== ex.exerciseId ? 0.5 : 1 }}>
           <div className="relative flex-1 overflow-hidden" style={{ background: "#0c0c13" }}>
             <HtmlPreview html={ex.previewHtml} />

@@ -26,7 +26,7 @@ function VideoCard({ gen, onOpen, onRetry, retryDisabled }: { gen: MediaGenerati
 
   return (
     <div onClick={gen.status === "ready" ? onOpen : undefined}
-      className={cx("group relative rounded-3xl overflow-hidden transition-transform mb-4 break-inside-avoid", gen.status === "ready" && "cursor-pointer hover:scale-[1.01]")}
+      className={cx("group relative rounded-3xl overflow-hidden transition-transform mb-4 break-inside-avoid", gen.status === "ready" && "cursor-pointer")}
       style={{ aspectRatio: videoAspectRatioToCss(gen.options), background: th.isDark ? "rgba(255,255,255,0.03)" : th.gradShadow(0.04), border: `1px solid ${th.sep}` }}>
       <MediaGenerationPlaceholder kind="video" ready={gen.status === "ready" && media.loaded && !error} error={error} onRetry={media.error ? media.retry : onRetry} retryDisabled={retryDisabled && !media.error} />
       {gen.status === "ready" && media.url && (

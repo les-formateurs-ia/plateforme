@@ -140,7 +140,7 @@ export function CompanyStudentHome({ companyId, studentId, preview = false }: Co
   };
 
   const previewBanner = preview && (
-    <div className="flex items-center gap-2 rounded-xl px-4 py-3 text-sm" style={{ background: th.gradShadow(0.1), border: `1px solid ${th.gradShadow(0.3)}`, color: th.fg }}>
+    <div className="flex items-center gap-2 rounded-xl px-4 py-3 text-sm" style={{ background: th.gradShadow(0.1), border: `1px solid ${th.ink}`, color: th.fg }}>
       <Eye className="w-4 h-4 shrink-0" style={{ color: th.navAC }} />
       Aperçu formateur — c'est exactement ce qu'un collaborateur de cette entreprise voit. Les tests peuvent être testés (réponses non enregistrées) ; l'envoi de fichier est réservé aux élèves.
     </div>

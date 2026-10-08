@@ -97,7 +97,7 @@ export function MediaExerciseSessionsPage() {
       {!loading && !loadError && (
         <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(190px, 1fr))" }}>
           <button onClick={startNewSession} disabled={creating}
-            className="group relative overflow-hidden rounded-2xl flex flex-col items-center justify-center gap-3 text-center transition-all duration-300 hover:scale-[1.02] disabled:opacity-60"
+            className="group relative overflow-hidden rounded-2xl flex flex-col items-center justify-center gap-3 text-center transition-all duration-300 disabled:opacity-60"
             style={{ aspectRatio: "1/1", background: th.isDark ? `${th.gradShadow(0.06)}` : `${th.gradShadow(0.05)}`, border: `1.5px dashed ${th.gradShadow(0.4)}` }}>
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `radial-gradient(circle at 50% 30%, ${th.gradShadow(0.18)}, transparent 70%)` }} />
             <div className="relative w-12 h-12 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110" style={{ background: th.ink, color: th.onInk }}>
@@ -114,7 +114,7 @@ export function MediaExerciseSessionsPage() {
             const gradient = s.mode ? MODE_GRADIENT[s.mode] : "linear-gradient(150deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))";
             return (
               <div key={s.sessionId} onClick={() => navigate(`/practice/media/${s.sessionId}`)}
-                className="group relative overflow-hidden rounded-2xl cursor-pointer flex flex-col transition-all duration-300 hover:scale-[1.02]"
+                className="group relative overflow-hidden rounded-2xl cursor-pointer flex flex-col transition-all duration-300"
                 style={{ aspectRatio: "1/1", background: th.card, border: `1px solid ${th.sep}`, boxShadow: "0 4px 18px rgba(0,0,0,0.16)" }}>
                 <div className="relative flex-1 flex items-center justify-center overflow-hidden" style={{ background: gradient }}>
                   <div className="absolute inset-0 opacity-40 mix-blend-overlay" style={{ background: "radial-gradient(circle at 30% 20%, rgba(255,255,255,0.5), transparent 60%)" }} />

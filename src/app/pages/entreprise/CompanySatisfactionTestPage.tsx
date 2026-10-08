@@ -144,7 +144,7 @@ export function CompanySatisfactionTestPage() {
                   const on = (answers[q.id] as number) >= n;
                   return (
                     <button key={n} onClick={() => setAnswer(q.id, n)} aria-label={`Note ${n} sur 5`}
-                      className="w-14 h-14 sm:w-20 sm:h-20 rounded-3xl flex flex-col items-center justify-center gap-0.5 transition-all duration-200 hover:-translate-y-1"
+                      className="w-14 h-14 sm:w-20 sm:h-20 rounded-3xl flex flex-col items-center justify-center gap-0.5 transition-all duration-200"
                       style={{ background: on ? "rgba(238,184,90,0.16)" : th.inputBg, border: `1px solid ${on ? "rgba(238,184,90,0.55)" : th.inputB}` }}>
                       <Star className="w-7 h-7 sm:w-9 sm:h-9 transition-colors" style={{ color: on ? STAR : th.fg3, fill: on ? STAR : "none" }} />
                       <span className="text-[11px] font-black tabular-nums" style={{ color: on ? STAR : th.fg3 }}>{n}</span>
