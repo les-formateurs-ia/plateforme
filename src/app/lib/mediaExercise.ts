@@ -43,6 +43,8 @@ export interface MediaExerciseSession {
   createdAt: string;
   lastAttemptAt: string | null;
   lastScore: number | null;
+  bestScore: number | null;
+  preview: string | null;
 }
 
 interface Row {
@@ -107,14 +109,14 @@ export async function listMediaExerciseAttempts(userId: string, sessionId: strin
 export async function listMediaExerciseSessions(userId: string): Promise<MediaExerciseSession[]> {
   const [sessions, attemptsResp] = await Promise.all([
     listExerciseSessions(userId, "media"),
-    supabase.from("media_exercise_attempts").select("session_id, mode, score, created_at").eq("user_id", userId).order("created_at", { ascending: true }),
+    supabase.from("media_exercise_attempts").select("session_id, mode, prompt_text, score, created_at").eq("user_id", userId).order("created_at", { ascending: true }),
   ]);
   if (attemptsResp.error) throw attemptsResp.error;
 
-  const bySession = new Map<string, { mode: MediaMode; score: number; createdAt: string }[]>();
+  const bySession = new Map<string, { mode: MediaMode; promptText: string; score: number; createdAt: string }[]>();
   for (const row of attemptsResp.data ?? []) {
     const list = bySession.get(row.session_id) ?? [];
-    list.push({ mode: row.mode, score: row.score, createdAt: row.created_at });
+    list.push({ mode: row.mode, promptText: row.prompt_text, score: row.score, createdAt: row.created_at });
     bySession.set(row.session_id, list);
   }
 
@@ -129,6 +131,8 @@ export async function listMediaExerciseSessions(userId: string): Promise<MediaEx
       createdAt: s.createdAt,
       lastAttemptAt: rows.length ? rows[rows.length - 1].createdAt : null,
       lastScore: rows.length ? rows[rows.length - 1].score : null,
+      bestScore: rows.length ? Math.max(...rows.map((r) => r.score)) : null,
+      preview: rows.length ? rows[0].promptText.slice(0, 90) : null,
     };
   });
   withOrdinal.sort((a, b) => b.createdAt.localeCompare(a.createdAt));

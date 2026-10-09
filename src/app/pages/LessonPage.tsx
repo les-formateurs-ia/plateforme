@@ -107,7 +107,8 @@ export function LessonPage() {
   const [agentStatus, setAgentStatus] = useState<"idle" | "connecting" | "connected">("idle");
   const [agentMode, setAgentMode] = useState<"listening" | "speaking">("listening");
   const [agentError, setAgentError] = useState<string | null>(null);
-  const [pttActive, setPttActive] = useState(false);
+  const [userTalking, setUserTalking] = useState(false);
+  const [micMuted, setMicMuted] = useState(false);
   const conversationRef = useRef<GeminiVoiceSession | null>(null);
   // Filet contre une course : startAgentCall est async (token + getUserMedia
   // + WebSocket peuvent prendre plus d'une seconde) — si le composant démonte
@@ -579,10 +580,11 @@ export function LessonPage() {
         onConnect: () => setAgentStatus("connected"),
         onDisconnect: () => {
           setAgentStatus("idle");
-          setPttActive(false);
+          setUserTalking(false);
           conversationRef.current = null;
         },
         onModeChange: ({ mode }) => setAgentMode(mode),
+        onUserSpeakingChange: setUserTalking,
         onMessage: ({ source, message }) => {
           setMsgs((prev) => [...prev, { role: source === "user" ? "user" : "ai", text: message }]);
           if (convId) void insertAgentVoiceMessage(convId, source === "user" ? "user" : "ai", message).catch(console.error);
@@ -599,10 +601,9 @@ export function LessonPage() {
         return;
       }
       conversationRef.current = conversation;
-      // Micro coupé par défaut : conversation en push-to-talk, on ne capte
-      // l'audio que pendant l'appui sur le bouton micro (cf. startPushToTalk).
-      conversation.setMicMuted(true);
-      setPttActive(false);
+      // Micro ouvert dès la connexion : échange naturel, Gemini détecte
+      // lui-même quand l'élève parle (cf. geminiVoice.ts).
+      setMicMuted(false);
     } catch (err) {
       console.error(err);
       setAgentStatus("idle");
@@ -620,24 +621,15 @@ export function LessonPage() {
     await conversationRef.current?.endSession();
     conversationRef.current = null;
     setAgentStatus("idle");
-    setPttActive(false);
+    setUserTalking(false);
   };
 
-  // Push-to-talk : le micro reste coupé tant qu'on ne maintient pas le
-  // bouton. sendUserActivity() prévient l'agent qu'on s'apprête à parler,
-  // ce qui l'aide à couper court à sa réponse en cours (barge-in) dès que
-  // le flux audio du micro arrive.
-  const startPushToTalk = () => {
-    if (agentStatus !== "connected" || !conversationRef.current) return;
-    conversationRef.current.sendUserActivity();
-    conversationRef.current.setMicMuted(false);
-    setPttActive(true);
-  };
-
-  const stopPushToTalk = () => {
+  // Bouton « muet » : l'élève peut couper son micro sans raccrocher.
+  const toggleMicMuted = () => {
     if (!conversationRef.current) return;
-    conversationRef.current.setMicMuted(true);
-    setPttActive(false);
+    const muted = !micMuted;
+    conversationRef.current.setMicMuted(muted);
+    setMicMuted(muted);
   };
 
   // Coupe l'appel si on quitte l'onglet Agent ou la page — pas de micro qui
@@ -647,7 +639,7 @@ export function LessonPage() {
       void conversationRef.current.endSession();
       conversationRef.current = null;
       setAgentStatus("idle");
-      setPttActive(false);
+      setUserTalking(false);
     }
   }, [tab]);
 
@@ -952,8 +944,8 @@ export function LessonPage() {
               )}
             </div>
           ) : tab === "agent" ? (
-            <LessonVoiceAgent status={agentStatus} mode={agentMode} ptt={pttActive} error={agentError}
-              onStart={() => void startAgentCall()} onEnd={() => void endAgentCall()} onPttStart={startPushToTalk} onPttStop={stopPushToTalk} />
+            <LessonVoiceAgent status={agentStatus} mode={agentMode} userTalking={userTalking} muted={micMuted} error={agentError}
+              onStart={() => void startAgentCall()} onEnd={() => void endAgentCall()} onToggleMute={toggleMicMuted} />
           ) : (
           <>
           {tab === "podcast" ? (

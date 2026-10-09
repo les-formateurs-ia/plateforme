@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
-import { Bot, Send, Plus, Sparkles, Phone, PhoneOff, Mic, AudioLines } from "lucide-react";
+import { Bot, Send, Plus, Sparkles, Phone, PhoneOff, Mic, MicOff, AudioLines } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
@@ -57,7 +57,8 @@ export function AgentPage() {
   const [agentStatus, setAgentStatus] = useState<"idle" | "connecting" | "connected">("idle");
   const [agentMode, setAgentMode] = useState<"listening" | "speaking">("listening");
   const [agentError, setAgentError] = useState<string | null>(null);
-  const [pttActive, setPttActive] = useState(false);
+  const [userTalking, setUserTalking] = useState(false);
+  const [micMuted, setMicMuted] = useState(false);
   const voiceRef = useRef<GeminiVoiceSession | null>(null);
   // Filet contre une course démontage/connexion asynchrone — même correctif
   // que LessonPage.tsx (cf. son commentaire détaillé sur unmountedRef) :
@@ -95,7 +96,7 @@ export function AgentPage() {
     await voiceRef.current?.endSession();
     voiceRef.current = null;
     setAgentStatus("idle");
-    setPttActive(false);
+    setUserTalking(false);
   };
 
   // Change de conversation (ou retour à la liste) : on raccroche un éventuel
@@ -196,8 +197,9 @@ export function AgentPage() {
         pedagogy_style: profile.tutor || "soft",
         conversation_id: convId,
         onConnect: () => setAgentStatus("connected"),
-        onDisconnect: () => { setAgentStatus("idle"); setPttActive(false); voiceRef.current = null; },
+        onDisconnect: () => { setAgentStatus("idle"); setUserTalking(false); voiceRef.current = null; },
         onModeChange: ({ mode }) => setAgentMode(mode),
+        onUserSpeakingChange: setUserTalking,
         onMessage: ({ source, message }) => {
           const role = source === "user" ? "user" : "ai";
           setMessages((m) => [...m, { id: `tmp-voice-${Date.now()}-${Math.random()}`, role, content: message, modality: "voice", isOffTopic: false, createdAt: new Date().toISOString() }]);
@@ -213,7 +215,7 @@ export function AgentPage() {
         return;
       }
       voiceRef.current = session;
-      session.setMicMuted(true);
+      setMicMuted(false);
     } catch (err) {
       console.error(err);
       setAgentStatus("idle");
@@ -223,16 +225,13 @@ export function AgentPage() {
     }
   };
 
-  const startPushToTalk = () => {
-    if (agentStatus !== "connected" || !voiceRef.current) return;
-    voiceRef.current.sendUserActivity();
-    voiceRef.current.setMicMuted(false);
-    setPttActive(true);
-  };
-  const stopPushToTalk = () => {
+  // Micro ouvert pendant tout l'appel (VAD automatique) ; ce bouton permet
+  // juste de le couper sans raccrocher.
+  const toggleMicMuted = () => {
     if (!voiceRef.current) return;
-    voiceRef.current.setMicMuted(true);
-    setPttActive(false);
+    const muted = !micMuted;
+    voiceRef.current.setMicMuted(muted);
+    setMicMuted(muted);
   };
 
   return (
@@ -296,7 +295,7 @@ export function AgentPage() {
                 {agentStatus === "idle" ? (
                   <AgentOrb status="idle" size={64}><Sparkles className="w-6 h-6 text-white" style={{ opacity: 0.9 }} /></AgentOrb>
                 ) : (
-                  <AgentOrb status={agentStatus} mode={agentMode} active={pttActive} size={96} />
+                  <AgentOrb status={agentStatus} mode={agentMode} active={userTalking} size={96} />
                 )}
                 <div>
                   <p className="eyebrow" style={{ color: th.fg3 }}>Ton agent IA</p>
@@ -352,16 +351,15 @@ export function AgentPage() {
         <div className="shrink-0 px-4 sm:px-6 pb-5 pt-2 space-y-2.5">
           {(agentStatus !== "idle") && (
             <GCard className="px-4 py-2.5 flex items-center gap-3">
-              <AgentOrb status={agentStatus} mode={agentMode} active={pttActive} size={40} />
+              <AgentOrb status={agentStatus} mode={agentMode} active={userTalking} size={40} />
               <span className="text-xs flex-1" style={{ color: th.fg3 }}>
-                {agentStatus === "connecting" ? "Connexion à l'agent vocal…" : agentMode === "speaking" ? "L'agent parle…" : pttActive ? "Je t'écoute…" : "Maintiens le micro pour parler"}
+                {agentStatus === "connecting" ? "Connexion à l'agent vocal…" : agentMode === "speaking" ? "L'agent parle…" : micMuted ? "Micro coupé" : userTalking ? "Je t'écoute…" : "Parle, ton agent t'écoute"}
               </span>
               {agentStatus === "connected" && (
-                <button onPointerDown={(e) => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); startPushToTalk(); }}
-                  onPointerUp={stopPushToTalk} onPointerCancel={stopPushToTalk}
-                  className="w-9 h-9 rounded-[4px] flex items-center justify-center shrink-0 transition-all active:scale-95 select-none touch-none"
-                  style={{ background: pttActive ? "linear-gradient(135deg,#2792dc,#9ce6e6)" : th.inputBg, border: `1px solid ${th.inputB}` }}>
-                  <Mic className="w-4 h-4" style={{ color: pttActive ? "#06121c" : th.fg }} />
+                <button onClick={toggleMicMuted} aria-pressed={micMuted} title={micMuted ? "Réactiver le micro" : "Couper le micro"}
+                  className="w-9 h-9 rounded-[4px] flex items-center justify-center shrink-0 transition-all active:scale-95"
+                  style={{ background: micMuted ? th.inputBg : "linear-gradient(135deg,#2792dc,#9ce6e6)", border: `1px solid ${th.inputB}` }}>
+                  {micMuted ? <MicOff className="w-4 h-4" style={{ color: th.fg }} /> : <Mic className="w-4 h-4" style={{ color: "#06121c" }} />}
                 </button>
               )}
               <button onClick={endVoiceCall} className="w-9 h-9 rounded-[4px] flex items-center justify-center shrink-0" style={{ background: "#e5484d" }}>

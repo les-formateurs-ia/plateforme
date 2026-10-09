@@ -100,7 +100,12 @@ Deno.serve(async (req) => {
           model,
           systemInstruction: { parts: [{ text: systemInstruction }] },
           generationConfig: { responseModalities: ["AUDIO"] },
-          realtimeInputConfig: { automaticActivityDetection: { disabled: true } },
+          // VAD automatique (échange naturel, sans bouton) quand le client le
+          // demande ; VAD manuelle (push-to-talk) sinon, pour les clients
+          // déployés avant ce changement.
+          realtimeInputConfig: body.vad === "auto"
+            ? { automaticActivityDetection: { disabled: false, silenceDurationMs: 700 } }
+            : { automaticActivityDetection: { disabled: true } },
           inputAudioTranscription: {},
           outputAudioTranscription: {},
         },

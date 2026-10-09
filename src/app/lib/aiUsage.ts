@@ -1,7 +1,7 @@
 // Données de consommation IA Runware de l'élève ("Mon utilisation IA", cf.
 // migration 0071_ai_usage_budget.sql). AI_BUDGET_CAP_USD doit rester en phase
 // avec _shared/ai-budget.ts côté edge functions (même convention que
-// BATTLE_MODELS/ALLOWED_BATTLE_MODELS).
+// BATTLE_TIERS de Battle Ground).
 import { supabase } from "@/app/lib/supabase/client";
 import type { AiUsageMediaType, AiUsageSource } from "@/app/lib/supabase/database.types";
 

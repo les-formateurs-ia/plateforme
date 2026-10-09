@@ -1,9 +1,10 @@
 // Mentor vocal temps réel — backend Gemini Live (remplace ElevenLabs
-// Conversational AI). GeminiVoiceSession expose exactement la même forme
-// que l'ancien objet `Conversation` d'@elevenlabs/client (setMicMuted,
-// sendUserActivity, sendUserMessage, endSession + callbacks onConnect/
-// onDisconnect/onModeChange/onMessage/onError) pour que LessonPage.tsx n'ait
-// presque rien à changer.
+// Conversational AI). Échange naturel : le micro reste ouvert pendant tout
+// l'appel et Gemini détecte lui-même début et fin de parole (VAD
+// automatique) — plus de push-to-talk. GeminiVoiceSession garde la forme
+// de l'ancien objet `Conversation` d'@elevenlabs/client (setMicMuted,
+// sendUserMessage, endSession + callbacks onConnect/onDisconnect/
+// onModeChange/onMessage/onError).
 //
 // Le prompt système ne transite JAMAIS ici : il est verrouillé dans le token
 // éphémère par gemini-voice-token (bidiGenerateContentSetup), donc le
@@ -52,29 +53,45 @@ interface StartGeminiVoiceOptions extends VoiceAgentVars {
   onDisconnect?: () => void;
   onModeChange?: (e: { mode: "listening" | "speaking" }) => void;
   onMessage?: (e: { source: "user" | "ai"; message: string }) => void;
+  // L'élève est en train de parler (niveau micro local) — sert uniquement
+  // à animer l'UI, la détection de tour de parole est faite par Gemini.
+  onUserSpeakingChange?: (speaking: boolean) => void;
   onError?: (message: string) => void;
 }
 
 export interface GeminiVoiceSession {
   setMicMuted(muted: boolean): void;
-  sendUserActivity(): void;
   sendUserMessage(text: string): void;
   endSession(): Promise<void>;
 }
 
 async function getVoiceToken(vars: VoiceAgentVars): Promise<string> {
-  const { data, error } = await supabase.functions.invoke("gemini-voice-token", { body: vars });
+  // vad: "auto" → détection automatique de la parole côté Gemini. Sans ce
+  // champ, gemini-voice-token reste en VAD manuelle (push-to-talk) pour ne
+  // pas casser un ancien client encore en cache.
+  const { data, error } = await supabase.functions.invoke("gemini-voice-token", { body: { ...vars, vad: "auto" } });
   if (error) throw new Error(await extractFunctionError(error));
   if (data?.error) throw new Error(data.error);
   if (!data?.token) throw new Error("Aucun token reçu.");
   return data.token;
 }
 
+// Seuil de niveau micro (après annulation d'écho) au-dessus duquel on
+// considère que l'élève parle, et durée de silence avant de repasser à
+// « ne parle pas » — purement visuel.
+const SPEAKING_LEVEL = 0.04;
+const SPEAKING_HOLD_MS = 600;
+
 export async function startGeminiVoiceSession(opts: StartGeminiVoiceOptions): Promise<GeminiVoiceSession> {
-  const { onConnect, onDisconnect, onModeChange, onMessage, onError, ...vars } = opts;
+  const { onConnect, onDisconnect, onModeChange, onMessage, onUserSpeakingChange, onError, ...vars } = opts;
   const token = await getVoiceToken(vars);
 
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  // Micro ouvert en continu : l'annulation d'écho est indispensable pour que
+  // la voix de l'agent sortant des haut-parleurs ne soit pas reprise par le
+  // micro (Gemini croirait que l'élève lui coupe la parole).
+  const stream = await navigator.mediaDevices.getUserMedia({
+    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+  });
   const player = new PcmPlayer(24000);
 
   let micActive = false;
@@ -82,6 +99,8 @@ export async function startGeminiVoiceSession(opts: StartGeminiVoiceOptions): Pr
   let inputTranscript = "";
   let outputTranscript = "";
   let speaking = false;
+  let userSpeaking = false;
+  let lastVoiceAt = 0;
 
   // Endpoint *Constrained* : obligatoire pour un token verrouillé (l'endpoint
   // standard BidiGenerateContent rejette ces tokens avec "Method doesn't
@@ -90,10 +109,30 @@ export async function startGeminiVoiceSession(opts: StartGeminiVoiceOptions): Pr
     `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained?access_token=${token}`,
   );
 
-  const mic = new MicCapture(stream, (base64) => {
+  const setUserSpeaking = (value: boolean) => {
+    if (userSpeaking === value) return;
+    userSpeaking = value;
+    onUserSpeakingChange?.(value);
+  };
+
+  const mic = new MicCapture(stream, (base64, peak) => {
     if (ws.readyState !== WebSocket.OPEN) return;
+    const now = performance.now();
+    if (peak > SPEAKING_LEVEL) lastVoiceAt = now;
+    setUserSpeaking(now - lastVoiceAt < SPEAKING_HOLD_MS);
     ws.send(JSON.stringify({ realtimeInput: { audio: { data: base64, mimeType: "audio/pcm;rate=16000" } } }));
   }, () => micActive);
+
+  // Les AudioContext naissent après plusieurs await, donc hors du clic
+  // « Démarrer l'appel » : Safari les crée suspendus. On tente de les
+  // relancer tout de suite (suffit sur Chrome), sinon au prochain geste.
+  const resumeAudio = () => {
+    mic.resume();
+    player.resume();
+  };
+  resumeAudio();
+  window.addEventListener("pointerdown", resumeAudio);
+  window.addEventListener("keydown", resumeAudio);
 
   const setMode = (mode: "listening" | "speaking") => {
     if (speaking === (mode === "speaking")) return;
@@ -103,14 +142,24 @@ export async function startGeminiVoiceSession(opts: StartGeminiVoiceOptions): Pr
 
   player.onQueueEmpty = () => setMode("listening");
 
+  const flushTranscripts = () => {
+    if (inputTranscript.trim()) onMessage?.({ source: "user", message: inputTranscript.trim() });
+    if (outputTranscript.trim()) onMessage?.({ source: "ai", message: outputTranscript.trim() });
+    inputTranscript = "";
+    outputTranscript = "";
+  };
+
   const cleanup = () => {
     if (closed) return;
     closed = true;
+    window.removeEventListener("pointerdown", resumeAudio);
+    window.removeEventListener("keydown", resumeAudio);
+    setUserSpeaking(false);
     mic.stop();
     player.close();
   };
 
-  // Setup vide : toute la config (modèle, prompt, VAD manuelle,
+  // Setup vide : toute la config (modèle, prompt, VAD automatique,
   // transcription) est déjà verrouillée dans le token côté serveur.
   await new Promise<void>((resolve, reject) => {
     ws.onopen = () => {
@@ -133,9 +182,10 @@ export async function startGeminiVoiceSession(opts: StartGeminiVoiceOptions): Pr
       onConnect?.();
       // Déclenche le message d'accueil sans jamais révéler son texte : le
       // prompt verrouillé côté serveur sait reconnaître ce mot de passe.
-      ws.send(JSON.stringify({ realtimeInput: { activityStart: {} } }));
+      // Puis on ouvre le micro : l'élève peut couper la parole à l'agent
+      // dès l'accueil, comme dans un vrai échange.
       ws.send(JSON.stringify({ realtimeInput: { text: START_TRIGGER } }));
-      ws.send(JSON.stringify({ realtimeInput: { activityEnd: {} } }));
+      micActive = true;
       return;
     }
 
@@ -148,9 +198,16 @@ export async function startGeminiVoiceSession(opts: StartGeminiVoiceOptions): Pr
     } | undefined;
     if (!serverContent) return;
 
+    if (serverContent.inputTranscription?.text) inputTranscript += serverContent.inputTranscription.text;
+    if (serverContent.outputTranscription?.text) outputTranscript += serverContent.outputTranscription.text;
+
+    // L'élève a coupé la parole à l'agent : on arrête la lecture et on
+    // enregistre ce que l'agent avait eu le temps de dire.
     if (serverContent.interrupted) {
       player.clear();
       setMode("listening");
+      if (outputTranscript.trim()) onMessage?.({ source: "ai", message: outputTranscript.trim() });
+      outputTranscript = "";
     }
 
     const parts = serverContent.modelTurn?.parts ?? [];
@@ -162,15 +219,7 @@ export async function startGeminiVoiceSession(opts: StartGeminiVoiceOptions): Pr
       }
     }
 
-    if (serverContent.inputTranscription?.text) inputTranscript += serverContent.inputTranscription.text;
-    if (serverContent.outputTranscription?.text) outputTranscript += serverContent.outputTranscription.text;
-
-    if (serverContent.turnComplete) {
-      if (inputTranscript.trim()) onMessage?.({ source: "user", message: inputTranscript.trim() });
-      if (outputTranscript.trim()) onMessage?.({ source: "ai", message: outputTranscript.trim() });
-      inputTranscript = "";
-      outputTranscript = "";
-    }
+    if (serverContent.turnComplete) flushTranscripts();
   };
 
   ws.onclose = () => {
@@ -183,22 +232,12 @@ export async function startGeminiVoiceSession(opts: StartGeminiVoiceOptions): Pr
   };
 
   return {
-    // Gemini Live avec VAD manuelle a besoin d'un signal explicite de fin de
-    // tour (sinon il continue d'attendre indéfiniment) : on l'envoie ici sur
-    // la transition micro actif → coupé, ce qui correspond exactement au
-    // relâchement du bouton push-to-talk dans LessonPage.tsx (stopPushToTalk
-    // n'appelle que setMicMuted(true), jamais un signal dédié).
+    // Coupe le micro (bouton « muet ») : plus aucun audio n'est envoyé,
+    // Gemini ne détecte donc plus de parole.
     setMicMuted(muted: boolean) {
-      if (muted && micActive && ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({ realtimeInput: { activityEnd: {} } }));
-      }
+      if (!muted) resumeAudio();
       micActive = !muted;
-    },
-    sendUserActivity() {
-      if (ws.readyState !== WebSocket.OPEN) return;
-      player.clear();
-      setMode("listening");
-      ws.send(JSON.stringify({ realtimeInput: { activityStart: {} } }));
+      if (muted) setUserSpeaking(false);
     },
     sendUserMessage(text: string) {
       if (ws.readyState !== WebSocket.OPEN) return;

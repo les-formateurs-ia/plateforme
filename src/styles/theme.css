@@ -735,3 +735,31 @@
     animation: none !important;
   }
 }
+
+/* Battle Ground : les réponses arrivent depuis un léger flou, l'identité du
+   modèle se dévoile après le vote à l'aveugle, le gagnant est souligné. */
+.battle-in {
+  animation: page-in 520ms var(--ease-out-strong) backwards;
+}
+.battle-reveal {
+  animation: battle-reveal 640ms var(--ease-out-strong) backwards;
+}
+@keyframes battle-reveal {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translateY(6px) scale(0.98);
+  }
+}
+.battle-winner {
+  box-shadow: 0 0 0 1px var(--ink), 0 30px 60px -40px rgba(181, 141, 224, 0.9);
+}
+.battle-scroll {
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .battle-in,
+  .battle-reveal {
+    animation: page-fade 200ms ease backwards;
+  }
+}

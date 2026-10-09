@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Mic, Phone, PhoneOff } from "lucide-react";
+import { Mic, MicOff, Phone, PhoneOff } from "lucide-react";
 import { NeuralField, type NeuralFieldHandle } from "@/app/components/particles/NeuralField";
 import { cx } from "@/app/lib/cx";
 
@@ -9,11 +9,11 @@ type Mode = "listening" | "speaking";
 // Onglet « Agent » d'une leçon : appel vocal avec l'agent IA. Sur fond noir,
 // le réseau de la marque réagit à la conversation (il s'active quand l'élève
 // parle, s'emballe quand l'agent répond) autour d'un orbe au dégradé iris qui
-// tourne, respire et ondule selon l'état. Parole en push-to-talk : bouton à
-// maintenir, ou barre d'espace.
-export function LessonVoiceAgent({ status, mode, ptt, error, onStart, onEnd, onPttStart, onPttStop }: {
-  status: Status; mode: Mode; ptt: boolean; error: string | null;
-  onStart: () => void; onEnd: () => void; onPttStart: () => void; onPttStop: () => void;
+// tourne, respire et ondule selon l'état. Échange naturel : le micro reste
+// ouvert, l'élève parle quand il veut (bouton pour couper son micro).
+export function LessonVoiceAgent({ status, mode, userTalking, muted, error, onStart, onEnd, onToggleMute }: {
+  status: Status; mode: Mode; userTalking: boolean; muted: boolean; error: string | null;
+  onStart: () => void; onEnd: () => void; onToggleMute: () => void;
 }) {
   const field = useRef<NeuralFieldHandle>(null);
   const speaking = status === "connected" && mode === "speaking";
@@ -21,27 +21,18 @@ export function LessonVoiceAgent({ status, mode, ptt, error, onStart, onEnd, onP
   // Le réseau suit la conversation : l'élève parle → activité modérée,
   // l'agent répond → forte activité.
   useEffect(() => {
-    if (!speaking && !ptt) return;
+    if (!speaking && !userTalking) return;
     const id = window.setInterval(() => field.current?.excite(speaking ? 0.35 : 0.18), 300);
     return () => window.clearInterval(id);
-  }, [speaking, ptt]);
-
-  // Barre d'espace maintenue = parler (hors champs de saisie).
-  useEffect(() => {
-    if (status !== "connected") return;
-    const typing = (t: EventTarget | null) => t instanceof HTMLElement && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
-    const down = (e: KeyboardEvent) => { if (e.code === "Space" && !e.repeat && !typing(e.target)) { e.preventDefault(); onPttStart(); } };
-    const up = (e: KeyboardEvent) => { if (e.code === "Space" && !typing(e.target)) { e.preventDefault(); onPttStop(); } };
-    window.addEventListener("keydown", down);
-    window.addEventListener("keyup", up);
-    return () => { window.removeEventListener("keydown", down); window.removeEventListener("keyup", up); };
-  }, [status, onPttStart, onPttStop]);
+  }, [speaking, userTalking]);
 
   const title = status === "connecting" ? "Connexion à ton agent…"
-    : status === "connected" ? (speaking ? "Ton agent te répond" : ptt ? "Je t'écoute…" : "À toi de parler")
+    : status === "connected" ? (speaking ? "Ton agent te répond" : muted ? "Micro coupé" : userTalking ? "Je t'écoute…" : "À toi de parler")
     : "Discute de la leçon à voix haute";
   const hint = status === "connected"
-    ? (speaking ? "Écoute la réponse, puis reprends la parole quand tu veux." : "Maintiens le micro, ou la barre d'espace, pendant que tu parles.")
+    ? (muted ? "Réactive ton micro pour reprendre la conversation."
+      : speaking ? "Tu peux lui couper la parole à tout moment, comme dans une vraie discussion."
+      : "Parle normalement, ton agent te répond dès que tu as fini.")
     : status === "connecting" ? "Autorise l'accès au micro si ton navigateur le demande."
     : "Pose tes questions, fais-toi expliquer une notion ou entraîne-toi à reformuler : ton agent connaît le cours.";
 
@@ -51,7 +42,7 @@ export function LessonVoiceAgent({ status, mode, ptt, error, onStart, onEnd, onP
       <div aria-hidden className="absolute inset-0" style={{ background: "radial-gradient(ellipse 48% 62% at 50% 55%, rgba(0,0,0,0.82) 35%, transparent 80%)" }} />
 
       {/* Orbe : dégradé iris qui tourne ; respire au repos, ondule quand l'agent parle. */}
-      <div className={cx("voice-orb relative w-[168px] h-[168px] sm:w-[200px] sm:h-[200px]", `voice-orb--${status === "connected" ? (speaking ? "speaking" : ptt ? "listening" : "ready") : status}`)} aria-hidden>
+      <div className={cx("voice-orb relative w-[168px] h-[168px] sm:w-[200px] sm:h-[200px]", `voice-orb--${status === "connected" ? (speaking ? "speaking" : userTalking ? "listening" : "ready") : status}`)} aria-hidden>
         {speaking && <><span className="voice-ripple" /><span className="voice-ripple" style={{ animationDelay: "0.7s" }} /></>}
         <span className="voice-orb__glow" />
         <span className="voice-orb__core" />
@@ -72,16 +63,14 @@ export function LessonVoiceAgent({ status, mode, ptt, error, onStart, onEnd, onP
           </button>
         ) : (
           <>
-            <button type="button"
-              onPointerDown={(e) => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); onPttStart(); }}
-              onPointerUp={onPttStop} onPointerCancel={onPttStop}
-              aria-pressed={ptt} aria-label="Maintenir pour parler"
-              className={cx("voice-ptt relative w-[84px] h-[84px] rounded-full flex items-center justify-center select-none touch-none transition-transform duration-150", ptt && "scale-95")}
-              style={{ background: ptt ? "var(--grad-iris)" : "#fff", color: "#000" }}>
-              {ptt && <span className="voice-ptt__ring" aria-hidden />}
-              <Mic className="w-7 h-7" />
+            <button type="button" onClick={onToggleMute}
+              aria-pressed={muted} aria-label={muted ? "Réactiver le micro" : "Couper le micro"}
+              className="voice-ptt relative w-[84px] h-[84px] rounded-full flex items-center justify-center select-none transition-transform duration-150"
+              style={{ background: muted ? "#fff" : "var(--grad-iris)", color: "#000", opacity: muted ? 0.7 : 1 }}>
+              {userTalking && !muted && <span className="voice-ptt__ring" aria-hidden />}
+              {muted ? <MicOff className="w-7 h-7" /> : <Mic className="w-7 h-7" />}
             </button>
-            <p className="text-sm text-white/60">{ptt ? "Relâche pour envoyer" : "Maintiens pour parler · ou la barre d'espace"}</p>
+            <p className="text-sm text-white/60">{muted ? "Micro coupé · touche pour le réactiver" : "Micro ouvert · touche pour le couper"}</p>
             <button type="button" onClick={onEnd} className="mt-1 inline-flex items-center gap-2 min-h-10 px-4 rounded-[2px] text-sm font-semibold border border-[#e5484d]/60 text-[#ff8a8d] hover-fine:bg-[#e5484d] hover-fine:text-white transition-colors">
               <PhoneOff className="w-4 h-4" />Raccrocher
             </button>
