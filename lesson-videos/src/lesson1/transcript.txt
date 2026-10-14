@@ -1,0 +1,62 @@
+[0.00] Bonjour à toutes et à tous, et bienvenue dans cette formation consacrée à l'intelligence artificielle générative.
+[6.60] Aujourd'hui, l'IA s'est installée directement sur nos postes de travail et transforme notre façon de rédiger, d'analyser et de concevoir.
+[15.44] Que vous soyez totalement débutants ou simplement curieux, ce cours a été conçu pour partir de zéro.
+[21.20] Nous allons définir l'IA générative, comprendre son fonctionnement technique, identifier ses limites, passer en revue les outils majeurs et découvrir des cas d'usage très concrets pour votre quotidien.
+[33.72] Nous attaquons tout de suite avec le premier chapitre.
+[36.35] Pour bien démarrer, situons l'IA générative dans le grand paysage informatique.
+[40.88] L'intelligence artificielle au sens large existe depuis des décennies.
+[45.32] Pendant longtemps, l'IA était uniquement analytique.
+[48.76] Son rôle était d'analyser des données existantes pour prendre des décisions, comme trier des spams, recommander un film ou reconnaître une forme sur une photo.
+[58.60] L'IA observait, mais ne créait rien.
+[61.48] L'IA générative représente la branche la plus récente et la plus évoluée.
+[65.40] Son objectif n'est plus seulement d'analyser, mais de créer.
+[69.16] C'est avec elle que nous allons travailler durant cette formation.
+[72.72] La rupture majeure de l'IA générative réside dans sa capacité à fabriquer du contenu original.
+[79.24] A partir d'une simple consigne en langage naturel, ce qu'on appelle un prompt, l'IA peut produire du texte, des images haute définition, du code informatique ou des fichiers audio.
+[90.32] Elle ne fait pas un simple copier-coller d'éléments trouvés sur Internet.
+[93.71] Elle synthétise l'ensemble de ses apprentissages pour générer une réponse entièrement inédite.
+[98.80] Essayons maintenant de comprendre comment tout cela fonctionne.
+[101.88] Les IA reposent sur ce qu'on appelle des LLM, pour Large Language Models.
+[107.32] Un peu comme nous, l'IA apprend par l'observation et la répétition.
+[111.44] Pour lui apprendre à parler, on l'immerge dans la culture humaine en lui faisant analyser des milliards de textes, d'images et de vidéos.
+[118.60] En voyant passer cette masse immense de données, elle repère des schémas récurrents et assimile naturellement comment les concepts et les mots s'assemblent.
+[127.44] Pour traiter toutes ces données, les IA modernes utilisent une architecture informatique appelée Transformé.
+[134.44] Son rôle est de réaliser une analyse panoramique du texte pour en saisir toute la cohérence.
+[140.12] Ensuite, pour générer du texte et répondre à vos demandes, l'IA calcule la probabilité mathématique du mot suivant.
+[147.32] Prenez cet exemple.
+[148.67] Si l'on donne à l'IA le début de phrase "le chat mange une", l'IA ne sait pas ce qu'est un chat.
+[154.48] En revanche, elle calcule que d'après ces données, le mot "souris" a 85% de chances d'apparaître, "croquette" 8% et "gamel" environ 5%.
+[165.60] Statistiquement, "souris" est donc le mot le plus probable.
+[169.35] C'est donc ce chemin qu'elle choisit pour compléter la phrase.
+[173.28] En revanche, parce que l'IA fonctionne par calcul de probabilité et non par compréhension du réel, elle présente des limites majeures.
+[181.84] La première est ce qu'on appelle l'hallucination.
+[184.67] Comme le modèle cherche toujours à produire le texte le plus fluide possible, il lui arrive d'inventer des faits, des chiffres, des lois ou des références bibliographiques, tout en les affirmant avec un ton extrêmement convaincant.
+[196.92] Gardez à l'esprit cette règle absolue.
+[199.60] L'IA ne remplace jamais votre propre vérification factuelle.
+[203.72] Entrons maintenant dans le panorama des outils d'IA existants.
+[207.52] Le premier que nous allons aborder est probablement le plus connu de tous, ChatGPT d'OpenAI.
+[213.04] C'est l'outil polyvalent par excellence.
+[215.87] Il brille par sa rédaction naturelle, sa qualité de génération de visuels et sa personnalisation.
+[221.48] Utilisez-le pour de la réflexion, la rédaction, la création d'images ou l'automatisation via des agents.
+[228.52] Disponible sur Web, mobile et ordinateur, il propose une version gratuite standard, un abonnement plus à environ 20 euros par mois pour les modèles avancés, ainsi que des offres Teams et Enterprise.
+[241.92] Le deuxième outil est Claude de la société Anthropique.
+[245.50] Il excelle en raisonnement, en logique et en précision pour la génération de codes.
+[250.52] C'est l'outil idéal pour les projets informatiques, l'analyse de longs documents juridiques et la rédaction de rapports de fonds complexes.
+[257.48] Accessible sur Web, mobile ou via des outils plus techniques, il dispose d'un accès gratuit limité, d'une version pro et même d'une version max pour encore plus d'utilisation.
+[269.12] Troisième acteur majeur, Google Gemini.
+[272.00] Sa force réside dans son intégration avec l'ensemble des outils Google ainsi que la récupération d'informations récentes.
+[279.72] Il est parfait pour travailler directement depuis votre drive, effectuer des synthèses approfondies.
+[285.65] Il existe en version gratuite standard et en version plus à environ 20 euros par mois.
+[290.88] Quatrième outil, Microsoft Copilot.
+[293.80] Son atout principal est son ancrage direct dans les données de votre entreprise et l'automatisation bureautique.
+[300.36] On l'utilise pour rédiger ou mettre en page des documents, des présentations et des tableaux, ainsi que pour résumer des réunions Teams en direct.
+[309.08] Nativement intégré dans la suite Microsoft 365 et Windows, il est accessible gratuitement sur le Web, en version pro à 20 euros par mois ou via une licence Enterprise.
+[321.52] Enfin, Adobe Firefly est l'outil de création visuelle par excellence.
+[326.32] Il permet la génération d'images haute qualité et une retouche photo d'une grande précision.
+[331.36] C'est l'allié des créatifs pour étendre des images, générer des textures ou créer des éléments graphiques.
+[337.08] Directement intégré dans la suite Creative Cloud comme Photoshop et Illustrator, il propose un accès gratuit avec crédit limité, est inclus dans les abonnements Adobe et dispose de packs de crédit rechargeables.
+[350.00] Voilà, c'est tout pour cette leçon.
+[352.00] Pour explorer la mise en pratique de ces outils, je vous invite à consulter les autres onglets de cette leçon.
+[357.60] Vous y trouverez de quoi identifier précisément des cas d'usage spécifiques à votre propre secteur et métier, ainsi que des exemples concrets.
+[366.12] Prenez le temps de les consulter.
+[368.00] Merci de votre attention et à très bientôt.
