@@ -29,7 +29,7 @@ function Thumb({ gen, onOpen }: { gen: StudioVideoGeneration; onOpen: () => void
     <GCard onClick={gen.status === "ready" ? onOpen : undefined} className="hover:scale-[1.02] transition-transform mb-3 break-inside-avoid">
       <div className="flex items-center justify-center" style={{ aspectRatio: videoAspectRatioToCss(gen.options), background: th.isDark ? "rgba(255,255,255,0.03)" : `${th.gradShadow(0.04)}` }}>
         {gen.status === "pending" && <Loader2 className="w-5 h-5 animate-spin" style={{ color: th.fg3 }} />}
-        {gen.status === "failed" && <p className="text-[10px] text-center px-2" style={{ color: "#fbc2ad" }}>Échec</p>}
+        {gen.status === "failed" && <p className="text-[10px] text-center px-2" style={{ color: th.danger }}>Échec</p>}
         {gen.status === "ready" && url && <video src={url} muted preload="metadata" className="w-full h-full object-cover" />}
       </div>
     </GCard>

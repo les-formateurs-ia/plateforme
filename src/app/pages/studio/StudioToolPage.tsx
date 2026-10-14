@@ -32,11 +32,11 @@ export function StudioToolPage() {
 
       <GCard>
         <div className="p-8 sm:p-12 flex flex-col items-center text-center gap-4" style={{ minHeight: 320 }}>
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: th.gradShadow(0.14), border: `1px solid ${th.gradShadow(0.3)}` }}>
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: th.gradShadow(0.14), border: `1px solid ${th.ink}` }}>
             <Icon className="w-7 h-7" style={{ color: th.navAC }} />
           </div>
           <div>
-            {subtitle && <span className="text-[10px] font-bold px-2.5 py-1 rounded-full" style={{ background: th.gradShadow(0.1), color: th.navAC, border: `1px solid ${th.gradShadow(0.25)}` }}>{subtitle}</span>}
+            {subtitle && <span className="text-[10px] font-bold px-2.5 py-1 rounded-[2px]" style={{ background: th.gradShadow(0.1), color: th.navAC, border: `1px solid ${th.gradShadow(0.25)}` }}>{subtitle}</span>}
             <h2 className="text-xl font-black mt-3" style={{ color: th.fg }}>{title}</h2>
             <p className="text-sm mt-2 max-w-md" style={{ color: th.fg3 }}>Ce module arrive bientôt dans Le Studio — l'intégration du modèle d'IA est en cours de branchement.</p>
           </div>

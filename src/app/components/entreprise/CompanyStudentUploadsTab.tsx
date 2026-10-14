@@ -102,7 +102,7 @@ export function CompanyStudentUploadsTab({ companyId }: { companyId: string }) {
       {loading && <Loading />}
       {!loading && !uploads.length && (
         <EmptyState Icon={Inbox} title="Aucun document reçu pour l'instant"
-          hint="Les collaborateurs envoient leurs fichiers depuis la rubrique « Mes fichiers » de leur espace. Ils apparaîtront ici." />
+          hint="Les collaborateurs envoient leurs fichiers depuis la rubrique « Espace de dépôt » de leur espace. Ils apparaîtront ici." />
       )}
       {!loading && !!uploads.length && !visible.length && <p className="text-sm" style={{ color: th.fg3 }}>Aucun document ne correspond à ces filtres.</p>}
 

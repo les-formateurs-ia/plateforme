@@ -18,7 +18,7 @@ export function AiBudgetExhaustedNotice({ compact = false }: { compact?: boolean
   const { profile } = useProfile();
   return (
     <div className={`flex items-start gap-3 rounded-2xl ${compact ? "px-3.5 py-2.5" : "px-5 py-4"}`} style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)" }}>
-      <Lock className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "#ef4444" }} />
+      <Lock className="w-4 h-4 mt-0.5 shrink-0" style={{ color: th.danger }} />
       <div className="text-sm" style={{ color: th.fg }}>
         <p className="font-bold">Crédits IA épuisés</p>
         <p style={{ color: th.fg2 }}>Tu as atteint ta limite de {profile.budgetUsd.toFixed(2)} $ de crédits IA. Ces modèles seront de nouveau disponibles une fois ton budget rechargé — contacte ton formateur ou l'administrateur.</p>

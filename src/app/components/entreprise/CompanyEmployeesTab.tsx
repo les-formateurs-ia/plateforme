@@ -21,7 +21,9 @@ function formatDate(iso: string): string {
 
 // profile_id est rempli dès l'envoi de l'invitation : seul
 // invite_accepted_at (mot de passe défini) signifie que le compte est utilisé.
+// password_set_manually_at : mot de passe fixé par le staff (icône clé).
 function accessStatus(e: CompanyEmployeeRow): { label: string; tone: PillTone } {
+  if (e.passwordSetManuallyAt) return { label: "Mot de passe défini manuellement", tone: "done" };
   if (e.inviteAcceptedAt) return { label: "Compte activé", tone: "done" };
   if (e.profileId) return { label: `Invitation envoyée${e.inviteSentAt ? ` le ${formatDate(e.inviteSentAt)}` : ""} — en attente`, tone: "warn" };
   return { label: "Pas encore invité", tone: "muted" };
@@ -175,7 +177,7 @@ export function CompanyEmployeesTab({ companyId }: { companyId: string }) {
                   <GeneratePasswordLinkButton studentId={e.profileId} studentName={fullName}
                     renderTrigger={({ onClick, disabled }) => <IconAction Icon={Link2} onClick={onClick} disabled={disabled} title="Générer un lien d'accès à transmettre" />} />
                 )}
-                {admin && e.profileId && <SetStudentPasswordButton studentId={e.profileId} studentName={fullName} email={e.email} />}
+                {e.profileId && <SetStudentPasswordButton studentId={e.profileId} studentName={fullName} email={e.email} />}
                 <IconAction Icon={Send} onClick={() => void handleSendOne(e)} disabled={sendingIds.has(e.id) || !!e.profileId}
                   title={e.profileId ? "Accès déjà envoyé" : "Envoyer l'accès par email"} />
                 {admin && (
@@ -193,9 +195,9 @@ export function CompanyEmployeesTab({ companyId }: { companyId: string }) {
         <DialogContent>
           <DialogHero Icon={editing ? Pencil : UserPlus} title={editing ? "Modifier le collaborateur" : "Nouveau collaborateur"} desc="Nom, prénom et email — l'accès pourra être envoyé ensuite." />
           <div className="space-y-3">
-            <input value={firstName} onChange={(e) => setFirstName(e.target.value)} autoFocus placeholder="Prénom" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
-            <input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Nom" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
-            <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="email@entreprise.com" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
+            <input value={firstName} onChange={(e) => setFirstName(e.target.value)} autoFocus placeholder="Prénom" className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input" />
+            <input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Nom" className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input" />
+            <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="email@entreprise.com" className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input" />
           </div>
           {error && <ErrorText>{error}</ErrorText>}
           <DialogFooter>

@@ -34,7 +34,7 @@ function AttachmentChip({ name, mimeType, size, onRemove }: { name: string; mime
   const th = useTh();
   const Icon = isImage(mimeType) ? ImageIcon : FileText;
   return (
-    <span className="inline-flex items-center gap-1.5 max-w-[220px] text-xs px-2.5 py-1 rounded-full" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg2 }}>
+    <span className="inline-flex items-center gap-1.5 max-w-[220px] text-xs px-2.5 py-1 rounded-[2px]" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg2 }}>
       <Icon className="w-3.5 h-3.5 shrink-0" />
       <span className="truncate">{name}</span>
       {size != null && <span className="shrink-0" style={{ color: th.fg3 }}>{formatSize(size)}</span>}
@@ -324,8 +324,8 @@ export function StudioChatPage({ provider }: { provider: ChatProvider }) {
         type="button"
         onClick={() => openConversation(null)}
         disabled={pending !== null}
-        className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80 disabled:opacity-50"
-        style={{ background: config.gradient, color: "#fff" }}
+        className="sweep w-full flex items-center gap-2 px-3 min-h-10 rounded-[2px] text-sm font-semibold disabled:opacity-50"
+        style={{ background: th.ink, color: th.onInk }}
       >
         <MessageSquarePlus className="w-4 h-4" />Nouvelle conversation
       </button>
@@ -367,13 +367,13 @@ export function StudioChatPage({ provider }: { provider: ChatProvider }) {
 
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif", color: th.fg }}>Discutez avec {config.name}</h2>
-          <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Échange librement avec les vrais modèles {config.name} ({config.company}) — choisis le modèle et joins tes fichiers (images, PDF, textes).</p>
+          <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}>Discutez avec {config.name}</h2>
+          <p className="text-[15px] sm:text-base mt-2 max-w-3xl leading-relaxed" style={{ color: th.fg2 }}>Échange librement avec les vrais modèles {config.name} ({config.company}) — choisis le modèle et joins tes fichiers (images, PDF, textes).</p>
         </div>
         <button
           type="button"
           onClick={() => setShowHistory((v) => !v)}
-          className="lg:hidden shrink-0 flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-full"
+          className="lg:hidden shrink-0 flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-[2px]"
           style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg2 }}
         >
           <History className="w-3.5 h-3.5" />Historique
@@ -409,7 +409,7 @@ export function StudioChatPage({ provider }: { provider: ChatProvider }) {
             <div className="p-3 sm:p-4 space-y-2.5" style={{ borderTop: `1px solid ${th.sep}` }}>
               {budgetLocked && <AiBudgetExhaustedNotice compact />}
               {error && (
-                <p className="text-xs px-3 py-2 rounded-xl" style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444" }}>{error}</p>
+                <p className="text-xs px-3 py-2 rounded-xl" style={{ background: "rgba(239,68,68,0.1)", color: th.danger }}>{error}</p>
               )}
               {files.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
@@ -447,7 +447,7 @@ export function StudioChatPage({ provider }: { provider: ChatProvider }) {
                     type="button"
                     onClick={() => fileRef.current?.click()}
                     disabled={composerDisabled || files.length >= CHAT_MAX_FILES}
-                    className="p-2 rounded-full transition-opacity hover:opacity-70 disabled:opacity-40"
+                    className="p-2 rounded-[4px] transition-opacity hover:opacity-70 disabled:opacity-40"
                     style={{ color: th.fg2 }}
                     aria-label="Joindre un fichier"
                     title="Joindre un fichier (images, PDF, textes — 10 Mo max)"
@@ -461,8 +461,8 @@ export function StudioChatPage({ provider }: { provider: ChatProvider }) {
                     type="button"
                     onClick={handleSend}
                     disabled={composerDisabled || !input.trim()}
-                    className="ml-auto w-9 h-9 rounded-full flex items-center justify-center text-white transition-opacity disabled:opacity-40"
-                    style={{ background: config.gradient }}
+                    className="sweep ml-auto w-9 h-9 rounded-[2px] flex items-center justify-center disabled:opacity-40"
+                    style={{ background: th.ink, color: th.onInk }}
                     aria-label="Envoyer"
                   >
                     {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <SendHorizontal className="w-4 h-4" />}

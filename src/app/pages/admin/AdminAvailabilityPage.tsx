@@ -248,8 +248,8 @@ export function AdminAvailabilityPage() {
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div>
-        <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>Rendez-vous</GT></h2>
-        <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Déclare tes disponibilités, les élèves réservent directement dessus.</p>
+        <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>Rendez-vous</GT></h2>
+        <p className="text-[15px] sm:text-base mt-2 max-w-3xl leading-relaxed" style={{ color: th.fg2 }}>Déclare tes disponibilités, les élèves réservent directement dessus.</p>
       </div>
 
       <GCard>
@@ -260,13 +260,13 @@ export function AdminAvailabilityPage() {
               <h3 className="text-sm font-black" style={{ color: th.fg }}>Mes disponibilités</h3>
             </div>
             <div className="flex items-center gap-2">
-              <button onClick={() => setWeekStart((w) => addDays(w, -7))} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ border: `1px solid ${th.sep}`, color: th.fg2 }}>
+              <button onClick={() => setWeekStart((w) => addDays(w, -7))} className="w-8 h-8 rounded-[4px] flex items-center justify-center" style={{ border: `1px solid ${th.sep}`, color: th.fg2 }}>
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <span className="text-xs font-semibold min-w-[150px] text-center" style={{ color: th.fg2 }}>
                 {weekStart.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })} – {weekEnd.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}
               </span>
-              <button onClick={() => setWeekStart((w) => addDays(w, 7))} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ border: `1px solid ${th.sep}`, color: th.fg2 }}>
+              <button onClick={() => setWeekStart((w) => addDays(w, 7))} className="w-8 h-8 rounded-[4px] flex items-center justify-center" style={{ border: `1px solid ${th.sep}`, color: th.fg2 }}>
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -317,7 +317,7 @@ export function AdminAvailabilityPage() {
                             className="h-4 border transition-colors"
                             style={{
                               borderColor: th.isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
-                              background: isBooked ? "rgba(148,163,184,0.35)" : isSelected ? `linear-gradient(135deg,${th.grad1},${th.grad2})` : "transparent",
+                              background: isBooked ? "rgba(148,163,184,0.35)" : isSelected ? th.ink : "transparent",
                               cursor: isBooked ? "not-allowed" : "pointer",
                             }}
                           />
@@ -355,7 +355,7 @@ export function AdminAvailabilityPage() {
                         {new Date(`${b.slotDate}T00:00:00`).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} · {b.startTime}–{b.endTime}
                       </div>
                       {b.proposedDate && (
-                        <div className="text-[11px] mt-1 font-semibold" style={{ color: "#fbc2ad" }}>
+                        <div className="text-[11px] mt-1 font-semibold" style={{ color: th.danger }}>
                           Proposition envoyée : {b.proposedDate} à {b.proposedStartTime} (en attente de réponse)
                         </div>
                       )}
@@ -376,11 +376,11 @@ export function AdminAvailabilityPage() {
                   <div className="mt-3 pt-3 flex items-end gap-2 flex-wrap" style={{ borderTop: `1px solid ${th.sep}` }}>
                     <div>
                       <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Nouvelle date</label>
-                      <input type="date" min={tomorrowISO()} value={proposalDraft.date} onChange={(e) => setProposalDraft((d) => ({ ...d, date: e.target.value }))} className="rounded-xl px-3 py-2 text-sm g-input" />
+                      <input type="date" min={tomorrowISO()} value={proposalDraft.date} onChange={(e) => setProposalDraft((d) => ({ ...d, date: e.target.value }))} className="rounded-[4px] px-3 py-2 text-sm g-input" />
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Heure de début</label>
-                      <input type="time" step={900} value={proposalDraft.time} onChange={(e) => setProposalDraft((d) => ({ ...d, time: e.target.value }))} className="rounded-xl px-3 py-2 text-sm g-input" />
+                      <input type="time" step={900} value={proposalDraft.time} onChange={(e) => setProposalDraft((d) => ({ ...d, time: e.target.value }))} className="rounded-[4px] px-3 py-2 text-sm g-input" />
                     </div>
                     <ShimBtn sm onClick={() => sendProposal(b)} disabled={sendingProposal}>{sendingProposal ? "Envoi…" : "Envoyer la proposition"}</ShimBtn>
                   </div>
@@ -410,7 +410,7 @@ export function AdminAvailabilityPage() {
                     </div>
                   </div>
                   {b.bilanFilledAt ? (
-                    <button onClick={() => openBilan(b)} className="text-xs font-semibold flex items-center gap-1.5 shrink-0 hover:opacity-80" style={{ color: "#6adeb1" }}>
+                    <button onClick={() => openBilan(b)} className="text-xs font-semibold flex items-center gap-1.5 shrink-0 hover:opacity-80" style={{ color: th.success }}>
                       <ClipboardCheck className="w-3.5 h-3.5" />Bilan envoyé
                       <Eye className="w-3.5 h-3.5 ml-1" />
                     </button>
@@ -435,15 +435,15 @@ export function AdminAvailabilityPage() {
           <div className="space-y-3">
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Sujet du rendez-vous</label>
-              <textarea value={bilanDraft.sujet} onChange={(e) => setBilanDraft((d) => ({ ...d, sujet: e.target.value }))} rows={2} className="w-full rounded-xl px-3 py-2 text-sm g-input resize-none" />
+              <textarea value={bilanDraft.sujet} onChange={(e) => setBilanDraft((d) => ({ ...d, sujet: e.target.value }))} rows={2} className="w-full rounded-[4px] px-3 py-2 text-sm g-input resize-none" />
             </div>
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Point fort</label>
-              <textarea value={bilanDraft.pointFort} onChange={(e) => setBilanDraft((d) => ({ ...d, pointFort: e.target.value }))} rows={2} className="w-full rounded-xl px-3 py-2 text-sm g-input resize-none" />
+              <textarea value={bilanDraft.pointFort} onChange={(e) => setBilanDraft((d) => ({ ...d, pointFort: e.target.value }))} rows={2} className="w-full rounded-[4px] px-3 py-2 text-sm g-input resize-none" />
             </div>
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Next step</label>
-              <textarea value={bilanDraft.nextStep} onChange={(e) => setBilanDraft((d) => ({ ...d, nextStep: e.target.value }))} rows={2} className="w-full rounded-xl px-3 py-2 text-sm g-input resize-none" />
+              <textarea value={bilanDraft.nextStep} onChange={(e) => setBilanDraft((d) => ({ ...d, nextStep: e.target.value }))} rows={2} className="w-full rounded-[4px] px-3 py-2 text-sm g-input resize-none" />
             </div>
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Pièce jointe (PDF)</label>
@@ -451,7 +451,7 @@ export function AdminAvailabilityPage() {
                 type="file"
                 accept="application/pdf"
                 onChange={(e) => setBilanFile(e.target.files?.[0] ?? null)}
-                className="w-full text-xs g-input rounded-xl px-3 py-2"
+                className="w-full text-xs g-input rounded-[4px] px-3 py-2"
               />
               {(bilanFile ?? bilanTarget?.bilanAttachmentName) && (
                 <p className="text-xs mt-1.5 flex items-center gap-1.5" style={{ color: th.fg3 }}>
@@ -470,7 +470,7 @@ export function AdminAvailabilityPage() {
                 disabled={submittingBilan || deletingBilan}
                 title="Supprimer le bilan"
                 className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-colors hover:opacity-80 disabled:opacity-50"
-                style={{ background: "rgba(251,194,173,0.1)", border: "1px solid rgba(251,194,173,0.25)", color: "#fbc2ad" }}
+                style={{ background: "rgba(251,194,173,0.1)", border: "1px solid rgba(251,194,173,0.25)", color: th.danger }}
               >
                 <Trash2 className="w-4 h-4" />
               </button>

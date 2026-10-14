@@ -27,7 +27,7 @@ export function VSelect({ value, onValueChange, options, placeholder, disabled, 
     <SelectPrimitive.Root value={value} onValueChange={onValueChange} disabled={disabled}>
       <SelectPrimitive.Trigger
         className={cx(
-          "w-full flex items-center justify-between gap-2 rounded-xl outline-none transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed data-[placeholder]:opacity-60",
+          "w-full flex items-center justify-between gap-2 rounded-[4px] outline-none transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed data-[placeholder]:opacity-60",
           sm ? "px-3.5 py-2 text-sm" : "px-4 py-3 text-sm",
         )}
         style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg }}
@@ -43,7 +43,7 @@ export function VSelect({ value, onValueChange, options, placeholder, disabled, 
         <SelectPrimitive.Content
           position="popper"
           sideOffset={6}
-          className="v-select-content z-50 overflow-hidden rounded-xl shadow-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-1 data-[side=top]:slide-in-from-bottom-1"
+          className="v-select-content z-50 overflow-hidden rounded-[6px] shadow-[0_18px_40px_-20px_rgba(0,0,0,0.35)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-1 data-[side=top]:slide-in-from-bottom-1"
           style={{ background: th.card, border: `1px solid ${th.sep}`, width: "var(--radix-select-trigger-width)" }}
         >
           <SelectPrimitive.ScrollUpButton className="flex items-center justify-center py-1" style={{ color: th.fg3 }}>
@@ -54,7 +54,7 @@ export function VSelect({ value, onValueChange, options, placeholder, disabled, 
               <SelectPrimitive.Item
                 key={o.value}
                 value={o.value}
-                className="v-select-item relative flex items-center gap-2 rounded-lg pl-8 pr-3 py-2 text-sm cursor-pointer select-none outline-none transition-colors"
+                className="v-select-item relative flex items-center gap-2 rounded-[4px] pl-8 pr-3 py-2 text-sm cursor-pointer select-none outline-none transition-colors"
                 style={{ color: th.fg }}
               >
                 <span className="absolute left-2.5 flex items-center justify-center w-4 h-4">

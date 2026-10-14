@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router";
-import { Plus, CalendarClock, Menu, X, Bug, Building2, ScanEye } from "lucide-react";
+import { Plus, CalendarClock, Menu, X, Bug, Building2, ScanEye, LogOut } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
@@ -15,8 +15,9 @@ import { NotificationBell } from "@/app/components/layout/NotificationBell";
 import { ImpersonationBanner } from "@/app/components/layout/ImpersonationBanner";
 import { useBulkGeneration } from "@/app/state/bulk-generation-context";
 import { ReportIncidentDialog } from "@/app/components/layout/ReportIncidentDialog";
+import { CommandPalette, CommandTrigger } from "@/app/components/layout/CommandPalette";
 import { cx } from "@/app/lib/cx";
-import { NAV_ITEMS } from "@/app/data/mock";
+import { NAV_ITEMS, NAV_GROUP_LABELS } from "@/app/data/mock";
 import { supabase } from "@/app/lib/supabase/client";
 import { countUnreadIncidentNotifications } from "@/app/lib/notifications";
 
@@ -32,7 +33,16 @@ function readStoredStaffSpace(): "cpf" | "entreprise" {
 
 export function MainLayout() {
   const th = useTh();
-  const { role, user, companyId } = useAuth();
+  const { role, user, companyId, signOut } = useAuth();
+  // Onglet actif : fond gris léger, texte à l'encre et filet vertical à la
+  // couleur du rôle (le seul endroit où elle apparaît dans la navigation).
+  const navItemClass = ({ isActive }: { isActive: boolean }) => cx(
+    "nav-item relative w-full flex items-center gap-3 px-3.5 py-2.5 rounded-[4px] text-[14px] text-left transition-colors",
+    isActive ? "font-bold" : "font-medium hover-fine:text-[var(--ink)]",
+  );
+  const navItemStyle = ({ isActive }: { isActive: boolean }) => isActive
+    ? { background: th.navA, color: th.fg, ["--nav-mark" as string]: th.roleGrad }
+    : { color: th.fg2, background: "transparent" };
   const { isImpersonating } = useImpersonation();
   const staffBase = useStaffBasePath();
   const { profile } = useProfile();
@@ -60,6 +70,12 @@ export function MainLayout() {
     try { localStorage.setItem(STAFF_SPACE_KEY, next); } catch { /* ignore */ }
   }, [location.pathname]);
   const entrepriseMode = isStaff(role) && space === "entreprise";
+
+  // Espace Entreprise (staff ou collaborateur) : pas de barre latérale,
+  // seulement un bandeau logo + Déconnexion. Le logo ramène sur "/" (choix
+  // CPF / Entreprise pour le staff, accueil pour un collaborateur).
+  const sidebarHidden = entrepriseMode || !!companyId;
+  const studentNav = !isStaff(role) && !companyId;
 
   useEffect(() => { setNavOpen(false); }, [location.pathname]);
 
@@ -121,10 +137,11 @@ export function MainLayout() {
       }}
     >
       <ImpersonationBanner />
+      <CommandPalette />
       <div className="main-layout-body flex flex-1 min-h-0 overflow-hidden">
       <Background />
 
-      {navOpen && (
+      {navOpen && !sidebarHidden && (
         <div className="fixed inset-0 z-30 bg-black/50 lg:hidden" onClick={() => setNavOpen(false)} />
       )}
 
@@ -134,10 +151,11 @@ export function MainLayout() {
           uniquement, comme un panneau qui flotte plutôt qu'un tiroir plein
           écran. Desktop (lg:) inchangé : colonne statique pleine hauteur,
           coins carrés, bord droit simple. */}
+      {!sidebarHidden && (
       <aside className={cx(
         // border côté classes (pas inline) : lg: doit pouvoir retirer le
         // haut/bas sans que le style inline (non responsive) ne les réimpose.
-        "fixed left-0 z-40 flex flex-col w-[240px] shrink-0 overflow-hidden transition-[transform,visibility] duration-300 ease-out border border-l-0 rounded-tr-[28px] rounded-br-[28px] shadow-[0_20px_48px_rgba(0,0,0,0.22)] lg:static lg:visible lg:z-auto lg:inset-y-0 lg:h-full lg:w-[232px] lg:border-t-0 lg:border-b-0 lg:rounded-none lg:shadow-none lg:translate-x-0",
+        "fixed left-0 z-40 flex flex-col w-[240px] shrink-0 overflow-hidden transition-[transform,visibility] duration-300 ease-out border border-l-0 rounded-tr-[10px] rounded-br-[10px] shadow-[0_30px_60px_-30px_rgba(0,0,0,0.45)] lg:static lg:visible lg:z-auto lg:inset-y-0 lg:h-full lg:w-[232px] lg:border-t-0 lg:border-b-0 lg:rounded-none lg:shadow-none lg:translate-x-0",
         navOpen ? "visible translate-x-0" : "invisible -translate-x-full",
       )} style={{
         background: th.sidebar,
@@ -146,17 +164,23 @@ export function MainLayout() {
         bottom: "max(0.75rem, env(safe-area-inset-bottom))",
       }}>
         <div className="px-6 py-6 flex items-center justify-between" style={{ borderBottom: `1px solid ${th.sidebarB}` }}>
-          <Link to="/" onClick={() => setNavOpen(false)} className="transition-opacity hover:opacity-80" title={isStaff(role) ? "Changer d'espace (CPF / Entreprise)" : "Accueil"}>
+          <Link to="/" onClick={() => setNavOpen(false)} className="grid gap-2.5 transition-opacity hover-fine:opacity-80" title={isStaff(role) ? "Changer d'espace (CPF / Entreprise)" : "Accueil"}>
             <Logo h={26} />
+            {/* Repère de l'espace courant : pastille à la couleur du rôle. */}
+            <span className="eyebrow flex items-center gap-2" style={{ color: th.fg3 }}>
+              <span className="w-2 h-2 rounded-full shrink-0" style={{ background: th.roleGrad }} />
+              {role === "admin" ? "Administration" : role === "formateur" ? "Espace formateur" : "Espace apprenant"}
+            </span>
           </Link>
-          <button className="lg:hidden w-8 h-8 -mr-1.5 rounded-full flex items-center justify-center shrink-0" onClick={() => setNavOpen(false)} style={{ color: th.fg3 }}>
+          <button aria-label="Fermer le menu" className="lg:hidden w-8 h-8 -mr-1.5 rounded-[2px] flex items-center justify-center shrink-0" onClick={() => setNavOpen(false)} style={{ color: th.fg }}>
             <X className="w-4 h-4" />
           </button>
         </div>
+        {studentNav && <div className="px-3 pt-4"><CommandTrigger /></div>}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {NAV_ITEMS.filter(({ id }) => id !== "profile")
             .sort((a, b) => isStaff(role) ? Number(b.id === "calendar") - Number(a.id === "calendar") : 0)
-            .map(({ id, Icon, label, path }) => {
+            .map(({ id, Icon, label, path, group }, index, items) => {
             // Espace Entreprise : seuls "Entreprise" et "Mon profil" restent
             // (ajoutés séparément plus bas) — tout le reste de cette liste
             // est un concept CPF (Pratique IA, Élèves, Rendez-vous...).
@@ -174,40 +198,48 @@ export function MainLayout() {
             // galerie précèdent les outils pédagogiques.
             if (id === "calendar" && isStaff(role)) {
               return [
-                <NavLink key="planning" to={`${staffBase}/planning`} onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-[14px] font-medium text-left transition-all"
-                  style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
+                <NavLink key="planning" to={`${staffBase}/planning`} onClick={() => setNavOpen(false)} className={navItemClass}
+                  style={navItemStyle}>
                   <CalendarClock className="w-4 h-4 shrink-0" />{role === "admin" ? "Élèves & formateurs" : "Élèves"}
                 </NavLink>,
-                <NavLink key={id} to="/planning" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-[14px] font-medium text-left transition-all"
-                  style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
+                <NavLink key={id} to="/planning" onClick={() => setNavOpen(false)} className={navItemClass}
+                  style={navItemStyle}>
                   <Icon className="w-4 h-4 shrink-0" />{label}
                 </NavLink>,
-                isAdmin(role) ? <NavLink key="advisor-leads" to="/admin/project-advisor-leads" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-[14px] font-medium text-left transition-all"
-                  style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
+                isAdmin(role) ? <NavLink key="advisor-leads" to="/admin/project-advisor-leads" onClick={() => setNavOpen(false)} className={navItemClass}
+                  style={navItemStyle}>
                   <Building2 className="w-4 h-4 shrink-0" />Demandes IA
                 </NavLink> : null,
-                <NavLink key="gallery" to="/admin/ai-detection-gallery" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-[14px] font-medium text-left transition-all"
-                  style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
+                <NavLink key="gallery" to="/admin/ai-detection-gallery" onClick={() => setNavOpen(false)} className={navItemClass}
+                  style={navItemStyle}>
                   <ScanEye className="w-4 h-4 shrink-0" />Galerie Détection IA
                 </NavLink>,
               ];
             }
+            // Élève CPF : la navigation est groupée par intention (apprendre,
+            // pratiquer, être accompagné), un sur-titre ouvre chaque groupe.
+            const groupStart = studentNav && group && items[index - 1]?.group !== group;
             return (
-              <NavLink key={id} to={path} end onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-[14px] font-medium text-left transition-all"
-                style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
-                <Icon className="w-4 h-4 shrink-0" />{label}
-              </NavLink>
+              <div key={id}>
+                {groupStart && (
+                  <p className={cx("eyebrow px-3.5 pb-2", index === 0 ? "pt-1" : "pt-5")} style={{ color: th.fg3 }}>{NAV_GROUP_LABELS[group]}</p>
+                )}
+                <NavLink to={path} end onClick={() => setNavOpen(false)} className={navItemClass}
+                  style={navItemStyle}>
+                  <Icon className="w-4 h-4 shrink-0" />{label}
+                </NavLink>
+              </div>
             );
           })}
           {entrepriseMode && (
-            <NavLink to="/entreprise" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-[14px] font-medium text-left transition-all"
-              style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
+            <NavLink to="/entreprise" onClick={() => setNavOpen(false)} className={navItemClass}
+              style={navItemStyle}>
               <Building2 className="w-4 h-4 shrink-0" />Entreprise
             </NavLink>
           )}
           {isAdmin(role) && !entrepriseMode && !companyId && (
-            <NavLink key="incidents" to="/admin/incidents" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-[14px] font-medium text-left transition-all"
-              style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
+            <NavLink key="incidents" to="/admin/incidents" onClick={() => setNavOpen(false)} className={navItemClass}
+              style={navItemStyle}>
               <span className="relative shrink-0">
                 <Bug className="w-4 h-4" />
                 {unreadIncidents > 0 && (
@@ -222,8 +254,8 @@ export function MainLayout() {
             if (!profileItem) return null;
             const { id, Icon, label, path } = profileItem;
             return (
-              <NavLink key={id} to={path} onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-[14px] font-medium text-left transition-all"
-                style={({ isActive }) => isActive ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", fontWeight: 700 } : { color: th.fg3, background: "transparent" }}>
+              <NavLink key={id} to={path} onClick={() => setNavOpen(false)} className={navItemClass}
+                style={navItemStyle}>
                 <Icon className="w-4 h-4 shrink-0" />{label}
               </NavLink>
             );
@@ -232,19 +264,19 @@ export function MainLayout() {
         {isStaff(role) && !entrepriseMode && (
           <div className="px-3 pb-3 space-y-1.5">
             {gen.running && (
-              <div className="rounded-xl px-3 py-2.5" style={{ background: th.isDark ? "rgba(255,255,255,0.05)" : "rgba(15,14,20,0.03)", border: `1px solid ${th.inputB}` }}>
+              <div className="rounded-[4px] px-3 py-2.5" style={{ border: `1px solid ${th.sep}` }}>
                 <div className="flex items-center justify-between gap-2 mb-1.5">
                   <span className="text-[11px] font-semibold truncate" style={{ color: th.fg2 }}>Génération : {gen.courseName}</span>
                   <span className="text-[11px] font-bold shrink-0" style={{ color: th.navAC }}>{genPct}%</span>
                 </div>
-                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.08)" : "rgba(15,14,20,0.06)" }}>
-                  <div className="h-full rounded-full transition-all duration-300" style={{ width: `${genPct}%`, background: `linear-gradient(90deg,${th.grad1},${th.grad2})` }} />
+                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: th.navA }}>
+                  <div className="h-full rounded-full transition-all duration-300" style={{ width: `${genPct}%`, background: th.iris }} />
                 </div>
                 <div className="text-[10px] mt-1" style={{ color: th.fg3 }}>{gen.done}/{gen.total} leçon{gen.total > 1 ? "s" : ""}</div>
               </div>
             )}
-            <NavLink to={`${staffBase}/courses`} onClick={() => setNavOpen(false)} className="w-full flex items-center gap-2.5 px-4 py-2.5 rounded-full text-[14px] font-semibold transition-all hover:opacity-90"
-              style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff" }}>
+            <NavLink to={`${staffBase}/courses`} onClick={() => setNavOpen(false)} className="sweep w-full flex items-center justify-center gap-2 px-3 min-h-10 rounded-[2px] text-[13px] font-semibold whitespace-nowrap"
+              style={{ background: th.ink, color: th.onInk }}>
               <Plus className="w-4 h-4 shrink-0" />
               Modifier les formations
             </NavLink>
@@ -260,21 +292,34 @@ export function MainLayout() {
           </div>
         )}
         <div className="px-4 pb-4 pt-2">
-          <Link to="/profile" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-2 py-1 rounded-xl cursor-pointer transition-opacity hover:opacity-80">
+          <Link to="/profile" onClick={() => setNavOpen(false)} className="w-full flex items-center gap-3 px-2 py-1 rounded-[4px] cursor-pointer transition-opacity hover-fine:opacity-80">
             <Avatar url={profile.avatarUrl} size={36} />
             <div className="min-w-0 flex-1 text-left"><div className="text-sm font-semibold truncate" style={{ color: th.fg }}>{name}</div><div className="text-xs truncate" style={{ color: th.fg3 }}>{profile.profession || "Apprenant IA"}</div></div>
           </Link>
         </div>
       </aside>
+      )}
 
       <div className="main-layout-main flex-1 min-w-0 flex flex-col relative z-10 overflow-hidden">
         {/* Seul le bouton flotte au-dessus de la page, sans bandeau opaque. */}
-        <button aria-label="Ouvrir le menu" aria-expanded={navOpen} className={cx("fixed left-3 z-30 w-9 h-9 rounded-full flex items-center justify-center shrink-0 lg:hidden", isImpersonating ? "top-[calc(env(safe-area-inset-top)+52px)]" : "top-[calc(env(safe-area-inset-top)+0.75rem)]")} style={{ background: th.card, border: `1px solid ${th.inputB}`, boxShadow: "0 6px 18px rgba(0,0,0,0.14)" }} onClick={() => setNavOpen(true)}>
-          <Menu className="w-4 h-4" style={{ color: th.fg3 }} />
+        {sidebarHidden ? (
+          <header className="shrink-0 flex items-center justify-between gap-3 px-4 sm:px-6 lg:px-8 pt-[calc(env(safe-area-inset-top)+0.75rem)] pb-1">
+            <Link to="/" className="transition-opacity hover:opacity-80" title={isStaff(role) ? "Changer d'espace (CPF / Entreprise)" : "Accueil"}>
+              <Logo h={22} />
+            </Link>
+            <button type="button" onClick={() => void signOut()} className="sweep inline-flex items-center gap-1.5 rounded-[2px] px-3 min-h-9 text-xs font-semibold"
+              style={{ color: th.fg, border: `1px solid ${th.ink}` }}>
+              <LogOut className="w-3.5 h-3.5" />Déconnexion
+            </button>
+          </header>
+        ) : (
+        <button aria-label="Ouvrir le menu" aria-expanded={navOpen} className={cx("fixed left-3 z-30 h-10 px-3 gap-2 rounded-[2px] flex items-center justify-center shrink-0 text-[13px] font-semibold lg:hidden", isImpersonating ? "top-[calc(env(safe-area-inset-top)+52px)]" : "top-[calc(env(safe-area-inset-top)+0.75rem)]")} style={{ background: th.card, border: `1px solid ${th.ink}`, color: th.fg }} onClick={() => setNavOpen(true)}>
+          <Menu className="w-4 h-4" />Menu
         </button>
+        )}
 
         {/* En défilement document, cet espace initial part avec le contenu. */}
-        <div className="main-layout-content flex-1 min-h-0 flex flex-col overflow-hidden pt-[calc(env(safe-area-inset-top)+2.5rem)] lg:pt-0">
+        <div className={cx("main-layout-content flex-1 min-h-0 flex flex-col overflow-hidden lg:pt-0", !sidebarHidden && "pt-[calc(env(safe-area-inset-top)+2.5rem)]")}>
           <Outlet />
         </div>
       </div>

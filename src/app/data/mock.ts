@@ -3,20 +3,28 @@
 // Chaque export ici correspond à une table du schéma (voir supabase/migrations).
 // ═══════════════════════════════════════════════════════════════════════════
 import {
-  BarChart3, BookOpen, Code2, Calendar, User,
+  BarChart3, BookOpen, Code2, Calendar, User, Home,
   Monitor, Headphones, FileText, Bot, Sparkles, LayoutGrid,
   type LucideIcon,
 } from "lucide-react";
 import type { NavId } from "@/app/types";
 
-export const NAV_ITEMS: { id: NavId; Icon: LucideIcon; label: string; path: string }[] = [
-  { id: "dashboard", Icon: BarChart3,  label: "Tableau de bord", path: "/dashboard" },
-  { id: "lessons",   Icon: BookOpen,   label: "Mes leçons",      path: "/lessons" },
-  { id: "practice",  Icon: Code2,      label: "Exercez-vous !",  path: "/practice" },
-  { id: "studio",    Icon: Sparkles,   label: "Le Studio",       path: "/studio" },
-  { id: "hub",       Icon: LayoutGrid, label: "Hub IA",          path: "/hub" },
-  { id: "agent",     Icon: Bot,        label: "Mon Agent IA",    path: "/agent" },
-  { id: "calendar",  Icon: Calendar,   label: "Rendez-vous",     path: "/calendar" },
+// Parcours apprenant groupé par intention (cf. MainLayout) : apprendre,
+// pratiquer, être accompagné. `group` n'est affiché que pour les élèves CPF.
+export type NavGroup = "learn" | "practice" | "support";
+export const NAV_GROUP_LABELS: Record<NavGroup, string> = {
+  learn: "Apprendre",
+  practice: "Pratiquer",
+  support: "Être accompagné",
+};
+export const NAV_ITEMS: { id: NavId; Icon: LucideIcon; label: string; path: string; group?: NavGroup }[] = [
+  { id: "dashboard", Icon: Home,       label: "Accueil",         path: "/dashboard", group: "learn" },
+  { id: "lessons",   Icon: BookOpen,   label: "Mes leçons",      path: "/lessons",   group: "learn" },
+  { id: "practice",  Icon: Code2,      label: "Exercices",       path: "/practice",  group: "practice" },
+  { id: "studio",    Icon: Sparkles,   label: "Le Studio",       path: "/studio",    group: "practice" },
+  { id: "hub",       Icon: LayoutGrid, label: "Hub IA",          path: "/hub",       group: "practice" },
+  { id: "agent",     Icon: Bot,        label: "Mon Agent IA",    path: "/agent",     group: "support" },
+  { id: "calendar",  Icon: Calendar,   label: "Rendez-vous",     path: "/calendar",  group: "support" },
   { id: "profile",   Icon: User,       label: "Mon profil",      path: "/profile" },
 ];
 

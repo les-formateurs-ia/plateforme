@@ -48,8 +48,8 @@ export function ResetStudentStatsButton({ studentId, studentName, onReset }: { s
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-opacity hover:opacity-80"
-        style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.3)", color: "#ef4444" }}
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-[2px] text-sm font-semibold transition-opacity hover:opacity-80"
+        style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.3)", color: th.danger }}
       >
         <RotateCcw className="w-4 h-4" />Réinitialiser les statistiques
       </button>
@@ -68,7 +68,7 @@ export function ResetStudentStatsButton({ studentId, studentName, onReset }: { s
               <p className="font-bold mb-1.5" style={{ color: th.fg }}>Sera réinitialisé</p>
               <ul className="space-y-1">
                 {RESET_ITEMS.map((item) => (
-                  <li key={item} className="flex gap-2" style={{ color: th.fg2 }}><X className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "#ef4444" }} />{item}</li>
+                  <li key={item} className="flex gap-2" style={{ color: th.fg2 }}><X className="w-4 h-4 mt-0.5 shrink-0" style={{ color: th.danger }} />{item}</li>
                 ))}
               </ul>
             </div>
@@ -76,17 +76,17 @@ export function ResetStudentStatsButton({ studentId, studentName, onReset }: { s
               <p className="font-bold mb-1.5" style={{ color: th.fg }}>Sera conservé</p>
               <ul className="space-y-1">
                 {KEPT_ITEMS.map((item) => (
-                  <li key={item} className="flex gap-2" style={{ color: th.fg2 }}><Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "#22c55e" }} />{item}</li>
+                  <li key={item} className="flex gap-2" style={{ color: th.fg2 }}><Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: th.success }} />{item}</li>
                 ))}
               </ul>
             </div>
           </div>
 
           <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2">
-            <button type="button" onClick={() => setOpen(false)} disabled={resetting} className="px-4 py-2.5 rounded-full text-sm font-semibold transition-opacity hover:opacity-70 disabled:opacity-40" style={{ color: th.fg2 }}>
+            <button type="button" onClick={() => setOpen(false)} disabled={resetting} className="px-4 py-2.5 rounded-[2px] text-sm font-semibold transition-opacity hover:opacity-70 disabled:opacity-40" style={{ color: th.fg2 }}>
               Annuler
             </button>
-            <button type="button" onClick={confirm} disabled={resetting} className="px-4 py-2.5 rounded-full text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60" style={{ background: "#ef4444" }}>
+            <button type="button" onClick={confirm} disabled={resetting} className="px-4 py-2.5 rounded-[2px] text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60" style={{ background: "#ef4444" }}>
               {resetting ? "Réinitialisation…" : "Confirmer la réinitialisation"}
             </button>
           </div>

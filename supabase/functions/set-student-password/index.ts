@@ -1,6 +1,7 @@
 // Définit à la main le mot de passe d'un élève (Collaborateurs d'une
-// entreprise → icône clé). Réservé à l'admin, comme update-student-email et
-// generate-password-link : ça touche l'identifiant de connexion réel.
+// entreprise → icône clé). Admin pour tout élève ; formateur uniquement pour
+// les collaborateurs d'une entreprise. Aucune règle de complexité : le staff
+// choisit librement (seules les limites de Supabase Auth s'appliquent).
 // Nécessite la clé service-role (auth.admin.updateUserById).
 //
 // Pour un collaborateur entreprise, must_onboard est aussi levé : sinon, à sa
@@ -10,8 +11,8 @@
 // activé". Les élèves CPF gardent leur must_onboard : il pilote leur
 // formulaire d'inscription, pas le mot de passe.
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
-import { CORS_HEADERS, jsonResponse, getCallerRole } from "../_shared/podcast-utils.ts";
-import { passwordProblem } from "../_shared/password-policy.ts";
+import { CORS_HEADERS, jsonResponse, getCallerRole, isStaffRole } from "../_shared/podcast-utils.ts";
+import { staffPasswordProblem } from "../_shared/password-policy.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
@@ -34,7 +35,7 @@ Deno.serve(async (req) => {
     if (userErr || !userData?.user) return jsonResponse({ error: "Session invalide." }, 401);
 
     const role = await getCallerRole(userClient, userData.user.id);
-    if (role !== "admin") return jsonResponse({ error: "Réservé aux administrateurs." }, 403);
+    if (!isStaffRole(role)) return jsonResponse({ error: "Réservé aux administrateurs et formateurs." }, 403);
 
     const serviceClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
@@ -46,20 +47,29 @@ Deno.serve(async (req) => {
     if (targetErr) return jsonResponse({ error: targetErr.message }, 500);
     if (!target) return jsonResponse({ error: "Élève introuvable." }, 404);
     if (target.role !== "student") return jsonResponse({ error: "Réservé aux comptes élèves." }, 400);
+    if (role !== "admin" && !target.company_id) return jsonResponse({ error: "Réservé aux collaborateurs d'une entreprise." }, 403);
 
     // L'email de connexion fait foi (auth.users), pas la copie de profiles.
     const { data: authUser, error: authErr } = await serviceClient.auth.admin.getUserById(studentId);
     if (authErr || !authUser?.user?.email) return jsonResponse({ error: "Compte de connexion introuvable pour cet élève." }, 404);
 
-    const problem = passwordProblem(password, authUser.user.email);
+    const problem = staffPasswordProblem(password);
     if (problem) return jsonResponse({ error: problem }, 400);
 
-    const { error: updateErr } = await serviceClient.auth.admin.updateUserById(studentId, { password });
+    // Un collaborateur invité qui n'a jamais cliqué son lien a un email non
+    // confirmé : Supabase Auth refuserait la connexion ("Email not confirmed").
+    // Le staff lui transmet ses identifiants à la main, on confirme donc l'email.
+    const { error: updateErr } = await serviceClient.auth.admin.updateUserById(studentId, { password, email_confirm: true });
     if (updateErr) return jsonResponse({ error: updateErr.message }, 400);
 
     if (target.company_id) {
       const { error: onboardErr } = await serviceClient.from("profiles").update({ must_onboard: false }).eq("id", studentId);
       if (onboardErr) return jsonResponse({ error: onboardErr.message }, 500);
+      const { error: statusErr } = await serviceClient
+        .from("company_employees")
+        .update({ password_set_manually_at: new Date().toISOString() })
+        .eq("profile_id", studentId);
+      if (statusErr) return jsonResponse({ error: statusErr.message }, 500);
     }
 
     // Un lien "Définir votre mot de passe" en cours écraserait ce mot de passe : on l'annule.

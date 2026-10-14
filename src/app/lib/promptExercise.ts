@@ -28,6 +28,7 @@ export interface PromptExerciseSession {
   createdAt: string;
   lastAttemptAt: string | null;
   lastScore: number | null;
+  bestScore: number | null;
   preview: string | null;
 }
 
@@ -89,6 +90,7 @@ export async function listPromptExerciseSessions(userId: string): Promise<Prompt
       createdAt: s.createdAt,
       lastAttemptAt: rows.length ? rows[rows.length - 1].createdAt : null,
       lastScore: rows.length ? rows[rows.length - 1].score : null,
+      bestScore: rows.length ? Math.max(...rows.map((r) => r.score)) : null,
       preview: rows.length ? rows[0].promptText.slice(0, 90) : null,
     };
   });

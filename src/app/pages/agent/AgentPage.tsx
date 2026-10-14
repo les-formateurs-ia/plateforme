@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
-import { Bot, Send, Plus, Sparkles, Phone, PhoneOff, Mic, AudioLines } from "lucide-react";
+import { Bot, Send, Plus, Sparkles, Phone, PhoneOff, Mic, MicOff, AudioLines } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
 import { useMyInstances } from "@/app/state/useMyInstances";
 import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
+import { NeuralField } from "@/app/components/particles/NeuralField";
 import { AgentOrb } from "@/app/components/agent/AgentOrb";
 import { cx } from "@/app/lib/cx";
 import {
@@ -27,6 +28,14 @@ function formatRelative(iso: string): string {
   if (days < 7) return `il y a ${days} j`;
   return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short" }).format(new Date(iso));
 }
+
+// Premières questions proposées quand la conversation est vide.
+const AGENT_STARTERS = [
+  "Résume ma dernière leçon",
+  "Donne-moi un exercice de prompt",
+  "Comment utiliser l'IA dans mon métier ?",
+  "Où en suis-je dans ma formation ?",
+];
 
 export function AgentPage() {
   const th = useTh();
@@ -48,7 +57,8 @@ export function AgentPage() {
   const [agentStatus, setAgentStatus] = useState<"idle" | "connecting" | "connected">("idle");
   const [agentMode, setAgentMode] = useState<"listening" | "speaking">("listening");
   const [agentError, setAgentError] = useState<string | null>(null);
-  const [pttActive, setPttActive] = useState(false);
+  const [userTalking, setUserTalking] = useState(false);
+  const [micMuted, setMicMuted] = useState(false);
   const voiceRef = useRef<GeminiVoiceSession | null>(null);
   // Filet contre une course démontage/connexion asynchrone — même correctif
   // que LessonPage.tsx (cf. son commentaire détaillé sur unmountedRef) :
@@ -86,7 +96,7 @@ export function AgentPage() {
     await voiceRef.current?.endSession();
     voiceRef.current = null;
     setAgentStatus("idle");
-    setPttActive(false);
+    setUserTalking(false);
   };
 
   // Change de conversation (ou retour à la liste) : on raccroche un éventuel
@@ -143,8 +153,8 @@ export function AgentPage() {
     navigate("/agent");
   };
 
-  const sendText = async () => {
-    const question = textInput.trim();
+  const sendText = async (override?: string) => {
+    const question = (override ?? textInput).trim();
     if (!question || sending || !user) return;
     setSending(true);
     setTextInput("");
@@ -187,8 +197,9 @@ export function AgentPage() {
         pedagogy_style: profile.tutor || "soft",
         conversation_id: convId,
         onConnect: () => setAgentStatus("connected"),
-        onDisconnect: () => { setAgentStatus("idle"); setPttActive(false); voiceRef.current = null; },
+        onDisconnect: () => { setAgentStatus("idle"); setUserTalking(false); voiceRef.current = null; },
         onModeChange: ({ mode }) => setAgentMode(mode),
+        onUserSpeakingChange: setUserTalking,
         onMessage: ({ source, message }) => {
           const role = source === "user" ? "user" : "ai";
           setMessages((m) => [...m, { id: `tmp-voice-${Date.now()}-${Math.random()}`, role, content: message, modality: "voice", isOffTopic: false, createdAt: new Date().toISOString() }]);
@@ -204,7 +215,7 @@ export function AgentPage() {
         return;
       }
       voiceRef.current = session;
-      session.setMicMuted(true);
+      setMicMuted(false);
     } catch (err) {
       console.error(err);
       setAgentStatus("idle");
@@ -214,16 +225,13 @@ export function AgentPage() {
     }
   };
 
-  const startPushToTalk = () => {
-    if (agentStatus !== "connected" || !voiceRef.current) return;
-    voiceRef.current.sendUserActivity();
-    voiceRef.current.setMicMuted(false);
-    setPttActive(true);
-  };
-  const stopPushToTalk = () => {
+  // Micro ouvert pendant tout l'appel (VAD automatique) ; ce bouton permet
+  // juste de le couper sans raccrocher.
+  const toggleMicMuted = () => {
     if (!voiceRef.current) return;
-    voiceRef.current.setMicMuted(true);
-    setPttActive(false);
+    const muted = !micMuted;
+    voiceRef.current.setMicMuted(muted);
+    setMicMuted(muted);
   };
 
   return (
@@ -231,9 +239,9 @@ export function AgentPage() {
       {/* Sidebar conversations */}
       <div className="w-full max-w-[300px] shrink-0 hidden md:flex flex-col border-r overflow-hidden" style={{ borderColor: th.sep }}>
         <div className="p-4 shrink-0 space-y-3">
-          <h2 className="text-lg font-black flex items-center gap-2" style={{ color: th.fg }}><Bot className="w-5 h-5" style={{ color: th.navAC }} /><GT>Mon Agent IA</GT></h2>
-          <button onClick={startNewConversation} className="w-full flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-opacity hover:opacity-90"
-            style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff" }}>
+          <h2 className="text-lg font-black flex items-center gap-2" style={{ color: th.fg }}><Bot className="w-5 h-5" />Mon Agent IA</h2>
+          <button onClick={startNewConversation} className="sweep w-full flex items-center gap-2 rounded-[2px] px-3.5 min-h-10 text-sm font-semibold"
+            style={{ background: th.ink, color: th.onInk }}>
             <Plus className="w-4 h-4" />Nouvelle conversation
           </button>
         </div>
@@ -269,7 +277,7 @@ export function AgentPage() {
           <div className="shrink-0 px-4 sm:px-6 py-3 flex items-center gap-2 flex-wrap" style={{ borderBottom: `1px solid ${th.sep}` }}>
             <span className="text-xs shrink-0" style={{ color: th.fg3 }}>Nouvelle conversation à propos de :</span>
             <select value={draftProjectId ?? instances[0]?.id ?? ""} onChange={(e) => setDraftProjectId(e.target.value || null)}
-              className="text-sm rounded-lg px-2.5 py-1.5 g-input" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg }}>
+              className="text-sm rounded-[4px] px-2.5 py-1.5 g-input" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg }}>
               {instances.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
             </select>
           </div>
@@ -278,23 +286,46 @@ export function AgentPage() {
         <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-5 space-y-3">
           {messagesLoading && <p className="text-sm text-center" style={{ color: th.fg3 }}>Chargement…</p>}
           {!messagesLoading && messages.length === 0 && (
-            <div className="h-full flex flex-col items-center justify-center gap-4 text-center py-10">
-              {agentStatus === "idle" ? (
-                <AgentOrb status="idle" size={64}><Sparkles className="w-6 h-6 text-white" style={{ opacity: 0.9 }} /></AgentOrb>
-              ) : (
-                <AgentOrb status={agentStatus} mode={agentMode} active={pttActive} size={96} />
-              )}
-              <p className="text-sm max-w-sm" style={{ color: th.fg3 }}>
-                Pose une question par écrit ou lance un appel vocal — ton agent connaît ta progression sur toutes tes formations et se souvient de vos échanges précédents.
-              </p>
+            <div className="relative h-full min-h-[420px] flex flex-col items-center justify-center gap-5 text-center py-10 overflow-hidden">
+              {/* Le réseau de la marque, qui s'active pendant l'appel vocal. */}
+              <NeuralField dark={th.isDark} density={3} band={0.5} center={0.42} active={agentStatus !== "idle"} className="opacity-70" />
+              {/* Voile : le texte reste lisible au-dessus du réseau. */}
+              <div aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(ellipse 46% 42% at 50% 50%, ${th.bg} 40%, transparent 100%)` }} />
+              <div className="relative flex flex-col items-center gap-5">
+                {agentStatus === "idle" ? (
+                  <AgentOrb status="idle" size={64}><Sparkles className="w-6 h-6 text-white" style={{ opacity: 0.9 }} /></AgentOrb>
+                ) : (
+                  <AgentOrb status={agentStatus} mode={agentMode} active={userTalking} size={96} />
+                )}
+                <div>
+                  <p className="eyebrow" style={{ color: th.fg3 }}>Ton agent IA</p>
+                  <p className="mt-2 text-[1.5rem] sm:text-[1.9rem] font-black leading-tight max-w-md" style={{ color: th.fg }}>Une question ? <GT>Demande-moi.</GT></p>
+                  <p className="mt-3 text-[15px] max-w-md leading-relaxed" style={{ color: th.fg2 }}>
+                    Par écrit ou par la voix : je connais ta progression sur toutes tes formations et je me souviens de nos échanges.
+                  </p>
+                </div>
+                {/* Questions pour démarrer (comme la démo de l'agent sur le site public). */}
+                {agentStatus === "idle" && (
+                  <div className="flex flex-wrap justify-center gap-2 max-w-lg">
+                    {AGENT_STARTERS.map((q) => (
+                      <button key={q} type="button" disabled={sending} onClick={() => void sendText(q)}
+                        className="px-3.5 py-2 rounded-full text-sm font-semibold transition-colors hover-fine:[border-color:var(--ink)]! disabled:opacity-50"
+                        style={{ border: `1px solid ${th.inputB}`, color: th.fg, background: th.bg }}>
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
           {messages.map((m) => (
             <div key={m.id} className={cx("flex", m.role === "user" ? "justify-end" : "justify-start")}>
               <div className="max-w-[85%] sm:max-w-[70%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-line flex items-start gap-2"
                 style={m.role === "user"
-                  ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", borderRadius: "16px 16px 4px 16px" }
-                  : { background: th.card, border: `1px solid ${th.sep}`, color: th.fg, borderRadius: "16px 16px 16px 4px" }}>
+                  ? { background: th.ink, color: th.onInk, borderRadius: "12px 12px 2px 12px" }
+                  // Réponse de l'agent cerclée du dégradé iris (démo de la plateforme sur le site public).
+                  : { background: `linear-gradient(${th.card},${th.card}) padding-box, ${th.iris} border-box`, border: "1.5px solid transparent", color: th.fg, borderRadius: "12px 12px 12px 2px" }}>
                 {m.modality === "voice" && <AudioLines className="w-3.5 h-3.5 shrink-0 mt-0.5 opacity-60" />}
                 <span>{m.content}</span>
               </div>
@@ -302,7 +333,7 @@ export function AgentPage() {
           ))}
           {sending && (
             <div className="flex justify-start" role="status" aria-live="polite">
-              <div className="rounded-2xl px-4 py-3 flex items-center gap-2.5" style={{ background: th.card, border: `1px solid ${th.sep}`, borderRadius: "16px 16px 16px 4px" }}>
+              <div className="px-4 py-3 flex items-center gap-2.5" style={{ background: `linear-gradient(${th.card},${th.card}) padding-box, ${th.iris} border-box`, border: "1.5px solid transparent", borderRadius: "12px 12px 12px 2px" }}>
                 <span className="flex items-center gap-1" aria-hidden="true">
                   {[0, 150, 300].map((delay) => (
                     <span key={delay} className="w-2 h-2 rounded-full animate-bounce" style={{ background: th.navAC, animationDelay: `${delay}ms` }} />
@@ -315,39 +346,38 @@ export function AgentPage() {
           <div ref={chatEnd} />
         </div>
 
-        {agentError && <div className="px-4 sm:px-6 pb-1 text-xs shrink-0" style={{ color: "#fbc2ad" }}>{agentError}</div>}
+        {agentError && <div className="px-4 sm:px-6 pb-1 text-xs shrink-0" style={{ color: th.danger }}>{agentError}</div>}
 
         <div className="shrink-0 px-4 sm:px-6 pb-5 pt-2 space-y-2.5">
           {(agentStatus !== "idle") && (
             <GCard className="px-4 py-2.5 flex items-center gap-3">
-              <AgentOrb status={agentStatus} mode={agentMode} active={pttActive} size={40} />
+              <AgentOrb status={agentStatus} mode={agentMode} active={userTalking} size={40} />
               <span className="text-xs flex-1" style={{ color: th.fg3 }}>
-                {agentStatus === "connecting" ? "Connexion à l'agent vocal…" : agentMode === "speaking" ? "L'agent parle…" : pttActive ? "Je t'écoute…" : "Maintiens le micro pour parler"}
+                {agentStatus === "connecting" ? "Connexion à l'agent vocal…" : agentMode === "speaking" ? "L'agent parle…" : micMuted ? "Micro coupé" : userTalking ? "Je t'écoute…" : "Parle, ton agent t'écoute"}
               </span>
               {agentStatus === "connected" && (
-                <button onPointerDown={(e) => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); startPushToTalk(); }}
-                  onPointerUp={stopPushToTalk} onPointerCancel={stopPushToTalk}
-                  className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95 select-none touch-none"
-                  style={{ background: pttActive ? "linear-gradient(135deg,#2792dc,#9ce6e6)" : th.inputBg, border: `1px solid ${th.inputB}` }}>
-                  <Mic className="w-4 h-4" style={{ color: pttActive ? "#06121c" : th.fg }} />
+                <button onClick={toggleMicMuted} aria-pressed={micMuted} title={micMuted ? "Réactiver le micro" : "Couper le micro"}
+                  className="w-9 h-9 rounded-[4px] flex items-center justify-center shrink-0 transition-all active:scale-95"
+                  style={{ background: micMuted ? th.inputBg : "linear-gradient(135deg,#2792dc,#9ce6e6)", border: `1px solid ${th.inputB}` }}>
+                  {micMuted ? <MicOff className="w-4 h-4" style={{ color: th.fg }} /> : <Mic className="w-4 h-4" style={{ color: "#06121c" }} />}
                 </button>
               )}
-              <button onClick={endVoiceCall} className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: "#e5484d" }}>
+              <button onClick={endVoiceCall} className="w-9 h-9 rounded-[4px] flex items-center justify-center shrink-0" style={{ background: "#e5484d" }}>
                 <PhoneOff className="w-4 h-4 text-white" />
               </button>
             </GCard>
           )}
           <div className="flex items-center gap-2">
             <button onClick={startVoiceCall} disabled={agentStatus !== "idle"} title="Démarrer un appel vocal"
-              className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 transition-opacity hover:opacity-90 disabled:opacity-40"
+              className="w-11 h-11 rounded-[4px] flex items-center justify-center shrink-0 transition-opacity hover:opacity-90 disabled:opacity-40"
               style={{ background: "linear-gradient(135deg,#2792dc,#9ce6e6)" }}>
               <Phone className="w-4 h-4 text-white" />
             </button>
             <input value={textInput} onChange={(e) => setTextInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && !sending && sendText()}
-              placeholder="Écris à ton agent…" className="flex-1 rounded-full px-4 py-3 text-sm g-input" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg }} />
-            <button onClick={sendText} disabled={!textInput.trim() || sending} className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 disabled:opacity-30"
-              style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})` }}>
-              <Send className="w-4 h-4 text-white" />
+              placeholder="Écris à ton agent…" className="flex-1 rounded-[4px] px-4 py-3 text-sm g-input" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg }} />
+            <button onClick={() => void sendText()} disabled={!textInput.trim() || sending} className="w-11 h-11 rounded-[4px] flex items-center justify-center shrink-0 disabled:opacity-30"
+              style={{ background: th.ink, color: th.onInk }}>
+              <Send className="w-4 h-4" />
             </button>
           </div>
         </div>

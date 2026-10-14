@@ -35,8 +35,8 @@ import { TUTOR_STYLES } from "@/app/data/mock";
 interface StudentProfile { id: string; first_name: string | null; last_name: string | null; email: string; phone: string | null; avatar_url: string | null; formateur_id: string | null; }
 
 const STATUS_LABEL: Record<EnrollmentStatus, { label: string; color: string; bg: string }> = {
-  active: { label: "Active", color: "#6adeb1", bg: "rgba(106,222,177,0.1)" },
-  paused: { label: "En pause", color: "#fbc2ad", bg: "rgba(251,194,173,0.1)" },
+  active: { label: "Active", color: "var(--success)", bg: "rgba(106,222,177,0.1)" },
+  paused: { label: "En pause", color: "var(--danger)", bg: "rgba(251,194,173,0.1)" },
   completed: { label: "Terminée", color: "#94A3B8", bg: "rgba(148,163,184,0.1)" },
 };
 
@@ -288,26 +288,26 @@ export function AdminStudentDetailPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-widest underline underline-offset-4 mb-1.5" style={{ color: th.fg3 }}>Prénom</label>
-                  <input value={firstNameDraft} onChange={(e) => setFirstNameDraft(e.target.value)} className="w-full rounded-xl px-3.5 py-2.5 text-sm g-input" />
+                  <input value={firstNameDraft} onChange={(e) => setFirstNameDraft(e.target.value)} className="w-full rounded-[4px] px-3.5 py-2.5 text-sm g-input" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-widest underline underline-offset-4 mb-1.5" style={{ color: th.fg3 }}>Âge</label>
-                  <input value={ageDraft} onChange={(e) => setAgeDraft(e.target.value)} type="number" className="w-full rounded-xl px-3.5 py-2.5 text-sm g-input" />
+                  <input value={ageDraft} onChange={(e) => setAgeDraft(e.target.value)} type="number" className="w-full rounded-[4px] px-3.5 py-2.5 text-sm g-input" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-widest underline underline-offset-4 mb-1.5" style={{ color: th.fg3 }}>Email</label>
-                  <input value={emailDraft} onChange={(e) => setEmailDraft(e.target.value)} type="email" className="w-full rounded-xl px-3.5 py-2.5 text-sm g-input" />
+                  <input value={emailDraft} onChange={(e) => setEmailDraft(e.target.value)} type="email" className="w-full rounded-[4px] px-3.5 py-2.5 text-sm g-input" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-widest underline underline-offset-4 mb-1.5" style={{ color: th.fg3 }}>Téléphone</label>
-                  <input value={phoneDraft} onChange={(e) => setPhoneDraft(e.target.value)} type="tel" className="w-full rounded-xl px-3.5 py-2.5 text-sm g-input" />
+                  <input value={phoneDraft} onChange={(e) => setPhoneDraft(e.target.value)} type="tel" className="w-full rounded-[4px] px-3.5 py-2.5 text-sm g-input" />
                 </div>
                 <div className="sm:col-span-2">
                   <label className="block text-xs font-bold uppercase tracking-widest underline underline-offset-4 mb-1.5" style={{ color: th.fg3 }}>Profession</label>
-                  <input value={professionDraft} onChange={(e) => setProfessionDraft(e.target.value)} className="w-full rounded-xl px-3.5 py-2.5 text-sm g-input" />
+                  <input value={professionDraft} onChange={(e) => setProfessionDraft(e.target.value)} className="w-full rounded-[4px] px-3.5 py-2.5 text-sm g-input" />
                 </div>
               </div>
-              {infoError && <p className="text-xs" style={{ color: "#fbc2ad" }}>{infoError}</p>}
+              {infoError && <p className="text-xs" style={{ color: th.danger }}>{infoError}</p>}
               <div className="flex items-center gap-2">
                 <ShimBtn sm onClick={saveInfo} disabled={infoSaving}>{infoSaving ? "Enregistrement…" : "Enregistrer"}</ShimBtn>
                 <VBtn sm onClick={cancelInfoEdit} disabled={infoSaving}>Annuler</VBtn>
@@ -339,7 +339,7 @@ export function AdminStudentDetailPage() {
                   onChange={(e) => setObjectiveDraft(e.target.value)}
                   rows={4}
                   placeholder="Décris l'objectif professionnel de l'élève…"
-                  className="w-full rounded-xl px-3.5 py-2.5 text-sm g-input resize-none"
+                  className="w-full rounded-[4px] px-3.5 py-2.5 text-sm g-input resize-none"
                 />
                 <div className="flex items-center gap-2">
                   <ShimBtn sm onClick={saveObjective} disabled={objectiveSaving}>{objectiveSaving ? "Enregistrement…" : "Enregistrer"}</ShimBtn>
@@ -365,7 +365,7 @@ export function AdminStudentDetailPage() {
                   onChange={(e) => setExperienceDraft(e.target.value)}
                   rows={5}
                   placeholder="Parcours, poste actuel, usage actuel de l'IA…"
-                  className="w-full rounded-xl px-3.5 py-2.5 text-sm g-input resize-none"
+                  className="w-full rounded-[4px] px-3.5 py-2.5 text-sm g-input resize-none"
                 />
                 <div className="flex items-center gap-2">
                   <ShimBtn sm onClick={saveExperience} disabled={experienceSaving}>{experienceSaving ? "Enregistrement…" : "Enregistrer"}</ShimBtn>
@@ -440,7 +440,7 @@ export function AdminStudentDetailPage() {
               <div key={inst.id} className="min-w-0 space-y-2.5">
                 <p className="text-sm font-semibold break-words" style={{ color: th.fg }}>{inst.name}</p>
                 <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0" style={{ background: sc.bg, color: sc.color, border: `1px solid ${sc.color}30` }}>{sc.label}</span>
+                <span className="text-[10px] font-bold px-2.5 py-1 rounded-[2px] shrink-0" style={{ background: sc.bg, color: sc.color, border: "1px solid transparent" }}>{sc.label}</span>
                 {admin && <button onClick={() => remove(inst.id)} title="Retirer" aria-label={`Retirer ${inst.name}`} className="shrink-0 p-1"><X className="w-4 h-4" style={{ color: th.fg3 }} /></button>}
                 </div>
                 <div className="min-w-0">

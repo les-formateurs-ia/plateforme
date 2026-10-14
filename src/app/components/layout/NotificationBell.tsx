@@ -118,10 +118,10 @@ export function NotificationBell() {
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
-        <button className="relative w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
+        <button className="relative w-9 h-9 rounded-[4px] flex items-center justify-center shrink-0" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
           <Bell className="w-4 h-4" style={{ color: th.fg3 }} />
           {unread > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full text-[9px] font-black flex items-center justify-center" style={{ background: "#fbc2ad", color: "#3a1f14" }}>
+            <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-[2px] text-[9px] font-black flex items-center justify-center" style={{ background: "#fbc2ad", color: "#3a1f14" }}>
               {unread > 9 ? "9+" : unread}
             </span>
           )}

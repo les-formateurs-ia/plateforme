@@ -16,10 +16,10 @@ export function ExerciseTagPill({ label, onRemove, active, onClick }: {
       className={clickable ? "cursor-pointer transition-opacity hover:opacity-80" : undefined}
       style={{
         display: "inline-flex", alignItems: "center", gap: 4,
-        fontSize: 10, fontWeight: 700, padding: "3px 9px", borderRadius: 999,
-        background: active ? `linear-gradient(135deg,${th.grad1},${th.grad2})` : `${th.gradShadow(0.12)}`,
-        color: active ? "#fff" : `${th.grad1}`,
-        border: active ? "1px solid transparent" : `1px solid ${th.gradShadow(0.3)}`,
+        fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 2,
+        background: active ? th.ink : "transparent",
+        color: active ? th.onInk : th.fg2,
+        border: `1px solid ${active ? th.ink : th.inputB}`,
       }}
     >
       {label}

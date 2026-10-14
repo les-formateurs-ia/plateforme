@@ -7,7 +7,7 @@ export type AgentOrbMode = "listening" | "speaking";
 interface AgentOrbProps {
   status: AgentOrbStatus;
   mode?: AgentOrbMode;
-  /** Micro tenu (push-to-talk) — bascule le dégradé vers l'émeraude "écoute". */
+  /** L'utilisateur parle — bascule le dégradé vers l'émeraude "écoute". */
   active?: boolean;
   size?: number;
   children?: ReactNode;
@@ -16,7 +16,7 @@ interface AgentOrbProps {
 // Représentation visuelle de l'agent vocal : un cercle qui respire au repos
 // (deux dégradés de marque — violet et corail — qui se fondent l'un dans
 // l'autre), grossit à la connexion, bascule en émeraude pendant que
-// l'utilisateur parle (micro tenu), et ondule quand l'agent répond.
+// l'utilisateur parle, et ondule quand l'agent répond.
 export function AgentOrb({ status, mode = "listening", active = false, size, children }: AgentOrbProps) {
   const th = useTh();
   const dimension = size ?? (status === "idle" ? 44 : 84);
@@ -41,7 +41,7 @@ export function AgentOrb({ status, mode = "listening", active = false, size, chi
         style={{
           borderRadius: "50%",
           animation: speaking ? "agent-orb-wobble 2.6s ease-in-out infinite" : "agent-orb-idle 3.4s ease-in-out infinite",
-          boxShadow: `0 4px 20px ${th.gradShadow(0.35)}`,
+          boxShadow: "none",
         }}
       >
         <div className="absolute inset-0" style={{ background: "linear-gradient(135deg,#b58de0,#dbacf0)" }} />

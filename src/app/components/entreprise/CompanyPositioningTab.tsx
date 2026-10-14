@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Plus, Trash2, CheckCircle2, Circle, Pencil, ClipboardList, Award, HelpCircle } from "lucide-react";
+import { Plus, Trash2, CheckCircle2, Circle, Pencil, ClipboardList, Award, HelpCircle, Upload, Download } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { Dialog, DialogContent } from "@/app/components/ui/dialog";
 import {
   ItemCard, ItemList, Toolbar, Pill, HueButton, IconAction, VisibilityToggle, EmptyState, Loading, ErrorText, DialogHero, SubCard, KitHeading,
-  useHue, SUCCESS,
+  GhostButton, useHue, SUCCESS,
 } from "@/app/components/entreprise/EntrepriseKit";
 import { useQuestionList, QuestionCardHeader, StickyEditorBar } from "@/app/components/entreprise/QuestionListEditor";
 import {
@@ -14,6 +14,7 @@ import {
   getPositioningQuestions, savePositioningQuestions, QUIZ_KIND_LABEL,
   type PositioningTestRow, type QuizQuestionDraft, type CompanyQuizKind,
 } from "@/app/lib/entreprise/companyPositioning";
+import { parseQuizCsv, downloadQuizCsvTemplate } from "@/app/lib/entreprise/quizCsv";
 
 const EMPTY_OPTION = () => ({ label: "", isCorrect: false });
 const EMPTY_QUESTION = (): QuizQuestionDraft => ({ question: "", explanation: "", options: [EMPTY_OPTION(), EMPTY_OPTION()] });
@@ -40,6 +41,7 @@ export function CompanyPositioningTab({ companyId, kind }: { companyId: string; 
   const questions = useQuestionList<QuizQuestionDraft>();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const csvInput = useRef<HTMLInputElement>(null);
 
   const load = async () => {
     setLoading(true);
@@ -79,6 +81,26 @@ export function CompanyPositioningTab({ companyId, kind }: { companyId: string; 
 
   const updateOptions = (qIndex: number, map: (options: QuizQuestionDraft["options"]) => QuizQuestionDraft["options"]) =>
     questions.update(qIndex, (q) => ({ options: map(q.options) }));
+
+  // Les questions importées remplacent l'éditeur s'il ne contient que des
+  // questions vides (nouveau quiz), sinon elles s'ajoutent à la suite.
+  const handleCsvImport = async (file: File) => {
+    try {
+      const { questions: imported, errors } = await parseQuizCsv(file);
+      if (!imported.length) {
+        setError(errors.length ? `Aucune question importée.\n${errors.slice(0, 5).join("\n")}` : "Le fichier ne contient aucune question.");
+        return;
+      }
+      const kept = questions.items.filter((q) => q.question.trim() || q.options.some((o) => o.label.trim()));
+      questions.reset([...kept, ...imported]);
+      if (!title.trim()) setTitle(file.name.replace(/\.[^.]+$/, ""));
+      setError(errors.length ? `${errors.length} ligne${errors.length > 1 ? "s" : ""} ignorée${errors.length > 1 ? "s" : ""} :\n${errors.slice(0, 5).join("\n")}${errors.length > 5 ? "\n…" : ""}` : null);
+      toast.success(`${imported.length} question${imported.length > 1 ? "s" : ""} importée${imported.length > 1 ? "s" : ""}. Vérifiez puis enregistrez.`);
+    } catch (err) {
+      console.error(err);
+      setError("Impossible de lire ce fichier CSV.");
+    }
+  };
 
   const handleSave = async () => {
     if (!user || !title.trim() || saving) return;
@@ -155,9 +177,21 @@ export function CompanyPositioningTab({ companyId, kind }: { companyId: string; 
           <DialogHero Icon={KindIcon} title={editingId ? "Modifier le quiz" : `Nouveau ${singular.toLowerCase()}`}
             desc={`${KIND_DESCRIPTION[kind]} Cochez la bonne réponse de chaque question.`} />
 
-          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Titre du quiz" className="w-full rounded-xl px-4 py-3 text-base font-semibold g-input" />
+          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Titre du quiz" className="w-full rounded-[4px] px-4 py-3 text-base font-semibold g-input" />
 
-          <div className="mt-2"><KitHeading>Questions ({questions.items.length})</KitHeading></div>
+          <div className="mt-2">
+            <KitHeading right={
+              <div className="flex items-center gap-2 flex-wrap">
+                <button type="button" onClick={downloadQuizCsvTemplate} className="inline-flex items-center gap-1 text-xs font-semibold hover:opacity-70" style={{ color: th.fg3 }}
+                  title="Format : question;reponse_1;…;reponse_5;bonne_reponse;explication">
+                  <Download className="w-3.5 h-3.5" />Modèle CSV
+                </button>
+                <GhostButton sm Icon={Upload} onClick={() => csvInput.current?.click()}>Importer un CSV</GhostButton>
+                <input ref={csvInput} type="file" accept=".csv,text/csv" className="hidden"
+                  onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ""; if (file) void handleCsvImport(file); }} />
+              </div>
+            }>Questions ({questions.items.length})</KitHeading>
+          </div>
 
           <div className="space-y-4">
             {questions.items.map((q, qIndex) => (
@@ -166,7 +200,7 @@ export function CompanyPositioningTab({ companyId, kind }: { companyId: string; 
                   <QuestionCardHeader index={qIndex} count={questions.items.length}
                     onMove={(delta) => questions.move(qIndex, delta)} onRemove={() => questions.remove(qIndex)} />
                   <input value={q.question} onChange={(e) => questions.update(qIndex, { question: e.target.value })} placeholder="Intitulé de la question"
-                    className="w-full rounded-xl px-3.5 py-2.5 text-sm font-semibold g-input mb-3" />
+                    className="w-full rounded-[4px] px-3.5 py-2.5 text-sm font-semibold g-input mb-3" />
                   <div className="space-y-2 mb-3">
                     {q.options.map((o, oIndex) => (
                       <div key={oIndex} className="flex items-center gap-2">
@@ -175,7 +209,7 @@ export function CompanyPositioningTab({ companyId, kind }: { companyId: string; 
                           {o.isCorrect ? <CheckCircle2 className="w-5 h-5" style={{ color: SUCCESS }} /> : <Circle className="w-5 h-5" style={{ color: th.fg3 }} />}
                         </button>
                         <input value={o.label} onChange={(e) => updateOptions(qIndex, (opts) => opts.map((x, j) => (j === oIndex ? { ...x, label: e.target.value } : x)))}
-                          placeholder={`Réponse ${oIndex + 1}`} className="flex-1 rounded-lg px-3 py-2 text-sm g-input"
+                          placeholder={`Réponse ${oIndex + 1}`} className="flex-1 rounded-[4px] px-3 py-2 text-sm g-input"
                           style={o.isCorrect ? { borderColor: "rgba(106,222,177,0.55)" } : undefined} />
                         <IconAction Icon={Trash2} onClick={() => updateOptions(qIndex, (opts) => opts.filter((_, j) => j !== oIndex))} title="Supprimer la réponse" />
                       </div>
@@ -184,14 +218,14 @@ export function CompanyPositioningTab({ companyId, kind }: { companyId: string; 
                       className="inline-flex items-center gap-1 text-sm font-semibold hover:opacity-70" style={{ color: h.text }}><Plus className="w-3.5 h-3.5" />Ajouter une réponse</button>
                   </div>
                   <textarea value={q.explanation} onChange={(e) => questions.update(qIndex, { explanation: e.target.value })} placeholder="Explication affichée après réponse (optionnel)"
-                    rows={2} className="w-full rounded-xl px-3 py-2 text-xs g-input resize-none" />
+                    rows={2} className="w-full rounded-[4px] px-3 py-2 text-xs g-input resize-none" />
                 </SubCard>
               </div>
             ))}
             {!questions.items.length && <p className="text-sm" style={{ color: th.fg3 }}>Aucune question pour l'instant.</p>}
           </div>
 
-          {error && <ErrorText>{error}</ErrorText>}
+          {error && <ErrorText><span className="whitespace-pre-line">{error}</span></ErrorText>}
           <StickyEditorBar onAdd={() => questions.add(EMPTY_QUESTION())}>
             <HueButton onClick={handleSave} disabled={!title.trim() || saving}>{saving ? "Enregistrement..." : "Enregistrer"}</HueButton>
           </StickyEditorBar>

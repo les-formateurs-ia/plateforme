@@ -29,7 +29,7 @@ export function ImpersonationBanner() {
       </span>
       <button
         onClick={handleReturn}
-        className="shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-opacity hover:opacity-90"
+        className="shrink-0 rounded-[2px] px-3.5 py-1.5 text-xs font-bold transition-opacity hover:opacity-90"
         style={{ background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.4)", color: "#fff" }}
       >
         Retour à mon compte

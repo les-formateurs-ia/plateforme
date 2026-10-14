@@ -309,17 +309,17 @@ export function HtmlExerciseEditDialog({
                     <p className="text-sm" style={{ color: th.fg3 }}>Aucun eleve pour l'instant.</p>
                   )}
                 </div>
-                {error && <p className="text-xs" style={{ color: "#fbc2ad" }}>{error}</p>}
+                {error && <p className="text-xs" style={{ color: th.danger }}>{error}</p>}
               </>
             ) : (
               <>
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.navAC }}>Nom</label>
-                  <input value={name} onChange={(e) => setName(e.target.value)} autoFocus placeholder="Ex. Landing page SaaS" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
+                  <input value={name} onChange={(e) => setName(e.target.value)} autoFocus placeholder="Ex. Landing page SaaS" className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.navAC }}>Consigne affichee a l'eleve</label>
-                  <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} placeholder="Ce que l'eleve doit faire dans cet exercice..." className="w-full rounded-xl px-4 py-2.5 text-sm g-input resize-none" />
+                  <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} placeholder="Ce que l'eleve doit faire dans cet exercice..." className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input resize-none" />
                 </div>
 
                 <div>
@@ -329,13 +329,13 @@ export function HtmlExerciseEditDialog({
                     onChange={(e) => setHtmlDraft(e.target.value)}
                     rows={12}
                     placeholder="Colle le code HTML ici (Ctrl+V)..."
-                    className="w-full rounded-xl px-4 py-3 text-xs g-input resize-none font-mono"
+                    className="w-full rounded-[4px] px-4 py-3 text-xs g-input resize-none font-mono"
                   />
-                  {fileError && <p className="text-xs mt-2 text-[#fbc2ad]">{fileError}</p>}
+                  {fileError && <p className="text-xs mt-2 text-[var(--danger)]">{fileError}</p>}
                   <div className="mt-2 flex items-center gap-2 flex-wrap">
                     <label className="cursor-pointer">
                       <input type="file" accept=".txt,.html,.htm,.docx" className="hidden" onChange={handleFileChange} />
-                      <span className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 hover:opacity-80"
+                      <span className="inline-flex items-center gap-1.5 rounded-[2px] px-4 py-2 text-sm font-semibold transition-all duration-200 hover:opacity-80"
                         style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(15,14,20,0.04)", border: `1px solid ${th.inputB}`, color: th.fg }}>
                         <Upload className="w-3.5 h-3.5" />Charger un fichier
                       </span>
@@ -353,9 +353,9 @@ export function HtmlExerciseEditDialog({
                       const active = visibility === v;
                       return (
                         <button key={v} type="button" onClick={() => setVisibility(v)}
-                          className="px-4 py-1.5 rounded-full text-xs font-bold transition-all"
+                          className="px-4 py-1.5 rounded-[2px] text-xs font-bold transition-all"
                           style={active
-                            ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff" }
+                            ? { background: th.ink, color: th.onInk }
                             : { color: th.fg2, background: "transparent" }}>
                           {label}
                         </button>
@@ -398,7 +398,7 @@ export function HtmlExerciseEditDialog({
                   </div>
                 )}
 
-                {error && <p className="text-xs" style={{ color: "#fbc2ad" }}>{error}</p>}
+                {error && <p className="text-xs" style={{ color: th.danger }}>{error}</p>}
               </>
             )}
           </div>
@@ -452,7 +452,7 @@ export function HtmlExerciseEditDialog({
                         {mine && (
                           <button type="button" onClick={() => void handleRemoveAssignee(s.id)} disabled={removingId === s.id}
                             title="Retirer l'accès à cet exercice"
-                            className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center shadow disabled:opacity-50"
+                            className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-[4px] flex items-center justify-center shadow disabled:opacity-50"
                             style={{ background: "#e5484d", color: "#fff" }}>
                             <X className="w-3 h-3" />
                           </button>
@@ -469,7 +469,7 @@ export function HtmlExerciseEditDialog({
         <DialogFooter className="flex items-center sm:justify-between gap-2">
           {isEditing ? (
             <VBtn sm onClick={handleDelete} disabled={busy}>
-              <span className="flex items-center gap-1.5" style={{ color: "#fbc2ad" }}><Trash2 className="w-3.5 h-3.5" />{deleting ? "Suppression..." : "Supprimer"}</span>
+              <span className="flex items-center gap-1.5" style={{ color: th.danger }}><Trash2 className="w-3.5 h-3.5" />{deleting ? "Suppression..." : "Supprimer"}</span>
             </VBtn>
           ) : <span />}
           <div className="flex items-center gap-2">

@@ -1402,6 +1402,7 @@ export interface Database {
           profile_id: string | null;
           invite_sent_at: string | null;
           invite_accepted_at: string | null;
+          password_set_manually_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -1414,6 +1415,7 @@ export interface Database {
           profile_id?: string | null;
           invite_sent_at?: string | null;
           invite_accepted_at?: string | null;
+          password_set_manually_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -1578,6 +1580,30 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["company_satisfaction_tests"]["Insert"]>;
+        Relationships: never[];
+      };
+      company_satisfaction_templates: {
+        Row: {
+          id: string;
+          title: string;
+          description: string | null;
+          questions: unknown[];
+          source_test_id: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          description?: string | null;
+          questions?: unknown[];
+          source_test_id?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["company_satisfaction_templates"]["Insert"]>;
         Relationships: never[];
       };
       company_satisfaction_questions: {

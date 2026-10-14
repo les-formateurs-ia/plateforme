@@ -104,6 +104,9 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: translateAuthError(updateErr) }, 400);
     }
 
+    // L'élève a choisi son mot de passe : il n'est plus "défini manuellement".
+    await serviceClient.from("company_employees").update({ password_set_manually_at: null }).eq("profile_id", claim.user_id);
+
     return jsonResponse({ ok: true, email });
   } catch {
     return jsonResponse({ error: "Erreur inattendue. Réessaie dans quelques instants." }, 500);

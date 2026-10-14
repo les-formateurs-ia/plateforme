@@ -65,7 +65,7 @@ function TtsCard({ gen, onRetry, retryDisabled }: { gen: MediaGeneration<StudioT
   const emotionLabel = gen.emotion ? TTS_EMOTIONS.find((e) => e.id === gen.emotion)?.label : null;
 
   return (
-    <div className="rounded-3xl overflow-hidden" style={{ background: th.card, border: `1px solid ${th.sep}`, boxShadow: "0 2px 10px rgba(0,0,0,0.18)" }}>
+    <div className="rounded-3xl overflow-hidden" style={{ background: th.card, border: `1px solid ${th.sep}` }}>
       <div className="relative w-full" style={{ minHeight: 96 }}>
         <div className="absolute inset-0 flex items-center justify-center" style={{ background: th.isDark ? "rgba(255,255,255,0.03)" : th.gradShadow(0.06) }}>
           <Volume2 className="w-7 h-7" style={{ color: th.fg3 }} />
@@ -75,12 +75,12 @@ function TtsCard({ gen, onRetry, retryDisabled }: { gen: MediaGeneration<StudioT
       <div className="p-4 space-y-2.5">
         <p className="text-sm line-clamp-3" style={{ color: th.fg }}>{gen.scriptText}</p>
         <div className="flex flex-wrap gap-1.5">
-          <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg3 }}>{voiceLabel}</span>
+          <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-[2px]" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg3 }}>{voiceLabel}</span>
           {emotionLabel && (
-            <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg3 }}>{emotionLabel}</span>
+            <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-[2px]" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg3 }}>{emotionLabel}</span>
           )}
           {gen.speed != null && gen.speed !== TTS_SPEED_RANGE.default && (
-            <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg3 }}>Vitesse ×{gen.speed}</span>
+            <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-[2px]" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg3 }}>Vitesse ×{gen.speed}</span>
           )}
         </div>
         {gen.status === "ready" && (
@@ -156,8 +156,8 @@ export function StudioTextToSpeechPage() {
       </button>
 
       <div>
-        <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif", color: th.fg }}>Du texte à l'audio</h2>
-        <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Convertis instantanément un script écrit en voix naturelle (Text-to-Speech).</p>
+        <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}>Du texte à l'audio</h2>
+        <p className="text-[15px] sm:text-base mt-2 max-w-3xl leading-relaxed" style={{ color: th.fg2 }}>Convertis instantanément un script écrit en voix naturelle (Text-to-Speech).</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-5 items-start">
@@ -240,9 +240,9 @@ export function StudioTextToSpeechPage() {
         <div>
           <div className="flex items-center gap-2 mb-3">
             <h3 className="text-sm font-black" style={{ color: th.fg }}>Vos créations audio</h3>
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg3 }}>{generations.length}</span>
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-[2px]" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg3 }}>{generations.length}</span>
             {pendingCount > 0 && (
-              <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg3 }}>
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-[2px]" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg3 }}>
                 <Loader2 className="w-3 h-3 animate-spin motion-reduce:animate-none" />{pendingCount} en cours
               </span>
             )}

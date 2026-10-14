@@ -17,6 +17,7 @@ import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
 import { VSelect } from "@/app/components/common/Select";
 import { cx } from "@/app/lib/cx";
 import { MediaGenerationPlaceholder } from "@/app/components/common/MediaGenerationPlaceholder";
+import { MediaThumbVideo } from "@/app/components/common/MediaThumbVideo";
 import { useMediaGenerations, type MediaGeneration } from "@/app/lib/useMediaGenerations";
 import { useGeneratedMedia } from "@/app/lib/useGeneratedMedia";
 import {
@@ -42,11 +43,11 @@ function DoublageCard({ gen, onOpen, onRetry, retryDisabled }: { gen: MediaGener
 
   return (
     <div onClick={gen.status === "ready" ? onOpen : undefined}
-      className={cx("group relative rounded-3xl overflow-hidden transition-transform mb-4 break-inside-avoid", gen.status === "ready" && "cursor-pointer hover:scale-[1.01]")}
+      className={cx("group relative rounded-3xl overflow-hidden transition-transform mb-4 break-inside-avoid", gen.status === "ready" && "cursor-pointer")}
       style={{ aspectRatio: "16 / 9", background: th.isDark ? "rgba(255,255,255,0.03)" : th.gradShadow(0.04), border: `1px solid ${th.sep}` }}>
       <MediaGenerationPlaceholder kind="video" ready={gen.status === "ready" && media.loaded && !error} error={error} onRetry={media.error ? media.retry : onRetry} retryDisabled={retryDisabled && !media.error} />
       {gen.status === "ready" && media.url && (
-        <video key={media.url} src={media.url} onLoadedData={media.onLoad} onError={media.onError} muted playsInline preload="auto" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 motion-reduce:transition-none group-hover:scale-105" />
+        <MediaThumbVideo url={media.url} onReady={media.onLoad} onError={media.onError} className="transition-transform duration-500 motion-reduce:transition-none group-hover:scale-105" />
       )}
       {gen.status === "ready" && (
         <span className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "rgba(10,10,16,0.55)", backdropFilter: "blur(4px)" }}>
@@ -134,10 +135,10 @@ export function StudioDoublagePage() {
 
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif", color: th.fg }}>Parlez n'importe quelle langue</h2>
-            <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>Upload une vidéo, choisis sa langue d'origine et la langue cible : l'IA transcrit, traduit et double automatiquement en resynchronisant les lèvres. Le rendu prend en général 1 à 5 minutes.</p>
+            <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}>Parlez n'importe quelle langue</h2>
+            <p className="text-[15px] sm:text-base mt-2 max-w-3xl leading-relaxed" style={{ color: th.fg2 }}>Upload une vidéo, choisis sa langue d'origine et la langue cible : l'IA transcrit, traduit et double automatiquement en resynchronisant les lèvres. Le rendu prend en général 1 à 5 minutes.</p>
           </div>
-          <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-full shrink-0" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg2 }}>
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-[2px] shrink-0" style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg2 }}>
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: generating ? th.fg3 : "#22c55e" }} />
             {generating ? "Génération en cours…" : "Génération disponible"}
           </span>
@@ -160,7 +161,7 @@ export function StudioDoublagePage() {
       </div>
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 px-4 sm:px-6 lg:px-8 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] sm:pb-[calc(env(safe-area-inset-bottom)+1.5rem)] pt-2">
-        <div className="pointer-events-auto rounded-3xl overflow-hidden max-w-[96%] mx-auto" style={{ background: th.card, border: `1px solid ${th.sep}`, boxShadow: "0 2px 10px rgba(0,0,0,0.18)" }}>
+        <div className="pointer-events-auto rounded-[10px] overflow-hidden max-w-[96%] mx-auto" style={{ background: th.card, border: `1px solid ${th.sep}`, boxShadow: "0 18px 40px -24px rgba(0,0,0,0.35)" }}>
           <div className="flex flex-wrap items-center gap-3 px-4 sm:px-5 py-3" style={{ borderBottom: `1px solid ${th.sep}` }}>
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold shrink-0" style={{ color: th.fg3 }}>Modèle</span>
@@ -181,12 +182,12 @@ export function StudioDoublagePage() {
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: "rgba(0,0,0,0.35)" }}>
                   <Eye className="w-4 h-4 text-white" />
                 </div>
-                <button onClick={(e) => { e.stopPropagation(); removeSourceVideo(); }} disabled={generating} className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center" style={{ background: "rgba(0,0,0,0.7)" }}>
+                <button onClick={(e) => { e.stopPropagation(); removeSourceVideo(); }} disabled={generating} className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-[4px] flex items-center justify-center" style={{ background: "rgba(0,0,0,0.7)" }}>
                   <X className="w-3 h-3 text-white" />
                 </button>
               </div>
             ) : (
-              <button onClick={() => fileInputRef.current?.click()} disabled={generating} className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold transition-all hover:opacity-80 disabled:opacity-50 shrink-0"
+              <button onClick={() => fileInputRef.current?.click()} disabled={generating} className="flex items-center gap-1.5 px-3.5 py-2 rounded-[2px] text-xs font-semibold transition-all hover:opacity-80 disabled:opacity-50 shrink-0"
                 style={{ background: th.inputBg, border: `1px dashed ${th.inputB}`, color: th.fg2 }}>
                 <Upload className="w-3.5 h-3.5" />Ajouter une vidéo<span className="opacity-70">(requis, {MAX_VIDEO_DURATION_S}s max)</span>
               </button>
@@ -209,7 +210,7 @@ export function StudioDoublagePage() {
       {sourcePreviewOpen && sourcePreview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.7)" }} onClick={() => setSourcePreviewOpen(false)}>
           <div onClick={(e) => e.stopPropagation()} className="max-w-lg w-full rounded-2xl overflow-hidden" style={{ background: th.card, border: `1px solid ${th.sep}` }}>
-            <video src={sourcePreview} controls autoPlay className="w-full max-h-[70vh]" style={{ background: "#000" }} />
+            <video src={sourcePreview} controls autoPlay playsInline className="w-full max-h-[70vh]" style={{ background: "#000" }} />
             <div className="p-5 space-y-2">
               <p className="text-sm" style={{ color: th.fg }}>Vidéo source utilisée pour le doublage.</p>
               <div className="pt-2"><VBtn sm onClick={() => setSourcePreviewOpen(false)}>Fermer</VBtn></div>
@@ -221,7 +222,7 @@ export function StudioDoublagePage() {
       {detail && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.7)" }} onClick={() => setDetail(null)}>
           <div onClick={(e) => e.stopPropagation()} className="max-w-lg w-full rounded-2xl overflow-hidden max-h-[85vh] overflow-y-auto" style={{ background: th.card, border: `1px solid ${th.sep}` }}>
-            {detailUrl && <video src={detailUrl} controls autoPlay className="w-full max-h-[60vh]" style={{ background: "#000" }} />}
+            {detailUrl && <video src={detailUrl} controls autoPlay playsInline className="w-full max-h-[60vh]" style={{ background: "#000" }} />}
             <div className="p-5 space-y-2">
               {detail.translatedText && (
                 <div>

@@ -14,6 +14,7 @@ export interface SatisfactionTestRow {
   title: string;
   isVisible: boolean;
   questionCount: number;
+  isGlobal: boolean; // déjà enregistré en questionnaire global
 }
 
 export interface SatisfactionOptionDraft { id?: string; label: string; }
@@ -45,7 +46,16 @@ export async function listSatisfactionTests(companyId: string): Promise<Satisfac
   const counts = new Map<string, number>();
   for (const q of questions ?? []) counts.set(q.test_id, (counts.get(q.test_id) ?? 0) + 1);
 
-  return tests.map((t) => ({ id: t.id, companyId: t.company_id, title: t.title, isVisible: t.is_visible, questionCount: counts.get(t.id) ?? 0 }));
+  const { data: templates, error: templatesError } = await supabase
+    .from("company_satisfaction_templates")
+    .select("source_test_id")
+    .in("source_test_id", tests.map((t) => t.id));
+  if (templatesError) throw templatesError;
+  const globalIds = new Set((templates ?? []).map((t) => t.source_test_id));
+
+  return tests.map((t) => ({
+    id: t.id, companyId: t.company_id, title: t.title, isVisible: t.is_visible, questionCount: counts.get(t.id) ?? 0, isGlobal: globalIds.has(t.id),
+  }));
 }
 
 export async function createSatisfactionTest(companyId: string, title: string, description: string | null, createdBy: string): Promise<string> {
@@ -178,6 +188,73 @@ async function saveQuestionOptions(questionId: string, options: SatisfactionOpti
       : await supabase.from("company_satisfaction_options").insert({ question_id: questionId, ...fields });
     if (error) throw error;
   }
+}
+
+// ── Questionnaires globaux (modèles réutilisables entre entreprises) ──────
+// Instantané jsonb sans id (cf. migration company_satisfaction_templates) :
+// "Utiliser" pré-remplit un nouveau questionnaire d'entreprise, qui reçoit
+// ses propres questions/options — le modèle et la copie restent indépendants.
+
+export interface SatisfactionTemplateRow {
+  id: string;
+  title: string;
+  description: string;
+  questions: SatisfactionQuestionDraft[];
+  createdBy: string | null;
+  updatedAt: string;
+}
+
+function toTemplateQuestions(questions: SatisfactionQuestionDraft[]): SatisfactionQuestionDraft[] {
+  return questions.filter((q) => q.question.trim()).map((q) => ({
+    question: q.question.trim(),
+    type: q.type,
+    isRequired: q.isRequired,
+    allowMultiple: q.type === "qcm" && q.allowMultiple,
+    followUpOn: q.type === "yes_no" ? q.followUpOn : null,
+    followUpLabel: q.type === "yes_no" && q.followUpOn ? q.followUpLabel.trim() : "",
+    options: q.type === "qcm" ? q.options.filter((o) => o.label.trim()).map((o) => ({ label: o.label.trim() })) : [],
+  }));
+}
+
+export async function listSatisfactionTemplates(): Promise<SatisfactionTemplateRow[]> {
+  const { data, error } = await supabase
+    .from("company_satisfaction_templates")
+    .select("id, title, description, questions, created_by, updated_at")
+    .order("updated_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map((t) => ({
+    id: t.id, title: t.title, description: t.description ?? "", createdBy: t.created_by, updatedAt: t.updated_at,
+    questions: (t.questions ?? []) as SatisfactionQuestionDraft[],
+  }));
+}
+
+// sourceTestId : questionnaire d'entreprise dont le modèle est issu — unique
+// en base, un même questionnaire ne peut être mis en global qu'une fois.
+export async function createSatisfactionTemplate(
+  title: string, description: string | null, questions: SatisfactionQuestionDraft[], createdBy: string, sourceTestId: string,
+): Promise<void> {
+  const { error } = await supabase
+    .from("company_satisfaction_templates")
+    .insert({ title, description, questions: toTemplateQuestions(questions), created_by: createdBy, source_test_id: sourceTestId });
+  if (error?.code === "23505") throw new Error("Ce questionnaire est déjà enregistré en global.");
+  if (error) throw error;
+}
+
+export async function updateSatisfactionTemplate(templateId: string, title: string, description: string | null, questions: SatisfactionQuestionDraft[]): Promise<void> {
+  const { data, error } = await supabase
+    .from("company_satisfaction_templates")
+    .update({ title, description, questions: toTemplateQuestions(questions) })
+    .eq("id", templateId)
+    .select("id");
+  if (error) throw error;
+  // RLS : une mise à jour refusée ne renvoie pas d'erreur, seulement 0 ligne.
+  if (!data?.length) throw new Error("Seul l'auteur de ce questionnaire global ou un administrateur peut le modifier.");
+}
+
+export async function deleteSatisfactionTemplate(templateId: string): Promise<void> {
+  const { data, error } = await supabase.from("company_satisfaction_templates").delete().eq("id", templateId).select("id");
+  if (error) throw error;
+  if (!data?.length) throw new Error("Seul l'auteur de ce questionnaire global ou un administrateur peut le supprimer.");
 }
 
 // ── Côté élève ────────────────────────────────────────────────────────────

@@ -172,8 +172,8 @@ export function AdminPlanningPage() {
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <h2 className="text-2xl font-black" style={{ fontFamily: "'Funnel Display',sans-serif" }}><GT>{isAdmin ? "Élèves & formateurs" : "Élèves"}</GT></h2>
-          <p className="text-sm mt-0.5" style={{ color: th.fg3 }}>{isAdmin ? "Gère les élèves et les formateurs de la plateforme." : "Tes élèves."}</p>
+          <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>{isAdmin ? "Élèves & formateurs" : "Élèves"}</GT></h2>
+          <p className="text-[15px] sm:text-base mt-2 max-w-3xl leading-relaxed" style={{ color: th.fg2 }}>{isAdmin ? "Gère les élèves et les formateurs de la plateforme." : "Tes élèves."}</p>
         </div>
         {(!isAdmin || tab === "etudiants") && (
           <ShimBtn sm onClick={openCreate}>
@@ -191,9 +191,9 @@ export function AdminPlanningPage() {
                 <button
                   key={t.id}
                   onClick={() => setTab(t.id)}
-                  className="px-7 py-3 rounded-full text-sm font-bold transition-all"
+                  className="px-7 py-3 rounded-[2px] text-sm font-bold transition-all"
                   style={active
-                    ? { background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, color: "#fff", boxShadow: `0 2px 12px ${th.gradShadow(0.35)}` }
+                    ? { background: th.ink, color: th.onInk, boxShadow: "none" }
                     : { color: th.fg2, background: "transparent" }}
                 >
                   {t.label}
@@ -233,15 +233,15 @@ export function AdminPlanningPage() {
           </DialogHeader>
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
-              <input value={firstName} onChange={(e) => setFirstName(e.target.value)} autoFocus placeholder="Prénom" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
-              <input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Nom" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
+              <input value={firstName} onChange={(e) => setFirstName(e.target.value)} autoFocus placeholder="Prénom" className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input" />
+              <input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Nom" className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input" />
             </div>
-            <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="email@exemple.com" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
-            <input value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" placeholder="Téléphone (optionnel)" className="w-full rounded-xl px-4 py-2.5 text-sm g-input" />
-            <textarea value={experience} onChange={(e) => setExperience(e.target.value)} rows={4} placeholder="Expérience professionnelle (optionnel)" className="w-full rounded-xl px-4 py-2.5 text-sm g-input resize-none" />
-            <textarea value={objective} onChange={(e) => setObjective(e.target.value)} rows={4} placeholder="Objectif professionnel (optionnel)" className="w-full rounded-xl px-4 py-2.5 text-sm g-input resize-none" />
+            <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="email@exemple.com" className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input" />
+            <input value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" placeholder="Téléphone (optionnel)" className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input" />
+            <textarea value={experience} onChange={(e) => setExperience(e.target.value)} rows={4} placeholder="Expérience professionnelle (optionnel)" className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input resize-none" />
+            <textarea value={objective} onChange={(e) => setObjective(e.target.value)} rows={4} placeholder="Objectif professionnel (optionnel)" className="w-full rounded-[4px] px-4 py-2.5 text-sm g-input resize-none" />
           </div>
-          {createError && <p className="text-xs" style={{ color: "#fbc2ad" }}>{createError}</p>}
+          {createError && <p className="text-xs" style={{ color: th.danger }}>{createError}</p>}
           <DialogFooter>
             <ShimBtn onClick={handleCreateStudent} disabled={!firstName.trim() || !email.trim() || creating}>
               {creating ? "Création…" : "Créer l'élève"}

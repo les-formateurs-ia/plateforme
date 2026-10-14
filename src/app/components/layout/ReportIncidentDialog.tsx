@@ -39,7 +39,7 @@ export function ReportIncidentDialog() {
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) reset(); }}>
       <button
         onClick={() => setOpen(true)}
-        className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+        className="w-9 h-9 rounded-[4px] flex items-center justify-center shrink-0"
         style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}
         title="Signaler un incident"
       >
@@ -62,7 +62,7 @@ export function ReportIncidentDialog() {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Qu'est-ce qui ne fonctionne pas ?"
               rows={4}
-              className="w-full rounded-xl px-3.5 py-2.5 text-sm g-input resize-none"
+              className="w-full rounded-[4px] px-3.5 py-2.5 text-sm g-input resize-none"
             />
           </div>
         </div>

@@ -42,11 +42,6 @@ function FeaturedQuizTile({ test, Icon, kindLabel, intro, variant, index, onStar
   const minutes = Math.max(1, Math.round(test.questionCount * 0.75));
   return (
     <Panel index={index} onClick={test.done ? undefined : onStart} halo={false}>
-      {/* Grand halo + icône géante en filigrane, comme les tuiles mais en plus ample. */}
-      <div className="pointer-events-none absolute -top-32 -right-24 w-[28rem] h-[28rem] rounded-full blur-3xl opacity-50 transition-opacity duration-300 group-hover:opacity-80"
-        style={{ background: `radial-gradient(circle, ${h.alpha(th.isDark ? 0.45 : 0.35)}, transparent 70%)` }} />
-      <Icon className="pointer-events-none absolute -bottom-16 right-6 w-72 h-72 -rotate-12 transition-transform duration-500 group-hover:rotate-0 group-hover:scale-105"
-        style={{ color: h.c1, opacity: th.isDark ? 0.07 : 0.09 }} strokeWidth={1.2} />
 
       <div className="relative min-h-[280px] p-6 sm:p-8 flex flex-col lg:flex-row lg:items-center gap-7">
         <div className="flex-1 min-w-0 flex flex-col gap-4">
@@ -64,7 +59,7 @@ function FeaturedQuizTile({ test, Icon, kindLabel, intro, variant, index, onStar
           </div>
           {!test.done && (
             <div className="pt-2">
-              <span className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-base font-bold transition-transform duration-200 group-hover:-translate-y-0.5"
+              <span className="inline-flex items-center gap-2 rounded-[2px] px-6 py-3 text-base font-bold transition-transform duration-200 group-hover:-translate-y-0.5"
                 style={{ background: h.gradient, color: "#fff", boxShadow: `0 10px 26px ${h.alpha(0.4)}`, textShadow: "0 1px 2px rgba(0,0,0,0.15)" }}>
                 Commencer<ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
               </span>
@@ -102,7 +97,7 @@ function FeaturedQuizTile({ test, Icon, kindLabel, intro, variant, index, onStar
   );
 }
 
-// ── Fichiers : chaque document présenté comme une feuille ─────────────────
+// ── Supports de cours : chaque document présenté comme une feuille ─────────────────
 
 function fileExtension(file: CompanyFileRow): string {
   const source = file.storagePath.split("/").pop() ?? file.name;
@@ -203,7 +198,7 @@ export function ExerciseTiles({ exercises, Icon, onOpen }: { exercises: CompanyH
   );
 }
 
-// ── Mes fichiers : catégorie obligatoire, puis envoi ──────────────────────
+// ── Espace de dépôt : catégorie obligatoire, puis envoi ──────────────────────
 
 const categoryMorphName = (id: string) => `kit-cat-${id}`;
 

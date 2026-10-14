@@ -2,11 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 import {
-  ChevronRight, ChevronLeft, Mic, Send,
-  Sparkles, MessageSquare, CheckCircle, X,
-  Lightbulb, Monitor, Loader2,
-  Network, RotateCcw, Play, Brain, Zap, Clock, PartyPopper, BookOpen, Headphones, Wand2, Bot, Code, Upload, Pencil, AudioLines, Video,
-  Phone, PhoneOff,
+  ChevronRight, ChevronLeft, Mic, Send, Sparkles, MessageSquare, CheckCircle, X, Lightbulb, Monitor, Loader2, Network, RotateCcw, Play, Brain, Zap, Clock, BookOpen, Headphones, Wand2, Bot, Code, Upload, Pencil, AudioLines, Video, Phone, PhoneOff,
 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { supabase } from "@/app/lib/supabase/client";
@@ -19,10 +15,9 @@ import { VBtn, ShimBtn } from "@/app/components/common/Buttons";
 import { cx } from "@/app/lib/cx";
 import type { ChatMsg } from "@/app/types";
 import {
-  getLessonDetail, ensureLessonStarted, addTimeSpent, submitQuiz, flattenLessons, QUIZ_PASS_THRESHOLD,
-  updateLessonCustomHtml, isLessonCompleted, isLessonInLockedModule, type LessonDetail, type QuizAnswer,
+  getLessonDetail, ensureLessonStarted, addTimeSpent, submitQuiz, flattenLessons, QUIZ_PASS_THRESHOLD, updateLessonCustomHtml, isLessonCompleted, isLessonInLockedModule, type LessonDetail, type QuizAnswer,
 } from "@/app/lib/learning";
-import { getMyPodcasts, getPodcastSignedUrl, requestPodcastGeneration, pollForPodcast, type Podcast } from "@/app/lib/podcasts";
+import { getMyPodcasts, getPodcastSignedUrl, generatePodcast, type Podcast, type PodcastProgress } from "@/app/lib/podcasts";
 import { PODCAST_FORMATS, type PodcastVariantId } from "@/app/lib/podcastFormats";
 import { getMyMindmap, requestMindmapGeneration, type MindmapTree } from "@/app/lib/mindmaps";
 import { findLatestConversationForInstance, getAgentMessages, sendAgentMessage, ensureConversation, insertAgentVoiceMessage } from "@/app/lib/agentChat";
@@ -32,6 +27,12 @@ import { injectPlatformAuth, injectAutoResize, injectMissionBridge, normalizeSma
 import { useHtmlTheme } from "@/app/lib/useHtmlTheme";
 import { getMySubmission, saveMissionDraft, submitMission, type MissionSubmission } from "@/app/lib/missionSubmissions";
 import { MindmapView } from "@/app/components/lesson/MindmapView";
+import { LessonPager } from "@/app/components/lesson/LessonPager";
+import { LessonVideo } from "@/app/components/lesson/LessonVideo";
+import { LessonPodcast } from "@/app/components/lesson/LessonPodcast";
+import { LessonVoiceAgent } from "@/app/components/lesson/LessonVoiceAgent";
+import { GT } from "@/app/components/common/GT";
+import { burst, sparkLine } from "@/app/lib/particles/burst";
 
 const DEFAULT_AI = "Je suis ton Copilote IA. Pose-moi n'importe quelle question sur cette leçon ou sur comment l'appliquer à ton métier 👋";
 
@@ -106,7 +107,8 @@ export function LessonPage() {
   const [agentStatus, setAgentStatus] = useState<"idle" | "connecting" | "connected">("idle");
   const [agentMode, setAgentMode] = useState<"listening" | "speaking">("listening");
   const [agentError, setAgentError] = useState<string | null>(null);
-  const [pttActive, setPttActive] = useState(false);
+  const [userTalking, setUserTalking] = useState(false);
+  const [micMuted, setMicMuted] = useState(false);
   const conversationRef = useRef<GeminiVoiceSession | null>(null);
   // Filet contre une course : startAgentCall est async (token + getUserMedia
   // + WebSocket peuvent prendre plus d'une seconde) — si le composant démonte
@@ -123,6 +125,14 @@ export function LessonPage() {
   const [podcastByVariant, setPodcastByVariant] = useState<Partial<Record<PodcastVariantId, PodcastVariantState>>>({});
   const [podcastLoading, setPodcastLoading] = useState(false);
   const [podcastGeneratingVariant, setPodcastGeneratingVariant] = useState<PodcastVariantId | null>(null);
+  const [podcastProgress, setPodcastProgress] = useState<PodcastProgress | null>(null);
+  // La génération est orchestrée par le navigateur : quitter la page l'interrompt.
+  useEffect(() => {
+    if (!podcastGeneratingVariant) return;
+    const warn = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [podcastGeneratingVariant]);
 
   const [avatarVideo, setAvatarVideo] = useState<AvatarVideo | null>(null);
   const [avatarVideoUrl, setAvatarVideoUrl] = useState<string | null>(null);
@@ -266,6 +276,18 @@ export function LessonPage() {
   const [quizResult, setQuizResult] = useState<{ score: number; passed: boolean } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [retaking, setRetaking] = useState(false);
+  // Leçon validée : gerbe de particules depuis le score, et la progression
+  // de l'en-tête lâche ses étincelles.
+  const scoreRef = useRef<HTMLParagraphElement>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!quizResult?.passed) return;
+    const t = window.setTimeout(() => {
+      if (scoreRef.current) burst(scoreRef.current, { count: 90 });
+      if (progressRef.current) sparkLine(progressRef.current, 1);
+    }, 180);
+    return () => window.clearTimeout(t);
+  }, [quizResult?.passed]);
   const [showFinishConfirm, setShowFinishConfirm] = useState(false);
   const [showQuizModal, setShowQuizModal] = useState(false);
 
@@ -442,23 +464,19 @@ export function LessonPage() {
   const handleGeneratePodcast = async (variant: PodcastVariantId) => {
     if (!lessonId || !user) return;
     setPodcastGeneratingVariant(variant);
-    const startedAt = Date.now();
+    setPodcastProgress({ step: "script" });
     try {
-      await requestPodcastGeneration(lessonId, variant);
-      toast.info("Génération du podcast en cours — ça peut prendre 1 à 2 minutes.");
-      const result = await pollForPodcast(user.id, lessonId, variant, startedAt);
-      if (!result) {
-        toast.error("La génération prend plus de temps que prévu. Réessaie dans un instant.");
-        return;
-      }
-      const audioUrl = await getPodcastSignedUrl(result.storagePath);
-      setPodcastByVariant((prev) => ({ ...prev, [variant]: { podcast: result, audioUrl } }));
-      toast.success("Podcast généré avec succès.");
+      const { storagePath, variant: done } = await generatePodcast(lessonId, variant, setPodcastProgress);
+      const result: Podcast = { variant: done, storagePath, transcript: "", createdAt: new Date().toISOString() };
+      const audioUrl = await getPodcastSignedUrl(storagePath);
+      setPodcastByVariant((prev) => ({ ...prev, [done]: { podcast: result, audioUrl } }));
+      toast.success("Ton épisode est prêt !");
     } catch (err) {
       console.error(err);
       toast.error(err instanceof Error ? err.message : "Impossible de générer le podcast.");
     } finally {
       setPodcastGeneratingVariant(null);
+      setPodcastProgress(null);
     }
   };
 
@@ -562,10 +580,11 @@ export function LessonPage() {
         onConnect: () => setAgentStatus("connected"),
         onDisconnect: () => {
           setAgentStatus("idle");
-          setPttActive(false);
+          setUserTalking(false);
           conversationRef.current = null;
         },
         onModeChange: ({ mode }) => setAgentMode(mode),
+        onUserSpeakingChange: setUserTalking,
         onMessage: ({ source, message }) => {
           setMsgs((prev) => [...prev, { role: source === "user" ? "user" : "ai", text: message }]);
           if (convId) void insertAgentVoiceMessage(convId, source === "user" ? "user" : "ai", message).catch(console.error);
@@ -582,10 +601,9 @@ export function LessonPage() {
         return;
       }
       conversationRef.current = conversation;
-      // Micro coupé par défaut : conversation en push-to-talk, on ne capte
-      // l'audio que pendant l'appui sur le bouton micro (cf. startPushToTalk).
-      conversation.setMicMuted(true);
-      setPttActive(false);
+      // Micro ouvert dès la connexion : échange naturel, Gemini détecte
+      // lui-même quand l'élève parle (cf. geminiVoice.ts).
+      setMicMuted(false);
     } catch (err) {
       console.error(err);
       setAgentStatus("idle");
@@ -603,24 +621,15 @@ export function LessonPage() {
     await conversationRef.current?.endSession();
     conversationRef.current = null;
     setAgentStatus("idle");
-    setPttActive(false);
+    setUserTalking(false);
   };
 
-  // Push-to-talk : le micro reste coupé tant qu'on ne maintient pas le
-  // bouton. sendUserActivity() prévient l'agent qu'on s'apprête à parler,
-  // ce qui l'aide à couper court à sa réponse en cours (barge-in) dès que
-  // le flux audio du micro arrive.
-  const startPushToTalk = () => {
-    if (agentStatus !== "connected" || !conversationRef.current) return;
-    conversationRef.current.sendUserActivity();
-    conversationRef.current.setMicMuted(false);
-    setPttActive(true);
-  };
-
-  const stopPushToTalk = () => {
+  // Bouton « muet » : l'élève peut couper son micro sans raccrocher.
+  const toggleMicMuted = () => {
     if (!conversationRef.current) return;
-    conversationRef.current.setMicMuted(true);
-    setPttActive(false);
+    const muted = !micMuted;
+    conversationRef.current.setMicMuted(muted);
+    setMicMuted(muted);
   };
 
   // Coupe l'appel si on quitte l'onglet Agent ou la page — pas de micro qui
@@ -630,7 +639,7 @@ export function LessonPage() {
       void conversationRef.current.endSession();
       conversationRef.current = null;
       setAgentStatus("idle");
-      setPttActive(false);
+      setUserTalking(false);
     }
   }, [tab]);
 
@@ -789,7 +798,7 @@ export function LessonPage() {
   if (lessonError || !lesson) {
     return (
       <div className="flex h-dvh flex-col items-center justify-center gap-3" style={{ background: th.bg }}>
-        <span className="text-sm text-[#fbc2ad]">{lessonError ?? "Leçon introuvable."}</span>
+        <span className="text-sm text-[var(--danger)]">{lessonError ?? "Leçon introuvable."}</span>
         <VBtn onClick={goBack}>Retour aux leçons</VBtn>
       </div>
     );
@@ -798,9 +807,9 @@ export function LessonPage() {
   return (
     <div className="flex flex-col h-dvh overflow-hidden" style={{ background: th.bg, fontFamily: "'Funnel Display',sans-serif" }}>
       <Background />
-      <div className="relative z-10 shrink-0 flex items-center justify-between gap-3 px-4 sm:px-6 py-3" style={{ borderBottom: `1px solid ${th.sep}`, background: th.topbar, backdropFilter: "blur(24px)" }}>
+      <div className="relative z-10 shrink-0 flex items-center justify-between gap-3 px-4 sm:px-6 py-3" style={{ borderBottom: `1px solid ${th.sep}`, background: th.topbar }}>
         <div className="flex items-center gap-4 min-w-0">
-          <button onClick={goBack} className="flex items-center gap-1.5 text-sm shrink-0 transition-colors hover:opacity-70" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />Mes leçons</button>
+          <button onClick={goBack} className="group flex items-center gap-1.5 text-sm font-semibold shrink-0 transition-colors hover-fine:text-[var(--ink)]" style={{ color: th.fg2 }}><ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" /><span className="ink-link">Mes leçons</span></button>
           <div className="w-px h-4 shrink-0 hidden sm:block" style={{ background: th.sep }} />
           <div className="hidden sm:flex items-center min-w-0">
             <span className="text-xs shrink-0" style={{ color: th.fg3 }}>{lesson.sectionTitle}</span><span className="text-xs mx-1 shrink-0" style={{ color: th.fg3 }}>›</span><span className="text-xs font-medium truncate" style={{ color: th.fg }}>{lesson.title}</span>
@@ -809,8 +818,8 @@ export function LessonPage() {
         <div className="flex items-center gap-3 sm:gap-4 shrink-0">
           <div className="hidden lg:flex items-center gap-2 text-xs" style={{ color: th.fg3 }}>
             Progression
-            <div className="w-28 h-1.5 rounded-full overflow-hidden" style={{ background: th.isDark ? "rgba(255,255,255,0.07)" : `${th.gradShadow(0.1)}` }}>
-              <div className="h-full rounded-full" style={{ width: `${overallPct}%`, background: `linear-gradient(90deg,${th.grad1},${th.grad2})` }} />
+            <div ref={progressRef} className="w-28 h-1.5 rounded-full overflow-hidden" style={{ background: th.navA }}>
+              <div className="h-full rounded-full" style={{ width: `${overallPct}%`, background: th.iris }} />
             </div>
             <span className="font-bold" style={{ color: th.navAC }}>{overallPct}%</span>
           </div>
@@ -820,7 +829,8 @@ export function LessonPage() {
 
       <div className="flex-1 flex overflow-hidden relative z-10">
         <div className="lesson-content-scroll flex-1 min-w-0 overflow-y-auto px-4 sm:px-8 lg:px-16 py-5 sm:py-6">
-          <h1 className="text-xl sm:text-2xl font-black mb-4" style={{ color: th.fg }}>{lesson.title}</h1>
+          {lesson.sectionTitle && <p className="eyebrow mb-2" style={{ color: th.fg3 }}>{lesson.sectionTitle}</p>}
+          <h1 className="text-[1.75rem] sm:text-[2.3rem] leading-[1.06] font-black mb-6 max-w-4xl" style={{ color: th.fg }}>{lesson.title}</h1>
 
           {lesson.isMission ? (
             <div className="pb-4">
@@ -838,7 +848,7 @@ export function LessonPage() {
               )}
 
               {missionSubmission?.status === "submitted" ? (
-                <div className="mt-5 rounded-2xl p-4 text-center text-sm font-semibold" style={{ background: "rgba(106,222,177,0.08)", border: "1px solid rgba(106,222,177,0.3)", color: "#6adeb1" }}>
+                <div className="mt-5 rounded-[6px] p-4 text-center text-sm font-semibold" style={{ background: "rgba(106,222,177,0.12)", color: th.success }}>
                   Mission envoyée — en attente de ton formateur.
                 </div>
               ) : (
@@ -850,14 +860,15 @@ export function LessonPage() {
             </div>
           ) : (
           <>
-          <div className="flex shrink-0 mb-4 rounded-2xl overflow-x-auto" style={{ background: th.card, border: `1px solid ${th.sep}` }}>
+          {/* Onglets soulignés (navigation du site public), actions à droite. */}
+          <div className="flex items-center shrink-0 mb-5 gap-x-6 overflow-x-auto overflow-y-hidden" role="tablist" style={{ borderBottom: `1px solid ${th.sep}` }}>
             {TABS.map(({ id, Icon, label }) => (
-              <button key={id} onClick={() => setTab(id)} className="flex items-center gap-2 px-3.5 sm:px-5 py-3.5 text-sm font-semibold transition-all border-b-2 -mb-px shrink-0 whitespace-nowrap"
-                style={{ borderColor: tab === id ? th.navAC : "transparent", color: tab === id ? th.navAC : th.fg3 }}>
+              <button key={id} role="tab" aria-selected={tab === id} onClick={() => setTab(id)} className="tab-link flex items-center gap-2 pt-2 pb-3 text-sm shrink-0 whitespace-nowrap transition-colors"
+                style={{ color: tab === id ? th.fg : th.fg3 }}>
                 <Icon className="w-3.5 h-3.5" />{label}
               </button>
             ))}
-            <div className="ml-auto flex items-center gap-3 pr-3 sm:pr-5 shrink-0">
+            <div className="ml-auto flex items-center gap-3 pb-2 pl-4 shrink-0">
               {lesson.durationMinutes && (
                 <span className="hidden sm:flex items-center gap-1.5 text-xs shrink-0 whitespace-nowrap" style={{ color: th.fg3 }}><Clock className="w-3.5 h-3.5" />{lesson.durationMinutes} min</span>
               )}
@@ -873,18 +884,18 @@ export function LessonPage() {
                     value={htmlDraft}
                     onChange={(e) => setHtmlDraft(e.target.value)}
                     placeholder="Colle le HTML ici (Ctrl+V)…"
-                    className="flex-1 w-full rounded-xl px-4 py-3 text-xs g-input resize-none font-mono"
+                    className="flex-1 w-full rounded-[4px] px-4 py-3 text-xs g-input resize-none font-mono"
                     style={{ minHeight: 0 }}
                   />
-                  {htmlFileError && <p className="text-xs text-[#fbc2ad]">{htmlFileError}</p>}
+                  {htmlFileError && <p className="text-xs text-[var(--danger)]">{htmlFileError}</p>}
                   <p className="text-[11px] leading-relaxed" style={{ color: th.fg3 }}>
                     Pour appeler l'IA sans exposer de clé : dans ce HTML, lis <code>window.__PLATFORM_AUTH__</code> (<code>supabaseUrl</code>, <code>supabaseAnonKey</code>, <code>accessToken</code>) et fais un POST JSON vers <code>{"{supabaseUrl}"}/functions/v1/ai-proxy</code> avec les headers <code>apikey</code> (=supabaseAnonKey) et <code>Authorization: Bearer {"{accessToken}"}</code>, et un corps <code>{"{ contents: [...] }"}</code> (format Gemini). La clé Gemini reste côté serveur.
                   </p>
                   <div className="flex items-center gap-3 flex-wrap gap-y-2">
                     <label className="cursor-pointer">
                       <input type="file" accept=".txt,.docx" className="hidden" onChange={handleHtmlFileChange} />
-                      <span className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 hover:opacity-80"
-                        style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : "rgba(15,14,20,0.04)", border: `1px solid ${th.inputB}`, color: th.fg }}>
+                      <span className="sweep inline-flex items-center gap-1.5 rounded-[2px] px-4 min-h-9 text-sm font-semibold"
+                        style={{ border: `1px solid ${th.ink}`, color: th.fg }}>
                         <Upload className="w-3.5 h-3.5" />Charger un fichier (.txt / .docx)
                       </span>
                     </label>
@@ -914,8 +925,8 @@ export function LessonPage() {
                     />
                   )}
                   {role === "admin" && (
-                    <button onClick={startEditHtml} className="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg"
-                      style={{ background: th.card, border: `1px solid ${th.sep}`, color: th.fg }}>
+                    <button onClick={startEditHtml} className="sweep absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-[2px] px-3.5 min-h-9 text-xs font-semibold"
+                      style={{ background: th.card, border: `1px solid ${th.ink}`, color: th.fg }}>
                       <Pencil className="w-3 h-3" />Modifier
                     </button>
                   )}
@@ -933,68 +944,18 @@ export function LessonPage() {
               )}
             </div>
           ) : tab === "agent" ? (
-            <div className="relative rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-6 p-8" style={{ height: "78vh", background: "#060410", border: `1px solid ${th.sep}` }}>
-              <div className="relative flex items-center justify-center shrink-0" style={{ width: 180, height: 180 }}>
-                {agentStatus === "connected" && agentMode === "speaking" && (
-                  <>
-                    <span className="absolute rounded-full" style={{ inset: 0, background: "linear-gradient(135deg,#2792dc,#9ce6e6)", animation: "agent-orb-ring 1.8s ease-out infinite" }} />
-                    <span className="absolute rounded-full" style={{ inset: 0, background: "linear-gradient(135deg,#2792dc,#9ce6e6)", animation: "agent-orb-ring 1.8s ease-out infinite", animationDelay: "0.6s" }} />
-                  </>
-                )}
-                <div className="relative rounded-full" style={{
-                  width: 140, height: 140,
-                  background: "linear-gradient(135deg,#2792dc,#9ce6e6)",
-                  boxShadow: "0 0 60px rgba(39,146,220,0.45)",
-                  transform: agentStatus === "connected" && agentMode === "speaking" ? "scale(1.16)" : "scale(1)",
-                  transition: "transform 450ms cubic-bezier(0.34,1.56,0.64,1)",
-                  animation: agentStatus === "connecting" ? "agent-orb-idle 1s ease-in-out infinite"
-                    : agentStatus === "idle" ? "agent-orb-idle 3.5s ease-in-out infinite"
-                    : "none",
-                }} />
-              </div>
-
-              <p className="text-sm -mt-2" style={{ color: th.fg3 }}>
-                {agentStatus === "connecting" ? "Connexion…"
-                  : agentStatus === "connected" ? (agentMode === "speaking" ? "L'agent parle…" : pttActive ? "Je t'écoute…" : "Maintiens le micro pour parler")
-                  : "Prêt à discuter"}
-              </p>
-
-              {agentError && <p className="text-xs text-[#fbc2ad] text-center max-w-sm">{agentError}</p>}
-
-              <div className="flex items-center gap-4 shrink-0">
-                <button
-                  onClick={agentStatus === "idle" ? startAgentCall : endAgentCall}
-                  disabled={agentStatus === "connecting"}
-                  className="flex items-center justify-center rounded-full transition-all duration-200 hover:opacity-90 active:scale-95 disabled:opacity-50"
-                  style={{ width: 48, height: 48, background: agentStatus === "idle" ? "linear-gradient(135deg,#b58de0,#dbacf0)" : "#e5484d" }}
-                  title={agentStatus === "idle" ? "Démarrer l'appel" : "Raccrocher"}
-                >
-                  {agentStatus === "idle" ? <Phone className="w-5 h-5 text-white" /> : <PhoneOff className="w-5 h-5 text-white" />}
-                </button>
-                <button
-                  onPointerDown={(e) => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); startPushToTalk(); }}
-                  onPointerUp={stopPushToTalk}
-                  onPointerCancel={stopPushToTalk}
-                  disabled={agentStatus !== "connected"}
-                  className="flex items-center justify-center rounded-full transition-all duration-150 active:scale-95 disabled:opacity-30 select-none touch-none"
-                  style={{
-                    width: 56, height: 56,
-                    background: pttActive ? "linear-gradient(135deg,#2792dc,#9ce6e6)" : "rgba(255,255,255,0.08)",
-                    border: `1px solid ${pttActive ? "transparent" : "rgba(255,255,255,0.15)"}`,
-                    boxShadow: pttActive ? "0 0 24px rgba(39,146,220,0.5)" : "none",
-                  }}
-                  title="Maintenir appuyé pour parler (push-to-talk)"
-                >
-                  <Mic className="w-5 h-5" style={{ color: pttActive ? "#06121c" : "#fff" }} />
-                </button>
-              </div>
-            </div>
+            <LessonVoiceAgent status={agentStatus} mode={agentMode} userTalking={userTalking} muted={micMuted} error={agentError}
+              onStart={() => void startAgentCall()} onEnd={() => void endAgentCall()} onToggleMute={toggleMicMuted} />
           ) : (
           <>
-          <div className="relative rounded-2xl overflow-hidden mb-5" style={{ paddingBottom: "40%", background: "#060410", border: `1px solid ${th.sep}` }}>
+          {tab === "podcast" ? (
+            <LessonPodcast episodes={podcastByVariant} loading={podcastLoading} generating={podcastGeneratingVariant} progress={podcastProgress}
+              onGenerate={(id) => void handleGeneratePodcast(id)} canRegenerate={isStaff(role)} />
+          ) : (
+          <div className="relative rounded-[10px] overflow-hidden mb-5" style={{ paddingBottom: tab === "video" || tab === "customVideo" ? "56.25%" : "40%", background: "#000", border: `1px solid ${th.sep}` }}>
             <div className="absolute inset-0 overflow-hidden">
               {tab === "video" && lesson.videoUrl && (
-                <video src={lesson.videoUrl} controls className="absolute inset-0 w-full h-full bg-black" />
+                <LessonVideo src={lesson.videoUrl} title={lesson.title} />
               )}
               {tab === "video" && !lesson.videoUrl && (
                 <>
@@ -1008,7 +969,7 @@ export function LessonPage() {
                 </>
               )}
               {tab === "customVideo" && lesson.customVideoUrl && (
-                <video src={lesson.customVideoUrl} controls className="absolute inset-0 w-full h-full bg-black" />
+                <LessonVideo src={lesson.customVideoUrl} title={`${lesson.title} (vidéo personnalisée)`} />
               )}
               {tab === "mindmap" && (
                 <div className="absolute inset-0" style={{ background: "#101017" }}>
@@ -1043,64 +1004,6 @@ export function LessonPage() {
                   )}
                 </div>
               )}
-              {tab === "podcast" && (() => {
-                const generatedVariants = Object.keys(podcastByVariant) as PodcastVariantId[];
-                const remainingFormats = PODCAST_FORMATS.filter((f) => !generatedVariants.includes(f.id));
-                return (
-                  <div className="absolute inset-0 overflow-y-auto p-6" style={{ background: "#101017" }}>
-                    <div className="max-w-md w-full mx-auto space-y-4">
-                      {podcastLoading && (
-                        <div className="text-center pt-6"><Headphones className="w-6 h-6 mx-auto mb-2 text-white/30" /><p className="text-sm text-white/60">Chargement…</p></div>
-                      )}
-
-                      {!podcastLoading && generatedVariants.map((variantId) => {
-                        const format = PODCAST_FORMATS.find((f) => f.id === variantId);
-                        const entry = podcastByVariant[variantId];
-                        if (!format || !entry) return null;
-                        const isGeneratingThis = podcastGeneratingVariant === variantId;
-                        return (
-                          <div key={variantId} className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)" }}>
-                            <div className="flex items-center gap-2 mb-2">
-                              <format.Icon className="w-4 h-4 text-white/50 shrink-0" />
-                              <span className="text-sm font-semibold text-white">{format.label}</span>
-                              {isStaff(role) && (
-                                <button onClick={() => handleGeneratePodcast(variantId)} disabled={podcastGeneratingVariant !== null}
-                                  className="ml-auto flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all hover:opacity-80 disabled:opacity-50 shrink-0"
-                                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff" }}>
-                                  <Wand2 className="w-3 h-3" />{isGeneratingThis ? "Génération…" : "Régénérer"}
-                                </button>
-                              )}
-                            </div>
-                            <audio src={entry.audioUrl} controls className="w-full" />
-                          </div>
-                        );
-                      })}
-
-                      {!podcastLoading && remainingFormats.length > 0 && (
-                        <div>
-                          <p className="text-sm text-white/60 mb-3 text-center">
-                            {generatedVariants.length === 0 ? "Choisis un format de podcast pour cette leçon :" : "Générer un autre format :"}
-                          </p>
-                          <div className="space-y-2">
-                            {remainingFormats.map(({ id, label, hint, Icon }) => (
-                              <button key={id} onClick={() => handleGeneratePodcast(id)} disabled={podcastGeneratingVariant !== null}
-                                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all hover:opacity-80 disabled:opacity-50"
-                                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.12)" }}>
-                                <Icon className="w-4 h-4 shrink-0 text-white/60" />
-                                <div className="min-w-0 flex-1">
-                                  <div className="text-sm font-semibold text-white">{label}</div>
-                                  <div className="text-xs text-white/40">{hint}</div>
-                                </div>
-                                {podcastGeneratingVariant === id && <span className="text-[11px] text-white/50 shrink-0">Génération…</span>}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })()}
               {tab === "avatar" && (
                 avatarVideoUrl ? (
                   <div className="absolute inset-0">
@@ -1122,7 +1025,7 @@ export function LessonPage() {
                       ) : avatarVideo?.status === "pending" ? (
                         <p className="text-sm text-white/60">Génération en cours…</p>
                       ) : avatarVideo?.status === "failed" ? (
-                        <p className="text-sm text-[#fbc2ad]">{avatarVideo.error ?? "Échec de la génération."}</p>
+                        <p className="text-sm text-[var(--danger)]">{avatarVideo.error ?? "Échec de la génération."}</p>
                       ) : (
                         <>
                           <p className="text-sm text-white/60">Pas encore de vidéo personnalisée pour cette leçon.</p>
@@ -1142,6 +1045,7 @@ export function LessonPage() {
               )}
             </div>
           </div>
+          )}
 
           <div className="space-y-5">
             {courseHtml && (
@@ -1171,22 +1075,26 @@ export function LessonPage() {
           )}
           </>
           )}
+          <LessonPager lessons={orderedLessons} states={course.lessonStates} currentId={lessonId} nextLocked={!nextLesson || !isCompleted} />
         </div>
 
         {/* Copilot */}
         {!lesson.isMission && (assistantOpen ? (
         <div className="fixed inset-0 z-30 bg-black/50 lg:bg-transparent p-4 lg:static lg:z-auto lg:p-0 lg:w-[27rem] lg:shrink-0 lg:py-6 lg:pr-6" onClick={(e) => { if (e.target === e.currentTarget) setAssistantOpen(false); }}>
-        <div className="h-full flex flex-col rounded-2xl overflow-hidden" style={{ background: `linear-gradient(165deg,${th.grad1},${th.grad2})`, border: "1px solid transparent", boxShadow: "0 12px 32px rgba(0,0,0,0.35)" }}>
+        {/* Panneau noir dans les deux thèmes (comme les sections sombres du site
+            public), signé d'un filet iris de la charte. */}
+        <div className="relative h-full flex flex-col rounded-[10px] overflow-hidden" style={{ background: "#000", border: `1px solid ${th.isDark ? "rgba(255,255,255,0.14)" : "#000"}`, boxShadow: "0 30px 60px -30px rgba(0,0,0,0.5)" }}>
+          <div aria-hidden className="absolute inset-x-0 top-0 h-[3px]" style={{ background: th.iris }} />
           <div className="shrink-0 px-5 py-4">
             <div className="flex items-center gap-2.5 mb-3">
               <Sparkles className="w-5 h-5 text-white shrink-0" />
               <div className="min-w-0 flex-1"><div className="text-base font-black text-white">Copilote IA</div><div className="text-[11px] truncate text-white/60">Ton formateur pour cette leçon</div></div>
               <span className="text-[10px] font-bold shrink-0 text-white/50">Bêta</span>
-              <button onClick={() => setAssistantOpen(false)} className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-colors hover:bg-white/10">
+              <button onClick={() => setAssistantOpen(false)} className="w-6 h-6 rounded-[4px] flex items-center justify-center shrink-0 transition-colors hover:bg-white/10">
                 <X className="w-4 h-4 text-white/70" />
               </button>
             </div>
-            <div className="rounded-xl px-3.5 py-3" style={{ background: "rgba(255,255,255,0.1)" }}>
+            <div className="rounded-[4px] px-3.5 py-3" style={{ border: "1px solid rgba(255,255,255,0.14)" }}>
               <p className="text-xs leading-relaxed text-white/85">💡 <strong>Pour {firstName} :</strong> Chaque concept → applique-le immédiatement en pratique.</p>
             </div>
           </div>
@@ -1195,7 +1103,7 @@ export function LessonPage() {
               <div key={i} className={cx("flex", m.role === "user" ? "justify-end" : "justify-start")}>
                 {m.role === "ai" && <div className="w-6 h-6 rounded-full flex items-center justify-center mr-2 mt-0.5 shrink-0" style={{ background: "rgba(255,255,255,0.15)" }}><Sparkles className="w-3 h-3 text-white" /></div>}
                 <div className="max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-line"
-                  style={m.role === "user" ? { background: "rgba(255,255,255,0.92)", color: `${th.grad1}`, fontWeight: 600, borderRadius: "16px 16px 4px 16px" } : { background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.9)", borderRadius: "16px 16px 16px 4px" }}>
+                  style={m.role === "user" ? { background: "#fff", color: "#000", fontWeight: 600, borderRadius: "12px 12px 2px 12px" } : { background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.9)", borderRadius: "12px 12px 12px 2px" }}>
                   {m.text}
                 </div>
               </div>
@@ -1207,8 +1115,8 @@ export function LessonPage() {
             <div className="text-[11px] font-bold mb-2.5 text-white/60">Actions rapides</div>
             <div className="space-y-2">
               {[{ Icon: MessageSquare, label: "Reformule simplement", cmd: "reformule simplement" }, { Icon: Lightbulb, label: "Exemple pour mon métier", cmd: "exemple concret métier" }, { Icon: Zap, label: "Crash test 2 min", cmd: "crash test" }].map(({ Icon, label, cmd }) => (
-                <button key={label} onClick={() => sendMsg(cmd)} className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left transition-colors hover:bg-white/15" style={{ background: "rgba(255,255,255,0.1)" }}>
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(255,255,255,0.15)" }}><Icon className="w-4 h-4 text-white" /></div>
+                <button key={label} onClick={() => sendMsg(cmd)} className="w-full flex items-center gap-3 px-3.5 py-3 rounded-[4px] text-left transition-colors hover-fine:bg-white/10" style={{ border: "1px solid rgba(255,255,255,0.14)" }}>
+                  <div className="w-8 h-8 rounded-[4px] flex items-center justify-center shrink-0" style={{ background: "rgba(255,255,255,0.1)" }}><Icon className="w-4 h-4 text-white" /></div>
                   <span className="text-sm font-semibold text-white">{label}</span>
                 </button>
               ))}
@@ -1217,33 +1125,37 @@ export function LessonPage() {
           <div className="px-5 pb-5 pt-1 shrink-0">
             <div className="flex gap-2">
               <input value={chatIn} onChange={e => setChatIn(e.target.value)} onKeyDown={e => e.key === "Enter" && !typing && sendMsg(chatIn)} placeholder="Pose ta question…"
-                className="flex-1 rounded-full px-4 py-2.5 text-sm text-white placeholder-white/40 outline-none" style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.15)" }} />
-              <button onClick={() => sendMsg(chatIn)} disabled={!chatIn.trim() || typing} className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 disabled:opacity-30" style={{ background: "#fff" }}>
-                <Send className="w-4 h-4" style={{ color: `${th.grad1}` }} />
+                className="flex-1 rounded-[4px] px-4 py-2.5 text-sm text-white placeholder-white/40 outline-none focus:border-white" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.2)" }} />
+              <button onClick={() => sendMsg(chatIn)} disabled={!chatIn.trim() || typing} aria-label="Envoyer" className="sweep w-10 h-10 rounded-[2px] flex items-center justify-center shrink-0 disabled:opacity-30" style={{ background: "#fff", color: "#000" }}>
+                <Send className="w-4 h-4" />
               </button>
             </div>
           </div>
         </div>
         </div>
         ) : (
-          <button onClick={() => setAssistantOpen(true)}
-            className="absolute right-6 top-20 z-20 w-11 h-11 rounded-full flex items-center justify-center shrink-0"
-            style={{ background: `linear-gradient(135deg,${th.grad1},${th.grad2})`, boxShadow: `0 4px 16px ${th.gradShadow(0.4)}` }}>
-            <Sparkles className="w-5 h-5 text-white" />
+          <button onClick={() => setAssistantOpen(true)} aria-label="Ouvrir le copilote IA"
+            className="sweep absolute right-6 top-20 z-20 w-11 h-11 rounded-[2px] flex items-center justify-center shrink-0"
+            style={{ background: th.ink, color: th.onInk }}>
+            <Sparkles className="w-5 h-5" />
           </button>
         ))}
       </div>
 
       {showFinishConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.7)" }} onClick={() => setShowFinishConfirm(false)}>
-          <div onClick={(e) => e.stopPropagation()} className="max-w-sm w-full rounded-2xl overflow-hidden p-6 text-center" style={{ background: th.card, border: `1px solid ${th.sep}` }}>
-            <PartyPopper className="w-8 h-8 mx-auto mb-3 text-[#6adeb1]" />
-            <p className="text-sm font-semibold mb-5" style={{ color: th.fg }}>
-              Félicitation pour cette leçon, testons maintenant tes connaissances pour vérifier si tu valides bien tous les acquis
+          <div onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="finish-title" className="relative max-w-md w-full rounded-[10px] overflow-hidden p-7 fade-up" style={{ background: th.card, border: `1px solid ${th.sep}` }}>
+            <div aria-hidden className="absolute inset-x-0 top-0 h-[3px]" style={{ background: th.iris }} />
+            <p className="eyebrow" style={{ color: th.fg3 }}>Fin de la leçon</p>
+            <h2 id="finish-title" className="mt-2 text-[1.6rem] font-black leading-tight" style={{ color: th.fg }}>Bien joué. Place au <GT>quiz</GT></h2>
+            <p className="mt-3 text-[15px] leading-relaxed" style={{ color: th.fg2 }}>
+              {lesson.questions.length > 0
+                ? <>{lesson.questions.length} question{lesson.questions.length > 1 ? "s" : ""} pour vérifier tes acquis. Il faut {QUIZ_PASS_THRESHOLD} % de bonnes réponses pour valider la leçon et débloquer la suivante.</>
+                : "Vérifions tes acquis avant de passer à la suite."}
             </p>
-            <div className="flex items-center justify-center gap-3">
-              <VBtn sm onClick={() => setShowFinishConfirm(false)}>Annuler</VBtn>
-              <ShimBtn sm onClick={() => { setShowFinishConfirm(false); setShowQuizModal(true); }}>Commencer le QCM</ShimBtn>
+            <div className="mt-7 flex items-center gap-3">
+              <ShimBtn onClick={() => { setShowFinishConfirm(false); setShowQuizModal(true); }}>Commencer le quiz</ShimBtn>
+              <button type="button" onClick={() => setShowFinishConfirm(false)} className="ink-link text-sm font-semibold" style={{ color: th.fg2 }}>Plus tard</button>
             </div>
           </div>
         </div>
@@ -1263,11 +1175,11 @@ export function LessonPage() {
                 <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${th.gradShadow(0.1)}`, border: `1px solid ${th.gradShadow(0.2)}` }}><Brain className="w-4 h-4" style={{ color: th.navAC }} /></div>
                 <span className="text-sm font-black flex-1" style={{ color: th.fg }}>Quiz de la leçon</span>
                 {lesson.questions.length > 0 && !quizResult && (retaking || currentLessonState?.state !== "completed") && (
-                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0" style={{ background: `${th.gradShadow(0.06)}`, color: th.navAC, border: `1px solid ${th.gradShadow(0.15)}` }}>
+                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-[2px] shrink-0" style={{ background: `${th.gradShadow(0.06)}`, color: th.navAC, border: `1px solid ${th.gradShadow(0.15)}` }}>
                     Question {quizStep + 1}/{lesson.questions.length}
                   </span>
                 )}
-                <button onClick={() => setShowQuizModal(false)} className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
+                <button onClick={() => setShowQuizModal(false)} className="w-6 h-6 rounded-[4px] flex items-center justify-center shrink-0 transition-colors hover:opacity-70" style={{ color: th.fg3 }}>
                   <X className="w-4 h-4" />
                 </button>
               </div>
@@ -1278,8 +1190,8 @@ export function LessonPage() {
 
               {lesson.questions.length > 0 && !quizResult && !retaking && currentLessonState?.state === "completed" && (
                 <div className="rounded-xl p-5 text-center" style={{ background: "rgba(106,222,177,0.08)", border: "1px solid rgba(106,222,177,0.3)" }}>
-                  <CheckCircle className="w-6 h-6 mx-auto mb-2 text-[#6adeb1]" />
-                  <p className="text-sm font-semibold mb-1" style={{ color: "#6adeb1" }}>Leçon déjà validée</p>
+                  <CheckCircle className="w-6 h-6 mx-auto mb-2 text-[var(--success)]" />
+                  <p className="text-sm font-semibold mb-1" style={{ color: th.success }}>Leçon déjà validée</p>
                   <p className="text-xs mb-4" style={{ color: th.fg3 }}>
                     {currentLessonState.progress?.bestQuizScore != null ? `Meilleur score : ${currentLessonState.progress.bestQuizScore}%` : ""}
                   </p>
@@ -1288,14 +1200,16 @@ export function LessonPage() {
               )}
 
               {lesson.questions.length > 0 && quizResult && (
-                <div className="rounded-xl p-5 text-center" style={{ background: quizResult.passed ? "rgba(106,222,177,0.08)" : "rgba(251,194,173,0.08)", border: `1px solid ${quizResult.passed ? "rgba(106,222,177,0.3)" : "rgba(251,194,173,0.3)"}` }}>
-                  {quizResult.passed ? <PartyPopper className="w-6 h-6 mx-auto mb-2 text-[#6adeb1]" /> : <X className="w-6 h-6 mx-auto mb-2 text-[#fbc2ad]" />}
-                  <p className="text-lg font-black mb-1" style={{ color: quizResult.passed ? "#6adeb1" : "#fbc2ad" }}>{quizResult.score}%</p>
-                  <p className="text-xs mb-4" style={{ color: th.fg3 }}>
-                    {quizResult.passed ? "Leçon validée — bravo !" : `Il faut au moins ${QUIZ_PASS_THRESHOLD}% pour valider cette leçon.`}
+                <div className="rounded-[6px] px-5 py-7 text-center" style={{ border: `1px solid ${th.sep}` }}>
+                  <p className="eyebrow" style={{ color: quizResult.passed ? th.success : th.danger }}>{quizResult.passed ? "Leçon validée" : "Pas encore"}</p>
+                  <p ref={scoreRef} className="mt-2 text-[3.2rem] leading-none font-black tabular-nums" style={{ color: th.fg }}>
+                    {quizResult.passed ? <GT>{quizResult.score}%</GT> : <>{quizResult.score}%</>}
+                  </p>
+                  <p className="text-sm mt-3 mb-5" style={{ color: th.fg2 }}>
+                    {quizResult.passed ? (nextLesson ? "Bravo ! La leçon suivante est débloquée." : "Bravo, c'était la dernière leçon de ce module.") : `Il faut au moins ${QUIZ_PASS_THRESHOLD} % pour valider cette leçon. Relis le cours, puis retente ta chance.`}
                   </p>
                   {quizResult.passed
-                    ? nextLesson && <VBtn onClick={() => navigate(`/lesson/${nextLesson.id}`)} sm><span className="flex items-center gap-2">Leçon suivante<ChevronRight className="w-3.5 h-3.5" /></span></VBtn>
+                    ? nextLesson && <ShimBtn onClick={() => navigate(`/lesson/${nextLesson.id}`)} sm><span className="flex items-center gap-2">Leçon suivante<ChevronRight className="w-3.5 h-3.5" /></span></ShimBtn>
                     : <VBtn onClick={retryQuiz} sm><span className="flex items-center gap-2"><RotateCcw className="w-3.5 h-3.5" />Réessayer le quiz</span></VBtn>}
                 </div>
               )}
@@ -1307,16 +1221,16 @@ export function LessonPage() {
                     {currentQuestion.options.map((opt, i) => {
                       let bg = th.isDark ? "rgba(255,255,255,0.03)" : th.inputBg, border = th.inputB, color = th.fg2;
                       if (selected !== null) {
-                        if (opt.isCorrect) { bg = "rgba(106,222,177,0.1)"; border = "rgba(106,222,177,0.35)"; color = "#6adeb1"; }
-                        else if (opt.id === selected) { bg = "rgba(251,194,173,0.1)"; border = "rgba(251,194,173,0.35)"; color = "#fbc2ad"; }
+                        if (opt.isCorrect) { bg = "rgba(106,222,177,0.14)"; border = "rgba(106,222,177,0.6)"; color = th.success; }
+                        else if (opt.id === selected) { bg = "rgba(251,194,173,0.14)"; border = "rgba(239,138,116,0.6)"; color = th.danger; }
                         else { bg = "transparent"; border = th.sep; color = th.fg3; }
                       }
                       return (
                         <button key={opt.id} onClick={() => selectOption(opt.id)}
-                          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-left transition-all"
+                          className="w-full flex items-center gap-3 px-4 py-3 rounded-[6px] text-sm text-left transition-colors hover-fine:[border-color:var(--ink)]!"
                           style={{ background: bg, border: `1px solid ${border}`, color }}>
                           <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{ background: th.isDark ? "rgba(255,255,255,0.06)" : `${th.gradShadow(0.06)}` }}>
-                            {selected !== null && opt.isCorrect ? <CheckCircle className="w-4 h-4 text-[#6adeb1]" /> : selected !== null && opt.id === selected ? <X className="w-4 h-4 text-[#fbc2ad]" /> : String.fromCharCode(65 + i)}
+                            {selected !== null && opt.isCorrect ? <CheckCircle className="w-4 h-4 text-[var(--success)]" /> : selected !== null && opt.id === selected ? <X className="w-4 h-4 text-[var(--danger)]" /> : String.fromCharCode(65 + i)}
                           </span>{opt.label}
                         </button>
                       );
@@ -1326,7 +1240,7 @@ export function LessonPage() {
                     <div className="rounded-xl p-4" style={{ background: "rgba(106,222,177,0.07)", border: "1px solid rgba(106,222,177,0.2)" }}>
                       {currentQuestion.explanation && (
                         <>
-                          <div className="flex items-center gap-1.5 mb-2 text-xs font-bold text-[#78d5e2]"><Lightbulb className="w-3.5 h-3.5" />Explication</div>
+                          <div className="flex items-center gap-1.5 mb-2 text-xs font-bold text-[var(--info)]"><Lightbulb className="w-3.5 h-3.5" />Explication</div>
                           <p className="text-xs leading-relaxed mb-3" style={{ color: th.fg2 }}>{currentQuestion.explanation}</p>
                         </>
                       )}

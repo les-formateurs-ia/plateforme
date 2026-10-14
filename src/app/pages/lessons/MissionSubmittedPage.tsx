@@ -34,7 +34,7 @@ export function MissionSubmittedPage() {
     <div className="relative flex h-dvh items-center justify-center p-4" style={{ background: th.bg, fontFamily: "'Funnel Display',sans-serif" }}>
       <Background />
       <div className="relative z-10 max-w-md w-full rounded-2xl p-8 text-center" style={{ background: th.card, border: `1px solid ${th.sep}` }}>
-        <PartyPopper className="w-10 h-10 mx-auto mb-4 text-[#6adeb1]" />
+        <PartyPopper className="w-10 h-10 mx-auto mb-4 text-[var(--success)]" />
         <h1 className="text-xl font-black mb-2" style={{ color: th.fg }}>Bravo, mission envoyée !</h1>
         <p className="text-sm leading-relaxed mb-1" style={{ color: th.fg2 }}>
           Tu viens de terminer le module {lesson ? <strong>"{lesson.sectionTitle}"</strong> : ""}.

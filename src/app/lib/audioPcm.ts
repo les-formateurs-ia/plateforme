@@ -59,15 +59,17 @@ export class MicCapture {
   private processor: ScriptProcessorNode;
   private stream: MediaStream;
 
-  constructor(stream: MediaStream, onChunk: (base64: string) => void, active: () => boolean) {
+  constructor(stream: MediaStream, onChunk: (base64: string, peak: number) => void, active: () => boolean) {
     this.stream = stream;
     this.ctx = new AudioContext();
     this.source = this.ctx.createMediaStreamSource(stream);
-    this.processor = this.ctx.createScriptProcessor(4096, 1, 1);
+    this.processor = this.ctx.createScriptProcessor(2048, 1, 1);
     this.processor.onaudioprocess = (e) => {
       if (!active()) return;
       const input = e.inputBuffer.getChannelData(0);
-      onChunk(encodePcm16Base64(input, this.ctx.sampleRate, 16000));
+      let peak = 0;
+      for (let i = 0; i < input.length; i++) peak = Math.max(peak, Math.abs(input[i]));
+      onChunk(encodePcm16Base64(input, this.ctx.sampleRate, 16000), peak);
     };
     this.source.connect(this.processor);
     // Un ScriptProcessorNode doit être connecté à une destination pour tourner
@@ -77,6 +79,14 @@ export class MicCapture {
     silentGain.gain.value = 0;
     this.processor.connect(silentGain);
     silentGain.connect(this.ctx.destination);
+  }
+
+  // Un AudioContext créé hors d'un geste utilisateur (ici : après les await
+  // du token et de getUserMedia) peut naître "suspended" — Safari le fait
+  // systématiquement — et onaudioprocess ne tourne alors jamais : aucun
+  // audio n'est envoyé. À rappeler depuis un handler de clic/appui.
+  resume() {
+    if (this.ctx.state === "suspended") void this.ctx.resume();
   }
 
   stop() {
@@ -97,6 +107,11 @@ export class PcmPlayer {
 
   constructor(sampleRate = 24000) {
     this.ctx = new AudioContext({ sampleRate });
+  }
+
+  // Cf. MicCapture.resume().
+  resume() {
+    if (this.ctx.state === "suspended") void this.ctx.resume();
   }
 
   push(base64: string) {

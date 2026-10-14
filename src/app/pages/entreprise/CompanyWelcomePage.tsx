@@ -4,9 +4,8 @@ import { KeyRound } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { supabase } from "@/app/lib/supabase/client";
-import { Background } from "@/app/components/common/Background";
-import { Logo } from "@/app/components/common/Logo";
-import { Panel, IconBadge, HueButton, ErrorText } from "@/app/components/entreprise/EntrepriseKit";
+import { AuthShell } from "@/app/components/common/AuthShell";
+import { IconBadge, HueButton, ErrorText } from "@/app/components/entreprise/EntrepriseKit";
 import { GT } from "@/app/components/common/GT";
 
 // Suite du lien d'invitation envoyé par le formateur (voir Edge Function
@@ -44,26 +43,22 @@ export function CompanyWelcomePage() {
   };
 
   return (
-    <div className="relative min-h-dvh flex items-center justify-center p-4" style={{ background: th.bg, fontFamily: "'Funnel Display',sans-serif" }}>
-      <Background />
-      <div className="relative z-10 w-full max-w-[440px] fade-up">
-        <div className="flex justify-center mb-10"><Logo h={30} /></div>
-        <Panel watermark={KeyRound}>
-          <form onSubmit={handleSubmit} className="p-6 sm:p-8 lg:p-10">
+    <AuthShell aside={{ eyebrow: "Espace entreprise", title: "La formation IA de votre équipe, au même endroit.", lead: "Contenus, quiz de positionnement, exercices et suivi des résultats de vos collaborateurs." }}>
+          <form onSubmit={handleSubmit}>
             <div className="mb-5"><IconBadge Icon={KeyRound} size="lg" /></div>
-            <h1 className="text-2xl font-black leading-tight mb-2" style={{ fontFamily: "'Funnel Display',sans-serif" }}>
+            <h1 className="text-[2.1rem] sm:text-[2.5rem] font-black leading-[1.02] mb-3">
               <GT>Bienvenue !</GT>
             </h1>
-            <p className="text-sm mb-6" style={{ color: th.fg3 }}>Choisis ton mot de passe pour accéder à ton espace entreprise.</p>
+            <p className="text-base mb-8" style={{ color: th.fg2 }}>Choisis ton mot de passe pour accéder à ton espace entreprise.</p>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Mot de passe</label>
-                <input type="password" required autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="w-full rounded-xl px-4 py-3 text-sm g-input" />
+                <label className="block text-sm font-semibold mb-2" style={{ color: th.fg }}>Mot de passe</label>
+                <input type="password" required autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="w-full rounded-[4px] px-4 py-3 text-base g-input" />
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Confirmer</label>
-                <input type="password" required autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="••••••••" className="w-full rounded-xl px-4 py-3 text-sm g-input" />
+                <label className="block text-sm font-semibold mb-2" style={{ color: th.fg }}>Confirmer</label>
+                <input type="password" required autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="••••••••" className="w-full rounded-[4px] px-4 py-3 text-base g-input" />
               </div>
             </div>
 
@@ -75,8 +70,6 @@ export function CompanyWelcomePage() {
               </HueButton>
             </div>
           </form>
-        </Panel>
-      </div>
-    </div>
+    </AuthShell>
   );
 }

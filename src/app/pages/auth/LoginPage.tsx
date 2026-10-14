@@ -1,11 +1,9 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate, Link } from "react-router";
-import { Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
-import { Background } from "@/app/components/common/Background";
-import { Logo } from "@/app/components/common/Logo";
-import { GCard } from "@/app/components/common/GCard";
+import { AuthShell, AuthField } from "@/app/components/common/AuthShell";
 import { GT } from "@/app/components/common/GT";
 import { ShimBtn } from "@/app/components/common/Buttons";
 
@@ -29,44 +27,35 @@ export function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-dvh flex items-center justify-center p-4" style={{ background: th.bg, fontFamily: "'Funnel Display',sans-serif" }}>
-      <Background />
-      <div className="relative z-10 w-full max-w-[440px] fade-up">
-        <div className="flex justify-center mb-10"><Logo h={30} /></div>
-        <GCard glow>
-          <form onSubmit={handleSubmit} className="p-6 sm:p-8 lg:p-10">
-            <h1 className="text-2xl font-black leading-tight mb-2" style={{ fontFamily: "'Funnel Display',sans-serif" }}>
-              <GT>Content de te revoir</GT>
-            </h1>
-            <p className="text-sm mb-6" style={{ color: th.fg3 }}>Connecte-toi pour reprendre ton parcours.</p>
+    <AuthShell>
+      <form onSubmit={handleSubmit}>
+        <p className="eyebrow mb-3" style={{ color: th.fg3 }}>Espace apprenant</p>
+        <h1 className="text-[2.1rem] sm:text-[2.5rem] font-black leading-[1.02] mb-3">
+          Content de te <GT>revoir</GT>
+        </h1>
+        <p className="text-base mb-8" style={{ color: th.fg2 }}>Connecte-toi pour reprendre ton parcours.</p>
 
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Email</label>
-                <input type="email" required autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="toi@exemple.com" className="w-full rounded-xl px-4 py-3 text-sm g-input" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Mot de passe</label>
-                <input type="password" required autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="w-full rounded-xl px-4 py-3 text-sm g-input" />
-              </div>
-            </div>
+        <div className="space-y-5">
+          <AuthField label="Email">
+            <input type="email" required autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="toi@exemple.com" className="w-full rounded-[4px] px-4 py-3 text-base g-input" />
+          </AuthField>
+          <AuthField label="Mot de passe">
+            <input type="password" required autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="w-full rounded-[4px] px-4 py-3 text-base g-input" />
+          </AuthField>
+        </div>
 
-            {error && <p className="text-xs mt-3" style={{ color: "#fbc2ad" }}>{error}</p>}
+        {error && <p role="alert" className="text-sm mt-4 rounded-[4px] px-3.5 py-2.5" style={{ background: "rgba(239,138,116,0.12)", color: th.isDark ? "#fbc2ad" : "#b4442b" }}>{error}</p>}
 
-            <div className="pt-6">
-              <ShimBtn full disabled={loading}>
-                <span className="flex items-center justify-center gap-2.5">
-                  {loading ? "Connexion…" : <><Sparkles className="w-5 h-5" />Se connecter</>}
-                </span>
-              </ShimBtn>
-            </div>
+        <div className="pt-7">
+          <ShimBtn full disabled={loading}>
+            {loading ? "Connexion…" : <>Se connecter<ArrowRight className="w-5 h-5" /></>}
+          </ShimBtn>
+        </div>
 
-            <p className="text-xs text-center mt-5" style={{ color: th.fg3 }}>
-              Pas encore de compte ? <Link to="/signup" style={{ color: th.navAC }} className="font-semibold hover:opacity-80">Créer un compte</Link>
-            </p>
-          </form>
-        </GCard>
-      </div>
-    </div>
+        <p className="text-sm mt-6 pt-6" style={{ color: th.fg2, borderTop: `1px solid ${th.sep}` }}>
+          Pas encore de compte ? <Link to="/signup" className="ink-link font-semibold" style={{ color: th.fg, backgroundSize: "100% 1px" }}>Créer un compte</Link>
+        </p>
+      </form>
+    </AuthShell>
   );
 }

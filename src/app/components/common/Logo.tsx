@@ -1,9 +1,17 @@
-import logoWhite from "@/imports/Logotype_BLANC.png";
+import logoSvg from "@/imports/logo-les-formateurs-ia.svg?raw";
 import { useTh } from "@/app/theme/theme";
 
+// Logotype vectoriel du site public, peint à l'encre du thème (noir en
+// clair, blanc en sombre) plutôt qu'un PNG blanc recoloré par filtre CSS.
 export function Logo({ h = 28 }: { h?: number }) {
   const th = useTh();
-  return th.isDark
-    ? <img src={logoWhite} alt="Les Formateurs IA" style={{ height: h, objectFit: "contain", objectPosition: "left" }} />
-    : <img src={logoWhite} alt="Les Formateurs IA" style={{ height: h, objectFit: "contain", objectPosition: "left", filter: "invert(1) sepia(1) saturate(3) hue-rotate(240deg) brightness(0.3)" }} />;
+  return (
+    <span
+      role="img"
+      aria-label="Les Formateurs IA"
+      className="block [&>svg]:h-full [&>svg]:w-auto [&_path]:fill-current"
+      style={{ height: h * 0.86, color: th.fg }}
+      dangerouslySetInnerHTML={{ __html: logoSvg }}
+    />
+  );
 }

@@ -80,7 +80,7 @@ export function CompaniesListPage() {
           <DialogHero Icon={Building2} title="Nouvelle entreprise" desc="Le nom de l'entreprise. Les collaborateurs s'ajoutent une fois l'entreprise créée." />
           <input
             value={name} onChange={(e) => setName(e.target.value)} autoFocus placeholder="Ex. Acme SAS"
-            className="w-full rounded-xl px-4 py-3 text-base font-semibold g-input"
+            className="w-full rounded-[4px] px-4 py-3 text-base font-semibold g-input"
             onKeyDown={(e) => e.key === "Enter" && void handleCreate()}
           />
           {error && <ErrorText>{error}</ErrorText>}

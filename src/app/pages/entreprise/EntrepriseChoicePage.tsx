@@ -2,8 +2,7 @@ import { Building2, GraduationCap } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
-import { Background } from "@/app/components/common/Background";
-import { Logo } from "@/app/components/common/Logo";
+import { AuthShell } from "@/app/components/common/AuthShell";
 import { SectionTile } from "@/app/components/entreprise/SectionTiles";
 import { GT } from "@/app/components/common/GT";
 import { useStaffBasePath } from "@/app/lib/staffBase";
@@ -24,23 +23,20 @@ export function EntrepriseChoicePage() {
   ];
 
   return (
-    <div className="relative min-h-dvh flex items-center justify-center p-4" style={{ background: th.bg, fontFamily: "'Funnel Display',sans-serif" }}>
-      <Background />
-      <div className="relative z-10 w-full max-w-2xl fade-up">
-        <div className="flex justify-center mb-10"><Logo h={30} /></div>
-        <h2 className="text-2xl font-black text-center mb-2">
-          <GT>Où souhaitez-vous aller ?</GT>
-        </h2>
-        <p className="text-sm text-center mb-8" style={{ color: th.fg3 }}>Choisissez un espace pour continuer.</p>
-        <div className="grid sm:grid-cols-2 gap-5">
+    <AuthShell width={640} aside={{ eyebrow: "Équipe pédagogique", title: "Deux espaces, une même équipe de formateurs.", lead: "Le parcours e-learning CPF d'un côté, la formation des entreprises de l'autre." }}>
+        <p className="eyebrow mb-3" style={{ color: th.fg3 }}>Bienvenue</p>
+        <h1 className="text-[2.1rem] sm:text-[2.5rem] font-black leading-[1.02] mb-3">
+          Où souhaitez-vous <GT>aller ?</GT>
+        </h1>
+        <p className="text-base mb-8" style={{ color: th.fg2 }}>Choisissez un espace pour continuer.</p>
+        <div className="grid sm:grid-cols-2 gap-4">
           {CHOICES.map(({ icon, title, desc, path, hue }, i) => (
             <SectionTile key={title} index={i} label={title} desc={desc} Icon={icon} hue={hue} onClick={() => navigate(path)} />
           ))}
         </div>
-        <button onClick={() => void signOut()} className="block mx-auto mt-8 text-xs font-semibold transition-opacity hover:opacity-70" style={{ color: th.fg3 }}>
+        <button onClick={() => void signOut()} className="ink-link mt-8 text-sm font-semibold" style={{ color: th.fg2 }}>
           Se déconnecter
         </button>
-      </div>
-    </div>
+    </AuthShell>
   );
 }
