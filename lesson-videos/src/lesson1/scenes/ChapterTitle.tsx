@@ -6,6 +6,7 @@ import { TOOLS } from "../tools";
 
 export type ChapterTitleProps = {
   num: number;
+  eyebrow?: string; // remplace « Chapitre N »
   before: string; // première ligne du titre
   accent: string; // seconde ligne (en dégradé)
   subtitle?: string;
@@ -65,6 +66,7 @@ const LogoRing: React.FC<{ out: number }> = ({ out }) => {
 
 export const ChapterTitle: React.FC<ChapterTitleProps> = ({
   num,
+  eyebrow,
   before,
   accent,
   subtitle,
@@ -91,7 +93,7 @@ export const ChapterTitle: React.FC<ChapterTitleProps> = ({
       />
       <div style={{ position: "relative", marginTop: ring ? -260 : 0 }}>
         <Reveal at={0.15} out={out}>
-          <Eyebrow>Chapitre {num}</Eyebrow>
+          <Eyebrow>{eyebrow ?? `Chapitre ${num}`}</Eyebrow>
         </Reveal>
         <RiseLines
           at={0.35}

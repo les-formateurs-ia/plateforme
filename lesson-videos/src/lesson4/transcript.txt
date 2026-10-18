@@ -1,0 +1,50 @@
+[0.00] Bonjour.
+[1.31] Vous savez maintenant ce qu'est l'IA générative et comment repérer les tâches où elles peuvent vous faire gagner du temps.
+[7.00] Nous allons maintenant rentrer dans la pratique avec une première étape concrète.
+[12.00] Créer un compte et prendre en main l'interface.
+[15.00] Même si vous avez déjà utilisé ces outils, ne négligez pas cette leçon, car elle pourra vous apprendre des informations et astuces qui vous aideront au quotidien.
+[24.00] Pour faire notre démonstration, nous allons utiliser Gemini comme exemple principal.
+[29.00] Mais rassurez-vous, tous ces outils fonctionnent de la même manière.
+[33.07] Vous ne serez pas perdus si vous utilisez un autre modèle.
+[36.00] Vous trouverez également toutes les ressources et liens nécessaires concernant toutes les IA directement dans le contenu écrit de la leçon.
+[44.00] Commençons par la première étape, la création de votre compte.
+[48.00] Pour accéder à Gemini, rendez-vous sur le site officiel et cliquez sur le bouton « Se connecter » en haut à droite.
+[55.00] Connectez-vous simplement avec votre compte Google habituel.
+[59.07] Si vous n'en avez pas encore, cliquez sur « Créer un compte » et laissez-vous guider par les instructions.
+[64.00] Pour les autres IA, le principe reste le même.
+[68.07] Une adresse e-mail ou un compte tiers suffisent pour commencer.
+[71.00] Une fois connecté, vous arrivez sur l'interface principale.
+[75.07] Elle est épurée pour vous permettre de vous concentrer sur vos échanges avec l'IA.
+[81.00] Détayons ensemble chaque zone de cet écran.
+[85.07] Tout d'abord, sur la gauche, vous trouvez le menu latéral.
+[88.00] C'est notamment ici que vous pourrez démarrer une nouvelle discussion pour commencer un nouvel échange.
+[94.00] Dans ce même menu, vous trouverez des raccourcis dédiés aux médias.
+[99.00] La section « Images » pour accéder rapidement aux outils de création visuelle et retrouver vos visuels générés.
+[106.00] Ainsi que la section « Vidéo » pour piloter directement la génération et le traitement de contenu animé.
+[112.00] Vous retrouverez aussi vos gems.
+[114.00] Nous rentrerons dans les détails plus tard, mais un gem, c'est un assistant sur mesure que tu pourras créer et qui sera dédié à une tâche précise.
+[123.00] Au lieu de réexpliquer ta demande à chaque nouveau message, le gem les garde en mémoire.
+[129.00] Juste en dessous se trouve tout l'historique de conversation, ce qui vous permet de retrouver vos recherches précédentes à tout moment, par date ou via une recherche textuelle.
+[140.00] Tout en bas à gauche, l'icône paramètre vous permet de personnaliser votre expérience.
+[146.00] C'est ici que vous gérez votre abonnement, contrôler vos données personnelles, comme la suppression automatique de l'historique ou la gestion des autorisations.
+[155.00] Passons maintenant au cœur de l'interface, la barre de saisie.
+[159.00] C'est ici que vous rédigerez vos demandes, c'est le cœur de l'interface et c'est ici que vous allez rédiger vos promptes.
+[166.00] Durant cette formation, nous vous apprendrons à bien les rédiger afin d'obtenir les meilleurs résultats possibles.
+[172.00] Nous y reviendrons plus tard.
+[174.00] Sur la gauche, le bouton plus vous permet d'exploiter les différents outils de l'IA.
+[179.17] Il vous permet notamment d'importer des fichiers pour les analyser ou d'ajouter des images.
+[185.00] Vous pourrez également faire appel à votre Google Drive pour retravailler directement vos documents.
+[191.00] Enfin, d'indiquer à l'IA que vous voulez générer une image, une vidéo, une présentation ou autre.
+[198.00] Une autre option essentielle qui va influencer la qualité de la réponse que vous allez obtenir, le sélecteur de modèle.
+[205.00] En fonction de votre demande, vous devrez choisir le modèle le plus pertinent.
+[209.07] Un modèle plus rapide comme la version Flash vous permet d'avoir des réponses rapides.
+[214.00] Très utile pour de la simple rédaction, correction de texte ou pour stimuler votre créativité.
+[220.00] Ce modèle sera largement suffisant pour la plupart de vos demandes et consomme peu de ressources.
+[225.93] Sélectionnez-le par défaut.
+[228.00] Pour des raisonnements plus complexes comme de l'analyse de données techniques ou qui demandent davantage de réflexion, vous pourrez passer par un modèle plus puissant comme la version Pro.
+[239.00] N'hésitez pas à consulter l'onglet Hub IA disponible sur la plateforme et qui vous permettra de comparer et tester l'ensemble des modèles existants.
+[248.00] Et voilà, vous avez maintenant une vue complète de l'interface.
+[252.00] Rappelez-vous que vous pouvez tester immédiatement tous ces modèles pour comparer leurs résultats.
+[258.00] Pour cela, utilisez notre studio directement accessible dans votre parcours.
+[263.00] Vous retrouverez également des informations complémentaires dans le reste de la leçon.
+[268.00] À vous de jouer !

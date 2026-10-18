@@ -1,12 +1,16 @@
 import React from "react";
 import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig } from "remotion";
-import { Logo, baseText } from "../components/ui";
+import { Logo, baseText } from "./ui";
 import { AVATAR_ZONE, C, GRAD, clamp } from "../theme";
-import { CHAPTERS, DURATION_S } from "./timeline";
 
 // Habillage permanent : logo, chapitre en cours, barre de progression par
 // chapitre (même logique que le suivi de progression de la plateforme).
-export const Chrome: React.FC = () => {
+export type Chapter = { id: string; label: string; from: number; to: number };
+
+export const Chrome: React.FC<{ chapters: readonly Chapter[]; duration: number }> = ({
+  chapters: CHAPTERS,
+  duration: DURATION_S,
+}) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const t = frame / fps;

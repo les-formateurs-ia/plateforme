@@ -1,0 +1,35 @@
+[0.00] Une fois qu'on a compris ce que l'IA générative sait faire, une question reste entière.
+[4.60] Par où commencer sur son propre poste ?
+[7.20] Sans méthode, deux pièges peuvent arriver.
+[9.76] Essayer un peu partout, sans jamais mesurer de résultats, ou au contraire, ignorer de bonnes pistes.
+[16.00] Il faut maintenant se demander comment l'IA peut vous servir concrètement dans votre métier.
+[21.00] Cette vidéo vous montre comment trancher avec une notion simple, le quick win.
+[25.60] Pour arbitrer nos choix, nous nous basons sur deux axes, la valeur ajoutée d'une tâche et sa facilité de mise en œuvre.
+[32.40] On retrouve alors, en bas à gauche, les fausses bonnes idées.
+[36.00] Ce sont des projets complexes qui n'apportent presque aucun résultat.
+[39.40] L'effort est lourd pour un gain quasi nul, c'est donc à écarter d'emblée.
+[43.00] En haut à gauche se placent les actions majeures.
+[45.80] La valeur ajoutée y est forte, mais la complexité exige une vraie planification.
+[50.80] En bas à droite figurent les actions mineures.
+[53.60] Ce sont des sujets très faciles à lancer mais dont l'impact reste limité.
+[58.00] Reste enfin la zone en haut à droite, le quick win.
+[61.40] Un quick win, c'est une tâche qui combine deux qualités indispensables.
+[65.60] Un gain de temps significatif, c'est-à-dire une forte valeur ajoutée, et une difficulté de mise en place faible.
+[72.80] C'est sur ces éléments que nous devons nous focaliser.
+[76.00] Mais concrètement, comment repérer ces tâches au travail ?
+[79.60] Une tâche idéale pour l'IA présente trois caractéristiques.
+[83.20] Premièrement, elle est répétitive.
+[85.60] Vous la réalisez souvent et selon une structure prévisible.
+[89.00] Vous pouvez par exemple noter pendant une semaine l'ensemble des tâches que vous faites au quotidien.
+[94.20] Vous identifierez rapidement celles qui reviennent régulièrement.
+[98.60] Deuxièmement, elle est sans jugement critique.
+[101.40] Elle demande de la méthode et de la rigueur, mais pas de négociation ni de décision stratégique.
+[107.60] Elle est logique et ne dépend pas de réelles réflexions humaines.
+[112.00] Enfin, elle repose sur des données claires en entrée comme des notes, un document, un mail ou un tableau pour produire un résultat bien défini en sortie, comme un compte rendu ou une synthèse.
+[123.20] Si une tâche coche ces trois cases, vous pourrez vous servir de l'IA pour l'optimiser.
+[127.60] Retenez une chose.
+[129.00] Savoir identifier une tâche pertinente vous permettra de gagner en productivité efficacement.
+[134.40] Et concentrez vos efforts au bon endroit.
+[137.40] À vous de jouer, réfléchissez aux tâches de votre quotidien professionnel et identifiez celles que vous pourriez optimiser.
+[144.20] Nous verrons dans les prochaines leçons comment le faire.
+[147.20] Mais avant ça, je vous invite à consulter les différents onglets de la leçon pour pratiquer avec les tâches de votre quotidien que votre formateur vous a préparé.

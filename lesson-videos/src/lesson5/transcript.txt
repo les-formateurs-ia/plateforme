@@ -1,0 +1,42 @@
+[0.00] Bienvenue dans cette leçon consacrée aux bases de la rédaction de promptes.
+[4.48] Quand on échange avec une intelligence artificielle générative, la qualité de la réponse dépend quasi entièrement de la manière dont on s'adresse à elle.
+[13.16] Ce texte que vous tapez dans la barre de recherche, cette consigne, ce texte de départ ou cette question, c'est ce qu'on appelle un prompt.
+[20.64] Beaucoup de débutants abordent l'IA comme s'il s'agissait d'un moteur de recherche classique ou d'un humain qui devine implicitement leurs intentions.
+[27.84] Mais un modèle de langage ne lit pas dans vos pensées.
+[30.68] Si votre consigne est vague ou incomplète, l'IA va devoir inventer tout ce que vous n'avez pas précisé, au risque de vous donner un résultat imprévisible ou hors sujet.
+[40.60] Le prompt engineering, ce n'est rien d'autre que l'art de donner des instructions claires, structurées et efficaces pour piloter l'IA et obtenir exactement le résultat voulu du premier coup.
+[52.28] C'est ce que nous allons découvrir ensemble.
+[54.48] Prenons un exemple volontairement incomplet.
+[57.84] Écris un message pour informer l'équipe du changement.
+[60.76] Aucun destinataire, aucune circonstance, aucun format n'est précisé.
+[66.16] Résultat, une IA peut générer à partir de cette seule phrase un e-mail très long et formel, un simple message instantané sur un outil ou une note de réorganisation.
+[77.40] Trois résultats totalement différents pour une même demande.
+[81.20] Simplement parce que rien ne permettait à l'IA de trancher.
+[85.36] Pour éviter cela, la solution consiste à structurer votre demande autour de cinq piliers essentiels.
+[91.88] D'abord le rôle, quelle posture ou expertise l'IA doit-elle adopter ?
+[95.68] La cible, à qui s'adresse exactement ce texte ?
+[99.32] L'objectif, qu'est-ce que le résultat doit accomplir concrètement ?
+[103.56] Le contexte, quelles sont les informations de fonds indispensables ?
+[107.92] Et enfin le format, quelle est la structure, la longueur et le ton attendu ?
+[113.04] Traiter ces cinq questions séparément vous évite d'oublier des consignes clés sans vous en rendre compte.
+[118.92] Reconstruisons exactement cette même demande avec nos cinq piliers.
+[123.48] Tu es un manager d'équipe projet, voilà pour le rôle.
+[127.16] Ce message s'adresse aux six membres de ton équipe technique, voilà la cible.
+[133.08] Annonce le report de deux semaines de la mise en production, voilà l'objectif, ce décalage est dû à l'attente d'une validation client, voilà le contexte.
+[141.64] Rédige un message pour Teams, rassurant et clair, avec trois puces d'action, voilà le format.
+[148.52] Avec cette formulation, l'IA dispose de tous les éléments pour produire un brouillon pertinent.
+[154.12] Une fois la réponse obtenue, gardez le réflexe de vérifier deux choses, est-elle adaptée, c'est-à-dire juste sur le fond et adaptée à vos collègues ?
+[163.20] Et est-elle conforme, c'est-à-dire fidèle, au format demandé ?
+[166.64] Même avec un bon prompt, votre relecture reste indispensable.
+[170.72] Nathalie, dans votre secteur, vous jonglez en permanence entre la technique et les utilisateurs.
+[176.56] Pour réussir vos prompts à tous les coups, gardez ces trois réflexes de rédaction en tête.
+[182.36] Injectez vos contraintes métiers dans vos prompts.
+[185.24] Précisez toujours à l'IA le nom de l'outil RH concerné, les règles de gestion ou les exigences RGPD.
+[191.88] Plus vos règles de bord sont claires dans le prompt, moins l'IA n'inventera de fonctionnalité.
+[197.52] Précisez correctement vos cibles.
+[199.72] Quand vous demandez un document, précisez l'écart de maturité.
+[203.52] Appliquez ces quelques clés dans vos prochains prompts et vous verrez la différence.
+[208.36] Vous l'avez compris, la clé pour réussir vos échanges avec une intelligence artificielle ne dépend pas de formules magiques, mais d'une bonne préparation.
+[218.32] Avant d'envoyer votre prochaine consigne, prenez toujours quelques secondes pour vérifier vos cinq repères.
+[224.60] Ce sont ces techniques qui transformeront vos demandes en documents directement exploitables au quotidien.
+[231.48] Comme d'habitude, consultez le contenu et les autres onglets de la leçon pour aller plus loin.

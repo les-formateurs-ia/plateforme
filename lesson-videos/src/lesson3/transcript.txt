@@ -1,0 +1,29 @@
+[0.00] Nous l'avons vu dans la leçon précédente, adopter des réflexes de sécurité est indispensable pour un usage responsable de l'intelligence artificielle.
+[8.72] Aujourd'hui, nous allons aborder trois façons qui vous serviront à sécuriser votre usage.
+[14.08] L'anonymisation des données, la restriction des accès et la revue manuelle.
+[19.52] Voyons ensemble comment appliquer ces principes avec rigueur.
+[23.64] De manière générale, le premier réflexe à adopter est de n'inclure uniquement ce qui est nécessaire à la requête.
+[30.16] Ne partagez pas un dossier ou un document entier si seules quelques informations seront utiles à l'IA.
+[36.16] Cela permettra également au modèle d'être plus cohérent et efficace dans sa réponse.
+[41.92] Dans le contenu que vous gardez, il pourra tout de même se trouver des informations sensibles.
+[47.40] Dans ce cas, il faudra passer par l'anonymisation.
+[50.92] L'anonymisation est le fait de supprimer définitivement tout moyen d'identifier une personne dans un jeu de données.
+[58.16] Observez bien l'exemple derrière moi.
+[60.72] Pour qu'une anonymisation soit valide, il ne suffit pas de masquer un nom.
+[64.96] Il faut aussi s'assurer qu'aucun croisement d'informations secondaires ne permette d'isoler à nouveau la personne.
+[71.36] Retirez alors les noms, prénoms, matricules, e-mails ou toute information permettant d'identifier quelqu'un.
+[77.96] Le second pilier repose sur la restriction d'accès.
+[81.72] La restriction d'accès repose sur le principe du moindre privilège, c'est-à-dire ne donner à chaque collaborateur que les droits strictement nécessaires à sa mission.
+[91.56] En pratique, cela exige par exemple d'utiliser un compte professionnel dédié plutôt qu'un compte personnel, de limiter les autorisations selon les besoins réels, et de les couper dès qu'un projet prend fin.
+[104.56] L'entreprise doit également établir des règles claires en interdisant explicitement la saisie de données sensibles dans les IA grand public.
+[113.68] Enfin, même après avoir anonymisé et cadré votre requête, votre dernier atout est et restera la revue manuelle.
+[122.36] Avant d'envoyer votre prompte, vérifiez qu'aucune donnée confidentielle ne soit présente dans la réponse.
+[128.92] Cela ne vous prendra que quelques secondes et évitera de vous exposer à des risques inutiles.
+[135.44] Nathalie, pour sécuriser votre utilisation de l'IA lors de la création de vos formations SIR, vous devrez appliquer ces trois réflexes essentiels.
+[145.04] Par exemple, si vous utilisez l'IA pour préparer un entretien, une formation ou une demande de congé, remplacez le nom des collaborateurs par salarié A et supprimez son matricule et ses informations personnelles.
+[158.84] Félicitations, vous avez désormais toutes les cartes en main pour utiliser l'IA en toute sécurité.
+[165.24] Dans le prochain module, nous verrons comment dompter les promptes pour générer du contenu percutant et adapter à vos besoins.
+[172.32] Mais avant d'aller plus loin, place à votre première mission IA.
+[177.08] Présentez en détail dans la prochaine leçon, elle vous permettra de valider vos acquis et de vous préparer sereinement à la certification.
+[185.00] Une fois votre mission accomplie, prenez rendez-vous avec votre formateur.
+[188.92] Ce sera le moment idéal pour faire le point, poser toutes vos questions et aborder la suite en toute confiance.

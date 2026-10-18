@@ -1,0 +1,36 @@
+[0.00] Vous savez désormais ce qu'est une intelligence artificielle, ce qu'elle peut faire pour vous et comment créer votre compte.
+[7.12] Mais avant d'aller plus loin, nous devons aborder une notion cruciale et souvent négligée, la sécurité des données.
+[14.62] On pense souvent qu'une donnée confidentielle est un secret d'entreprise, ou qu'une donnée personnelle n'est qu'un nom et un prénom.
+[22.24] En réalité, un bon usage juridique et éthique est bien plus strict, et avec l'IA, la moindre imprudence peut entraîner une fuite majeure.
+[31.32] Pour bien vous protéger, identifions d'abord ce que l'on manipule au quotidien.
+[36.16] Première catégorie, les données confidentielles d'entreprise.
+[40.62] Les données confidentielles d'entreprise sont des informations non publiques dont la divulgation ou le vol peut causer un préjudice financier, juridique ou stratégique à l'organisation.
+[52.16] Cela peut concerner toutes les données internes à l'entreprise, comme par exemple, des documents financiers, toutes informations liées à la sécurité, des informations RH.
+[63.28] Cela concerne également toutes les données externes, c'est-à-dire celles qui proviennent de vos clients, fournisseurs, prospect, par exemple des documents de confidentialité, documents commerciaux, données clients, etc.
+[76.28] Deuxième catégorie, les données personnelles.
+[79.38] Elles sont encadrées par le RGPD, le Règlement général sur la protection des données.
+[84.88] C'est la loi européenne qui protège la vie privée des citoyens.
+[88.78] Selon le RGPD, une donnée personnelle, c'est n'importe quelle information qui permet d'identifier une personne physique.
+[95.94] On pense aux identifiants directs comme un nom ou une photo, mais attention aux identifiants indirects.
+[102.04] Une adresse IP, une plaque d'immatriculation, un numéro de sécurité sociale, une adresse mail ou toute information qui, en les croisant avec d'autres bases, permettrait de remonter jusqu'à un individu.
+[114.52] Enfin, au cœur des données personnelles, le RGPD définit une catégorie ultra protégée, les données sensibles.
+[122.04] Leur traitement est collecte et par défaut strictement interdite.
+[125.84] Il s'agit des données d'origine, d'opinion politique, conviction religieuse, données génétiques, biométriques, de santé ou sexuelle.
+[134.84] Leur traitement est strictement interdit, sauf exception très encadrée comme un consentement explicite ou une obligation légale.
+[142.84] Mais dans tout ça, quel est le risque avec l'IA ?
+[145.45] C'est simple.
+[146.54] Quand vous écrivez un prompt, les données que vous partagez servent à la plupart des IA à réentraîner leur modèle.
+[153.04] C'est-à-dire que l'IA va inclure vos données dans sa base de données.
+[157.04] Une donnée confidentielle ou personnelle injectée dans un prompt peut ainsi être réutilisée, voire même partagée, pour répondre à un autre utilisateur.
+[167.04] De plus, toutes les données que vous partagez sont stockées sur un serveur, un piratage informatique, et tout se retrouverait alors dans les mains d'autres personnes qui pourraient les utiliser pour de l'usurpation, chantage, revente de données, etc.
+[182.04] Concrètement pour vous, Nathalie, la vigilance porte en priorité sur ces trois catégories de documents RH.
+[189.04] Les contrats et données personnelles, tout ce qui touche à la paix et les documents de santé.
+[194.04] Envoyer un document réel comme une vraie fiche de paye à une IA constitue une violation grave du RGPD.
+[201.04] Nous verrons ensemble, dans la prochaine leçon, comment traiter ces informations en toute sécurité, sans prendre le moindre risque.
+[209.04] En résumé, gardez en tête qu'en France, des lois et organismes veillent au respect de l'utilisation des données.
+[216.04] Avant d'injecter une information dans une IA, posez-vous toujours ces trois questions.
+[221.04] Permet-elle d'identifier quelqu'un ?
+[223.04] Est-elle de nature sensible ou confidentielle ?
+[225.92] Et ai-je le droit de la partager ?
+[228.04] Dans la prochaine leçon, nous verrons comment configurer vos outils et vos demandes pour une utilisation en toute sécurité.
+[234.04] Mais d'ici là, on vous laisse explorer les autres aspects de la leçon.

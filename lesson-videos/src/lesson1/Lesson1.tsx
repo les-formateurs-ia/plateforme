@@ -3,9 +3,9 @@ import React from "react";
 import { AbsoluteFill, Sequence, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { Backdrop } from "../components/Backdrop";
 import { ParticleField } from "../components/ParticleField";
-import { AVATAR_ZONE, C, fontFamily } from "../theme";
-import { Chrome } from "./Chrome";
-import { SCENES, SFX, TOOL_ROWS, cameraAt, warmthAt } from "./timeline";
+import { C } from "../theme";
+import { Chrome } from "../components/Chrome";
+import { CHAPTERS, DURATION_S, SCENES, SFX, TOOL_ROWS, cameraAt, warmthAt } from "./timeline";
 import { ToolScene } from "./ToolScene";
 import { ChapterTitle } from "./scenes/ChapterTitle";
 import { Create } from "./scenes/Create";
@@ -32,13 +32,8 @@ const At: React.FC<{ k: Key; children: React.ReactNode }> = ({ k, children }) =>
 // Durée d'une scène moins le temps de sa sortie (0,5 s).
 const outOf = (k: Key) => SCENES[k][1] - SCENES[k][0] - 0.55;
 
-export type Lesson1Props = {
-  // Contrôle uniquement (composition "…-controle") : affiche la zone réservée
-  // à l'avatar et rejoue la voix d'origine pour vérifier la synchronisation.
-  guide?: boolean;
-};
 
-export const Lesson1: React.FC<Lesson1Props> = ({ guide = false }) => {
+export const Lesson1: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const t = frame / fps;
@@ -97,37 +92,13 @@ export const Lesson1: React.FC<Lesson1Props> = ({ guide = false }) => {
         <Outro />
       </At>
 
-      <Chrome />
+      <Chrome chapters={CHAPTERS} duration={DURATION_S} />
       {SFX.map((s, i) => (
         <Sequence key={i} name={`sfx ${s.src}`} from={Math.round(s.at * fps)} durationInFrames={2 * fps}>
           <Audio src={staticFile(s.src)} volume={s.volume} />
         </Sequence>
       ))}
 
-      {guide ? (
-        <>
-          <div
-            style={{
-              position: "absolute",
-              left: AVATAR_ZONE.x,
-              top: AVATAR_ZONE.y,
-              width: AVATAR_ZONE.w,
-              height: AVATAR_ZONE.h,
-              border: "3px dashed rgba(251,194,173,0.8)",
-              background: "rgba(251,194,173,0.08)",
-              display: "grid",
-              placeItems: "center",
-              fontFamily,
-              fontSize: 32,
-              fontWeight: 700,
-              color: C.beige,
-            }}
-          >
-            Zone avatar
-          </div>
-          <Audio src={staticFile("lesson1/reference-voix.m4a")} />
-        </>
-      ) : null}
     </AbsoluteFill>
   );
 };
