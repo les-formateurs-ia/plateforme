@@ -64,7 +64,7 @@ export function MainLayout() {
     () => (location.pathname.startsWith("/entreprise") ? "entreprise" : readStoredStaffSpace()),
   );
   useEffect(() => {
-    if (location.pathname === "/profile") return;
+    if (location.pathname === "/profile" || location.pathname.startsWith("/prospects")) return;
     const next = location.pathname.startsWith("/entreprise") ? "entreprise" : "cpf";
     setSpace(next);
     try { localStorage.setItem(STAFF_SPACE_KEY, next); } catch { /* ignore */ }
@@ -74,7 +74,10 @@ export function MainLayout() {
   // Espace Entreprise (staff ou collaborateur) : pas de barre latérale,
   // seulement un bandeau logo + Déconnexion. Le logo ramène sur "/" (choix
   // CPF / Entreprise pour le staff, accueil pour un collaborateur).
-  const sidebarHidden = entrepriseMode || !!companyId;
+  // Espace Prospects (admin) : même bandeau, le tableau Kanban a besoin de
+  // toute la largeur. Il ne touche pas à l'espace CPF / Entreprise mémorisé.
+  const prospectsMode = isAdmin(role) && location.pathname.startsWith("/prospects");
+  const sidebarHidden = entrepriseMode || prospectsMode || !!companyId;
   const studentNav = !isStaff(role) && !companyId;
 
   useEffect(() => { setNavOpen(false); }, [location.pathname]);
@@ -206,10 +209,6 @@ export function MainLayout() {
                   style={navItemStyle}>
                   <Icon className="w-4 h-4 shrink-0" />{label}
                 </NavLink>,
-                isAdmin(role) ? <NavLink key="advisor-leads" to="/admin/project-advisor-leads" onClick={() => setNavOpen(false)} className={navItemClass}
-                  style={navItemStyle}>
-                  <Building2 className="w-4 h-4 shrink-0" />Demandes IA
-                </NavLink> : null,
                 <NavLink key="gallery" to="/admin/ai-detection-gallery" onClick={() => setNavOpen(false)} className={navItemClass}
                   style={navItemStyle}>
                   <ScanEye className="w-4 h-4 shrink-0" />Galerie Détection IA

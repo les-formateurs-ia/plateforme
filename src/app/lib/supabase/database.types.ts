@@ -22,6 +22,9 @@ export type CompanyQuizKind = "positioning" | "validation";
 export type StudioImageStatus = "pending" | "ready" | "failed";
 export type MissionSubmissionStatus = "draft" | "submitted";
 export type AiUsageMediaType = "image" | "video" | "audio" | "text";
+export type ProspectStage = "nouveau" | "a_rappeler" | "contacte" | "proposition" | "gagne" | "archive";
+export type ProspectManualSource = "google" | "maformation" | "reseaux-sociaux" | "appel-direct";
+export type ProspectActivityKind = "note" | "appel" | "email" | "rdv" | "etape";
 export type AiUsageSource = "studio_image" | "studio_video" | "studio_music" | "studio_talkinghead" | "studio_tts" | "studio_doublage" | "studio_chat" | "battle_ground" | "reverse_prompt";
 
 export interface Database {
@@ -34,7 +37,7 @@ export interface Database {
           access_token_hash: string | null;
           first_name: string;
           last_name: string;
-          email: string;
+          email: string | null;
           profile: "entreprise" | "particulier";
           sector: string | null;
           need: string | null;
@@ -42,7 +45,7 @@ export interface Database {
           status: "new" | "callback_requested";
           created_at: string;
           callback_requested_at: string | null;
-          source: "conseiller-ia" | "contact-general" | "contact-entreprise" | "contact-particulier";
+          source: "conseiller-ia" | "contact-general" | "contact-entreprise" | "contact-particulier" | ProspectManualSource;
           company: string | null;
           challenges: string[] | null;
           employment_status: string | null;
@@ -54,9 +57,66 @@ export interface Database {
           analysis_attempts: number;
           analysis_started_at: string | null;
           analysis: unknown;
+          pipeline_stage: ProspectStage;
+          stage_changed_at: string;
+          deal_value: number | null;
         };
-        Insert: never;
-        Update: never;
+        // L'admin ne crée que des prospects saisis à la main (cf. 20261020130000).
+        Insert: {
+          first_name: string;
+          last_name: string;
+          email?: string | null;
+          phone?: string | null;
+          profile: "entreprise" | "particulier";
+          company?: string | null;
+          sector?: string | null;
+          need?: string | null;
+          source: ProspectManualSource;
+          pipeline_stage?: ProspectStage;
+          deal_value?: number | null;
+        };
+        // Seules les colonnes de suivi sont modifiables (admin, cf. 20261020120000).
+        Update: { pipeline_stage?: ProspectStage; deal_value?: number | null };
+        Relationships: never[];
+      };
+      prospect_activities: {
+        Row: {
+          id: number;
+          lead_id: number;
+          kind: ProspectActivityKind;
+          body: string;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          lead_id: number;
+          kind: ProspectActivityKind;
+          body: string;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["prospect_activities"]["Insert"]>;
+        Relationships: never[];
+      };
+      prospect_reminders: {
+        Row: {
+          id: number;
+          lead_id: number;
+          due_at: string;
+          title: string;
+          done_at: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          lead_id: number;
+          due_at: string;
+          title: string;
+          done_at?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["prospect_reminders"]["Insert"]>;
         Relationships: never[];
       };
       profiles: {

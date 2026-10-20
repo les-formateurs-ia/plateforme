@@ -53,7 +53,7 @@ import { AdminFormateurDetailPage } from "@/app/pages/admin/AdminFormateurDetail
 import { AdminAvailabilityPage } from "@/app/pages/admin/AdminAvailabilityPage";
 import { AdminTrashPage } from "@/app/pages/admin/AdminTrashPage";
 import { AdminIncidentsPage } from "@/app/pages/admin/AdminIncidentsPage";
-import { AdminProjectAdvisorLeadsPage } from "@/app/pages/admin/AdminProjectAdvisorLeadsPage";
+import { ProspectsPage } from "@/app/pages/prospects/ProspectsPage";
 import { EntrepriseChoicePage } from "@/app/pages/entreprise/EntrepriseChoicePage";
 import { CompaniesListPage } from "@/app/pages/entreprise/CompaniesListPage";
 import { CompanyDetailPage } from "@/app/pages/entreprise/CompanyDetailPage";
@@ -233,7 +233,9 @@ function AppRoutes() {
         <Route path="admin/planning/students/:studentId" element={<RequireAdmin><AdminStudentDetailPage /></RequireAdmin>} />
         <Route path="admin/planning/formateurs/:formateurId" element={<RequireAdmin><AdminFormateurDetailPage /></RequireAdmin>} />
         <Route path="admin/incidents" element={<RequireAdmin><AdminIncidentsPage /></RequireAdmin>} />
-        <Route path="admin/project-advisor-leads" element={<RequireAdmin><AdminProjectAdvisorLeadsPage /></RequireAdmin>} />
+        {/* Ancienne liste "Demandes IA", remplacée par l'espace Prospects. */}
+        <Route path="admin/project-advisor-leads" element={<Navigate to="/prospects" replace />} />
+        <Route path="prospects" element={<RequireAdmin><ProspectsPage /></RequireAdmin>} />
 
         <Route path="formateur/courses" element={<RequireFormateur><AdminCoursesPage /></RequireFormateur>} />
         <Route path="formateur/courses/new" element={<RequireFormateur><AdminCourseEditorPage /></RequireFormateur>} />
