@@ -4,7 +4,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 import {
   BarChart3, BookOpen, Code2, Calendar, User, Home,
-  Monitor, Headphones, FileText, Bot, Sparkles, LayoutGrid,
+  Monitor, Headphones, FileText, Bot, Sparkles, LayoutGrid, Award,
   type LucideIcon,
 } from "lucide-react";
 import type { NavId } from "@/app/types";
@@ -20,6 +20,7 @@ export const NAV_GROUP_LABELS: Record<NavGroup, string> = {
 export const NAV_ITEMS: { id: NavId; Icon: LucideIcon; label: string; path: string; group?: NavGroup }[] = [
   { id: "dashboard", Icon: Home,       label: "Accueil",         path: "/dashboard", group: "learn" },
   { id: "lessons",   Icon: BookOpen,   label: "Mes leçons",      path: "/lessons",   group: "learn" },
+  { id: "certification", Icon: Award, label: "Ma certification", path: "/certification", group: "learn" },
   { id: "practice",  Icon: Code2,      label: "Exercices",       path: "/practice",  group: "practice" },
   { id: "studio",    Icon: Sparkles,   label: "Le Studio",       path: "/studio",    group: "practice" },
   { id: "hub",       Icon: LayoutGrid, label: "Hub IA",          path: "/hub",       group: "practice" },

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight, CalendarClock, User, CalendarCog, Video, ClipboardList, ClipboardCheck, Paperclip, Eye, Trash2 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
@@ -129,15 +129,27 @@ export function AdminAvailabilityPage() {
     return set;
   }, [bookings]);
 
-  const toggle = (key: string) => {
+  const paint = (key: string, mode: "add" | "remove") => {
     if (bookedKeys.has(key)) return; // créneau déjà réservé, non modifiable ici
     setSelected((prev) => {
+      if ((mode === "add") === prev.has(key)) return prev;
       const next = new Set(prev);
-      if (next.has(key)) next.delete(key); else next.add(key);
+      if (mode === "add") next.add(key); else next.delete(key);
       return next;
     });
     setDirty(true);
   };
+
+  // Cliquer-glisser : la première case décide si le geste ajoute ou retire,
+  // chaque case survolée ensuite suit (souris/stylet ; au doigt, un appui
+  // reste un simple clic pour ne pas bloquer le défilement).
+  const dragMode = useRef<"add" | "remove" | null>(null);
+  useEffect(() => {
+    const stop = () => { dragMode.current = null; };
+    window.addEventListener("pointerup", stop);
+    window.addEventListener("pointercancel", stop);
+    return () => { window.removeEventListener("pointerup", stop); window.removeEventListener("pointercancel", stop); };
+  }, []);
 
   const save = async () => {
     if (!user) return;
@@ -273,7 +285,7 @@ export function AdminAvailabilityPage() {
           </div>
 
           <p className="text-xs mb-4" style={{ color: th.fg3 }}>
-            Clique sur les créneaux de 15 min où tu es disponible, puis enregistre. Une session réservée dure 1h. Les créneaux grisés sont déjà pris par un élève.
+            Clique sur les créneaux de 15 min où tu es disponible, ou fais glisser la souris pour en sélectionner (ou en retirer) plusieurs d'un coup, puis enregistre. Une session réservée dure 1h. Les créneaux grisés sont déjà pris par un élève.
           </p>
 
           {loading ? (
@@ -290,7 +302,7 @@ export function AdminAvailabilityPage() {
                     </div>
                   ))}
                 </div>
-                <div className="max-h-[420px] overflow-y-auto relative">
+                <div className="max-h-[420px] overflow-y-auto relative select-none">
                   {showNowLine && (
                     <div
                       className="absolute left-0 right-0 grid pointer-events-none z-20"
@@ -312,7 +324,16 @@ export function AdminAvailabilityPage() {
                         return (
                           <button
                             key={key}
-                            onClick={() => toggle(key)}
+                            onPointerDown={(e) => {
+                              if (isBooked || e.button !== 0) return;
+                              e.preventDefault();
+                              const mode = isSelected ? "remove" : "add";
+                              paint(key, mode);
+                              if (e.pointerType !== "touch") dragMode.current = mode;
+                            }}
+                            onPointerEnter={() => { if (dragMode.current) paint(key, dragMode.current); }}
+                            // Clavier (Entrée/Espace) : detail vaut 0, le pointeur est déjà géré ci-dessus.
+                            onClick={(e) => { if (e.detail === 0) paint(key, isSelected ? "remove" : "add"); }}
                             title={isBooked ? "Réservé par un élève" : undefined}
                             className="h-4 border transition-colors"
                             style={{

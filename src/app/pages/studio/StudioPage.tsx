@@ -2,6 +2,7 @@ import { useNavigate } from "react-router";
 
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
+import { useCertification } from "@/app/state/certification-context";
 import { GT } from "@/app/components/common/GT";
 import { SymbolCard } from "@/app/components/common/SymbolCard";
 import type { DemoKind } from "@/app/components/common/ToolDemo";
@@ -44,7 +45,9 @@ export function StudioPage() {
   const navigate = useNavigate();
   const { role } = useAuth();
   const isAdminRole = role === "admin";
-  const visibleModules = STUDIO_MODULES.filter((m) => !m.restricted || isAdminRole);
+  // Épreuve de certification : texte (chats) et image uniquement.
+  const { examMode } = useCertification();
+  const visibleModules = STUDIO_MODULES.filter((m) => (!m.restricted || isAdminRole) && (!examMode || m.group === "chat" || m.slug === "images"));
   // Tous les modules passent par Runware sauf le chat Gemini (appel Google direct).
   const budgetExhausted = useAiBudgetExhausted();
 
@@ -70,14 +73,16 @@ export function StudioPage() {
         <p className="eyebrow" style={{ color: th.fg3 }}>Pratiquer</p>
         <h1 className="mt-2 text-[2rem] sm:text-[2.6rem] leading-[1.02] font-black" style={{ color: th.fg }}>Le <GT>Studio</GT></h1>
         <p className="text-[15px] sm:text-base mt-3 max-w-2xl leading-relaxed" style={{ color: th.fg2 }}>
-          Discute avec ChatGPT, Gemini et Claude, et crée avec de vrais modèles d'IA : image, vidéo, musique, voix et avatar.
+          {examMode
+            ? "Pendant ton épreuve de certification, utilise ChatGPT, Gemini, Claude et le générateur d'images pour préparer tes réponses."
+            : "Discute avec ChatGPT, Gemini et Claude, et crée avec de vrais modèles d'IA : image, vidéo, musique, voix et avatar."}
         </p>
       </div>
 
       {budgetExhausted && <AiBudgetExhaustedNotice />}
 
       {section("chat", "Discuter", "Les grands modèles, côte à côte")}
-      {section("create", "Créer", "Image, vidéo, son : à toi de jouer")}
+      {section("create", "Créer", examMode ? "Crée tes visuels" : "Image, vidéo, son : à toi de jouer")}
     </div>
   );
 }

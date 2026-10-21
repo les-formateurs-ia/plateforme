@@ -96,3 +96,11 @@ export async function resetStudentStats(studentId: string): Promise<void> {
     if (storageError) console.warn(`Suppression des fichiers ${bucket} incomplète :`, storageError.message);
   }));
 }
+
+// Suppression définitive du compte (admin) — Edge Function service-role,
+// cf. supabase/functions/delete-student (compte, données en cascade et fichiers).
+export async function deleteStudent(studentId: string): Promise<void> {
+  const { data, error } = await supabase.functions.invoke("delete-student", { body: { studentId } });
+  if (error) throw new Error(await extractFunctionError(error));
+  if (data?.error) throw new Error(data.error);
+}

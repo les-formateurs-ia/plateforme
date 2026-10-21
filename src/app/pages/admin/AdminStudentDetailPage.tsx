@@ -15,6 +15,7 @@ import {
 } from "@/app/lib/formationInstances";
 import { listCoachAssignableCards, assignFormateurToStudent, type PersonCard } from "@/app/lib/planning";
 import { StudentMissionGallery } from "@/app/components/admin/StudentMissionGallery";
+import { StudentCertificationCard } from "@/app/components/admin/StudentCertificationCard";
 import { StudentAiBudgetCard } from "@/app/components/admin/StudentAiBudgetCard";
 import { ResetStudentStatsButton } from "@/app/components/admin/ResetStudentStatsButton";
 import { GeneratePasswordLinkButton } from "@/app/components/admin/GeneratePasswordLinkButton";
@@ -468,6 +469,7 @@ export function AdminStudentDetailPage() {
       </div>
 
       {staff && <StudentAiBudgetCard key={`budget-${statsResetCount}`} studentId={profile.id} canTopUp={admin} />}
+      {admin && <StudentCertificationCard studentId={profile.id} studentName={name} />}
       {staff && <StudentMissionGallery key={`missions-${statsResetCount}`} studentId={profile.id} />}
       {staff && <StudentStudioGallery studentId={profile.id} />}
       {staff && <StudentStudioVideoGallery studentId={profile.id} />}

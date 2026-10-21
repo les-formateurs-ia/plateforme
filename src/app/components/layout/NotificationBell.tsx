@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Bell, Calendar as CalendarIcon, XCircle, RefreshCw, CalendarPlus, ClipboardList, CheckCircle2, Flag, FileCheck } from "lucide-react";
+import { Bell, Calendar as CalendarIcon, XCircle, RefreshCw, CalendarPlus, ClipboardList, CheckCircle2, Flag, FileCheck, Award } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
@@ -26,6 +26,7 @@ const ICONS: Record<NotificationRow["type"], typeof Bell> = {
   rdv_confirmed: CheckCircle2,
   incident_reported: Flag,
   mission_submitted: FileCheck,
+  certification_submitted: Award,
 };
 
 function timeAgo(iso: string): string {
@@ -98,6 +99,11 @@ export function NotificationBell() {
   const goTo = async (n: NotificationRow) => {
     setOpen(false);
     if (n.type === "incident_reported") { navigate("/admin/incidents"); return; }
+    if (n.type === "certification_submitted" && n.rdvId) {
+      const { data } = await supabase.from("rendez_vous").select("student_id").eq("id", n.rdvId).maybeSingle();
+      navigate(data?.student_id ? `/admin/planning/students/${data.student_id}/certification` : "/admin/planning");
+      return;
+    }
     if (n.type === "mission_submitted" && n.missionSubmissionId) {
       const { data } = await supabase.from("mission_submissions").select("student_id").eq("id", n.missionSubmissionId).maybeSingle();
       navigate(data?.student_id ? `${staffBase}/planning/students/${data.student_id}` : `${staffBase}/planning`);

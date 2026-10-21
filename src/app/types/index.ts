@@ -18,4 +18,4 @@ export interface ChatMsg {
   text: string;
 }
 
-export type NavId = "dashboard" | "lessons" | "practice" | "studio" | "hub" | "agent" | "calendar" | "profile";
+export type NavId = "dashboard" | "lessons" | "certification" | "practice" | "studio" | "hub" | "agent" | "calendar" | "profile";

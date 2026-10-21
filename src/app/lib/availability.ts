@@ -330,6 +330,9 @@ export async function listMyBookingsAsStudent(studentId: string): Promise<Studen
     .from("rendez_vous")
     .select("*")
     .eq("student_id", studentId)
+    // La soutenance de certification se suit dans "Ma certification", pas
+    // dans les rendez-vous de coaching (cf. 20261021120000_certification_exams.sql).
+    .eq("kind", "coaching")
     .order("slot_date", { ascending: true })
     .order("start_time", { ascending: true });
   if (error) throw error;

@@ -16,6 +16,11 @@ import { PASSWORD_SETUP_PATH } from "@/app/lib/passwordSetup";
 import { LessonPage } from "@/app/pages/LessonPage";
 import { DashboardPage } from "@/app/pages/dashboard/DashboardPage";
 import { LessonsPage } from "@/app/pages/lessons/LessonsPage";
+import { CertificationPage } from "@/app/pages/certification/CertificationPage";
+import { CertificationExamPage } from "@/app/pages/certification/CertificationExamPage";
+import { CertificationExamHome } from "@/app/pages/certification/CertificationExamHome";
+import { AdminCertificationAnswersPage } from "@/app/pages/admin/AdminCertificationAnswersPage";
+import { CertificationProvider, useCertification } from "@/app/state/certification-context";
 import { MissionSubmittedPage } from "@/app/pages/lessons/MissionSubmittedPage";
 import { StudioPage } from "@/app/pages/studio/StudioPage";
 import { StudioImagesPage } from "@/app/pages/studio/StudioImagesPage";
@@ -177,7 +182,19 @@ function RootGate() {
 // selon le profil. Jamais atteint par le staff (RootGate l'intercepte avant).
 function DashboardRoute() {
   const { companyId } = useAuth();
-  return companyId ? <CompanyStudentHomePage /> : <DashboardPage />;
+  const { loading, examMode } = useCertification();
+  if (companyId) return <CompanyStudentHomePage />;
+  if (loading) return <LoadingScreen />;
+  // Épreuve écrite de certification en cours : l'accueil devient l'épreuve.
+  return examMode ? <CertificationExamHome /> : <DashboardPage />;
+}
+
+// Leçons (hors MainLayout) : fermées pendant l'épreuve de certification.
+function ExamLock({ children }: { children: ReactElement }) {
+  const { loading, examMode } = useCertification();
+  if (loading) return <LoadingScreen />;
+  if (examMode) return <Navigate to="/dashboard" replace />;
+  return children;
 }
 
 function AppRoutes() {
@@ -192,6 +209,8 @@ function AppRoutes() {
       <Route element={<RequireAuth><MainLayout /></RequireAuth>}>
         <Route path="dashboard" element={<DashboardRoute />} />
         <Route path="lessons" element={<LessonsPage />} />
+        <Route path="certification" element={<CertificationPage />} />
+        <Route path="certification/ecrit" element={<CertificationExamPage />} />
         <Route path="practice" element={<PracticePage2 />} />
         <Route path="practice/prompts" element={<PromptSessionsPage />} />
         <Route path="practice/prompts/:sessionId" element={<PromptExercisePage />} />
@@ -231,6 +250,7 @@ function AppRoutes() {
         <Route path="admin/instances/:instanceId/lessons/:lessonId" element={<RequireAdmin><AdminLessonEditorPage /></RequireAdmin>} />
         <Route path="admin/planning" element={<RequireAdmin><AdminPlanningPage /></RequireAdmin>} />
         <Route path="admin/planning/students/:studentId" element={<RequireAdmin><AdminStudentDetailPage /></RequireAdmin>} />
+        <Route path="admin/planning/students/:studentId/certification" element={<RequireAdmin><AdminCertificationAnswersPage /></RequireAdmin>} />
         <Route path="admin/planning/formateurs/:formateurId" element={<RequireAdmin><AdminFormateurDetailPage /></RequireAdmin>} />
         <Route path="admin/incidents" element={<RequireAdmin><AdminIncidentsPage /></RequireAdmin>} />
         {/* Ancienne liste "Demandes IA", remplacée par l'espace Prospects. */}
@@ -259,8 +279,8 @@ function AppRoutes() {
         <Route path="entreprise/html/:exerciseId" element={<RequireCompanyStudent><CompanyHtmlExercisePage /></RequireCompanyStudent>} />
         <Route path="entreprise/satisfaction/:testId" element={<RequireCompanyStudent><CompanySatisfactionTestPage /></RequireCompanyStudent>} />
       </Route>
-      <Route path="/lesson/:lessonId" element={<RequireAuth><LessonPage /></RequireAuth>} />
-      <Route path="/lesson/:lessonId/mission-envoyee" element={<RequireAuth><MissionSubmittedPage /></RequireAuth>} />
+      <Route path="/lesson/:lessonId" element={<RequireAuth><ExamLock><LessonPage /></ExamLock></RequireAuth>} />
+      <Route path="/lesson/:lessonId/mission-envoyee" element={<RequireAuth><ExamLock><MissionSubmittedPage /></ExamLock></RequireAuth>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
@@ -273,9 +293,11 @@ export default function App() {
         <ImpersonationProvider>
           <ProfileProvider>
             <BulkGenerationProvider>
-              <BrowserRouter>
-                <AppRoutes />
-              </BrowserRouter>
+              <CertificationProvider>
+                <BrowserRouter>
+                  <AppRoutes />
+                </BrowserRouter>
+              </CertificationProvider>
               <Toaster />
             </BulkGenerationProvider>
           </ProfileProvider>

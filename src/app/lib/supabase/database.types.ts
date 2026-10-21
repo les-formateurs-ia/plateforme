@@ -6,7 +6,8 @@ export type UserRole = "admin" | "formateur" | "student";
 export type EnrollmentStatus = "active" | "completed" | "paused";
 export type LessonProgressStatus = "locked" | "in_progress" | "completed";
 export type RdvStatus = "pending" | "confirmed" | "cancelled";
-export type NotificationType = "rdv_cancelled" | "rdv_reschedule_proposed" | "rdv_reschedule_accepted" | "rdv_reschedule_declined" | "rdv_booked" | "bilan_reminder" | "rdv_confirmed" | "incident_reported" | "mission_submitted";
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+export type NotificationType = "rdv_cancelled" | "rdv_reschedule_proposed" | "rdv_reschedule_accepted" | "rdv_reschedule_declined" | "rdv_booked" | "bilan_reminder" | "rdv_confirmed" | "incident_reported" | "mission_submitted" | "certification_submitted";
 export type AiContentType = "practical_exercise" | "mindmap" | "podcast" | "text_summary" | "remedial_explanation" | "remedial_quiz" | "avatar_video";
 export type ChatRole = "user" | "ai";
 export type VideoProvider = "cloudflare_stream" | "youtube" | "vimeo" | "external_url";
@@ -1257,6 +1258,7 @@ export interface Database {
           start_time: string;
           end_time: string;
           status: RdvStatus;
+          kind: "coaching" | "soutenance";
           message: string | null;
           cancelled_by: string | null;
           proposed_date: string | null;
@@ -1283,6 +1285,7 @@ export interface Database {
           start_time: string;
           end_time: string;
           status?: RdvStatus;
+          kind?: "coaching" | "soutenance";
           message?: string | null;
           cancelled_by?: string | null;
           proposed_date?: string | null;
@@ -1338,6 +1341,38 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["google_oauth_states"]["Insert"]>;
+        Relationships: never[];
+      };
+      certification_exams: {
+        Row: {
+          id: string;
+          student_id: string;
+          examiner_id: string | null;
+          launched_by: string | null;
+          launched_at: string;
+          deadline_at: string;
+          status: "in_progress" | "submitted";
+          answers: Json;
+          submitted_at: string | null;
+          rendez_vous_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          student_id: string;
+          examiner_id?: string | null;
+          launched_by?: string | null;
+          launched_at?: string;
+          deadline_at: string;
+          status?: "in_progress" | "submitted";
+          answers?: Json;
+          submitted_at?: string | null;
+          rendez_vous_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["certification_exams"]["Insert"]>;
         Relationships: never[];
       };
       notifications: {
@@ -1783,6 +1818,14 @@ export interface Database {
       };
       create_template_from_instance: {
         Args: { p_instance_id: string; p_name: string; p_slug: string };
+        Returns: string;
+      };
+      launch_certification_exam: {
+        Args: { p_student_id: string };
+        Returns: string;
+      };
+      submit_certification_exam: {
+        Args: { p_answers: Json; p_slot_date: string; p_start_time: string };
         Returns: string;
       };
       admin_reset_student_stats: {

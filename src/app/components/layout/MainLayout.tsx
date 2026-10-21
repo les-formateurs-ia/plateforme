@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useState } from "react";
-import { Link, NavLink, Outlet, useLocation } from "react-router";
+import { Link, Navigate, NavLink, Outlet, useLocation } from "react-router";
 import { Plus, CalendarClock, Menu, X, Bug, Building2, ScanEye, LogOut } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
@@ -20,6 +20,7 @@ import { cx } from "@/app/lib/cx";
 import { NAV_ITEMS, NAV_GROUP_LABELS } from "@/app/data/mock";
 import { supabase } from "@/app/lib/supabase/client";
 import { countUnreadIncidentNotifications } from "@/app/lib/notifications";
+import { isPathAllowedDuringExam, useCertification } from "@/app/state/certification-context";
 
 const STAFF_SPACE_KEY = "staffSpace";
 
@@ -50,6 +51,8 @@ export function MainLayout() {
   const [navOpen, setNavOpen] = useState(false);
   const [unreadIncidents, setUnreadIncidents] = useState(0);
   const location = useLocation();
+  // Épreuve de certification en cours : accueil (= l'épreuve), Studio et profil uniquement.
+  const { examMode } = useCertification();
   const gen = useBulkGeneration();
   const genPct = gen.total > 0 ? Math.round((gen.done / gen.total) * 100) : 0;
   // Le staff bascule entre deux espaces (choisis sur "/", cf. RootGate) : tant
@@ -140,7 +143,7 @@ export function MainLayout() {
       }}
     >
       <ImpersonationBanner />
-      <CommandPalette />
+      {!examMode && <CommandPalette />}
       <div className="main-layout-body flex flex-1 min-h-0 overflow-hidden">
       <Background />
 
@@ -179,7 +182,7 @@ export function MainLayout() {
             <X className="w-4 h-4" />
           </button>
         </div>
-        {studentNav && <div className="px-3 pt-4"><CommandTrigger /></div>}
+        {studentNav && !examMode && <div className="px-3 pt-4"><CommandTrigger /></div>}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {NAV_ITEMS.filter(({ id }) => id !== "profile")
             .sort((a, b) => isStaff(role) ? Number(b.id === "calendar") - Number(a.id === "calendar") : 0)
@@ -188,15 +191,16 @@ export function MainLayout() {
             // (ajoutés séparément plus bas) — tout le reste de cette liste
             // est un concept CPF (Pratique IA, Élèves, Rendez-vous...).
             if (entrepriseMode) return null;
+            if (examMode && id !== "dashboard" && id !== "studio") return null;
             // "Tableau de bord", "Mes leçons" et "Mon Agent IA" sont pensés
             // pour un parcours élève (progression, agent personnel, gains)
             // — pas de version admin/formateur pour l'instant, donc masqués
             // pour le staff plutôt que d'afficher une page vide/hors-sujet.
-            if ((id === "dashboard" || id === "lessons" || id === "agent") && isStaff(role)) return null;
+            if ((id === "dashboard" || id === "lessons" || id === "certification" || id === "agent") && isStaff(role)) return null;
             // Collaborateur entreprise : parcours CPF (leçons, pratique,
             // agent, RDV) hors-sujet, seul "Tableau de bord" (son espace
             // entreprise) et "Mon profil" restent pertinents.
-            if ((id === "lessons" || id === "practice" || id === "studio" || id === "hub" || id === "agent" || id === "calendar") && companyId) return null;
+            if ((id === "lessons" || id === "certification" || id === "practice" || id === "studio" || id === "hub" || id === "agent" || id === "calendar") && companyId) return null;
             // Staff : élèves, rendez-vous et
             // galerie précèdent les outils pédagogiques.
             if (id === "calendar" && isStaff(role)) {
@@ -319,7 +323,7 @@ export function MainLayout() {
 
         {/* En défilement document, cet espace initial part avec le contenu. */}
         <div className={cx("main-layout-content flex-1 min-h-0 flex flex-col overflow-hidden lg:pt-0", !sidebarHidden && "pt-[calc(env(safe-area-inset-top)+2.5rem)]")}>
-          <Outlet />
+          {examMode && !isPathAllowedDuringExam(location.pathname) ? <Navigate to="/dashboard" replace /> : <Outlet />}
         </div>
       </div>
       </div>

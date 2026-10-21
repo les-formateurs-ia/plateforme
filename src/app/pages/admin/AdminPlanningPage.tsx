@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { useImpersonation } from "@/app/state/impersonation-context";
@@ -10,7 +10,7 @@ import { GCard } from "@/app/components/common/GCard";
 import { ShimBtn } from "@/app/components/common/Buttons";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/app/components/ui/dialog";
 import { listStudentCards, listFormateurCards, type StudentCard, type PersonCard } from "@/app/lib/planning";
-import { createStudent } from "@/app/lib/students";
+import { createStudent, deleteStudent } from "@/app/lib/students";
 import { useStaffBasePath } from "@/app/lib/staffBase";
 
 type PlanningTab = "etudiants" | "formateurs";
@@ -23,12 +23,13 @@ function formatRegistrationDate(iso: string): string {
   return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(iso));
 }
 
-function PersonTable({ people, loading, onClick, onImpersonate, impersonatingId }: {
+function PersonTable({ people, loading, onClick, onImpersonate, impersonatingId, onDelete }: {
   people: PersonCard[];
   loading: boolean;
   onClick?: (id: string) => void;
   onImpersonate: (id: string) => void;
   impersonatingId: string | null;
+  onDelete?: (person: PersonCard) => void;
 }) {
   const th = useTh();
   if (loading) return <p className="text-sm" style={{ color: th.fg3 }}>Chargement…</p>;
@@ -62,9 +63,23 @@ function PersonTable({ people, loading, onClick, onImpersonate, impersonatingId 
               <td className="px-5 py-3.5 whitespace-nowrap" style={{ color: th.fg2 }}>{p.phone || "—"}</td>
               <td className="px-5 py-3.5 whitespace-nowrap" style={{ color: th.fg3 }}>{formatRegistrationDate(p.createdAt)}</td>
               <td className="px-5 py-3.5 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                <ShimBtn sm onClick={() => onImpersonate(p.id)} disabled={impersonatingId === p.id}>
-                  {impersonatingId === p.id ? "Connexion…" : "Se connecter en tant que"}
-                </ShimBtn>
+                <div className="inline-flex items-center gap-2">
+                  <ShimBtn sm onClick={() => onImpersonate(p.id)} disabled={impersonatingId === p.id}>
+                    {impersonatingId === p.id ? "Connexion…" : "Se connecter en tant que"}
+                  </ShimBtn>
+                  {onDelete && (
+                    <button
+                      type="button"
+                      aria-label={`Supprimer le compte de ${p.firstName || p.email}`}
+                      title="Supprimer le compte"
+                      onClick={() => onDelete(p)}
+                      className="w-9 h-9 inline-flex items-center justify-center rounded-[2px] transition-opacity hover:opacity-80"
+                      style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.3)", color: th.danger }}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
               </td>
             </tr>
           ))}
@@ -100,6 +115,23 @@ export function AdminPlanningPage() {
   const [experience, setExperience] = useState("");
   const [objective, setObjective] = useState("");
   const [impersonatingId, setImpersonatingId] = useState<string | null>(null);
+  const [toDelete, setToDelete] = useState<PersonCard | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!toDelete || deleting) return;
+    setDeleting(true);
+    try {
+      await deleteStudent(toDelete.id);
+      setStudents((prev) => prev.filter((s) => s.id !== toDelete.id));
+      toast.success("Compte élève supprimé.");
+      setToDelete(null);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Suppression impossible.");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const handleImpersonate = async (id: string) => {
     if (impersonatingId) return;
@@ -212,6 +244,7 @@ export function AdminPlanningPage() {
             onClick={(id) => navigate(`${base}/planning/students/${id}`)}
             onImpersonate={handleImpersonate}
             impersonatingId={impersonatingId}
+            onDelete={isAdmin ? setToDelete : undefined}
           />
         )}
         {isAdmin && tab === "formateurs" && (
@@ -224,6 +257,26 @@ export function AdminPlanningPage() {
           />
         )}
       </div>
+
+      <Dialog open={!!toDelete} onOpenChange={(v) => { if (!v && !deleting) setToDelete(null); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Supprimer ce compte élève ?</DialogTitle>
+            <DialogDescription>
+              Le compte de {[toDelete?.firstName, toDelete?.lastName].filter(Boolean).join(" ") || toDelete?.email} sera définitivement supprimé :
+              accès à la plateforme, progression, missions, conversations avec l'Agent IA et créations du Studio. Cette action est irréversible.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2">
+            <button type="button" onClick={() => setToDelete(null)} disabled={deleting} className="px-4 py-2.5 rounded-[2px] text-sm font-semibold transition-opacity hover:opacity-70 disabled:opacity-40" style={{ color: th.fg2 }}>
+              Annuler
+            </button>
+            <button type="button" onClick={handleDelete} disabled={deleting} className="px-4 py-2.5 rounded-[2px] text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60" style={{ background: "#ef4444" }}>
+              {deleting ? "Suppression…" : "Supprimer définitivement"}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={createOpen} onOpenChange={(v) => !creating && setCreateOpen(v)}>
         <DialogContent>
