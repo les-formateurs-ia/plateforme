@@ -20,9 +20,12 @@ export interface StudentCard extends PersonCard {
 // (profiles.formateur_id) — utilisé par la page Planning pour qu'un
 // formateur ne voie que SES élèves, contrairement à l'admin qui les voit
 // tous (cf. 0024_student_formateur.sql).
-export async function listStudentCards(formateurId?: string): Promise<StudentCard[]> {
+// `cpfOnly` exclut les salariés créés depuis l'espace Entreprise
+// (profiles.company_id renseigné).
+export async function listStudentCards(formateurId?: string, { cpfOnly = false }: { cpfOnly?: boolean } = {}): Promise<StudentCard[]> {
   let studentsQuery = supabase.from("profiles").select("id, first_name, last_name, email, avatar_url, formateur_id, phone, created_at").eq("role", "student").order("first_name");
   if (formateurId) studentsQuery = studentsQuery.eq("formateur_id", formateurId);
+  if (cpfOnly) studentsQuery = studentsQuery.is("company_id", null);
 
   const [{ data: students, error: studentsError }, { data: instances, error: instancesError }] = await Promise.all([
     studentsQuery,

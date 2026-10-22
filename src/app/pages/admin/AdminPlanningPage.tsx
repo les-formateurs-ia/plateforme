@@ -148,7 +148,7 @@ export function AdminPlanningPage() {
   const loadStudents = async () => {
     if (!user) return;
     setLoadingStudents(true);
-    const rows = await listStudentCards(isAdmin ? undefined : user.id);
+    const rows = await listStudentCards(isAdmin ? undefined : user.id, { cpfOnly: true });
     setStudents(rows);
     setLoadingStudents(false);
   };
@@ -158,7 +158,7 @@ export function AdminPlanningPage() {
     let cancelled = false;
     (async () => {
       setLoadingStudents(true);
-      const rows = await listStudentCards(isAdmin ? undefined : user.id);
+      const rows = await listStudentCards(isAdmin ? undefined : user.id, { cpfOnly: true });
       if (!cancelled) { setStudents(rows); setLoadingStudents(false); }
     })();
     if (isAdmin) {
@@ -223,7 +223,7 @@ export function AdminPlanningPage() {
                 <button
                   key={t.id}
                   onClick={() => setTab(t.id)}
-                  className="px-7 py-3 rounded-[2px] text-sm font-bold transition-all"
+                  className="px-7 py-3 rounded-full text-sm font-bold transition-all"
                   style={active
                     ? { background: th.ink, color: th.onInk, boxShadow: "none" }
                     : { color: th.fg2, background: "transparent" }}
