@@ -165,7 +165,10 @@ function measurePageBreaks(doc: Document): { lines: PrintInterval[]; blocks: Pri
 
 export async function generateMissionPdf(snapshotHtml: string): Promise<Blob> {
   const frame = document.createElement("iframe");
-  frame.setAttribute("sandbox", "allow-same-origin");
+  // html2canvas clones the body into a nested iframe and waits for its onload handler,
+  // which Chrome blocks without allow-scripts. Lesson scripts stay disabled: they are
+  // stripped by prepareDocument and the injected CSP forbids any script source.
+  frame.setAttribute("sandbox", "allow-same-origin allow-scripts");
   frame.setAttribute("aria-hidden", "true");
   frame.setAttribute("scrolling", "no");
   frame.tabIndex = -1;
