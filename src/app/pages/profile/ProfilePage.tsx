@@ -136,6 +136,7 @@ export function ProfilePage() {
   // Google Calendar de la plateforme (admin)
   const [googleConnected, setGoogleConnected] = useState(false);
   const [googleCalendarEmail, setGoogleCalendarEmail] = useState<string | null>(null);
+  const [googleCanSendMail, setGoogleCanSendMail] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
   const loadGoogleCalendarStatus = async () => {
@@ -144,6 +145,7 @@ export function ProfilePage() {
       const status = await getGoogleCalendarStatus();
       setGoogleConnected(status.connected);
       setGoogleCalendarEmail(status.email);
+      setGoogleCanSendMail(status.canSendMail);
     } catch (err) {
       console.error(err);
     }
@@ -364,11 +366,12 @@ export function ProfilePage() {
             </p>
           </Section>
 
-          {/* Google Calendar — compte UNIQUE de la plateforme (pas un compte
-              par formateur), sert à créer les évènements Meet de tous les
-              rendez-vous (voir availability.ts, sync-meet-event). */}
+          {/* Compte Google UNIQUE de la plateforme (pas un compte par
+              formateur) : crée les évènements Meet de tous les rendez-vous
+              (sync-meet-event) et envoie les mails de la plateforme
+              (notify-mission-submitted). */}
           {role === "admin" && (
-            <Section title="Google Calendar de la plateforme">
+            <Section title="Compte Google de la plateforme">
               <div className="flex items-center justify-between gap-4 flex-wrap">
                 <div className="flex items-start gap-3 min-w-0">
                   {googleConnected
@@ -376,15 +379,27 @@ export function ProfilePage() {
                     : <CalendarClock className="w-5 h-5 shrink-0 mt-0.5" style={{ color: th.fg3 }} />}
                   <p className="text-sm leading-relaxed min-w-0 break-words" style={{ color: th.fg2 }}>
                     {googleConnected
-                      ? <>Connecté{googleCalendarEmail ? <> avec <b style={{ color: th.fg }}>{googleCalendarEmail}</b></> : ""}. Un lien Meet est créé à chaque rendez-vous, tous formateurs confondus.</>
-                      : "Connecte le compte Google de la plateforme pour créer automatiquement un lien Meet à chaque rendez-vous."}
+                      ? <>
+                          Connecté{googleCalendarEmail ? <> avec <b style={{ color: th.fg }}>{googleCalendarEmail}</b></> : ""}. Un lien Meet est créé à chaque rendez-vous, tous formateurs confondus.
+                          {googleCanSendMail
+                            ? " Les mails de la plateforme (mission validée…) partent de ce compte."
+                            : <span className="block mt-1" style={{ color: th.warn }}>L'envoi de mails n'est pas autorisé sur ce compte : reconnecte-le pour que le formateur et les administrateurs soient prévenus des missions validées.</span>}
+                        </>
+                      : "Connecte le compte Google de la plateforme pour créer automatiquement un lien Meet à chaque rendez-vous et envoyer les mails de la plateforme."}
                   </p>
                 </div>
                 {googleConnected ? (
-                  <VBtn sm onClick={handleDisconnectGoogle} disabled={googleLoading}>{googleLoading ? "…" : "Déconnecter"}</VBtn>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {!googleCanSendMail && (
+                      <ShimBtn sm onClick={handleConnectGoogle} disabled={googleLoading}>
+                        <GoogleLogo className="w-4 h-4 shrink-0" />{googleLoading ? "Redirection…" : "Reconnecter"}
+                      </ShimBtn>
+                    )}
+                    <VBtn sm onClick={handleDisconnectGoogle} disabled={googleLoading}>{googleLoading ? "…" : "Déconnecter"}</VBtn>
+                  </div>
                 ) : (
                   <ShimBtn sm onClick={handleConnectGoogle} disabled={googleLoading}>
-                    <GoogleLogo className="w-4 h-4 shrink-0" />{googleLoading ? "Redirection…" : "Connecter Google Calendar"}
+                    <GoogleLogo className="w-4 h-4 shrink-0" />{googleLoading ? "Redirection…" : "Connecter le compte Google"}
                   </ShimBtn>
                 )}
               </div>

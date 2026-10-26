@@ -3,6 +3,7 @@
 // seuls habilités à le connecter/déconnecter (google-oauth-start/disconnect).
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse, getCallerRole } from "../_shared/podcast-utils.ts";
+import { GOOGLE_SCOPES } from "../_shared/google-platform.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
@@ -25,11 +26,14 @@ Deno.serve(async (req) => {
     const serviceClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
     const { data: tokenRow } = await serviceClient
       .from("google_oauth_tokens")
-      .select("google_email")
+      .select("google_email, granted_scopes")
       .eq("is_platform_default", true)
       .maybeSingle();
 
-    return jsonResponse({ connected: !!tokenRow, email: tokenRow?.google_email ?? null });
+    // canSendMail : le compte a autorisé l'envoi Gmail (connexions antérieures
+    // à cet ajout : à reconnecter depuis le profil).
+    const scopes: string[] = (tokenRow?.granted_scopes ?? "").split(" ");
+    return jsonResponse({ connected: !!tokenRow, email: tokenRow?.google_email ?? null, canSendMail: scopes.includes(GOOGLE_SCOPES.gmailSend) });
   } catch (err) {
     return jsonResponse({ error: err instanceof Error ? err.message : "Erreur inconnue." }, 500);
   }

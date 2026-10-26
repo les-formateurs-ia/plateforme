@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useLocation, Link } from "react-router";
-import { ChevronLeft, Upload, Plus, Trash2, CheckCircle, Eye, Code } from "lucide-react";
+import { ChevronLeft, Upload, Plus, Trash2, CheckCircle, Eye, Code, BookOpen, Target, Check } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { checkVideoFile } from "@/app/components/lesson/LessonVideo";
 import { supabase } from "@/app/lib/supabase/client";
@@ -10,6 +10,7 @@ import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
 import { useStaffBasePath } from "@/app/lib/staffBase";
 import { deleteLessonVideoFiles } from "@/app/lib/lessonVideos";
 import { useHtmlTheme } from "@/app/lib/useHtmlTheme";
+import { MISSION_TEMPLATES } from "@/app/data/missions";
 
 interface QuizOptionDraft { id?: string; label: string; is_correct: boolean; }
 interface QuizQuestionDraft { id?: string; question: string; explanation: string; options: QuizOptionDraft[]; }
@@ -134,6 +135,9 @@ export function AdminLessonEditorPage() {
   const [customHtml, setCustomHtml] = useState("");
   const [htmlPreviewOpen, setHtmlPreviewOpen] = useState(false);
   const [isMission, setIsMission] = useState(false);
+  // Mission de fin de module choisie (cf. data/missions) ; null = ancienne
+  // mission en HTML libre (reference_content), conservée telle quelle.
+  const [missionTemplate, setMissionTemplate] = useState<string | null>(null);
   const [questions, setQuestions] = useState<QuizQuestionDraft[]>([]);
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
@@ -168,6 +172,7 @@ export function AdminLessonEditorPage() {
       setPracticalExercisePrompt(lesson.practical_exercise_prompt ?? "");
       setCustomHtml(lesson.custom_html_content ?? "");
       setIsMission(lesson.is_mission ?? false);
+      setMissionTemplate(lesson.mission_template ?? null);
 
       if (isInstance) {
         const { data: questionRows } = await supabase.from("instance_quiz_questions").select("id, question, explanation, order_index").eq("lesson_id", routeLessonId).order("order_index");
@@ -295,7 +300,9 @@ export function AdminLessonEditorPage() {
   const save = async () => {
     if (!sectionId) { setError("Section inconnue — reviens depuis la fiche du cours."); return; }
     if (!title.trim() || !slug.trim()) { setError("Titre et identifiant sont obligatoires."); return; }
-    for (const q of questions) {
+    if (isMission && !missionTemplate && !referenceContent.trim()) { setError("Choisis la mission que les élèves vont réaliser."); return; }
+    // Quiz masqué pour une mission : il n'est ni affiché à l'élève ni vérifié ici.
+    for (const q of isMission ? [] : questions) {
       if (!q.question.trim()) { setError("Une question du quiz est vide."); return; }
       if (q.options.filter((o) => o.label.trim()).length < 2) { setError(`La question "${q.question}" doit avoir au moins 2 réponses.`); return; }
       if (!q.options.some((o) => o.is_correct)) { setError(`La question "${q.question}" n'a pas de bonne réponse cochée.`); return; }
@@ -317,6 +324,7 @@ export function AdminLessonEditorPage() {
       practical_exercise_prompt: practicalExercisePrompt || null,
       custom_html_content: customHtml.trim() || null,
       is_mission: isMission,
+      mission_template: isMission ? missionTemplate : null,
     };
 
     let lessonId = routeLessonId;
@@ -391,15 +399,60 @@ export function AdminLessonEditorPage() {
       <GCard><div className="p-6 space-y-4">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <h2 className="text-lg font-black" style={{ color: th.fg }}><GT>{isNew ? "Nouvelle leçon" : "Éditer la leçon"}</GT></h2>
-          <label className="flex items-center gap-2 cursor-pointer select-none px-3 py-2 rounded-xl" style={{ background: th.inputBg, border: `1px solid ${th.inputB}` }}>
-            <input type="checkbox" checked={isMission} onChange={(e) => setIsMission(e.target.checked)} className="w-4 h-4" />
-            <span className="text-xs font-bold" style={{ color: th.fg }}>Mission</span>
-          </label>
         </div>
+
+        <div>
+          <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Type de leçon</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {([
+              { mission: false, Icon: BookOpen, label: "Leçon classique", desc: "Vidéo, podcast, Playground, Agent, Copilote et quiz." },
+              { mission: true, Icon: Target, label: "Mission", desc: "Mission de fin de module : l'élève la remplit étape par étape, l'enregistre puis la valide." },
+            ] as const).map(({ mission, Icon, label, desc }) => {
+              const active = isMission === mission;
+              return (
+                <button key={label} type="button" onClick={() => setIsMission(mission)} aria-pressed={active}
+                  className="text-left rounded-[6px] p-4 flex items-start gap-3 transition-colors"
+                  style={active ? { background: th.ink, color: th.onInk, border: `1px solid ${th.ink}` } : { background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg }}>
+                  <Icon className="w-5 h-5 shrink-0 mt-0.5" />
+                  <span>
+                    <span className="block text-sm font-bold">{label}</span>
+                    <span className="block text-xs mt-1" style={{ opacity: 0.75 }}>{desc}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {isMission && (
-          <p className="text-xs -mt-2" style={{ color: th.fg3 }}>
-            Leçon "Mission" : l'élève ne verra que le "Contenu du cours (HTML)" ci-dessous — pas de podcast, Playground, Agent, Copilote ni bouton "Terminer la leçon". Deux boutons "Enregistrer" et "Valider ma mission" apparaîtront sous le HTML.
-          </p>
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Mission à réaliser</label>
+            <div className="space-y-2">
+              {MISSION_TEMPLATES.map((m) => {
+                const active = missionTemplate === m.key;
+                const questionCount = m.exercises.reduce((n, e) => n + e.questions.length, 0);
+                return (
+                  <button key={m.key} type="button" aria-pressed={active}
+                    onClick={() => { setMissionTemplate(m.key); if (!title.trim()) handleTitleChange(m.title); }}
+                    className="w-full text-left rounded-[6px] p-4 flex items-start gap-3 transition-colors"
+                    style={{ background: th.inputBg, border: `1px solid ${active ? th.ink : th.inputB}`, boxShadow: active ? `inset 0 0 0 1px ${th.ink}` : undefined }}>
+                    <span className="w-5 h-5 rounded-full shrink-0 mt-0.5 flex items-center justify-center"
+                      style={active ? { background: th.ink, color: th.onInk } : { border: `1px solid ${th.inputB}` }}>
+                      {active && <Check className="w-3 h-3" strokeWidth={3} />}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-bold" style={{ color: th.fg }}>{m.title}</span>
+                      <span className="block text-xs mt-1 leading-relaxed" style={{ color: th.fg3 }}>{m.summary}</span>
+                      <span className="block text-[11px] mt-1.5 font-semibold" style={{ color: th.fg2 }}>{m.exercises.length} exercices · {questionCount} questions · grille de notation</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-xs mt-2" style={{ color: th.fg3 }}>
+              L'élève ne voit que la mission — pas de podcast, Playground, Agent, Copilote ni quiz. À la validation, le PDF de sa mission est envoyé à son formateur, qui est prévenu par mail avec les administrateurs.
+            </p>
+          </div>
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -422,12 +475,20 @@ export function AdminLessonEditorPage() {
           </div>
         </div>
 
+        {(!isMission || !missionTemplate) && (
         <div>
-          <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Contenu du cours (HTML)</label>
+          <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>{isMission ? "Mission en HTML libre (ancien format)" : "Contenu du cours (HTML)"}</label>
           <textarea value={referenceContent} onChange={(e) => setReferenceContent(e.target.value)} rows={14}
             className="w-full rounded-[4px] px-4 py-3 text-sm g-input resize-y font-mono" placeholder="<h2>Objectif</h2>&#10;<p>...</p>&#10;&#10;<h3>Théorie</h3>&#10;<p>...</p>" />
-          <p className="text-xs mt-1.5" style={{ color: th.fg3 }}>Contenu fixe affiché à tous les élèves — sert de base à la personnalisation IA (Étape 2). HTML complet (balises, style, tableaux, script…), rendu à l'identique comme l'onglet Playground.</p>
+          <p className="text-xs mt-1.5" style={{ color: th.fg3 }}>
+            {isMission
+              ? "Utilisé seulement si aucune mission n'est choisie ci-dessus : le HTML est affiché tel quel, avec les boutons Enregistrer et Valider en dessous."
+              : "Contenu fixe affiché à tous les élèves — sert de base à la personnalisation IA (Étape 2). HTML complet (balises, style, tableaux, script…), rendu à l'identique comme l'onglet Playground."}
+          </p>
         </div>
+        )}
+
+        {!isMission && (<>
 
         <div>
           <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Vidéo</label>
@@ -498,8 +559,10 @@ export function AdminLessonEditorPage() {
           <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: th.fg3 }}>Prompt de référence (exercice pratique)</label>
           <textarea value={practicalExercisePrompt} onChange={(e) => setPracticalExercisePrompt(e.target.value)} rows={3} className="w-full rounded-[4px] px-4 py-3 text-sm g-input resize-none" />
         </div>
+        </>)}
       </div></GCard>
 
+      {!isMission && (
       <GCard><div className="p-6">
         <div className="flex items-center justify-between mb-2 gap-3 flex-wrap">
           <h3 className="text-sm font-black" style={{ color: th.fg }}>Quiz</h3>
@@ -550,6 +613,7 @@ export function AdminLessonEditorPage() {
           <VBtn onClick={addQuestion} sm><span className="flex items-center gap-1.5"><Plus className="w-3.5 h-3.5" />Ajouter une question</span></VBtn>
         </div>
       </div></GCard>
+      )}
 
       {error && <p className="text-xs" style={{ color: th.danger }}>{error}</p>}
       <ShimBtn onClick={save} disabled={saving}>{saving ? "Enregistrement…" : "Enregistrer la leçon"}</ShimBtn>

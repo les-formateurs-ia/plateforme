@@ -554,6 +554,7 @@ export interface Database {
           custom_html_content: string | null;
           custom_video_url: string | null;
           is_mission: boolean;
+          mission_template: string | null;
           order_index: number;
           created_at: string;
           updated_at: string;
@@ -573,6 +574,7 @@ export interface Database {
           custom_html_content?: string | null;
           custom_video_url?: string | null;
           is_mission?: boolean;
+          mission_template?: string | null;
           order_index: number;
           created_at?: string;
           updated_at?: string;
@@ -1083,6 +1085,7 @@ export interface Database {
           custom_html_content: string | null;
           custom_video_url: string | null;
           is_mission: boolean;
+          mission_template: string | null;
           order_index: number;
           created_at: string;
           updated_at: string;
@@ -1102,6 +1105,7 @@ export interface Database {
           custom_html_content?: string | null;
           custom_video_url?: string | null;
           is_mission?: boolean;
+          mission_template?: string | null;
           order_index: number;
           created_at?: string;
           updated_at?: string;
@@ -1314,6 +1318,7 @@ export interface Database {
           access_token: string | null;
           access_token_expires_at: string | null;
           google_email: string | null;
+          granted_scopes: string | null;
           connected_at: string;
           is_platform_default: boolean;
         };
@@ -1323,6 +1328,7 @@ export interface Database {
           access_token?: string | null;
           access_token_expires_at?: string | null;
           google_email?: string | null;
+          granted_scopes?: string | null;
           connected_at?: string;
           is_platform_default?: boolean;
         };
@@ -1413,6 +1419,7 @@ export interface Database {
           pdf_path: string | null;
           viewed_at: string | null;
           submitted_at: string | null;
+          email_notified_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -1425,6 +1432,7 @@ export interface Database {
           pdf_path?: string | null;
           viewed_at?: string | null;
           submitted_at?: string | null;
+          email_notified_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };

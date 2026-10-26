@@ -9,25 +9,7 @@
 // meetLink:null (le front retente au prochain chargement).
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
-
-async function refreshAccessToken(clientId: string, clientSecret: string, refreshToken: string) {
-  const resp = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      client_id: clientId,
-      client_secret: clientSecret,
-      refresh_token: refreshToken,
-      grant_type: "refresh_token",
-    }),
-  });
-  if (!resp.ok) throw new Error(`Échec du rafraîchissement du token Google : ${await resp.text()}`);
-  const json = await resp.json();
-  return {
-    accessToken: json.access_token as string,
-    expiresAt: new Date(Date.now() + (json.expires_in ?? 3600) * 1000).toISOString(),
-  };
-}
+import { getPlatformGoogleAccount } from "../_shared/google-platform.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
@@ -62,27 +44,9 @@ Deno.serve(async (req) => {
     // is_platform_default = true identifie LE compte plateforme (0059),
     // indépendamment du formateur assigné à ce rendez-vous.
     const serviceClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-    const { data: tokenRow } = await serviceClient
-      .from("google_oauth_tokens")
-      .select("*")
-      .eq("is_platform_default", true)
-      .maybeSingle();
-    if (!tokenRow) return jsonResponse({ ok: true, meetLink: null });
-
-    const clientId = Deno.env.get("GOOGLE_CLIENT_ID");
-    const clientSecret = Deno.env.get("GOOGLE_CLIENT_SECRET");
-    if (!clientId || !clientSecret) return jsonResponse({ ok: true, meetLink: null });
-
-    let accessToken = tokenRow.access_token as string | null;
-    const expiresAtMs = tokenRow.access_token_expires_at ? new Date(tokenRow.access_token_expires_at).getTime() : 0;
-    if (!accessToken || expiresAtMs < Date.now() + 60_000) {
-      const refreshed = await refreshAccessToken(clientId, clientSecret, tokenRow.refresh_token);
-      accessToken = refreshed.accessToken;
-      await serviceClient
-        .from("google_oauth_tokens")
-        .update({ access_token: refreshed.accessToken, access_token_expires_at: refreshed.expiresAt })
-        .eq("formateur_id", tokenRow.formateur_id);
-    }
+    const account = await getPlatformGoogleAccount(serviceClient);
+    if (!account) return jsonResponse({ ok: true, meetLink: null });
+    const accessToken = account.accessToken;
 
     // Annulé → on supprime l'évènement Google s'il existe, rien d'autre à faire.
     if (rdv.status === "cancelled") {

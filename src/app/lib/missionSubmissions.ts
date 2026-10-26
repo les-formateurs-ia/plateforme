@@ -56,7 +56,8 @@ export async function saveMissionDraft(lessonId: string, studentId: string, html
 // Validation définitive : génère le PDF à partir du snapshot HTML, l'envoie
 // dans le bucket privé mission-pdfs, verrouille la soumission ("submitted" —
 // la policy RLS refusera toute écriture ultérieure), notifie le formateur
-// assigné (si renseigné) et débloque la leçon suivante.
+// assigné (si renseigné), débloque la leçon suivante, puis prévient par mail
+// le formateur et les administrateurs (fonction notify-mission-submitted).
 export async function submitMission(params: {
   lessonId: string;
   studentId: string;
@@ -103,6 +104,11 @@ export async function submitMission(params: {
   }
 
   await completeMissionLesson(studentId, lessonId);
+
+  // Mail au formateur et aux administrateurs (PDF joint). La mission est déjà
+  // validée : un échec d'envoi ne doit pas la faire paraître ratée à l'élève.
+  const { error: mailError } = await supabase.functions.invoke("notify-mission-submitted", { body: { submissionId: submissionRow.id } });
+  if (mailError) console.error("Mail de mission validée non envoyé :", mailError);
 }
 
 // Lecture staff (fiche élève admin/formateur) : RLS (mission_submissions_select)

@@ -26,6 +26,8 @@ import { startGeminiVoiceSession, type GeminiVoiceSession } from "@/app/lib/gemi
 import { injectPlatformAuth, injectAutoResize, injectMissionBridge, normalizeSmartQuotes } from "@/app/lib/platformHtml";
 import { useHtmlTheme } from "@/app/lib/useHtmlTheme";
 import { getMySubmission, saveMissionDraft, submitMission, type MissionSubmission } from "@/app/lib/missionSubmissions";
+import { getMissionTemplate } from "@/app/data/missions";
+import { MissionPlayer } from "@/app/components/lesson/MissionPlayer";
 import { MindmapView } from "@/app/components/lesson/MindmapView";
 import { LessonPager } from "@/app/components/lesson/LessonPager";
 import { LessonVideo } from "@/app/components/lesson/LessonVideo";
@@ -186,8 +188,16 @@ export function LessonPage() {
   const missionIframeRef = useRef<HTMLIFrameElement>(null);
   const [missionIframeHeight, setMissionIframeHeight] = useState(0);
   const missionHtmlSource = missionSubmission?.htmlContent ?? courseHtml;
+  // Mission de fin de module choisie dans l'éditeur (cf. data/missions) :
+  // déroulée étape par étape dans la page. Sans elle (ancienne mission en
+  // HTML libre), le reference_content reste affiché dans son iframe.
+  const missionTemplate = lesson?.isMission ? getMissionTemplate(lesson.missionTemplate) : null;
+  // Le parcours lit les réponses du brouillon à son montage : on attend donc
+  // la soumission existante avant de l'afficher.
+  const [missionLoaded, setMissionLoaded] = useState(false);
 
   useEffect(() => {
+    setMissionLoaded(false);
     if (!lesson?.isMission || !lessonId || !user) { setMissionSubmission(null); return; }
     let cancelled = false;
     (async () => {
@@ -196,6 +206,8 @@ export function LessonPage() {
         if (!cancelled) setMissionSubmission(sub);
       } catch (err) {
         console.error(err);
+      } finally {
+        if (!cancelled) setMissionLoaded(true);
       }
     })();
     return () => { cancelled = true; };
@@ -237,27 +249,31 @@ export function LessonPage() {
     });
   };
 
-  const handleSaveMissionDraft = async () => {
-    if (!lessonId || !user) return;
+  // silent : enregistrement automatique du parcours de mission (changement
+  // d'étape), sans toast de réussite.
+  const handleSaveMissionDraft = async (snapshot?: string, { silent = false } = {}): Promise<boolean> => {
+    if (!lessonId || !user) return false;
     setMissionSaving(true);
     try {
-      const html = await requestMissionSnapshot();
+      const html = snapshot ?? await requestMissionSnapshot();
       await saveMissionDraft(lessonId, user.id, html);
       setMissionSubmission((prev) => (prev ? { ...prev, htmlContent: html } : prev));
-      toast.success("Mission enregistrée — tu pourras reprendre où tu en étais.");
+      if (!silent) toast.success("Mission enregistrée — tu pourras reprendre où tu en étais.");
+      return true;
     } catch (err) {
       console.error(err);
       toast.error(err instanceof Error ? err.message : "Impossible d'enregistrer la mission.");
+      return false;
     } finally {
       setMissionSaving(false);
     }
   };
 
-  const handleValidateMission = async () => {
+  const handleValidateMission = async (snapshot?: string) => {
     if (!lessonId || !user || !lesson) return;
     setMissionSubmitting(true);
     try {
-      const html = await requestMissionSnapshot();
+      const html = snapshot ?? await requestMissionSnapshot();
       const studentName = profile.name?.trim() || user.email || "Élève";
       await submitMission({ lessonId, studentId: user.id, htmlContent: html, lessonTitle: lesson.title, studentName });
       course.refresh();
@@ -832,7 +848,15 @@ export function LessonPage() {
           {lesson.sectionTitle && <p className="eyebrow mb-2" style={{ color: th.fg3 }}>{lesson.sectionTitle}</p>}
           <h1 className="text-[1.75rem] sm:text-[2.3rem] leading-[1.06] font-black mb-6 max-w-4xl" style={{ color: th.fg }}>{lesson.title}</h1>
 
-          {lesson.isMission ? (
+          {missionTemplate ? (
+            missionLoaded ? (
+              <MissionPlayer mission={missionTemplate} savedHtml={missionSubmission?.htmlContent ?? null}
+                studentName={profile.name?.trim() || user?.email || "Élève"} readOnly={missionSubmission?.status === "submitted"}
+                onSave={(html, opts) => handleSaveMissionDraft(html, opts)} onSubmit={(html) => handleValidateMission(html)} />
+            ) : (
+              <p className="text-sm py-10 text-center" style={{ color: th.fg3 }}>Chargement de la mission…</p>
+            )
+          ) : lesson.isMission ? (
             <div className="pb-4">
               {missionHtmlSource ? (
                 <iframe
@@ -853,8 +877,8 @@ export function LessonPage() {
                 </div>
               ) : (
                 <div className="mt-5 flex items-center justify-center gap-3">
-                  <VBtn onClick={handleSaveMissionDraft} disabled={missionSaving || missionSubmitting}>{missionSaving ? "Enregistrement…" : "Enregistrer"}</VBtn>
-                  <ShimBtn onClick={handleValidateMission} disabled={missionSaving || missionSubmitting}>{missionSubmitting ? "Envoi…" : "Valider ma mission"}</ShimBtn>
+                  <VBtn onClick={() => void handleSaveMissionDraft()} disabled={missionSaving || missionSubmitting}>{missionSaving ? "Enregistrement…" : "Enregistrer"}</VBtn>
+                  <ShimBtn onClick={() => void handleValidateMission()} disabled={missionSaving || missionSubmitting}>{missionSubmitting ? "Envoi…" : "Valider ma mission"}</ShimBtn>
                 </div>
               )}
             </div>

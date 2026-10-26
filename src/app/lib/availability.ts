@@ -65,12 +65,14 @@ export async function disconnectGoogleCalendar(): Promise<void> {
   if (error) throw error;
 }
 
-export interface GoogleCalendarStatus { connected: boolean; email: string | null }
+// canSendMail : le compte a autorisé l'envoi de mails (mail "mission
+// validée", cf. notify-mission-submitted) — sinon il faut le reconnecter.
+export interface GoogleCalendarStatus { connected: boolean; email: string | null; canSendMail: boolean }
 
 export async function getGoogleCalendarStatus(): Promise<GoogleCalendarStatus> {
   const { data, error } = await supabase.functions.invoke("google-oauth-status");
   if (error) throw error;
-  return { connected: !!data?.connected, email: data?.email ?? null };
+  return { connected: !!data?.connected, email: data?.email ?? null, canSendMail: !!data?.canSendMail };
 }
 
 // Formateur/admin attribué à l'élève (profiles.formateur_id, cf.

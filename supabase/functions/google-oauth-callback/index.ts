@@ -66,6 +66,9 @@ Deno.serve(async (req) => {
       access_token: tokens.access_token,
       access_token_expires_at: expiresAt,
       google_email: googleEmail,
+      // L'admin peut décocher une autorisation sur l'écran de Google : on
+      // garde ce qui a réellement été accordé (cf. google-oauth-status).
+      granted_scopes: tokens.scope ?? null,
       connected_at: new Date().toISOString(),
     });
     if (upsertErr) return fail(`token_store_failed: ${upsertErr.message}`);

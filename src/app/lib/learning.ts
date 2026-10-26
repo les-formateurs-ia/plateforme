@@ -245,6 +245,9 @@ export interface LessonDetail {
   referenceContent: string | null;
   customHtmlContent: string | null;
   isMission: boolean;
+  // Mission de fin de module choisie dans l'éditeur (cf. data/missions) — null pour
+  // une leçon classique ou une ancienne mission en HTML libre.
+  missionTemplate: string | null;
   sectionTitle: string;
   instanceId: string;
   instanceName: string;
@@ -259,7 +262,7 @@ export interface LessonDetail {
 export async function getLessonDetail(lessonId: string): Promise<LessonDetail | null> {
   const { data: instanceLesson, error: instanceLessonError } = await supabase
     .from("instance_lessons")
-    .select("id, section_id, slug, title, video_provider, video_url, custom_video_url, duration_minutes, ai_content_prompt, practical_exercise_prompt, reference_content, custom_html_content, is_mission")
+    .select("id, section_id, slug, title, video_provider, video_url, custom_video_url, duration_minutes, ai_content_prompt, practical_exercise_prompt, reference_content, custom_html_content, is_mission, mission_template")
     .eq("id", lessonId)
     .maybeSingle();
   if (instanceLessonError) throw instanceLessonError;
@@ -309,6 +312,7 @@ export async function getLessonDetail(lessonId: string): Promise<LessonDetail | 
       referenceContent: instanceLesson.reference_content,
       customHtmlContent: instanceLesson.custom_html_content,
       isMission: instanceLesson.is_mission,
+      missionTemplate: instanceLesson.mission_template,
       sectionTitle: section?.title ?? "",
       instanceId: section?.instance_id ?? "",
       instanceName: instance?.name ?? "",
@@ -335,7 +339,7 @@ export async function getLessonDetail(lessonId: string): Promise<LessonDetail | 
   // un élève, via /lesson/:id — cf. bouton "œil" de AdminCourseEditorPage).
   const { data: lesson, error: lessonError } = await supabase
     .from("lessons")
-    .select("id, section_id, slug, title, video_provider, video_url, custom_video_url, duration_minutes, ai_content_prompt, practical_exercise_prompt, reference_content, custom_html_content, is_mission")
+    .select("id, section_id, slug, title, video_provider, video_url, custom_video_url, duration_minutes, ai_content_prompt, practical_exercise_prompt, reference_content, custom_html_content, is_mission, mission_template")
     .eq("id", lessonId)
     .maybeSingle();
   if (lessonError) throw lessonError;
@@ -385,6 +389,7 @@ export async function getLessonDetail(lessonId: string): Promise<LessonDetail | 
     referenceContent: lesson.reference_content,
     customHtmlContent: lesson.custom_html_content,
     isMission: lesson.is_mission,
+    missionTemplate: lesson.mission_template,
     sectionTitle: section?.title ?? "",
     instanceId: "",
     instanceName: formation?.name ?? "",

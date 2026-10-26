@@ -1,4 +1,4 @@
-// Étape 1 du flux OAuth Google Calendar : construit l'URL de consentement
+// Étape 1 du flux OAuth Google (Calendar + envoi Gmail) : construit l'URL de consentement
 // Google et enregistre un état CSRF-safe (google_oauth_states) lié à
 // l'admin appelant. Le front redirige ensuite le navigateur vers cette URL ;
 // google-oauth-callback récupère cet état au retour et marque le compte
@@ -8,6 +8,7 @@
 // plateforme.
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse, getCallerRole } from "../_shared/podcast-utils.ts";
+import { GOOGLE_SCOPES } from "../_shared/google-platform.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
@@ -50,7 +51,10 @@ Deno.serve(async (req) => {
       // première autorisation — on le force à chaque connexion pour toujours
       // repartir avec un refresh_token utilisable.
       prompt: "consent",
-      scope: "https://www.googleapis.com/auth/calendar.events",
+      // Agenda (Meet des rendez-vous), envoi de mails depuis ce compte
+      // (notify-mission-submitted) et adresse du compte (affichée au profil,
+      // expéditeur des mails).
+      scope: ["openid", "email", GOOGLE_SCOPES.calendar, GOOGLE_SCOPES.gmailSend].join(" "),
       state: stateRow.state,
     });
 
