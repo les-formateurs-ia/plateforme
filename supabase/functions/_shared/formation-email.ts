@@ -226,54 +226,61 @@ export function clientEmail(s: SessionRow, frontendUrl: string, aSigner: string[
 // deno-lint-ignore no-explicit-any
 type Db = any;
 
-export async function sendFormationEmails(db: Db, google: PlatformGoogleAccount, p: {
-  sessionId: string; kind: EmailKind; traineeIds?: string[]; automatic: boolean; sentBy: string | null; frontendUrl: string;
-}): Promise<SendResult> {
-  const result: SendResult = { sent: [], skipped: [], errors: [] };
+// Destinataire d'un envoi, avec l'e-mail exact qu'il recevra. key = id du
+// stagiaire, ou "client" pour l'espace client.
+export type Recipient = {
+  key: string; traineeId: string | null; name: string; email: string;
+  eligible: boolean; reason: string | null; subject: string; html: string;
+};
+
+// Liste des destinataires d'un envoi et e-mail de chacun : sert à l'aperçu
+// (fenêtre de confirmation) comme à l'envoi, pour que l'aperçu soit
+// exactement ce qui part.
+export async function buildRecipients(db: Db, p: { sessionId: string; kind: EmailKind; frontendUrl: string }): Promise<Recipient[]> {
   const [{ data: session }, { data: trainees }, { data: slots }, { data: docs }] = await Promise.all([
     db.from("training_sessions").select("*").eq("id", p.sessionId).maybeSingle(),
-    db.from("training_session_trainees").select("id, prenom, nom, email, profile_id, access_token").eq("session_id", p.sessionId),
+    db.from("training_session_trainees").select("id, prenom, nom, email, profile_id, access_token").eq("session_id", p.sessionId).order("nom"),
     db.from("training_session_slots").select("slot_date, start_time, end_time").eq("session_id", p.sessionId).order("slot_date").order("start_time"),
     db.from("session_documents").select("template_id, title, trainee_id, requires_signature, signed_at").eq("session_id", p.sessionId),
   ]);
   if (!session) throw new Error("Formation introuvable.");
   const s = session as SessionRow;
 
-  const log = (row: { trainee_id?: string | null; recipient: string; status: "sent" | "error"; error?: string }) =>
-    db.from("session_emails").insert({ session_id: s.id, kind: p.kind, automatic: p.automatic, sent_by: p.sentBy, ...row });
-
   if (p.kind === "espace-client") {
-    const to = s.client.email?.trim();
-    if (!to) { result.skipped.push({ email: s.client.nom, reason: "Pas d'e-mail client renseigné." }); return result; }
+    const to = s.client.email?.trim() ?? "";
     const aSigner = (docs ?? []).filter((d: { requires_signature: boolean; signed_at: string | null; trainee_id: string | null }) => d.requires_signature && !d.signed_at && !d.trainee_id)
       .map((d: { title: string }) => d.title.split(" · ")[0]);
-    try {
-      await sendGmail(google, { to, ...clientEmail(s, p.frontendUrl, [...new Set<string>(aSigner)]) });
-      await log({ recipient: to, status: "sent" });
-      result.sent.push(to);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      await log({ recipient: to, status: "error", error: message });
-      result.errors.push({ email: to, message });
-    }
-    return result;
+    const mail = clientEmail(s, p.frontendUrl, [...new Set<string>(aSigner)]);
+    return [{
+      key: "client", traineeId: null, name: s.client.representant?.nom || s.client.nom, email: to,
+      eligible: !!to, reason: to ? null : "Pas d'e-mail client renseigné dans le dossier.", ...mail,
+    }];
   }
 
-  const targets = ((trainees ?? []) as TraineeRow[]).filter((t) => !p.traineeIds?.length || p.traineeIds.includes(t.id));
-  for (const t of targets) {
-    if (!t.email) { result.skipped.push({ email: `${t.prenom} ${t.nom}`, reason: "Pas d'e-mail." }); continue; }
-    if (p.kind === "certificat" && !(docs ?? []).some((d: { template_id: string; trainee_id: string | null }) => d.template_id === "certificat-realisation" && d.trainee_id === t.id)) {
-      result.skipped.push({ email: t.email, reason: "Certificat individuel pas encore émis." });
-      continue;
-    }
+  return ((trainees ?? []) as TraineeRow[]).map((t) => {
+    const hasCert = (docs ?? []).some((d: { template_id: string; trainee_id: string | null }) => d.template_id === "certificat-realisation" && d.trainee_id === t.id);
+    const reason = !t.email ? "Pas d'e-mail." : p.kind === "certificat" && !hasCert ? "Certificat individuel pas encore émis." : null;
+    const mail = learnerEmail(p.kind as Exclude<EmailKind, "espace-client">, s, t, (slots ?? []) as SlotRow[], p.frontendUrl);
+    return { key: t.id, traineeId: t.id, name: `${t.prenom} ${t.nom}`, email: t.email, eligible: !reason, reason, ...mail };
+  });
+}
+
+// keys : destinataires retenus (cases cochées) ; absent = tous les éligibles.
+export async function sendFormationEmails(db: Db, google: PlatformGoogleAccount, p: {
+  sessionId: string; kind: EmailKind; keys?: string[]; automatic: boolean; sentBy: string | null; frontendUrl: string;
+}): Promise<SendResult> {
+  const result: SendResult = { sent: [], skipped: [], errors: [] };
+  const recipients = (await buildRecipients(db, p)).filter((r) => !p.keys?.length || p.keys.includes(r.key));
+  for (const r of recipients) {
+    if (!r.eligible) { result.skipped.push({ email: r.email || r.name, reason: r.reason ?? "" }); continue; }
     try {
-      await sendGmail(google, { to: t.email, ...learnerEmail(p.kind, s, t, (slots ?? []) as SlotRow[], p.frontendUrl) });
-      await log({ trainee_id: t.id, recipient: t.email, status: "sent" });
-      result.sent.push(t.email);
+      await sendGmail(google, { to: r.email, subject: r.subject, html: r.html });
+      await db.from("session_emails").insert({ session_id: p.sessionId, kind: p.kind, automatic: p.automatic, sent_by: p.sentBy, trainee_id: r.traineeId, recipient: r.email, status: "sent" });
+      result.sent.push(r.email);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      await log({ trainee_id: t.id, recipient: t.email, status: "error", error: message });
-      result.errors.push({ email: t.email, message });
+      await db.from("session_emails").insert({ session_id: p.sessionId, kind: p.kind, automatic: p.automatic, sent_by: p.sentBy, trainee_id: r.traineeId, recipient: r.email, status: "error", error: message });
+      result.errors.push({ email: r.email, message });
     }
   }
   return result;

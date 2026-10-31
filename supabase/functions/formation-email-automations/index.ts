@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
 
       const run = async (kind: EmailKind, traineeIds: string[]) => {
         if (!traineeIds.length) return;
-        const r = await sendFormationEmails(db, google, { sessionId: s.id, kind, traineeIds, automatic: true, sentBy: null, frontendUrl });
+        const r = await sendFormationEmails(db, google, { sessionId: s.id, kind, keys: traineeIds, automatic: true, sentBy: null, frontendUrl });
         summary.push({ sessionId: s.id, kind, sent: r.sent.length });
       };
 

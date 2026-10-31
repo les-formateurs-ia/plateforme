@@ -360,14 +360,30 @@ export type EmailKind = "espace-client" | "convocation" | "rappel" | "certificat
 export type EmailResult = { sent: string[]; skipped: { email: string; reason: string }[]; errors: { email: string; message: string }[] };
 export type SessionEmail = Database["public"]["Tables"]["session_emails"]["Row"];
 
-export async function sendFormationEmail(sessionId: string, kind: EmailKind, traineeIds?: string[]): Promise<EmailResult> {
-  const { data, error } = await supabase.functions.invoke("send-formation-email", { body: { sessionId, kind, traineeIds } });
+async function invokeEmailFunction<T>(body: Record<string, unknown>): Promise<T> {
+  const { data, error } = await supabase.functions.invoke("send-formation-email", { body });
   if (error) {
     // Message de la fonction (compte Google non connecté…) plutôt que le statut HTTP.
-    const body = await (error as { context?: Response }).context?.json?.().catch(() => null);
-    throw new Error(body?.error ?? error.message);
+    const payload = await (error as { context?: Response }).context?.json?.().catch(() => null);
+    throw new Error(payload?.error ?? error.message);
   }
-  return data as EmailResult;
+  return data as T;
+}
+
+// keys : destinataires retenus (id du stagiaire, ou "client") ; absent = tous.
+export async function sendFormationEmail(sessionId: string, kind: EmailKind, keys?: string[]): Promise<EmailResult> {
+  return invokeEmailFunction<EmailResult>({ sessionId, kind, keys });
+}
+
+export type EmailRecipient = {
+  key: string; traineeId: string | null; name: string; email: string;
+  eligible: boolean; reason: string | null; subject: string; html: string;
+};
+
+// Aperçu d'un envoi : chaque destinataire et l'e-mail exact qu'il recevra.
+export async function previewFormationEmail(sessionId: string, kind: EmailKind): Promise<EmailRecipient[]> {
+  const res = await invokeEmailFunction<{ recipients: EmailRecipient[] }>({ sessionId, kind, preview: true });
+  return res.recipients;
 }
 
 export async function listSessionEmails(sessionId: string): Promise<SessionEmail[]> {

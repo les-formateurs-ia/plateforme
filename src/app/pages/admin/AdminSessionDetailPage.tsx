@@ -17,10 +17,11 @@ import type { DocumentContext } from "@/app/lib/documents/types";
 import {
   addSlot, addTrainee, buildDocumentContext, clientPortalUrl, deleteDocument, deleteSession, deleteSlot, deleteTrainee, findProfileIdByEmail,
   createCompanyAccess, getDocumentHtml, getSessionActivity, getSessionBundle, importCompanyEmployees, isSlotOpen, issueDocument, listSessionEmails,
-  sendFormationEmail, setAutoEmails, signAttendanceAsTrainer, updateSession, updateTraineeResult,
+  setAutoEmails, signAttendanceAsTrainer, updateSession, updateTraineeResult,
   type ActivityRow, type EmailKind, type SessionBundle, type SessionDocument, type SessionEmail, type TrainingSession,
 } from "@/app/lib/trainingSessions";
 import { VSwitch } from "@/app/components/common/VSwitch";
+import { EmailComposer } from "@/app/components/sessions/EmailComposer";
 
 // Dossier d'une formation : un seul tableau de bord. En haut la
 // progression et la carte du parcours en trois phases ; au centre l'étape
@@ -84,6 +85,8 @@ export function AdminSessionDetailPage() {
   const [contenuText, setContenuText] = useState("");
   const [activity, setActivity] = useState<Record<string, ActivityRow[]>>({});
   const [selected, setSelected] = useState<string | null>(null);
+  // Envoi d'e-mail en cours de confirmation (fenêtre d'aperçu).
+  const [composer, setComposer] = useState<{ kind: EmailKind; aSigner?: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
 
@@ -145,18 +148,10 @@ export function AdminSessionDetailPage() {
     setTimeout(() => document.getElementById("step-focus")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
   };
 
-  const sendPortalEmail = async (aSigner?: string) => {
+  // Tout envoi passe par la fenêtre de confirmation (aperçu, destinataires).
+  const openPortalEmail = (aSigner?: string) => {
     if (!bundle.clientToken) return toast.error(PORTAL_MISSING);
-    if (!bundle.session.client.email) return toast.error("Renseigne l'e-mail du client dans le dossier client.");
-    try {
-      const r = await sendFormationEmail(bundle.session.id, "espace-client");
-      if (r.sent.length) toast.success(`E-mail envoyé à ${r.sent[0]}.`);
-      else toast.error(r.errors[0]?.message ?? r.skipped[0]?.reason ?? "E-mail non envoyé.");
-    } catch (err) {
-      toast.error(`${err instanceof Error ? err.message : "Envoi impossible."} E-mail pré-rempli ouvert à la place.`);
-      copyPortalLink(bundle);
-      mailPortalLink(bundle, aSigner);
-    }
+    setComposer({ kind: "espace-client", aSigner });
   };
 
   // Émet un ou plusieurs documents ; une saisie en cours est enregistrée
@@ -177,9 +172,8 @@ export function AdminSessionDetailPage() {
       await issueDocument(bundle.session.id, template, docCtx, logoSvg, bundle.trainees.map((t) => t.id));
       if (template.signable) aSigner = template.titre;
     }
-    // Document à signer : le lien de l'espace client part tout de suite par
-    // Gmail ; à défaut (compte Google non connecté), e-mail pré-rempli.
-    if (aSigner) await sendPortalEmail(aSigner);
+    // Document à signer : on propose aussitôt l'envoi du lien de l'espace client.
+    if (aSigner) openPortalEmail(aSigner);
     if (todos) toast.warning(`${todos} champ${todos > 1 ? "s restent" : " reste"} à compléter dans les documents émis.`);
   }, templateIds.length > 1 ? `${templateIds.length} documents émis.` : "Document émis.");
 
@@ -196,7 +190,7 @@ export function AdminSessionDetailPage() {
       }) : html);
     }),
     remove: (doc) => { if (confirm(`Supprimer « ${doc.title} » ?`)) void run(() => deleteDocument(doc.id), "Document supprimé."); },
-    share: (doc) => void run(() => sendPortalEmail(doc.title.split(" · ")[0])),
+    share: (doc) => openPortalEmail(doc.title.split(" · ")[0]),
   };
 
   const onAction = (step: JourneyStep) => (a: JourneyAction) => {
@@ -361,7 +355,7 @@ export function AdminSessionDetailPage() {
             {bundle.clientToken ? (
               <div className="flex gap-2 flex-wrap">
                 <VBtn sm onClick={() => copyPortalLink(bundle)}><Copy className="w-3.5 h-3.5" />Copier</VBtn>
-                <VBtn sm disabled={busy} onClick={() => void run(() => sendPortalEmail())}><Mail className="w-3.5 h-3.5" />Envoyer</VBtn>
+                <VBtn sm disabled={busy} onClick={() => openPortalEmail()}><Mail className="w-3.5 h-3.5" />Envoyer</VBtn>
                 <VBtn sm onClick={() => window.open(clientPortalUrl(bundle.clientToken), "_blank", "noopener")}><ExternalLink className="w-3.5 h-3.5" />Voir</VBtn>
               </div>
             ) : (
@@ -369,7 +363,7 @@ export function AdminSessionDetailPage() {
             )}
           </div></GCard>
 
-          <EmailsCard bundle={bundle} busy={busy} run={run} />
+          <EmailsCard bundle={bundle} busy={busy} onCompose={(kind) => setComposer({ kind })} />
 
           <DocumentsArchive kit={kit} />
 
@@ -391,6 +385,9 @@ export function AdminSessionDetailPage() {
           </button>
         </aside>
       </div>
+
+      <EmailComposer sessionId={bundle.session.id} kind={composer?.kind ?? null} onClose={() => setComposer(null)}
+        onSent={() => void reload()} onFallback={() => { copyPortalLink(bundle); mailPortalLink(bundle, composer?.aSigner); }} />
 
       {dirty && (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 flex items-center gap-4 rounded-[6px] px-5 py-3 shadow-lg"
@@ -734,23 +731,12 @@ const EMAIL_LABELS: Record<EmailKind, string> = {
   convocation: "Convocation", rappel: "Rappel", certificat: "Certificat", "espace-client": "Espace client",
 };
 
-function EmailsCard({ bundle, busy, run }: { bundle: SessionBundle; busy: boolean; run: Run }) {
+function EmailsCard({ bundle, busy, onCompose }: { bundle: SessionBundle; busy: boolean; onCompose: (kind: EmailKind) => void }) {
   const th = useTh();
   const [emails, setEmails] = useState<SessionEmail[]>([]);
   const [auto, setAuto] = useState(bundle.autoEmails);
-  const refresh = () => listSessionEmails(bundle.session.id).then(setEmails).catch(console.error);
-  useEffect(() => { void refresh(); }, [bundle]);
-
-  const send = (kind: EmailKind) => run(async () => {
-    const r = await sendFormationEmail(bundle.session.id, kind);
-    const parts = [
-      r.sent.length ? `${r.sent.length} envoyé${r.sent.length > 1 ? "s" : ""}` : null,
-      r.skipped.length ? `${r.skipped.length} ignoré${r.skipped.length > 1 ? "s" : ""} (${r.skipped[0].reason})` : null,
-    ].filter(Boolean);
-    if (r.errors.length) toast.error(`Échec pour ${r.errors.map((e) => e.email).join(", ")} : ${r.errors[0].message}`);
-    else toast.success(parts.join(" · ") || "Aucun destinataire.");
-    await refresh();
-  });
+  // L'historique se recharge avec la formation (après chaque envoi).
+  useEffect(() => { listSessionEmails(bundle.session.id).then(setEmails).catch(console.error); }, [bundle]);
 
   const toggleAuto = (v: boolean) => {
     setAuto(v);
@@ -772,7 +758,7 @@ function EmailsCard({ bundle, busy, run }: { bundle: SessionBundle; busy: boolea
       </div>
       <div className="grid grid-cols-2 gap-2">
         {actions.map((a) => (
-          <button key={a.kind} type="button" disabled={busy} onClick={() => void send(a.kind)}
+          <button key={a.kind} type="button" disabled={busy} onClick={() => onCompose(a.kind)}
             className="text-left rounded-[6px] px-3 py-2 hover:opacity-80 disabled:opacity-40" style={{ background: th.navA }}>
             <span className="block text-xs font-bold" style={{ color: th.fg }}>{a.label}</span>
             <span className="block text-[10.5px]" style={{ color: th.fg3 }}>{a.hint}</span>
