@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { useNavigate, Link } from "react-router";
+import { useNavigate, Link, useSearchParams } from "react-router";
 import { ArrowRight } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
@@ -7,10 +7,19 @@ import { AuthShell, AuthField } from "@/app/components/common/AuthShell";
 import { GT } from "@/app/components/common/GT";
 import { ShimBtn } from "@/app/components/common/Buttons";
 
+// Échec d'un lien d'accès direct (learner-access → /login?acces=…).
+const ACCESS_ERRORS: Record<string, string> = {
+  lien_invalide: "Ce lien d'accès n'est plus valable. Demande un nouvel e-mail à ton formateur.",
+  compte_absent: "Aucun compte n'est encore associé à ce lien. Contacte ton formateur.",
+  compte_non_apprenant: "Ce lien est réservé aux apprenants : connecte-toi avec ton mot de passe.",
+};
+
 export function LoginPage() {
   const th = useTh();
   const navigate = useNavigate();
   const { signIn } = useAuth();
+  const [searchParams] = useSearchParams();
+  const accessError = searchParams.get("acces");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +43,11 @@ export function LoginPage() {
           Content de te <GT>revoir</GT>
         </h1>
         <p className="text-base mb-8" style={{ color: th.fg2 }}>Connecte-toi pour reprendre ton parcours.</p>
+        {accessError && (
+          <p className="text-sm mb-6 rounded-[4px] px-4 py-3" style={{ background: th.navA, color: th.fg }}>
+            {ACCESS_ERRORS[accessError] ?? "La connexion directe n'a pas abouti. Réessaie depuis le lien de l'e-mail, ou connecte-toi ci-dessous."}
+          </p>
+        )}
 
         <div className="space-y-5">
           <AuthField label="Email">

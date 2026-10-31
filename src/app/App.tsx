@@ -63,6 +63,7 @@ import { FormationsPage } from "@/app/pages/formations/FormationsPage";
 import { AdminSessionDetailPage } from "@/app/pages/admin/AdminSessionDetailPage";
 import { SignDocumentPage } from "@/app/pages/SignDocumentPage";
 import { ClientPortalPage } from "@/app/pages/ClientPortalPage";
+import { LearnerAccessPage } from "@/app/pages/LearnerAccessPage";
 import { ProspectsPage } from "@/app/pages/prospects/ProspectsPage";
 import { EntrepriseChoicePage } from "@/app/pages/entreprise/EntrepriseChoicePage";
 import { CompaniesListPage } from "@/app/pages/entreprise/CompaniesListPage";
@@ -212,6 +213,7 @@ function AppRoutes() {
       <Route path={PASSWORD_SETUP_PATH} element={<SetPasswordPage />} />
       <Route path="/signer/:token" element={<SignDocumentPage />} />
       <Route path="/espace-client/:token" element={<ClientPortalPage />} />
+      <Route path="/acces/:token" element={<LearnerAccessPage />} />
       <Route path="/" element={<RequireAuth><RootGate /></RequireAuth>} />
       <Route element={<RequireAuth><MainLayout /></RequireAuth>}>
         <Route path="dashboard" element={<DashboardRoute />} />

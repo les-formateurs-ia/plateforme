@@ -14,6 +14,10 @@ verify_jwt = false
 [functions.google-oauth-callback]
 verify_jwt = false
 
+# Email button for trainees (/acces/:token): the personal access token is the credential.
+[functions.learner-access]
+verify_jwt = false
+
 # Daily cron call (pg_net): authenticated by the CRON_SECRET header instead.
 [functions.formation-email-automations]
 verify_jwt = false

@@ -137,7 +137,7 @@ type SessionRow = {
   formation: { intitule: string; dureeHeures: number; modalite: string; prerequis?: string[] }; date_debut: string; date_fin: string;
   lieu: string; lien_connexion: string | null; intervenants: { nom: string; qualite: string }[]; client_token: string;
 };
-type TraineeRow = { id: string; prenom: string; nom: string; email: string; profile_id: string | null };
+type TraineeRow = { id: string; prenom: string; nom: string; email: string; profile_id: string | null; access_token: string };
 type SlotRow = { slot_date: string; start_time: string; end_time: string };
 
 export type SendResult = { sent: string[]; skipped: { email: string; reason: string }[]; errors: { email: string; message: string }[] };
@@ -149,7 +149,8 @@ function lieuHtml(s: SessionRow): string {
 }
 
 export function learnerEmail(kind: Exclude<EmailKind, "espace-client">, s: SessionRow, t: TraineeRow, slots: SlotRow[], frontendUrl: string): { subject: string; html: string } {
-  const espace = `${frontendUrl}/dashboard`;
+  // Lien d'accès direct : connecte le stagiaire à son espace sans mot de passe.
+  const espace = `${frontendUrl}/acces/${t.access_token}`;
   const formateur = s.intervenants[0]?.nom ?? "Les Formateurs IA";
   if (kind === "convocation") {
     return {
@@ -169,7 +170,7 @@ export function learnerEmail(kind: Exclude<EmailKind, "espace-client">, s: Sessi
           ...(s.formation.prerequis?.length ? [`<p style="margin:26px 0 8px;font-size:13px;font-weight:700;color:${INK}">À prévoir</p><ul style="margin:0;padding-left:18px;font-size:14px;line-height:1.7;color:#3d3d48">${s.formation.prerequis.map((p) => `<li>${esc(p)}</li>`).join("")}</ul>`] : []),
         ],
         cta: { label: "Accéder à mon espace formation", url: espace },
-        note: "Le programme et le règlement intérieur sont disponibles dans votre espace. Pendant la formation, vous y signerez votre présence en un clic. Un besoin d'aménagement (handicap) ? Répondez simplement à cet e-mail.",
+        note: "Ce bouton vous connecte directement à votre espace, sans mot de passe : gardez cet e-mail. Vous y trouverez le programme et le règlement intérieur, et pendant la formation vous y signerez votre présence en un clic. Un besoin d'aménagement (handicap) ? Répondez simplement à cet e-mail.",
       }),
     };
   }
@@ -231,7 +232,7 @@ export async function sendFormationEmails(db: Db, google: PlatformGoogleAccount,
   const result: SendResult = { sent: [], skipped: [], errors: [] };
   const [{ data: session }, { data: trainees }, { data: slots }, { data: docs }] = await Promise.all([
     db.from("training_sessions").select("*").eq("id", p.sessionId).maybeSingle(),
-    db.from("training_session_trainees").select("id, prenom, nom, email, profile_id").eq("session_id", p.sessionId),
+    db.from("training_session_trainees").select("id, prenom, nom, email, profile_id, access_token").eq("session_id", p.sessionId),
     db.from("training_session_slots").select("slot_date, start_time, end_time").eq("session_id", p.sessionId).order("slot_date").order("start_time"),
     db.from("session_documents").select("template_id, title, trainee_id, requires_signature, signed_at").eq("session_id", p.sessionId),
   ]);
