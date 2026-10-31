@@ -10,6 +10,10 @@ verify_jwt = false
 [functions.password-setup]
 verify_jwt = false
 
+# Google redirects the browser here after consent: the one-time OAuth state is the credential.
+[functions.google-oauth-callback]
+verify_jwt = false
+
 # Daily cron call (pg_net): authenticated by the CRON_SECRET header instead.
 [functions.formation-email-automations]
 verify_jwt = false
