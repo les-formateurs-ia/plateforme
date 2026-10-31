@@ -58,6 +58,11 @@ import { AdminFormateurDetailPage } from "@/app/pages/admin/AdminFormateurDetail
 import { AdminAvailabilityPage } from "@/app/pages/admin/AdminAvailabilityPage";
 import { AdminTrashPage } from "@/app/pages/admin/AdminTrashPage";
 import { AdminIncidentsPage } from "@/app/pages/admin/AdminIncidentsPage";
+import { AdminDocumentsPage } from "@/app/pages/admin/AdminDocumentsPage";
+import { FormationsPage } from "@/app/pages/formations/FormationsPage";
+import { AdminSessionDetailPage } from "@/app/pages/admin/AdminSessionDetailPage";
+import { SignDocumentPage } from "@/app/pages/SignDocumentPage";
+import { ClientPortalPage } from "@/app/pages/ClientPortalPage";
 import { ProspectsPage } from "@/app/pages/prospects/ProspectsPage";
 import { EntrepriseChoicePage } from "@/app/pages/entreprise/EntrepriseChoicePage";
 import { CompaniesListPage } from "@/app/pages/entreprise/CompaniesListPage";
@@ -205,6 +210,8 @@ function AppRoutes() {
       <Route path="/entreprise/welcome" element={<CompanyWelcomeGuard><CompanyWelcomePage /></CompanyWelcomeGuard>} />
       {/* Public : le jeton du lien fait foi, pas la session (cf. SetPasswordPage). */}
       <Route path={PASSWORD_SETUP_PATH} element={<SetPasswordPage />} />
+      <Route path="/signer/:token" element={<SignDocumentPage />} />
+      <Route path="/espace-client/:token" element={<ClientPortalPage />} />
       <Route path="/" element={<RequireAuth><RootGate /></RequireAuth>} />
       <Route element={<RequireAuth><MainLayout /></RequireAuth>}>
         <Route path="dashboard" element={<DashboardRoute />} />
@@ -253,6 +260,11 @@ function AppRoutes() {
         <Route path="admin/planning/students/:studentId/certification" element={<RequireAdmin><AdminCertificationAnswersPage /></RequireAdmin>} />
         <Route path="admin/planning/formateurs/:formateurId" element={<RequireAdmin><AdminFormateurDetailPage /></RequireAdmin>} />
         <Route path="admin/incidents" element={<RequireAdmin><AdminIncidentsPage /></RequireAdmin>} />
+        <Route path="formations" element={<RequireStaff><FormationsPage /></RequireStaff>} />
+        <Route path="formations/sessions/:sessionId" element={<RequireStaff><AdminSessionDetailPage /></RequireStaff>} />
+        <Route path="formations/modeles" element={<RequireAdmin><AdminDocumentsPage /></RequireAdmin>} />
+        <Route path="admin/documents" element={<Navigate to="/formations/modeles" replace />} />
+        <Route path="admin/sessions" element={<Navigate to="/formations" replace />} />
         {/* Ancienne liste "Demandes IA", remplacée par l'espace Prospects. */}
         <Route path="admin/project-advisor-leads" element={<Navigate to="/prospects" replace />} />
         <Route path="prospects" element={<RequireAdmin><ProspectsPage /></RequireAdmin>} />

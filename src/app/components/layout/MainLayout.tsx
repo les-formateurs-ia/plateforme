@@ -67,7 +67,7 @@ export function MainLayout() {
     () => (location.pathname.startsWith("/entreprise") ? "entreprise" : readStoredStaffSpace()),
   );
   useEffect(() => {
-    if (location.pathname === "/profile" || location.pathname.startsWith("/prospects")) return;
+    if (location.pathname === "/profile" || location.pathname.startsWith("/prospects") || location.pathname.startsWith("/formations")) return;
     const next = location.pathname.startsWith("/entreprise") ? "entreprise" : "cpf";
     setSpace(next);
     try { localStorage.setItem(STAFF_SPACE_KEY, next); } catch { /* ignore */ }
@@ -80,7 +80,10 @@ export function MainLayout() {
   // Espace Prospects (admin) : même bandeau, le tableau Kanban a besoin de
   // toute la largeur. Il ne touche pas à l'espace CPF / Entreprise mémorisé.
   const prospectsMode = isAdmin(role) && location.pathname.startsWith("/prospects");
-  const sidebarHidden = entrepriseMode || prospectsMode || !!companyId;
+  // Espace Formations (staff) : clients CPF et entreprises réunis, même
+  // bandeau pleine largeur que Prospects.
+  const formationsMode = isStaff(role) && location.pathname.startsWith("/formations");
+  const sidebarHidden = entrepriseMode || prospectsMode || formationsMode || !!companyId;
   const studentNav = !isStaff(role) && !companyId;
 
   useEffect(() => { setNavOpen(false); }, [location.pathname]);

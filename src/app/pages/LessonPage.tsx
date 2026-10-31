@@ -714,15 +714,21 @@ export function LessonPage() {
     }
   };
 
-  // Cumule le temps passé sur la leçon toutes les 30s + au démontage.
+  // Cumule le temps passé sur la leçon toutes les 30s + au démontage. Le
+  // temps onglet masqué n'est pas compté : il sert de justificatif de
+  // présence pour les formations à distance.
   const elapsedRef = useRef(0);
   const lastTickRef = useRef(Date.now());
   useEffect(() => {
     if (!user || !lessonId || access !== "granted") return;
     lastTickRef.current = Date.now();
+    // État de l'onglet depuis le dernier relevé (document.hidden vaut déjà
+    // true quand l'événement de masquage arrive).
+    let wasVisible = !document.hidden;
     const flush = () => {
       const now = Date.now();
-      elapsedRef.current += (now - lastTickRef.current) / 1000;
+      if (wasVisible) elapsedRef.current += (now - lastTickRef.current) / 1000;
+      wasVisible = !document.hidden;
       lastTickRef.current = now;
       if (elapsedRef.current >= 1) {
         const toSend = Math.round(elapsedRef.current);
@@ -731,7 +737,9 @@ export function LessonPage() {
       }
     };
     const interval = setInterval(flush, 30000);
-    return () => { clearInterval(interval); flush(); };
+    // Au passage en arrière-plan, on solde le temps visible écoulé.
+    document.addEventListener("visibilitychange", flush);
+    return () => { clearInterval(interval); document.removeEventListener("visibilitychange", flush); flush(); };
   }, [user, lessonId, access]);
 
   const currentQuestion = lesson?.questions[quizStep] ?? null;

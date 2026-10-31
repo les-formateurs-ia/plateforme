@@ -16,6 +16,8 @@ import { listVisibleCompanyHtmlExercises, type CompanyHtmlExerciseRow } from "@/
 import { listVisibleSatisfactionTests, type VisibleSatisfactionTest } from "@/app/lib/entreprise/companySatisfaction";
 import { listCompanyFileCategories, type CompanyFileCategoryRow } from "@/app/lib/entreprise/companyFileCategories";
 import { FeaturedQuizzes, DocumentShelf, ExerciseTiles, CategoryUploads } from "@/app/components/entreprise/StudentSections";
+import { AttendanceCard } from "@/app/components/entreprise/AttendanceCard";
+import { MyTrainingDocuments } from "@/app/components/entreprise/MyTrainingDocuments";
 import { listMyCompanyUploads, uploadCompanyStudentFile, type CompanyStudentUploadRow } from "@/app/lib/entreprise/companyStudentUploads";
 
 interface CompanyStudentHomeProps {
@@ -249,6 +251,9 @@ export function CompanyStudentHome({ companyId, studentId, preview = false }: Co
           )}
         </div>
       </section>
+
+      {!preview && <AttendanceCard />}
+      {!preview && <MyTrainingDocuments />}
 
       {loading ? <Loading /> : (
         <section aria-labelledby="phases-title">

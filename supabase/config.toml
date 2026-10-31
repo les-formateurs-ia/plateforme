@@ -9,3 +9,7 @@ verify_jwt = false
 # The one-time password-setup token is the only credential (see the function).
 [functions.password-setup]
 verify_jwt = false
+
+# Daily cron call (pg_net): authenticated by the CRON_SECRET header instead.
+[functions.formation-email-automations]
+verify_jwt = false

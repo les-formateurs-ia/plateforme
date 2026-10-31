@@ -200,6 +200,10 @@ export async function ensureLessonStarted(userId: string, lessonId: string): Pro
 
 export async function addTimeSpent(userId: string, lessonId: string, seconds: number): Promise<void> {
   if (seconds <= 0) return;
+  // Journal daté (relevés de connexion des formations à distance) : une
+  // erreur ici ne doit pas empêcher le cumul par leçon.
+  void supabase.rpc("log_learning_time", { p_lesson_id: lessonId, p_seconds: Math.round(seconds) })
+    .then(({ error }) => { if (error) console.error(error); });
   const { data, error } = await supabase
     .from("lesson_progress")
     .select("time_spent_seconds")

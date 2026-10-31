@@ -1,4 +1,4 @@
-import { Building2, GraduationCap, Target } from "lucide-react";
+import { Building2, ClipboardList, GraduationCap, Target } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
@@ -19,6 +19,7 @@ export function EntrepriseChoicePage() {
   const { signOut, role } = useAuth();
 
   const CHOICES = [
+    { icon: ClipboardList, title: "Formations", desc: "Tous les clients, CPF et entreprises : administratif, émargement, documents.", path: "/formations", hue: "amber" as const },
     { icon: GraduationCap, title: "E-learning CPF", desc: "Formations, leçons et suivi des élèves CPF.", path: `${staffBase}/courses`, hue: "violet" as const },
     { icon: Building2, title: "Entreprise", desc: "Entreprises, collaborateurs, contenu et suivi B2B.", path: "/entreprise", hue: "teal" as const },
     // Suivi commercial des demandes du site : réservé à l'admin.
@@ -26,13 +27,13 @@ export function EntrepriseChoicePage() {
   ];
 
   return (
-    <AuthShell width={CHOICES.length > 2 ? 900 : 640} aside={{ eyebrow: "Équipe pédagogique", title: CHOICES.length > 2 ? "Trois espaces, une même équipe." : "Deux espaces, une même équipe de formateurs.", lead: CHOICES.length > 2 ? "Le parcours e-learning CPF, la formation des entreprises et le suivi des prospects." : "Le parcours e-learning CPF d'un côté, la formation des entreprises de l'autre." }}>
+    <AuthShell width={900} aside={{ eyebrow: "Équipe pédagogique", title: "Une même équipe, tous vos espaces.", lead: CHOICES.length > 3 ? "Les formations et leur administratif, le parcours e-learning CPF, la formation des entreprises et le suivi des prospects." : "Les formations et leur administratif, le parcours e-learning CPF et la formation des entreprises." }}>
         <p className="eyebrow mb-3" style={{ color: th.fg3 }}>Bienvenue</p>
         <h1 className="text-[2.1rem] sm:text-[2.5rem] font-black leading-[1.02] mb-3">
           Où souhaitez-vous <GT>aller ?</GT>
         </h1>
         <p className="text-base mb-8" style={{ color: th.fg2 }}>Choisissez un espace pour continuer.</p>
-        <div className={CHOICES.length > 2 ? "grid sm:grid-cols-3 gap-4" : "grid sm:grid-cols-2 gap-4"}>
+        <div className={CHOICES.length > 3 ? "grid sm:grid-cols-2 gap-4" : "grid sm:grid-cols-3 gap-4"}>
           {CHOICES.map(({ icon, title, desc, path, hue }, i) => (
             <SectionTile key={title} index={i} label={title} desc={desc} Icon={icon} hue={hue} onClick={() => navigate(path)} />
           ))}

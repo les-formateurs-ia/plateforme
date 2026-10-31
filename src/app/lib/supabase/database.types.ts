@@ -99,6 +99,154 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["prospect_activities"]["Insert"]>;
         Relationships: never[];
       };
+      training_sessions: {
+        Row: {
+          id: string;
+          reference: string;
+          financement: "entreprise" | "opco" | "cpf" | "particulier";
+          financeur: string | null;
+          company_id: string | null;
+          client: Json;
+          formation: Json;
+          lignes: Json;
+          conditions_paiement: string;
+          date_debut: string;
+          date_fin: string;
+          lieu: string;
+          lien_connexion: string | null;
+          intervenants: Json;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+          client_token: string;
+          auto_emails: boolean;
+        };
+        Insert: {
+          reference: string;
+          financement: "entreprise" | "opco" | "cpf" | "particulier";
+          financeur?: string | null;
+          company_id?: string | null;
+          client: Json;
+          formation: Json;
+          lignes?: Json;
+          conditions_paiement?: string;
+          date_debut: string;
+          date_fin: string;
+          lieu?: string;
+          lien_connexion?: string | null;
+          intervenants?: Json;
+          created_by?: string | null;
+          updated_at?: string;
+          auto_emails?: boolean;
+        };
+        Update: Partial<Database["public"]["Tables"]["training_sessions"]["Insert"]>;
+        Relationships: never[];
+      };
+      training_session_slots: {
+        Row: { id: string; session_id: string; slot_date: string; start_time: string; end_time: string; created_at: string };
+        Insert: { session_id: string; slot_date: string; start_time: string; end_time: string };
+        Update: Partial<Database["public"]["Tables"]["training_session_slots"]["Insert"]>;
+        Relationships: never[];
+      };
+      training_session_trainees: {
+        Row: {
+          id: string;
+          session_id: string;
+          profile_id: string | null;
+          civilite: string;
+          prenom: string;
+          nom: string;
+          email: string;
+          fonction: string | null;
+          resultat_evaluation: string | null;
+          created_at: string;
+        };
+        Insert: {
+          session_id: string;
+          profile_id?: string | null;
+          civilite?: string;
+          prenom: string;
+          nom: string;
+          email: string;
+          fonction?: string | null;
+          resultat_evaluation?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["training_session_trainees"]["Insert"]>;
+        Relationships: never[];
+      };
+      attendance_signatures: {
+        Row: {
+          id: string;
+          slot_id: string;
+          trainee_id: string | null;
+          signer_role: "stagiaire" | "intervenant";
+          signer_profile_id: string | null;
+          signer_name: string;
+          signed_at: string;
+          ip: string | null;
+          user_agent: string | null;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: never[];
+      };
+      session_documents: {
+        Row: {
+          id: string;
+          session_id: string;
+          template_id: string;
+          title: string;
+          html: string;
+          html_sha256: string;
+          requires_signature: boolean;
+          sign_token: string;
+          signer_name: string | null;
+          signer_email: string | null;
+          issued_by: string | null;
+          issued_at: string;
+          signed_at: string | null;
+          signed_ip: string | null;
+          signed_user_agent: string | null;
+          trainee_id: string | null;
+        };
+        Insert: {
+          session_id: string;
+          trainee_id?: string | null;
+          template_id: string;
+          title: string;
+          html: string;
+          html_sha256: string;
+          requires_signature?: boolean;
+          signer_name?: string | null;
+          signer_email?: string | null;
+          issued_by?: string | null;
+        };
+        Update: never;
+        Relationships: never[];
+      };
+      session_emails: {
+        Row: {
+          id: string;
+          session_id: string;
+          trainee_id: string | null;
+          kind: "espace-client" | "convocation" | "rappel" | "certificat";
+          recipient: string;
+          status: "sent" | "error";
+          error: string | null;
+          automatic: boolean;
+          sent_by: string | null;
+          sent_at: string;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: never[];
+      };
+      learning_activity_log: {
+        Row: { user_id: string; activity_date: string; lesson_id: string; seconds: number; updated_at: string };
+        Insert: never;
+        Update: never;
+        Relationships: never[];
+      };
       prospect_reminders: {
         Row: {
           id: number;
@@ -1816,6 +1964,54 @@ export interface Database {
     };
     Views: Record<string, never>;
     Functions: {
+      my_training_documents: {
+        Args: Record<string, never>;
+        Returns: { id: string; template_id: string; title: string; issued_at: string; intitule: string | null; date_debut: string; date_fin: string }[];
+      };
+      get_my_training_document: {
+        Args: { p_document_id: string };
+        Returns: { title: string; html: string }[];
+      };
+      get_client_portal: {
+        Args: { p_token: string };
+        Returns: Json;
+      };
+      get_client_document: {
+        Args: { p_token: string; p_document_id: string };
+        Returns: { title: string; html: string; html_sha256: string; issued_at: string; requires_signature: boolean; signer_name: string | null; signed_at: string | null; signed_ip: string | null; signed_user_agent: string | null }[];
+      };
+      sign_client_document: {
+        Args: { p_token: string; p_document_id: string };
+        Returns: string;
+      };
+      my_attendance_slots: {
+        Args: Record<string, never>;
+        Returns: { slot_id: string; slot_date: string; start_time: string; end_time: string; intitule: string | null; signed_at: string | null }[];
+      };
+      sign_attendance: {
+        Args: { p_slot_id: string };
+        Returns: string;
+      };
+      sign_attendance_as_trainer: {
+        Args: { p_slot_id: string };
+        Returns: string;
+      };
+      get_document_for_signing: {
+        Args: { p_token: string };
+        Returns: { title: string; html: string; html_sha256: string; signer_name: string | null; signed_at: string | null }[];
+      };
+      sign_document: {
+        Args: { p_token: string };
+        Returns: string;
+      };
+      log_learning_time: {
+        Args: { p_lesson_id: string; p_seconds: number };
+        Returns: undefined;
+      };
+      trainee_activity: {
+        Args: { p_profile_id: string; p_from: string; p_to: string };
+        Returns: { activity_date: string; activite: string; seconds: number }[];
+      };
       assign_formation_to_student: {
         Args: { p_template_id: string; p_student_id: string };
         Returns: string;
