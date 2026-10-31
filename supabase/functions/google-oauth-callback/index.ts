@@ -7,15 +7,20 @@ import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 
 Deno.serve(async (req) => {
   const frontendUrl = Deno.env.get("FRONTEND_URL") ?? "/";
+  // La raison (code court) est transmise au profil pour un message précis.
   const fail = (reason: string) => {
     console.error("google-oauth-callback:", reason);
-    return Response.redirect(`${frontendUrl}/profile?google=error`, 302);
+    const code = reason.split(":")[0];
+    return Response.redirect(`${frontendUrl}/profile?google=error&reason=${encodeURIComponent(code)}`, 302);
   };
 
   try {
     const url = new URL(req.url);
     const code = url.searchParams.get("code");
     const state = url.searchParams.get("state");
+    // Refus ou erreur côté Google : ?error=access_denied, invalid_scope…
+    const googleError = url.searchParams.get("error");
+    if (googleError) return fail(`google_${googleError}`);
     if (!code || !state) return fail("missing_params");
 
     const clientId = Deno.env.get("GOOGLE_CLIENT_ID");
@@ -60,17 +65,21 @@ Deno.serve(async (req) => {
 
     const expiresAt = new Date(Date.now() + (tokens.expires_in ?? 3600) * 1000).toISOString();
 
-    const { error: upsertErr } = await serviceClient.from("google_oauth_tokens").upsert({
+    const row = {
       formateur_id: stateRow.formateur_id,
       refresh_token: tokens.refresh_token,
       access_token: tokens.access_token,
       access_token_expires_at: expiresAt,
       google_email: googleEmail,
-      // L'admin peut décocher une autorisation sur l'écran de Google : on
-      // garde ce qui a réellement été accordé (cf. google-oauth-status).
-      granted_scopes: tokens.scope ?? null,
       connected_at: new Date().toISOString(),
-    });
+    };
+    // L'admin peut décocher une autorisation sur l'écran de Google : on
+    // garde ce qui a réellement été accordé (cf. google-oauth-status).
+    let { error: upsertErr } = await serviceClient.from("google_oauth_tokens").upsert({ ...row, granted_scopes: tokens.scope ?? null });
+    // Base sans la colonne granted_scopes (migration 20261026120000 incomplète) :
+    // le compte est enregistré quand même, les autorisations seront lues
+    // auprès de Google (getPlatformGoogleAccount).
+    if (upsertErr?.message.includes("granted_scopes")) ({ error: upsertErr } = await serviceClient.from("google_oauth_tokens").upsert(row));
     if (upsertErr) return fail(`token_store_failed: ${upsertErr.message}`);
 
     // Un seul compte organise les Meet de toute la plateforme (cf. 0059) :

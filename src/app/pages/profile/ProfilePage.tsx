@@ -82,6 +82,21 @@ function ThemePreview({ dark }: { dark: boolean }) {
   );
 }
 
+// Raison transmise par google-oauth-callback (?reason=…) : message actionnable.
+function googleErrorMessage(reason: string | null): string {
+  const messages: Record<string, string> = {
+    google_access_denied: "Connexion Google annulée : l'autorisation n'a pas été accordée.",
+    google_invalid_scope: "Google refuse une des autorisations demandées : vérifie l'écran de consentement OAuth du projet Google Cloud (agenda et Gmail).",
+    expired_state: "La connexion a pris trop de temps : relance-la depuis ton profil.",
+    invalid_state: "Lien de connexion expiré ou déjà utilisé : relance la connexion.",
+    no_refresh_token: "Google n'a pas fourni d'accès durable : retire l'accès de la plateforme dans ton compte Google, puis reconnecte-toi.",
+    token_exchange_failed: "Google a refusé l'échange du code de connexion : vérifie l'identifiant client OAuth.",
+    token_store_failed: "Le compte Google n'a pas pu être enregistré sur la plateforme.",
+    not_configured: "La connexion Google n'est pas configurée côté serveur.",
+  };
+  return messages[reason ?? ""] ?? `Impossible de connecter Google${reason ? ` (${reason})` : ""} — réessaie.`;
+}
+
 export function ProfilePage() {
   const th = useTh();
   const { user, role, signOut } = useAuth();
@@ -156,9 +171,10 @@ export function ProfilePage() {
   useEffect(() => {
     const googleStatus = searchParams.get("google");
     if (!googleStatus) return;
-    if (googleStatus === "connected") { toast.success("Google Calendar connecté."); void loadGoogleCalendarStatus(); }
-    else if (googleStatus === "error") toast.error("Impossible de connecter Google Calendar — réessayez.");
+    if (googleStatus === "connected") { toast.success("Compte Google connecté (agenda et envoi des e-mails)."); void loadGoogleCalendarStatus(); }
+    else if (googleStatus === "error") toast.error(googleErrorMessage(searchParams.get("reason")));
     searchParams.delete("google");
+    searchParams.delete("reason");
     setSearchParams(searchParams, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);

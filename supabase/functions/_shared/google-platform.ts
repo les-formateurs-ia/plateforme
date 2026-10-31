@@ -59,9 +59,16 @@ export async function getPlatformGoogleAccount(serviceClient: any): Promise<Plat
       .update({ access_token: refreshed.accessToken, access_token_expires_at: refreshed.expiresAt })
       .eq("formateur_id", tokenRow.formateur_id);
   }
-  return {
-    accessToken,
-    email: tokenRow.google_email ?? null,
-    scopes: (tokenRow.granted_scopes ?? "").split(" ").filter(Boolean),
-  };
+  let scopes: string[] = (tokenRow.granted_scopes ?? "").split(" ").filter(Boolean);
+  // Autorisations non enregistrées (colonne absente ou ancien compte) : on
+  // les demande à Google pour le jeton en cours.
+  if (!scopes.length) scopes = await fetchTokenScopes(accessToken);
+  return { accessToken, email: tokenRow.google_email ?? null, scopes };
+}
+
+export async function fetchTokenScopes(accessToken: string): Promise<string[]> {
+  const resp = await fetch(`https://oauth2.googleapis.com/tokeninfo?access_token=${encodeURIComponent(accessToken)}`);
+  if (!resp.ok) return [];
+  const info = await resp.json();
+  return String(info.scope ?? "").split(" ").filter(Boolean);
 }
