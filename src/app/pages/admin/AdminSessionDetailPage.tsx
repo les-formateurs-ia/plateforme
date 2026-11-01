@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, Check, ChevronLeft, Copy, ExternalLink, Eye, Globe, Lock, Mail, PenLine, Plus, Sparkles, Trash2, Users } from "lucide-react";
+import { ArrowLeft, ArrowRight, Building2, Calendar, Check, ChevronLeft, Copy, ExternalLink, Eye, Globe, GraduationCap, Lock, Mail, MapPin, PenLine, Plus, Sparkles, Trash2, UserCheck, Users, Video } from "lucide-react";
 import logoSvg from "@/imports/logo-les-formateurs-ia.svg?raw";
 import { useTh } from "@/app/theme/theme";
 import { GCard } from "@/app/components/common/GCard";
@@ -12,21 +12,27 @@ import { ProgrammeEditor, contenuToText, textToContenu } from "@/app/components/
 import { ActionButtons, GREEN, JourneyHero } from "@/app/components/sessions/JourneyView";
 import { computeJourney, type JourneyAction, type JourneyStep } from "@/app/lib/documents/journey";
 import { countTodos, DOCUMENT_TEMPLATES, renderTemplate } from "@/app/lib/documents/catalog";
-import { creneauDuree, dateLongueFr, FINANCEMENT_LABELS, heureFr, heures, periodeFr, withSignatureProof } from "@/app/lib/documents/render";
+import { creneauDuree, dateLongueFr, FINANCEMENT_LABELS, heureFr, heures, MODALITE_LABELS, periodeFr, withSignatureProof } from "@/app/lib/documents/render";
 import type { DocumentContext } from "@/app/lib/documents/types";
 import {
-  addSlot, addTrainee, buildDocumentContext, clientPortalUrl, deleteDocument, deleteSession, deleteSlot, deleteTrainee, findProfileIdByEmail,
+  addSlot, addTrainee, assignSessionFormateur, buildDocumentContext, clientPortalUrl, deleteDocument, deleteSession, deleteSlot, deleteTrainee, findProfileIdByEmail,
   createCompanyAccess, getDocumentHtml, getSessionActivity, getSessionBundle, importCompanyEmployees, isSlotOpen, issueDocument, listSessionEmails,
   setAutoEmails, signAttendanceAsTrainer, updateSession, updateTraineeResult,
   type ActivityRow, type EmailKind, type SessionBundle, type SessionDocument, type SessionEmail, type TrainingSession,
 } from "@/app/lib/trainingSessions";
 import { VSwitch } from "@/app/components/common/VSwitch";
 import { EmailComposer } from "@/app/components/sessions/EmailComposer";
+import { VSelect } from "@/app/components/common/Select";
+import { useAuth } from "@/app/state/auth-context";
+import { isAdmin } from "@/app/lib/permissions";
+import { listCoachAssignableCards, type PersonCard } from "@/app/lib/planning";
 
 // Dossier d'une formation : un seul tableau de bord. En haut la
 // progression et la carte du parcours en trois phases ; au centre l'étape
 // choisie, avec tout ce qu'il faut y faire ; à droite la prochaine action,
 // la séance du jour, l'espace client et l'archive des documents.
+// Un formateur n'ouvre que ses sessions attribuées, dans une vue réduite à
+// la partie pédagogique (FormateurSessionView) : ni prix, ni documents.
 
 const dateHeure = (iso: string) => new Intl.DateTimeFormat("fr-FR", { dateStyle: "short", timeStyle: "short", timeZone: "Europe/Paris" }).format(new Date(iso));
 
@@ -80,6 +86,8 @@ export function AdminSessionDetailPage() {
   const th = useTh();
   const navigate = useNavigate();
   const { sessionId } = useParams<{ sessionId: string }>();
+  const { role } = useAuth();
+  const admin = isAdmin(role);
   const [bundle, setBundle] = useState<SessionBundle | null>(null);
   const [draft, setDraft] = useState<TrainingSession | null>(null);
   const [contenuText, setContenuText] = useState("");
@@ -93,7 +101,7 @@ export function AdminSessionDetailPage() {
   const reload = async () => {
     if (!sessionId) return;
     try {
-      const b = await getSessionBundle(sessionId);
+      const b = await getSessionBundle(sessionId, !admin);
       setBundle(b);
       if (b) setActivity(await getSessionActivity(b));
     } catch (err) {
@@ -104,7 +112,7 @@ export function AdminSessionDetailPage() {
     }
   };
 
-  useEffect(() => { void reload(); }, [sessionId]);
+  useEffect(() => { if (role) void reload(); }, [sessionId, role]);
   // Le brouillon n'est réinitialisé qu'au chargement de la session, pas à
   // chaque rechargement (émargement, documents) : la saisie en cours reste.
   useEffect(() => {
@@ -135,7 +143,8 @@ export function AdminSessionDetailPage() {
   }, [journey, selected]);
 
   if (loading) return <div className="p-8 text-sm" style={{ color: th.fg3 }}>Chargement…</div>;
-  if (!bundle || !draft || !journey) return <div className="p-8 text-sm" style={{ color: th.fg3 }}>Formation introuvable.</div>;
+  if (!bundle || !draft || !journey) return <div className="p-8 text-sm" style={{ color: th.fg3 }}>{admin ? "Formation introuvable." : "Cette session est introuvable ou ne vous est pas attribuée."}</div>;
+  if (!admin) return <FormateurSessionView bundle={bundle} activity={activity} busy={busy} run={run} />;
 
   const merged: TrainingSession = { ...draft, formation: { ...draft.formation, contenu: textToContenu(contenuText) } };
   const dirty = JSON.stringify(draft) !== JSON.stringify(bundle.session) || contenuText !== contenuToText(bundle.session.formation.contenu);
@@ -230,7 +239,7 @@ export function AdminSessionDetailPage() {
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6 pb-24">
       <div className="flex items-end gap-4 flex-wrap">
         <div className="flex-1 min-w-0">
-          <Link to="/formations" className="flex items-center gap-1.5 text-sm w-fit hover:opacity-70 mb-3" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />Formations</Link>
+          <Link to="/sessions" className="flex items-center gap-1.5 text-sm w-fit hover:opacity-70 mb-3" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />Sessions</Link>
           <p className="text-xs font-bold" style={{ color: th.fg3 }}>{bundle.session.reference} · {FINANCEMENT_LABELS[bundle.session.financement]}</p>
           <h1 className="text-[1.7rem] sm:text-[2.1rem] leading-[1.1] font-black mt-1" style={{ color: th.fg }}><GT>{bundle.session.client.nom}</GT></h1>
           <p className="text-sm mt-1" style={{ color: th.fg2 }}>{bundle.session.formation.intitule} · {periodeFr(bundle.session.dateDebut, bundle.session.dateFin)}</p>
@@ -343,6 +352,12 @@ export function AdminSessionDetailPage() {
             </div></GCard>
           )}
 
+          <FormateurCard formateurId={draft.formateurId} busy={busy}
+            onAssign={(formateurId) => void run(async () => {
+              await assignSessionFormateur(bundle.session.id, formateurId);
+              setDraft((d) => (d ? { ...d, formateurId } : d));
+            }, formateurId ? "Formateur attribué." : "Attribution retirée.")} />
+
           <GCard><div className="p-4 space-y-3">
             <div className="flex items-center gap-2">
               <Globe className="w-4 h-4" style={{ color: th.fg3 }} />
@@ -377,7 +392,7 @@ export function AdminSessionDetailPage() {
               } else if (!confirm("Supprimer définitivement cette formation, ses séances et ses documents ?")) return;
               setBusy(true);
               deleteSession(bundle.session.id)
-                .then(() => { toast.success("Formation supprimée."); navigate("/formations"); })
+                .then(() => { toast.success("Formation supprimée."); navigate("/sessions"); })
                 .catch((err) => { console.error(err); toast.error(err instanceof Error ? err.message : "Impossible de supprimer la formation."); setBusy(false); });
             }}
             className="flex items-center gap-1.5 text-xs font-bold disabled:opacity-40 px-1 hover:opacity-70" style={{ color: th.danger }}>
@@ -785,5 +800,133 @@ function EmailsCard({ bundle, busy, onCompose }: { bundle: SessionBundle; busy: 
         </div>
       )}
     </div></GCard>
+  );
+}
+
+// ── Formateur attribué (admin) ────────────────────────────────────────
+
+const NO_FORMATEUR = "none";
+
+function FormateurCard({ formateurId, busy, onAssign }: { formateurId: string | null; busy: boolean; onAssign: (id: string | null) => void }) {
+  const th = useTh();
+  const [people, setPeople] = useState<PersonCard[]>([]);
+  useEffect(() => { listCoachAssignableCards().then(setPeople).catch(console.error); }, []);
+  const label = (p: PersonCard) => [p.firstName, p.lastName].filter(Boolean).join(" ") || p.email;
+  return (
+    <GCard><div className="p-4 space-y-3">
+      <div className="flex items-center gap-2">
+        <UserCheck className="w-4 h-4" style={{ color: th.fg3 }} />
+        <p className="text-sm font-black" style={{ color: th.fg }}>Formateur attribué</p>
+      </div>
+      <VSelect value={formateurId ?? NO_FORMATEUR} disabled={busy} onValueChange={(v) => onAssign(v === NO_FORMATEUR ? null : v)}
+        options={[{ value: NO_FORMATEUR, label: "Aucun formateur" }, ...people.map((p) => ({ value: p.id, label: label(p) }))]} />
+      <p className="text-[11px]" style={{ color: th.fg3 }}>Il voit cette session dans son espace, sans les prix ni les documents administratifs, et en assure l'émargement.</p>
+    </div></GCard>
+  );
+}
+
+// ── Vue formateur : la partie pédagogique seule ───────────────────────
+
+function InfoLine({ Icon, children }: { Icon: typeof Calendar; children: ReactNode }) {
+  const th = useTh();
+  return (
+    <div className="flex items-start gap-2.5 text-sm" style={{ color: th.fg }}>
+      <Icon className="w-4 h-4 mt-0.5 shrink-0" style={{ color: th.fg3 }} />
+      <div className="min-w-0 break-words">{children}</div>
+    </div>
+  );
+}
+
+function FormateurSessionView({ bundle, activity, busy, run }: { bundle: SessionBundle; activity: Record<string, ActivityRow[]>; busy: boolean; run: Run }) {
+  const th = useTh();
+  const { session, slots, trainees, signatures } = bundle;
+  const f = session.formation;
+  const now = new Date();
+  const past = slots.filter((s) => new Date(`${s.date}T${s.debut}:00`) <= now);
+  const toSign = past.filter((s) => !signatures.some((g) => g.slotId === s.id && g.role === "intervenant"));
+  const next = slots.find((s) => new Date(`${s.date}T${s.fin}:00`) >= now);
+  const card = (title: string, children: ReactNode, right?: ReactNode) => (
+    <GCard><div className="p-4 sm:p-5 space-y-3">
+      <div className="flex items-center gap-2"><p className="text-sm font-black flex-1" style={{ color: th.fg }}>{title}</p>{right}</div>
+      {children}
+    </div></GCard>
+  );
+
+  return (
+    <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6 pb-24">
+      <div>
+        <Link to="/sessions" className="flex items-center gap-1.5 text-sm w-fit hover:opacity-70 mb-3" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />Mes sessions</Link>
+        <p className="text-xs font-bold" style={{ color: th.fg3 }}>{session.reference} · {FINANCEMENT_LABELS[session.financement]}</p>
+        <h1 className="text-[1.7rem] sm:text-[2.1rem] leading-[1.1] font-black mt-1" style={{ color: th.fg }}><GT>{session.client.nom}</GT></h1>
+        <p className="text-sm mt-1" style={{ color: th.fg2 }}>{f.intitule} · {periodeFr(session.dateDebut, session.dateFin)}</p>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        {[
+          { label: "Séances réalisées", value: `${past.length}/${slots.length}` },
+          { label: "À émarger", value: String(toSign.length), alert: toSign.length > 0 },
+          { label: "Stagiaires", value: String(trainees.length) },
+        ].map((k) => (
+          <GCard key={k.label}><div className="p-4">
+            <p className="text-[11px] font-bold" style={{ color: th.fg3 }}>{k.label}</p>
+            <p className="text-[1.8rem] font-black tabular-nums leading-tight" style={{ color: k.alert ? th.danger : th.fg }}>{k.value}</p>
+          </div></GCard>
+        ))}
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px] items-start">
+        <div className="space-y-6">
+          {card("Émargement", <RealisationPanel bundle={bundle} activity={activity} busy={busy} run={run} />,
+            toSign.length ? <span className="text-xs font-bold" style={{ color: th.danger }}>{toSign.length} séance{toSign.length > 1 ? "s" : ""} à signer</span> : undefined)}
+          {card("Évaluation des acquis", <EvaluationPanel bundle={bundle} run={run} />)}
+          {card("Programme", (
+            <div className="space-y-3">
+              {f.objectifs.length > 0 && (
+                <div>
+                  <p className="text-xs font-bold mb-1" style={{ color: th.fg2 }}>Objectifs</p>
+                  <ul className="list-disc pl-5 text-sm space-y-0.5" style={{ color: th.fg }}>{f.objectifs.map((o) => <li key={o}>{o}</li>)}</ul>
+                </div>
+              )}
+              {f.contenu.map((m, i) => (
+                <div key={i} className="rounded-[6px] px-3 py-2.5" style={{ background: th.navA }}>
+                  <p className="text-sm font-bold" style={{ color: th.fg }}>{m.titre}{m.duree ? <span className="font-normal" style={{ color: th.fg3 }}> · {m.duree}</span> : null}</p>
+                  {m.points.length > 0 && <ul className="list-disc pl-5 text-xs mt-1 space-y-0.5" style={{ color: th.fg2 }}>{m.points.map((pt) => <li key={pt}>{pt}</li>)}</ul>}
+                </div>
+              ))}
+              {!f.objectifs.length && !f.contenu.length && <p className="text-xs" style={{ color: th.fg3 }}>Programme non renseigné.</p>}
+            </div>
+          ))}
+        </div>
+
+        <aside className="space-y-4 xl:sticky xl:top-4">
+          {card("Infos pratiques", (
+            <div className="space-y-2.5">
+              <InfoLine Icon={Calendar}>{periodeFr(session.dateDebut, session.dateFin)} · {heures(f.dureeHeures)}</InfoLine>
+              {next && <InfoLine Icon={PenLine}>Prochaine séance : {dateLongueFr(next.date)}, {heureFr(next.debut)} à {heureFr(next.fin)}</InfoLine>}
+              <InfoLine Icon={GraduationCap}>{MODALITE_LABELS[f.modalite]}</InfoLine>
+              {session.lieu && <InfoLine Icon={MapPin}>{session.lieu}</InfoLine>}
+              {session.lienConnexion && (
+                <InfoLine Icon={Video}><a href={session.lienConnexion} target="_blank" rel="noopener noreferrer" className="underline">Rejoindre la classe virtuelle</a></InfoLine>
+              )}
+              {session.companyId && (
+                <InfoLine Icon={Building2}><Link to={`/clients/entreprises/${session.companyId}`} className="underline">Espace de formation de l'entreprise</Link></InfoLine>
+              )}
+            </div>
+          ))}
+          {card(`Stagiaires (${trainees.length})`, (
+            <div className="space-y-1">
+              {!trainees.length && <p className="text-xs" style={{ color: th.fg3 }}>Aucun stagiaire inscrit pour l'instant.</p>}
+              {trainees.map((tr) => (
+                <div key={tr.id} className="py-1.5" style={{ borderBottom: `1px solid ${th.sep}` }}>
+                  <p className="text-sm font-semibold" style={{ color: th.fg }}>{tr.civilite} {tr.prenom} {tr.nom}</p>
+                  <p className="text-[11px] truncate" style={{ color: th.fg3 }}>{tr.fonction ? `${tr.fonction} · ` : ""}{tr.email}</p>
+                </div>
+              ))}
+            </div>
+          ), <Users className="w-4 h-4" style={{ color: th.fg3 }} />)}
+          <p className="text-[11px] px-1" style={{ color: th.fg3 }}>Le planning, les inscriptions et les documents administratifs sont gérés par l'administrateur.</p>
+        </aside>
+      </div>
+    </div>
   );
 }

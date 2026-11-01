@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router";
+import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router";
 import { ThemeProvider, useTh } from "@/app/theme/theme";
 import { AuthProvider, useAuth } from "@/app/state/auth-context";
 import { isStaff, isAdmin } from "@/app/lib/permissions";
@@ -59,14 +59,14 @@ import { AdminAvailabilityPage } from "@/app/pages/admin/AdminAvailabilityPage";
 import { AdminTrashPage } from "@/app/pages/admin/AdminTrashPage";
 import { AdminIncidentsPage } from "@/app/pages/admin/AdminIncidentsPage";
 import { AdminDocumentsPage } from "@/app/pages/admin/AdminDocumentsPage";
-import { FormationsPage } from "@/app/pages/formations/FormationsPage";
+import { StaffHomePage } from "@/app/pages/equipe/StaffHomePage";
+import { SessionsPage } from "@/app/pages/equipe/SessionsPage";
+import { ClientsPage } from "@/app/pages/equipe/ClientsPage";
 import { AdminSessionDetailPage } from "@/app/pages/admin/AdminSessionDetailPage";
 import { SignDocumentPage } from "@/app/pages/SignDocumentPage";
 import { ClientPortalPage } from "@/app/pages/ClientPortalPage";
 import { LearnerAccessPage } from "@/app/pages/LearnerAccessPage";
 import { ProspectsPage } from "@/app/pages/prospects/ProspectsPage";
-import { EntrepriseChoicePage } from "@/app/pages/entreprise/EntrepriseChoicePage";
-import { CompaniesListPage } from "@/app/pages/entreprise/CompaniesListPage";
 import { CompanyDetailPage } from "@/app/pages/entreprise/CompanyDetailPage";
 import { CompanyStudentHomePage } from "@/app/pages/entreprise/CompanyStudentHomePage";
 import { CompanyPreviewPage } from "@/app/pages/entreprise/CompanyPreviewPage";
@@ -173,15 +173,19 @@ function RequireFormateur({ children }: { children: ReactElement }) {
   return children;
 }
 
-// "/" : porte d'entrée, rendue HORS MainLayout (comme /login) — le staff n'a
-// donc accès à AUCUNE barre latérale tant qu'il n'a pas choisi CPF ou
-// Entreprise. Un élève (CPF ou entreprise) n'a rien à choisir : renvoyé
-// directement vers son tableau de bord, qui lui affiche la barre complète.
+// "/" : l'équipe arrive sur son tableau de bord (/pilotage), un élève (CPF
+// ou entreprise) sur le sien (/dashboard).
 function RootGate() {
   const { role } = useAuth();
   if (role === null) return <LoadingScreen />;
-  if (isStaff(role)) return <EntrepriseChoicePage />;
-  return <Navigate to="/dashboard" replace />;
+  return <Navigate to={isStaff(role) ? "/pilotage" : "/dashboard"} replace />;
+}
+
+// Anciennes adresses de l'équipe (espaces Formations et Entreprise) : elles
+// restent valables dans les favoris et les liens déjà partagés.
+function LegacyRedirect({ to }: { to: (p: Record<string, string | undefined>) => string }) {
+  const params = useParams();
+  return <Navigate to={to(params)} replace />;
 }
 
 // "/dashboard" (sous MainLayout) : tableau de bord élève — entreprise ou CPF
@@ -262,11 +266,18 @@ function AppRoutes() {
         <Route path="admin/planning/students/:studentId/certification" element={<RequireAdmin><AdminCertificationAnswersPage /></RequireAdmin>} />
         <Route path="admin/planning/formateurs/:formateurId" element={<RequireAdmin><AdminFormateurDetailPage /></RequireAdmin>} />
         <Route path="admin/incidents" element={<RequireAdmin><AdminIncidentsPage /></RequireAdmin>} />
-        <Route path="formations" element={<RequireStaff><FormationsPage /></RequireStaff>} />
-        <Route path="formations/sessions/:sessionId" element={<RequireStaff><AdminSessionDetailPage /></RequireStaff>} />
-        <Route path="formations/modeles" element={<RequireAdmin><AdminDocumentsPage /></RequireAdmin>} />
-        <Route path="admin/documents" element={<Navigate to="/formations/modeles" replace />} />
-        <Route path="admin/sessions" element={<Navigate to="/formations" replace />} />
+        <Route path="pilotage" element={<RequireStaff><StaffHomePage /></RequireStaff>} />
+        <Route path="sessions" element={<RequireStaff><SessionsPage /></RequireStaff>} />
+        <Route path="sessions/modeles" element={<RequireAdmin><AdminDocumentsPage /></RequireAdmin>} />
+        <Route path="sessions/:sessionId" element={<RequireStaff><AdminSessionDetailPage /></RequireStaff>} />
+        <Route path="clients" element={<RequireStaff><ClientsPage /></RequireStaff>} />
+        <Route path="clients/entreprises/:companyId" element={<RequireStaff><CompanyDetailPage /></RequireStaff>} />
+        <Route path="clients/entreprises/:companyId/preview" element={<RequireStaff><CompanyPreviewPage /></RequireStaff>} />
+        <Route path="formations" element={<Navigate to="/sessions" replace />} />
+        <Route path="formations/sessions/:sessionId" element={<LegacyRedirect to={(p) => `/sessions/${p.sessionId}`} />} />
+        <Route path="formations/modeles" element={<Navigate to="/sessions/modeles" replace />} />
+        <Route path="admin/documents" element={<Navigate to="/sessions/modeles" replace />} />
+        <Route path="admin/sessions" element={<Navigate to="/sessions" replace />} />
         {/* Ancienne liste "Demandes IA", remplacée par l'espace Prospects. */}
         <Route path="admin/project-advisor-leads" element={<Navigate to="/prospects" replace />} />
         <Route path="prospects" element={<RequireAdmin><ProspectsPage /></RequireAdmin>} />
@@ -286,9 +297,9 @@ function AppRoutes() {
         <Route path="planning" element={<RequireStaff><AdminAvailabilityPage /></RequireStaff>} />
         <Route path="admin/ai-detection-gallery" element={<RequireStaff><AdminAiDetectionGalleryPage /></RequireStaff>} />
 
-        <Route path="entreprise" element={<RequireStaff><CompaniesListPage /></RequireStaff>} />
-        <Route path="entreprise/:companyId" element={<RequireStaff><CompanyDetailPage /></RequireStaff>} />
-        <Route path="entreprise/:companyId/preview" element={<RequireStaff><CompanyPreviewPage /></RequireStaff>} />
+        <Route path="entreprise" element={<Navigate to="/clients?type=entreprise" replace />} />
+        <Route path="entreprise/:companyId" element={<LegacyRedirect to={(p) => `/clients/entreprises/${p.companyId}`} />} />
+        <Route path="entreprise/:companyId/preview" element={<LegacyRedirect to={(p) => `/clients/entreprises/${p.companyId}/preview`} />} />
         <Route path="entreprise/positioning/:testId" element={<RequireCompanyStudent><CompanyPositioningTestPage /></RequireCompanyStudent>} />
         <Route path="entreprise/html/:exerciseId" element={<RequireCompanyStudent><CompanyHtmlExercisePage /></RequireCompanyStudent>} />
         <Route path="entreprise/satisfaction/:testId" element={<RequireCompanyStudent><CompanySatisfactionTestPage /></RequireCompanyStudent>} />

@@ -32,6 +32,7 @@ import { useAuth } from "@/app/state/auth-context";
 import { isAdmin, isStaff } from "@/app/lib/permissions";
 import { useStaffBasePath } from "@/app/lib/staffBase";
 import { TUTOR_STYLES } from "@/app/data/mock";
+import { ClientSessionsCard } from "@/app/components/sessions/ClientSessionsCard";
 
 interface StudentProfile { id: string; first_name: string | null; last_name: string | null; email: string; phone: string | null; avatar_url: string | null; formateur_id: string | null; }
 
@@ -273,6 +274,8 @@ export function AdminStudentDetailPage() {
           </div>
         )}
       </div>
+
+      {staff && <ClientSessionsCard profileId={profile.id} />}
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
       {staff && (

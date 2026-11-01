@@ -120,6 +120,7 @@ export interface Database {
           updated_at: string;
           client_token: string;
           auto_emails: boolean;
+          formateur_id: string | null;
         };
         Insert: {
           reference: string;
@@ -138,6 +139,7 @@ export interface Database {
           created_by?: string | null;
           updated_at?: string;
           auto_emails?: boolean;
+          formateur_id?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["training_sessions"]["Insert"]>;
         Relationships: never[];
@@ -1991,6 +1993,10 @@ export interface Database {
       sign_attendance: {
         Args: { p_slot_id: string };
         Returns: string;
+      };
+      my_formateur_sessions: {
+        Args: { p_session_id?: string };
+        Returns: Database["public"]["Tables"]["training_sessions"]["Row"][];
       };
       sign_attendance_as_trainer: {
         Args: { p_slot_id: string };

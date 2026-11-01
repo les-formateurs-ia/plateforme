@@ -20,6 +20,8 @@ export type TrainingSession = {
   lieu: string;
   lienConnexion: string | null;
   intervenants: Intervenant[];
+  // Formateur attribué (profil) : lui seul, avec l'admin, voit la session.
+  formateurId: string | null;
 };
 
 export type SessionSlot = { id: string; date: string; debut: string; fin: string };

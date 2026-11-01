@@ -28,7 +28,7 @@ export function AdminDocumentsPage() {
 
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
-      <Link to="/formations" className="flex items-center gap-1.5 text-sm w-fit hover:opacity-70" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />Formations</Link>
+      <Link to="/sessions" className="flex items-center gap-1.5 text-sm w-fit hover:opacity-70" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />Sessions</Link>
       <div>
         <h2 className="text-[1.75rem] sm:text-[2.1rem] leading-[1.08] font-black" style={{ color: th.fg }}><GT>Documents de formation</GT></h2>
         <p className="text-[15px] sm:text-base mt-2 max-w-3xl leading-relaxed" style={{ color: th.fg2 }}>

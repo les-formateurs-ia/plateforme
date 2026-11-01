@@ -78,6 +78,7 @@ export function NewSessionForm({ clients, sessions, initial, onCancel }: {
         dateDebut: form.dateDebut, dateFin: form.dateFin,
         lieu: preset.formation.modalite === "presentiel" ? "" : "Plateforme e-learning et visioconférence", lienConnexion: null,
         intervenants: [{ nom: "Yanis SOUICI", qualite: "Formateur IA générative, dirigeant de Les Formateurs IA" }],
+        formateurId: null,
       });
       // Un élève de la plateforme est aussi le stagiaire : son compte relie
       // la session à ses relevés de connexion.
@@ -85,7 +86,7 @@ export function NewSessionForm({ clients, sessions, initial, onCancel }: {
         const [prenom, ...reste] = nom.split(" ");
         await addTrainee(id, { civilite: "", prenom, nom: (reste.join(" ") || prenom).toUpperCase(), email, fonction: null, profileId: student?.studentId ?? null });
       }
-      navigate(`/formations/sessions/${id}`);
+      navigate(`/sessions/${id}`);
     } catch (err) {
       console.error(err);
       toast.error("Impossible de créer la formation.");

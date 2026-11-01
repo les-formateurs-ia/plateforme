@@ -1,9 +1,10 @@
 // Envoi à la demande des e-mails d'une session de formation (convocation,
 // rappel, certificat aux stagiaires ; lien de l'espace client au client),
-// depuis le tableau de bord de la formation. Réservé à l'équipe
-// pédagogique ; envoi par Gmail depuis le compte Google de la plateforme.
+// depuis le tableau de bord de la formation. Réservé à l'administrateur
+// (le formateur n'a pas accès au lien de l'espace client) ; envoi par Gmail
+// depuis le compte Google de la plateforme.
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
-import { CORS_HEADERS, getCallerRole, isStaffRole, jsonResponse } from "../_shared/podcast-utils.ts";
+import { CORS_HEADERS, getCallerRole, jsonResponse } from "../_shared/podcast-utils.ts";
 import { GOOGLE_SCOPES, getPlatformGoogleAccount } from "../_shared/google-platform.ts";
 import { buildRecipients, sendFormationEmails, type EmailKind } from "../_shared/formation-email.ts";
 
@@ -22,7 +23,7 @@ Deno.serve(async (req) => {
     });
     const { data: userData, error: userErr } = await userClient.auth.getUser();
     if (userErr || !userData?.user) return jsonResponse({ error: "Session invalide." }, 401);
-    if (!isStaffRole(await getCallerRole(userClient, userData.user.id))) return jsonResponse({ error: "Réservé à l'équipe pédagogique." }, 403);
+    if (await getCallerRole(userClient, userData.user.id) !== "admin") return jsonResponse({ error: "Réservé à l'administrateur." }, 403);
 
     const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
     const frontendUrl = (Deno.env.get("FRONTEND_URL") ?? "https://plateforme.les-formateurs-ia.fr").replace(/\/$/, "");

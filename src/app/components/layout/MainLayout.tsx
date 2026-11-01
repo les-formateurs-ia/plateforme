@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useState } from "react";
 import { Link, Navigate, NavLink, Outlet, useLocation } from "react-router";
-import { Plus, CalendarClock, Menu, X, Bug, Building2, ScanEye, LogOut } from "lucide-react";
+import { Menu, X, Bug, ScanEye, LogOut, LayoutDashboard, CalendarClock, ClipboardList, Users, GraduationCap, Target, FileText, Code2, Sparkles, LayoutGrid, BookOpen, type LucideIcon } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
@@ -22,14 +22,34 @@ import { supabase } from "@/app/lib/supabase/client";
 import { countUnreadIncidentNotifications } from "@/app/lib/notifications";
 import { isPathAllowedDuringExam, useCertification } from "@/app/state/certification-context";
 
-const STAFF_SPACE_KEY = "staffSpace";
-
-function readStoredStaffSpace(): "cpf" | "entreprise" {
-  try {
-    return localStorage.getItem(STAFF_SPACE_KEY) === "entreprise" ? "entreprise" : "cpf";
-  } catch {
-    return "cpf";
-  }
+// Navigation de l'équipe (admin et formateur) : un seul espace, groupé par
+// usage. Le formateur n'y voit que la partie pédagogique (ses sessions, ses
+// clients, ses élèves) ; prospects, modèles de documents et incidents sont
+// réservés à l'admin.
+type StaffNavItem = { to: string; label: string; Icon: LucideIcon; end?: boolean };
+function staffNav(admin: boolean, base: string): { title: string; items: StaffNavItem[] }[] {
+  return [
+    { title: "Pilotage", items: [
+      { to: "/pilotage", label: "Tableau de bord", Icon: LayoutDashboard },
+      { to: "/planning", label: "Disponibilités & RDV", Icon: CalendarClock },
+      ...(admin ? [{ to: "/prospects", label: "Prospects", Icon: Target }] : []),
+    ] },
+    { title: "Formations", items: [
+      { to: "/sessions", label: admin ? "Sessions" : "Mes sessions", Icon: ClipboardList },
+      { to: "/clients", label: admin ? "Clients" : "Mes clients", Icon: Users },
+      { to: `${base}/planning`, label: admin ? "Élèves & formateurs" : "Mes élèves", Icon: GraduationCap },
+    ] },
+    { title: "Pédagogie", items: [
+      { to: `${base}/courses`, label: "Catalogue e-learning", Icon: BookOpen },
+      { to: "/admin/ai-detection-gallery", label: "Galerie Détection IA", Icon: ScanEye },
+      { to: "/practice", label: "Exercices", Icon: Code2, end: true },
+      { to: "/studio", label: "Le Studio", Icon: Sparkles, end: true },
+      { to: "/hub", label: "Hub IA", Icon: LayoutGrid, end: true },
+    ] },
+    ...(admin ? [{ title: "Administration", items: [
+      { to: "/sessions/modeles", label: "Modèles de documents", Icon: FileText },
+    ] }] : []),
+  ];
 }
 
 export function MainLayout() {
@@ -55,36 +75,11 @@ export function MainLayout() {
   const { examMode } = useCertification();
   const gen = useBulkGeneration();
   const genPct = gen.total > 0 ? Math.round((gen.done / gen.total) * 100) : 0;
-  // Le staff bascule entre deux espaces (choisis sur "/", cf. RootGate) : tant
-  // qu'il navigue sous /entreprise, la barre latérale ne montre plus que ce
-  // qui concerne l'entreprise — le reste (Pratique IA, Élèves, RDV, Modifier
-  // les formations) appartient au CPF et redeviendra visible en y retournant
-  // (logo cliquable → "/", qui renvoie vers le choix). "/profile" est
-  // partagé entre les deux espaces (même page pour tout le monde) : on ne
-  // le laisse pas faire basculer l'espace mémorisé, sinon "Mon profil"
-  // depuis Entreprise renvoyait visuellement vers la nav CPF complète.
-  const [space, setSpace] = useState<"cpf" | "entreprise">(
-    () => (location.pathname.startsWith("/entreprise") ? "entreprise" : readStoredStaffSpace()),
-  );
-  useEffect(() => {
-    if (location.pathname === "/profile" || location.pathname.startsWith("/prospects") || location.pathname.startsWith("/formations")) return;
-    const next = location.pathname.startsWith("/entreprise") ? "entreprise" : "cpf";
-    setSpace(next);
-    try { localStorage.setItem(STAFF_SPACE_KEY, next); } catch { /* ignore */ }
-  }, [location.pathname]);
-  const entrepriseMode = isStaff(role) && space === "entreprise";
-
-  // Espace Entreprise (staff ou collaborateur) : pas de barre latérale,
-  // seulement un bandeau logo + Déconnexion. Le logo ramène sur "/" (choix
-  // CPF / Entreprise pour le staff, accueil pour un collaborateur).
-  // Espace Prospects (admin) : même bandeau, le tableau Kanban a besoin de
-  // toute la largeur. Il ne touche pas à l'espace CPF / Entreprise mémorisé.
-  const prospectsMode = isAdmin(role) && location.pathname.startsWith("/prospects");
-  // Espace Formations (staff) : clients CPF et entreprises réunis, même
-  // bandeau pleine largeur que Prospects.
-  const formationsMode = isStaff(role) && location.pathname.startsWith("/formations");
-  const sidebarHidden = entrepriseMode || prospectsMode || formationsMode || !!companyId;
-  const studentNav = !isStaff(role) && !companyId;
+  // Collaborateur entreprise : pas de barre latérale, seulement un bandeau
+  // logo + Déconnexion. L'équipe garde la même barre latérale partout.
+  const sidebarHidden = !!companyId;
+  const staff = isStaff(role);
+  const studentNav = !staff && !companyId;
 
   useEffect(() => { setNavOpen(false); }, [location.pathname]);
 
@@ -173,7 +168,7 @@ export function MainLayout() {
         bottom: "max(0.75rem, env(safe-area-inset-bottom))",
       }}>
         <div className="px-6 py-6 flex items-center justify-between" style={{ borderBottom: `1px solid ${th.sidebarB}` }}>
-          <Link to="/" onClick={() => setNavOpen(false)} className="grid gap-2.5 transition-opacity hover-fine:opacity-80" title={isStaff(role) ? "Changer d'espace (CPF / Entreprise)" : "Accueil"}>
+          <Link to="/" onClick={() => setNavOpen(false)} className="grid gap-2.5 transition-opacity hover-fine:opacity-80" title="Accueil">
             <Logo h={26} />
             {/* Repère de l'espace courant : pastille à la couleur du rôle. */}
             <span className="eyebrow flex items-center gap-2" style={{ color: th.fg3 }}>
@@ -187,41 +182,22 @@ export function MainLayout() {
         </div>
         {studentNav && !examMode && <div className="px-3 pt-4"><CommandTrigger /></div>}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {NAV_ITEMS.filter(({ id }) => id !== "profile")
-            .sort((a, b) => isStaff(role) ? Number(b.id === "calendar") - Number(a.id === "calendar") : 0)
-            .map(({ id, Icon, label, path, group }, index, items) => {
-            // Espace Entreprise : seuls "Entreprise" et "Mon profil" restent
-            // (ajoutés séparément plus bas) — tout le reste de cette liste
-            // est un concept CPF (Pratique IA, Élèves, Rendez-vous...).
-            if (entrepriseMode) return null;
+          {staff && staffNav(isAdmin(role), staffBase).map((group, gi) => (
+            <div key={group.title} className="space-y-1">
+              <p className={cx("eyebrow px-3.5 pb-1", gi === 0 ? "pt-1" : "pt-4")} style={{ color: th.fg3 }}>{group.title}</p>
+              {group.items.map(({ to, label, Icon, end }) => (
+                <NavLink key={to} to={to} end={end} onClick={() => setNavOpen(false)} className={navItemClass} style={navItemStyle}>
+                  <Icon className="w-4 h-4 shrink-0" />{label}
+                </NavLink>
+              ))}
+            </div>
+          ))}
+          {!staff && NAV_ITEMS.filter(({ id }) => id !== "profile").map(({ id, Icon, label, path, group }, index, items) => {
             if (examMode && id !== "dashboard" && id !== "studio") return null;
-            // "Tableau de bord", "Mes leçons" et "Mon Agent IA" sont pensés
-            // pour un parcours élève (progression, agent personnel, gains)
-            // — pas de version admin/formateur pour l'instant, donc masqués
-            // pour le staff plutôt que d'afficher une page vide/hors-sujet.
-            if ((id === "dashboard" || id === "lessons" || id === "certification" || id === "agent") && isStaff(role)) return null;
             // Collaborateur entreprise : parcours CPF (leçons, pratique,
             // agent, RDV) hors-sujet, seul "Tableau de bord" (son espace
             // entreprise) et "Mon profil" restent pertinents.
             if ((id === "lessons" || id === "certification" || id === "practice" || id === "studio" || id === "hub" || id === "agent" || id === "calendar") && companyId) return null;
-            // Staff : élèves, rendez-vous et
-            // galerie précèdent les outils pédagogiques.
-            if (id === "calendar" && isStaff(role)) {
-              return [
-                <NavLink key="planning" to={`${staffBase}/planning`} onClick={() => setNavOpen(false)} className={navItemClass}
-                  style={navItemStyle}>
-                  <CalendarClock className="w-4 h-4 shrink-0" />{role === "admin" ? "Élèves & formateurs" : "Élèves"}
-                </NavLink>,
-                <NavLink key={id} to="/planning" onClick={() => setNavOpen(false)} className={navItemClass}
-                  style={navItemStyle}>
-                  <Icon className="w-4 h-4 shrink-0" />{label}
-                </NavLink>,
-                <NavLink key="gallery" to="/admin/ai-detection-gallery" onClick={() => setNavOpen(false)} className={navItemClass}
-                  style={navItemStyle}>
-                  <ScanEye className="w-4 h-4 shrink-0" />Galerie Détection IA
-                </NavLink>,
-              ];
-            }
             // Élève CPF : la navigation est groupée par intention (apprendre,
             // pratiquer, être accompagné), un sur-titre ouvre chaque groupe.
             const groupStart = studentNav && group && items[index - 1]?.group !== group;
@@ -237,13 +213,7 @@ export function MainLayout() {
               </div>
             );
           })}
-          {entrepriseMode && (
-            <NavLink to="/entreprise" onClick={() => setNavOpen(false)} className={navItemClass}
-              style={navItemStyle}>
-              <Building2 className="w-4 h-4 shrink-0" />Entreprise
-            </NavLink>
-          )}
-          {isAdmin(role) && !entrepriseMode && !companyId && (
+          {isAdmin(role) && (
             <NavLink key="incidents" to="/admin/incidents" onClick={() => setNavOpen(false)} className={navItemClass}
               style={navItemStyle}>
               <span className="relative shrink-0">
@@ -267,25 +237,18 @@ export function MainLayout() {
             );
           })()}
         </nav>
-        {isStaff(role) && !entrepriseMode && (
-          <div className="px-3 pb-3 space-y-1.5">
-            {gen.running && (
-              <div className="rounded-[4px] px-3 py-2.5" style={{ border: `1px solid ${th.sep}` }}>
-                <div className="flex items-center justify-between gap-2 mb-1.5">
-                  <span className="text-[11px] font-semibold truncate" style={{ color: th.fg2 }}>Génération : {gen.courseName}</span>
-                  <span className="text-[11px] font-bold shrink-0" style={{ color: th.navAC }}>{genPct}%</span>
-                </div>
-                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: th.navA }}>
-                  <div className="h-full rounded-full transition-all duration-300" style={{ width: `${genPct}%`, background: th.iris }} />
-                </div>
-                <div className="text-[10px] mt-1" style={{ color: th.fg3 }}>{gen.done}/{gen.total} leçon{gen.total > 1 ? "s" : ""}</div>
+        {staff && gen.running && (
+          <div className="px-3 pb-3">
+            <div className="rounded-[4px] px-3 py-2.5" style={{ border: `1px solid ${th.sep}` }}>
+              <div className="flex items-center justify-between gap-2 mb-1.5">
+                <span className="text-[11px] font-semibold truncate" style={{ color: th.fg2 }}>Génération : {gen.courseName}</span>
+                <span className="text-[11px] font-bold shrink-0" style={{ color: th.navAC }}>{genPct}%</span>
               </div>
-            )}
-            <NavLink to={`${staffBase}/courses`} onClick={() => setNavOpen(false)} className="sweep w-full flex items-center justify-center gap-2 px-3 min-h-10 rounded-[2px] text-[13px] font-semibold whitespace-nowrap"
-              style={{ background: th.ink, color: th.onInk }}>
-              <Plus className="w-4 h-4 shrink-0" />
-              Modifier les formations
-            </NavLink>
+              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: th.navA }}>
+                <div className="h-full rounded-full transition-all duration-300" style={{ width: `${genPct}%`, background: th.iris }} />
+              </div>
+              <div className="text-[10px] mt-1" style={{ color: th.fg3 }}>{gen.done}/{gen.total} leçon{gen.total > 1 ? "s" : ""}</div>
+            </div>
           </div>
         )}
         <div className="px-4 pt-3 pb-2 flex items-center gap-2" style={{ borderTop: `1px solid ${th.sidebarB}` }}>
@@ -310,7 +273,7 @@ export function MainLayout() {
         {/* Seul le bouton flotte au-dessus de la page, sans bandeau opaque. */}
         {sidebarHidden ? (
           <header className="shrink-0 flex items-center justify-between gap-3 px-4 sm:px-6 lg:px-8 pt-[calc(env(safe-area-inset-top)+0.75rem)] pb-1">
-            <Link to="/" className="transition-opacity hover:opacity-80" title={isStaff(role) ? "Changer d'espace (CPF / Entreprise)" : "Accueil"}>
+            <Link to="/" className="transition-opacity hover:opacity-80" title="Accueil">
               <Logo h={22} />
             </Link>
             <button type="button" onClick={() => void signOut()} className="sweep inline-flex items-center gap-1.5 rounded-[2px] px-3 min-h-9 text-xs font-semibold"

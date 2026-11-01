@@ -13,6 +13,9 @@ import { CompanySatisfactionTab } from "@/app/components/entreprise/CompanySatis
 import { CompanyCategoriesTab } from "@/app/components/entreprise/CompanyCategoriesTab";
 import { CompanyResultsTab } from "@/app/components/entreprise/CompanyResultsTab";
 import { CompanyStudentUploadsTab } from "@/app/components/entreprise/CompanyStudentUploadsTab";
+import { ClientSessionsCard } from "@/app/components/sessions/ClientSessionsCard";
+import { useAuth } from "@/app/state/auth-context";
+import { isAdmin } from "@/app/lib/permissions";
 
 const SECTION_IDS = ["employees", "positioning", "files", "html", "validation", "satisfaction", "results", "uploads", "categories"] as const;
 type SectionId = typeof SECTION_IDS[number];
@@ -42,6 +45,9 @@ export function CompanyDetailPage() {
   const [name, setName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [overview, setOverview] = useState<CompanyOverview | null>(null);
+  // Un formateur n'ouvre que les entreprises dont une session lui est attribuée.
+  const { role } = useAuth();
+  const [allowed, setAllowed] = useState<boolean | null>(isAdmin(role) ? true : null);
 
   useEffect(() => {
     if (!companyId) return;
@@ -67,10 +73,10 @@ export function CompanyDetailPage() {
   if (!companyId) return null;
 
   const previewButton = name && (
-    <GhostButton Icon={Eye} onClick={() => navigate(`/entreprise/${companyId}/preview`)}>Aperçu élève</GhostButton>
+    <GhostButton Icon={Eye} onClick={() => navigate(`/clients/entreprises/${companyId}/preview`)}>Aperçu élève</GhostButton>
   );
 
-  if (name && section) {
+  if (name && section && allowed) {
     return (
       <div data-morph-scope="" className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
         <SectionHeader morphName={sectionMorphName(section.id)} backLabel={name} onBack={close} label={section.label} desc={section.desc} Icon={section.Icon} hue={section.hue} actions={previewButton} />
@@ -91,10 +97,16 @@ export function CompanyDetailPage() {
 
   return (
     <div data-morph-scope="" className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-8">
-      <PageHero back={{ label: "Entreprises", onClick: () => navigate("/entreprise") }} eyebrow="Entreprise" Icon={Building2}
-        title={loading ? "Chargement…" : (name ?? "Entreprise introuvable")} desc={name ? "Choisissez une rubrique à gérer." : undefined} actions={previewButton} />
+      <PageHero back={{ label: "Clients", onClick: () => navigate("/clients") }} eyebrow="Client entreprise" Icon={Building2}
+        title={loading ? "Chargement…" : (name ?? "Entreprise introuvable")} desc={name && allowed ? "Ses sessions, puis l'espace de formation de ses collaborateurs." : undefined} actions={allowed ? previewButton : undefined} />
 
-      {name && (
+      {name && <ClientSessionsCard companyId={companyId} onLoaded={(list) => { if (!isAdmin(role)) setAllowed(list.length > 0); }} />}
+
+      {name && allowed === false && (
+        <p className="text-sm" style={{ color: "var(--muted-foreground)" }}>Cette entreprise ne vous est pas encore attribuée : ses contenus s'ouvriront dès qu'une de ses sessions vous sera confiée.</p>
+      )}
+
+      {name && allowed && (
         <SectionGrid>
           {SECTIONS.map((s, i) => (
             <SectionTile key={s.id} morphName={sectionMorphName(s.id)} index={i} label={s.label} desc={s.desc} Icon={s.Icon} hue={s.hue}

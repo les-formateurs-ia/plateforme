@@ -18,7 +18,7 @@ export function CompanyPreviewPage() {
   return (
     <div className="flex-1 overflow-y-auto flex flex-col">
       <div className="px-4 sm:px-6 lg:px-8 pt-5 sm:pt-6">
-        <BackButton label="Retour à l'entreprise" onClick={() => navigate(`/entreprise/${companyId}`)} />
+        <BackButton label="Retour à l'entreprise" onClick={() => navigate(`/clients/entreprises/${companyId}`)} />
       </div>
       <CompanyStudentHome companyId={companyId} studentId={user.id} preview />
     </div>

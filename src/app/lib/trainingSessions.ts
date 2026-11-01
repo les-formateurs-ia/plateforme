@@ -26,7 +26,7 @@ function mapSession(r: SessionRow): TrainingSession {
     id: r.id, reference: r.reference, financement: r.financement, financeur: r.financeur, companyId: r.company_id,
     client: r.client as Client, formation: r.formation as Formation, lignes: r.lignes as LigneTarif[],
     conditionsPaiement: r.conditions_paiement, dateDebut: r.date_debut, dateFin: r.date_fin, lieu: r.lieu,
-    lienConnexion: r.lien_connexion, intervenants: r.intervenants as Intervenant[],
+    lienConnexion: r.lien_connexion, intervenants: r.intervenants as Intervenant[], formateurId: r.formateur_id ?? null,
   };
 }
 
@@ -45,14 +45,21 @@ function toRow(s: Omit<TrainingSession, "id">): Database["public"]["Tables"]["tr
     reference: s.reference, financement: s.financement, financeur: s.financeur, company_id: s.companyId,
     client: s.client as unknown as Json, formation: s.formation as unknown as Json, lignes: s.lignes as unknown as Json,
     conditions_paiement: s.conditionsPaiement, date_debut: s.dateDebut, date_fin: s.dateFin, lieu: s.lieu,
-    lien_connexion: s.lienConnexion, intervenants: s.intervenants as unknown as Json,
+    lien_connexion: s.lienConnexion, intervenants: s.intervenants as unknown as Json, formateur_id: s.formateurId,
   };
 }
 
 // ── Sessions ──────────────────────────────────────────────────────────
 
-export async function listSessions(): Promise<TrainingSession[]> {
-  const { data, error } = await supabase.from("training_sessions").select("*").order("date_debut", { ascending: false });
+// Formateur (mine) : seulement ses sessions attribuées, sans prix,
+// conditions de paiement, financeur ni lien de l'espace client
+// (my_formateur_sessions, migration 20261106120000_session_formateur).
+const NO_TOKEN = "00000000-0000-0000-0000-000000000000";
+
+export async function listSessions(mine = false): Promise<TrainingSession[]> {
+  const { data, error } = mine
+    ? await supabase.rpc("my_formateur_sessions", {})
+    : await supabase.from("training_sessions").select("*").order("date_debut", { ascending: false });
   if (error) throw error;
   return (data ?? []).map(mapSession);
 }
@@ -71,6 +78,12 @@ export async function updateSession(s: TrainingSession): Promise<void> {
   if (error) throw error;
 }
 
+// Attribution du formateur seule, sans réécrire le reste de la session.
+export async function assignSessionFormateur(id: string, formateurId: string | null): Promise<void> {
+  const { error } = await supabase.from("training_sessions").update({ formateur_id: formateurId }).eq("id", id);
+  if (error) throw error;
+}
+
 export async function deleteSession(id: string): Promise<void> {
   // RLS : un refus ne lève pas d'erreur, il supprime zéro ligne.
   const { data, error } = await supabase.from("training_sessions").delete().eq("id", id).select("id");
@@ -78,9 +91,11 @@ export async function deleteSession(id: string): Promise<void> {
   if (!data?.length) throw new Error("La suppression a été refusée.");
 }
 
-export async function getSessionBundle(id: string): Promise<SessionBundle | null> {
+export async function getSessionBundle(id: string, mine = false): Promise<SessionBundle | null> {
   const [sessionRes, slotsRes, traineesRes, docsRes] = await Promise.all([
-    supabase.from("training_sessions").select("*").eq("id", id).maybeSingle(),
+    mine
+      ? supabase.rpc("my_formateur_sessions", { p_session_id: id }).then((r) => ({ data: r.data?.[0] ?? null, error: r.error }))
+      : supabase.from("training_sessions").select("*").eq("id", id).maybeSingle(),
     supabase.from("training_session_slots").select("id, slot_date, start_time, end_time").eq("session_id", id)
       .order("slot_date").order("start_time"),
     supabase.from("training_session_trainees").select("*").eq("session_id", id).order("nom"),
@@ -100,7 +115,7 @@ export async function getSessionBundle(id: string): Promise<SessionBundle | null
   }
   return {
     session: mapSession(sessionRes.data),
-    clientToken: sessionRes.data.client_token,
+    clientToken: sessionRes.data.client_token === NO_TOKEN ? "" : sessionRes.data.client_token,
     autoEmails: sessionRes.data.auto_emails ?? true,
     slots,
     trainees: (traineesRes.data ?? []).map(mapTrainee),

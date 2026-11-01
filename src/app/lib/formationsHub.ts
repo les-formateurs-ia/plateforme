@@ -1,5 +1,7 @@
-// Espace « Formations » (staff) : tous les clients, entreprises et élèves
-// CPF, avec leurs sessions et ce qui reste à faire (signatures, émargement).
+// Espace équipe : tous les clients, entreprises et élèves CPF, avec leurs
+// sessions et ce qui reste à faire (signatures, émargement). Pour un
+// formateur (mine), seulement ses sessions attribuées et les clients qui
+// le concernent, sans documents ni données financières.
 import { supabase } from "@/app/lib/supabase/client";
 import { listCompanies } from "@/app/lib/entreprise/companies";
 import { listSessions, todayIso, type TrainingSession } from "@/app/lib/trainingSessions";
@@ -33,16 +35,19 @@ export type FormationsHub = {
   slots: HubSlot[];
   pendingSignatures: PendingSignature[];
   todaySlots: TodaySlot[];
+  // Séances déjà signées par l'intervenant.
+  trainerSignedSlotIds: Set<string>;
 };
 
-export async function loadFormationsHub(): Promise<FormationsHub> {
+export async function loadFormationsHub(mine: { formateurId: string } | null = null): Promise<FormationsHub> {
+  const noDocs = Promise.resolve({ data: [] as { id: string; session_id: string; template_id: string; title: string; signer_name: string | null; issued_at: string; requires_signature: boolean; signed_at: string | null }[], error: null });
   const [companies, sessions, studentsRes, instancesRes, traineesRes, docsRes, slotsRes] = await Promise.all([
     listCompanies(),
-    listSessions(),
-    supabase.from("profiles").select("id, first_name, last_name, email").eq("role", "student").is("company_id", null).order("last_name"),
+    listSessions(!!mine),
+    supabase.from("profiles").select("id, first_name, last_name, email, formateur_id").eq("role", "student").is("company_id", null).order("last_name"),
     supabase.from("formation_instances").select("id, user_id, name").eq("status", "active").order("assigned_at", { ascending: false }),
     supabase.from("training_session_trainees").select("*"),
-    supabase.from("session_documents").select("id, session_id, template_id, title, signer_name, issued_at, requires_signature, signed_at")
+    mine ? noDocs : supabase.from("session_documents").select("id, session_id, template_id, title, signer_name, issued_at, requires_signature, signed_at")
       .order("issued_at", { ascending: false }),
     supabase.from("training_session_slots").select("id, session_id, slot_date, start_time, end_time").order("slot_date").order("start_time"),
   ]);
@@ -112,8 +117,11 @@ export async function loadFormationsHub(): Promise<FormationsHub> {
 
   const today = todayIso();
   const todays = allSlots.filter((s) => s.date === today);
+  const formateurOf = new Map((studentsRes.data ?? []).map((p) => [p.id, p.formateur_id]));
+  const clients = [...companyClients, ...studentClients, ...orphanClients]
+    .filter((c) => !mine || c.sessions.length > 0 || (c.studentId && formateurOf.get(c.studentId) === mine.formateurId));
   return {
-    clients: [...companyClients, ...studentClients, ...orphanClients],
+    clients,
     sessions,
     journeys,
     slots: allSlots,
@@ -125,6 +133,7 @@ export async function loadFormationsHub(): Promise<FormationsHub> {
       signedCount: allSignatures.filter((g) => g.slotId === s.id && g.role === "stagiaire").length,
       traineeCount: traineeCount.get(s.sessionId) ?? 0,
     })),
+    trainerSignedSlotIds: new Set(allSignatures.filter((g) => g.role === "intervenant").map((g) => g.slotId)),
   };
 }
 
