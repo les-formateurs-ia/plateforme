@@ -20,6 +20,7 @@ import { CertificationPage } from "@/app/pages/certification/CertificationPage";
 import { CertificationExamPage } from "@/app/pages/certification/CertificationExamPage";
 import { CertificationExamHome } from "@/app/pages/certification/CertificationExamHome";
 import { AdminCertificationAnswersPage } from "@/app/pages/admin/AdminCertificationAnswersPage";
+import { AdminStudioContenuPage } from "@/app/pages/admin/AdminStudioContenuPage";
 import { CertificationProvider, useCertification } from "@/app/state/certification-context";
 import { MissionSubmittedPage } from "@/app/pages/lessons/MissionSubmittedPage";
 import { StudioPage } from "@/app/pages/studio/StudioPage";
@@ -266,6 +267,7 @@ function AppRoutes() {
         <Route path="admin/planning/students/:studentId/certification" element={<RequireAdmin><AdminCertificationAnswersPage /></RequireAdmin>} />
         <Route path="admin/planning/formateurs/:formateurId" element={<RequireAdmin><AdminFormateurDetailPage /></RequireAdmin>} />
         <Route path="admin/incidents" element={<RequireAdmin><AdminIncidentsPage /></RequireAdmin>} />
+        <Route path="admin/studio-contenu" element={<RequireAdmin><AdminStudioContenuPage /></RequireAdmin>} />
         <Route path="pilotage" element={<RequireStaff><StaffHomePage /></RequireStaff>} />
         <Route path="sessions" element={<RequireStaff><SessionsPage /></RequireStaff>} />
         <Route path="sessions/modeles" element={<RequireAdmin><AdminDocumentsPage /></RequireAdmin>} />

@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useState } from "react";
 import { Link, Navigate, NavLink, Outlet, useLocation } from "react-router";
-import { Menu, X, Bug, ScanEye, LogOut, LayoutDashboard, CalendarClock, ClipboardList, Users, GraduationCap, Target, FileText, Code2, Sparkles, LayoutGrid, BookOpen, type LucideIcon } from "lucide-react";
+import { Menu, X, Bug, ScanEye, LogOut, LayoutDashboard, CalendarClock, ClipboardList, Users, GraduationCap, Target, FileText, Code2, Sparkles, LayoutGrid, BookOpen, Megaphone, type LucideIcon } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
@@ -24,8 +24,8 @@ import { isPathAllowedDuringExam, useCertification } from "@/app/state/certifica
 
 // Navigation de l'équipe (admin et formateur) : un seul espace, groupé par
 // usage. Le formateur n'y voit que la partie pédagogique (ses sessions, ses
-// clients, ses élèves) ; prospects, modèles de documents et incidents sont
-// réservés à l'admin.
+// clients, ses élèves) ; prospects, modèles de documents, studio de contenu
+// et incidents sont réservés à l'admin.
 type StaffNavItem = { to: string; label: string; Icon: LucideIcon; end?: boolean };
 function staffNav(admin: boolean, base: string): { title: string; items: StaffNavItem[] }[] {
   return [
@@ -48,6 +48,7 @@ function staffNav(admin: boolean, base: string): { title: string; items: StaffNa
     ] },
     ...(admin ? [{ title: "Administration", items: [
       { to: "/sessions/modeles", label: "Modèles de documents", Icon: FileText },
+      { to: "/admin/studio-contenu", label: "Studio contenu", Icon: Megaphone },
     ] }] : []),
   ];
 }
