@@ -17,7 +17,7 @@ import type { DocumentContext } from "@/app/lib/documents/types";
 import {
   addSlot, addTrainee, assignSessionFormateur, buildDocumentContext, clientPortalUrl, deleteDocument, deleteSession, deleteSlot, deleteTrainee, findProfileIdByEmail,
   createCompanyAccess, getDocumentHtml, getSessionActivity, getSessionBundle, importCompanyEmployees, isSlotOpen, issueDocument, listSessionEmails,
-  setAutoEmails, signAttendanceAsTrainer, updateSession, updateTraineeResult,
+  setAutoEmails, signAttendanceAsTrainer, updateSession, updateTraineeResult, STATUT_COMMERCIAL_LABELS,
   type ActivityRow, type EmailKind, type SessionBundle, type SessionDocument, type SessionEmail, type TrainingSession,
 } from "@/app/lib/trainingSessions";
 import { VSwitch } from "@/app/components/common/VSwitch";
@@ -26,6 +26,7 @@ import { VSelect } from "@/app/components/common/Select";
 import { useAuth } from "@/app/state/auth-context";
 import { isAdmin } from "@/app/lib/permissions";
 import { listCoachAssignableCards, type PersonCard } from "@/app/lib/planning";
+import { ArchiveCard, CommercialCard } from "@/app/components/sessions/DigiformaCards";
 
 // Dossier d'une formation : un seul tableau de bord. En haut la
 // progression et la carte du parcours en trois phases ; au centre l'étape
@@ -240,7 +241,11 @@ export function AdminSessionDetailPage() {
       <div className="flex items-end gap-4 flex-wrap">
         <div className="flex-1 min-w-0">
           <Link to="/sessions" className="flex items-center gap-1.5 text-sm w-fit hover:opacity-70 mb-3" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />Sessions</Link>
-          <p className="text-xs font-bold" style={{ color: th.fg3 }}>{bundle.session.reference} · {FINANCEMENT_LABELS[bundle.session.financement]}</p>
+          <p className="text-xs font-bold" style={{ color: th.fg3 }}>
+            {bundle.session.reference} · {FINANCEMENT_LABELS[bundle.session.financement]}
+            {bundle.session.source === "digiforma" ? " · Repris de Digiforma" : ""}
+            {bundle.session.statutCommercial !== "gagne" ? ` · ${STATUT_COMMERCIAL_LABELS[bundle.session.statutCommercial]}` : ""}
+          </p>
           <h1 className="text-[1.7rem] sm:text-[2.1rem] leading-[1.1] font-black mt-1" style={{ color: th.fg }}><GT>{bundle.session.client.nom}</GT></h1>
           <p className="text-sm mt-1" style={{ color: th.fg2 }}>{bundle.session.formation.intitule} · {periodeFr(bundle.session.dateDebut, bundle.session.dateFin)}</p>
         </div>
@@ -352,6 +357,8 @@ export function AdminSessionDetailPage() {
             </div></GCard>
           )}
 
+          <CommercialCard draft={draft} setDraft={setDraft} />
+
           <FormateurCard formateurId={draft.formateurId} busy={busy}
             onAssign={(formateurId) => void run(async () => {
               await assignSessionFormateur(bundle.session.id, formateurId);
@@ -381,6 +388,8 @@ export function AdminSessionDetailPage() {
           <EmailsCard bundle={bundle} busy={busy} onCompose={(kind) => setComposer({ kind })} />
 
           <DocumentsArchive kit={kit} />
+
+          <ArchiveCard session={bundle.session} />
 
           <button type="button" disabled={busy}
             onClick={() => {
@@ -599,7 +608,12 @@ function PlanningPanel({ bundle, busy, run }: { bundle: SessionBundle; busy: boo
         {bundle.trainees.map((tr) => (
           <div key={tr.id} className="flex items-center gap-2 text-sm py-1.5" style={{ borderBottom: `1px solid ${th.sep}` }}>
             <span className="flex-1 font-semibold" style={{ color: th.fg }}>{tr.civilite} {tr.prenom} {tr.nom}</span>
-            <span className="text-xs truncate" style={{ color: th.fg3 }}>{tr.email}</span>
+            {tr.heuresPrevues != null && (
+              <span className="text-[11px] tabular-nums shrink-0" style={{ color: th.fg2 }} title="Heures réalisées / prévues">
+                {tr.heuresRealisees != null ? `${heures(tr.heuresRealisees)} / ` : ""}{heures(tr.heuresPrevues)}
+              </span>
+            )}
+            <span className="text-xs truncate" style={{ color: th.fg3 }}>{tr.email || "Pas d'e-mail"}</span>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0" style={{ background: tr.profileId ? `${GREEN}22` : th.navA, color: tr.profileId ? GREEN : th.danger }}>
               {tr.profileId ? "Accès créé" : "Sans accès"}
             </span>

@@ -121,6 +121,11 @@ export interface Database {
           client_token: string;
           auto_emails: boolean;
           formateur_id: string | null;
+          statut_commercial: "prospect" | "devis" | "gagne" | "perdu";
+          factures: Json;
+          charges_ht: number;
+          source: "plateforme" | "digiforma";
+          archive: Json | null;
         };
         Insert: {
           reference: string;
@@ -140,6 +145,11 @@ export interface Database {
           updated_at?: string;
           auto_emails?: boolean;
           formateur_id?: string | null;
+          statut_commercial?: "prospect" | "devis" | "gagne" | "perdu";
+          factures?: Json;
+          charges_ht?: number;
+          source?: "plateforme" | "digiforma";
+          archive?: Json | null;
         };
         Update: Partial<Database["public"]["Tables"]["training_sessions"]["Insert"]>;
         Relationships: never[];
@@ -158,9 +168,11 @@ export interface Database {
           civilite: string;
           prenom: string;
           nom: string;
-          email: string;
+          email: string | null;
           fonction: string | null;
           resultat_evaluation: string | null;
+          heures_prevues: number | null;
+          heures_realisees: number | null;
           created_at: string;
         };
         Insert: {
@@ -169,9 +181,11 @@ export interface Database {
           civilite?: string;
           prenom: string;
           nom: string;
-          email: string;
+          email?: string | null;
           fonction?: string | null;
           resultat_evaluation?: string | null;
+          heures_prevues?: number | null;
+          heures_realisees?: number | null;
         };
         Update: Partial<Database["public"]["Tables"]["training_session_trainees"]["Insert"]>;
         Relationships: never[];
@@ -1634,6 +1648,20 @@ export interface Database {
           created_by: string | null;
           created_at: string;
           updated_at: string;
+          legal_name: string | null;
+          siret: string | null;
+          vat_number: string | null;
+          ape_code: string | null;
+          address: string | null;
+          postal_code: string | null;
+          city: string | null;
+          email: string | null;
+          phone: string | null;
+          website: string | null;
+          notes: string | null;
+          country: string;
+          contacts: Json;
+          digiforma_id: number | null;
         };
         Insert: {
           id?: string;
@@ -1641,6 +1669,20 @@ export interface Database {
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
+          legal_name?: string | null;
+          siret?: string | null;
+          vat_number?: string | null;
+          ape_code?: string | null;
+          address?: string | null;
+          postal_code?: string | null;
+          city?: string | null;
+          email?: string | null;
+          phone?: string | null;
+          website?: string | null;
+          notes?: string | null;
+          country?: string;
+          contacts?: Json;
+          digiforma_id?: number | null;
         };
         Update: Partial<Database["public"]["Tables"]["companies"]["Insert"]>;
         Relationships: never[];

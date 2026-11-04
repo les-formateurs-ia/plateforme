@@ -10,6 +10,7 @@ import { FINANCEMENT_LABELS } from "@/app/lib/documents/render";
 import type { Financement } from "@/app/lib/documents/types";
 import { addTrainee, createSession, todayIso, type TrainingSession } from "@/app/lib/trainingSessions";
 import type { HubClient } from "@/app/lib/formationsHub";
+import { clientFromCompany, getCompanyProfile } from "@/app/lib/entreprise/companies";
 import { Field, TextInput } from "./fields";
 
 // Création d'une session (une formation vendue à un client). Ouverte depuis
@@ -61,12 +62,14 @@ export function NewSessionForm({ clients, sessions, initial, onCancel }: {
     const preset = FORMATION_PRESETS.find((p) => p.id === form.preset)!;
     setSaving(true);
     try {
+      // La fiche de l'entreprise (adresse, SIRET, signataire) préremplit le dossier client.
+      const profile = b2b && company?.companyId ? await getCompanyProfile(company.companyId).catch(() => null) : null;
       const id = await createSession({
         reference: nextReference(sessions, form.financement),
         financement: form.financement,
         financeur: form.financement === "cpf" ? "Caisse des dépôts (Mon Compte Formation)" : null,
         companyId: company?.companyId ?? null,
-        client: {
+        client: profile ? clientFromCompany(profile) : {
           type: b2b ? "entreprise" : "particulier", nom: b2b ? company!.name : nom,
           adresse: "", codePostal: "", ville: "", siret: null, representant: null, email: b2b ? "" : email,
         },
@@ -79,6 +82,7 @@ export function NewSessionForm({ clients, sessions, initial, onCancel }: {
         lieu: preset.formation.modalite === "presentiel" ? "" : "Plateforme e-learning et visioconférence", lienConnexion: null,
         intervenants: [{ nom: "Yanis SOUICI", qualite: "Formateur IA générative, dirigeant de Les Formateurs IA" }],
         formateurId: null,
+        statutCommercial: "gagne", factures: [], chargesHt: 0,
       });
       // Un élève de la plateforme est aussi le stagiaire : son compte relie
       // la session à ses relevés de connexion.

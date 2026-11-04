@@ -8,8 +8,8 @@ import { isAdmin } from "@/app/lib/permissions";
 import { GCard } from "@/app/components/common/GCard";
 import { GREEN } from "@/app/components/sessions/JourneyView";
 import { FIN_COLORS, MiniRing, daysBetween } from "@/app/components/sessions/hubUi";
-import { FINANCEMENT_LABELS, periodeFr } from "@/app/lib/documents/render";
-import { todayIso, type TrainingSession } from "@/app/lib/trainingSessions";
+import { eur, FINANCEMENT_LABELS, periodeFr, totalHt } from "@/app/lib/documents/render";
+import { STATUT_COMMERCIAL_LABELS, todayIso, type TrainingSession } from "@/app/lib/trainingSessions";
 import { loadFormationsHub, sessionStatus, type FormationsHub } from "@/app/lib/formationsHub";
 
 // Chargement du hub selon le rôle : tout pour l'admin, seulement ses
@@ -40,7 +40,9 @@ export function pedagogyOf(hub: FormationsHub, s: TrainingSession, today = today
 }
 
 // toClose : session terminée dont le dossier n'est pas complet.
+// Prospect, devis en attente ou affaire perdue : le statut commercial prime sur les dates.
 export function sessionBadge(s: TrainingSession, toClose = false, today = todayIso()) {
+  if (s.statutCommercial !== "gagne") return STATUT_COMMERCIAL_LABELS[s.statutCommercial];
   const status = sessionStatus(s, today);
   const d = daysBetween(today, s.dateDebut);
   return status === "en_cours" ? "En cours" : status === "a_venir" ? (d === 0 ? "Aujourd'hui" : `J-${d}`) : toClose ? "À clôturer" : "Terminée";
@@ -81,7 +83,9 @@ export function SessionCard({ hub, session: s, admin }: { hub: FormationsHub; se
         <div className="flex items-center gap-2 text-xs rounded-[6px] px-3 py-2" style={{ background: th.navA }}>
           {admin || !p.toSign ? <ArrowRight className="w-3.5 h-3.5 shrink-0" style={{ color: th.fg }} /> : <PenLine className="w-3.5 h-3.5 shrink-0" style={{ color: th.danger }} />}
           <span className="truncate" style={{ color: th.fg }}>
-            {admin
+            {admin && s.statutCommercial !== "gagne"
+              ? <><strong>{STATUT_COMMERCIAL_LABELS[s.statutCommercial]}</strong>{totalHt(s.lignes) ? ` · ${eur(totalHt(s.lignes))} HT` : ""}</>
+              : admin
               ? (j?.next ? <><strong>{j.next.titre}</strong>{j.next.missing.length ? ` · ${j.next.missing.length} à compléter` : j.next.actions[0] ? ` · ${j.next.actions[0].label}` : ""}</> : "Dossier complet 🏆")
               : p.toSign ? <><strong>{p.toSign} séance{p.toSign > 1 ? "s" : ""} à émarger</strong></> : p.total ? "Émargement à jour" : "Aucune séance planifiée"}
           </span>

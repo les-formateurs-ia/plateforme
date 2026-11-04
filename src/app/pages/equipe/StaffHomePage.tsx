@@ -7,7 +7,7 @@ import { NeuralField } from "@/app/components/particles/NeuralField";
 import { MiniRing, UpcomingSlotsCard, daysBetween } from "@/app/components/sessions/hubUi";
 import { SessionCard, pedagogyOf, useFormationsHub } from "@/app/components/sessions/SessionCards";
 import { eur, totalHt } from "@/app/lib/documents/render";
-import { todayIso, type TrainingSession } from "@/app/lib/trainingSessions";
+import { FACTURE_STATUT_LABELS, STATUT_COMMERCIAL_LABELS, todayIso, type TrainingSession } from "@/app/lib/trainingSessions";
 import { sessionStatus, type FormationsHub } from "@/app/lib/formationsHub";
 
 // Tableau de bord de l'équipe : ce qu'il y a à faire maintenant. L'admin y
@@ -70,7 +70,13 @@ function AdminHome({ hub }: { hub: FormationsHub }) {
   const th = useTh();
   const today = todayIso();
   const journeyOf = (s: TrainingSession) => hub.journeys[s.id];
-  const actives = hub.sessions.filter((s) => sessionStatus(s) !== "terminee" || (journeyOf(s)?.progress ?? 0) < 100);
+  // Les prospects et devis en attente ne sont pas encore des dossiers de formation.
+  const won = hub.sessions.filter((s) => s.statutCommercial === "gagne");
+  const pipeline = hub.sessions.filter((s) => s.statutCommercial === "prospect" || s.statutCommercial === "devis")
+    .sort((a, b) => totalHt(b.lignes) - totalHt(a.lignes));
+  const aEncaisser = hub.sessions.flatMap((s) => s.factures.filter((f) => f.statut !== "payee").map((f) => ({ ...f, session: s })))
+    .sort((a, b) => a.date.localeCompare(b.date));
+  const actives = won.filter((s) => sessionStatus(s) !== "terminee" || (journeyOf(s)?.progress ?? 0) < 100);
   const score = actives.length ? Math.round(actives.reduce((sum, s) => sum + (journeyOf(s)?.progress ?? 0), 0) / actives.length) : 100;
   const signe = (s: TrainingSession) => journeyOf(s)?.steps.some((st) => ["devis", "convention", "contrat-particulier"].includes(st.id) && st.status === "done") ?? false;
   const caSigne = hub.sessions.filter((s) => new Date(s.dateDebut).getFullYear() === new Date().getFullYear() && signe(s))
@@ -83,9 +89,10 @@ function AdminHome({ hub }: { hub: FormationsHub }) {
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
       <Hero ring={score} ringLabel="score Qualiopi" eyebrow="Tableau de bord" title={level}
         chips={<>
-          <Chip emoji="🔥" value={hub.sessions.filter((s) => sessionStatus(s) === "en_cours").length} label="en cours" />
-          <Chip emoji="📅" value={hub.sessions.filter((s) => sessionStatus(s) === "a_venir").length} label="à venir" />
-          <Chip emoji="🏆" value={hub.sessions.filter((s) => journeyOf(s)?.progress === 100).length} label="dossiers complets" />
+          <Chip emoji="🔥" value={won.filter((s) => sessionStatus(s) === "en_cours").length} label="en cours" />
+          <Chip emoji="📅" value={won.filter((s) => sessionStatus(s) === "a_venir").length} label="à venir" />
+          <Chip emoji="🏆" value={won.filter((s) => journeyOf(s)?.progress === 100).length} label="dossiers complets" />
+          {pipeline.length > 0 && <Chip emoji="💼" value={pipeline.length} label="prospects" />}
           <Chip emoji="✍️" value={hub.pendingSignatures.length} label="à signer" />
         </>}
         side={<>
@@ -108,6 +115,41 @@ function AdminHome({ hub }: { hub: FormationsHub }) {
         </section>
         <aside className="space-y-4">
           <UpcomingSlotsCard slots={hub.slots} sessions={hub.sessions} />
+          {aEncaisser.length > 0 && (
+            <GCard><div className="p-4 space-y-2">
+              <div className="flex items-baseline gap-2">
+                <p className="text-sm font-black flex-1" style={{ color: th.fg }}>💶 À encaisser</p>
+                <p className="text-xs font-bold tabular-nums" style={{ color: th.fg }}>{eur(aEncaisser.reduce((t, f) => t + f.montantHt - f.payeHt, 0))} HT</p>
+              </div>
+              {aEncaisser.map((f) => (
+                <Link key={`${f.session.id}-${f.numero}`} to={`/sessions/${f.session.id}`} className="flex items-center gap-2 py-1.5 hover:opacity-80" style={{ borderBottom: `1px solid ${th.sep}` }}>
+                  <span className="flex-1 min-w-0">
+                    <span className="block text-xs font-bold truncate" style={{ color: th.fg }}>{f.session.client.nom}</span>
+                    <span className="block text-[11px]" style={{ color: f.statut === "en_retard" ? th.danger : th.fg3 }}>Facture {f.numero} · {FACTURE_STATUT_LABELS[f.statut]}</span>
+                  </span>
+                  <span className="text-xs tabular-nums" style={{ color: th.fg }}>{eur(f.montantHt - f.payeHt)}</span>
+                </Link>
+              ))}
+            </div></GCard>
+          )}
+          {pipeline.length > 0 && (
+            <GCard><div className="p-4 space-y-2">
+              <div className="flex items-baseline gap-2">
+                <p className="text-sm font-black flex-1" style={{ color: th.fg }}>💼 Pipeline commercial</p>
+                <p className="text-xs font-bold tabular-nums" style={{ color: th.fg }}>{eur(pipeline.reduce((t, s) => t + totalHt(s.lignes), 0))} HT</p>
+              </div>
+              {pipeline.slice(0, 8).map((s) => (
+                <Link key={s.id} to={`/sessions/${s.id}`} className="flex items-center gap-2 py-1.5 hover:opacity-80" style={{ borderBottom: `1px solid ${th.sep}` }}>
+                  <span className="flex-1 min-w-0">
+                    <span className="block text-xs font-bold truncate" style={{ color: th.fg }}>{s.client.nom}</span>
+                    <span className="block text-[11px]" style={{ color: th.fg3 }}>{STATUT_COMMERCIAL_LABELS[s.statutCommercial]}</span>
+                  </span>
+                  <span className="text-xs tabular-nums" style={{ color: th.fg }}>{eur(totalHt(s.lignes))}</span>
+                </Link>
+              ))}
+              <Link to="/sessions?vue=prospects" className="inline-flex items-center gap-1 text-xs font-bold hover:opacity-70" style={{ color: th.fg }}>Tous les prospects<ArrowRight className="w-3.5 h-3.5" /></Link>
+            </div></GCard>
+          )}
           <GCard><div className="p-4 space-y-2">
             <p className="text-sm font-black" style={{ color: th.fg }}>✍️ En attente de signature</p>
             {!hub.pendingSignatures.length && <p className="text-xs" style={{ color: th.fg3 }}>Tout est signé.</p>}

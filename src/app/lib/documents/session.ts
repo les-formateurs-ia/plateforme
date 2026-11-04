@@ -22,12 +22,50 @@ export type TrainingSession = {
   intervenants: Intervenant[];
   // Formateur attribué (profil) : lui seul, avec l'admin, voit la session.
   formateurId: string | null;
+  // Suivi commercial et financier (admin seul, masqué au formateur).
+  statutCommercial: StatutCommercial;
+  factures: Facture[];
+  chargesHt: number;
+  // Session reprise d'un autre outil (Digiforma) et son dossier d'origine.
+  source: "plateforme" | "digiforma";
+  archive: SessionArchive | null;
+};
+
+export type StatutCommercial = "prospect" | "devis" | "gagne" | "perdu";
+export const STATUT_COMMERCIAL_LABELS: Record<StatutCommercial, string> = {
+  prospect: "Prospect", devis: "Devis envoyé", gagne: "Gagnée", perdu: "Perdue",
+};
+
+export type Facture = {
+  numero: string; date: string; destinataire: string | null; montantHt: number;
+  statut: "non_payee" | "en_retard" | "payee"; payeHt: number; fichier: string | null;
+};
+export const FACTURE_STATUT_LABELS: Record<Facture["statut"], string> = { non_payee: "À encaisser", en_retard: "En retard", payee: "Payée" };
+
+export type ArchiveDocument = { categorie: string; dossier: string; nom: string; chemin: string; octets: number };
+
+// Dossier repris de Digiforma. cloture : le dossier administratif y a été
+// mené jusqu'au bout, le parcours Qualiopi est donc considéré comme fait.
+export type SessionArchive = {
+  source: "digiforma";
+  code: string;
+  etape: "prospect" | "projet" | "planification" | "terminee";
+  etapeLibelle: string | null;
+  cloture: boolean;
+  nomSession: string | null;
+  programme: string | null;
+  heuresRealisees: number | null;
+  satisfaction: { moyenne: number; repondants: number } | null;
+  notes: string[];
+  documents?: ArchiveDocument[];
 };
 
 export type SessionSlot = { id: string; date: string; debut: string; fin: string };
 export type SessionTrainee = {
   id: string; profileId: string | null; civilite: string; prenom: string; nom: string;
+  // Vide si inconnu (stagiaires repris de Digiforma) : pas d'e-mail ni d'accès possible.
   email: string; fonction: string | null; resultatEvaluation: string | null;
+  heuresPrevues?: number | null; heuresRealisees?: number | null;
 };
 export type AttendanceSignature = {
   id: string; slotId: string; traineeId: string | null; role: "stagiaire" | "intervenant";

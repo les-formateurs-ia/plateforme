@@ -211,3 +211,14 @@ test('signature boxes are filled: organisation at issue, client once signed', ()
   assert.doesNotMatch(signed, /class="sign-box" data-sign="client"><\/div>/);
   assert.match(signed, /<span class="sig-name">Claire DUPONT<\/span>/);
 });
+
+test('a file closed in Digiforma counts as complete; one still in progress does not', () => {
+  const archive = { source: 'digiforma', code: 'AF1', etape: 'terminee', etapeLibelle: 'Terminée', cloture: true, nomSession: null, programme: null, heuresRealisees: 7, satisfaction: null, notes: [], documents: [] };
+  const bundle = { session: { ...baseSession(FORMATION_ENTREPRISE), archive }, slots: [], trainees: [], signatures: [] };
+  const closed = computeJourney(bundle, [], {}, new Date('2026-12-20T10:00:00Z'));
+  assert.equal(closed.progress, 100);
+  assert.equal(closed.next, null);
+  assert.deepEqual(closed.missingFields, []);
+  const open = computeJourney({ ...bundle, session: { ...bundle.session, archive: { ...archive, cloture: false } } }, [], {}, new Date('2026-12-20T10:00:00Z'));
+  assert.equal(open.next.id, 'client');
+});

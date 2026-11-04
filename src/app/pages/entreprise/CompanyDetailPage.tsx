@@ -14,6 +14,8 @@ import { CompanyCategoriesTab } from "@/app/components/entreprise/CompanyCategor
 import { CompanyResultsTab } from "@/app/components/entreprise/CompanyResultsTab";
 import { CompanyStudentUploadsTab } from "@/app/components/entreprise/CompanyStudentUploadsTab";
 import { ClientSessionsCard } from "@/app/components/sessions/ClientSessionsCard";
+import { CompanyProfileCard } from "@/app/components/entreprise/CompanyProfileCard";
+import type { TrainingSession } from "@/app/lib/trainingSessions";
 import { useAuth } from "@/app/state/auth-context";
 import { isAdmin } from "@/app/lib/permissions";
 
@@ -48,6 +50,7 @@ export function CompanyDetailPage() {
   // Un formateur n'ouvre que les entreprises dont une session lui est attribuée.
   const { role } = useAuth();
   const [allowed, setAllowed] = useState<boolean | null>(isAdmin(role) ? true : null);
+  const [sessions, setSessions] = useState<TrainingSession[] | null>(null);
 
   useEffect(() => {
     if (!companyId) return;
@@ -100,7 +103,9 @@ export function CompanyDetailPage() {
       <PageHero back={{ label: "Clients", onClick: () => navigate("/clients") }} eyebrow="Client entreprise" Icon={Building2}
         title={loading ? "Chargement…" : (name ?? "Entreprise introuvable")} desc={name && allowed ? "Ses sessions, puis l'espace de formation de ses collaborateurs." : undefined} actions={allowed ? previewButton : undefined} />
 
-      {name && <ClientSessionsCard companyId={companyId} onLoaded={(list) => { if (!isAdmin(role)) setAllowed(list.length > 0); }} />}
+      {name && isAdmin(role) && sessions && <CompanyProfileCard companyId={companyId} sessions={sessions} onRenamed={setName} />}
+
+      {name && <ClientSessionsCard companyId={companyId} onLoaded={(list) => { setSessions(list); if (!isAdmin(role)) setAllowed(list.length > 0); }} />}
 
       {name && allowed === false && (
         <p className="text-sm" style={{ color: "var(--muted-foreground)" }}>Cette entreprise ne vous est pas encore attribuée : ses contenus s'ouvriront dès qu'une de ses sessions vous sera confiée.</p>

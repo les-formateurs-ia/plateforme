@@ -7,7 +7,7 @@ import { renderTemplate, signataire, type DocumentTemplate } from "@/app/lib/doc
 import { stampSignature } from "@/app/lib/documents/render";
 import type { Client, DocumentContext, Formation, Intervenant, LigneTarif } from "@/app/lib/documents/types";
 import type {
-  ActivityRow, AttendanceSignature, SessionBundle as PureBundle, SessionSlot, SessionTrainee, TrainingSession,
+  ActivityRow, AttendanceSignature, Facture, SessionArchive, SessionBundle as PureBundle, SessionSlot, SessionTrainee, TrainingSession,
 } from "@/app/lib/documents/session";
 
 export * from "@/app/lib/documents/session";
@@ -27,21 +27,28 @@ function mapSession(r: SessionRow): TrainingSession {
     client: r.client as Client, formation: r.formation as Formation, lignes: r.lignes as LigneTarif[],
     conditionsPaiement: r.conditions_paiement, dateDebut: r.date_debut, dateFin: r.date_fin, lieu: r.lieu,
     lienConnexion: r.lien_connexion, intervenants: r.intervenants as Intervenant[], formateurId: r.formateur_id ?? null,
+    // Valeurs par défaut tant que la migration 20261107120000 n'est pas appliquée.
+    statutCommercial: r.statut_commercial ?? "gagne", factures: (r.factures ?? []) as Facture[], chargesHt: Number(r.charges_ht ?? 0),
+    source: r.source ?? "plateforme", archive: (r.archive ?? null) as SessionArchive | null,
   };
 }
 
 function mapTrainee(r: TraineeRow): SessionTrainee {
   return {
     id: r.id, profileId: r.profile_id, civilite: r.civilite, prenom: r.prenom, nom: r.nom,
-    email: r.email, fonction: r.fonction, resultatEvaluation: r.resultat_evaluation,
+    email: r.email ?? "", fonction: r.fonction, resultatEvaluation: r.resultat_evaluation,
+    heuresPrevues: r.heures_prevues == null ? null : Number(r.heures_prevues),
+    heuresRealisees: r.heures_realisees == null ? null : Number(r.heures_realisees),
   };
 }
 
 // Postgres renvoie "09:00:00" ; les modèles attendent "09:00".
 const hhmm = (t: string) => t.slice(0, 5);
 
-function toRow(s: Omit<TrainingSession, "id">): Database["public"]["Tables"]["training_sessions"]["Insert"] {
+// source et archive ne sont jamais réécrites : elles décrivent l'origine de la session.
+function toRow(s: Omit<TrainingSession, "id" | "source" | "archive">): Database["public"]["Tables"]["training_sessions"]["Insert"] {
   return {
+    statut_commercial: s.statutCommercial, factures: s.factures as unknown as Json, charges_ht: s.chargesHt,
     reference: s.reference, financement: s.financement, financeur: s.financeur, company_id: s.companyId,
     client: s.client as unknown as Json, formation: s.formation as unknown as Json, lignes: s.lignes as unknown as Json,
     conditions_paiement: s.conditionsPaiement, date_debut: s.dateDebut, date_fin: s.dateFin, lieu: s.lieu,
@@ -64,7 +71,7 @@ export async function listSessions(mine = false): Promise<TrainingSession[]> {
   return (data ?? []).map(mapSession);
 }
 
-export async function createSession(s: Omit<TrainingSession, "id">): Promise<string> {
+export async function createSession(s: Omit<TrainingSession, "id" | "source" | "archive">): Promise<string> {
   const { data: auth } = await supabase.auth.getUser();
   const { data, error } = await supabase.from("training_sessions")
     .insert({ ...toRow(s), created_by: auth.user?.id ?? null }).select("id").single();
@@ -421,7 +428,8 @@ export async function setAutoEmails(sessionId: string, enabled: boolean): Promis
 export async function createCompanyAccess(bundle: SessionBundle): Promise<{ invited: number; errors: string[] }> {
   const companyId = bundle.session.companyId;
   if (!companyId) throw new Error("Cette formation n'est rattachée à aucune entreprise.");
-  const sansCompte = bundle.trainees.filter((t) => !t.profileId);
+  // Sans e-mail (stagiaire repris de Digiforma), pas d'invitation possible.
+  const sansCompte = bundle.trainees.filter((t) => !t.profileId && t.email.trim());
   if (!sansCompte.length) return { invited: 0, errors: [] };
   const { error: upsertError } = await supabase.from("company_employees").upsert(
     sansCompte.map((t) => ({ company_id: companyId, first_name: t.prenom, last_name: t.nom, email: t.email.toLowerCase() })),

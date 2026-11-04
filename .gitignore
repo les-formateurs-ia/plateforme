@@ -15,3 +15,7 @@ pnpm-debug.log*
 Thumbs.db
 
 supabase/.temp/
+
+# Export Digiforma et son script d'import : données personnelles, hors dépôt
+ExportDigiforma/
+supabase/scripts/import_digiforma.sql

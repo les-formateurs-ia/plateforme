@@ -220,6 +220,14 @@ export function computeJourney(bundle: SessionBundle, documents: JourneyDocument
     missing: [], actions: ended && clotureMissing.length ? [{ kind: "issue", templateIds: clotureMissing, label: "Générer les documents de fin" }] : [],
   });
 
+  // Dossier mené jusqu'au bout dans Digiforma : ses justificatifs (devis,
+  // convention, émargements, certificats) sont dans l'archive de la session.
+  if (session.archive?.cloture) {
+    for (const [i, s] of steps.entries()) {
+      if (s.status !== "done") steps[i] = { ...s, status: "done", detail: "Traité dans Digiforma (voir l'archive)", missing: [], actions: [] };
+    }
+  }
+
   const done = steps.filter((s) => s.status === "done").length;
   const progress = Math.round((done / steps.length) * 100);
   const next = steps.find((s) => s.status === "current") ?? null;
@@ -231,5 +239,5 @@ export function computeJourney(bundle: SessionBundle, documents: JourneyDocument
       ? { label: "Formation terminée", ratio: 1 }
       : { label: `Jour ${daysBetween(session.dateDebut, today) + 1} sur ${total}`, ratio: (daysBetween(session.dateDebut, today) + 1) / total };
 
-  return { steps, progress, done, next, missingFields, level: { label: level.label, emoji: level.emoji }, timeline };
+  return { steps, progress, done, next, missingFields: session.archive?.cloture ? [] : missingFields, level: { label: level.label, emoji: level.emoji }, timeline };
 }

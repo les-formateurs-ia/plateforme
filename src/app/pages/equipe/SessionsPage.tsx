@@ -8,13 +8,14 @@ import { PageHero, HueButton, GhostButton } from "@/app/components/entreprise/En
 import { NewSessionForm } from "@/app/components/sessions/NewSessionForm";
 import { SessionsCalendar } from "@/app/components/sessions/hubUi";
 import { SessionCard, pedagogyOf, useFormationsHub } from "@/app/components/sessions/SessionCards";
+import { DigiformaImportButton } from "@/app/components/sessions/DigiformaCards";
 import type { Financement } from "@/app/lib/documents/types";
 import { sessionStatus, type HubClient } from "@/app/lib/formationsHub";
 
 // Toutes les sessions de formation (une action vendue à un client, avec ses
 // séances, ses stagiaires et son dossier). Pour un formateur : les siennes.
 
-type Period = "actives" | "terminees" | "toutes";
+type Period = "actives" | "terminees" | "prospects" | "toutes";
 type FinFilter = "tous" | Financement;
 
 export function SessionsPage() {
@@ -22,7 +23,7 @@ export function SessionsPage() {
   const navigate = useNavigate();
   const { hub, admin } = useFormationsHub();
   const [params, setParams] = useSearchParams();
-  const [period, setPeriod] = useState<Period>("actives");
+  const [period, setPeriod] = useState<Period>(() => (params.get("vue") === "prospects" ? "prospects" : "actives"));
   const [fin, setFin] = useState<FinFilter>("tous");
   const [query, setQuery] = useState("");
   // ?nouvelle=1 (depuis le tableau de bord ou une fiche client) : formulaire ouvert.
@@ -40,6 +41,10 @@ export function SessionsPage() {
       .filter((s) => fin === "tous" || s.financement === fin)
       .filter((s) => {
         if (period === "toutes") return true;
+        // Prospects et devis en attente : à part, tant que la vente n'est pas conclue.
+        const won = s.statutCommercial === "gagne";
+        if (period === "prospects") return !won;
+        if (!won) return false;
         const ended = sessionStatus(s) === "terminee";
         // Une session terminée reste « active » tant qu'il reste à faire.
         const pending = admin ? (hub.journeys[s.id]?.progress ?? 0) < 100 : pedagogyOf(hub, s).toSign > 0;
@@ -63,6 +68,7 @@ export function SessionsPage() {
       <PageHero Icon={ClipboardList} eyebrow="Formations" title={admin ? "Sessions" : "Mes sessions"}
         desc={admin ? "Chaque formation vendue : dates, séances, stagiaires, émargement et dossier Qualiopi." : "Les formations qui vous sont attribuées : séances, stagiaires, émargement et évaluation."}
         actions={admin ? <>
+          <DigiformaImportButton sessions={hub.sessions} />
           <GhostButton Icon={FileText} onClick={() => navigate("/sessions/modeles")}>Modèles de documents</GhostButton>
           <HueButton Icon={Plus} onClick={() => setCreatingFor(null)}>Nouvelle session</HueButton>
         </> : undefined} />
@@ -77,7 +83,9 @@ export function SessionsPage() {
       <section className="space-y-3">
         <div className="flex items-center gap-3 flex-wrap">
           <Segmented value={period} onChange={(v) => setPeriod(v as Period)} options={[
-            { value: "actives", label: "En cours et à venir" }, { value: "terminees", label: "Terminées" }, { value: "toutes", label: "Toutes" },
+            { value: "actives", label: "En cours et à venir" }, { value: "terminees", label: "Terminées" },
+            ...(admin ? [{ value: "prospects", label: `Prospects (${hub.sessions.filter((s) => s.statutCommercial !== "gagne").length})` }] : []),
+            { value: "toutes", label: "Toutes" },
           ]} />
           <Segmented value={fin} onChange={(v) => setFin(v as FinFilter)} options={finOptions} />
           <label className="flex-1 min-w-[200px] relative">

@@ -70,7 +70,7 @@ export async function loadFormationsHub(mine: { formateurId: string } | null = n
   for (const session of sessions) {
     const slots = allSlots.filter((s) => s.sessionId === session.id);
     const trainees: SessionTrainee[] = allTrainees.filter((t) => t.session_id === session.id).map((t) => ({
-      id: t.id, profileId: t.profile_id, civilite: t.civilite, prenom: t.prenom, nom: t.nom, email: t.email, fonction: t.fonction, resultatEvaluation: t.resultat_evaluation,
+      id: t.id, profileId: t.profile_id, civilite: t.civilite, prenom: t.prenom, nom: t.nom, email: t.email ?? "", fonction: t.fonction, resultatEvaluation: t.resultat_evaluation,
     }));
     const signatures = allSignatures.filter((g) => slots.some((s) => s.id === g.slotId));
     journeys[session.id] = computeJourney({ session, slots, trainees, signatures }, allDocs.filter((d) => d.session_id === session.id), {});
@@ -93,7 +93,7 @@ export async function loadFormationsHub(mine: { formateurId: string } | null = n
 
   const companyClients: HubClient[] = companies.map((c) => ({
     key: `c:${c.id}`, kind: "entreprise", name: c.name,
-    detail: `${c.employeeCount} collaborateur${c.employeeCount > 1 ? "s" : ""}`,
+    detail: `${c.city ? `${c.city} · ` : ""}${c.employeeCount} collaborateur${c.employeeCount > 1 ? "s" : ""}`,
     companyId: c.id, studentId: null, studentEmail: null, activeInstanceId: null,
     sessions: take(sessions.filter((s) => s.companyId === c.id)),
   }));
