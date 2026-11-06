@@ -96,43 +96,87 @@ function portalContext(p: ClientPortal): DocumentContext {
   };
 }
 
-type Tile = { templateId: string; doc: PortalDocument | null; lockedHint?: string };
+type Tile = { templateId: string; doc: PortalDocument | null; lockedHint: string };
+type DocState = "to-sign" | "signed" | "available" | "upcoming";
+const stateOf = (t: Tile): DocState =>
+  !t.doc ? "upcoming" : t.doc.requiresSignature && !t.doc.signedAt ? "to-sign" : t.doc.signedAt ? "signed" : "available";
+const dateCourte = (iso: string) => new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
 
-// Un document présenté comme une feuille : couleur de sa phase, icône,
-// état (à signer, signé, disponible) ou verrouillé s'il arrive plus tard.
-function DocTile({ tile, index, onOpen }: { tile: Tile; index: number; onOpen: (d: PortalDocument) => void }) {
+// En-tête d'un bloc de documents : pastille, titre, nombre et explication.
+function DocGroupTitle({ Icon, title, count, hint, tone }: { Icon: LucideIcon; title: string; count: number; hint: string; tone: string }) {
+  const th = useTh();
+  return (
+    <div className="flex items-center gap-3">
+      <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ background: `${tone}1f`, color: tone }}><Icon className="w-4 h-4" /></span>
+      <div className="min-w-0">
+        <p className="text-base font-black leading-tight" style={{ color: th.fg }}>
+          {title} <span className="ml-1 text-xs font-bold tabular-nums px-2 py-0.5 rounded-full align-middle" style={{ background: th.navA, color: th.fg2 }}>{count}</span>
+        </p>
+        <p className="text-xs mt-0.5" style={{ color: th.fg3 }}>{hint}</p>
+      </div>
+    </div>
+  );
+}
+
+// Document qui attend la signature du client : mis en avant, action explicite.
+function SignCard({ tile, index, onOpen }: { tile: Tile; index: number; onOpen: (d: PortalDocument) => void }) {
+  const th = useTh();
+  const meta = DOC_META[tile.templateId];
+  const d = tile.doc!;
+  return (
+    <div className="fade-up flex items-center gap-4 flex-wrap rounded-[12px] p-4 sm:p-5"
+      style={{ animationDelay: `${60 + index * 60}ms`, background: th.card, border: `2px solid ${th.ink}`, boxShadow: "0 10px 30px -18px rgba(0,0,0,0.45)" }}>
+      <span className="w-12 h-12 rounded-[12px] flex items-center justify-center shrink-0" style={{ background: th.ink, color: th.onInk }}><meta.Icon className="w-5 h-5" /></span>
+      <div className="flex-1 min-w-[180px]">
+        <p className="text-[11px] font-black uppercase tracking-widest" style={{ color: th.danger }}>Signature attendue</p>
+        <p className="text-lg font-black leading-tight mt-0.5" style={{ color: th.fg }}>{meta.label}</p>
+        <p className="text-xs mt-1" style={{ color: th.fg3 }}>Reçu le {dateCourte(d.issuedAt)} · une case à cocher et « Signer », la signature est horodatée.</p>
+      </div>
+      <ShimBtn sm onClick={() => onOpen(d)}><PenLine className="w-4 h-4 inline -mt-0.5 mr-1.5" />Lire et signer</ShimBtn>
+    </div>
+  );
+}
+
+// Document disponible (signé ou simplement remis) : ouvrable et téléchargeable.
+function AvailableCard({ tile, index, onOpen }: { tile: Tile; index: number; onOpen: (d: PortalDocument) => void }) {
   const th = useTh();
   const meta = DOC_META[tile.templateId];
   const color = PHASE_META[meta.phase].color;
-  const d = tile.doc;
-  const pending = !!d?.requiresSignature && !d.signedAt;
-  const Icon = meta.Icon;
+  const d = tile.doc!;
+  const signedDoc = !!d.signedAt;
   return (
-    <button type="button" disabled={!d} onClick={() => d && onOpen(d)}
-      className="fade-up group relative text-left rounded-[10px] overflow-hidden flex flex-col transition-all duration-200 enabled:hover:-translate-y-1 enabled:hover:shadow-xl disabled:cursor-default"
-      style={{ animationDelay: `${60 + index * 45}ms`, background: th.card, border: `1px solid ${pending ? th.ink : th.sep}`, minHeight: 168, opacity: d ? 1 : 0.55 }}>
-      <span className="h-1.5 w-full" style={{ background: d ? color : th.sep }} />
-      {pending && (
-        <span className="absolute top-3 right-3 text-[10px] font-black uppercase tracking-wide px-2 py-1 rounded-full animate-pulse" style={{ background: th.ink, color: th.onInk }}>À signer</span>
-      )}
-      {d?.signedAt && (
-        <span className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center text-white" style={{ background: GREEN }}><Check className="w-3.5 h-3.5" /></span>
-      )}
-      <span className="p-4 flex-1 flex flex-col gap-3">
-        <span className="w-11 h-11 rounded-[10px] flex items-center justify-center" style={{ background: d ? `${color}1f` : th.navA, color: d ? color : th.fg3 }}>
-          {d ? <Icon className="w-5 h-5" /> : <Lock className="w-4 h-4" />}
-        </span>
+    <button type="button" onClick={() => onOpen(d)}
+      className="fade-up group text-left rounded-[10px] p-4 flex items-start gap-3 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+      style={{ animationDelay: `${60 + index * 40}ms`, background: th.card, border: `1px solid ${th.sep}` }}>
+      <span className="w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0" style={{ background: `${color}1f`, color }}><meta.Icon className="w-5 h-5" /></span>
+      <span className="flex-1 min-w-0">
         <span className="block text-sm font-black leading-tight" style={{ color: th.fg }}>{meta.label}</span>
-        <span className="mt-auto flex items-center justify-between gap-2">
-          <span className="text-[11px] leading-snug" style={{ color: pending ? th.danger : d?.signedAt ? GREEN : th.fg3 }}>
-            {!d ? tile.lockedHint : pending ? "Votre signature est attendue" : d.signedAt ? `Signé le ${new Date(d.signedAt).toLocaleDateString("fr-FR")}` : d.id.startsWith(LIVE_PREFIX) ? "Disponible" : `Depuis le ${new Date(d.issuedAt).toLocaleDateString("fr-FR")}`}
-          </span>
-          {d && (pending
-            ? <PenLine className="w-4 h-4 shrink-0" style={{ color: th.fg }} />
-            : <Download className="w-4 h-4 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: th.fg2 }} />)}
+        <span className="mt-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold"
+          style={signedDoc ? { background: `${GREEN}1f`, color: GREEN } : { background: th.navA, color: th.fg2 }}>
+          {signedDoc ? <><CheckCircle2 className="w-3 h-3" />Signé le {new Date(d.signedAt!).toLocaleDateString("fr-FR")}</>
+            : d.id.startsWith(LIVE_PREFIX) ? <><FileText className="w-3 h-3" />Disponible</>
+              : <><FileText className="w-3 h-3" />Reçu le {new Date(d.issuedAt).toLocaleDateString("fr-FR")}</>}
         </span>
       </span>
+      <span className="self-center inline-flex items-center gap-1 text-xs font-semibold shrink-0" style={{ color: th.fg2 }}>
+        <span className="hidden sm:inline group-hover:underline">Consulter</span><Download className="w-4 h-4" />
+      </span>
     </button>
+  );
+}
+
+// Document prévu mais pas encore émis : en pointillés, avec le moment où il arrivera.
+function UpcomingRow({ tile }: { tile: Tile }) {
+  const th = useTh();
+  const meta = DOC_META[tile.templateId];
+  return (
+    <li className="flex items-center gap-3 rounded-[10px] px-4 py-3" style={{ border: `1.5px dashed ${th.inputB}`, background: "transparent" }}>
+      <span className="w-9 h-9 rounded-[10px] flex items-center justify-center shrink-0" style={{ background: th.navA, color: th.fg3 }}><Lock className="w-4 h-4" /></span>
+      <span className="flex-1 min-w-0">
+        <span className="block text-sm font-bold leading-tight" style={{ color: th.fg2 }}>{meta.label}</span>
+        <span className="flex items-center gap-1 text-[11px] mt-0.5" style={{ color: th.fg3 }}><Clock className="w-3 h-3" />{tile.lockedHint}</span>
+      </span>
+    </li>
   );
 }
 
@@ -216,17 +260,18 @@ export function ClientPortalPage() {
     latest.set(id, { id: `${LIVE_PREFIX}${id}`, templateId: id, title: template.titre, issuedAt: new Date().toISOString(), requiresSignature: false, signedAt: null, signerName: null });
   }
   const signed = (id: string) => !!latest.get(id)?.signedAt;
-  const toSign = [...latest.values()].filter((d) => d.requiresSignature && !d.signedAt);
 
   const seances = portal.seances;
   const pastSeances = seances.filter((s) => s.date < today || (s.date === today && s.fin <= new Date().toTimeString().slice(0, 5)));
   const nextSeance = seances.find((s) => !pastSeances.includes(s));
   const b2b = portal.financement === "entreprise" || portal.financement === "opco";
+  const particulier = portal.financement === "particulier";
 
   // Les grandes étapes de la formation, vues du client.
   const milestones = [
-    ...(b2b ? [{ label: "Devis accepté", done: signed("devis") }, { label: "Convention signée", done: signed("convention") }] : []),
-    ...(portal.financement === "particulier" ? [{ label: "Contrat signé", done: signed("contrat-particulier") }] : []),
+    ...(b2b || particulier ? [{ label: "Devis accepté", done: signed("devis") }] : []),
+    ...(b2b ? [{ label: "Convention signée", done: signed("convention") }] : []),
+    ...(particulier ? [{ label: "Contrat signé", done: signed("contrat-particulier") }] : []),
     { label: "Convocations reçues", done: latest.has("convocation") },
     { label: seances.length ? `Formation réalisée · ${pastSeances.length}/${seances.length}` : "Formation réalisée", done: ended || (seances.length > 0 && pastSeances.length === seances.length) },
     { label: "Certificat disponible", done: latest.has("certificat-realisation") },
@@ -237,20 +282,29 @@ export function ClientPortalPage() {
   const seanceDuree = (s: { date: string; debut: string; fin: string }) => heures(creneauDuree(s));
   const programmeDoc = latest.get("programme");
 
-  // Les cartes documents : à signer d'abord, puis l'ordre du parcours ; ce
-  // qui arrivera plus tard (contrat, certificats) apparaît verrouillé.
+  // Les documents, rangés par état : à signer, disponibles, à venir. Ce qui
+  // arrivera plus tard (contrat, convocation, certificats) dit quand il arrive.
   const expected = [
-    ...(b2b ? ["devis", "convention"] : portal.financement === "particulier" ? ["contrat-particulier"] : []),
+    ...(b2b ? ["devis", "convention"] : particulier ? ["devis", "contrat-particulier"] : []),
     "convocation", "certificat-realisation", "attestation-fin-formation",
   ];
+  const UPCOMING_HINTS: Record<string, string> = {
+    devis: "Envoyé dès que votre proposition est prête",
+    convention: "Après acceptation du devis",
+    "contrat-particulier": "Après acceptation du devis",
+    convocation: "Quelques jours avant le début de la formation",
+  };
   const tiles: Tile[] = DOC_ORDER
     .filter((id) => latest.has(id) || expected.includes(id))
     .map((id) => ({
       templateId: id, doc: latest.get(id) ?? null,
-      lockedHint: DOC_META[id].phase === "apres" ? "À la fin de la formation" : "En préparation",
-    }))
-    .sort((a, b) => Number(!!b.doc && b.doc.requiresSignature && !b.doc.signedAt) - Number(!!a.doc && a.doc.requiresSignature && !a.doc.signedAt));
-  const available = tiles.filter((t) => t.doc).length;
+      lockedHint: UPCOMING_HINTS[id] ?? (DOC_META[id].phase === "apres" ? "À la fin de la formation" : "En préparation"),
+    }));
+  const toSignTiles = tiles.filter((t) => stateOf(t) === "to-sign");
+  // Disponibles : les documents signés d'abord, puis l'ordre du parcours.
+  const availableTiles = tiles.filter((t) => stateOf(t) === "signed" || stateOf(t) === "available")
+    .sort((a, b) => Number(stateOf(b) === "signed") - Number(stateOf(a) === "signed"));
+  const upcomingTiles = tiles.filter((t) => stateOf(t) === "upcoming");
 
   return (
     <div className="min-h-dvh relative" style={{ background: th.bg, ["--avatar-ring" as string]: th.card }}>
@@ -307,43 +361,51 @@ export function ClientPortalPage() {
           </div>
         </section>
 
-        {/* Les documents, au premier plan. */}
-        <section className="space-y-4">
+        {/* Les documents, au premier plan, rangés par état. */}
+        <section className="space-y-6">
           <div className="flex items-end gap-4 flex-wrap">
             <div className="flex-1 min-w-[200px]">
               <p className="eyebrow" style={{ color: th.fg3 }}>Documents</p>
               <h2 className="text-[1.5rem] sm:text-[1.8rem] font-black leading-tight mt-1" style={{ color: th.fg }}>Vos documents de formation</h2>
             </div>
-            <div className="flex gap-2 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold" style={{ background: th.navA, color: th.fg }}>
-                <FileText className="w-3.5 h-3.5" />{available} disponible{available > 1 ? "s" : ""}
-              </span>
-              {toSign.length > 0 && (
-                <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold" style={{ background: th.ink, color: th.onInk }}>
-                  <PenLine className="w-3.5 h-3.5" />{toSign.length} à signer
-                </span>
-              )}
+            {/* Résumé : une barre en trois couleurs, comme les trois blocs. */}
+            <div className="w-full sm:w-72">
+              <div className="flex h-2 rounded-full overflow-hidden" style={{ background: th.navA }}>
+                <span style={{ width: `${(availableTiles.length / tiles.length) * 100}%`, background: GREEN }} />
+                <span style={{ width: `${(toSignTiles.length / tiles.length) * 100}%`, background: th.ink }} />
+              </div>
+              <div className="flex justify-between gap-2 mt-1.5 text-[11px] font-semibold" style={{ color: th.fg3 }}>
+                <span><span style={{ color: GREEN }}>●</span> {availableTiles.length} disponible{availableTiles.length > 1 ? "s" : ""}</span>
+                {toSignTiles.length > 0 && <span><span style={{ color: th.fg }}>●</span> {toSignTiles.length} à signer</span>}
+                <span>○ {upcomingTiles.length} à venir</span>
+              </div>
             </div>
           </div>
-          {toSign.length > 0 && (
-            <div className="fade-up flex items-center gap-4 flex-wrap rounded-[10px] p-4 sm:p-5" style={{ background: th.navA, border: `1px solid ${th.ink}` }}>
-              <span className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 animate-pulse" style={{ background: th.ink, color: th.onInk }}><PenLine className="w-5 h-5" /></span>
-              <div className="flex-1 min-w-[200px]">
-                <p className="text-base font-black" style={{ color: th.fg }}>{toSign.length === 1 ? "Un document attend votre signature" : `${toSign.length} documents attendent votre signature`}</p>
-                <p className="text-xs mt-0.5" style={{ color: th.fg2 }}>Une case à cocher et un clic suffisent : la signature électronique est horodatée.</p>
+
+          {toSignTiles.length > 0 && (
+            <div className="space-y-3">
+              <DocGroupTitle Icon={PenLine} tone={th.danger} title="À signer" count={toSignTiles.length} hint="Ces documents attendent votre accord pour que la formation avance." />
+              <div className="grid gap-3 lg:grid-cols-2">
+                {toSignTiles.map((t, i) => <SignCard key={t.templateId} tile={t} index={i} onOpen={(d) => void open(d)} />)}
               </div>
-              <ShimBtn sm onClick={() => void open(toSign[0])}>Lire et signer{toSign.length > 1 ? ` (${toSign.length})` : ""}</ShimBtn>
             </div>
           )}
-          <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
-            {tiles.map((t, i) => <DocTile key={t.templateId} tile={t} index={i} onOpen={(d) => void open(d)} />)}
-          </div>
-          <div className="flex gap-4 flex-wrap">
-            {(Object.keys(PHASE_META) as Phase[]).map((ph) => (
-              <span key={ph} className="flex items-center gap-1.5 text-[11px]" style={{ color: th.fg3 }}>
-                <span className="w-2.5 h-2.5 rounded-sm" style={{ background: PHASE_META[ph].color }} />{PHASE_META[ph].titre} la formation
-              </span>
-            ))}
+
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] items-start">
+            <div className="space-y-3 min-w-0">
+              <DocGroupTitle Icon={FileText} tone={GREEN} title="Disponibles" count={availableTiles.length} hint="À consulter ou télécharger à tout moment." />
+              {availableTiles.length ? (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {availableTiles.map((t, i) => <AvailableCard key={t.templateId} tile={t} index={i} onOpen={(d) => void open(d)} />)}
+                </div>
+              ) : <p className="text-sm" style={{ color: th.fg3 }}>Aucun document pour le moment.</p>}
+            </div>
+            {upcomingTiles.length > 0 && (
+              <div className="space-y-3">
+                <DocGroupTitle Icon={Clock} tone={th.fg3} title="À venir" count={upcomingTiles.length} hint="Ils apparaîtront ici au fil de la formation." />
+                <ul className="space-y-2">{upcomingTiles.map((t) => <UpcomingRow key={t.templateId} tile={t} />)}</ul>
+              </div>
+            )}
           </div>
         </section>
 
