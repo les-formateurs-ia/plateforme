@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { openDocument } from "@/app/lib/documents/openDocument";
 import { Award, BadgeCheck, Download, FileText, Send } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { GCard } from "@/app/components/common/GCard";
@@ -23,17 +24,17 @@ export function MyTrainingDocuments() {
   // Dernière version de chaque document.
   const latest = docs.filter((d, i) => docs.findIndex((x) => x.templateId === d.templateId) === i);
 
-  const open = async (d: MyTrainingDocument) => {
-    try {
-      const html = await getMyTrainingDocumentHtml(d.id);
-      if (!html) return toast.error("Document introuvable.");
-      const url = URL.createObjectURL(new Blob([html], { type: "text/html" }));
-      window.open(url, "_blank", "noopener");
-      setTimeout(() => URL.revokeObjectURL(url), 60_000);
-    } catch (err) {
+  // L'onglet s'ouvre dans le geste du clic, puis se remplit ; il propose
+  // « Enregistrer en PDF » (mise en page A4).
+  const open = (d: MyTrainingDocument) => {
+    const html = getMyTrainingDocumentHtml(d.id).then((h) => {
+      if (!h) throw new Error("Document introuvable.");
+      return h;
+    });
+    openDocument(html).catch((err) => {
       console.error(err);
-      toast.error("Impossible d'ouvrir ce document.");
-    }
+      toast.error(err instanceof Error && err.message ? err.message : "Impossible d'ouvrir ce document.");
+    });
   };
 
   return (

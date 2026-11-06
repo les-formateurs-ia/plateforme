@@ -11,6 +11,7 @@ import { ShimBtn } from "@/app/components/common/Buttons";
 import { NeuralField } from "@/app/components/particles/NeuralField";
 import { Background } from "@/app/components/common/Background";
 import logoSvg from "@/imports/logo-les-formateurs-ia.svg?raw";
+import { openDocument } from "@/app/lib/documents/openDocument";
 import { creneauDuree, dateLongueFr, heureFr, heures, MODALITE_LABELS, periodeFr, stampSignature, withSignatureProof } from "@/app/lib/documents/render";
 import { DOCUMENT_TEMPLATES, renderTemplate } from "@/app/lib/documents/catalog";
 import { ORGANISME } from "@/app/lib/documents/organisme";
@@ -634,10 +635,9 @@ function DocumentViewer({ token, meta, doc, onClose, onSigned }: {
     }
   };
 
+  // Le document seul, puis la boîte d'impression : « Enregistrer au format PDF ».
   const download = () => {
-    const url = URL.createObjectURL(new Blob([displayHtml(doc)], { type: "text/html" }));
-    window.open(url, "_blank", "noopener");
-    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    openDocument(displayHtml(doc), { print: true }).catch((err) => setError(err instanceof Error ? err.message : String(err)));
   };
 
   return (
@@ -646,7 +646,7 @@ function DocumentViewer({ token, meta, doc, onClose, onSigned }: {
         <div className="flex items-center gap-3 px-4 py-3" style={{ borderBottom: `1px solid ${th.sep}` }}>
           <p className="flex-1 text-sm font-bold truncate" style={{ color: th.fg }}>{doc.title}</p>
           <button type="button" onClick={download} className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-[2px] hover:opacity-70" style={{ border: `1px solid ${th.sep}`, color: th.fg }}>
-            <Download className="w-3.5 h-3.5" />Télécharger / imprimer
+            <Download className="w-3.5 h-3.5" />Enregistrer en PDF
           </button>
           <button type="button" onClick={onClose} aria-label="Fermer" className="w-9 h-9 flex items-center justify-center hover:opacity-70" style={{ color: th.fg }}><X className="w-5 h-5" /></button>
         </div>

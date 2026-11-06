@@ -173,48 +173,84 @@ function cssString(s: string): string {
   return `"${s.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 }
 
+// Charte des documents : Funnel Display, liserés dégradés aux couleurs de la
+// marque, titres de section en bandeaux, champs sur fond gris clair.
+const IRIS = "linear-gradient(90deg, #b58de0, #dbacf0 25%, #78d5e2 55%, #6adeb1 75%, #fbc2ad)";
+const FONTS = `<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@400;500;600;700;800&display=swap">`;
+
 const CSS = `
-  @page { size: A4; margin: 16mm 16mm 22mm; }
-  * { box-sizing: border-box; }
+  @page { size: A4; margin: 18mm 17mm 24mm; }
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   html, body { margin: 0; background: #fff; }
-  body { font-family: "Helvetica Neue", Arial, sans-serif; font-size: 10pt; line-height: 1.45; color: #1d2433; }
-  .page { max-width: 178mm; margin: 0 auto; padding: 8mm 0 0; }
-  @media screen { body { background: #eef0f4; padding: 16px 0; } .page { background: #fff; padding: 14mm 16mm 10mm; max-width: 210mm; box-shadow: 0 1px 6px rgba(0,0,0,.12); margin-bottom: 16px; } }
+  body { font-family: "Funnel Display", "Helvetica Neue", Arial, sans-serif; font-size: 9.8pt; line-height: 1.5; color: #1a1a1a; }
+  .page { position: relative; max-width: 176mm; margin: 0 auto; }
   .break { break-before: page; }
-  @media screen { .break { margin-top: 0; } }
-  header.doc { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding-bottom: 10px; border-bottom: 2px solid #2A78D6; margin-bottom: 16px; }
-  header.doc .logo svg { height: 26px; width: auto; fill: #1d2433; }
-  header.doc .coords { text-align: right; font-size: 8.5pt; color: #555; }
-  h1 { font-size: 17pt; margin: 6px 0 4px; color: #1d2433; }
-  .subtitle { color: #555; margin: 0 0 14px; }
-  h2 { font-size: 11.5pt; margin: 18px 0 6px; color: #2A78D6; break-after: avoid; }
-  h3 { font-size: 10.5pt; margin: 12px 0 4px; break-after: avoid; }
+  /* Liserés haut et bas de chaque page imprimée, dans les marges (coins + centre). */
+  @page {
+    @top-left-corner { content: ""; background: linear-gradient(#b58de0, #b58de0) top / 100% 2.2mm no-repeat; }
+    @top-center { content: ""; background: ${IRIS} top / 100% 2.2mm no-repeat; }
+    @top-right-corner { content: ""; background: linear-gradient(#fbc2ad, #fbc2ad) top / 100% 2.2mm no-repeat; }
+    @bottom-left-corner { content: ""; background: linear-gradient(#b58de0, #b58de0) bottom / 100% 2.2mm no-repeat; }
+    @bottom-right-corner { content: ""; background: linear-gradient(#fbc2ad, #fbc2ad) bottom / 100% 2.2mm no-repeat; }
+  }
+  @media screen {
+    body { background: #eceef2; padding: 24px 0; }
+    .page { background: #fff; max-width: 210mm; padding: 18mm 17mm 12mm; margin-bottom: 24px; box-shadow: 0 2px 14px rgba(0,0,0,.1); }
+    .page::before, .page::after { content: ""; position: absolute; left: 0; right: 0; height: 6px; background: ${IRIS}; }
+    .page::before { top: 0; }
+    .page::after { bottom: 0; }
+  }
+  header.doc { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 9mm; }
+  header.doc .logo svg { height: 22px; width: auto; fill: #111; }
+  header.doc .kind { font-size: 8.5pt; color: #555; text-align: right; line-height: 1.35; }
+  header.doc .kind strong { display: block; color: #1a1a1a; font-weight: 600; }
+  h1 { font-size: 24pt; line-height: 1.08; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 5px; color: #111; }
+  .subtitle { font-size: 10.5pt; color: #555; margin: 2px 0 18px; }
+  .subtitle.caps { font-size: 8.5pt; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: #6b6b6b; }
+  h2 { font-size: 8.6pt; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #1a1a1a;
+    margin: 20px 0 10px; padding: 7px 13px; border-radius: 5px; background: linear-gradient(90deg, #e9cdf6, #c9a3ea); break-after: avoid; }
+  h2:nth-of-type(4n+2) { background: linear-gradient(90deg, #a6e4ee, #8fe3c4); }
+  h2:nth-of-type(4n+3) { background: linear-gradient(90deg, #fde0d2, #f8c4ad); }
+  h2:nth-of-type(4n+4) { background: linear-gradient(90deg, #c6dcf8, #a9c6f2); }
+  h3 { font-size: 10.5pt; font-weight: 700; margin: 13px 0 4px; break-after: avoid; }
   p { margin: 4px 0; }
-  ul { margin: 4px 0 4px 18px; padding: 0; }
-  li { margin: 2px 0; }
-  .muted { color: #666; }
-  .small { font-size: 8.5pt; }
-  .box { border: 1px solid #d9dee8; border-radius: 4px; padding: 8px 10px; margin: 8px 0; background: #f8f9fc; }
+  ul { margin: 4px 0 6px 0; padding-left: 16px; }
+  li { margin: 2.5px 0; }
+  li::marker { color: #b58de0; }
+  strong { font-weight: 700; }
+  .muted { color: #6b6b6b; }
+  .small { font-size: 8.3pt; }
+  /* Encadré d'identification : fond pêche, liseré dégradé à gauche. */
+  .box { position: relative; border-radius: 6px; padding: 11px 14px 11px 18px; margin: 10px 0 14px; background: #fcebd3; overflow: hidden; }
+  .box::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: linear-gradient(180deg, #b58de0, #dbacf0 50%, #fbc2ad); }
   table { border-collapse: collapse; width: 100%; margin: 6px 0; }
-  table.grid th, table.grid td { border: 1px solid #cfd5e1; padding: 5px 6px; text-align: left; vertical-align: top; }
-  table.grid th { background: #f1f4f9; font-size: 9pt; }
-  table.kv td { padding: 3px 6px 3px 0; vertical-align: top; }
-  table.kv td:first-child { width: 38%; color: #555; }
+  table.grid { border-collapse: separate; border-spacing: 0; border: 1px solid #e4e0ea; border-radius: 6px; }
+  table.grid th, table.grid td { padding: 6px 8px; text-align: left; vertical-align: top; border-bottom: 1px solid #ece9f1; }
+  table.grid thead th:first-child { border-top-left-radius: 6px; }
+  table.grid thead th:last-child { border-top-right-radius: 6px; }
+  table.grid th { background: #f4effa; font-size: 8.3pt; font-weight: 700; letter-spacing: .04em; color: #333; }
+  table.grid tr:last-child td { border-bottom: 0; }
+  /* Couples libellé / valeur présentés comme des champs remplis. */
+  table.kv { border-collapse: separate; border-spacing: 0 3px; }
+  table.kv td { padding: 3.5px 10px; vertical-align: top; }
+  table.kv td:first-child { width: 36%; padding-left: 0; color: #444; }
+  table.kv td:last-child { background: #f6f4f4; border-bottom: 1px solid #1a1a1a; }
   .num { text-align: right; white-space: nowrap; }
-  tfoot td { font-weight: 600; }
-  tr.strong td { background: #f1f4f9; }
+  tfoot td { font-weight: 600; background: #fbfafc; }
+  tr.strong td { background: #f4effa; font-weight: 800; }
   tr { break-inside: avoid; }
   td.sig { height: 38px; min-width: 90px; }
   .check { display: inline-block; margin-right: 14px; }
-  .signatures { display: flex; gap: 24px; margin-top: 18px; break-inside: avoid; }
+  .signatures { display: flex; gap: 22px; margin-top: 22px; break-inside: avoid; }
   .sign { flex: 1; }
-  .sign-title { font-weight: 600; }
-  .sign-box { border: 1px dashed #b8c0cf; height: 70px; margin-top: 6px; border-radius: 4px; }
-  .sign-box.signed { border: 1px solid #1BAF7A; background: #f1faf6; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px; }
-  .sig-name { font-family: "Snell Roundhand", "Segoe Script", "Brush Script MT", cursive; font-size: 17pt; color: #1d2433; line-height: 1.1; }
+  .sign-title { font-weight: 700; }
+  .sign-box { height: 76px; margin-top: 6px; background: #f6f4f4; border-bottom: 1px solid #1a1a1a; border-radius: 3px 3px 0 0; }
+  .sign-box.signed { background: #effaf5; border-bottom-color: #1BAF7A; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px; }
+  .sig-name { font-family: "Snell Roundhand", "Segoe Script", "Brush Script MT", cursive; font-size: 17pt; color: #1a1a1a; line-height: 1.1; }
   .sig-meta { font-size: 7.5pt; color: #2c6a48; }
   mark.todo { background: #ffe8a3; color: #6b4a00; padding: 0 2px; border-radius: 2px; }
-  footer.doc { margin-top: 22px; padding-top: 6px; border-top: 1px solid #d9dee8; font-size: 7.5pt; color: #666; text-align: center; }
+  footer.doc { margin-top: 26px; padding-top: 8px; border-top: 1px solid #e6e6e6; font-size: 7.3pt; color: #6b6b6b; text-align: center; line-height: 1.45; }
+  footer.doc strong { color: #1a1a1a; }
   @media print { footer.doc { display: none; } }
 `;
 
@@ -222,21 +258,22 @@ export type DocumentPage = { titre: string; sousTitre?: string; body: string };
 
 // Plusieurs pages (une convocation par stagiaire…) dans un seul document.
 export function renderDocument(titreDocument: string, pages: DocumentPage[], o: Organisme, logoSvg = ""): string {
+  const [genre] = titreDocument.split(" · ");
   const pagesHtml = pages.map((p, i) => `
   <section class="page${i > 0 ? " break" : ""}">
     <header class="doc">
       <div class="logo">${logoSvg || `<strong>${esc(o.nomCommercial)}</strong>`}</div>
-      <div class="coords">${esc(o.adresse)}, ${esc(o.codePostal)} ${esc(o.ville)}<br>${esc(o.email)} · ${esc(o.telephone)}</div>
+      <div class="kind"><strong>${esc(genre)}</strong>${esc(o.adresse)}, ${esc(o.codePostal)} ${esc(o.ville)}<br>${esc(o.email)} · ${esc(o.telephone)}</div>
     </header>
     <h1>${esc(p.titre)}</h1>
-    ${p.sousTitre ? `<p class="subtitle">${p.sousTitre}</p>` : ""}
+    ${p.sousTitre ? `<p class="subtitle${p.sousTitre.length <= 70 ? " caps" : ""}">${p.sousTitre}</p>` : ""}
     ${p.body}
     <footer class="doc">${mentionsPied(o).map(esc).join("<br>")}</footer>
   </section>`).join("");
   // À l'impression, les mentions passent dans la marge basse de chaque page,
   // avec la pagination ; à l'écran, elles closent chaque page.
-  const pied = `@page { @bottom-center { content: ${mentionsPied(o).map(cssString).join(' "\\A" ')} "\\A Page " counter(page) " / " counter(pages); white-space: pre-wrap; font: 7pt Arial, sans-serif; color: #666; text-align: center; } }`;
-  return `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>${esc(titreDocument)}</title><style>${CSS}${pied}</style></head><body>${pagesHtml}</body></html>`;
+  const pied = `@page { @bottom-center { content: ${mentionsPied(o).map(cssString).join(' "\\A" ')} "\\A " counter(page) " / " counter(pages); white-space: pre-wrap; font: 7pt "Funnel Display", Arial, sans-serif; color: #6b6b6b; text-align: center; vertical-align: middle; background: ${IRIS} bottom / 100% 2.2mm no-repeat; } }`;
+  return `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>${esc(titreDocument)}</title>${FONTS}<style>${CSS}${pied}</style></head><body>${pagesHtml}</body></html>`;
 }
 
 export type SignatureProof = {

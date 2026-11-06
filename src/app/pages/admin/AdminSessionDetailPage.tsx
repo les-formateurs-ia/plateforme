@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
+import { openDocument } from "@/app/lib/documents/openDocument";
 import { ArrowLeft, ArrowRight, Building2, Calendar, Check, ChevronLeft, Copy, ExternalLink, Eye, Globe, GraduationCap, Lock, Mail, MapPin, PenLine, Plus, Sparkles, Trash2, UserCheck, Users, Video } from "lucide-react";
 import logoSvg from "@/imports/logo-les-formateurs-ia.svg?raw";
 import { useTh } from "@/app/theme/theme";
@@ -58,10 +59,12 @@ function mailPortalLink(bundle: SessionBundle, aSigner?: string) {
   window.location.href = `mailto:${c.email ?? ""}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
-function openHtml(html: string) {
-  const url = URL.createObjectURL(new Blob([html], { type: "text/html" }));
-  window.open(url, "_blank", "noopener");
-  setTimeout(() => URL.revokeObjectURL(url), 60_000);
+// Document seul dans un onglet, avec « Enregistrer en PDF » (mise en page A4).
+function openHtml(html: string | Promise<string>) {
+  openDocument(html).catch((err) => {
+    console.error(err);
+    toast.error(err instanceof Error ? err.message : "Impossible d'ouvrir le document.");
+  });
 }
 
 type Run = (action: () => Promise<unknown>, success?: string) => Promise<void>;
@@ -192,13 +195,11 @@ export function AdminSessionDetailPage() {
   const sessionDocs = bundle.documents.filter((d) => !d.trainee_id);
   const kit: DocKit = {
     ctx, documents: sessionDocs, busy, issue,
-    open: (doc) => void run(async () => {
-      const html = await getDocumentHtml(doc.id);
-      openHtml(doc.signed_at ? withSignatureProof(html, {
-        titre: doc.title, sha256: doc.html_sha256, emisLe: doc.issued_at, emisPar: "Les Formateurs IA",
-        signataire: doc.signer_name ?? "", signeLe: doc.signed_at, ip: doc.signed_ip, navigateur: doc.signed_user_agent,
-      }) : html);
-    }),
+    // L'onglet s'ouvre dans le geste du clic, puis se remplit.
+    open: (doc) => openHtml(getDocumentHtml(doc.id).then((html) => doc.signed_at ? withSignatureProof(html, {
+      titre: doc.title, sha256: doc.html_sha256, emisLe: doc.issued_at, emisPar: "Les Formateurs IA",
+      signataire: doc.signer_name ?? "", signeLe: doc.signed_at, ip: doc.signed_ip, navigateur: doc.signed_user_agent,
+    }) : html)),
     remove: (doc) => { if (confirm(`Supprimer « ${doc.title} » ?`)) void run(() => deleteDocument(doc.id), "Document supprimé."); },
     share: (doc) => openPortalEmail(doc.title.split(" · ")[0]),
   };
