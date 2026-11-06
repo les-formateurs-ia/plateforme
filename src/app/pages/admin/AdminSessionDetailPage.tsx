@@ -218,7 +218,7 @@ export function AdminSessionDetailPage() {
     switch (step.id) {
       case "client": return <ClientPanel draft={draft} setDraft={setDraft} />;
       case "programme": return <ProgrammeEditor value={draft.formation} onChange={(formation) => setDraft({ ...draft, formation })} contenuText={contenuText} onContenuText={setContenuText} />;
-      case "devis": return <><PrixPanel draft={draft} setDraft={setDraft} /><DocLines kit={kit} ids={["devis"]} /></>;
+      case "devis": return <><PrixPanel draft={draft} setDraft={setDraft} /><DocLines kit={kit} ids={["devis", "programme"]} /></>;
       case "planning": return <PlanningPanel bundle={bundle} busy={busy} run={run} />;
       case "convention": case "contrat-particulier": return <DocLines kit={kit} ids={[step.id]} />;
       case "accueil": return <DocLines kit={kit} ids={["convocation", "programme", "cgv", "reglement-interieur"]} />;

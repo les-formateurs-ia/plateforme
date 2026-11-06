@@ -1,8 +1,9 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { Link } from "react-router";
 import { toast } from "sonner";
 import { addDays, addHours, nextMonday, setHours, setMinutes, startOfHour } from "date-fns";
 import {
-  AlarmClock, ArrowRightLeft, CalendarCheck, Check, Copy, Mail, MessageSquareText, Phone, PhoneCall, Plus, StickyNote, Trash2,
+  AlarmClock, ArrowRightLeft, CalendarCheck, Check, Copy, FolderOpen, Mail, MessageSquareText, Phone, PhoneCall, Plus, StickyNote, Trash2, Wand2,
 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/app/components/ui/sheet";
@@ -12,6 +13,8 @@ import {
   setDealValue, setReminderDone, ACTIVITY_KINDS, SOURCES, STAGES, STAGE_LABEL,
   type Activity, type Lead, type ProspectActivityKind, type ProspectStage, type Reminder,
 } from "@/app/lib/prospects";
+import { getLeadSessionId } from "@/app/lib/prospectConversion";
+import { ConvertProspectDialog } from "./ConvertProspectDialog";
 
 const KIND_ICONS: Record<ProspectActivityKind, typeof StickyNote> = {
   note: StickyNote, appel: PhoneCall, email: Mail, rdv: CalendarCheck, etape: ArrowRightLeft,
@@ -61,6 +64,10 @@ function PanelBody({ lead, onLeadChange, onMove, onBoardStale, onDeleted }: {
   const [remTitle, setRemTitle] = useState(`Rappeler ${lead.first_name}`);
   const [remDate, setRemDate] = useState(() => toLocalInput(at9(addDays(new Date(), 1))));
   const [value, setValue] = useState(lead.deal_value?.toString() ?? "");
+  // Dossier de formation déjà ouvert pour ce prospect (conversion).
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [converting, setConverting] = useState(false);
+  useEffect(() => { void getLeadSessionId(lead.id).then(setSessionId); }, [lead.id]);
 
   const loadDetails = async () => {
     try {
@@ -214,6 +221,30 @@ function PanelBody({ lead, onLeadChange, onMove, onBoardStale, onDeleted }: {
           </>}
         </div>
       </div>
+
+      {/* Conversion en dossier de formation */}
+      <section className="px-6 py-4 flex flex-wrap items-center gap-3" style={{ borderBottom: `1px solid ${th.sep}`, background: th.card }}>
+        {sessionId ? (
+          <>
+            <span className="text-sm flex-1 min-w-[180px]" style={{ color: th.fg2 }}>Ce prospect a son dossier de formation.</span>
+            <Link to={`/sessions/${sessionId}`} className="sweep inline-flex items-center gap-2 rounded-[2px] min-h-9 px-4 text-sm font-semibold" style={{ background: th.ink, color: th.onInk }}>
+              <FolderOpen className="w-4 h-4" />Ouvrir le dossier
+            </Link>
+            <button onClick={() => setConverting(true)} className="text-xs font-semibold underline" style={{ color: th.fg3 }}>Créer un autre dossier</button>
+          </>
+        ) : (
+          <>
+            <span className="text-sm flex-1 min-w-[180px]" style={{ color: th.fg2 }}>Prêt à signer ? Crée le dossier avec le devis et le programme.</span>
+            <HueButton sm Icon={Wand2} onClick={() => setConverting(true)}>Convertir le prospect</HueButton>
+          </>
+        )}
+      </section>
+      <ConvertProspectDialog lead={lead} open={converting} onOpenChange={setConverting}
+        onConverted={id => {
+          setSessionId(id);
+          if (lead.pipeline_stage !== "proposition" && lead.pipeline_stage !== "gagne") onLeadChange({ pipeline_stage: "proposition" });
+          onBoardStale();
+        }} />
 
       {/* Étape + montant */}
       <Section title="Étape">

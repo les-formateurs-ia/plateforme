@@ -68,7 +68,7 @@ export function devis(ctx: DocumentContext): DocumentPage[] {
     ${tableTarifs(ctx.lignes)}
     <p class="small muted">Mode de financement envisagé : ${FINANCEMENT_LABELS[ctx.financement]}${ctx.financeur ? ` (${esc(ctx.financeur)})` : ""}.</p>
     <h2>4. Conditions</h2>
-    <p>Ce devis est valable ${esc(ctx.validiteDevisJours)} jours à compter de sa date d'émission. Son acceptation vaut commande et entraîne l'établissement d'une convention de formation. Les conditions générales de vente jointes s'appliquent.</p>
+    <p>Ce devis est valable ${esc(ctx.validiteDevisJours)} jours à compter de sa date d'émission. Son acceptation vaut commande et entraîne l'établissement ${ctx.financement === "particulier" ? "d'un contrat de formation (art. L6353-3 du Code du travail)" : "d'une convention de formation"}. Les conditions générales de vente jointes s'appliquent.</p>
     <p>${esc(ctx.conditionsPaiement)}</p>
     ${signatures([
       { role: "organisme", titre: "Pour l'organisme de formation", nom: `${esc(ctx.organisme.representant.nom)}, ${esc(ctx.organisme.representant.qualite)}` },

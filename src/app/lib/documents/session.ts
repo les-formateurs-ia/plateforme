@@ -112,6 +112,15 @@ function dureeFr(seconds: number): string {
 
 const dateCourte = (iso: string) => iso.split("-").reverse().join("/");
 
+// Prochain numéro de dossier pour ce financement : ENT-2026-004, PAR-2026-001…
+const REFERENCE_PREFIX: Record<Financement, string> = { entreprise: "ENT", opco: "ENT", cpf: "CPF", particulier: "PAR" };
+export function nextReference(sessions: { reference: string }[], financement: Financement, year = new Date().getFullYear()): string {
+  const base = `${REFERENCE_PREFIX[financement]}-${year}-`;
+  const max = sessions.filter((s) => s.reference.startsWith(base))
+    .reduce((m, s) => Math.max(m, Number(s.reference.slice(base.length)) || 0), 0);
+  return `${base}${String(max + 1).padStart(3, "0")}`;
+}
+
 export function todayIso(): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(new Date());
 }

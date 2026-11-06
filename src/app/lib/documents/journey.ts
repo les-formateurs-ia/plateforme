@@ -149,7 +149,16 @@ export function computeJourney(bundle: SessionBundle, documents: JourneyDocument
     };
   };
   const dossierManquant = missingFields.length > 0 || programmeMissing.length > 0;
-  if (b2b) steps.push(contractStep("devis", "Devis signé", dossierManquant));
+  // Devis pour l'entreprise comme pour le particulier qui finance lui-même ;
+  // le programme part avec lui (le devis y renvoie en annexe).
+  if (b2b || session.financement === "particulier") {
+    const step = contractStep("devis", "Devis signé", dossierManquant);
+    const issue = step.actions[0];
+    if (issue?.kind === "issue" && !issued("programme").length) {
+      step.actions = [{ kind: "issue", templateIds: ["devis", "programme"], label: "Émettre le devis et le programme" }];
+    }
+    steps.push(step);
+  }
 
   // Planning : stagiaires et séances
   const plannedHours = slots.reduce((s, sl) => s + creneauDuree(sl), 0);

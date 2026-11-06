@@ -8,7 +8,7 @@ import { VSelect } from "@/app/components/common/Select";
 import { FORMATION_PRESETS } from "@/app/lib/documents/samples";
 import { FINANCEMENT_LABELS } from "@/app/lib/documents/render";
 import type { Financement } from "@/app/lib/documents/types";
-import { addTrainee, createSession, todayIso, type TrainingSession } from "@/app/lib/trainingSessions";
+import { addTrainee, createSession, nextReference, todayIso, type TrainingSession } from "@/app/lib/trainingSessions";
 import type { HubClient } from "@/app/lib/formationsHub";
 import { clientFromCompany, getCompanyProfile } from "@/app/lib/entreprise/companies";
 import { Field, TextInput } from "./fields";
@@ -17,15 +17,7 @@ import { Field, TextInput } from "./fields";
 // la fiche d'un client, elle arrive préremplie : entreprise ou élève CPF.
 
 const FINANCEMENTS: Financement[] = ["entreprise", "opco", "cpf", "particulier"];
-const PREFIX: Record<Financement, string> = { entreprise: "ENT", opco: "ENT", cpf: "CPF", particulier: "PAR" };
 const MANUAL = "__manuel";
-
-function nextReference(sessions: TrainingSession[], financement: Financement): string {
-  const base = `${PREFIX[financement]}-${new Date().getFullYear()}-`;
-  const max = sessions.filter((s) => s.reference.startsWith(base))
-    .reduce((m, s) => Math.max(m, Number(s.reference.slice(base.length)) || 0), 0);
-  return `${base}${String(max + 1).padStart(3, "0")}`;
-}
 
 export function NewSessionForm({ clients, sessions, initial, onCancel }: {
   clients: HubClient[];

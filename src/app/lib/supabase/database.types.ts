@@ -61,6 +61,8 @@ export interface Database {
           pipeline_stage: ProspectStage;
           stage_changed_at: string;
           deal_value: number | null;
+          // Dossier de formation issu de la conversion (20261108120000).
+          session_id?: string | null;
         };
         // L'admin ne crée que des prospects saisis à la main (cf. 20261020130000).
         Insert: {
@@ -77,7 +79,7 @@ export interface Database {
           deal_value?: number | null;
         };
         // Seules les colonnes de suivi sont modifiables (admin, cf. 20261020120000).
-        Update: { pipeline_stage?: ProspectStage; deal_value?: number | null };
+        Update: { pipeline_stage?: ProspectStage; deal_value?: number | null; session_id?: string | null };
         Relationships: never[];
       };
       prospect_activities: {

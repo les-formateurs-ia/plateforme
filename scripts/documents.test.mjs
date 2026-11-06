@@ -165,9 +165,33 @@ test('with client and programme ready, the next step is issuing the quote', () =
   };
   const j = computeJourney(bundle, [], {}, new Date('2026-11-20T10:00:00Z'));
   assert.equal(j.next.id, 'devis');
-  assert.deepEqual(j.next.actions[0], { kind: 'issue', templateIds: ['devis'], label: 'Émettre le devis' });
+  assert.deepEqual(j.next.actions[0], { kind: 'issue', templateIds: ['devis', 'programme'], label: 'Émettre le devis et le programme' });
+  const withProgramme = computeJourney(bundle, [doc('programme')], {}, new Date('2026-11-20T10:00:00Z'));
+  assert.deepEqual(withProgramme.next.actions[0], { kind: 'issue', templateIds: ['devis'], label: 'Émettre le devis' });
   const sent = computeJourney(bundle, [doc('devis')], {}, new Date('2026-11-20T10:00:00Z'));
   assert.equal(sent.next.actions[0].kind, 'share');
+});
+
+test('a self-funded learner gets a quote and the programme before the contract', () => {
+  const client = { type: 'particulier', nom: 'Léa Martin', adresse: '2 rue B', codePostal: '75011', ville: 'Paris', siret: null, representant: null, email: 'lea@x.fr' };
+  const bundle = {
+    session: { ...baseSession(FORMATION_RS6776), financement: 'particulier', financeur: null, client, intervenants: [{ nom: 'Yanis', qualite: 'Formateur' }] },
+    slots: [], trainees: [], signatures: [],
+  };
+  const j = computeJourney(bundle, [], {}, new Date('2026-11-20T10:00:00Z'));
+  const order = j.steps.map((s) => s.id);
+  assert.ok(order.indexOf('devis') < order.indexOf('contrat-particulier'));
+  assert.equal(j.next.id, 'devis');
+  assert.deepEqual(j.next.actions[0].templateIds, ['devis', 'programme']);
+  const html = renderTemplate(DOCUMENT_TEMPLATES.find((t) => t.id === 'devis'), buildDocumentContext(bundle));
+  assert.match(html, /contrat de formation/);
+});
+
+test('nextReference numbers files per financing and year', () => {
+  const sessions = [{ reference: 'ENT-2026-004' }, { reference: 'PAR-2026-001' }, { reference: 'ENT-2025-009' }];
+  assert.equal(mod.nextReference(sessions, 'opco', 2026), 'ENT-2026-005');
+  assert.equal(mod.nextReference(sessions, 'particulier', 2026), 'PAR-2026-002');
+  assert.equal(mod.nextReference([], 'cpf', 2027), 'CPF-2027-001');
 });
 
 test('a finished and fully documented session reaches 100 %', () => {
