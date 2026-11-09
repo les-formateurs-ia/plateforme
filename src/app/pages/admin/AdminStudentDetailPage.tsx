@@ -11,8 +11,11 @@ import { VBtn, ShimBtn } from "@/app/components/common/Buttons";
 import { VSelect } from "@/app/components/common/Select";
 import {
   listInstancesForStudent, listPublishedTemplates, assignFormationToStudent,
-  updateInstanceStatus, deleteInstance, type FormationInstanceRow, type PublishedTemplate,
+  updateInstanceStatus, deleteInstance, setInstanceAvailableFrom, type FormationInstanceRow, type PublishedTemplate,
 } from "@/app/lib/formationInstances";
+import { parisToday } from "@/app/lib/learning";
+import { StudentConnectionsCard } from "@/app/components/admin/StudentConnectionsCard";
+import { EmailHistoryCard } from "@/app/components/sessions/EmailHistory";
 import { listCoachAssignableCards, assignFormateurToStudent, type PersonCard } from "@/app/lib/planning";
 import { StudentMissionGallery } from "@/app/components/admin/StudentMissionGallery";
 import { StudentCertificationCard } from "@/app/components/admin/StudentCertificationCard";
@@ -241,6 +244,17 @@ export function AdminStudentDetailPage() {
     }
   };
 
+  const changeAvailableFrom = async (instanceId: string, date: string | null) => {
+    try {
+      await setInstanceAvailableFrom(instanceId, date);
+      setInstances((rows) => rows.map((r) => (r.id === instanceId ? { ...r, availableFrom: date } : r)));
+      toast.success(date && date > parisToday() ? `Formation ouverte le ${date.split("-").reverse().join("/")}.` : "Formation ouverte dès maintenant.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Impossible de modifier la date d'ouverture.");
+    }
+  };
+
   const remove = async (instanceId: string) => {
     if (!confirm("Retirer cette formation à l'élève ? Sa progression sur ce duplicata sera perdue.")) return;
     try {
@@ -276,6 +290,12 @@ export function AdminStudentDetailPage() {
       </div>
 
       {staff && <ClientSessionsCard profileId={profile.id} />}
+      {admin && (
+        <div className="grid gap-6 lg:grid-cols-2">
+          <StudentConnectionsCard studentId={profile.id} studentName={name} />
+          <EmailHistoryCard profileId={profile.id} />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
       {staff && (
@@ -460,6 +480,20 @@ export function AdminStudentDetailPage() {
                     ]}
                   />
                 </div>
+                <label className="block">
+                  <span className="flex items-center justify-between text-[11px] font-bold mb-1" style={{ color: th.fg2 }}>
+                    Ouverture
+                    {inst.availableFrom && inst.availableFrom > parisToday() && <span className="font-semibold" style={{ color: th.fg3 }}>décompte en cours</span>}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <input type="date" value={inst.availableFrom ?? ""} disabled={!admin}
+                      onChange={(e) => void changeAvailableFrom(inst.id, e.target.value || null)}
+                      className="flex-1 min-w-0 rounded-[4px] px-2 py-1.5 text-xs g-input" />
+                    {admin && inst.availableFrom && (
+                      <button type="button" onClick={() => void changeAvailableFrom(inst.id, null)} className="text-[11px] font-semibold shrink-0 hover:opacity-70" style={{ color: th.fg3 }}>Ouvrir</button>
+                    )}
+                  </div>
+                </label>
                 <ShimBtn sm full onClick={() => navigate(`${base}/instances/${inst.id}`)}>Personnaliser</ShimBtn>
               </div>
             );

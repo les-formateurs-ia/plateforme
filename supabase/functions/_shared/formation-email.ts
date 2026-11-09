@@ -2,11 +2,12 @@
 // client), envoyés par l'API Gmail depuis le compte Google de la plateforme.
 // Partagé par send-formation-email (envoi à la demande) et
 // formation-email-automations (envois automatiques quotidiens).
-// Chaque envoi est journalisé dans session_emails.
+// Chaque envoi est journalisé dans session_emails (date, objet, destinataire).
 
 import type { PlatformGoogleAccount } from "./google-platform.ts";
+import { generateToken, hashToken } from "./password-setup-token.ts";
 
-export type EmailKind = "espace-client" | "convocation" | "rappel" | "certificat";
+export type EmailKind = "espace-client" | "convocation" | "rappel" | "certificat" | "acces-elearning";
 
 const GMAIL_SEND_URL = "https://gmail.googleapis.com/upload/gmail/v1/users/me/messages/send?uploadType=media";
 const SENDER_NAME = "Les Formateurs IA";
@@ -148,7 +149,40 @@ function lieuHtml(s: SessionRow): string {
   return esc(s.lieu || "Communiqué prochainement");
 }
 
-export function learnerEmail(kind: Exclude<EmailKind, "espace-client">, s: SessionRow, t: TraineeRow, slots: SlotRow[], frontendUrl: string): { subject: string; html: string } {
+// Accès e-learning (parcours CPF) : le stagiaire crée son compte (lien
+// « Définir mon mot de passe »), ou se connecte s'il l'a déjà fait. Si la
+// formation ouvre plus tard, son espace affiche le décompte jusqu'au jour J.
+export function accessEmail(s: SessionRow, t: TraineeRow, link: { url: string; activated: boolean }, frontendUrl: string, today: string): { subject: string; html: string } {
+  const future = s.date_debut > today;
+  return {
+    subject: link.activated ? `Vos accès e-learning · ${s.formation.intitule}` : `Créez votre compte e-learning · ${s.formation.intitule}`,
+    html: layout({
+      frontendUrl,
+      preheader: future ? `Votre formation ouvre le ${dateFr(s.date_debut)} : créez votre compte dès maintenant.` : "Votre formation est ouverte : créez votre compte et commencez.",
+      eyebrow: "Bienvenue dans votre formation",
+      title: `Bienvenue ${t.prenom} !`,
+      intro: `<p style="margin:0">Votre inscription à la formation <strong>${esc(s.formation.intitule)}</strong> est confirmée. Vous la suivrez sur notre plateforme e-learning, à votre rythme.</p>`
+        + `<p style="margin:12px 0 0">${link.activated
+          ? "Votre compte est déjà actif : connectez-vous avec votre adresse e-mail et votre mot de passe."
+          : "Première étape : créez votre compte en choisissant votre mot de passe. Cela prend moins d'une minute."}</p>`,
+      blocks: [
+        infoCard([
+          ["Formation", esc(s.formation.intitule)],
+          ["Ouverture de la formation", future ? `${esc(dateFr(s.date_debut))}` : "Dès maintenant"],
+          ...(s.date_fin > s.date_debut ? [["Fin de la formation", esc(dateFr(s.date_fin))] as [string, string]] : []),
+          ["Votre identifiant", esc(t.email)],
+        ]),
+        future ? `<p style="margin:22px 0 0;font-size:14px;line-height:1.65;color:#3d3d48">Une fois votre compte créé, votre espace affiche un <strong>décompte jusqu'à l'ouverture</strong> : le ${esc(dateFr(s.date_debut))}, toute la formation se débloque automatiquement.</p>` : "",
+      ],
+      cta: { label: link.activated ? "Me connecter" : "Créer mon compte", url: link.url },
+      note: link.activated
+        ? `Adresse de la plateforme : <a href="${esc(frontendUrl)}" style="color:${ACCENT}">${esc(frontendUrl.replace(/^https?:\/\//, ""))}</a>. Une question ou un besoin d'aménagement (handicap) ? Répondez simplement à cet e-mail.`
+        : `Ce lien est personnel et valable 14 jours. Passé ce délai, répondez à cet e-mail pour en recevoir un nouveau. Une question ou un besoin d'aménagement (handicap) ? Nous sommes là.`,
+    }),
+  };
+}
+
+export function learnerEmail(kind: Exclude<EmailKind, "espace-client" | "acces-elearning">, s: SessionRow, t: TraineeRow, slots: SlotRow[], frontendUrl: string): { subject: string; html: string } {
   // Lien d'accès direct : connecte le stagiaire à son espace sans mot de passe.
   const espace = `${frontendUrl}/acces/${t.access_token}`;
   const formateur = s.intervenants[0]?.nom ?? "Les Formateurs IA";
@@ -229,14 +263,34 @@ type Db = any;
 // Destinataire d'un envoi, avec l'e-mail exact qu'il recevra. key = id du
 // stagiaire, ou "client" pour l'espace client.
 export type Recipient = {
-  key: string; traineeId: string | null; name: string; email: string;
+  key: string; traineeId: string | null; profileId: string | null; name: string; email: string;
   eligible: boolean; reason: string | null; subject: string; html: string;
 };
 
 // Liste des destinataires d'un envoi et e-mail de chacun : sert à l'aperçu
 // (fenêtre de confirmation) comme à l'envoi, pour que l'aperçu soit
 // exactement ce qui part.
-export async function buildRecipients(db: Db, p: { sessionId: string; kind: EmailKind; frontendUrl: string }): Promise<Recipient[]> {
+const SETUP_LINK_DAYS = 14;
+const parisToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(new Date());
+
+// Lien « Créer mon compte » (page /definir-mot-de-passe) : remplace le lien
+// précédent de l'élève, comme le bouton « Générer le lien » de sa fiche.
+async function issueSetupLink(db: Db, userId: string, email: string, createdBy: string | null, frontendUrl: string): Promise<string> {
+  const token = generateToken();
+  const now = new Date();
+  const { error } = await db.from("password_setup_tokens").upsert({
+    user_id: userId, token_hash: await hashToken(token), email, created_by: createdBy,
+    created_at: now.toISOString(), expires_at: new Date(now.getTime() + SETUP_LINK_DAYS * 86_400_000).toISOString(),
+  }, { onConflict: "user_id" });
+  if (error) throw new Error(`Lien de création de compte impossible : ${error.message}`);
+  return `${frontendUrl}/definir-mot-de-passe#${token}`;
+}
+
+// issueLinks : à l'envoi seulement (jamais pour l'aperçu), crée le lien
+// personnel de création de compte des destinataires retenus.
+export async function buildRecipients(db: Db, p: {
+  sessionId: string; kind: EmailKind; frontendUrl: string; keys?: string[]; issueLinks?: { createdBy: string | null };
+}): Promise<Recipient[]> {
   const [{ data: session }, { data: trainees }, { data: slots }, { data: docs }] = await Promise.all([
     db.from("training_sessions").select("*").eq("id", p.sessionId).maybeSingle(),
     db.from("training_session_trainees").select("id, prenom, nom, email, profile_id, access_token").eq("session_id", p.sessionId).order("nom"),
@@ -252,16 +306,41 @@ export async function buildRecipients(db: Db, p: { sessionId: string; kind: Emai
       .map((d: { title: string }) => d.title.split(" · ")[0]);
     const mail = clientEmail(s, p.frontendUrl, [...new Set<string>(aSigner)]);
     return [{
-      key: "client", traineeId: null, name: s.client.representant?.nom || s.client.nom, email: to,
+      key: "client", traineeId: null, profileId: null, name: s.client.representant?.nom || s.client.nom, email: to,
       eligible: !!to, reason: to ? null : "Pas d'e-mail client renseigné dans le dossier.", ...mail,
     }];
+  }
+
+  if (p.kind === "acces-elearning") {
+    const today = parisToday();
+    const out: Recipient[] = [];
+    for (const t of (trainees ?? []) as TraineeRow[]) {
+      let activated = false;
+      let accountEmail = t.email;
+      if (t.profile_id) {
+        const { data: auth } = await db.auth.admin.getUserById(t.profile_id);
+        activated = !!auth?.user?.last_sign_in_at;
+        accountEmail = auth?.user?.email ?? t.email;
+      }
+      const reason = !t.email ? "Pas d'e-mail." : !t.profile_id ? "Pas encore de compte élève : créez l'élève (même e-mail) puis réessayez." : null;
+      const selected = !p.keys?.length || p.keys.includes(t.id);
+      let url = `${p.frontendUrl}/login`;
+      if (!activated) {
+        url = !reason && selected && p.issueLinks
+          ? await issueSetupLink(db, t.profile_id!, accountEmail, p.issueLinks.createdBy, p.frontendUrl)
+          : `${p.frontendUrl}/definir-mot-de-passe#lien-personnel-genere-a-l-envoi`;
+      }
+      const mail = accessEmail(s, { ...t, email: accountEmail }, { url, activated }, p.frontendUrl, today);
+      out.push({ key: t.id, traineeId: t.id, profileId: t.profile_id, name: `${t.prenom} ${t.nom}`, email: accountEmail, eligible: !reason, reason, ...mail });
+    }
+    return out;
   }
 
   return ((trainees ?? []) as TraineeRow[]).map((t) => {
     const hasCert = (docs ?? []).some((d: { template_id: string; trainee_id: string | null }) => d.template_id === "certificat-realisation" && d.trainee_id === t.id);
     const reason = !t.email ? "Pas d'e-mail." : p.kind === "certificat" && !hasCert ? "Certificat individuel pas encore émis." : null;
-    const mail = learnerEmail(p.kind as Exclude<EmailKind, "espace-client">, s, t, (slots ?? []) as SlotRow[], p.frontendUrl);
-    return { key: t.id, traineeId: t.id, name: `${t.prenom} ${t.nom}`, email: t.email, eligible: !reason, reason, ...mail };
+    const mail = learnerEmail(p.kind as Exclude<EmailKind, "espace-client" | "acces-elearning">, s, t, (slots ?? []) as SlotRow[], p.frontendUrl);
+    return { key: t.id, traineeId: t.id, profileId: t.profile_id, name: `${t.prenom} ${t.nom}`, email: t.email, eligible: !reason, reason, ...mail };
   });
 }
 
@@ -270,18 +349,36 @@ export async function sendFormationEmails(db: Db, google: PlatformGoogleAccount,
   sessionId: string; kind: EmailKind; keys?: string[]; automatic: boolean; sentBy: string | null; frontendUrl: string;
 }): Promise<SendResult> {
   const result: SendResult = { sent: [], skipped: [], errors: [] };
-  const recipients = (await buildRecipients(db, p)).filter((r) => !p.keys?.length || p.keys.includes(r.key));
+  const recipients = (await buildRecipients(db, { ...p, issueLinks: { createdBy: p.sentBy } })).filter((r) => !p.keys?.length || p.keys.includes(r.key));
+  const { data: session } = await db.from("training_sessions").select("company_id").eq("id", p.sessionId).maybeSingle();
   for (const r of recipients) {
     if (!r.eligible) { result.skipped.push({ email: r.email || r.name, reason: r.reason ?? "" }); continue; }
+    const entry = {
+      session_id: p.sessionId, kind: p.kind, automatic: p.automatic, sent_by: p.sentBy, trainee_id: r.traineeId,
+      profile_id: r.profileId, company_id: session?.company_id ?? null, recipient: r.email, subject: r.subject,
+    };
     try {
       await sendGmail(google, { to: r.email, subject: r.subject, html: r.html });
-      await db.from("session_emails").insert({ session_id: p.sessionId, kind: p.kind, automatic: p.automatic, sent_by: p.sentBy, trainee_id: r.traineeId, recipient: r.email, status: "sent" });
+      await logEmail(db, { ...entry, status: "sent" });
       result.sent.push(r.email);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      await db.from("session_emails").insert({ session_id: p.sessionId, kind: p.kind, automatic: p.automatic, sent_by: p.sentBy, trainee_id: r.traineeId, recipient: r.email, status: "error", error: message });
+      await logEmail(db, { ...entry, status: "error", error: message });
       result.errors.push({ email: r.email, message });
     }
   }
   return result;
+}
+
+// Journal des e-mails du parcours client (session_emails) : tout envoi, de
+// session ou non (invitation Entreprise…), y laisse sa date et son objet.
+export type EmailLogEntry = {
+  kind: EmailKind | "invitation-entreprise"; recipient: string; subject: string; status: "sent" | "error";
+  session_id?: string | null; trainee_id?: string | null; profile_id?: string | null; company_id?: string | null;
+  automatic?: boolean; sent_by?: string | null; error?: string | null;
+};
+
+export async function logEmail(db: Db, entry: EmailLogEntry): Promise<void> {
+  const { error } = await db.from("session_emails").insert(entry);
+  if (error) console.error("Journal des e-mails :", error.message);
 }

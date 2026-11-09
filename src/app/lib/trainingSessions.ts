@@ -378,7 +378,14 @@ export async function signClientDocument(token: string, documentId: string): Pro
 
 // ── E-mails (Gmail, fonction send-formation-email) ────────────────────
 
-export type EmailKind = "espace-client" | "convocation" | "rappel" | "certificat";
+export type EmailKind = "espace-client" | "convocation" | "rappel" | "certificat" | "acces-elearning";
+export type LoggedEmailKind = EmailKind | "invitation-entreprise";
+
+// Nom de chaque e-mail du parcours client, pour les historiques.
+export const EMAIL_HISTORY_LABELS: Record<LoggedEmailKind, string> = {
+  convocation: "Convocation", rappel: "Rappel", certificat: "Certificat", "espace-client": "Espace client",
+  "acces-elearning": "Accès e-learning", "invitation-entreprise": "Invitation espace Entreprise",
+};
 export type EmailResult = { sent: string[]; skipped: { email: string; reason: string }[]; errors: { email: string; message: string }[] };
 export type SessionEmail = Database["public"]["Tables"]["session_emails"]["Row"];
 
@@ -409,7 +416,21 @@ export async function previewFormationEmail(sessionId: string, kind: EmailKind):
 }
 
 export async function listSessionEmails(sessionId: string): Promise<SessionEmail[]> {
-  const { data, error } = await supabase.from("session_emails").select("*").eq("session_id", sessionId).order("sent_at", { ascending: false }).limit(50);
+  const { data, error } = await supabase.from("session_emails").select("*").eq("session_id", sessionId).order("sent_at", { ascending: false }).limit(200);
+  if (error) throw error;
+  return data ?? [];
+}
+
+// Historique des e-mails reçus par un élève (toutes sessions confondues).
+export async function listProfileEmails(profileId: string): Promise<SessionEmail[]> {
+  const { data, error } = await supabase.from("session_emails").select("*").eq("profile_id", profileId).order("sent_at", { ascending: false }).limit(200);
+  if (error) throw error;
+  return data ?? [];
+}
+
+// Historique des e-mails liés à une entreprise (sessions et invitations).
+export async function listCompanyEmails(companyId: string): Promise<SessionEmail[]> {
+  const { data, error } = await supabase.from("session_emails").select("*").eq("company_id", companyId).order("sent_at", { ascending: false }).limit(200);
   if (error) throw error;
   return data ?? [];
 }

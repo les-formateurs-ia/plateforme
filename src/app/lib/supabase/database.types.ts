@@ -245,9 +245,12 @@ export interface Database {
       session_emails: {
         Row: {
           id: string;
-          session_id: string;
+          session_id: string | null;
           trainee_id: string | null;
-          kind: "espace-client" | "convocation" | "rappel" | "certificat";
+          profile_id: string | null;
+          company_id: string | null;
+          kind: "espace-client" | "convocation" | "rappel" | "certificat" | "acces-elearning" | "invitation-entreprise";
+          subject: string | null;
           recipient: string;
           status: "sent" | "error";
           error: string | null;
@@ -255,6 +258,12 @@ export interface Database {
           sent_by: string | null;
           sent_at: string;
         };
+        Insert: never;
+        Update: never;
+        Relationships: never[];
+      };
+      learner_connections: {
+        Row: { id: string; user_id: string; started_at: string; last_seen_at: string; ip: string | null; user_agent: string | null };
         Insert: never;
         Update: never;
         Relationships: never[];
@@ -1193,6 +1202,7 @@ export interface Database {
           created_at: string;
           updated_at: string;
           is_preview: boolean;
+          available_from: string | null;
         };
         Insert: {
           id?: string;
@@ -1211,6 +1221,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
           is_preview?: boolean;
+          available_from?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["formation_instances"]["Insert"]>;
         Relationships: never[];
@@ -2010,6 +2021,10 @@ export interface Database {
     };
     Views: Record<string, never>;
     Functions: {
+      touch_learner_connection: {
+        Args: Record<string, never>;
+        Returns: string | null;
+      };
       my_training_documents: {
         Args: Record<string, never>;
         Returns: { id: string; template_id: string; title: string; issued_at: string; intitule: string | null; date_debut: string; date_fin: string }[];

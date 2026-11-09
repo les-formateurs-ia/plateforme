@@ -23,6 +23,7 @@ import {
 } from "@/app/lib/trainingSessions";
 import { VSwitch } from "@/app/components/common/VSwitch";
 import { EmailComposer } from "@/app/components/sessions/EmailComposer";
+import { EmailHistoryList } from "@/app/components/sessions/EmailHistory";
 import { VSelect } from "@/app/components/common/Select";
 import { useAuth } from "@/app/state/auth-context";
 import { isAdmin } from "@/app/lib/permissions";
@@ -757,10 +758,6 @@ function EvaluationPanel({ bundle, run }: { bundle: SessionBundle; run: Run }) {
 
 // ── E-mails ───────────────────────────────────────────────────────────
 
-const EMAIL_LABELS: Record<EmailKind, string> = {
-  convocation: "Convocation", rappel: "Rappel", certificat: "Certificat", "espace-client": "Espace client",
-};
-
 function EmailsCard({ bundle, busy, onCompose }: { bundle: SessionBundle; busy: boolean; onCompose: (kind: EmailKind) => void }) {
   const th = useTh();
   const [emails, setEmails] = useState<SessionEmail[]>([]);
@@ -773,7 +770,9 @@ function EmailsCard({ bundle, busy, onCompose }: { bundle: SessionBundle; busy: 
     void setAutoEmails(bundle.session.id, v).catch((err) => { console.error(err); setAuto(!v); toast.error("Impossible de modifier les envois automatiques."); });
   };
 
+  const elearning = bundle.session.financement === "cpf" || bundle.session.financement === "particulier";
   const actions: { kind: EmailKind; label: string; hint: string }[] = [
+    ...(elearning ? [{ kind: "acces-elearning" as const, label: "Accès e-learning", hint: "Création de compte" }] : []),
     { kind: "convocation", label: "Convocations", hint: "Aux stagiaires" },
     { kind: "rappel", label: "Rappel", hint: "Aux stagiaires" },
     { kind: "certificat", label: "Certificats", hint: "Aux stagiaires" },
@@ -801,19 +800,10 @@ function EmailsCard({ bundle, busy, onCompose }: { bundle: SessionBundle; busy: 
           <strong style={{ color: th.fg }}>Envois automatiques</strong><br />Convocation à J-7, rappel la veille de chaque séance, certificat dès qu'il est émis.
         </span>
       </label>
-      {emails.length > 0 && (
-        <div className="pt-2 space-y-1" style={{ borderTop: `1px solid ${th.sep}` }}>
-          {emails.slice(0, 8).map((e) => (
-            <div key={e.id} className="flex items-center gap-2 text-[11px]" title={e.error ?? undefined}>
-              <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: e.status === "sent" ? GREEN : th.danger }} />
-              <span className="font-semibold" style={{ color: th.fg }}>{EMAIL_LABELS[e.kind]}</span>
-              <span className="truncate flex-1" style={{ color: th.fg3 }}>{e.recipient}</span>
-              {e.automatic && <span className="px-1.5 rounded" style={{ background: th.navA, color: th.fg3 }}>auto</span>}
-              <span className="tabular-nums" style={{ color: th.fg3 }}>{new Date(e.sent_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })}</span>
-            </div>
-          ))}
-        </div>
-      )}
+      <div className="pt-2" style={{ borderTop: `1px solid ${th.sep}` }}>
+        <p className="text-[10px] font-black uppercase tracking-widest mb-1.5" style={{ color: th.fg3 }}>Historique des e-mails</p>
+        <EmailHistoryList emails={emails} compact />
+      </div>
     </div></GCard>
   );
 }

@@ -12,6 +12,7 @@ import { previewFormationEmail, sendFormationEmail, type EmailKind, type EmailRe
 
 export const EMAIL_KIND_LABELS: Record<EmailKind, string> = {
   convocation: "Convocations", rappel: "Rappel de séance", certificat: "Certificats", "espace-client": "Espace client",
+  "acces-elearning": "Accès e-learning",
 };
 
 export function EmailComposer({ sessionId, kind, onClose, onSent, onFallback }: {

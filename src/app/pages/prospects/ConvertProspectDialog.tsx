@@ -1,24 +1,26 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
-import { ArrowLeft, Building2, FileCheck2, User, Wand2 } from "lucide-react";
+import { ArrowLeft, Building2, FileCheck2, MailCheck, User, Wand2 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { Dialog, DialogContent, DialogFooter } from "@/app/components/ui/dialog";
 import { DialogHero, ErrorText, HueButton } from "@/app/components/entreprise/EntrepriseKit";
 import { FORMATION_PRESETS } from "@/app/lib/documents/samples";
 import { todayIso } from "@/app/lib/trainingSessions";
 import { listCompanies, type CompanyRow } from "@/app/lib/entreprise/companies";
-import { convertProspect } from "@/app/lib/prospectConversion";
+import { convertCpfProspect, convertProspect } from "@/app/lib/prospectConversion";
+import { listPublishedTemplates, type PublishedTemplate } from "@/app/lib/formationInstances";
 import type { Lead } from "@/app/lib/prospects";
 
 type Kind = "particulier" | "entreprise";
+type Payment = "cpf" | "direct";
 const NEW_COMPANY = "__nouvelle";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const PATHS: Record<Kind, { label: string; Icon: typeof User; desc: string; steps: string[] }> = {
   particulier: {
-    label: "Particulier", Icon: User, desc: "La personne finance elle-même sa formation.",
-    steps: ["Dossier « particulier » et stagiaire", "Devis + programme émis", "Puis contrat de formation (rétractation 14 j)"],
+    label: "Particulier", Icon: User, desc: "Financée par son CPF ou payée directement.",
+    steps: ["CPF : compte élève + accès e-learning par e-mail", "Paiement direct : devis + programme émis", "Puis contrat de formation (rétractation 14 j)"],
   },
   entreprise: {
     label: "Entreprise", Icon: Building2, desc: "Une entreprise (ou son OPCO) finance la formation.",
@@ -56,6 +58,9 @@ export function ConvertProspectDialog({ lead, open, onOpenChange, onConverted }:
   const [companies, setCompanies] = useState<CompanyRow[]>([]);
   const [companyId, setCompanyId] = useState(NEW_COMPANY);
   const [contactSigns, setContactSigns] = useState(true);
+  const [payment, setPayment] = useState<Payment>("cpf");
+  const [templates, setTemplates] = useState<PublishedTemplate[]>([]);
+  const [templateId, setTemplateId] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const set = (key: keyof ReturnType<typeof initialFields>) => (e: { target: { value: string } }) => setF((x) => ({ ...x, [key]: e.target.value }));
@@ -77,11 +82,50 @@ export function ConvertProspectDialog({ lead, open, onOpenChange, onConverted }:
     }).catch((err) => console.error(err));
   }, [open, kind, lead.company]);
 
-  const reset = () => { setKind(null); setF(initialFields(lead)); setCompanyId(NEW_COMPANY); setContactSigns(true); setError(null); };
+  // Formations e-learning attribuables (parcours CPF).
+  useEffect(() => {
+    if (!open || kind !== "particulier") return;
+    listPublishedTemplates().then((list) => {
+      setTemplates(list);
+      setTemplateId((cur) => cur || list.find((t) => t.status === "published")?.id || list[0]?.id || "");
+    }).catch((err) => console.error(err));
+  }, [open, kind]);
+
+  const cpf = kind === "particulier" && payment === "cpf";
+
+  const reset = () => { setKind(null); setPayment("cpf"); setF(initialFields(lead)); setCompanyId(NEW_COMPANY); setContactSigns(true); setError(null); };
+
+  const submitCpf = async () => {
+    if (!f.prenom.trim() || !f.nom.trim()) return setError("Le prénom et le nom sont obligatoires.");
+    if (!EMAIL_RE.test(f.email.trim())) return setError("L’e-mail de l’élève est nécessaire : il y reçoit ses accès.");
+    if (!templateId) return setError("Choisis la formation e-learning à lui attribuer.");
+    if (!f.dateDebut) return setError("Indique la date de début.");
+    if (f.dateFin < f.dateDebut) return setError("La date de fin précède la date de début.");
+    setSaving(true);
+    setError(null);
+    try {
+      const result = await convertCpfProspect(lead, {
+        kind: "cpf", prenom: f.prenom, nom: f.nom, email: f.email, telephone: f.telephone,
+        presetId: "rs6776", templateId, dateDebut: f.dateDebut, dateFin: f.dateFin,
+      });
+      if (result.emailSent) toast.success(`Dossier CPF ${result.reference} créé.`, { description: `Accès envoyés à ${f.email.trim()}.` });
+      else toast.warning(`Dossier CPF ${result.reference} créé, e-mail non envoyé.`, { description: `${result.emailError ?? "Erreur inconnue."} Renvoie-le depuis le dossier (E-mails › Accès e-learning).`, duration: 12000 });
+      onConverted(result.sessionId);
+      onOpenChange(false);
+      reset();
+      navigate(`/sessions/${result.sessionId}`);
+    } catch (err) {
+      console.error(err);
+      setError(err instanceof Error && err.message ? `Conversion impossible : ${err.message}` : "Conversion impossible.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (!kind || saving) return;
+    if (cpf) return submitCpf();
     const prix = f.prix.trim() === "" ? (lead.deal_value ?? preset.prix) : Number(f.prix.replace(/\s/g, "").replace(",", "."));
     if (!f.prenom.trim() || !f.nom.trim()) return setError("Le prénom et le nom sont obligatoires.");
     if (!EMAIL_RE.test(f.email.trim())) return setError(kind === "particulier"
@@ -190,6 +234,20 @@ export function ConvertProspectDialog({ lead, open, onOpenChange, onConverted }:
               </Group>
             )}
 
+            {kind === "particulier" && (
+              <Group title="Mode de paiement">
+                <div className="grid sm:grid-cols-2 gap-2" role="group" aria-label="Mode de paiement">
+                  {([["cpf", "CPF", "Mon Compte Formation : pas de devis ni de programme, juste ses accès."], ["direct", "Paiement direct", "Devis, programme puis contrat de formation."]] as const).map(([id, label, hint]) => (
+                    <button key={id} type="button" onClick={() => { setPayment(id); setError(null); }} aria-pressed={payment === id}
+                      className="text-left rounded-[6px] border px-3 py-2" style={chip(payment === id)}>
+                      <span className="block text-sm font-bold">{label}</span>
+                      <span className="block text-[11px] opacity-80">{hint}</span>
+                    </button>
+                  ))}
+                </div>
+              </Group>
+            )}
+
             <Group title={kind === "particulier" ? "Stagiaire" : "Contact formation"}>
               <div className="grid sm:grid-cols-2 gap-3">
                 <Field label="Prénom">{input("prenom")}</Field>
@@ -214,6 +272,20 @@ export function ConvertProspectDialog({ lead, open, onOpenChange, onConverted }:
               )}
             </Group>
 
+            {cpf ? (
+              <Group title="Formation e-learning">
+                <Field label="Formation attribuée">
+                  <select value={templateId} onChange={(e) => setTemplateId(e.target.value)} className="w-full rounded-[4px] border px-3 py-2 text-sm" style={selectStyle}>
+                    {!templates.length && <option value="">Chargement…</option>}
+                    {templates.map((t) => <option key={t.id} value={t.id}>{t.name}{t.status === "draft" ? " (brouillon)" : ""}</option>)}
+                  </select>
+                </Field>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <Field label="Date de début (ouverture)">{input("dateDebut", { type: "date" })}</Field>
+                  <Field label="Date de fin">{input("dateFin", { type: "date" })}</Field>
+                </div>
+              </Group>
+            ) : (<>
             <Group title={kind === "particulier" ? "Adresse du stagiaire" : `Adresse de l’entreprise${existing ? " (si absente de la fiche)" : ""}`}>
               <Field label="Adresse">{input("adresse")}</Field>
               <div className="grid grid-cols-[1fr_2fr] gap-3">
@@ -238,16 +310,28 @@ export function ConvertProspectDialog({ lead, open, onOpenChange, onConverted }:
               </div>
             </Group>
 
+            </>)}
+
+            {cpf ? (
+              <p className="flex items-start gap-2 text-xs" style={{ color: th.fg3 }}>
+                <MailCheck className="w-4 h-4 shrink-0" />
+                {f.dateDebut > todayIso()
+                  ? `Il reçoit tout de suite un e-mail pour créer son compte, puis voit un décompte jusqu’au ${f.dateDebut.split("-").reverse().join("/")} : ce jour-là, toute la formation s’ouvre.`
+                  : "Il reçoit tout de suite un e-mail pour créer son compte ; la formation est ouverte dès sa première connexion."}
+                {" "}Il apparaît dans Élèves, où tu peux modifier sa formation et sa date d’ouverture.
+              </p>
+            ) : (
             <p className="flex items-start gap-2 text-xs" style={{ color: th.fg3 }}>
               <FileCheck2 className="w-4 h-4 shrink-0" />
               {kind === "entreprise"
                 ? "Le devis et le programme sont émis dès que l’adresse, le SIRET et le signataire sont connus ; sinon le dossier indique ce qu’il manque. Tout reste modifiable."
                 : "Le devis et le programme sont émis dès que l’adresse est connue ; sinon le dossier indique ce qu’il manque. Tout reste modifiable."}
             </p>
+            )}
 
             {error && <ErrorText>{error}</ErrorText>}
             <DialogFooter>
-              <HueButton type="submit" Icon={Wand2} disabled={saving}>{saving ? "Création du dossier…" : "Créer le dossier"}</HueButton>
+              <HueButton type="submit" Icon={Wand2} disabled={saving}>{saving ? (cpf ? "Création et envoi…" : "Création du dossier…") : cpf ? "Valider et envoyer les accès" : "Créer le dossier"}</HueButton>
             </DialogFooter>
           </form>
         )}

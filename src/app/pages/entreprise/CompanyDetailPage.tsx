@@ -14,6 +14,7 @@ import { CompanyCategoriesTab } from "@/app/components/entreprise/CompanyCategor
 import { CompanyResultsTab } from "@/app/components/entreprise/CompanyResultsTab";
 import { CompanyStudentUploadsTab } from "@/app/components/entreprise/CompanyStudentUploadsTab";
 import { ClientSessionsCard } from "@/app/components/sessions/ClientSessionsCard";
+import { EmailHistoryCard } from "@/app/components/sessions/EmailHistory";
 import { CompanyProfileCard } from "@/app/components/entreprise/CompanyProfileCard";
 import type { TrainingSession } from "@/app/lib/trainingSessions";
 import { useAuth } from "@/app/state/auth-context";
@@ -106,6 +107,7 @@ export function CompanyDetailPage() {
       {name && isAdmin(role) && sessions && <CompanyProfileCard companyId={companyId} sessions={sessions} onRenamed={setName} />}
 
       {name && <ClientSessionsCard companyId={companyId} onLoaded={(list) => { setSessions(list); if (!isAdmin(role)) setAllowed(list.length > 0); }} />}
+      {name && isAdmin(role) && <EmailHistoryCard companyId={companyId} />}
 
       {name && allowed === false && (
         <p className="text-sm" style={{ color: "var(--muted-foreground)" }}>Cette entreprise ne vous est pas encore attribuée : ses contenus s'ouvriront dès qu'une de ses sessions vous sera confiée.</p>

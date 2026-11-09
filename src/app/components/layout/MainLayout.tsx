@@ -5,6 +5,7 @@ import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
 import { useImpersonation } from "@/app/state/impersonation-context";
+import { AccessGate } from "@/app/components/layout/LearnerAccess";
 import { isStaff, isAdmin } from "@/app/lib/permissions";
 import { useStaffBasePath } from "@/app/lib/staffBase";
 import { Background } from "@/app/components/common/Background";
@@ -290,7 +291,9 @@ export function MainLayout() {
 
         {/* En défilement document, cet espace initial part avec le contenu. */}
         <div className={cx("main-layout-content flex-1 min-h-0 flex flex-col overflow-hidden lg:pt-0", !sidebarHidden && "pt-[calc(env(safe-area-inset-top)+2.5rem)]")}>
-          {examMode && !isPathAllowedDuringExam(location.pathname) ? <Navigate to="/dashboard" replace /> : <Outlet />}
+          {examMode && !isPathAllowedDuringExam(location.pathname) ? <Navigate to="/dashboard" replace /> : (
+            <AccessGate allow={location.pathname.startsWith("/profile")}><Outlet /></AccessGate>
+          )}
         </div>
       </div>
       </div>

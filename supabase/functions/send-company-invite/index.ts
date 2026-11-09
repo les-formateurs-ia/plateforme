@@ -6,6 +6,9 @@
 // passer par une simple écriture RLS côté client.
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse, isStaffRole, getCallerRole } from "../_shared/podcast-utils.ts";
+import { logEmail } from "../_shared/formation-email.ts";
+
+const INVITE_SUBJECT = "Invitation à l'espace Entreprise";
 
 // Messages Supabase Auth bruts (anglais, peu actionnables) → texte FR clair,
 // même esprit que translateAuthError() côté client (auth-context.tsx).
@@ -61,9 +64,19 @@ Deno.serve(async (req) => {
         data: { company_id: employee.company_id, first_name: employee.first_name, last_name: employee.last_name },
       });
       if (inviteError || !invited?.user) {
-        errors.push({ employeeId: employee.id, message: translateInviteError(inviteError?.message ?? "Échec de l'invitation.") });
+        const message = translateInviteError(inviteError?.message ?? "Échec de l'invitation.");
+        errors.push({ employeeId: employee.id, message });
+        await logEmail(serviceClient, {
+          kind: "invitation-entreprise", recipient: employee.email, subject: INVITE_SUBJECT, status: "error", error: message,
+          company_id: employee.company_id, sent_by: userData.user.id,
+        });
         continue;
       }
+      // Journal du parcours client : l'invitation est partie (mail Supabase).
+      await logEmail(serviceClient, {
+        kind: "invitation-entreprise", recipient: employee.email, subject: INVITE_SUBJECT, status: "sent",
+        company_id: employee.company_id, profile_id: invited.user.id, sent_by: userData.user.id,
+      });
 
       const nowIso = new Date().toISOString();
       const { error: profileError } = await serviceClient

@@ -1,5 +1,6 @@
 // Envoi à la demande des e-mails d'une session de formation (convocation,
-// rappel, certificat aux stagiaires ; lien de l'espace client au client),
+// rappel, certificat et accès e-learning aux stagiaires ; lien de l'espace
+// client au client),
 // depuis le tableau de bord de la formation. Réservé à l'administrateur
 // (le formateur n'a pas accès au lien de l'espace client) ; envoi par Gmail
 // depuis le compte Google de la plateforme.
@@ -8,7 +9,7 @@ import { CORS_HEADERS, getCallerRole, jsonResponse } from "../_shared/podcast-ut
 import { GOOGLE_SCOPES, getPlatformGoogleAccount } from "../_shared/google-platform.ts";
 import { buildRecipients, sendFormationEmails, type EmailKind } from "../_shared/formation-email.ts";
 
-const KINDS: EmailKind[] = ["espace-client", "convocation", "rappel", "certificat"];
+const KINDS: EmailKind[] = ["espace-client", "convocation", "rappel", "certificat", "acces-elearning"];
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });

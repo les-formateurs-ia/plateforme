@@ -14,6 +14,7 @@ import { SignupPage } from "@/app/pages/auth/SignupPage";
 import { SetPasswordPage } from "@/app/pages/auth/SetPasswordPage";
 import { PASSWORD_SETUP_PATH } from "@/app/lib/passwordSetup";
 import { LessonPage } from "@/app/pages/LessonPage";
+import { AccessGate, LearnerPresence } from "@/app/components/layout/LearnerAccess";
 import { DashboardPage } from "@/app/pages/dashboard/DashboardPage";
 import { LessonsPage } from "@/app/pages/lessons/LessonsPage";
 import { CertificationPage } from "@/app/pages/certification/CertificationPage";
@@ -306,8 +307,8 @@ function AppRoutes() {
         <Route path="entreprise/html/:exerciseId" element={<RequireCompanyStudent><CompanyHtmlExercisePage /></RequireCompanyStudent>} />
         <Route path="entreprise/satisfaction/:testId" element={<RequireCompanyStudent><CompanySatisfactionTestPage /></RequireCompanyStudent>} />
       </Route>
-      <Route path="/lesson/:lessonId" element={<RequireAuth><ExamLock><LessonPage /></ExamLock></RequireAuth>} />
-      <Route path="/lesson/:lessonId/mission-envoyee" element={<RequireAuth><ExamLock><MissionSubmittedPage /></ExamLock></RequireAuth>} />
+      <Route path="/lesson/:lessonId" element={<RequireAuth><AccessGate redirectTo="/dashboard"><ExamLock><LessonPage /></ExamLock></AccessGate></RequireAuth>} />
+      <Route path="/lesson/:lessonId/mission-envoyee" element={<RequireAuth><AccessGate redirectTo="/dashboard"><ExamLock><MissionSubmittedPage /></ExamLock></AccessGate></RequireAuth>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
@@ -322,6 +323,7 @@ export default function App() {
             <BulkGenerationProvider>
               <CertificationProvider>
                 <BrowserRouter>
+                  <LearnerPresence />
                   <AppRoutes />
                 </BrowserRouter>
               </CertificationProvider>

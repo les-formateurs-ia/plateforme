@@ -12,12 +12,13 @@ export interface FormationInstanceRow {
   name: string;
   status: EnrollmentStatus;
   assignedAt: string;
+  availableFrom: string | null; // jour d'ouverture (CPF) ; null = ouverte
 }
 
 export async function listInstancesForStudent(studentId: string): Promise<FormationInstanceRow[]> {
   const { data, error } = await supabase
     .from("formation_instances")
-    .select("id, template_id, user_id, name, status, assigned_at")
+    .select("id, template_id, user_id, name, status, assigned_at, available_from")
     .eq("user_id", studentId)
     .order("assigned_at", { ascending: false });
   if (error) throw error;
@@ -28,6 +29,7 @@ export async function listInstancesForStudent(studentId: string): Promise<Format
     name: r.name,
     status: r.status,
     assignedAt: r.assigned_at,
+    availableFrom: r.available_from ?? null,
   }));
 }
 
@@ -60,6 +62,12 @@ export async function assignFormationToStudent(templateId: string, studentId: st
   });
   if (error) throw error;
   return data as string;
+}
+
+// Jour d'ouverture de la formation pour l'élève : avant, il voit un décompte.
+export async function setInstanceAvailableFrom(instanceId: string, date: string | null): Promise<void> {
+  const { error } = await supabase.from("formation_instances").update({ available_from: date }).eq("id", instanceId);
+  if (error) throw error;
 }
 
 export async function updateInstanceStatus(instanceId: string, status: EnrollmentStatus): Promise<void> {

@@ -49,9 +49,33 @@ export async function getMyInstances(userId: string): Promise<MyInstance[]> {
     // servent uniquement à /admin/instances/:id/preview, pas au parcours
     // élève (Dashboard, Mes leçons, Pratique IA...).
     .eq("is_preview", false)
+    // Formation CPF pas encore ouverte : invisible jusqu'au jour J (décompte).
+    .or(`available_from.is.null,available_from.lte.${parisToday()}`)
     .order("assigned_at", { ascending: false });
   if (error) throw error;
   return data ?? [];
+}
+
+export const parisToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(new Date());
+
+export type PendingAccess = { name: string; availableFrom: string };
+
+// Élève dont aucune formation n'est encore ouverte : la prochaine ouverture,
+// pour le décompte. null dès qu'une formation est accessible (ou s'il n'en a
+// aucune en attente).
+export async function getPendingAccess(userId: string): Promise<PendingAccess | null> {
+  const today = parisToday();
+  const { data, error } = await supabase
+    .from("formation_instances")
+    .select("name, available_from")
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .eq("is_preview", false);
+  if (error) throw error;
+  const rows = data ?? [];
+  if (rows.some((r) => !r.available_from || r.available_from <= today)) return null;
+  const next = rows.filter((r) => r.available_from).sort((a, b) => a.available_from!.localeCompare(b.available_from!))[0];
+  return next ? { name: next.name, availableFrom: next.available_from! } : null;
 }
 
 export async function getCourseOutline(instanceId: string): Promise<CourseOutline | null> {
