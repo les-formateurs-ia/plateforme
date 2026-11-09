@@ -68,6 +68,8 @@ import { AdminSessionDetailPage } from "@/app/pages/admin/AdminSessionDetailPage
 import { SignDocumentPage } from "@/app/pages/SignDocumentPage";
 import { ClientPortalPage } from "@/app/pages/ClientPortalPage";
 import { LearnerAccessPage } from "@/app/pages/LearnerAccessPage";
+import { ImpactSurveyPage } from "@/app/pages/ImpactSurveyPage";
+import { ImpactResultsPage } from "@/app/pages/ImpactResultsPage";
 import { ProspectsPage } from "@/app/pages/prospects/ProspectsPage";
 import { CompanyDetailPage } from "@/app/pages/entreprise/CompanyDetailPage";
 import { CompanyStudentHomePage } from "@/app/pages/entreprise/CompanyStudentHomePage";
@@ -220,6 +222,8 @@ function AppRoutes() {
       <Route path="/signer/:token" element={<SignDocumentPage />} />
       <Route path="/espace-client/:token" element={<ClientPortalPage />} />
       <Route path="/acces/:token" element={<LearnerAccessPage />} />
+      <Route path="/evaluation/resultats/:token" element={<ImpactResultsPage />} />
+      <Route path="/evaluation/:token" element={<ImpactSurveyPage />} />
       <Route path="/" element={<RequireAuth><RootGate /></RequireAuth>} />
       <Route element={<RequireAuth><MainLayout /></RequireAuth>}>
         <Route path="dashboard" element={<DashboardRoute />} />

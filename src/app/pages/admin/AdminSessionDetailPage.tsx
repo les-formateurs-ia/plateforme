@@ -24,6 +24,7 @@ import {
 import { VSwitch } from "@/app/components/common/VSwitch";
 import { EmailComposer } from "@/app/components/sessions/EmailComposer";
 import { EmailHistoryList } from "@/app/components/sessions/EmailHistory";
+import { ImpactSurveysCard } from "@/app/components/sessions/ImpactSurveysCard";
 import { VSelect } from "@/app/components/common/Select";
 import { useAuth } from "@/app/state/auth-context";
 import { isAdmin } from "@/app/lib/permissions";
@@ -388,6 +389,8 @@ export function AdminSessionDetailPage() {
           </div></GCard>
 
           <EmailsCard bundle={bundle} busy={busy} onCompose={(kind) => setComposer({ kind })} />
+
+          <ImpactSurveysCard sessionId={bundle.session.id} />
 
           <DocumentsArchive kit={kit} />
 

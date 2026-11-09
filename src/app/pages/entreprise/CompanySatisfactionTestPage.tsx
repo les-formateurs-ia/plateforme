@@ -1,20 +1,17 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { Star, Check, Heart, Info, SearchX } from "lucide-react";
+import { Star, Heart, Info, SearchX } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { isStaff } from "@/app/lib/permissions";
-import { HueProvider, PageHero, Panel, ChoiceButton, LetterBadge, CompletionPanel, HueButton, EmptyState, Loading, HUES, DANGER } from "@/app/components/entreprise/EntrepriseKit";
+import { HueProvider, PageHero, Panel, CompletionPanel, HueButton, EmptyState, Loading, HUES, DANGER } from "@/app/components/entreprise/EntrepriseKit";
 import { QuestionStepper } from "@/app/components/entreprise/QuestionStepper";
 import {
   getSatisfactionTestForTaking, submitSatisfactionResponse,
   type SatisfactionQuestionForStudent, type SatisfactionAnswer,
 } from "@/app/lib/entreprise/companySatisfaction";
 
-type AnswerValue = string | number | string[];
-
-const isEmpty = (v: AnswerValue | undefined) => v === undefined || v === "" || (Array.isArray(v) && !v.length);
-const needsFollowUp = (q: SatisfactionQuestionForStudent, v: AnswerValue | undefined) => q.type === "yes_no" && !!q.followUpOn && v === q.followUpOn;
+import { SatisfactionAnswerInput, isEmpty, needsFollowUp, type AnswerValue } from "@/app/components/entreprise/SatisfactionAnswerInput";
 
 export function CompanySatisfactionTestPage() {
   const th = useTh();
@@ -85,7 +82,6 @@ export function CompanySatisfactionTestPage() {
   const canSubmit = questions.length > 0 && missing.length === 0;
 
   const goBack = () => (window.history.state?.idx > 0 ? navigate(-1) : navigate("/"));
-  const STAR = HUES.amber[0];
   const q = questions[current];
 
   return (
@@ -120,71 +116,9 @@ export function CompanySatisfactionTestPage() {
             hint={q.type === "qcm" ? (q.allowMultiple ? "Plusieurs réponses possibles." : "Une seule réponse.") : q.type === "rating" ? "Donne une note de 1 à 5." : undefined}
             canNext={current === questions.length - 1 ? canSubmit : isSatisfied(q)}
             submitting={submitting} submitLabel="Envoyer mes réponses" onSubmit={() => void handleSubmit()}>
-            {q.type === "qcm" && (
-              <div className="grid sm:grid-cols-2 gap-3">
-                {q.options.map((o, i) => {
-                  const value = answers[q.id];
-                  const active = q.allowMultiple ? Array.isArray(value) && value.includes(o.id) : value === o.id;
-                  const indicator = q.allowMultiple
-                    ? <span className="w-6 h-6 rounded-lg shrink-0 flex items-center justify-center" style={{ border: `2px solid ${active ? "#fff" : th.fg3}` }}>{active && <Check className="w-4 h-4" />}</span>
-                    : <LetterBadge letter={String.fromCharCode(65 + i)} active={active} />;
-                  return (
-                    <ChoiceButton key={o.id} big active={active} indicator={indicator}
-                      onClick={() => (q.allowMultiple ? toggleMulti(q.id, o.id) : setAnswer(q.id, o.id))}>
-                      {o.label}
-                    </ChoiceButton>
-                  );
-                })}
-              </div>
-            )}
-
-            {q.type === "rating" && (
-              <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                {[1, 2, 3, 4, 5].map((n) => {
-                  const on = (answers[q.id] as number) >= n;
-                  return (
-                    <button key={n} onClick={() => setAnswer(q.id, n)} aria-label={`Note ${n} sur 5`}
-                      className="w-14 h-14 sm:w-20 sm:h-20 rounded-3xl flex flex-col items-center justify-center gap-0.5 transition-all duration-200"
-                      style={{ background: on ? "rgba(238,184,90,0.16)" : th.inputBg, border: `1px solid ${on ? "rgba(238,184,90,0.55)" : th.inputB}` }}>
-                      <Star className="w-7 h-7 sm:w-9 sm:h-9 transition-colors" style={{ color: on ? STAR : th.fg3, fill: on ? STAR : "none" }} />
-                      <span className="text-[11px] font-black tabular-nums" style={{ color: on ? STAR : th.fg3 }}>{n}</span>
-                    </button>
-                  );
-                })}
-                {typeof answers[q.id] === "number" && <span className="ml-2 text-2xl font-black tabular-nums" style={{ color: th.fg }}>{answers[q.id]}/5</span>}
-              </div>
-            )}
-
-            {q.type === "yes_no" && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-3 max-w-lg">
-                  {([["yes", "Oui"], ["no", "Non"]] as const).map(([value, label]) => (
-                    <ChoiceButton key={value} big active={answers[q.id] === value} onClick={() => setAnswer(q.id, value)}>
-                      <span className="w-full text-center text-lg">{label}</span>
-                    </ChoiceButton>
-                  ))}
-                </div>
-                {needsFollowUp(q, answers[q.id]) && (
-                  <textarea
-                    value={details[q.id] ?? ""}
-                    onChange={(e) => setDetails((prev) => ({ ...prev, [q.id]: e.target.value }))}
-                    rows={4}
-                    placeholder={q.followUpLabel || "Précise ta réponse..."}
-                    className="w-full rounded-[4px] px-5 py-4 text-base g-input resize-none"
-                  />
-                )}
-              </div>
-            )}
-
-            {q.type === "text" && (
-              <textarea
-                value={(answers[q.id] as string) ?? ""}
-                onChange={(e) => setAnswer(q.id, e.target.value)}
-                rows={6}
-                placeholder="Ta réponse..."
-                className="w-full rounded-[4px] px-5 py-4 text-base g-input resize-none"
-              />
-            )}
+            <SatisfactionAnswerInput q={q} value={answers[q.id]} detail={details[q.id] ?? ""}
+              onValue={(v) => setAnswer(q.id, v)} onToggle={(id) => toggleMulti(q.id, id)}
+              onDetail={(text) => setDetails((prev) => ({ ...prev, [q.id]: text }))} />
           </QuestionStepper>
         )}
       </div>

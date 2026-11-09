@@ -262,6 +262,21 @@ export interface Database {
         Update: never;
         Relationships: never[];
       };
+      impact_surveys: {
+        Row: {
+          id: string; session_id: string; title: string; description: string | null; questions: Json;
+          answer_token: string; results_token: string; is_open: boolean; created_by: string | null; created_at: string; updated_at: string;
+        };
+        Insert: { id?: string; session_id: string; title: string; description?: string | null; questions?: Json; is_open?: boolean; created_by?: string | null; updated_at?: string };
+        Update: Partial<Database["public"]["Tables"]["impact_surveys"]["Insert"]>;
+        Relationships: [{ foreignKeyName: "impact_survey_responses_survey_id_fkey"; columns: ["id"]; isOneToOne: false; referencedRelation: "impact_survey_responses"; referencedColumns: ["survey_id"] }];
+      };
+      impact_survey_responses: {
+        Row: { id: string; survey_id: string; first_name: string; last_name: string; answers: Json; created_at: string };
+        Insert: never;
+        Update: never;
+        Relationships: [{ foreignKeyName: "impact_survey_responses_survey_id_fkey"; columns: ["survey_id"]; isOneToOne: false; referencedRelation: "impact_surveys"; referencedColumns: ["id"] }];
+      };
       learner_connections: {
         Row: { id: string; user_id: string; started_at: string; last_seen_at: string; ip: string | null; user_agent: string | null };
         Insert: never;
@@ -2033,6 +2048,9 @@ export interface Database {
         Args: { p_document_id: string };
         Returns: { title: string; html: string }[];
       };
+      get_impact_survey: { Args: { p_token: string }; Returns: Json };
+      get_impact_survey_results: { Args: { p_token: string }; Returns: Json };
+      submit_impact_survey: { Args: { p_token: string; p_first_name: string; p_last_name: string; p_answers: Json }; Returns: string };
       get_client_portal: {
         Args: { p_token: string };
         Returns: Json;
