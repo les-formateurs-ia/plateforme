@@ -26,6 +26,8 @@ export type TrainingSession = {
   statutCommercial: StatutCommercial;
   factures: Facture[];
   chargesHt: number;
+  // Effectif prévu (devis, convention) tant que les apprenants ne sont pas tous inscrits.
+  effectifPrevu: number | null;
   // Session reprise d'un autre outil (Digiforma) et son dossier d'origine.
   source: "plateforme" | "digiforma";
   archive: SessionArchive | null;
@@ -159,7 +161,7 @@ export function buildDocumentContext(bundle: SessionBundle, activity: Record<str
     session: {
       reference: session.reference, dateDebut: session.dateDebut, dateFin: session.dateFin, lieu: session.lieu,
       lienConnexion: session.lienConnexion, creneaux: bundle.slots.map(({ date, debut, fin }) => ({ date, debut, fin })),
-      intervenants: session.intervenants, effectif: Math.max(bundle.trainees.length, 1),
+      intervenants: session.intervenants, effectif: Math.max(bundle.trainees.length, session.effectifPrevu ?? 0, 1),
     },
     client: session.client,
     stagiaires,

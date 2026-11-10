@@ -74,7 +74,7 @@ export function NewSessionForm({ clients, sessions, initial, onCancel }: {
         lieu: preset.formation.modalite === "presentiel" ? "" : "Plateforme e-learning et visioconférence", lienConnexion: null,
         intervenants: [{ nom: "Yanis SOUICI", qualite: "Formateur IA générative, dirigeant de Les Formateurs IA" }],
         formateurId: null,
-        statutCommercial: "gagne", factures: [], chargesHt: 0,
+        statutCommercial: "gagne", factures: [], chargesHt: 0, effectifPrevu: null,
       });
       // Un élève de la plateforme est aussi le stagiaire : son compte relie
       // la session à ses relevés de connexion.

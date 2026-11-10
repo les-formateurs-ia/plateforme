@@ -14,7 +14,7 @@ import {
 } from "@/app/components/ui/dropdown-menu";
 import { cx } from "@/app/lib/cx";
 import {
-  dueLabel, loadBoard, setStage, setReminderDone, leadName, SOURCES, STAGES, STAGE_LABEL,
+  dueLabel, formatPhone, loadBoard, setStage, setReminderDone, leadName, SOURCES, STAGES, STAGE_LABEL,
   type Board, type Lead, type ProspectStage, type Reminder,
 } from "@/app/lib/prospects";
 import { ProspectPanel } from "./ProspectPanel";
@@ -343,7 +343,7 @@ function LeadCard({ lead, reminder, lastContact, notes, onOpen, onMove }: {
         <span title={new Date(lead.created_at).toLocaleString("fr-FR")}>Reçue {ago(lead.created_at)}</span>
         {notes > 0 && <span className="inline-flex items-center gap-1" title={lastContact ? `Dernier échange ${ago(lastContact)}` : undefined}><MessageSquareText className="w-3 h-3" />{notes}</span>}
         <span className="ml-auto flex items-center gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
-          {lead.phone && <a href={`tel:${lead.phone}`} onClick={e => e.stopPropagation()} title={`Appeler ${lead.phone}`} className="p-1 rounded-[3px] hover:bg-black/5" style={{ color: th.fg }}><Phone className="w-3.5 h-3.5" /></a>}
+          {lead.phone && <a href={`tel:${lead.phone}`} onClick={e => e.stopPropagation()} title={`Appeler ${formatPhone(lead.phone)}`} className="p-1 rounded-[3px] hover:bg-black/5" style={{ color: th.fg }}><Phone className="w-3.5 h-3.5" /></a>}
           {lead.email && <a href={`mailto:${lead.email}`} onClick={e => e.stopPropagation()} title={`Écrire à ${lead.email}`} className="p-1 rounded-[3px] hover:bg-black/5" style={{ color: th.fg }}><Mail className="w-3.5 h-3.5" /></a>}
         </span>
       </div>
@@ -388,7 +388,7 @@ function RemindersAgenda({ reminders, leadById, onOpen, onDone }: {
                     </div>
                   </button>
                   <span className="text-xs font-semibold whitespace-nowrap" style={{ color: g.tone ?? th.fg2 }}>{dueLabel(r.due_at)}</span>
-                  {lead?.phone && <a href={`tel:${lead.phone}`} title={`Appeler ${lead.phone}`} className="p-1.5 rounded-[4px] border" style={{ borderColor: th.inputB, color: th.fg }}><Phone className="w-3.5 h-3.5" /></a>}
+                  {lead?.phone && <a href={`tel:${lead.phone}`} title={`Appeler ${formatPhone(lead.phone)}`} className="p-1.5 rounded-[4px] border" style={{ borderColor: th.inputB, color: th.fg }}><Phone className="w-3.5 h-3.5" /></a>}
                   <ChevronRight className="w-4 h-4 shrink-0" style={{ color: th.fg3 }} />
                 </li>
               );

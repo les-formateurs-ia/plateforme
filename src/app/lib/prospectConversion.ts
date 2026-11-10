@@ -34,6 +34,7 @@ export type ParticulierConversion = ConversionCommon & {
 export type EntrepriseConversion = ConversionCommon & {
   kind: "entreprise";
   financement: "entreprise" | "opco";
+  effectif: number; // apprenants prévus (devis, convention), inscrits ensuite un par un
   companyId: string | null; // fiche existante, sinon une fiche est créée
   name: string; siret: string; address: string; postalCode: string; city: string;
   contact: CompanyContact; // le prospect, contact formation de l'entreprise
@@ -130,6 +131,7 @@ export async function convertProspect(lead: Lead, input: ConversionInput): Promi
     lieu: preset.formation.modalite === "presentiel" ? "" : "Plateforme e-learning et visioconférence", lienConnexion: null,
     intervenants: [INTERVENANT], formateurId: null,
     statutCommercial: "devis", factures: [], chargesHt: 0,
+    effectifPrevu: input.kind === "entreprise" ? input.effectif : null,
   });
 
   // Le particulier est le stagiaire ; son compte plateforme, s'il en a un,
@@ -165,7 +167,7 @@ export async function convertProspect(lead: Lead, input: ConversionInput): Promi
   if (linkError) console.warn("Lien prospect → dossier non enregistré (migration 20261108120000 à appliquer ?)", linkError);
   if (lead.pipeline_stage !== "proposition" && lead.pipeline_stage !== "gagne") await setStage(lead.id, "proposition");
   await addActivity(lead.id, "note", [
-    `Converti en dossier ${input.kind === "particulier" ? "particulier" : "entreprise"} ${reference} (${preset.formation.intitule}).`,
+    `Converti en dossier ${input.kind === "particulier" ? "particulier" : "entreprise"} ${reference} (${preset.formation.intitule}${input.kind === "entreprise" ? `, ${input.effectif} apprenant${input.effectif > 1 ? "s" : ""}` : ""}).`,
     companyCreated ? "Fiche entreprise créée." : null,
     issued.length ? `Émis : ${issued.join(", ")}.` : "Devis à émettre depuis le dossier une fois le dossier client complété.",
   ].filter(Boolean).join(" "));
@@ -210,7 +212,7 @@ export async function convertCpfProspect(lead: Lead, input: CpfConversion): Prom
     dateDebut: input.dateDebut, dateFin: input.dateFin,
     lieu: "Plateforme e-learning Les Formateurs IA", lienConnexion: null,
     intervenants: [INTERVENANT], formateurId: null,
-    statutCommercial: "gagne", factures: [], chargesHt: 0,
+    statutCommercial: "gagne", factures: [], chargesHt: 0, effectifPrevu: null,
   });
   // Pas de convocation ni de rappel de séance automatiques : l'élève suit
   // la formation en ligne, à son rythme.

@@ -29,6 +29,7 @@ function mapSession(r: SessionRow): TrainingSession {
     lienConnexion: r.lien_connexion, intervenants: r.intervenants as Intervenant[], formateurId: r.formateur_id ?? null,
     // Valeurs par défaut tant que la migration 20261107120000 n'est pas appliquée.
     statutCommercial: r.statut_commercial ?? "gagne", factures: (r.factures ?? []) as Facture[], chargesHt: Number(r.charges_ht ?? 0),
+    effectifPrevu: r.effectif_prevu ?? null,
     source: r.source ?? "plateforme", archive: (r.archive ?? null) as SessionArchive | null,
   };
 }
@@ -49,6 +50,7 @@ const hhmm = (t: string) => t.slice(0, 5);
 function toRow(s: Omit<TrainingSession, "id" | "source" | "archive">): Database["public"]["Tables"]["training_sessions"]["Insert"] {
   return {
     statut_commercial: s.statutCommercial, factures: s.factures as unknown as Json, charges_ht: s.chargesHt,
+    effectif_prevu: s.effectifPrevu,
     reference: s.reference, financement: s.financement, financeur: s.financeur, company_id: s.companyId,
     client: s.client as unknown as Json, formation: s.formation as unknown as Json, lignes: s.lignes as unknown as Json,
     conditions_paiement: s.conditionsPaiement, date_debut: s.dateDebut, date_fin: s.dateFin, lieu: s.lieu,

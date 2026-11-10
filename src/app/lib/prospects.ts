@@ -64,6 +64,17 @@ export function normalizePhone(input: string): string | null {
   return /^\+[1-9]\d{7,14}$/.test(digits) ? digits : null;
 }
 
+/** Affichage d'un numéro français : « +33 7 00 00 00 00 » ou « 07 00 00 00 00 »
+ *  selon la forme saisie ; un numéro étranger ou atypique est rendu tel quel. */
+export function formatPhone(input: string): string {
+  const raw = input.trim();
+  const digits = raw.replace(/[\s.\-()]/g, "").replace(/^00/, "+");
+  const intl = /^\+33(?:0)?([1-9]\d{8})$/.exec(digits);
+  if (intl) return `+33 ${intl[1][0]} ${intl[1].slice(1).match(/\d{2}/g)!.join(" ")}`;
+  if (/^0[1-9]\d{8}$/.test(digits)) return digits.match(/\d{2}/g)!.join(" ");
+  return raw;
+}
+
 const CHALLENGES: Record<string, string> = {
   "charge-equipes": "Alléger la charge de travail des équipes",
   automatisation: "Automatiser le traitement de données / documents",

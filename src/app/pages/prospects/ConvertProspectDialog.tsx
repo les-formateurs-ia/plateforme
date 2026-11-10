@@ -10,7 +10,7 @@ import { todayIso } from "@/app/lib/trainingSessions";
 import { listCompanies, type CompanyRow } from "@/app/lib/entreprise/companies";
 import { convertCpfProspect, convertProspect } from "@/app/lib/prospectConversion";
 import { listPublishedTemplates, type PublishedTemplate } from "@/app/lib/formationInstances";
-import type { Lead } from "@/app/lib/prospects";
+import { formatPhone, type Lead } from "@/app/lib/prospects";
 
 type Kind = "particulier" | "entreprise";
 type Payment = "cpf" | "direct";
@@ -36,11 +36,11 @@ function addDaysIso(iso: string, days: number): string {
 function initialFields(lead: Lead) {
   const start = addDaysIso(todayIso(), 14);
   return {
-    prenom: lead.first_name, nom: lead.last_name, email: lead.email ?? "", telephone: lead.phone ?? "", fonction: "",
+    prenom: lead.first_name, nom: lead.last_name, email: lead.email ?? "", telephone: lead.phone ? formatPhone(lead.phone) : "", fonction: "",
     adresse: "", codePostal: "", ville: "",
     company: lead.company ?? "", siret: "", financement: "entreprise" as "entreprise" | "opco",
     signataireNom: "", signataireFonction: "", signataireEmail: "",
-    dateDebut: start, dateFin: start, prix: "",
+    dateDebut: start, dateFin: start, prix: "", effectif: "1",
   };
 }
 
@@ -132,6 +132,8 @@ export function ConvertProspectDialog({ lead, open, onOpenChange, onConverted }:
       ? "L’e-mail du stagiaire est nécessaire : il reçoit son devis et signe en ligne."
       : "L’e-mail du contact est nécessaire : il reçoit le devis et signe en ligne.");
     if (!Number.isFinite(prix) || prix < 0) return setError("Prix invalide.");
+    const effectif = Number(f.effectif.trim());
+    if (kind === "entreprise" && (!Number.isInteger(effectif) || effectif < 1 || effectif > 500)) return setError("Indique le nombre d’apprenants (au moins 1).");
     if (f.dateFin < f.dateDebut) return setError("La date de fin précède la date de début.");
     if (kind === "entreprise" && companyId === NEW_COMPANY && !f.company.trim()) return setError("Indiquez le nom de l’entreprise.");
     if (kind === "entreprise" && !contactSigns && (!f.signataireNom.trim() || !EMAIL_RE.test(f.signataireEmail.trim())))
@@ -145,7 +147,7 @@ export function ConvertProspectDialog({ lead, open, onOpenChange, onConverted }:
       const result = await convertProspect(lead, kind === "particulier"
         ? { ...common, kind, prenom: f.prenom, nom: f.nom, email: f.email, adresse: f.adresse, codePostal: f.codePostal, ville: f.ville }
         : {
-          ...common, kind, financement: f.financement, companyId: companyId === NEW_COMPANY ? null : companyId,
+          ...common, kind, financement: f.financement, effectif, companyId: companyId === NEW_COMPANY ? null : companyId,
           name: f.company, siret: f.siret, address: f.adresse, postalCode: f.codePostal, city: f.ville, contact,
           signataire: contactSigns ? null : { civilite: "", prenom: sPrenom, nom: sNom.join(" "), fonction: f.signataireFonction.trim(), email: f.signataireEmail.trim(), telephone: "" },
         });
@@ -303,10 +305,11 @@ export function ConvertProspectDialog({ lead, open, onOpenChange, onConverted }:
                   ))}
                 </div>
               </Field>
-              <div className="grid sm:grid-cols-3 gap-3">
+              <div className={`grid gap-3 ${kind === "entreprise" ? "sm:grid-cols-4" : "sm:grid-cols-3"}`}>
                 <Field label="Début">{input("dateDebut", { type: "date" })}</Field>
                 <Field label="Fin">{input("dateFin", { type: "date" })}</Field>
                 <Field label="Prix HT (€)">{input("prix", { inputMode: "decimal", placeholder: String(lead.deal_value ?? preset.prix) })}</Field>
+                {kind === "entreprise" && <Field label="Apprenants">{input("effectif", { type: "number", inputMode: "numeric" })}</Field>}
               </div>
             </Group>
 

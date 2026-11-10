@@ -567,6 +567,12 @@ function PrixPanel({ draft, setDraft }: { draft: TrainingSession; setDraft: (s: 
         <Field label="Quantité"><TextInput type="number" value={String(ligne.quantite)} onChange={(v) => setLigne({ quantite: Number(v) || 0 })} /></Field>
         <Field label="Prix unitaire HT (€)"><TextInput type="number" value={String(ligne.prixUnitaireHt)} onChange={(v) => setLigne({ prixUnitaireHt: Number(v) || 0 })} /></Field>
       </div>
+      {(draft.financement === "entreprise" || draft.financement === "opco") && (
+        <Field label="Apprenants prévus" hint="Effectif du devis et de la convention ; les stagiaires inscrits le remplacent s’ils sont plus nombreux.">
+          <TextInput type="number" value={draft.effectifPrevu == null ? "" : String(draft.effectifPrevu)}
+            onChange={(v) => { const n = Math.round(Number(v)); setDraft({ ...draft, effectifPrevu: v.trim() && n >= 1 ? Math.min(n, 500) : null }); }} />
+        </Field>
+      )}
       <Field label="Conditions de paiement"><TextArea rows={2} value={draft.conditionsPaiement} onChange={(v) => setDraft({ ...draft, conditionsPaiement: v })} /></Field>
     </div>
   );

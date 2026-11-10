@@ -128,6 +128,7 @@ export interface Database {
           charges_ht: number;
           source: "plateforme" | "digiforma";
           archive: Json | null;
+          effectif_prevu: number | null;
         };
         Insert: {
           reference: string;
@@ -152,6 +153,7 @@ export interface Database {
           charges_ht?: number;
           source?: "plateforme" | "digiforma";
           archive?: Json | null;
+          effectif_prevu?: number | null;
         };
         Update: Partial<Database["public"]["Tables"]["training_sessions"]["Insert"]>;
         Relationships: never[];

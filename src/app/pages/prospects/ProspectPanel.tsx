@@ -9,7 +9,7 @@ import { useTh } from "@/app/theme/theme";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/app/components/ui/sheet";
 import { Pill, HueButton, GhostButton } from "@/app/components/entreprise/EntrepriseKit";
 import {
-  addActivity, addReminder, deleteActivity, deleteProspect, dueLabel, isManual, deleteReminder, leadAnswers, leadName, listActivities, listLeadReminders,
+  addActivity, addReminder, deleteActivity, deleteProspect, dueLabel, isManual, deleteReminder, formatPhone, leadAnswers, leadName, listActivities, listLeadReminders,
   setDealValue, setReminderDone, ACTIVITY_KINDS, SOURCES, STAGES, STAGE_LABEL,
   type Activity, type Lead, type ProspectActivityKind, type ProspectStage, type Reminder,
 } from "@/app/lib/prospects";
@@ -208,10 +208,10 @@ function PanelBody({ lead, onLeadChange, onMove, onBoardStale, onDeleted }: {
         </SheetDescription>
         <div className="flex flex-wrap gap-2 mt-4">
           {lead.phone && <>
-            <a href={`tel:${lead.phone}`} className="sweep inline-flex items-center gap-2 rounded-[2px] min-h-9 px-4 text-sm font-semibold" style={{ background: th.ink, color: th.onInk }}>
-              <Phone className="w-4 h-4" />{lead.phone}
+            <a href={`tel:${lead.phone.replace(/[\s.\-()]/g, "")}`} className="sweep inline-flex items-center gap-2 rounded-[2px] min-h-9 px-4 text-sm font-semibold" style={{ background: th.ink, color: th.onInk }}>
+              <Phone className="w-4 h-4" />{formatPhone(lead.phone)}
             </a>
-            <IconBtn title="Copier le numéro" onClick={() => copy(lead.phone!, "Numéro")}><Copy className="w-4 h-4" /></IconBtn>
+            <IconBtn title="Copier le numéro" onClick={() => copy(formatPhone(lead.phone!), "Numéro")}><Copy className="w-4 h-4" /></IconBtn>
           </>}
           {lead.email && <>
             <a href={`mailto:${lead.email}`} className="inline-flex items-center gap-2 rounded-[2px] min-h-9 px-4 text-sm font-semibold border min-w-0" style={{ borderColor: th.ink, color: th.fg }}>
