@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Playground personnalisé de Nathalie</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --paper:#F7F7FA;
+      --surface:#ffffff;
+      --ink:#1b1a17;
+      --ink-2:#4a4741;
+      --ink-3:#7c786f;
+      --rule:#e4e1d9;
+      --rule-2:#efece5;
+      --accent:#1f4e46;
+      --accent-soft:#eef3f1;
+      --ok:#2c6a48;
+      --ok-soft:#eef4ef;
+      --warn:#8a6519;
+      --warn-soft:#faf4e7;
+      --alert:#963428;
+      --alert-soft:#fbf1ef;
+      --serif:'Funnel Display',Georgia,'Iowan Old Style','Times New Roman',serif;
+      --sans:'Funnel Display',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    }
+    html{scroll-behavior:smooth}
+    body{
+      font-family:var(--sans);font-size:15.5px;color:var(--ink);background:var(--paper);
+      line-height:1.65;-webkit-font-smoothing:antialiased;
+    }
+    a{color:var(--accent)}
+    button,input,textarea{font:inherit}
+    .skip{position:absolute;left:-9999px;top:0;background:var(--surface);color:var(--ink);padding:12px;z-index:10}
+    .skip:focus{left:12px}
+
+    .wrap{width:100%;margin:0 auto;padding:0 22px 80px}
+
+    header.top{padding:44px 0 26px;border-bottom:1px solid var(--rule)}
+    header.top h1{
+      font-family:var(--serif);font-size:clamp(28px,4.5vw,37px);line-height:1.2;font-weight:400;
+      letter-spacing:-.01em;margin-bottom:12px;max-width:28ch;
+    }
+    header.top .sub{font-size:15px;color:var(--ink-2);}
+
+    .intro{font-size:16.5px;color:var(--ink-2);margin:26px 0}
+
+    .exercise{margin-top:44px}
+    .exercise h2{
+      font-family:var(--serif);font-size:23px;font-weight:400;line-height:1.3;
+      letter-spacing:-.01em;padding-bottom:12px;border-bottom:1px solid var(--rule);margin-bottom:18px;
+    }
+    .exercise h2 .num{color:var(--accent);font-size:15px;font-family:var(--sans);font-weight:600;letter-spacing:.06em;display:block;margin-bottom:4px;text-transform:uppercase}
+    .instruction{color:var(--ink-2);margin:4px 0 22px;font-size:15px;}
+
+    fieldset{border:1px solid var(--rule);border-radius:3px;margin:16px 0;padding:18px 20px;background:var(--surface)}
+    fieldset.correct{border-color:var(--ok);background:var(--ok-soft)}
+    fieldset.incorrect{border-color:var(--warn);background:var(--warn-soft)}
+    legend{font-weight:600;padding:0 8px;max-width:94%;font-size:15px}
+    .choices{display:grid;gap:7px;margin-top:12px}
+    label.choice{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:3px;cursor:pointer;font-size:14.5px;color:var(--ink-2)}
+    label.choice:hover{background:var(--accent-soft)}
+    input[type="radio"]{width:1.1rem;height:1.1rem;margin-top:.2rem;accent-color:var(--accent);flex:0 0 auto}
+    .feedback{min-height:1.5em;margin:.7rem 0 0;font-weight:500;font-size:14.5px;line-height:1.6}
+    .correct .feedback{color:var(--ok)}
+    .incorrect .feedback{color:var(--warn)}
+
+    .aside{border-left:2px solid var(--rule);padding:2px 0 2px 20px;margin:22px 0;font-size:15px;color:var(--ink-2);}
+    .aside .lab{display:block;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);margin-bottom:5px;font-weight:600}
+    .aside.caution{border-left-color:var(--alert)}
+    .aside.caution .lab{color:var(--alert)}
+    .aside.key{border-left-color:var(--accent)}
+    .aside.key .lab{color:var(--accent)}
+    .aside strong{color:var(--ink);font-weight:600}
+    .aside em{font-style:italic}
+
+    .promptbox{border:1px solid var(--rule);background:var(--surface);padding:16px 18px;margin:14px 0 20px;border-radius:3px}
+    .promptbox .exlab{display:block;font-size:11px;letter-spacing:.13em;text-transform:uppercase;font-weight:600;color:var(--ink-3);margin-bottom:8px}
+    .promptbox p{font-family:var(--serif);font-style:italic;font-size:15px;line-height:1.7;color:var(--ink)}
+
+    textarea.freeform{width:100%;min-height:120px;border:1px solid var(--rule);border-radius:3px;padding:12px 14px;font-family:var(--sans);font-size:14.5px;color:var(--ink);resize:vertical;background:var(--surface)}
+    textarea.freeform:focus{outline:2px solid var(--accent);outline-offset:1px}
+    .savehint{font-size:12.5px;color:var(--ink-3);margin-top:6px}
+    .modelanswer{display:none;margin-top:16px;border-left:2px solid var(--accent);padding:2px 0 2px 20px;font-size:14.5px;color:var(--ink-2);}
+    .modelanswer.show{display:block}
+    .modelanswer .lab{display:block;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;font-weight:600}
+    .modelanswer .promptline{font-family:var(--serif);font-style:italic;color:var(--ink);margin:6px 0 10px}
+
+    .toolbar{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:34px;padding-top:22px;border-top:1px solid var(--rule)}
+    .btn{font:inherit;font-size:14.5px;font-weight:500;border-radius:3px;padding:10px 20px;border:1px solid var(--accent);cursor:pointer;transition:.15s;background:none;color:var(--accent)}
+    .btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+    .btn-primary{background:var(--accent);color:#fff}
+    .btn-primary:hover{background:#173b35}
+    .btn:hover{background:var(--accent-soft)}
+    .ex-score{font-size:14px;font-weight:600;color:var(--ink-2);margin-left:auto}
+    .score-good{color:var(--ok)}
+    .score-review{color:var(--warn)}
+
+    footer{margin-top:60px;padding-top:22px;border-top:1px solid var(--rule);font-size:12.5px;color:var(--ink-3);line-height:1.7;}
+
+    @media(max-width:700px){
+      .ex-score{width:100%;margin-left:0}
+      header.top h1{font-size:27px}
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#contenu">Aller au playground</a>
+
+  <div class="wrap">
+    <header class="top">
+      <h1>Nathalie, sécurisez vos supports de formation SIRH</h1>
+      <p class="sub">Ce playground reprend votre activité de préparation de guides et supports de formation SIRH pour vos clients. Toutes les données proposées sont fictives : n'utilisez aucune information réelle de vos clients.</p>
+    </header>
+
+    <main id="contenu">
+      <p class="intro">Trois temps : décider quoi faire d'une information avant de l'envoyer à une IA, vérifier si un comportement courant est déjà le bon réflexe, puis corriger vous-même un prompt et justifier vos choix.</p>
+
+      <div class="aside key">
+        <span class="lab">Un repère avant de commencer</span>
+        Retirer, anonymiser ou garder : trois réponses possibles à la même question, selon que l'information est utile ou non à la tâche demandée, et selon qu'elle identifie ou non une personne ou une structure précise.
+      </div>
+
+      <form id="quiz" novalidate>
+        <section class="exercise" aria-labelledby="ex1-title">
+          <h2 id="ex1-title"><span class="num">Exercice 1</span>Retirer, anonymiser, ou garder ?</h2>
+          <p class="instruction">Quatre informations que vous pourriez rencontrer en préparant un support de formation SIRH. Pour chacune, dites ce qu'il faut en faire avant de la soumettre à une IA.</p>
+
+          <fieldset data-answer="remove" data-ok="Exact. Un numéro de sécurité sociale n'a aucune utilité pour un pas-à-pas générique : il se retire entièrement, il n'y a rien à en garder ni à anonymiser." data-why="Anonymiser suppose qu'un élément reste utile sous une forme générique. Ici, rien dans la tâche ne demande un numéro de sécurité sociale, même fictif : le bon réflexe est de le retirer entièrement.">
+            <legend>1. Le numéro de sécurité sociale d'un salarié, visible sur une fiche de paie que vous utilisez comme exemple pour rédiger un pas-à-pas SIRH.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="q1" value="remove"> Retirer entièrement</label>
+              <label class="choice"><input type="radio" name="q1" value="anon"> Anonymiser / généraliser</label>
+              <label class="choice"><input type="radio" name="q1" value="keep"> Garder tel quel</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <fieldset data-answer="keep" data-ok="Exact. Le nom du module SIRH n'identifie ni une personne ni une structure précise, et il est indispensable pour que l'IA rédige un texte pertinent : rien à en retirer ni à anonymiser." data-why="Retirer ou anonymiser cette information priverait l'IA du contexte nécessaire à la tâche, alors qu'elle ne présente elle-même aucun caractère sensible.">
+            <legend>2. Le nom du module SIRH précis à documenter (par exemple « gestion des congés »), nécessaire pour que l'IA rédige un texte pertinent.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="q2" value="remove"> Retirer entièrement</label>
+              <label class="choice"><input type="radio" name="q2" value="anon"> Anonymiser / généraliser</label>
+              <label class="choice"><input type="radio" name="q2" value="keep"> Garder tel quel</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <fieldset data-answer="remove" data-ok="Exact. Le commentaire d'une interface générique n'a pas besoin d'un nom. Retirez-le et, si un repère est indispensable, recréez une capture de démonstration entièrement fictive." data-why="Remplacer le nom sur une capture réelle ne garantit pas que les métadonnées, autres champs ou détails visuels ne permettent plus d'identifier la personne. La minimisation prime.">
+            <legend>3. Le nom et le prénom d'un salarié apparaissant en exemple dans une capture d'écran que vous voulez faire commenter par l'IA.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="q3" value="remove"> Retirer entièrement</label>
+              <label class="choice"><input type="radio" name="q3" value="anon"> Anonymiser / généraliser</label>
+              <label class="choice"><input type="radio" name="q3" value="keep"> Garder tel quel</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <fieldset data-answer="remove" data-ok="Exact. Le paragraphe est générique et sans rapport avec ce client précis : son nom n'apporte rien à la tâche, il se retire entièrement." data-why="Le nom du client n'est utile que si la tâche en dépend. Ici, la reformulation porte sur une méthode générale : ce nom n'a aucune raison de figurer dans le prompt.">
+            <legend>4. Le nom de la structure cliente elle-même, dans un prompt demandant de reformuler un paragraphe générique de méthode pédagogique, sans rapport avec ce client précis.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="q4" value="remove"> Retirer entièrement</label>
+              <label class="choice"><input type="radio" name="q4" value="anon"> Anonymiser / généraliser</label>
+              <label class="choice"><input type="radio" name="q4" value="keep"> Garder tel quel</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <div class="toolbar no-print">
+            <button class="btn btn-primary grade-btn" type="button">Corriger mes réponses</button>
+            <div class="ex-score" role="status" aria-live="polite">Répondez aux 4 questions</div>
+          </div>
+        </section>
+
+        <section class="exercise" aria-labelledby="ex2-title">
+          <h2 id="ex2-title"><span class="num">Exercice 2</span>Est-ce déjà le bon réflexe ?</h2>
+          <p class="instruction">Vous intervenez chez plusieurs clients en parallèle. Pour chaque comportement décrit, dites s'il s'agit déjà du bon réflexe.</p>
+
+          <fieldset data-answer="non" data-ok="Exact. Un fil distinct par mission réduit les mélanges de contexte, mais vous devez aussi contrôler le compte, la mémoire, les fichiers joints, les permissions et l'outil autorisé." data-why="Le cloisonnement conversationnel est une mesure d'organisation, pas une garantie de sécurité à lui seul.">
+            <legend>1. Vous utilisez la même conversation IA, ouverte depuis plusieurs semaines, pour avancer successivement sur les supports de trois clients différents, en changeant simplement de sujet d'une question à l'autre.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="p1" value="oui"> Oui, bon réflexe</label>
+              <label class="choice"><input type="radio" name="p1" value="non"> Non, pas encore</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <fieldset data-answer="oui" data-ok="Exact. Vous seule connaissez la configuration réelle de chaque client : cette vérification est précisément la revue manuelle attendue avant tout usage d'un texte généré." data-why="Un contenu généré peut décrire un réglage plausible mais inexistant dans la version précise utilisée par ce client : seule une vérification humaine, spécifique à chaque client, permet de l'écarter.">
+            <legend>2. Avant d'intégrer un paragraphe rédigé par l'IA dans un support de formation, vous vérifiez que chaque réglage ou fonctionnalité mentionné existe réellement dans la version du SIRH utilisée par ce client précis.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="p2" value="oui"> Oui, bon réflexe</label>
+              <label class="choice"><input type="radio" name="p2" value="non"> Non, pas encore</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <fieldset data-answer="non" data-ok="Exact. Une mission terminée doit entraîner la révocation de l'accès qui allait avec, même par commodité : le garder « au cas où » est justement ce que le moindre privilège cherche à éviter." data-why="Un accès qui n'a plus de raison d'être, mais qui reste actif, est le scénario même que la révocation en fin de mission est censée prévenir.">
+            <legend>3. Une mission chez un client vient de se terminer : vous continuez d'utiliser le compte professionnel que ce client vous avait ouvert sur son propre outil d'IA, « au cas où » une question resterait à traiter.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="p3" value="oui"> Oui, bon réflexe</label>
+              <label class="choice"><input type="radio" name="p3" value="non"> Non, pas encore</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <fieldset data-answer="oui" data-ok="Exact. La relecture reste utile même après un prompt bien corrigé : une IA peut réintroduire un détail identifiant dans sa réponse, indépendamment de ce qui lui a été demandé." data-why="Corriger le prompt réduit le risque en amont, mais ne garantit rien sur ce que l'outil produit en sortie : la vérification finale reste un réflexe à part entière, à chaque fois.">
+            <legend>4. Vous relisez systématiquement un texte généré par l'IA pour vérifier qu'aucun nom réel ne s'y est glissé, même quand le prompt de départ était déjà correctement anonymisé.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="p4" value="oui"> Oui, bon réflexe</label>
+              <label class="choice"><input type="radio" name="p4" value="non"> Non, pas encore</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <div class="toolbar no-print">
+            <button class="btn btn-primary grade-btn" type="button">Corriger mes réponses</button>
+            <div class="ex-score" role="status" aria-live="polite">Répondez aux 4 questions</div>
+          </div>
+        </section>
+
+        <section class="exercise" aria-labelledby="ex3-title">
+          <h2 id="ex3-title"><span class="num">Exercice 3</span>À vous de corriger et de justifier</h2>
+          <p class="instruction">Voici un prompt à ne pas envoyer tel quel. Corrigez-le vous-même, puis écrivez la justification de chacun de vos choix, comme dans l'exemple travaillé du cours. Il n'y a pas de correction automatique ici : comparez ensuite votre réponse au corrigé indicatif.</p>
+
+          <div class="promptbox">
+            <span class="exlab">Prompt à corriger</span>
+            <p>« Rédige un paragraphe d'introduction pour le guide de formation du SIRH que j'anime chez ce client : présente le module de gestion des absences, sachant que Karim Belaïd, responsable RH du client Ossature Bois Vosgienne, a demandé à ce qu'on insiste particulièrement sur le cas d'une salariée actuellement en arrêt longue maladie, dont le dossier n°4521 illustre bien la procédure à suivre. »</p>
+          </div>
+
+          <label for="ex3-prompt" style="display:block;font-size:13px;font-weight:600;color:var(--ink-2);margin-bottom:6px">Votre prompt corrigé</label>
+          <textarea class="freeform" id="ex3-prompt" placeholder="Écrivez ici votre version corrigée du prompt..."></textarea>
+
+          <label for="ex3-justif" style="display:block;font-size:13px;font-weight:600;color:var(--ink-2);margin:16px 0 6px">Votre justification</label>
+          <textarea class="freeform" id="ex3-justif" placeholder="Expliquez ce que vous avez retiré, anonymisé ou gardé, et pourquoi..."></textarea>
+          <p class="savehint" id="ex3-savehint">Votre brouillon est enregistré automatiquement dans ce navigateur.</p>
+
+          <div class="toolbar no-print">
+            <button class="btn" type="button" id="ex3-reveal">Voir le corrigé indicatif</button>
+          </div>
+
+          <div class="modelanswer" id="ex3-model">
+            <span class="lab">Corrigé indicatif</span>
+            <p class="promptline">« Rédige un paragraphe d'introduction pour un guide de formation SIRH présentant le module de gestion des absences. Illustre uniquement les étapes génériques avec un profil de démonstration fictif et une absence prolongée fictive, sans reprendre le cas, le diagnostic, le numéro de dossier ou l'identité d'une personne réelle. N'invente aucun réglage : signale les informations manquantes. »</p>
+            <p>Le nom, la fonction, la structure, le numéro de dossier et le cas de santé réel ont été retirés : aucun n'est nécessaire. L'exemple est recréé de zéro avec un profil et une absence fictifs. Le modèle doit signaler ce qu'il ignore au lieu d'inventer le fonctionnement du SIRH.</p>
+          </div>
+        </section>
+      </form>
+    </main>
+
+    <footer>
+      Toutes les entreprises, personnes et données de cet exercice sont fictives. Ce support ne remplace pas la politique interne de vos clients ni les consignes de leur DSI ou de leur DPO.
+    </footer>
+  </div>
+
+  <script>
+    document.querySelectorAll('.grade-btn').forEach((btn) => {
+      const section = btn.closest('.exercise');
+      const fieldsets = [...section.querySelectorAll('fieldset[data-answer]')];
+      const scoreEl = section.querySelector('.ex-score');
+      const threshold = Math.max(1, Math.ceil(fieldsets.length * 0.8));
+
+      btn.addEventListener('click', () => {
+        let score = 0;
+        let answered = 0;
+        fieldsets.forEach((fieldset) => {
+          const selected = fieldset.querySelector('input:checked');
+          const feedback = fieldset.querySelector('.feedback');
+          fieldset.classList.remove('correct', 'incorrect');
+          if (!selected) {
+            feedback.textContent = 'Choisissez une réponse.';
+            fieldset.classList.add('incorrect');
+            return;
+          }
+          answered += 1;
+          if (selected.value === fieldset.dataset.answer) {
+            score += 1;
+            fieldset.classList.add('correct');
+            feedback.textContent = fieldset.dataset.ok;
+          } else {
+            fieldset.classList.add('incorrect');
+            feedback.textContent = `À revoir. ${fieldset.dataset.why}`;
+          }
+        });
+        scoreEl.className = 'ex-score ' + (score >= threshold ? 'score-good' : 'score-review');
+        if (answered < fieldsets.length) {
+          scoreEl.textContent = `${answered}/${fieldsets.length} réponses données. Score provisoire : ${score}/${fieldsets.length}.`;
+        } else if (score === fieldsets.length) {
+          scoreEl.textContent = `${score}/${fieldsets.length}. Tout est juste.`;
+        } else if (score >= threshold) {
+          scoreEl.textContent = `${score}/${fieldsets.length}. Relisez les retours en couleur, puis continuez.`;
+        } else {
+          scoreEl.textContent = `${score}/${fieldsets.length}. Relisez les retours en couleur avant de poursuivre.`;
+        }
+        section.querySelector('.incorrect')?.scrollIntoView({ behavior:'smooth', block:'center' });
+      });
+    });
+
+    /* ---- exercice 3 : zone libre avec autosave localStorage et corrigé indicatif ---- */
+    var STORAGE_KEY = "playground_nathalie_lecon1.6_prompt_corrige";
+    var ex3Prompt = document.getElementById('ex3-prompt');
+    var ex3Justif = document.getElementById('ex3-justif');
+    var ex3Hint = document.getElementById('ex3-savehint');
+    var ex3Reveal = document.getElementById('ex3-reveal');
+    var ex3Model = document.getElementById('ex3-model');
+
+    (function loadDraft(){
+      try {
+        var raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        var data = JSON.parse(raw);
+        if (data && typeof data.prompt === 'string') ex3Prompt.value = data.prompt;
+        if (data && typeof data.justif === 'string') ex3Justif.value = data.justif;
+      } catch (e) { /* stockage indisponible : pas de brouillon restauré */ }
+    })();
+
+    function saveDraft(){
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ v:1, prompt: ex3Prompt.value, justif: ex3Justif.value }));
+        ex3Hint.textContent = 'Brouillon enregistré.';
+      } catch (e) {
+        ex3Hint.textContent = "Le brouillon n'a pas pu être enregistré dans ce navigateur.";
+      }
+    }
+    ex3Prompt.addEventListener('input', saveDraft);
+    ex3Justif.addEventListener('input', saveDraft);
+
+    ex3Reveal.addEventListener('click', function(){
+      var showing = ex3Model.classList.toggle('show');
+      ex3Reveal.textContent = showing ? 'Masquer le corrigé indicatif' : 'Voir le corrigé indicatif';
+    });
+  </script>
+</body>
+</html>

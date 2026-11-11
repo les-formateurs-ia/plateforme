@@ -11,6 +11,7 @@ import { useStaffBasePath } from "@/app/lib/staffBase";
 import { deleteLessonVideoFiles } from "@/app/lib/lessonVideos";
 import { useHtmlTheme } from "@/app/lib/useHtmlTheme";
 import { MISSION_TEMPLATES } from "@/app/data/missions";
+import { PLAYGROUNDS, parsePlaygroundMarker, buildPlaygroundMarker } from "@/app/playgrounds/registry";
 
 interface QuizOptionDraft { id?: string; label: string; is_correct: boolean; }
 interface QuizQuestionDraft { id?: string; question: string; explanation: string; options: QuizOptionDraft[]; }
@@ -534,16 +535,58 @@ export function AdminLessonEditorPage() {
         <div>
           <div className="flex items-center justify-between mb-2">
             <label className="block text-xs font-bold uppercase tracking-widest" style={{ color: th.fg3 }}>Playground (page HTML)</label>
-            {customHtml.trim() && (
+            {customHtml.trim() && !parsePlaygroundMarker(customHtml) && (
               <button type="button" onClick={() => setHtmlPreviewOpen((v) => !v)}
                 className="flex items-center gap-1.5 text-xs font-semibold hover:opacity-70" style={{ color: th.navAC }}>
                 <Eye className="w-3.5 h-3.5" />{htmlPreviewOpen ? "Masquer l'aperçu" : "Aperçu"}
               </button>
             )}
           </div>
+          {(() => {
+            const native = parsePlaygroundMarker(customHtml);
+            const selectedId = native?.entry.id ?? "";
+            const profiles = native?.entry.profiles ?? [];
+            return (
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                <select value={selectedId} aria-label="Playground natif"
+                  onChange={(e) => {
+                    const id = e.target.value;
+                    if (!id) { if (native) setCustomHtml(""); return; }
+                    if (customHtml.trim() && !native && !window.confirm("Remplacer le HTML actuel par un Playground natif ?")) return;
+                    setCustomHtml(buildPlaygroundMarker(id));
+                  }}
+                  className="rounded-[4px] px-3 py-2 text-xs g-input">
+                  <option value="">HTML collé (pas de Playground natif)</option>
+                  {PLAYGROUNDS.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
+                </select>
+                {native && (
+                  <select value={native.params.pg === "non" ? "non" : ""} aria-label="Onglet Playground"
+                    onChange={(e) => setCustomHtml(buildPlaygroundMarker(native.entry.id, { ...native.params, pg: e.target.value }))}
+                    className="rounded-[4px] px-3 py-2 text-xs g-input">
+                    <option value="">Fiche de révision + Playground</option>
+                    <option value="non">Fiche de révision seule</option>
+                  </select>
+                )}
+                {native && profiles.length > 0 && (
+                  <select value={native.params.profil ?? ""} aria-label="Variante du Playground"
+                    onChange={(e) => setCustomHtml(buildPlaygroundMarker(native.entry.id, { ...native.params, profil: e.target.value }))}
+                    className="rounded-[4px] px-3 py-2 text-xs g-input">
+                    <option value="">Version commune</option>
+                    {profiles.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
+                  </select>
+                )}
+              </div>
+            );
+          })()}
+          {parsePlaygroundMarker(customHtml) && !parsePlaygroundMarker(customHtml)!.html ? (
+            <p className="text-xs rounded-[4px] px-4 py-3" style={{ color: th.fg2, border: `1px solid ${th.sep}` }}>
+              Playground natif : composant de la plateforme, mis à jour pour tous les élèves à chaque déploiement. Marqueur enregistré : <code>{customHtml.trim()}</code>
+            </p>
+          ) : (
           <textarea value={customHtml} onChange={(e) => setCustomHtml(e.target.value)} rows={10} placeholder="Colle ici le HTML du template (identique pour tous les élèves — la personnalisation se fait sur un duplicata)."
             className="w-full rounded-[4px] px-4 py-3 text-xs g-input resize-y font-mono" />
-          {htmlPreviewOpen && customHtml.trim() && (
+          )}
+          {htmlPreviewOpen && customHtml.trim() && !parsePlaygroundMarker(customHtml) && (
             <iframe srcDoc={htmlTheme.withTheme(customHtml)} sandbox="allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox" title="Aperçu du Playground"
               className="w-full rounded-xl mt-2" style={{ height: 420, border: `1px solid ${th.sep}`, background: htmlTheme.background }} />
           )}

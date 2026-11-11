@@ -1,0 +1,4289 @@
+{
+  "name": "lesson3_1-commune",
+  "source": "../docs/formation-rs6776/lecon-3.1/script-video-commune.md",
+  "voice": "341b4807e5e6455fa88f34bda5d6eeea",
+  "model": "heygen-voice-1-turbo-free",
+  "total": 279.5349206349207,
+  "avatarSeconds": 60.847845804988665,
+  "scenes": [
+    {
+      "id": "1",
+      "title": "Ouverture",
+      "avatar": "full",
+      "text": "Bienvenue dans le troisième et dernier module. Dans le module deux, vous avez appris à optimiser un contenu selon des critères précis, dont le public et le handicap, puis vous l'avez mis en pratique dans la mission. Une question reste ouverte : votre contenu est-il vraiment utilisable par tout le monde ?",
+      "audio": "generated/lesson3_1-commune/scene-1.wav",
+      "duration": 14.398526077097506,
+      "words": [
+        {
+          "w": "Bienvenue",
+          "start": 0.256,
+          "end": 0.725
+        },
+        {
+          "w": "dans",
+          "start": 0.768,
+          "end": 0.896
+        },
+        {
+          "w": "le",
+          "start": 0.939,
+          "end": 0.981
+        },
+        {
+          "w": "troisième",
+          "start": 1.024,
+          "end": 1.493
+        },
+        {
+          "w": "et",
+          "start": 1.536,
+          "end": 1.579
+        },
+        {
+          "w": "dernier",
+          "start": 1.621,
+          "end": 1.877
+        },
+        {
+          "w": "module.",
+          "start": 1.92,
+          "end": 2.347
+        },
+        {
+          "w": "Dans",
+          "start": 2.517,
+          "end": 2.688
+        },
+        {
+          "w": "le",
+          "start": 2.731,
+          "end": 2.773
+        },
+        {
+          "w": "module",
+          "start": 2.816,
+          "end": 3.072
+        },
+        {
+          "w": "deux,",
+          "start": 3.115,
+          "end": 3.413
+        },
+        {
+          "w": "vous",
+          "start": 3.541,
+          "end": 3.669
+        },
+        {
+          "w": "avez",
+          "start": 3.712,
+          "end": 3.925
+        },
+        {
+          "w": "appris",
+          "start": 3.968,
+          "end": 4.224
+        },
+        {
+          "w": "à",
+          "start": 4.267,
+          "end": 4.309
+        },
+        {
+          "w": "optimiser",
+          "start": 4.352,
+          "end": 4.864
+        },
+        {
+          "w": "un",
+          "start": 4.907,
+          "end": 4.992
+        },
+        {
+          "w": "contenu",
+          "start": 5.035,
+          "end": 5.419
+        },
+        {
+          "w": "selon",
+          "start": 5.461,
+          "end": 5.675
+        },
+        {
+          "w": "des",
+          "start": 5.717,
+          "end": 5.803
+        },
+        {
+          "w": "critères",
+          "start": 5.845,
+          "end": 6.144
+        },
+        {
+          "w": "précis,",
+          "start": 6.187,
+          "end": 6.72
+        },
+        {
+          "w": "dont",
+          "start": 6.827,
+          "end": 6.997
+        },
+        {
+          "w": "le",
+          "start": 7.04,
+          "end": 7.083
+        },
+        {
+          "w": "public",
+          "start": 7.125,
+          "end": 7.253
+        },
+        {
+          "w": "et",
+          "start": 7.509,
+          "end": 7.552
+        },
+        {
+          "w": "le",
+          "start": 7.595,
+          "end": 7.637
+        },
+        {
+          "w": "handicap,",
+          "start": 7.68,
+          "end": 8.277
+        },
+        {
+          "w": "puis",
+          "start": 8.491,
+          "end": 8.704
+        },
+        {
+          "w": "vous",
+          "start": 8.747,
+          "end": 8.875
+        },
+        {
+          "w": "l'avez",
+          "start": 8.917,
+          "end": 9.088
+        },
+        {
+          "w": "mis",
+          "start": 9.131,
+          "end": 9.173
+        },
+        {
+          "w": "en",
+          "start": 9.216,
+          "end": 9.259
+        },
+        {
+          "w": "pratique",
+          "start": 9.301,
+          "end": 9.6
+        },
+        {
+          "w": "dans",
+          "start": 9.643,
+          "end": 9.728
+        },
+        {
+          "w": "la",
+          "start": 9.771,
+          "end": 9.856
+        },
+        {
+          "w": "mission.",
+          "start": 9.899,
+          "end": 10.163
+        },
+        {
+          "w": "Une",
+          "start": 10.384,
+          "end": 10.555
+        },
+        {
+          "w": "question",
+          "start": 10.598,
+          "end": 10.726
+        },
+        {
+          "w": "reste",
+          "start": 10.939,
+          "end": 11.11
+        },
+        {
+          "w": "ouverte",
+          "start": 11.152,
+          "end": 11.409
+        },
+        {
+          "w": ":",
+          "start": 11.451,
+          "end": 11.494
+        },
+        {
+          "w": "votre",
+          "start": 11.537,
+          "end": 11.707
+        },
+        {
+          "w": "contenu",
+          "start": 11.75,
+          "end": 12.134
+        },
+        {
+          "w": "est-il",
+          "start": 12.177,
+          "end": 12.432
+        },
+        {
+          "w": "vraiment",
+          "start": 12.475,
+          "end": 12.859
+        },
+        {
+          "w": "utilisable",
+          "start": 12.902,
+          "end": 13.329
+        },
+        {
+          "w": "par",
+          "start": 13.457,
+          "end": 13.585
+        },
+        {
+          "w": "tout",
+          "start": 13.627,
+          "end": 13.755
+        },
+        {
+          "w": "le",
+          "start": 13.798,
+          "end": 13.841
+        },
+        {
+          "w": "monde",
+          "start": 13.883,
+          "end": 13.969
+        },
+        {
+          "w": "?",
+          "start": 14.054,
+          "end": 14.097
+        }
+      ],
+      "avatarVideo": "generated/lesson3_1-commune/avatar-1.mp4",
+      "avatarVideoId": "cc48f0f49ce5766ee9dea50a684c5e38",
+      "avatarDuration": 14.28
+    },
+    {
+      "id": "2",
+      "title": "L'objectif de la leçon",
+      "avatar": "none",
+      "text": "Dans cette leçon, vous allez apprendre à adapter un contenu à trois familles de besoins : visuels, auditifs et cognitifs. Ce sont des repères : une même personne peut rencontrer plusieurs obstacles. On part donc toujours du besoin concret. Et vous saurez écrire un prompt qui pose la contrainte d'accessibilité, au lieu d'espérer qu'elle soit respectée. C'est exactement l'exercice quatre de l'écrit : rédiger une note interne accessible à un salarié en situation de handicap.",
+      "audio": "generated/lesson3_1-commune/scene-2.wav",
+      "duration": 25.189297052154195,
+      "words": [
+        {
+          "w": "Dans",
+          "start": 0.256,
+          "end": 0.469
+        },
+        {
+          "w": "cette",
+          "start": 0.512,
+          "end": 0.64
+        },
+        {
+          "w": "leçon,",
+          "start": 0.683,
+          "end": 1.109
+        },
+        {
+          "w": "vous",
+          "start": 1.323,
+          "end": 1.408
+        },
+        {
+          "w": "allez",
+          "start": 1.451,
+          "end": 1.621
+        },
+        {
+          "w": "apprendre",
+          "start": 1.664,
+          "end": 1.963
+        },
+        {
+          "w": "à",
+          "start": 2.048,
+          "end": 2.091
+        },
+        {
+          "w": "adapter",
+          "start": 2.133,
+          "end": 2.432
+        },
+        {
+          "w": "un",
+          "start": 2.475,
+          "end": 2.56
+        },
+        {
+          "w": "contenu",
+          "start": 2.603,
+          "end": 2.901
+        },
+        {
+          "w": "à",
+          "start": 2.944,
+          "end": 3.029
+        },
+        {
+          "w": "trois",
+          "start": 3.072,
+          "end": 3.328
+        },
+        {
+          "w": "familles",
+          "start": 3.371,
+          "end": 3.627
+        },
+        {
+          "w": "de",
+          "start": 3.669,
+          "end": 3.712
+        },
+        {
+          "w": "besoins",
+          "start": 3.755,
+          "end": 4.096
+        },
+        {
+          "w": ":",
+          "start": 4.139,
+          "end": 4.181
+        },
+        {
+          "w": "visuels,",
+          "start": 4.224,
+          "end": 4.8
+        },
+        {
+          "w": "auditifs",
+          "start": 4.949,
+          "end": 5.589
+        },
+        {
+          "w": "et",
+          "start": 5.632,
+          "end": 5.76
+        },
+        {
+          "w": "cognitifs.",
+          "start": 5.803,
+          "end": 6.549
+        },
+        {
+          "w": "Ce",
+          "start": 6.827,
+          "end": 6.912
+        },
+        {
+          "w": "sont",
+          "start": 6.955,
+          "end": 7.125
+        },
+        {
+          "w": "des",
+          "start": 7.168,
+          "end": 7.211
+        },
+        {
+          "w": "repères",
+          "start": 7.253,
+          "end": 7.595
+        },
+        {
+          "w": ":",
+          "start": 7.68,
+          "end": 7.723
+        },
+        {
+          "w": "une",
+          "start": 7.765,
+          "end": 7.851
+        },
+        {
+          "w": "même",
+          "start": 7.893,
+          "end": 8.064
+        },
+        {
+          "w": "personne",
+          "start": 8.107,
+          "end": 8.448
+        },
+        {
+          "w": "peut",
+          "start": 8.533,
+          "end": 8.619
+        },
+        {
+          "w": "rencontrer",
+          "start": 8.661,
+          "end": 9.003
+        },
+        {
+          "w": "plusieurs",
+          "start": 9.045,
+          "end": 9.387
+        },
+        {
+          "w": "obstacles.",
+          "start": 9.429,
+          "end": 9.999
+        },
+        {
+          "w": "On",
+          "start": 10.099,
+          "end": 10.313
+        },
+        {
+          "w": "part",
+          "start": 10.355,
+          "end": 10.441
+        },
+        {
+          "w": "donc",
+          "start": 10.483,
+          "end": 10.611
+        },
+        {
+          "w": "toujours",
+          "start": 10.697,
+          "end": 11.166
+        },
+        {
+          "w": "du",
+          "start": 11.251,
+          "end": 11.337
+        },
+        {
+          "w": "besoin",
+          "start": 11.379,
+          "end": 11.635
+        },
+        {
+          "w": "concret.",
+          "start": 11.678,
+          "end": 12.233
+        },
+        {
+          "w": "Et",
+          "start": 12.489,
+          "end": 12.574
+        },
+        {
+          "w": "vous",
+          "start": 12.617,
+          "end": 12.702
+        },
+        {
+          "w": "saurez",
+          "start": 12.745,
+          "end": 13.001
+        },
+        {
+          "w": "écrire",
+          "start": 13.043,
+          "end": 13.257
+        },
+        {
+          "w": "un",
+          "start": 13.342,
+          "end": 13.385
+        },
+        {
+          "w": "prompt",
+          "start": 13.427,
+          "end": 13.683
+        },
+        {
+          "w": "qui",
+          "start": 13.769,
+          "end": 13.854
+        },
+        {
+          "w": "pose",
+          "start": 13.897,
+          "end": 14.025
+        },
+        {
+          "w": "la",
+          "start": 14.11,
+          "end": 14.195
+        },
+        {
+          "w": "contrainte",
+          "start": 14.238,
+          "end": 14.579
+        },
+        {
+          "w": "d'accessibilité,",
+          "start": 14.622,
+          "end": 15.518
+        },
+        {
+          "w": "au",
+          "start": 15.646,
+          "end": 15.902
+        },
+        {
+          "w": "lieu",
+          "start": 15.945,
+          "end": 16.03
+        },
+        {
+          "w": "d'espérer",
+          "start": 16.073,
+          "end": 16.457
+        },
+        {
+          "w": "qu'elle",
+          "start": 16.499,
+          "end": 16.67
+        },
+        {
+          "w": "soit",
+          "start": 16.713,
+          "end": 16.798
+        },
+        {
+          "w": "respectée.",
+          "start": 16.841,
+          "end": 17.538
+        },
+        {
+          "w": "C'est",
+          "start": 17.767,
+          "end": 18.023
+        },
+        {
+          "w": "exactement",
+          "start": 18.066,
+          "end": 18.706
+        },
+        {
+          "w": "l'exercice",
+          "start": 18.748,
+          "end": 19.175
+        },
+        {
+          "w": "quatre",
+          "start": 19.26,
+          "end": 19.516
+        },
+        {
+          "w": "de",
+          "start": 19.602,
+          "end": 19.687
+        },
+        {
+          "w": "l'écrit",
+          "start": 19.73,
+          "end": 20.028
+        },
+        {
+          "w": ":",
+          "start": 20.071,
+          "end": 20.199
+        },
+        {
+          "w": "rédiger",
+          "start": 20.242,
+          "end": 20.924
+        },
+        {
+          "w": "une",
+          "start": 20.967,
+          "end": 21.01
+        },
+        {
+          "w": "note",
+          "start": 21.052,
+          "end": 21.223
+        },
+        {
+          "w": "interne",
+          "start": 21.351,
+          "end": 21.82
+        },
+        {
+          "w": "accessible",
+          "start": 21.906,
+          "end": 22.674
+        },
+        {
+          "w": "à",
+          "start": 22.802,
+          "end": 22.844
+        },
+        {
+          "w": "un",
+          "start": 22.887,
+          "end": 22.93
+        },
+        {
+          "w": "salarié",
+          "start": 22.972,
+          "end": 23.442
+        },
+        {
+          "w": "en",
+          "start": 23.527,
+          "end": 23.612
+        },
+        {
+          "w": "situation",
+          "start": 23.698,
+          "end": 23.954
+        },
+        {
+          "w": "de",
+          "start": 24.167,
+          "end": 24.21
+        },
+        {
+          "w": "handicap.",
+          "start": 24.252,
+          "end": 25.02
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "title": "Une obligation, pas une option",
+      "avatar": "none",
+      "text": "L'accessibilité numérique est une obligation. En France, l'article quarante-sept de la loi du onze février deux mille cinq impose l'accessibilité des services de communication au public en ligne qui entrent dans son champ. Sa traduction concrète est le R-G-A-A, le référentiel général d'amélioration de l'accessibilité, construit à partir de la référence internationale, les W-C-A-G. L'Acte européen sur l'accessibilité ajoute des exigences pour des catégories précises de produits et de services, mais pas pour tout contenu de toute entreprise : on vérifie avant d'affirmer. Au-delà du droit, le but est simple : repérer un obstacle réel, et fournir un équivalent utilisable, sans appauvrir l'information.",
+      "audio": "generated/lesson3_1-commune/scene-3.wav",
+      "duration": 39.91585034013605,
+      "words": [
+        {
+          "w": "L'accessibilité",
+          "start": 0.299,
+          "end": 1.067
+        },
+        {
+          "w": "numérique",
+          "start": 1.109,
+          "end": 1.408
+        },
+        {
+          "w": "est",
+          "start": 1.451,
+          "end": 1.493
+        },
+        {
+          "w": "une",
+          "start": 1.536,
+          "end": 1.621
+        },
+        {
+          "w": "obligation.",
+          "start": 1.664,
+          "end": 2.261
+        },
+        {
+          "w": "En",
+          "start": 2.517,
+          "end": 2.56
+        },
+        {
+          "w": "France,",
+          "start": 2.603,
+          "end": 3.029
+        },
+        {
+          "w": "l'article",
+          "start": 3.243,
+          "end": 3.584
+        },
+        {
+          "w": "quarante-sept",
+          "start": 3.755,
+          "end": 4.267
+        },
+        {
+          "w": "de",
+          "start": 4.309,
+          "end": 4.437
+        },
+        {
+          "w": "la",
+          "start": 4.48,
+          "end": 4.523
+        },
+        {
+          "w": "loi",
+          "start": 4.565,
+          "end": 4.693
+        },
+        {
+          "w": "du",
+          "start": 4.736,
+          "end": 4.821
+        },
+        {
+          "w": "onze",
+          "start": 4.864,
+          "end": 5.035
+        },
+        {
+          "w": "février",
+          "start": 5.12,
+          "end": 5.504
+        },
+        {
+          "w": "deux",
+          "start": 5.547,
+          "end": 5.931
+        },
+        {
+          "w": "mille",
+          "start": 5.973,
+          "end": 6.059
+        },
+        {
+          "w": "cinq",
+          "start": 6.101,
+          "end": 6.229
+        },
+        {
+          "w": "impose",
+          "start": 6.272,
+          "end": 6.741
+        },
+        {
+          "w": "l'accessibilité",
+          "start": 6.869,
+          "end": 7.595
+        },
+        {
+          "w": "des",
+          "start": 7.637,
+          "end": 7.723
+        },
+        {
+          "w": "services",
+          "start": 7.765,
+          "end": 7.893
+        },
+        {
+          "w": "de",
+          "start": 8.064,
+          "end": 8.149
+        },
+        {
+          "w": "communication",
+          "start": 8.192,
+          "end": 8.576
+        },
+        {
+          "w": "au",
+          "start": 8.789,
+          "end": 8.832
+        },
+        {
+          "w": "public",
+          "start": 8.875,
+          "end": 9.003
+        },
+        {
+          "w": "en",
+          "start": 9.216,
+          "end": 9.301
+        },
+        {
+          "w": "ligne",
+          "start": 9.344,
+          "end": 9.6
+        },
+        {
+          "w": "qui",
+          "start": 9.643,
+          "end": 9.771
+        },
+        {
+          "w": "entrent",
+          "start": 9.813,
+          "end": 10.069
+        },
+        {
+          "w": "dans",
+          "start": 10.112,
+          "end": 10.197
+        },
+        {
+          "w": "son",
+          "start": 10.24,
+          "end": 10.325
+        },
+        {
+          "w": "champ.",
+          "start": 10.368,
+          "end": 10.706
+        },
+        {
+          "w": "Sa",
+          "start": 10.831,
+          "end": 10.959
+        },
+        {
+          "w": "traduction",
+          "start": 11.002,
+          "end": 11.258
+        },
+        {
+          "w": "concrète",
+          "start": 11.471,
+          "end": 11.898
+        },
+        {
+          "w": "est",
+          "start": 12.026,
+          "end": 12.239
+        },
+        {
+          "w": "le",
+          "start": 12.282,
+          "end": 12.325
+        },
+        {
+          "w": "R-G-A-A,",
+          "start": 12.41,
+          "end": 14.437
+        },
+        {
+          "w": "le",
+          "start": 14.629,
+          "end": 14.714
+        },
+        {
+          "w": "référentiel",
+          "start": 14.799,
+          "end": 15.311
+        },
+        {
+          "w": "général",
+          "start": 15.354,
+          "end": 15.738
+        },
+        {
+          "w": "d'amélioration",
+          "start": 15.823,
+          "end": 16.293
+        },
+        {
+          "w": "de",
+          "start": 16.463,
+          "end": 16.549
+        },
+        {
+          "w": "l'accessibilité,",
+          "start": 16.591,
+          "end": 17.509
+        },
+        {
+          "w": "construit",
+          "start": 17.701,
+          "end": 18.085
+        },
+        {
+          "w": "à",
+          "start": 18.127,
+          "end": 18.17
+        },
+        {
+          "w": "partir",
+          "start": 18.213,
+          "end": 18.469
+        },
+        {
+          "w": "de",
+          "start": 18.511,
+          "end": 18.554
+        },
+        {
+          "w": "la",
+          "start": 18.597,
+          "end": 18.639
+        },
+        {
+          "w": "référence",
+          "start": 18.682,
+          "end": 19.109
+        },
+        {
+          "w": "internationale,",
+          "start": 19.237,
+          "end": 20.005
+        },
+        {
+          "w": "les",
+          "start": 20.175,
+          "end": 20.389
+        },
+        {
+          "w": "W-C-A-G.",
+          "start": 20.431,
+          "end": 22.594
+        },
+        {
+          "w": "L'Acte",
+          "start": 22.88,
+          "end": 23.221
+        },
+        {
+          "w": "européen",
+          "start": 23.306,
+          "end": 23.691
+        },
+        {
+          "w": "sur",
+          "start": 23.733,
+          "end": 23.861
+        },
+        {
+          "w": "l'accessibilité",
+          "start": 23.904,
+          "end": 24.672
+        },
+        {
+          "w": "ajoute",
+          "start": 24.843,
+          "end": 25.141
+        },
+        {
+          "w": "des",
+          "start": 25.184,
+          "end": 25.269
+        },
+        {
+          "w": "exigences",
+          "start": 25.312,
+          "end": 25.824
+        },
+        {
+          "w": "pour",
+          "start": 25.994,
+          "end": 26.08
+        },
+        {
+          "w": "des",
+          "start": 26.122,
+          "end": 26.25
+        },
+        {
+          "w": "catégories",
+          "start": 26.293,
+          "end": 26.592
+        },
+        {
+          "w": "précises",
+          "start": 26.72,
+          "end": 27.189
+        },
+        {
+          "w": "de",
+          "start": 27.274,
+          "end": 27.36
+        },
+        {
+          "w": "produits",
+          "start": 27.402,
+          "end": 27.701
+        },
+        {
+          "w": "et",
+          "start": 27.744,
+          "end": 27.787
+        },
+        {
+          "w": "de",
+          "start": 27.829,
+          "end": 27.872
+        },
+        {
+          "w": "services,",
+          "start": 27.915,
+          "end": 28.469
+        },
+        {
+          "w": "mais",
+          "start": 28.811,
+          "end": 28.939
+        },
+        {
+          "w": "pas",
+          "start": 28.981,
+          "end": 29.067
+        },
+        {
+          "w": "pour",
+          "start": 29.109,
+          "end": 29.195
+        },
+        {
+          "w": "tout",
+          "start": 29.237,
+          "end": 29.408
+        },
+        {
+          "w": "contenu",
+          "start": 29.451,
+          "end": 29.792
+        },
+        {
+          "w": "de",
+          "start": 29.834,
+          "end": 29.877
+        },
+        {
+          "w": "toute",
+          "start": 29.92,
+          "end": 30.048
+        },
+        {
+          "w": "entreprise",
+          "start": 30.09,
+          "end": 30.517
+        },
+        {
+          "w": ":",
+          "start": 30.602,
+          "end": 30.645
+        },
+        {
+          "w": "on",
+          "start": 30.688,
+          "end": 30.73
+        },
+        {
+          "w": "vérifie",
+          "start": 30.773,
+          "end": 31.157
+        },
+        {
+          "w": "avant",
+          "start": 31.2,
+          "end": 31.328
+        },
+        {
+          "w": "d'affirmer.",
+          "start": 31.37,
+          "end": 31.981
+        },
+        {
+          "w": "Au-delà",
+          "start": 32.208,
+          "end": 32.549
+        },
+        {
+          "w": "du",
+          "start": 32.592,
+          "end": 32.677
+        },
+        {
+          "w": "droit,",
+          "start": 32.72,
+          "end": 33.104
+        },
+        {
+          "w": "le",
+          "start": 33.274,
+          "end": 33.402
+        },
+        {
+          "w": "but",
+          "start": 33.445,
+          "end": 33.573
+        },
+        {
+          "w": "est",
+          "start": 33.616,
+          "end": 33.701
+        },
+        {
+          "w": "simple",
+          "start": 33.744,
+          "end": 34
+        },
+        {
+          "w": ":",
+          "start": 34.17,
+          "end": 34.256
+        },
+        {
+          "w": "repérer",
+          "start": 34.298,
+          "end": 34.682
+        },
+        {
+          "w": "un",
+          "start": 34.725,
+          "end": 34.768
+        },
+        {
+          "w": "obstacle",
+          "start": 34.81,
+          "end": 35.194
+        },
+        {
+          "w": "réel,",
+          "start": 35.237,
+          "end": 35.792
+        },
+        {
+          "w": "et",
+          "start": 35.962,
+          "end": 36.09
+        },
+        {
+          "w": "fournir",
+          "start": 36.133,
+          "end": 36.474
+        },
+        {
+          "w": "un",
+          "start": 36.56,
+          "end": 36.602
+        },
+        {
+          "w": "équivalent",
+          "start": 36.645,
+          "end": 37.114
+        },
+        {
+          "w": "utilisable,",
+          "start": 37.157,
+          "end": 37.946
+        },
+        {
+          "w": "sans",
+          "start": 38.138,
+          "end": 38.309
+        },
+        {
+          "w": "appauvrir",
+          "start": 38.352,
+          "end": 38.778
+        },
+        {
+          "w": "l'information.",
+          "start": 38.821,
+          "end": 39.716
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "title": "Handicap visuel",
+      "avatar": "none",
+      "text": "Premier besoin : le handicap visuel. Une personne qui ne voit pas utilise un lecteur d'écran. Une personne malvoyante a besoin d'un contraste suffisant et d'un texte agrandissable. Pour une image, tout part de son rôle. Une image décorative reçoit une alternative vide. Une image informative reçoit un texte alternatif qui décrit sa fonction, jamais le nom du fichier. Pour un graphique complexe, ajoutez une description détaillée ou un tableau dans la page. Le lecteur d'écran se repère aussi grâce aux titres : gardez une hiérarchie cohérente. Et le contraste se vérifie avec un outil dédié, pas à l'œil.",
+      "audio": "generated/lesson3_1-commune/scene-4.wav",
+      "duration": 32.57834467120181,
+      "words": [
+        {
+          "w": "Premier",
+          "start": 0.256,
+          "end": 0.597
+        },
+        {
+          "w": "besoin",
+          "start": 0.64,
+          "end": 0.939
+        },
+        {
+          "w": ":",
+          "start": 1.067,
+          "end": 1.109
+        },
+        {
+          "w": "le",
+          "start": 1.152,
+          "end": 1.237
+        },
+        {
+          "w": "handicap",
+          "start": 1.323,
+          "end": 1.792
+        },
+        {
+          "w": "visuel.",
+          "start": 1.877,
+          "end": 2.475
+        },
+        {
+          "w": "Une",
+          "start": 2.688,
+          "end": 2.773
+        },
+        {
+          "w": "personne",
+          "start": 2.816,
+          "end": 3.115
+        },
+        {
+          "w": "qui",
+          "start": 3.157,
+          "end": 3.285
+        },
+        {
+          "w": "ne",
+          "start": 3.328,
+          "end": 3.371
+        },
+        {
+          "w": "voit",
+          "start": 3.413,
+          "end": 3.499
+        },
+        {
+          "w": "pas",
+          "start": 3.541,
+          "end": 3.627
+        },
+        {
+          "w": "utilise",
+          "start": 3.669,
+          "end": 4.011
+        },
+        {
+          "w": "un",
+          "start": 4.053,
+          "end": 4.096
+        },
+        {
+          "w": "lecteur",
+          "start": 4.139,
+          "end": 4.395
+        },
+        {
+          "w": "d'écran.",
+          "start": 4.48,
+          "end": 4.928
+        },
+        {
+          "w": "Une",
+          "start": 5.077,
+          "end": 5.163
+        },
+        {
+          "w": "personne",
+          "start": 5.205,
+          "end": 5.461
+        },
+        {
+          "w": "malvoyante",
+          "start": 5.547,
+          "end": 5.973
+        },
+        {
+          "w": "a",
+          "start": 6.101,
+          "end": 6.144
+        },
+        {
+          "w": "besoin",
+          "start": 6.187,
+          "end": 6.443
+        },
+        {
+          "w": "d'un",
+          "start": 6.485,
+          "end": 6.613
+        },
+        {
+          "w": "contraste",
+          "start": 6.656,
+          "end": 6.997
+        },
+        {
+          "w": "suffisant",
+          "start": 7.083,
+          "end": 7.637
+        },
+        {
+          "w": "et",
+          "start": 7.765,
+          "end": 8.064
+        },
+        {
+          "w": "d'un",
+          "start": 8.107,
+          "end": 8.235
+        },
+        {
+          "w": "texte",
+          "start": 8.277,
+          "end": 8.533
+        },
+        {
+          "w": "agrandissable.",
+          "start": 8.576,
+          "end": 9.344
+        },
+        {
+          "w": "Pour",
+          "start": 9.557,
+          "end": 9.728
+        },
+        {
+          "w": "une",
+          "start": 9.771,
+          "end": 9.856
+        },
+        {
+          "w": "image,",
+          "start": 9.941,
+          "end": 10.325
+        },
+        {
+          "w": "tout",
+          "start": 10.539,
+          "end": 10.709
+        },
+        {
+          "w": "part",
+          "start": 10.752,
+          "end": 10.923
+        },
+        {
+          "w": "de",
+          "start": 10.965,
+          "end": 11.051
+        },
+        {
+          "w": "son",
+          "start": 11.093,
+          "end": 11.221
+        },
+        {
+          "w": "rôle.",
+          "start": 11.264,
+          "end": 11.665
+        },
+        {
+          "w": "Une",
+          "start": 11.853,
+          "end": 11.981
+        },
+        {
+          "w": "image",
+          "start": 12.024,
+          "end": 12.194
+        },
+        {
+          "w": "décorative",
+          "start": 12.28,
+          "end": 12.664
+        },
+        {
+          "w": "reçoit",
+          "start": 12.92,
+          "end": 13.218
+        },
+        {
+          "w": "une",
+          "start": 13.261,
+          "end": 13.346
+        },
+        {
+          "w": "alternative",
+          "start": 13.389,
+          "end": 13.773
+        },
+        {
+          "w": "vide.",
+          "start": 14.029,
+          "end": 14.498
+        },
+        {
+          "w": "Une",
+          "start": 14.754,
+          "end": 14.968
+        },
+        {
+          "w": "image",
+          "start": 15.01,
+          "end": 15.224
+        },
+        {
+          "w": "informative",
+          "start": 15.309,
+          "end": 15.864
+        },
+        {
+          "w": "reçoit",
+          "start": 15.949,
+          "end": 16.248
+        },
+        {
+          "w": "un",
+          "start": 16.29,
+          "end": 16.333
+        },
+        {
+          "w": "texte",
+          "start": 16.376,
+          "end": 16.632
+        },
+        {
+          "w": "alternatif",
+          "start": 16.674,
+          "end": 17.272
+        },
+        {
+          "w": "qui",
+          "start": 17.4,
+          "end": 17.485
+        },
+        {
+          "w": "décrit",
+          "start": 17.528,
+          "end": 17.784
+        },
+        {
+          "w": "sa",
+          "start": 17.826,
+          "end": 17.912
+        },
+        {
+          "w": "fonction,",
+          "start": 17.954,
+          "end": 18.424
+        },
+        {
+          "w": "jamais",
+          "start": 18.68,
+          "end": 19.149
+        },
+        {
+          "w": "le",
+          "start": 19.192,
+          "end": 19.234
+        },
+        {
+          "w": "nom",
+          "start": 19.277,
+          "end": 19.362
+        },
+        {
+          "w": "du",
+          "start": 19.405,
+          "end": 19.49
+        },
+        {
+          "w": "fichier.",
+          "start": 19.533,
+          "end": 20.1
+        },
+        {
+          "w": "Pour",
+          "start": 20.368,
+          "end": 20.496
+        },
+        {
+          "w": "un",
+          "start": 20.539,
+          "end": 20.582
+        },
+        {
+          "w": "graphique",
+          "start": 20.624,
+          "end": 20.923
+        },
+        {
+          "w": "complexe,",
+          "start": 21.008,
+          "end": 21.584
+        },
+        {
+          "w": "ajoutez",
+          "start": 21.734,
+          "end": 22.246
+        },
+        {
+          "w": "une",
+          "start": 22.288,
+          "end": 22.331
+        },
+        {
+          "w": "description",
+          "start": 22.374,
+          "end": 22.63
+        },
+        {
+          "w": "détaillée",
+          "start": 22.843,
+          "end": 23.398
+        },
+        {
+          "w": "ou",
+          "start": 23.483,
+          "end": 23.568
+        },
+        {
+          "w": "un",
+          "start": 23.611,
+          "end": 23.654
+        },
+        {
+          "w": "tableau",
+          "start": 23.696,
+          "end": 23.952
+        },
+        {
+          "w": "dans",
+          "start": 23.995,
+          "end": 24.123
+        },
+        {
+          "w": "la",
+          "start": 24.166,
+          "end": 24.208
+        },
+        {
+          "w": "page.",
+          "start": 24.251,
+          "end": 24.699
+        },
+        {
+          "w": "Le",
+          "start": 24.976,
+          "end": 25.062
+        },
+        {
+          "w": "lecteur",
+          "start": 25.104,
+          "end": 25.36
+        },
+        {
+          "w": "d'écran",
+          "start": 25.403,
+          "end": 25.659
+        },
+        {
+          "w": "se",
+          "start": 25.702,
+          "end": 25.83
+        },
+        {
+          "w": "repère",
+          "start": 25.872,
+          "end": 26.128
+        },
+        {
+          "w": "aussi",
+          "start": 26.171,
+          "end": 26.256
+        },
+        {
+          "w": "grâce",
+          "start": 26.427,
+          "end": 26.64
+        },
+        {
+          "w": "aux",
+          "start": 26.683,
+          "end": 26.768
+        },
+        {
+          "w": "titres",
+          "start": 26.811,
+          "end": 27.024
+        },
+        {
+          "w": ":",
+          "start": 27.067,
+          "end": 27.11
+        },
+        {
+          "w": "gardez",
+          "start": 27.152,
+          "end": 27.408
+        },
+        {
+          "w": "une",
+          "start": 27.451,
+          "end": 27.494
+        },
+        {
+          "w": "hiérarchie",
+          "start": 27.536,
+          "end": 27.92
+        },
+        {
+          "w": "cohérente.",
+          "start": 27.963,
+          "end": 28.656
+        },
+        {
+          "w": "Et",
+          "start": 28.965,
+          "end": 29.05
+        },
+        {
+          "w": "le",
+          "start": 29.093,
+          "end": 29.135
+        },
+        {
+          "w": "contraste",
+          "start": 29.178,
+          "end": 29.605
+        },
+        {
+          "w": "se",
+          "start": 29.733,
+          "end": 29.818
+        },
+        {
+          "w": "vérifie",
+          "start": 29.861,
+          "end": 30.245
+        },
+        {
+          "w": "avec",
+          "start": 30.287,
+          "end": 30.415
+        },
+        {
+          "w": "un",
+          "start": 30.458,
+          "end": 30.586
+        },
+        {
+          "w": "outil",
+          "start": 30.629,
+          "end": 30.842
+        },
+        {
+          "w": "dédié,",
+          "start": 30.885,
+          "end": 31.418
+        },
+        {
+          "w": "pas",
+          "start": 31.567,
+          "end": 31.695
+        },
+        {
+          "w": "à",
+          "start": 31.738,
+          "end": 31.781
+        },
+        {
+          "w": "l'œil.",
+          "start": 31.823,
+          "end": 32.378
+        }
+      ]
+    },
+    {
+      "id": "5",
+      "title": "Ce que les outils apportent",
+      "avatar": "none",
+      "text": "Les outils d'IA peuvent vous aider à écrire un premier texte alternatif. ChatGPT décrit une image ; son intégration à l'application Be My Eyes sert au quotidien à des personnes aveugles ou malvoyantes. Claude n'est pas cité dans le cours pour cet usage, mais dans le Studio, il accepte lui aussi une image jointe. Gemini peut décrire un visuel inséré dans un document Google Workspace. Dans Word et PowerPoint, le vérificateur d'accessibilité signale les textes alternatifs manquants. Firefly peut décrire le visuel qu'il vient de générer. Dans tous les cas, c'est un brouillon : vous relisez et vous corrigez.",
+      "audio": "generated/lesson3_1-commune/scene-5.wav",
+      "duration": 31.644444444444446,
+      "words": [
+        {
+          "w": "Les",
+          "start": 0.299,
+          "end": 0.469
+        },
+        {
+          "w": "outils",
+          "start": 0.512,
+          "end": 0.725
+        },
+        {
+          "w": "d'IA",
+          "start": 0.768,
+          "end": 0.981
+        },
+        {
+          "w": "peuvent",
+          "start": 1.024,
+          "end": 1.195
+        },
+        {
+          "w": "vous",
+          "start": 1.237,
+          "end": 1.323
+        },
+        {
+          "w": "aider",
+          "start": 1.365,
+          "end": 1.493
+        },
+        {
+          "w": "à",
+          "start": 1.664,
+          "end": 1.707
+        },
+        {
+          "w": "écrire",
+          "start": 1.749,
+          "end": 2.005
+        },
+        {
+          "w": "un",
+          "start": 2.091,
+          "end": 2.133
+        },
+        {
+          "w": "premier",
+          "start": 2.176,
+          "end": 2.475
+        },
+        {
+          "w": "texte",
+          "start": 2.517,
+          "end": 2.731
+        },
+        {
+          "w": "alternatif.",
+          "start": 2.773,
+          "end": 3.627
+        },
+        {
+          "w": "ChatGPT",
+          "start": 3.968,
+          "end": 4.565
+        },
+        {
+          "w": "décrit",
+          "start": 4.608,
+          "end": 4.907
+        },
+        {
+          "w": "une",
+          "start": 4.949,
+          "end": 4.992
+        },
+        {
+          "w": "image",
+          "start": 5.077,
+          "end": 5.248
+        },
+        {
+          "w": ";",
+          "start": 5.461,
+          "end": 5.547
+        },
+        {
+          "w": "son",
+          "start": 5.76,
+          "end": 5.931
+        },
+        {
+          "w": "intégration",
+          "start": 5.973,
+          "end": 6.357
+        },
+        {
+          "w": "à",
+          "start": 6.571,
+          "end": 6.613
+        },
+        {
+          "w": "l'application",
+          "start": 6.656,
+          "end": 6.955
+        },
+        {
+          "w": "Be",
+          "start": 7.211,
+          "end": 7.339
+        },
+        {
+          "w": "My",
+          "start": 7.381,
+          "end": 7.509
+        },
+        {
+          "w": "Eyes",
+          "start": 7.552,
+          "end": 7.808
+        },
+        {
+          "w": "sert",
+          "start": 8.021,
+          "end": 8.32
+        },
+        {
+          "w": "au",
+          "start": 8.363,
+          "end": 8.405
+        },
+        {
+          "w": "quotidien",
+          "start": 8.448,
+          "end": 8.832
+        },
+        {
+          "w": "à",
+          "start": 8.875,
+          "end": 8.917
+        },
+        {
+          "w": "des",
+          "start": 8.96,
+          "end": 9.045
+        },
+        {
+          "w": "personnes",
+          "start": 9.088,
+          "end": 9.344
+        },
+        {
+          "w": "aveugles",
+          "start": 9.429,
+          "end": 9.856
+        },
+        {
+          "w": "ou",
+          "start": 9.899,
+          "end": 9.941
+        },
+        {
+          "w": "malvoyantes.",
+          "start": 9.984,
+          "end": 10.642
+        },
+        {
+          "w": "Claude",
+          "start": 10.831,
+          "end": 11.087
+        },
+        {
+          "w": "n'est",
+          "start": 11.13,
+          "end": 11.258
+        },
+        {
+          "w": "pas",
+          "start": 11.301,
+          "end": 11.386
+        },
+        {
+          "w": "cité",
+          "start": 11.429,
+          "end": 11.642
+        },
+        {
+          "w": "dans",
+          "start": 11.685,
+          "end": 11.77
+        },
+        {
+          "w": "le",
+          "start": 11.813,
+          "end": 11.855
+        },
+        {
+          "w": "cours",
+          "start": 11.898,
+          "end": 12.154
+        },
+        {
+          "w": "pour",
+          "start": 12.197,
+          "end": 12.282
+        },
+        {
+          "w": "cet",
+          "start": 12.325,
+          "end": 12.453
+        },
+        {
+          "w": "usage,",
+          "start": 12.495,
+          "end": 13.007
+        },
+        {
+          "w": "mais",
+          "start": 13.263,
+          "end": 13.391
+        },
+        {
+          "w": "dans",
+          "start": 13.434,
+          "end": 13.519
+        },
+        {
+          "w": "le",
+          "start": 13.562,
+          "end": 13.605
+        },
+        {
+          "w": "Studio,",
+          "start": 13.647,
+          "end": 14.074
+        },
+        {
+          "w": "il",
+          "start": 14.202,
+          "end": 14.458
+        },
+        {
+          "w": "accepte",
+          "start": 14.501,
+          "end": 14.842
+        },
+        {
+          "w": "lui",
+          "start": 14.97,
+          "end": 15.141
+        },
+        {
+          "w": "aussi",
+          "start": 15.183,
+          "end": 15.269
+        },
+        {
+          "w": "une",
+          "start": 15.439,
+          "end": 15.567
+        },
+        {
+          "w": "image",
+          "start": 15.61,
+          "end": 15.738
+        },
+        {
+          "w": "jointe.",
+          "start": 15.866,
+          "end": 16.314
+        },
+        {
+          "w": "Gemini",
+          "start": 16.549,
+          "end": 16.933
+        },
+        {
+          "w": "peut",
+          "start": 16.975,
+          "end": 17.103
+        },
+        {
+          "w": "décrire",
+          "start": 17.146,
+          "end": 17.402
+        },
+        {
+          "w": "un",
+          "start": 17.487,
+          "end": 17.53
+        },
+        {
+          "w": "visuel",
+          "start": 17.573,
+          "end": 17.914
+        },
+        {
+          "w": "inséré",
+          "start": 17.999,
+          "end": 18.511
+        },
+        {
+          "w": "dans",
+          "start": 18.554,
+          "end": 18.682
+        },
+        {
+          "w": "un",
+          "start": 18.725,
+          "end": 18.81
+        },
+        {
+          "w": "document",
+          "start": 18.853,
+          "end": 19.066
+        },
+        {
+          "w": "Google",
+          "start": 19.237,
+          "end": 19.493
+        },
+        {
+          "w": "Workspace.",
+          "start": 19.578,
+          "end": 20.272
+        },
+        {
+          "w": "Dans",
+          "start": 20.581,
+          "end": 20.794
+        },
+        {
+          "w": "Word",
+          "start": 20.837,
+          "end": 21.008
+        },
+        {
+          "w": "et",
+          "start": 21.136,
+          "end": 21.178
+        },
+        {
+          "w": "PowerPoint,",
+          "start": 21.221,
+          "end": 21.882
+        },
+        {
+          "w": "le",
+          "start": 22.117,
+          "end": 22.288
+        },
+        {
+          "w": "vérificateur",
+          "start": 22.33,
+          "end": 22.842
+        },
+        {
+          "w": "d'accessibilité",
+          "start": 22.885,
+          "end": 23.568
+        },
+        {
+          "w": "signale",
+          "start": 23.61,
+          "end": 23.952
+        },
+        {
+          "w": "les",
+          "start": 24.08,
+          "end": 24.122
+        },
+        {
+          "w": "textes",
+          "start": 24.165,
+          "end": 24.421
+        },
+        {
+          "w": "alternatifs",
+          "start": 24.464,
+          "end": 24.976
+        },
+        {
+          "w": "manquants.",
+          "start": 25.018,
+          "end": 25.488
+        },
+        {
+          "w": "Firefly",
+          "start": 25.658,
+          "end": 26.213
+        },
+        {
+          "w": "peut",
+          "start": 26.298,
+          "end": 26.426
+        },
+        {
+          "w": "décrire",
+          "start": 26.469,
+          "end": 26.725
+        },
+        {
+          "w": "le",
+          "start": 26.768,
+          "end": 26.853
+        },
+        {
+          "w": "visuel",
+          "start": 26.896,
+          "end": 27.152
+        },
+        {
+          "w": "qu'il",
+          "start": 27.237,
+          "end": 27.365
+        },
+        {
+          "w": "vient",
+          "start": 27.408,
+          "end": 27.493
+        },
+        {
+          "w": "de",
+          "start": 27.536,
+          "end": 27.578
+        },
+        {
+          "w": "générer.",
+          "start": 27.621,
+          "end": 28.112
+        },
+        {
+          "w": "Dans",
+          "start": 28.261,
+          "end": 28.389
+        },
+        {
+          "w": "tous",
+          "start": 28.432,
+          "end": 28.56
+        },
+        {
+          "w": "les",
+          "start": 28.602,
+          "end": 28.645
+        },
+        {
+          "w": "cas,",
+          "start": 28.688,
+          "end": 28.986
+        },
+        {
+          "w": "c'est",
+          "start": 29.114,
+          "end": 29.328
+        },
+        {
+          "w": "un",
+          "start": 29.37,
+          "end": 29.456
+        },
+        {
+          "w": "brouillon",
+          "start": 29.498,
+          "end": 29.797
+        },
+        {
+          "w": ":",
+          "start": 29.882,
+          "end": 29.925
+        },
+        {
+          "w": "vous",
+          "start": 29.968,
+          "end": 30.096
+        },
+        {
+          "w": "relisez",
+          "start": 30.138,
+          "end": 30.565
+        },
+        {
+          "w": "et",
+          "start": 30.608,
+          "end": 30.65
+        },
+        {
+          "w": "vous",
+          "start": 30.693,
+          "end": 30.778
+        },
+        {
+          "w": "corrigez.",
+          "start": 30.821,
+          "end": 31.444
+        }
+      ]
+    },
+    {
+      "id": "6",
+      "title": "Handicap auditif",
+      "avatar": "none",
+      "text": "Deuxième besoin : le handicap auditif. Une vidéo demande des sous-titres synchronisés, qui donnent accès aux paroles et aux sons utiles, et une transcription pour parcourir le contenu en texte. Si une information importante n'apparaît qu'à l'image, elle doit aussi être dite, audiodécrite ou intégrée à la transcription. Plusieurs outils d'IA savent transcrire un enregistrement, ce qui accélère un premier jeu de sous-titres. Aucun n'est fiable à cent pour cent. Les sous-titres sont relus avant publication : noms propres, sigles, termes techniques, locuteurs et sons porteurs de sens.",
+      "audio": "generated/lesson3_1-commune/scene-6.wav",
+      "duration": 31.26641723356009,
+      "words": [
+        {
+          "w": "Deuxième",
+          "start": 0.299,
+          "end": 0.64
+        },
+        {
+          "w": "besoin",
+          "start": 0.683,
+          "end": 0.981
+        },
+        {
+          "w": ":",
+          "start": 1.067,
+          "end": 1.109
+        },
+        {
+          "w": "le",
+          "start": 1.152,
+          "end": 1.493
+        },
+        {
+          "w": "handicap",
+          "start": 1.579,
+          "end": 1.963
+        },
+        {
+          "w": "auditif.",
+          "start": 2.048,
+          "end": 2.752
+        },
+        {
+          "w": "Une",
+          "start": 3.072,
+          "end": 3.243
+        },
+        {
+          "w": "vidéo",
+          "start": 3.285,
+          "end": 3.584
+        },
+        {
+          "w": "demande",
+          "start": 3.627,
+          "end": 3.84
+        },
+        {
+          "w": "des",
+          "start": 3.883,
+          "end": 3.968
+        },
+        {
+          "w": "sous-titres",
+          "start": 4.011,
+          "end": 4.395
+        },
+        {
+          "w": "synchronisés,",
+          "start": 4.437,
+          "end": 5.291
+        },
+        {
+          "w": "qui",
+          "start": 5.461,
+          "end": 5.589
+        },
+        {
+          "w": "donnent",
+          "start": 5.632,
+          "end": 5.76
+        },
+        {
+          "w": "accès",
+          "start": 5.803,
+          "end": 6.059
+        },
+        {
+          "w": "aux",
+          "start": 6.101,
+          "end": 6.187
+        },
+        {
+          "w": "paroles",
+          "start": 6.229,
+          "end": 6.528
+        },
+        {
+          "w": "et",
+          "start": 6.613,
+          "end": 6.656
+        },
+        {
+          "w": "aux",
+          "start": 6.699,
+          "end": 6.784
+        },
+        {
+          "w": "sons",
+          "start": 6.827,
+          "end": 6.955
+        },
+        {
+          "w": "utiles,",
+          "start": 6.997,
+          "end": 7.467
+        },
+        {
+          "w": "et",
+          "start": 7.637,
+          "end": 7.851
+        },
+        {
+          "w": "une",
+          "start": 7.893,
+          "end": 7.936
+        },
+        {
+          "w": "transcription",
+          "start": 7.979,
+          "end": 8.405
+        },
+        {
+          "w": "pour",
+          "start": 8.661,
+          "end": 8.789
+        },
+        {
+          "w": "parcourir",
+          "start": 8.832,
+          "end": 9.259
+        },
+        {
+          "w": "le",
+          "start": 9.344,
+          "end": 9.387
+        },
+        {
+          "w": "contenu",
+          "start": 9.429,
+          "end": 9.728
+        },
+        {
+          "w": "en",
+          "start": 9.771,
+          "end": 9.813
+        },
+        {
+          "w": "texte.",
+          "start": 9.856,
+          "end": 10.302
+        },
+        {
+          "w": "Si",
+          "start": 10.448,
+          "end": 10.619
+        },
+        {
+          "w": "une",
+          "start": 10.662,
+          "end": 10.704
+        },
+        {
+          "w": "information",
+          "start": 10.747,
+          "end": 11.088
+        },
+        {
+          "w": "importante",
+          "start": 11.259,
+          "end": 11.686
+        },
+        {
+          "w": "n'apparaît",
+          "start": 11.771,
+          "end": 12.07
+        },
+        {
+          "w": "qu'à",
+          "start": 12.112,
+          "end": 12.24
+        },
+        {
+          "w": "l'image,",
+          "start": 12.283,
+          "end": 12.731
+        },
+        {
+          "w": "elle",
+          "start": 12.966,
+          "end": 13.136
+        },
+        {
+          "w": "doit",
+          "start": 13.179,
+          "end": 13.307
+        },
+        {
+          "w": "aussi",
+          "start": 13.35,
+          "end": 13.435
+        },
+        {
+          "w": "être",
+          "start": 13.606,
+          "end": 13.691
+        },
+        {
+          "w": "dite,",
+          "start": 13.819,
+          "end": 14.224
+        },
+        {
+          "w": "audiodécrite",
+          "start": 14.416,
+          "end": 15.099
+        },
+        {
+          "w": "ou",
+          "start": 15.227,
+          "end": 15.398
+        },
+        {
+          "w": "intégrée",
+          "start": 15.44,
+          "end": 15.867
+        },
+        {
+          "w": "à",
+          "start": 15.91,
+          "end": 15.952
+        },
+        {
+          "w": "la",
+          "start": 15.995,
+          "end": 16.038
+        },
+        {
+          "w": "transcription.",
+          "start": 16.08,
+          "end": 16.737
+        },
+        {
+          "w": "Plusieurs",
+          "start": 17.052,
+          "end": 17.436
+        },
+        {
+          "w": "outils",
+          "start": 17.521,
+          "end": 17.734
+        },
+        {
+          "w": "d'IA",
+          "start": 17.777,
+          "end": 18.033
+        },
+        {
+          "w": "savent",
+          "start": 18.118,
+          "end": 18.374
+        },
+        {
+          "w": "transcrire",
+          "start": 18.417,
+          "end": 18.801
+        },
+        {
+          "w": "un",
+          "start": 18.886,
+          "end": 18.929
+        },
+        {
+          "w": "enregistrement,",
+          "start": 18.972,
+          "end": 19.718
+        },
+        {
+          "w": "ce",
+          "start": 19.868,
+          "end": 19.996
+        },
+        {
+          "w": "qui",
+          "start": 20.038,
+          "end": 20.124
+        },
+        {
+          "w": "accélère",
+          "start": 20.166,
+          "end": 20.508
+        },
+        {
+          "w": "un",
+          "start": 20.593,
+          "end": 20.636
+        },
+        {
+          "w": "premier",
+          "start": 20.678,
+          "end": 21.02
+        },
+        {
+          "w": "jeu",
+          "start": 21.062,
+          "end": 21.148
+        },
+        {
+          "w": "de",
+          "start": 21.19,
+          "end": 21.233
+        },
+        {
+          "w": "sous-titres.",
+          "start": 21.276,
+          "end": 21.809
+        },
+        {
+          "w": "Aucun",
+          "start": 22.001,
+          "end": 22.385
+        },
+        {
+          "w": "n'est",
+          "start": 22.428,
+          "end": 22.556
+        },
+        {
+          "w": "fiable",
+          "start": 22.598,
+          "end": 22.769
+        },
+        {
+          "w": "à",
+          "start": 22.854,
+          "end": 22.897
+        },
+        {
+          "w": "cent",
+          "start": 22.94,
+          "end": 23.068
+        },
+        {
+          "w": "pour",
+          "start": 23.11,
+          "end": 23.196
+        },
+        {
+          "w": "cent.",
+          "start": 23.281,
+          "end": 23.679
+        },
+        {
+          "w": "Les",
+          "start": 23.949,
+          "end": 24.12
+        },
+        {
+          "w": "sous-titres",
+          "start": 24.163,
+          "end": 24.461
+        },
+        {
+          "w": "sont",
+          "start": 24.547,
+          "end": 24.717
+        },
+        {
+          "w": "relus",
+          "start": 24.76,
+          "end": 25.016
+        },
+        {
+          "w": "avant",
+          "start": 25.144,
+          "end": 25.443
+        },
+        {
+          "w": "publication",
+          "start": 25.485,
+          "end": 25.912
+        },
+        {
+          "w": ":",
+          "start": 26.168,
+          "end": 26.296
+        },
+        {
+          "w": "noms",
+          "start": 26.339,
+          "end": 26.552
+        },
+        {
+          "w": "propres,",
+          "start": 26.595,
+          "end": 27.085
+        },
+        {
+          "w": "sigles,",
+          "start": 27.192,
+          "end": 27.683
+        },
+        {
+          "w": "termes",
+          "start": 27.789,
+          "end": 28.003
+        },
+        {
+          "w": "techniques,",
+          "start": 28.045,
+          "end": 28.6
+        },
+        {
+          "w": "locuteurs",
+          "start": 28.771,
+          "end": 29.325
+        },
+        {
+          "w": "et",
+          "start": 29.539,
+          "end": 29.624
+        },
+        {
+          "w": "sons",
+          "start": 29.667,
+          "end": 29.88
+        },
+        {
+          "w": "porteurs",
+          "start": 29.923,
+          "end": 30.179
+        },
+        {
+          "w": "de",
+          "start": 30.264,
+          "end": 30.307
+        },
+        {
+          "w": "sens.",
+          "start": 30.349,
+          "end": 31.066
+        }
+      ]
+    },
+    {
+      "id": "7",
+      "title": "Handicap cognitif et FALC",
+      "avatar": "none",
+      "text": "Troisième besoin : certaines difficultés cognitives. La méthode FALC, facile à lire et à comprendre, donne des règles : une idée par phrase, un vocabulaire courant, des phrases courtes à la voix active, une mise en page aérée. Mais sa caractéristique essentielle, c'est la participation de personnes en situation de handicap intellectuel à la rédaction et à la relecture. Sans elles, on parle de langage clair, pas de FALC. Et un prompt qui demande seulement de simplifier le texte ne suffit pas : l'outil peut supprimer un délai ou une condition.",
+      "audio": "generated/lesson3_1-commune/scene-7.wav",
+      "duration": 29.095351473922904,
+      "words": [
+        {
+          "w": "Troisième",
+          "start": 0.299,
+          "end": 0.683
+        },
+        {
+          "w": "besoin",
+          "start": 0.725,
+          "end": 1.067
+        },
+        {
+          "w": ":",
+          "start": 1.195,
+          "end": 1.28
+        },
+        {
+          "w": "certaines",
+          "start": 1.323,
+          "end": 1.749
+        },
+        {
+          "w": "difficultés",
+          "start": 1.835,
+          "end": 2.347
+        },
+        {
+          "w": "cognitives.",
+          "start": 2.389,
+          "end": 3.058
+        },
+        {
+          "w": "La",
+          "start": 3.215,
+          "end": 3.343
+        },
+        {
+          "w": "méthode",
+          "start": 3.386,
+          "end": 3.642
+        },
+        {
+          "w": "FALC,",
+          "start": 3.685,
+          "end": 4.197
+        },
+        {
+          "w": "facile",
+          "start": 4.367,
+          "end": 4.666
+        },
+        {
+          "w": "à",
+          "start": 4.709,
+          "end": 4.794
+        },
+        {
+          "w": "lire",
+          "start": 4.837,
+          "end": 4.965
+        },
+        {
+          "w": "et",
+          "start": 5.007,
+          "end": 5.05
+        },
+        {
+          "w": "à",
+          "start": 5.093,
+          "end": 5.135
+        },
+        {
+          "w": "comprendre,",
+          "start": 5.178,
+          "end": 5.797
+        },
+        {
+          "w": "donne",
+          "start": 5.989,
+          "end": 6.245
+        },
+        {
+          "w": "des",
+          "start": 6.287,
+          "end": 6.373
+        },
+        {
+          "w": "règles",
+          "start": 6.415,
+          "end": 6.714
+        },
+        {
+          "w": ":",
+          "start": 6.799,
+          "end": 6.842
+        },
+        {
+          "w": "une",
+          "start": 6.885,
+          "end": 7.013
+        },
+        {
+          "w": "idée",
+          "start": 7.055,
+          "end": 7.226
+        },
+        {
+          "w": "par",
+          "start": 7.269,
+          "end": 7.354
+        },
+        {
+          "w": "phrase,",
+          "start": 7.397,
+          "end": 7.909
+        },
+        {
+          "w": "un",
+          "start": 8.079,
+          "end": 8.207
+        },
+        {
+          "w": "vocabulaire",
+          "start": 8.25,
+          "end": 8.719
+        },
+        {
+          "w": "courant,",
+          "start": 8.762,
+          "end": 9.274
+        },
+        {
+          "w": "des",
+          "start": 9.487,
+          "end": 9.615
+        },
+        {
+          "w": "phrases",
+          "start": 9.658,
+          "end": 9.829
+        },
+        {
+          "w": "courtes",
+          "start": 9.871,
+          "end": 10.085
+        },
+        {
+          "w": "à",
+          "start": 10.127,
+          "end": 10.17
+        },
+        {
+          "w": "la",
+          "start": 10.213,
+          "end": 10.255
+        },
+        {
+          "w": "voix",
+          "start": 10.298,
+          "end": 10.469
+        },
+        {
+          "w": "active,",
+          "start": 10.511,
+          "end": 10.789
+        },
+        {
+          "w": "une",
+          "start": 10.981,
+          "end": 11.365
+        },
+        {
+          "w": "mise",
+          "start": 11.407,
+          "end": 11.535
+        },
+        {
+          "w": "en",
+          "start": 11.621,
+          "end": 11.706
+        },
+        {
+          "w": "page",
+          "start": 11.749,
+          "end": 11.877
+        },
+        {
+          "w": "aérée.",
+          "start": 11.962,
+          "end": 12.506
+        },
+        {
+          "w": "Mais",
+          "start": 12.71,
+          "end": 12.88
+        },
+        {
+          "w": "sa",
+          "start": 12.923,
+          "end": 13.051
+        },
+        {
+          "w": "caractéristique",
+          "start": 13.094,
+          "end": 13.691
+        },
+        {
+          "w": "essentielle,",
+          "start": 13.733,
+          "end": 14.416
+        },
+        {
+          "w": "c'est",
+          "start": 14.587,
+          "end": 14.8
+        },
+        {
+          "w": "la",
+          "start": 14.843,
+          "end": 14.886
+        },
+        {
+          "w": "participation",
+          "start": 14.928,
+          "end": 15.398
+        },
+        {
+          "w": "de",
+          "start": 15.568,
+          "end": 15.611
+        },
+        {
+          "w": "personnes",
+          "start": 15.653,
+          "end": 15.995
+        },
+        {
+          "w": "en",
+          "start": 16.038,
+          "end": 16.166
+        },
+        {
+          "w": "situation",
+          "start": 16.208,
+          "end": 16.422
+        },
+        {
+          "w": "de",
+          "start": 16.592,
+          "end": 16.677
+        },
+        {
+          "w": "handicap",
+          "start": 16.72,
+          "end": 17.019
+        },
+        {
+          "w": "intellectuel",
+          "start": 17.104,
+          "end": 17.659
+        },
+        {
+          "w": "à",
+          "start": 17.787,
+          "end": 18.128
+        },
+        {
+          "w": "la",
+          "start": 18.171,
+          "end": 18.213
+        },
+        {
+          "w": "rédaction",
+          "start": 18.256,
+          "end": 18.555
+        },
+        {
+          "w": "et",
+          "start": 18.811,
+          "end": 19.11
+        },
+        {
+          "w": "à",
+          "start": 19.152,
+          "end": 19.195
+        },
+        {
+          "w": "la",
+          "start": 19.238,
+          "end": 19.28
+        },
+        {
+          "w": "relecture.",
+          "start": 19.323,
+          "end": 19.92
+        },
+        {
+          "w": "Sans",
+          "start": 20.134,
+          "end": 20.304
+        },
+        {
+          "w": "elles,",
+          "start": 20.347,
+          "end": 20.688
+        },
+        {
+          "w": "on",
+          "start": 20.773,
+          "end": 21.029
+        },
+        {
+          "w": "parle",
+          "start": 21.072,
+          "end": 21.2
+        },
+        {
+          "w": "de",
+          "start": 21.243,
+          "end": 21.285
+        },
+        {
+          "w": "langage",
+          "start": 21.328,
+          "end": 21.584
+        },
+        {
+          "w": "clair,",
+          "start": 21.669,
+          "end": 22.011
+        },
+        {
+          "w": "pas",
+          "start": 22.139,
+          "end": 22.309
+        },
+        {
+          "w": "de",
+          "start": 22.352,
+          "end": 22.395
+        },
+        {
+          "w": "FALC.",
+          "start": 22.395,
+          "end": 22.958
+        },
+        {
+          "w": "Et",
+          "start": 23.222,
+          "end": 23.35
+        },
+        {
+          "w": "un",
+          "start": 23.392,
+          "end": 23.478
+        },
+        {
+          "w": "prompt",
+          "start": 23.52,
+          "end": 23.776
+        },
+        {
+          "w": "qui",
+          "start": 23.819,
+          "end": 23.904
+        },
+        {
+          "w": "demande",
+          "start": 23.947,
+          "end": 24.118
+        },
+        {
+          "w": "seulement",
+          "start": 24.16,
+          "end": 24.544
+        },
+        {
+          "w": "de",
+          "start": 24.587,
+          "end": 24.672
+        },
+        {
+          "w": "simplifier",
+          "start": 24.715,
+          "end": 25.184
+        },
+        {
+          "w": "le",
+          "start": 25.227,
+          "end": 25.27
+        },
+        {
+          "w": "texte",
+          "start": 25.312,
+          "end": 25.611
+        },
+        {
+          "w": "ne",
+          "start": 25.739,
+          "end": 25.824
+        },
+        {
+          "w": "suffit",
+          "start": 25.867,
+          "end": 26.123
+        },
+        {
+          "w": "pas",
+          "start": 26.166,
+          "end": 26.294
+        },
+        {
+          "w": ":",
+          "start": 26.336,
+          "end": 26.379
+        },
+        {
+          "w": "l'outil",
+          "start": 26.422,
+          "end": 26.72
+        },
+        {
+          "w": "peut",
+          "start": 26.763,
+          "end": 26.891
+        },
+        {
+          "w": "supprimer",
+          "start": 26.934,
+          "end": 27.36
+        },
+        {
+          "w": "un",
+          "start": 27.403,
+          "end": 27.446
+        },
+        {
+          "w": "délai",
+          "start": 27.488,
+          "end": 27.83
+        },
+        {
+          "w": "ou",
+          "start": 27.915,
+          "end": 28
+        },
+        {
+          "w": "une",
+          "start": 28.043,
+          "end": 28.086
+        },
+        {
+          "w": "condition.",
+          "start": 28.171,
+          "end": 28.895
+        }
+      ]
+    },
+    {
+      "id": "8",
+      "title": "Le prompt qui pose la contrainte",
+      "avatar": "none",
+      "text": "Un outil ne produit pas un contenu accessible par défaut : il produit ce qu'on lui demande. Écrivez donc la contrainte, comme une contrainte de longueur ou de ton. Le gabarit du cours tient en cinq lignes : le contenu à adapter et son usage, le public et son besoin, la contrainte d'accessibilité précise, les informations à conserver absolument, et le résultat attendu, avec les points à faire valider. Ensuite, le contrôle reste humain : vous comparez la sortie au texte source, et vous testez le support avec les usages concernés.",
+      "audio": "generated/lesson3_1-commune/scene-8.wav",
+      "duration": 28.997369614512472,
+      "words": [
+        {
+          "w": "Un",
+          "start": 0.256,
+          "end": 0.427
+        },
+        {
+          "w": "outil",
+          "start": 0.469,
+          "end": 0.725
+        },
+        {
+          "w": "ne",
+          "start": 0.768,
+          "end": 0.811
+        },
+        {
+          "w": "produit",
+          "start": 0.853,
+          "end": 1.109
+        },
+        {
+          "w": "pas",
+          "start": 1.152,
+          "end": 1.237
+        },
+        {
+          "w": "un",
+          "start": 1.28,
+          "end": 1.323
+        },
+        {
+          "w": "contenu",
+          "start": 1.365,
+          "end": 1.664
+        },
+        {
+          "w": "accessible",
+          "start": 1.707,
+          "end": 2.133
+        },
+        {
+          "w": "par",
+          "start": 2.261,
+          "end": 2.347
+        },
+        {
+          "w": "défaut",
+          "start": 2.389,
+          "end": 2.731
+        },
+        {
+          "w": ":",
+          "start": 2.773,
+          "end": 2.859
+        },
+        {
+          "w": "il",
+          "start": 2.901,
+          "end": 3.285
+        },
+        {
+          "w": "produit",
+          "start": 3.328,
+          "end": 3.627
+        },
+        {
+          "w": "ce",
+          "start": 3.669,
+          "end": 3.712
+        },
+        {
+          "w": "qu'on",
+          "start": 3.755,
+          "end": 3.883
+        },
+        {
+          "w": "lui",
+          "start": 3.925,
+          "end": 4.011
+        },
+        {
+          "w": "demande.",
+          "start": 4.053,
+          "end": 4.672
+        },
+        {
+          "w": "Écrivez",
+          "start": 5.035,
+          "end": 5.376
+        },
+        {
+          "w": "donc",
+          "start": 5.419,
+          "end": 5.547
+        },
+        {
+          "w": "la",
+          "start": 5.632,
+          "end": 5.717
+        },
+        {
+          "w": "contrainte,",
+          "start": 5.76,
+          "end": 6.485
+        },
+        {
+          "w": "comme",
+          "start": 6.699,
+          "end": 6.827
+        },
+        {
+          "w": "une",
+          "start": 6.869,
+          "end": 6.912
+        },
+        {
+          "w": "contrainte",
+          "start": 6.955,
+          "end": 7.296
+        },
+        {
+          "w": "de",
+          "start": 7.339,
+          "end": 7.424
+        },
+        {
+          "w": "longueur",
+          "start": 7.467,
+          "end": 7.808
+        },
+        {
+          "w": "ou",
+          "start": 7.979,
+          "end": 8.064
+        },
+        {
+          "w": "de",
+          "start": 8.107,
+          "end": 8.149
+        },
+        {
+          "w": "ton.",
+          "start": 8.192,
+          "end": 8.52
+        },
+        {
+          "w": "Le",
+          "start": 8.678,
+          "end": 8.848
+        },
+        {
+          "w": "gabarit",
+          "start": 8.891,
+          "end": 9.19
+        },
+        {
+          "w": "du",
+          "start": 9.232,
+          "end": 9.361
+        },
+        {
+          "w": "cours",
+          "start": 9.403,
+          "end": 9.617
+        },
+        {
+          "w": "tient",
+          "start": 9.702,
+          "end": 9.915
+        },
+        {
+          "w": "en",
+          "start": 9.958,
+          "end": 10.001
+        },
+        {
+          "w": "cinq",
+          "start": 10.043,
+          "end": 10.299
+        },
+        {
+          "w": "lignes",
+          "start": 10.384,
+          "end": 10.683
+        },
+        {
+          "w": ":",
+          "start": 10.768,
+          "end": 10.811
+        },
+        {
+          "w": "le",
+          "start": 10.854,
+          "end": 10.939
+        },
+        {
+          "w": "contenu",
+          "start": 10.982,
+          "end": 11.323
+        },
+        {
+          "w": "à",
+          "start": 11.366,
+          "end": 11.451
+        },
+        {
+          "w": "adapter",
+          "start": 11.494,
+          "end": 11.835
+        },
+        {
+          "w": "et",
+          "start": 11.963,
+          "end": 12.006
+        },
+        {
+          "w": "son",
+          "start": 12.049,
+          "end": 12.134
+        },
+        {
+          "w": "usage,",
+          "start": 12.177,
+          "end": 12.689
+        },
+        {
+          "w": "le",
+          "start": 12.902,
+          "end": 13.03
+        },
+        {
+          "w": "public",
+          "start": 13.072,
+          "end": 13.243
+        },
+        {
+          "w": "et",
+          "start": 13.499,
+          "end": 13.542
+        },
+        {
+          "w": "son",
+          "start": 13.585,
+          "end": 13.67
+        },
+        {
+          "w": "besoin,",
+          "start": 13.713,
+          "end": 14.246
+        },
+        {
+          "w": "la",
+          "start": 14.395,
+          "end": 14.566
+        },
+        {
+          "w": "contrainte",
+          "start": 14.608,
+          "end": 15.035
+        },
+        {
+          "w": "d'accessibilité",
+          "start": 15.078,
+          "end": 15.761
+        },
+        {
+          "w": "précise,",
+          "start": 15.803,
+          "end": 16.443
+        },
+        {
+          "w": "les",
+          "start": 16.657,
+          "end": 16.785
+        },
+        {
+          "w": "informations",
+          "start": 16.827,
+          "end": 17.169
+        },
+        {
+          "w": "à",
+          "start": 17.382,
+          "end": 17.424
+        },
+        {
+          "w": "conserver",
+          "start": 17.467,
+          "end": 17.894
+        },
+        {
+          "w": "absolument,",
+          "start": 17.936,
+          "end": 18.449
+        },
+        {
+          "w": "et",
+          "start": 18.619,
+          "end": 18.918
+        },
+        {
+          "w": "le",
+          "start": 18.96,
+          "end": 19.003
+        },
+        {
+          "w": "résultat",
+          "start": 19.046,
+          "end": 19.43
+        },
+        {
+          "w": "attendu,",
+          "start": 19.473,
+          "end": 20.081
+        },
+        {
+          "w": "avec",
+          "start": 20.305,
+          "end": 20.561
+        },
+        {
+          "w": "les",
+          "start": 20.603,
+          "end": 20.689
+        },
+        {
+          "w": "points",
+          "start": 20.731,
+          "end": 20.902
+        },
+        {
+          "w": "à",
+          "start": 20.945,
+          "end": 20.987
+        },
+        {
+          "w": "faire",
+          "start": 21.03,
+          "end": 21.158
+        },
+        {
+          "w": "valider.",
+          "start": 21.201,
+          "end": 21.841
+        },
+        {
+          "w": "Ensuite,",
+          "start": 22.225,
+          "end": 22.737
+        },
+        {
+          "w": "le",
+          "start": 22.95,
+          "end": 23.078
+        },
+        {
+          "w": "contrôle",
+          "start": 23.121,
+          "end": 23.505
+        },
+        {
+          "w": "reste",
+          "start": 23.547,
+          "end": 23.718
+        },
+        {
+          "w": "humain",
+          "start": 23.761,
+          "end": 23.974
+        },
+        {
+          "w": ":",
+          "start": 24.017,
+          "end": 24.059
+        },
+        {
+          "w": "vous",
+          "start": 24.102,
+          "end": 24.23
+        },
+        {
+          "w": "comparez",
+          "start": 24.273,
+          "end": 24.614
+        },
+        {
+          "w": "la",
+          "start": 24.657,
+          "end": 24.699
+        },
+        {
+          "w": "sortie",
+          "start": 24.742,
+          "end": 25.083
+        },
+        {
+          "w": "au",
+          "start": 25.126,
+          "end": 25.211
+        },
+        {
+          "w": "texte",
+          "start": 25.254,
+          "end": 25.425
+        },
+        {
+          "w": "source,",
+          "start": 25.553,
+          "end": 25.958
+        },
+        {
+          "w": "et",
+          "start": 26.15,
+          "end": 26.406
+        },
+        {
+          "w": "vous",
+          "start": 26.449,
+          "end": 26.534
+        },
+        {
+          "w": "testez",
+          "start": 26.577,
+          "end": 26.833
+        },
+        {
+          "w": "le",
+          "start": 26.875,
+          "end": 26.961
+        },
+        {
+          "w": "support",
+          "start": 27.003,
+          "end": 27.217
+        },
+        {
+          "w": "avec",
+          "start": 27.43,
+          "end": 27.601
+        },
+        {
+          "w": "les",
+          "start": 27.643,
+          "end": 27.729
+        },
+        {
+          "w": "usages",
+          "start": 27.771,
+          "end": 27.985
+        },
+        {
+          "w": "concernés.",
+          "start": 28.07,
+          "end": 28.823
+        }
+      ]
+    },
+    {
+      "id": "9",
+      "title": "À vous de jouer",
+      "avatar": "pip",
+      "text": "À vous, maintenant. Commencez par l'onglet Playground : c'est là que vous appliquez la méthode, et c'est le temps de pratique compté dans votre assiduité. Ensuite, dans le Studio, essayez Du texte à l'audio pour produire la version audio d'un texte ; elle consomme votre budget IA, alors dosez. Enfin, ouvrez un chat du Studio, joignez une image et demandez un texte alternatif en précisant son rôle. Le chat Gemini ne consomme pas de budget. Relisez toujours le résultat.",
+      "audio": "generated/lesson3_1-commune/scene-9.wav",
+      "duration": 26.338684807256236,
+      "words": [
+        {
+          "w": "À",
+          "start": 0.256,
+          "end": 0.427
+        },
+        {
+          "w": "vous,",
+          "start": 0.469,
+          "end": 0.747
+        },
+        {
+          "w": "maintenant.",
+          "start": 0.853,
+          "end": 1.451
+        },
+        {
+          "w": "Commencez",
+          "start": 1.707,
+          "end": 2.048
+        },
+        {
+          "w": "par",
+          "start": 2.091,
+          "end": 2.176
+        },
+        {
+          "w": "l'onglet",
+          "start": 2.219,
+          "end": 2.517
+        },
+        {
+          "w": "Playground",
+          "start": 2.56,
+          "end": 2.987
+        },
+        {
+          "w": ":",
+          "start": 3.2,
+          "end": 3.285
+        },
+        {
+          "w": "c'est",
+          "start": 3.328,
+          "end": 3.669
+        },
+        {
+          "w": "là",
+          "start": 3.712,
+          "end": 3.797
+        },
+        {
+          "w": "que",
+          "start": 3.84,
+          "end": 3.883
+        },
+        {
+          "w": "vous",
+          "start": 3.925,
+          "end": 4.011
+        },
+        {
+          "w": "appliquez",
+          "start": 4.053,
+          "end": 4.309
+        },
+        {
+          "w": "la",
+          "start": 4.352,
+          "end": 4.395
+        },
+        {
+          "w": "méthode,",
+          "start": 4.437,
+          "end": 4.864
+        },
+        {
+          "w": "et",
+          "start": 5.035,
+          "end": 5.163
+        },
+        {
+          "w": "c'est",
+          "start": 5.205,
+          "end": 5.333
+        },
+        {
+          "w": "le",
+          "start": 5.376,
+          "end": 5.419
+        },
+        {
+          "w": "temps",
+          "start": 5.461,
+          "end": 5.547
+        },
+        {
+          "w": "de",
+          "start": 5.589,
+          "end": 5.632
+        },
+        {
+          "w": "pratique",
+          "start": 5.675,
+          "end": 6.016
+        },
+        {
+          "w": "compté",
+          "start": 6.187,
+          "end": 6.528
+        },
+        {
+          "w": "dans",
+          "start": 6.571,
+          "end": 6.656
+        },
+        {
+          "w": "votre",
+          "start": 6.699,
+          "end": 6.827
+        },
+        {
+          "w": "assiduité.",
+          "start": 6.869,
+          "end": 7.525
+        },
+        {
+          "w": "Ensuite,",
+          "start": 7.668,
+          "end": 8.265
+        },
+        {
+          "w": "dans",
+          "start": 8.479,
+          "end": 8.649
+        },
+        {
+          "w": "le",
+          "start": 8.692,
+          "end": 8.735
+        },
+        {
+          "w": "Studio,",
+          "start": 8.777,
+          "end": 9.246
+        },
+        {
+          "w": "essayez",
+          "start": 9.374,
+          "end": 9.929
+        },
+        {
+          "w": "Du",
+          "start": 9.972,
+          "end": 10.057
+        },
+        {
+          "w": "texte",
+          "start": 10.1,
+          "end": 10.356
+        },
+        {
+          "w": "à",
+          "start": 10.399,
+          "end": 10.441
+        },
+        {
+          "w": "l'audio",
+          "start": 10.484,
+          "end": 10.74
+        },
+        {
+          "w": "pour",
+          "start": 10.825,
+          "end": 10.953
+        },
+        {
+          "w": "produire",
+          "start": 11.039,
+          "end": 11.337
+        },
+        {
+          "w": "la",
+          "start": 11.38,
+          "end": 11.465
+        },
+        {
+          "w": "version",
+          "start": 11.508,
+          "end": 11.678
+        },
+        {
+          "w": "audio",
+          "start": 11.849,
+          "end": 12.148
+        },
+        {
+          "w": "d'un",
+          "start": 12.191,
+          "end": 12.361
+        },
+        {
+          "w": "texte",
+          "start": 12.404,
+          "end": 12.745
+        },
+        {
+          "w": ";",
+          "start": 12.831,
+          "end": 12.873
+        },
+        {
+          "w": "elle",
+          "start": 12.916,
+          "end": 13.172
+        },
+        {
+          "w": "consomme",
+          "start": 13.214,
+          "end": 13.598
+        },
+        {
+          "w": "votre",
+          "start": 13.641,
+          "end": 13.769
+        },
+        {
+          "w": "budget",
+          "start": 13.854,
+          "end": 14.153
+        },
+        {
+          "w": "IA,",
+          "start": 14.239,
+          "end": 14.601
+        },
+        {
+          "w": "alors",
+          "start": 14.751,
+          "end": 14.921
+        },
+        {
+          "w": "dosez.",
+          "start": 15.007,
+          "end": 15.535
+        },
+        {
+          "w": "Enfin,",
+          "start": 15.765,
+          "end": 16.256
+        },
+        {
+          "w": "ouvrez",
+          "start": 16.362,
+          "end": 16.874
+        },
+        {
+          "w": "un",
+          "start": 16.917,
+          "end": 16.96
+        },
+        {
+          "w": "chat",
+          "start": 17.002,
+          "end": 17.173
+        },
+        {
+          "w": "du",
+          "start": 17.216,
+          "end": 17.258
+        },
+        {
+          "w": "Studio,",
+          "start": 17.301,
+          "end": 17.856
+        },
+        {
+          "w": "joignez",
+          "start": 18.026,
+          "end": 18.453
+        },
+        {
+          "w": "une",
+          "start": 18.496,
+          "end": 18.581
+        },
+        {
+          "w": "image",
+          "start": 18.624,
+          "end": 18.837
+        },
+        {
+          "w": "et",
+          "start": 19.093,
+          "end": 19.477
+        },
+        {
+          "w": "demandez",
+          "start": 19.52,
+          "end": 19.861
+        },
+        {
+          "w": "un",
+          "start": 19.904,
+          "end": 19.946
+        },
+        {
+          "w": "texte",
+          "start": 19.989,
+          "end": 20.245
+        },
+        {
+          "w": "alternatif",
+          "start": 20.288,
+          "end": 20.8
+        },
+        {
+          "w": "en",
+          "start": 20.885,
+          "end": 20.928
+        },
+        {
+          "w": "précisant",
+          "start": 20.97,
+          "end": 21.354
+        },
+        {
+          "w": "son",
+          "start": 21.397,
+          "end": 21.525
+        },
+        {
+          "w": "rôle.",
+          "start": 21.568,
+          "end": 22.122
+        },
+        {
+          "w": "Le",
+          "start": 22.464,
+          "end": 22.549
+        },
+        {
+          "w": "chat",
+          "start": 22.592,
+          "end": 22.762
+        },
+        {
+          "w": "Gemini",
+          "start": 22.805,
+          "end": 23.189
+        },
+        {
+          "w": "ne",
+          "start": 23.232,
+          "end": 23.274
+        },
+        {
+          "w": "consomme",
+          "start": 23.317,
+          "end": 23.658
+        },
+        {
+          "w": "pas",
+          "start": 23.701,
+          "end": 23.829
+        },
+        {
+          "w": "de",
+          "start": 23.872,
+          "end": 23.914
+        },
+        {
+          "w": "budget.",
+          "start": 23.957,
+          "end": 24.448
+        },
+        {
+          "w": "Relisez",
+          "start": 24.64,
+          "end": 25.066
+        },
+        {
+          "w": "toujours",
+          "start": 25.109,
+          "end": 25.408
+        },
+        {
+          "w": "le",
+          "start": 25.45,
+          "end": 25.493
+        },
+        {
+          "w": "résultat.",
+          "start": 25.536,
+          "end": 26.164
+        }
+      ],
+      "avatarVideo": "generated/lesson3_1-commune/avatar-9.mp4",
+      "avatarVideoId": "71fe53f741bde17735e9a10b69d9fab1",
+      "avatarDuration": 26.2
+    },
+    {
+      "id": "10",
+      "title": "Clôture",
+      "avatar": "full",
+      "text": "Retenez trois choses. Partez du besoin réel, visuel, auditif ou cognitif. Écrivez la contrainte d'accessibilité dans le prompt, avec ce qu'il faut conserver. Et contrôlez toujours la sortie avant publication. Validez le quiz pour débloquer la suite. Vos contenus sont accessibles ; dans la prochaine leçon, on vérifie qu'ils sont conformes, avec l'IA Act et le RGPD.",
+      "audio": "generated/lesson3_1-commune/scene-10.wav",
+      "duration": 20.110634920634922,
+      "words": [
+        {
+          "w": "Retenez",
+          "start": 0.256,
+          "end": 0.64
+        },
+        {
+          "w": "trois",
+          "start": 0.683,
+          "end": 0.811
+        },
+        {
+          "w": "choses.",
+          "start": 0.853,
+          "end": 1.365
+        },
+        {
+          "w": "Partez",
+          "start": 1.579,
+          "end": 1.835
+        },
+        {
+          "w": "du",
+          "start": 1.877,
+          "end": 1.963
+        },
+        {
+          "w": "besoin",
+          "start": 2.005,
+          "end": 2.261
+        },
+        {
+          "w": "réel,",
+          "start": 2.304,
+          "end": 2.816
+        },
+        {
+          "w": "visuel,",
+          "start": 2.987,
+          "end": 3.584
+        },
+        {
+          "w": "auditif",
+          "start": 3.712,
+          "end": 4.181
+        },
+        {
+          "w": "ou",
+          "start": 4.309,
+          "end": 4.395
+        },
+        {
+          "w": "cognitif.",
+          "start": 4.437,
+          "end": 5.077
+        },
+        {
+          "w": "Écrivez",
+          "start": 5.333,
+          "end": 5.931
+        },
+        {
+          "w": "la",
+          "start": 5.973,
+          "end": 6.016
+        },
+        {
+          "w": "contrainte",
+          "start": 6.059,
+          "end": 6.4
+        },
+        {
+          "w": "d'accessibilité",
+          "start": 6.443,
+          "end": 7.125
+        },
+        {
+          "w": "dans",
+          "start": 7.168,
+          "end": 7.253
+        },
+        {
+          "w": "le",
+          "start": 7.296,
+          "end": 7.339
+        },
+        {
+          "w": "prompt,",
+          "start": 7.381,
+          "end": 7.723
+        },
+        {
+          "w": "avec",
+          "start": 7.808,
+          "end": 7.979
+        },
+        {
+          "w": "ce",
+          "start": 8.021,
+          "end": 8.107
+        },
+        {
+          "w": "qu'il",
+          "start": 8.149,
+          "end": 8.277
+        },
+        {
+          "w": "faut",
+          "start": 8.32,
+          "end": 8.405
+        },
+        {
+          "w": "conserver.",
+          "start": 8.448,
+          "end": 9.045
+        },
+        {
+          "w": "Et",
+          "start": 9.259,
+          "end": 9.344
+        },
+        {
+          "w": "contrôlez",
+          "start": 9.387,
+          "end": 9.771
+        },
+        {
+          "w": "toujours",
+          "start": 9.813,
+          "end": 10.197
+        },
+        {
+          "w": "la",
+          "start": 10.24,
+          "end": 10.283
+        },
+        {
+          "w": "sortie",
+          "start": 10.325,
+          "end": 10.624
+        },
+        {
+          "w": "avant",
+          "start": 10.667,
+          "end": 10.795
+        },
+        {
+          "w": "publication.",
+          "start": 10.837,
+          "end": 11.388
+        },
+        {
+          "w": "Validez",
+          "start": 11.598,
+          "end": 11.939
+        },
+        {
+          "w": "le",
+          "start": 11.982,
+          "end": 12.024
+        },
+        {
+          "w": "quiz",
+          "start": 12.067,
+          "end": 12.28
+        },
+        {
+          "w": "pour",
+          "start": 12.408,
+          "end": 12.494
+        },
+        {
+          "w": "débloquer",
+          "start": 12.536,
+          "end": 12.878
+        },
+        {
+          "w": "la",
+          "start": 12.92,
+          "end": 13.006
+        },
+        {
+          "w": "suite.",
+          "start": 13.048,
+          "end": 13.539
+        },
+        {
+          "w": "Vos",
+          "start": 13.859,
+          "end": 13.987
+        },
+        {
+          "w": "contenus",
+          "start": 14.03,
+          "end": 14.286
+        },
+        {
+          "w": "sont",
+          "start": 14.328,
+          "end": 14.456
+        },
+        {
+          "w": "accessibles",
+          "start": 14.499,
+          "end": 15.096
+        },
+        {
+          "w": ";",
+          "start": 15.139,
+          "end": 15.224
+        },
+        {
+          "w": "dans",
+          "start": 15.267,
+          "end": 15.438
+        },
+        {
+          "w": "la",
+          "start": 15.48,
+          "end": 15.523
+        },
+        {
+          "w": "prochaine",
+          "start": 15.566,
+          "end": 15.822
+        },
+        {
+          "w": "leçon,",
+          "start": 15.864,
+          "end": 16.248
+        },
+        {
+          "w": "on",
+          "start": 16.334,
+          "end": 16.675
+        },
+        {
+          "w": "vérifie",
+          "start": 16.718,
+          "end": 16.974
+        },
+        {
+          "w": "qu'ils",
+          "start": 17.016,
+          "end": 17.144
+        },
+        {
+          "w": "sont",
+          "start": 17.187,
+          "end": 17.315
+        },
+        {
+          "w": "conformes,",
+          "start": 17.358,
+          "end": 17.934
+        },
+        {
+          "w": "avec",
+          "start": 18.083,
+          "end": 18.254
+        },
+        {
+          "w": "l'IA",
+          "start": 18.339,
+          "end": 18.552
+        },
+        {
+          "w": "Act",
+          "start": 18.595,
+          "end": 18.808
+        },
+        {
+          "w": "et",
+          "start": 18.979,
+          "end": 19.107
+        },
+        {
+          "w": "le",
+          "start": 19.15,
+          "end": 19.235
+        },
+        {
+          "w": "RGPD.",
+          "start": 19.278,
+          "end": 19.911
+        }
+      ],
+      "avatarVideo": "generated/lesson3_1-commune/avatar-10.mp4",
+      "avatarVideoId": "0fb5cf154f5a3b3e40f969624bafbe79",
+      "avatarDuration": 20
+    }
+  ]
+}

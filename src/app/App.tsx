@@ -1,4 +1,4 @@
-import type { ReactElement } from "react";
+import { lazy, Suspense, type ReactElement } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router";
 import { ThemeProvider, useTh } from "@/app/theme/theme";
 import { AuthProvider, useAuth } from "@/app/state/auth-context";
@@ -78,6 +78,9 @@ import { CompanyPositioningTestPage } from "@/app/pages/entreprise/CompanyPositi
 import { CompanyHtmlExercisePage } from "@/app/pages/entreprise/CompanyHtmlExercisePage";
 import { CompanySatisfactionTestPage } from "@/app/pages/entreprise/CompanySatisfactionTestPage";
 import { CompanyWelcomePage } from "@/app/pages/entreprise/CompanyWelcomePage";
+
+// Aperçu local des Playgrounds natifs (développement uniquement).
+const PlaygroundDevPreview = lazy(() => import("@/app/playgrounds/PlaygroundDevPreview"));
 
 function LoadingScreen() {
   const th = useTh();
@@ -313,6 +316,9 @@ function AppRoutes() {
       </Route>
       <Route path="/lesson/:lessonId" element={<RequireAuth><AccessGate redirectTo="/dashboard"><ExamLock><LessonPage /></ExamLock></AccessGate></RequireAuth>} />
       <Route path="/lesson/:lessonId/mission-envoyee" element={<RequireAuth><AccessGate redirectTo="/dashboard"><ExamLock><MissionSubmittedPage /></ExamLock></AccessGate></RequireAuth>} />
+      {import.meta.env.DEV && (
+        <Route path="/__playground/:id" element={<Suspense fallback={null}><PlaygroundDevPreview /></Suspense>} />
+      )}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

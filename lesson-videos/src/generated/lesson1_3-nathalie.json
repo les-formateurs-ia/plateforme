@@ -1,0 +1,1696 @@
+{
+  "name": "lesson1_3-nathalie",
+  "source": "../docs/formation-rs6776/lecon-1.3/script-video-nathalie.md",
+  "voice": "341b4807e5e6455fa88f34bda5d6eeea",
+  "model": "heygen-voice-1-turbo-free",
+  "total": 105.94900226757369,
+  "avatarSeconds": 32.72632653061224,
+  "scenes": [
+    {
+      "id": "1",
+      "title": "Accroche",
+      "avatar": "full",
+      "text": "Bonjour Nathalie. Vous utilisez déjà ChatGPT tous les jours, et vous intervenez chez plusieurs clients. Votre enjeu n'est donc pas de créer le plus de comptes possible. C'est de savoir, pour chaque mission, quel accès utiliser, qui le contrôle, et quelles données peuvent y entrer.",
+      "audio": "generated/lesson1_3-nathalie/scene-1.wav",
+      "duration": 14.619115646258503,
+      "words": [
+        {
+          "w": "Bonjour",
+          "start": 0.299,
+          "end": 0.597
+        },
+        {
+          "w": "Nathalie.",
+          "start": 0.64,
+          "end": 1.109
+        },
+        {
+          "w": "Vous",
+          "start": 1.28,
+          "end": 1.451
+        },
+        {
+          "w": "utilisez",
+          "start": 1.493,
+          "end": 1.877
+        },
+        {
+          "w": "déjà",
+          "start": 1.92,
+          "end": 2.176
+        },
+        {
+          "w": "ChatGPT",
+          "start": 2.219,
+          "end": 2.773
+        },
+        {
+          "w": "tous",
+          "start": 2.816,
+          "end": 2.987
+        },
+        {
+          "w": "les",
+          "start": 3.029,
+          "end": 3.072
+        },
+        {
+          "w": "jours,",
+          "start": 3.115,
+          "end": 3.456
+        },
+        {
+          "w": "et",
+          "start": 3.627,
+          "end": 3.883
+        },
+        {
+          "w": "vous",
+          "start": 3.925,
+          "end": 4.011
+        },
+        {
+          "w": "intervenez",
+          "start": 4.053,
+          "end": 4.437
+        },
+        {
+          "w": "chez",
+          "start": 4.48,
+          "end": 4.608
+        },
+        {
+          "w": "plusieurs",
+          "start": 4.651,
+          "end": 4.907
+        },
+        {
+          "w": "clients.",
+          "start": 4.992,
+          "end": 5.419
+        },
+        {
+          "w": "Votre",
+          "start": 5.589,
+          "end": 5.845
+        },
+        {
+          "w": "enjeu",
+          "start": 5.888,
+          "end": 6.059
+        },
+        {
+          "w": "n'est",
+          "start": 6.101,
+          "end": 6.4
+        },
+        {
+          "w": "donc",
+          "start": 6.443,
+          "end": 6.528
+        },
+        {
+          "w": "pas",
+          "start": 6.571,
+          "end": 6.613
+        },
+        {
+          "w": "de",
+          "start": 6.656,
+          "end": 6.699
+        },
+        {
+          "w": "créer",
+          "start": 6.741,
+          "end": 6.912
+        },
+        {
+          "w": "le",
+          "start": 6.955,
+          "end": 7.04
+        },
+        {
+          "w": "plus",
+          "start": 7.083,
+          "end": 7.296
+        },
+        {
+          "w": "de",
+          "start": 7.339,
+          "end": 7.424
+        },
+        {
+          "w": "comptes",
+          "start": 7.467,
+          "end": 7.68
+        },
+        {
+          "w": "possible.",
+          "start": 7.723,
+          "end": 8.204
+        },
+        {
+          "w": "C'est",
+          "start": 8.388,
+          "end": 8.601
+        },
+        {
+          "w": "de",
+          "start": 8.644,
+          "end": 8.686
+        },
+        {
+          "w": "savoir,",
+          "start": 8.729,
+          "end": 9.177
+        },
+        {
+          "w": "pour",
+          "start": 9.284,
+          "end": 9.454
+        },
+        {
+          "w": "chaque",
+          "start": 9.497,
+          "end": 9.71
+        },
+        {
+          "w": "mission,",
+          "start": 9.753,
+          "end": 10.201
+        },
+        {
+          "w": "quel",
+          "start": 10.521,
+          "end": 10.692
+        },
+        {
+          "w": "accès",
+          "start": 10.734,
+          "end": 11.033
+        },
+        {
+          "w": "utiliser,",
+          "start": 11.076,
+          "end": 11.652
+        },
+        {
+          "w": "qui",
+          "start": 11.801,
+          "end": 11.929
+        },
+        {
+          "w": "le",
+          "start": 11.972,
+          "end": 12.014
+        },
+        {
+          "w": "contrôle,",
+          "start": 12.057,
+          "end": 12.633
+        },
+        {
+          "w": "et",
+          "start": 12.782,
+          "end": 12.996
+        },
+        {
+          "w": "quelles",
+          "start": 13.038,
+          "end": 13.252
+        },
+        {
+          "w": "données",
+          "start": 13.294,
+          "end": 13.55
+        },
+        {
+          "w": "peuvent",
+          "start": 13.593,
+          "end": 13.764
+        },
+        {
+          "w": "y",
+          "start": 13.806,
+          "end": 13.892
+        },
+        {
+          "w": "entrer.",
+          "start": 13.934,
+          "end": 14.445
+        }
+      ],
+      "avatarVideo": "generated/lesson1_3-nathalie/avatar-1.mp4",
+      "avatarVideoId": "4736122d91e2fb46b11f89c9d793b5e9",
+      "avatarDuration": 14.48
+    },
+    {
+      "id": "2",
+      "title": "Une carte d'accès par client",
+      "avatar": "none",
+      "text": "Commencez par une carte d'accès très simple. Un espace pour votre propre activité, puis un espace séparé pour chaque client. Dans chaque case, notez l'outil autorisé, l'offre, le propriétaire du compte et les données admises. Une case inconnue n'est pas une autorisation : c'est une question à poser au client. Et pour tester Gemini sur une tâche qui ne concerne aucun client, un compte Google dédié au test, sur des données fictives, suffit, si ce test est autorisé.",
+      "audio": "generated/lesson1_3-nathalie/scene-2.wav",
+      "duration": 25.13124716553288,
+      "words": [
+        {
+          "w": "Commencez",
+          "start": 0.256,
+          "end": 0.683
+        },
+        {
+          "w": "par",
+          "start": 0.725,
+          "end": 0.811
+        },
+        {
+          "w": "une",
+          "start": 0.853,
+          "end": 0.896
+        },
+        {
+          "w": "carte",
+          "start": 0.981,
+          "end": 1.152
+        },
+        {
+          "w": "d'accès",
+          "start": 1.195,
+          "end": 1.579
+        },
+        {
+          "w": "très",
+          "start": 1.621,
+          "end": 1.792
+        },
+        {
+          "w": "simple.",
+          "start": 1.835,
+          "end": 2.325
+        },
+        {
+          "w": "Un",
+          "start": 2.603,
+          "end": 2.816
+        },
+        {
+          "w": "espace",
+          "start": 2.859,
+          "end": 3.157
+        },
+        {
+          "w": "pour",
+          "start": 3.243,
+          "end": 3.371
+        },
+        {
+          "w": "votre",
+          "start": 3.413,
+          "end": 3.541
+        },
+        {
+          "w": "propre",
+          "start": 3.627,
+          "end": 3.84
+        },
+        {
+          "w": "activité,",
+          "start": 3.883,
+          "end": 4.608
+        },
+        {
+          "w": "puis",
+          "start": 4.821,
+          "end": 4.992
+        },
+        {
+          "w": "un",
+          "start": 5.035,
+          "end": 5.077
+        },
+        {
+          "w": "espace",
+          "start": 5.12,
+          "end": 5.376
+        },
+        {
+          "w": "séparé",
+          "start": 5.419,
+          "end": 5.888
+        },
+        {
+          "w": "pour",
+          "start": 5.931,
+          "end": 6.016
+        },
+        {
+          "w": "chaque",
+          "start": 6.101,
+          "end": 6.272
+        },
+        {
+          "w": "client.",
+          "start": 6.4,
+          "end": 6.933
+        },
+        {
+          "w": "Dans",
+          "start": 7.211,
+          "end": 7.381
+        },
+        {
+          "w": "chaque",
+          "start": 7.424,
+          "end": 7.595
+        },
+        {
+          "w": "case,",
+          "start": 7.68,
+          "end": 8.064
+        },
+        {
+          "w": "notez",
+          "start": 8.277,
+          "end": 8.619
+        },
+        {
+          "w": "l'outil",
+          "start": 8.661,
+          "end": 8.96
+        },
+        {
+          "w": "autorisé,",
+          "start": 9.003,
+          "end": 9.536
+        },
+        {
+          "w": "l'offre,",
+          "start": 9.643,
+          "end": 10.24
+        },
+        {
+          "w": "le",
+          "start": 10.325,
+          "end": 10.411
+        },
+        {
+          "w": "propriétaire",
+          "start": 10.453,
+          "end": 10.965
+        },
+        {
+          "w": "du",
+          "start": 11.008,
+          "end": 11.093
+        },
+        {
+          "w": "compte",
+          "start": 11.136,
+          "end": 11.392
+        },
+        {
+          "w": "et",
+          "start": 11.52,
+          "end": 11.605
+        },
+        {
+          "w": "les",
+          "start": 11.648,
+          "end": 11.776
+        },
+        {
+          "w": "données",
+          "start": 11.819,
+          "end": 12.032
+        },
+        {
+          "w": "admises.",
+          "start": 12.075,
+          "end": 12.558
+        },
+        {
+          "w": "Une",
+          "start": 12.701,
+          "end": 12.829
+        },
+        {
+          "w": "case",
+          "start": 12.914,
+          "end": 13.042
+        },
+        {
+          "w": "inconnue",
+          "start": 13.085,
+          "end": 13.426
+        },
+        {
+          "w": "n'est",
+          "start": 13.469,
+          "end": 13.597
+        },
+        {
+          "w": "pas",
+          "start": 13.639,
+          "end": 13.725
+        },
+        {
+          "w": "une",
+          "start": 13.767,
+          "end": 13.853
+        },
+        {
+          "w": "autorisation",
+          "start": 13.895,
+          "end": 14.279
+        },
+        {
+          "w": ":",
+          "start": 14.535,
+          "end": 14.578
+        },
+        {
+          "w": "c'est",
+          "start": 14.621,
+          "end": 14.749
+        },
+        {
+          "w": "une",
+          "start": 14.791,
+          "end": 14.834
+        },
+        {
+          "w": "question",
+          "start": 14.877,
+          "end": 15.047
+        },
+        {
+          "w": "à",
+          "start": 15.303,
+          "end": 15.389
+        },
+        {
+          "w": "poser",
+          "start": 15.431,
+          "end": 15.645
+        },
+        {
+          "w": "au",
+          "start": 15.687,
+          "end": 15.73
+        },
+        {
+          "w": "client.",
+          "start": 15.773,
+          "end": 16.261
+        },
+        {
+          "w": "Et",
+          "start": 16.494,
+          "end": 16.622
+        },
+        {
+          "w": "pour",
+          "start": 16.665,
+          "end": 16.793
+        },
+        {
+          "w": "tester",
+          "start": 16.836,
+          "end": 17.092
+        },
+        {
+          "w": "Gemini",
+          "start": 17.134,
+          "end": 17.476
+        },
+        {
+          "w": "sur",
+          "start": 17.561,
+          "end": 17.689
+        },
+        {
+          "w": "une",
+          "start": 17.732,
+          "end": 17.774
+        },
+        {
+          "w": "tâche",
+          "start": 17.86,
+          "end": 18.116
+        },
+        {
+          "w": "qui",
+          "start": 18.158,
+          "end": 18.244
+        },
+        {
+          "w": "ne",
+          "start": 18.286,
+          "end": 18.329
+        },
+        {
+          "w": "concerne",
+          "start": 18.372,
+          "end": 18.713
+        },
+        {
+          "w": "aucun",
+          "start": 18.798,
+          "end": 19.097
+        },
+        {
+          "w": "client,",
+          "start": 19.182,
+          "end": 19.609
+        },
+        {
+          "w": "un",
+          "start": 19.737,
+          "end": 20.036
+        },
+        {
+          "w": "compte",
+          "start": 20.078,
+          "end": 20.249
+        },
+        {
+          "w": "Google",
+          "start": 20.292,
+          "end": 20.59
+        },
+        {
+          "w": "dédié",
+          "start": 20.718,
+          "end": 21.017
+        },
+        {
+          "w": "au",
+          "start": 21.06,
+          "end": 21.145
+        },
+        {
+          "w": "test,",
+          "start": 21.188,
+          "end": 21.529
+        },
+        {
+          "w": "sur",
+          "start": 21.742,
+          "end": 21.87
+        },
+        {
+          "w": "des",
+          "start": 21.913,
+          "end": 21.998
+        },
+        {
+          "w": "données",
+          "start": 22.041,
+          "end": 22.212
+        },
+        {
+          "w": "fictives,",
+          "start": 22.254,
+          "end": 22.873
+        },
+        {
+          "w": "suffit,",
+          "start": 23.065,
+          "end": 23.598
+        },
+        {
+          "w": "si",
+          "start": 23.705,
+          "end": 23.833
+        },
+        {
+          "w": "ce",
+          "start": 23.876,
+          "end": 23.961
+        },
+        {
+          "w": "test",
+          "start": 24.004,
+          "end": 24.132
+        },
+        {
+          "w": "est",
+          "start": 24.217,
+          "end": 24.302
+        },
+        {
+          "w": "autorisé.",
+          "start": 24.345,
+          "end": 24.931
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "title": "Le client vous ouvre son accès",
+      "avatar": "none",
+      "text": "Un client vous ouvre son environnement Microsoft 365, avec Copilot ? Utilisez cet accès fourni, uniquement pour sa mission, sans créer de compte personnel en plus. S'il bloque un outil, ne contournez pas ce choix avec votre propre compte. Et si l'accès cesse soudain de fonctionner, le premier réflexe est de vérifier auprès du client : son administrateur l'a peut-être modifié ou retiré.",
+      "audio": "generated/lesson1_3-nathalie/scene-3.wav",
+      "duration": 20.621473922902496,
+      "words": [
+        {
+          "w": "Un",
+          "start": 0.256,
+          "end": 0.427
+        },
+        {
+          "w": "client",
+          "start": 0.469,
+          "end": 0.768
+        },
+        {
+          "w": "vous",
+          "start": 0.811,
+          "end": 0.939
+        },
+        {
+          "w": "ouvre",
+          "start": 0.981,
+          "end": 1.152
+        },
+        {
+          "w": "son",
+          "start": 1.195,
+          "end": 1.323
+        },
+        {
+          "w": "environnement",
+          "start": 1.451,
+          "end": 1.835
+        },
+        {
+          "w": "Microsoft",
+          "start": 1.877,
+          "end": 2.304
+        },
+        {
+          "w": "365,",
+          "start": 2.475,
+          "end": 3.413
+        },
+        {
+          "w": "avec",
+          "start": 3.541,
+          "end": 3.712
+        },
+        {
+          "w": "Copilot",
+          "start": 3.755,
+          "end": 4.139
+        },
+        {
+          "w": "?",
+          "start": 4.267,
+          "end": 4.309
+        },
+        {
+          "w": "Utilisez",
+          "start": 4.651,
+          "end": 5.163
+        },
+        {
+          "w": "cet",
+          "start": 5.205,
+          "end": 5.333
+        },
+        {
+          "w": "accès",
+          "start": 5.376,
+          "end": 5.589
+        },
+        {
+          "w": "fourni,",
+          "start": 5.632,
+          "end": 6.016
+        },
+        {
+          "w": "uniquement",
+          "start": 6.101,
+          "end": 6.656
+        },
+        {
+          "w": "pour",
+          "start": 6.699,
+          "end": 6.784
+        },
+        {
+          "w": "sa",
+          "start": 6.827,
+          "end": 6.955
+        },
+        {
+          "w": "mission,",
+          "start": 6.997,
+          "end": 7.339
+        },
+        {
+          "w": "sans",
+          "start": 7.595,
+          "end": 7.851
+        },
+        {
+          "w": "créer",
+          "start": 7.893,
+          "end": 8.107
+        },
+        {
+          "w": "de",
+          "start": 8.149,
+          "end": 8.192
+        },
+        {
+          "w": "compte",
+          "start": 8.235,
+          "end": 8.405
+        },
+        {
+          "w": "personnel",
+          "start": 8.448,
+          "end": 8.789
+        },
+        {
+          "w": "en",
+          "start": 8.832,
+          "end": 8.917
+        },
+        {
+          "w": "plus.",
+          "start": 8.96,
+          "end": 9.291
+        },
+        {
+          "w": "S'il",
+          "start": 9.494,
+          "end": 9.75
+        },
+        {
+          "w": "bloque",
+          "start": 9.793,
+          "end": 9.964
+        },
+        {
+          "w": "un",
+          "start": 10.049,
+          "end": 10.092
+        },
+        {
+          "w": "outil,",
+          "start": 10.134,
+          "end": 10.582
+        },
+        {
+          "w": "ne",
+          "start": 10.732,
+          "end": 10.86
+        },
+        {
+          "w": "contournez",
+          "start": 10.902,
+          "end": 11.286
+        },
+        {
+          "w": "pas",
+          "start": 11.329,
+          "end": 11.414
+        },
+        {
+          "w": "ce",
+          "start": 11.457,
+          "end": 11.5
+        },
+        {
+          "w": "choix",
+          "start": 11.585,
+          "end": 11.798
+        },
+        {
+          "w": "avec",
+          "start": 11.841,
+          "end": 11.969
+        },
+        {
+          "w": "votre",
+          "start": 12.012,
+          "end": 12.182
+        },
+        {
+          "w": "propre",
+          "start": 12.268,
+          "end": 12.524
+        },
+        {
+          "w": "compte.",
+          "start": 12.609,
+          "end": 13.078
+        },
+        {
+          "w": "Et",
+          "start": 13.292,
+          "end": 13.42
+        },
+        {
+          "w": "si",
+          "start": 13.462,
+          "end": 13.59
+        },
+        {
+          "w": "l'accès",
+          "start": 13.633,
+          "end": 13.932
+        },
+        {
+          "w": "cesse",
+          "start": 13.974,
+          "end": 14.188
+        },
+        {
+          "w": "soudain",
+          "start": 14.23,
+          "end": 14.529
+        },
+        {
+          "w": "de",
+          "start": 14.572,
+          "end": 14.614
+        },
+        {
+          "w": "fonctionner,",
+          "start": 14.657,
+          "end": 15.212
+        },
+        {
+          "w": "le",
+          "start": 15.425,
+          "end": 15.553
+        },
+        {
+          "w": "premier",
+          "start": 15.596,
+          "end": 15.852
+        },
+        {
+          "w": "réflexe",
+          "start": 15.894,
+          "end": 16.236
+        },
+        {
+          "w": "est",
+          "start": 16.278,
+          "end": 16.321
+        },
+        {
+          "w": "de",
+          "start": 16.364,
+          "end": 16.406
+        },
+        {
+          "w": "vérifier",
+          "start": 16.449,
+          "end": 16.876
+        },
+        {
+          "w": "auprès",
+          "start": 16.918,
+          "end": 17.174
+        },
+        {
+          "w": "du",
+          "start": 17.217,
+          "end": 17.26
+        },
+        {
+          "w": "client",
+          "start": 17.302,
+          "end": 17.558
+        },
+        {
+          "w": ":",
+          "start": 17.644,
+          "end": 17.686
+        },
+        {
+          "w": "son",
+          "start": 17.729,
+          "end": 17.814
+        },
+        {
+          "w": "administrateur",
+          "start": 17.857,
+          "end": 18.54
+        },
+        {
+          "w": "l'a",
+          "start": 18.582,
+          "end": 18.71
+        },
+        {
+          "w": "peut-être",
+          "start": 18.753,
+          "end": 18.966
+        },
+        {
+          "w": "modifié",
+          "start": 19.052,
+          "end": 19.564
+        },
+        {
+          "w": "ou",
+          "start": 19.692,
+          "end": 19.82
+        },
+        {
+          "w": "retiré.",
+          "start": 19.82,
+          "end": 20.447
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "title": "Vos propres comptes",
+      "avatar": "none",
+      "text": "Côté personnel, vous pouvez vous connecter à ChatGPT avec votre compte Google ou Microsoft, sans nouveau mot de passe. Lisez alors les permissions demandées, et retenez que cet accès se révoque depuis les paramètres de sécurité du compte. Pour le reste, un gestionnaire de mots de passe, un mot de passe distinct par compte, jamais celui d'un client réutilisé ailleurs. Avant chaque session client, regardez le profil actif et le nom de l'espace de travail. Et à la fin d'une mission, demandez le retrait de vos droits.",
+      "audio": "generated/lesson1_3-nathalie/scene-4.wav",
+      "duration": 27.469954648526077,
+      "words": [
+        {
+          "w": "Côté",
+          "start": 0.299,
+          "end": 0.555
+        },
+        {
+          "w": "personnel,",
+          "start": 0.597,
+          "end": 1.152
+        },
+        {
+          "w": "vous",
+          "start": 1.365,
+          "end": 1.579
+        },
+        {
+          "w": "pouvez",
+          "start": 1.621,
+          "end": 1.792
+        },
+        {
+          "w": "vous",
+          "start": 1.835,
+          "end": 1.92
+        },
+        {
+          "w": "connecter",
+          "start": 1.963,
+          "end": 2.304
+        },
+        {
+          "w": "à",
+          "start": 2.347,
+          "end": 2.389
+        },
+        {
+          "w": "ChatGPT",
+          "start": 2.432,
+          "end": 3.072
+        },
+        {
+          "w": "avec",
+          "start": 3.115,
+          "end": 3.243
+        },
+        {
+          "w": "votre",
+          "start": 3.285,
+          "end": 3.499
+        },
+        {
+          "w": "compte",
+          "start": 3.541,
+          "end": 3.84
+        },
+        {
+          "w": "Google",
+          "start": 3.968,
+          "end": 4.309
+        },
+        {
+          "w": "ou",
+          "start": 4.523,
+          "end": 4.608
+        },
+        {
+          "w": "Microsoft,",
+          "start": 4.651,
+          "end": 5.269
+        },
+        {
+          "w": "sans",
+          "start": 5.461,
+          "end": 5.76
+        },
+        {
+          "w": "nouveau",
+          "start": 5.803,
+          "end": 6.016
+        },
+        {
+          "w": "mot",
+          "start": 6.059,
+          "end": 6.101
+        },
+        {
+          "w": "de",
+          "start": 6.144,
+          "end": 6.187
+        },
+        {
+          "w": "passe.",
+          "start": 6.229,
+          "end": 6.59
+        },
+        {
+          "w": "Lisez",
+          "start": 6.779,
+          "end": 7.121
+        },
+        {
+          "w": "alors",
+          "start": 7.163,
+          "end": 7.334
+        },
+        {
+          "w": "les",
+          "start": 7.377,
+          "end": 7.462
+        },
+        {
+          "w": "permissions",
+          "start": 7.505,
+          "end": 7.846
+        },
+        {
+          "w": "demandées,",
+          "start": 7.889,
+          "end": 8.444
+        },
+        {
+          "w": "et",
+          "start": 8.572,
+          "end": 8.828
+        },
+        {
+          "w": "retenez",
+          "start": 8.87,
+          "end": 9.211
+        },
+        {
+          "w": "que",
+          "start": 9.254,
+          "end": 9.339
+        },
+        {
+          "w": "cet",
+          "start": 9.382,
+          "end": 9.467
+        },
+        {
+          "w": "accès",
+          "start": 9.51,
+          "end": 9.809
+        },
+        {
+          "w": "se",
+          "start": 9.851,
+          "end": 9.937
+        },
+        {
+          "w": "révoque",
+          "start": 9.979,
+          "end": 10.278
+        },
+        {
+          "w": "depuis",
+          "start": 10.406,
+          "end": 10.662
+        },
+        {
+          "w": "les",
+          "start": 10.705,
+          "end": 10.748
+        },
+        {
+          "w": "paramètres",
+          "start": 10.79,
+          "end": 11.259
+        },
+        {
+          "w": "de",
+          "start": 11.345,
+          "end": 11.387
+        },
+        {
+          "w": "sécurité",
+          "start": 11.43,
+          "end": 11.899
+        },
+        {
+          "w": "du",
+          "start": 11.942,
+          "end": 12.027
+        },
+        {
+          "w": "compte.",
+          "start": 12.07,
+          "end": 12.576
+        },
+        {
+          "w": "Pour",
+          "start": 12.868,
+          "end": 13.039
+        },
+        {
+          "w": "le",
+          "start": 13.082,
+          "end": 13.167
+        },
+        {
+          "w": "reste,",
+          "start": 13.21,
+          "end": 13.551
+        },
+        {
+          "w": "un",
+          "start": 13.679,
+          "end": 13.892
+        },
+        {
+          "w": "gestionnaire",
+          "start": 13.935,
+          "end": 14.362
+        },
+        {
+          "w": "de",
+          "start": 14.404,
+          "end": 14.49
+        },
+        {
+          "w": "mots",
+          "start": 14.532,
+          "end": 14.66
+        },
+        {
+          "w": "de",
+          "start": 14.703,
+          "end": 14.746
+        },
+        {
+          "w": "passe,",
+          "start": 14.788,
+          "end": 15.087
+        },
+        {
+          "w": "un",
+          "start": 15.258,
+          "end": 15.343
+        },
+        {
+          "w": "mot",
+          "start": 15.386,
+          "end": 15.514
+        },
+        {
+          "w": "de",
+          "start": 15.556,
+          "end": 15.599
+        },
+        {
+          "w": "passe",
+          "start": 15.642,
+          "end": 15.727
+        },
+        {
+          "w": "distinct",
+          "start": 15.77,
+          "end": 16.196
+        },
+        {
+          "w": "par",
+          "start": 16.239,
+          "end": 16.324
+        },
+        {
+          "w": "compte,",
+          "start": 16.367,
+          "end": 16.815
+        },
+        {
+          "w": "jamais",
+          "start": 17.007,
+          "end": 17.476
+        },
+        {
+          "w": "celui",
+          "start": 17.519,
+          "end": 17.732
+        },
+        {
+          "w": "d'un",
+          "start": 17.775,
+          "end": 17.903
+        },
+        {
+          "w": "client",
+          "start": 17.946,
+          "end": 18.116
+        },
+        {
+          "w": "réutilisé",
+          "start": 18.159,
+          "end": 18.714
+        },
+        {
+          "w": "ailleurs.",
+          "start": 18.756,
+          "end": 19.29
+        },
+        {
+          "w": "Avant",
+          "start": 19.567,
+          "end": 19.951
+        },
+        {
+          "w": "chaque",
+          "start": 19.994,
+          "end": 20.164
+        },
+        {
+          "w": "session",
+          "start": 20.207,
+          "end": 20.335
+        },
+        {
+          "w": "client,",
+          "start": 20.506,
+          "end": 20.932
+        },
+        {
+          "w": "regardez",
+          "start": 21.06,
+          "end": 21.572
+        },
+        {
+          "w": "le",
+          "start": 21.615,
+          "end": 21.658
+        },
+        {
+          "w": "profil",
+          "start": 21.7,
+          "end": 21.956
+        },
+        {
+          "w": "actif",
+          "start": 21.999,
+          "end": 22.298
+        },
+        {
+          "w": "et",
+          "start": 22.468,
+          "end": 22.554
+        },
+        {
+          "w": "le",
+          "start": 22.596,
+          "end": 22.682
+        },
+        {
+          "w": "nom",
+          "start": 22.724,
+          "end": 22.852
+        },
+        {
+          "w": "de",
+          "start": 22.895,
+          "end": 22.98
+        },
+        {
+          "w": "l'espace",
+          "start": 23.023,
+          "end": 23.322
+        },
+        {
+          "w": "de",
+          "start": 23.364,
+          "end": 23.407
+        },
+        {
+          "w": "travail.",
+          "start": 23.45,
+          "end": 24.036
+        },
+        {
+          "w": "Et",
+          "start": 24.325,
+          "end": 24.495
+        },
+        {
+          "w": "à",
+          "start": 24.538,
+          "end": 24.581
+        },
+        {
+          "w": "la",
+          "start": 24.623,
+          "end": 24.666
+        },
+        {
+          "w": "fin",
+          "start": 24.709,
+          "end": 24.794
+        },
+        {
+          "w": "d'une",
+          "start": 24.837,
+          "end": 24.965
+        },
+        {
+          "w": "mission,",
+          "start": 25.007,
+          "end": 25.455
+        },
+        {
+          "w": "demandez",
+          "start": 25.775,
+          "end": 26.159
+        },
+        {
+          "w": "le",
+          "start": 26.202,
+          "end": 26.287
+        },
+        {
+          "w": "retrait",
+          "start": 26.33,
+          "end": 26.586
+        },
+        {
+          "w": "de",
+          "start": 26.628,
+          "end": 26.671
+        },
+        {
+          "w": "vos",
+          "start": 26.714,
+          "end": 26.799
+        },
+        {
+          "w": "droits.",
+          "start": 26.842,
+          "end": 27.27
+        }
+      ]
+    },
+    {
+      "id": "5",
+      "title": "À vous",
+      "avatar": "pip",
+      "text": "Dans le Playground, quatre situations de votre activité vous attendent, puis vos réflexes de sécurité. Enfin, remplissez votre tableau de bord des comptes : pour chaque outil, son statut réel, sans créer de compte pour remplir une case. Non retenu est une décision valable. Téléchargez votre suivi : il nourrira votre plan d'actions.",
+      "audio": "generated/lesson1_3-nathalie/scene-5.wav",
+      "duration": 18.10721088435374,
+      "words": [
+        {
+          "w": "Dans",
+          "start": 0.299,
+          "end": 0.427
+        },
+        {
+          "w": "le",
+          "start": 0.469,
+          "end": 0.512
+        },
+        {
+          "w": "Playground,",
+          "start": 0.555,
+          "end": 1.173
+        },
+        {
+          "w": "quatre",
+          "start": 1.408,
+          "end": 1.707
+        },
+        {
+          "w": "situations",
+          "start": 1.792,
+          "end": 2.133
+        },
+        {
+          "w": "de",
+          "start": 2.347,
+          "end": 2.389
+        },
+        {
+          "w": "votre",
+          "start": 2.432,
+          "end": 2.603
+        },
+        {
+          "w": "activité",
+          "start": 2.645,
+          "end": 3.072
+        },
+        {
+          "w": "vous",
+          "start": 3.115,
+          "end": 3.2
+        },
+        {
+          "w": "attendent,",
+          "start": 3.243,
+          "end": 3.819
+        },
+        {
+          "w": "puis",
+          "start": 3.968,
+          "end": 4.181
+        },
+        {
+          "w": "vos",
+          "start": 4.224,
+          "end": 4.352
+        },
+        {
+          "w": "réflexes",
+          "start": 4.395,
+          "end": 4.736
+        },
+        {
+          "w": "de",
+          "start": 4.779,
+          "end": 4.821
+        },
+        {
+          "w": "sécurité.",
+          "start": 4.864,
+          "end": 5.484
+        },
+        {
+          "w": "Enfin,",
+          "start": 5.591,
+          "end": 6.103
+        },
+        {
+          "w": "remplissez",
+          "start": 6.231,
+          "end": 6.786
+        },
+        {
+          "w": "votre",
+          "start": 6.829,
+          "end": 6.999
+        },
+        {
+          "w": "tableau",
+          "start": 7.042,
+          "end": 7.298
+        },
+        {
+          "w": "de",
+          "start": 7.341,
+          "end": 7.383
+        },
+        {
+          "w": "bord",
+          "start": 7.426,
+          "end": 7.554
+        },
+        {
+          "w": "des",
+          "start": 7.597,
+          "end": 7.682
+        },
+        {
+          "w": "comptes",
+          "start": 7.725,
+          "end": 7.981
+        },
+        {
+          "w": ":",
+          "start": 8.023,
+          "end": 8.066
+        },
+        {
+          "w": "pour",
+          "start": 8.109,
+          "end": 8.194
+        },
+        {
+          "w": "chaque",
+          "start": 8.237,
+          "end": 8.45
+        },
+        {
+          "w": "outil,",
+          "start": 8.493,
+          "end": 8.941
+        },
+        {
+          "w": "son",
+          "start": 9.09,
+          "end": 9.261
+        },
+        {
+          "w": "statut",
+          "start": 9.303,
+          "end": 9.602
+        },
+        {
+          "w": "réel,",
+          "start": 9.645,
+          "end": 10.114
+        },
+        {
+          "w": "sans",
+          "start": 10.327,
+          "end": 10.498
+        },
+        {
+          "w": "créer",
+          "start": 10.541,
+          "end": 10.797
+        },
+        {
+          "w": "de",
+          "start": 10.839,
+          "end": 10.882
+        },
+        {
+          "w": "compte",
+          "start": 10.925,
+          "end": 11.095
+        },
+        {
+          "w": "pour",
+          "start": 11.138,
+          "end": 11.309
+        },
+        {
+          "w": "remplir",
+          "start": 11.351,
+          "end": 11.607
+        },
+        {
+          "w": "une",
+          "start": 11.65,
+          "end": 11.693
+        },
+        {
+          "w": "case.",
+          "start": 11.778,
+          "end": 12.162
+        },
+        {
+          "w": "Non",
+          "start": 12.375,
+          "end": 12.589
+        },
+        {
+          "w": "retenu",
+          "start": 12.631,
+          "end": 12.93
+        },
+        {
+          "w": "est",
+          "start": 13.015,
+          "end": 13.058
+        },
+        {
+          "w": "une",
+          "start": 13.101,
+          "end": 13.186
+        },
+        {
+          "w": "décision",
+          "start": 13.229,
+          "end": 13.613
+        },
+        {
+          "w": "valable.",
+          "start": 13.655,
+          "end": 14.202
+        },
+        {
+          "w": "Téléchargez",
+          "start": 14.494,
+          "end": 15.048
+        },
+        {
+          "w": "votre",
+          "start": 15.091,
+          "end": 15.262
+        },
+        {
+          "w": "suivi",
+          "start": 15.304,
+          "end": 15.646
+        },
+        {
+          "w": ":",
+          "start": 15.774,
+          "end": 15.816
+        },
+        {
+          "w": "il",
+          "start": 15.859,
+          "end": 16.243
+        },
+        {
+          "w": "nourrira",
+          "start": 16.286,
+          "end": 16.755
+        },
+        {
+          "w": "votre",
+          "start": 16.798,
+          "end": 17.011
+        },
+        {
+          "w": "plan",
+          "start": 17.096,
+          "end": 17.224
+        },
+        {
+          "w": "d'actions.",
+          "start": 17.267,
+          "end": 17.907
+        }
+      ],
+      "avatarVideo": "generated/lesson1_3-nathalie/avatar-5.mp4",
+      "avatarVideoId": "04feac5500b8a93b9fd0927eb74ecf1c",
+      "avatarDuration": 18
+    }
+  ]
+}

@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Élaborer son plan d'actions IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --paper:#F7F7FA; --surface:#fff; --ink:#1b1a17; --ink-2:#4a4741; --ink-3:#7c786f;
+    --rule:#e4e1d9; --rule-2:#efece5; --accent:#1f4e46; --accent-soft:#eef3f1;
+    --ok:#2c6a48; --ok-soft:#eef4ef; --warn:#8a6519; --warn-soft:#faf4e7;
+    --alert:#963428; --alert-soft:#fbf1ef;
+    --serif:'Funnel Display',Georgia,'Iowan Old Style','Times New Roman',serif;
+    --sans:'Funnel Display',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  body{font-family:var(--sans);font-size:15.5px;line-height:1.65;color:var(--ink);background:var(--paper);padding:0 22px 80px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;margin:0 auto}
+  header.top{padding:44px 0 26px;border-bottom:1px solid var(--rule)}
+  header.top h1{font-family:var(--serif);font-size:clamp(26px,4.5vw,34px);line-height:1.2;font-weight:400;letter-spacing:-.01em;margin-bottom:12px;max-width:30ch}
+  header.top .sub{font-size:15.5px;color:var(--ink-2);}
+  h2{font-family:var(--serif);font-size:24px;font-weight:400;line-height:1.3;letter-spacing:-.01em;margin:44px 0 16px;padding-bottom:10px;border-bottom:1px solid var(--rule)}
+  h3{font-size:12px;letter-spacing:.13em;text-transform:uppercase;font-weight:600;color:var(--ink-3);margin:30px 0 14px}
+  h4{font-family:var(--serif);font-size:17px;font-weight:400;margin-bottom:6px}
+  p+p{margin-top:12px}
+  strong{color:var(--ink);font-weight:600}
+  em{font-style:italic}
+  ul,ol{margin:14px 0 14px 20px;}
+  li{margin-bottom:8px}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14.5px}
+  th,td{border-bottom:1px solid var(--rule-2);padding:10px 12px 10px 0;text-align:left;vertical-align:top}
+  th{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:600;border-bottom:1px solid var(--rule)}
+
+  .aside{border-left:2px solid var(--rule);padding:2px 0 2px 20px;margin:22px 0;font-size:15px;color:var(--ink-2);}
+  .aside .lab{display:block;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);margin-bottom:5px;font-weight:600}
+  .aside.key{border-left-color:var(--accent)} .aside.key .lab{color:var(--accent)}
+  .aside.caution{border-left-color:var(--alert)} .aside.caution .lab{color:var(--alert)}
+  .aside.further{border-left-color:var(--warn)} .aside.further .lab{color:var(--warn)}
+
+  .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin:18px 0}
+  .cols>div{background:var(--surface);padding:18px 20px}
+  .cols p{font-size:14px;color:var(--ink-2);max-width:none}
+  .cols .tag{display:block;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px;font-weight:600}
+
+  .twocol{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin:18px 0}
+  .exbox{border:1px solid var(--rule);padding:18px 20px;background:var(--surface)}
+  .exbox.bad{border-color:var(--alert)} .exbox.bad .exlab{color:var(--alert)}
+  .exbox.good{border-color:var(--ok)} .exbox.good .exlab{color:var(--ok)}
+  .exlab{display:block;font-size:11px;letter-spacing:.13em;text-transform:uppercase;font-weight:600;margin-bottom:8px}
+  .exbox p{font-size:14.5px;color:var(--ink-2);max-width:none}
+
+  .game{background:var(--surface);border:1px solid var(--rule);padding:24px 26px;margin:22px 0}
+  .game .gamelab{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:10px}
+  .game .gameintro{font-size:14.5px;color:var(--ink-2);margin-bottom:18px;}
+  .roundhead{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--ink-3);margin:0 0 16px;letter-spacing:.02em}
+  .roundhead b{color:var(--accent)}
+  .askbox .q{font-family:var(--serif);font-size:16.5px;margin-bottom:14px;max-width:none}
+  .optgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule)}
+  .qopt{font:inherit;font-size:14px;text-align:center;padding:14px 12px;border:none;background:var(--surface);cursor:pointer;transition:.12s;color:var(--ink-2);border-top:3px solid transparent;line-height:1.35;font-weight:500}
+  .qopt:hover:not(:disabled){background:#fbfaf7}
+  .qopt:disabled{cursor:default}
+  .qopt.picked-good{border-top-color:var(--ok);background:var(--ok-soft);color:var(--ok);font-weight:600}
+  .qopt.picked-bad{border-top-color:var(--alert);background:var(--alert-soft)}
+  .qopt.reveal-good:not(.picked-good){border-top-color:var(--ok)}
+  .fb{margin-top:14px;font-size:14.5px;display:none;line-height:1.6;color:var(--ink-2);padding-left:20px;border-left:2px solid var(--rule);max-width:none}
+  .fb.show{display:block}
+  .fb.good{border-left-color:var(--ok)} .fb.bad{border-left-color:var(--warn)}
+  .fb .head{display:block;font-size:11px;letter-spacing:.13em;text-transform:uppercase;font-weight:600;margin-bottom:5px}
+  .fb.good .head{color:var(--ok)} .fb.bad .head{color:var(--warn)}
+  .gscore{font-size:13px;color:var(--ink-3);margin-top:18px}
+  .btn{font:inherit;font-size:14.5px;font-weight:500;border-radius:3px;padding:10px 20px;border:1px solid var(--accent);cursor:pointer;transition:.15s;background:none;color:var(--accent)}
+  .btn:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{background:#173b35}
+  .btn[hidden]{display:none}
+
+  .calc{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin:20px 0 8px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+  .field input{font:inherit;font-size:15px;padding:9px 10px;border:1px solid var(--rule);border-radius:3px;background:var(--paper);color:var(--ink)}
+  .field input:focus{outline:none;border-color:var(--accent)}
+  .calcout{background:var(--accent-soft);border:1px solid var(--rule);padding:18px 20px;margin-top:16px}
+  .calcout .num{font-family:var(--serif);font-size:28px;color:var(--accent);display:block}
+  .calcout .lab2{font-size:12.5px;color:var(--ink-3);margin-top:2px}
+  .calcrow{display:flex;gap:28px;flex-wrap:wrap}
+
+  footer{margin-top:60px;padding-top:22px;border-top:1px solid var(--rule);font-size:12.5px;color:var(--ink-3);line-height:1.7;}
+  @media(max-width:600px){header.top h1{font-size:26px} h2{font-size:21px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <h1>Élaborer son plan d'actions IA</h1>
+    <p class="sub">Vous savez repérer une tâche candidate. Cette leçon rassemble ce réflexe dans un document concret : un plan d'actions IA, écrit, priorisé et mesurable, plutôt qu'une intention vague de « mieux utiliser l'IA ».</p>
+  </header>
+
+  <h2>La structure du plan : six colonnes</h2>
+  <p>Un plan d'actions IA se construit autour de six éléments, toujours dans le même ordre, pour chaque tâche retenue :</p>
+  <table>
+    <tr><th>Colonne</th><th>Ce qu'elle contient</th></tr>
+    <tr><td><strong>Tâche cible</strong></td><td>La tâche précise à déléguer en partie à l'IA, telle qu'identifiée dans votre grille d'analyse</td></tr>
+    <tr><td><strong>Fréquence</strong></td><td>Le rythme auquel cette tâche revient : hebdomadaire, mensuelle, ponctuelle. Un gain de temps ne vaut que rapporté à sa fréquence réelle</td></tr>
+    <tr><td><strong>Outil choisi</strong></td><td>L'outil pressenti pour cette tâche, et son statut de compte (gratuit, payant, fourni par une structure)</td></tr>
+    <tr><td><strong>Justification</strong></td><td>Pourquoi ce choix : le gain visé, le risque évalué, ce qui rend l'outil adapté à cette tâche précise</td></tr>
+    <tr><td><strong>Budget éventuel</strong></td><td>Le coût réel de ce choix, s'il y en a un : montant de l'abonnement, ou confirmation qu'un compte gratuit suffit</td></tr>
+    <tr><td><strong>Délai de mise en œuvre</strong></td><td>La date ou la période à laquelle ce changement doit être en place</td></tr>
+  </table>
+  <p>Une ligne qui ne peut pas être remplie précisément, colonne par colonne, n'est pas encore prête à intégrer le plan : elle a besoin d'être clarifiée d'abord. La colonne budget précise le montant, la période, le nombre d'utilisateurs et, si le prix n'est pas confirmé, la source à vérifier.</p>
+  <div class="aside key"><span class="lab">Pour piloter réellement le plan</span>Ajoutez à ces six éléments un <strong>responsable ou valideur</strong> et un <strong>critère de réussite avec sa situation de départ</strong>. Exemple : « Nathalie valide chaque compte-rendu ; temps actuel 45 minutes ; cible 25 minutes ; zéro erreur de date, de montant ou de décision sur trois essais. » Le délai dit quand tester ; l'indicateur dit comment décider de poursuivre, corriger ou arrêter.</div>
+  <p>À ce stade, la colonne <em>outil choisi</em> se limite au nom de l'outil pressenti et à son statut de compte : vous apprendrez à régler chaque outil précisément selon la tâche dans une prochaine étape du parcours. Le plan reste un document vivant (voir plus loin) : une fois ces réglages appris, chaque ligne pourra être complétée avec le paramétrage exact retenu, sans qu'il soit nécessaire de le connaître dès cette première version.</p>
+
+  <h3>Écrire une justification qui tient</h3>
+  <p>La colonne justification est celle qui distingue un plan solide d'une simple liste de bonnes intentions. Une justification qui tient croise toujours trois éléments : le gain de temps estimé, le risque évalué, et la raison pour laquelle l'outil retenu convient à cette tâche précise.</p>
+  <div class="twocol">
+    <div class="exbox bad">
+      <span class="exlab">Justification qui ne tient pas</span>
+      <p>« Cet outil est pratique et fera gagner du temps. »<br>Aucun gain chiffré, aucun risque évalué, aucune raison précise pour laquelle cet outil-là convient à cette tâche-là plutôt qu'à une autre.</p>
+    </div>
+    <div class="exbox good">
+      <span class="exlab">Justification qui tient</span>
+      <p>« Tâche répétitive à structure stable, réalisée chaque semaine : le gain estimé est de 20 à 30 minutes par occurrence. Aucune donnée confidentielle n'est nécessaire pour un premier essai, le risque est donc faible. L'outil retenu est déjà utilisé quotidiennement pour des tâches comparables, ce qui ne demande aucun temps d'apprentissage supplémentaire. »</p>
+    </div>
+  </div>
+
+  <h2>Prioriser : commencer petit, pas tout à la fois</h2>
+  <p>Un plan qui liste dix tâches à changer en même temps se met difficilement en œuvre. Retenez d'abord une à trois tâches en croisant quatre critères : impact attendu, effort de mise en place, niveau de risque et facilité de contrôle. Un usage prioritaire est autorisé, testable sur un périmètre limité et assorti d'un critère d'arrêt si la qualité se dégrade.</p>
+  <p>Une tâche à fort impact mais à risque élevé n'est pas écartée pour autant : elle reste sur la liste, mais après les premières tâches plus sûres, une fois les réflexes de sécurité solidement pris.</p>
+
+  <div class="game">
+    <div class="gamelab">Mini-jeu : priorisez la tâche</div>
+    <p class="gameintro">Cinq manches. À chaque manche, une tâche candidate pour un plan d'actions IA. Choisissez son niveau de priorité avant de découvrir l'explication.</p>
+    <div class="roundhead"><span>Manche <b id="catNum">1</b>/5</span><span>Score : <b id="catScore">0</b>/5</span></div>
+    <div class="askbox" id="catGame">
+      <p class="q" id="catItemTxt"></p>
+      <div class="optgrid" id="catGrid"></div>
+      <p class="fb" id="catFb"></p>
+      <button class="btn btn-primary" id="catNextBtn" hidden>Manche suivante</button>
+    </div>
+  </div>
+
+  <h2>Anticiper les obstacles avant qu'ils n'arrêtent le plan</h2>
+  <p>Trois types d'obstacles reviennent le plus souvent, et anticiper ne veut pas dire les éliminer, mais prévoir comment les traverser :</p>
+  <ul>
+    <li><strong>Le temps d'apprentissage</strong> : un outil nouvellement configuré demande quelques essais avant de devenir un réflexe. Prévoir ce temps dans le délai de mise en œuvre évite de juger un changement en échec trop tôt.</li>
+    <li><strong>La validation nécessaire</strong> : selon le contexte, il peut s'agir d'un accord hiérarchique, d'un feu vert contractuel d'un client, ou d'une simple information à donner en amont. Cette validation se prépare avant la mise en œuvre, pas après coup.</li>
+    <li><strong>Le budget éventuel</strong> : si la colonne outil choisi indique un compte payant ou fourni par une structure, ce coût doit être confirmé avant la mise en œuvre, pas découvert après. Un plan qui repose sur un abonnement pas encore validé n'est pas encore prêt à démarrer.</li>
+  </ul>
+
+  <h2>Définir des indicateurs de réussite mesurables</h2>
+  <p>Un plan sans indicateur ne permet pas de savoir s'il fonctionne. Trois types d'indicateurs suffisent le plus souvent : <strong>le temps gagné</strong>, comparé à la façon de faire précédente sur une tâche identique ou comparable ; <strong>la qualité du résultat</strong>, c'est-à-dire si le contenu produit reste au moins aussi bon qu'avant, une fois relu ; et <strong>la satisfaction</strong>, la vôtre et celle des personnes qui reçoivent le résultat de cette tâche.</p>
+  <p>Un indicateur qui ne peut pas être observé simplement, sans outil de mesure compliqué, n'est pas un bon indicateur pour ce plan : un chiffre approximatif mais suivi régulièrement vaut mieux qu'un calcul précis jamais refait.</p>
+  <p>Ce temps gagné peut aussi se traduire en valeur monétaire, un exercice utile pour justifier un abonnement payant ou pour en discuter avec une structure cliente : il suffit de multiplier le temps gagné par un taux horaire de référence, le vôtre ou celui de la personne dont la tâche a été allégée. Ce calcul reste une estimation, pas une facturation réelle : il sert à comparer un bénéfice et un coût sur la même échelle, pas à créer une nouvelle ligne de facturation.</p>
+
+  <div class="game">
+    <div class="gamelab">Testez-le vous-même : combien vaut le temps gagné ?</div>
+    <p class="gameintro">Renseignez un temps gagné par occurrence, une fréquence, et un taux horaire de référence : le calcul se met à jour immédiatement.</p>
+    <div class="calc">
+      <div class="field"><label for="cMin">Temps gagné par occurrence (minutes)</label><input type="number" id="cMin" min="0" step="1" value="30"></div>
+      <div class="field"><label for="cFreq">Fréquence (occurrences / semaine)</label><input type="number" id="cFreq" min="0" step="1" value="3"></div>
+      <div class="field"><label for="cRate">Taux horaire de référence (€)</label><input type="number" id="cRate" min="0" step="1" value="40"></div>
+    </div>
+    <div class="calcout">
+      <div class="calcrow">
+        <div><span class="num" id="outWeek">60 €</span><span class="lab2">de temps valorisé par semaine</span></div>
+        <div><span class="num" id="outMonth">260 €</span><span class="lab2">de temps valorisé par mois (≈ 4,33 semaines)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Un plan vivant, pas figé</h2>
+  <p>Un plan d'actions IA se relit et s'ajuste : une tâche qui ne donne pas les bénéfices attendus au délai prévu peut être retirée ou revue, et une tâche initialement écartée pour cause de risque élevé peut être ajoutée une fois les réflexes de sécurité bien installés. Le plan documente une progression, pas un engagement figé une fois pour toutes.</p>
+
+  <div class="game">
+    <div class="gamelab">Mini-jeu : obstacle ou indicateur ?</div>
+    <p class="gameintro">Six manches. À chaque manche, une situation liée à un plan d'actions IA. Reconnaissez s'il s'agit d'un obstacle à anticiper ou d'un indicateur à mesurer, et lequel précisément.</p>
+    <div class="roundhead"><span>Manche <b id="obsNum">1</b>/6</span><span>Score : <b id="obsScore">0</b>/6</span></div>
+    <div class="askbox" id="obsGame">
+      <p class="q" id="obsItemTxt"></p>
+      <div class="optgrid" id="obsGrid"></div>
+      <p class="fb" id="obsFb"></p>
+      <button class="btn btn-primary" id="obsNextBtn" hidden>Manche suivante</button>
+    </div>
+  </div>
+
+  <h2>Du plan individuel à l'échelle d'une équipe ou d'un processus</h2>
+  <p>Un plan d'actions qui a fait ses preuves à l'échelle individuelle ne s'arrête pas nécessairement là. Une tâche allégée avec succès peut être documentée au-delà de son propre usage : le prompt qui fonctionne bien, la méthode de vérification appliquée, le temps réellement gagné, sont autant d'éléments réutilisables par d'autres personnes confrontées à une tâche similaire. Cette mise en commun, parfois appelée bibliothèque de prompts ou base de bonnes pratiques selon les structures, transforme un gain individuel en gain collectif, sans qu'il soit nécessaire d'attendre une initiative formelle pour commencer à la construire soi-même, ne serait-ce qu'à son propre niveau.</p>
+  <p>Un changement individuel répété et documenté peut aussi, avec le temps, remonter jusqu'à devenir un élément de la gouvernance plus large d'une structure : une tâche fiabilisée par un usage individuel prolongé est un argument concret pour proposer l'ajout d'un outil à une liste d'outils autorisés, là où une simple demande sans résultat démontré a moins de poids. Le plan individuel n'est donc pas seulement un outil de suivi personnel : documenté sérieusement, il peut devenir la preuve qui manque pour faire évoluer une pratique au-delà de son propre usage.</p>
+
+  <h2>Pour aller plus loin</h2>
+  <p>Cette section approfondit au-delà de ce qui est nécessaire pour suivre la suite du programme ; la sauter ne bloque rien pour les leçons suivantes.</p>
+  <p>Une tâche répétée avec un prompt stable peut devenir candidate à une automatisation plus poussée. Avant d'enchaîner automatiquement réception, génération et dépôt dans un document partagé, définissez les droits d'accès, les journaux, la conservation, les contrôles d'erreur et le point de validation humaine. Une automatisation augmente la fréquence et l'ampleur d'une erreur : commencez en mode brouillon, avec un responsable capable d'arrêter le flux.</p>
+  <p>Pour une activité qui s'exerce auprès de plusieurs structures clientes en parallèle, un même plan d'actions ne suffit généralement pas : chaque structure a ses propres priorités, son propre budget disponible, et son propre niveau de tolérance au risque sur les données. La méthode de priorisation vue dans cette leçon reste valable, mais s'applique alors mission par mission, pas une fois pour toutes : une tâche jugée prioritaire chez une structure peut rester secondaire chez une autre, selon le contexte et la politique interne déjà en place. Tenir un plan distinct par structure, même simplifié, évite de transposer par erreur un choix d'outil ou un budget validé pour l'une vers une autre où il n'a pas été vérifié.</p>
+  <p>Enfin, un plan d'actions qui couvre plusieurs missions en parallèle gagne à intégrer un arbitrage explicite du temps disponible : consacrer une plage horaire fixe, chaque semaine, à la mise en œuvre et au suivi du plan, plutôt que de le faire dépendre du temps libre restant une fois les urgences de chaque mission traitées. Un plan non suivi faute de temps dédié reste une intention, pas un plan.</p>
+
+  <footer>
+    Toutes les entreprises, personnes et données de cette leçon sont fictives.
+  </footer>
+</div>
+
+<script>
+  /* ---- jeu 1 : priorisez la tâche (5 manches) ---- */
+  var CATS = [
+    { key:'now', label:'Prioritaire maintenant' },
+    { key:'later', label:'Fort impact, plus tard' },
+    { key:'skip', label:'Pas encore une priorité' }
+  ];
+  var CATROUNDS = [
+    { item:"Rédiger des comptes-rendus de réunion hebdomadaires : une tâche répétitive, sans donnée confidentielle particulière.", correct:'now',
+      explain:"Fort impact par sa répétition, et risque faible : c'est exactement le profil d'une tâche à démarrer en premier." },
+    { item:"Reformuler l'intégralité d'un dossier de rémunération individuel, avec montants et noms, pour un client qui n'a pas encore stabilisé sa politique sur le sujet.", correct:'later',
+      explain:"Fort impact potentiel, mais le risque est élevé tant que la politique du client n'est pas connue : elle attend que ce point soit clarifié." },
+    { item:"Générer, une seule fois par trimestre, un visuel pour une publication interne, sans donnée personnelle.", correct:'skip',
+      explain:"Le risque est faible, mais la fréquence si rare limite l'impact réel : ce n'est pas là que le temps gagné se fera sentir en premier." },
+    { item:"Automatiser une première relecture orthographique d'e-mails courants, sans donnée sensible.", correct:'now',
+      explain:"Fort impact par la fréquence, et risque faible : un excellent candidat pour démarrer." },
+    { item:"Reprendre entièrement le paramétrage d'un nouvel outil métier, avec des identifiants de connexion à conserver.", correct:'skip',
+      explain:"Cette tâche touche à une donnée stratégique et reste au cœur d'une expertise humaine : ni son impact IA ni son risque n'en font une priorité de départ." }
+  ];
+  var catIdx = 0, catScore = 0;
+  var catNumEl = document.getElementById('catNum'), catScoreEl = document.getElementById('catScore');
+  var catItemTxt = document.getElementById('catItemTxt'), catGrid = document.getElementById('catGrid');
+  var catFb = document.getElementById('catFb'), catNextBtn = document.getElementById('catNextBtn');
+  CATS.forEach(function(cat){
+    var b = document.createElement('button');
+    b.className = 'qopt'; b.textContent = cat.label; b.dataset.key = cat.key;
+    b.addEventListener('click', function(){ handleCatChoice(cat.key); });
+    catGrid.appendChild(b);
+  });
+  function renderCatRound(i){
+    var r = CATROUNDS[i];
+    catNumEl.textContent = i+1; catScoreEl.textContent = catScore;
+    catItemTxt.textContent = r.item;
+    [].slice.call(catGrid.children).forEach(function(b){ b.classList.remove('picked-good','picked-bad','reveal-good'); b.disabled = false; });
+    catFb.className = 'fb'; catFb.textContent = '';
+    catNextBtn.hidden = true;
+  }
+  function handleCatChoice(key){
+    var r = CATROUNDS[catIdx];
+    var ok = key === r.correct;
+    [].slice.call(catGrid.children).forEach(function(b){
+      b.disabled = true;
+      if(b.dataset.key === key){ b.classList.add(ok ? 'picked-good' : 'picked-bad'); }
+      if(b.dataset.key === r.correct){ b.classList.add('reveal-good'); }
+    });
+    catFb.className = 'fb show ' + (ok ? 'good' : 'bad');
+    catFb.innerHTML = "<span class='head'>"+(ok ? 'Bon choix' : 'À ajuster')+"</span>" + r.explain;
+    if(ok){ catScore++; catScoreEl.textContent = catScore; }
+    if(catIdx < CATROUNDS.length - 1){
+      catNextBtn.hidden = false; catNextBtn.textContent = 'Manche suivante';
+    } else {
+      var done = document.createElement('p');
+      done.className = 'fb show good'; done.style.marginTop = '10px';
+      done.innerHTML = "<span class='head'>Terminé</span>Un fort impact ne suffit pas à lui seul : sans un risque faible ou maîtrisé, une tâche prometteuse attend son tour plutôt que d'ouvrir le plan.";
+      catFb.insertAdjacentElement('afterend', done);
+    }
+  }
+  catNextBtn.addEventListener('click', function(){ catIdx++; renderCatRound(catIdx); });
+  renderCatRound(0);
+
+  /* ---- jeu 2 : obstacle ou indicateur (6 manches) ---- */
+  var OBSCATS = [
+    { key:'apprentissage', label:"Temps d'apprentissage" },
+    { key:'validation', label:'Validation nécessaire' },
+    { key:'budget', label:'Budget éventuel' },
+    { key:'temps', label:'Temps gagné' },
+    { key:'qualite', label:'Qualité' },
+    { key:'satisfaction', label:'Satisfaction' }
+  ];
+  var OBSROUNDS = [
+    { item:"Un nouvel outil est configuré : il faudra quelques semaines avant de l'utiliser aussi vite que l'ancienne méthode.", correct:'apprentissage',
+      explain:"C'est un obstacle à anticiper dans le délai de mise en œuvre, pas un signe d'échec du plan." },
+    { item:"Un client doit valider par écrit qu'il autorise l'usage d'une IA sur ses dossiers avant qu'on change la façon de les traiter pour lui.", correct:'validation',
+      explain:"C'est la validation nécessaire, qui se prépare avant la mise en œuvre, pas après coup." },
+    { item:"L'outil envisagé n'est disponible, pour l'usage recherché, qu'en version payante.", correct:'budget',
+      explain:"C'est un budget éventuel à identifier avant de compter sur la justification prévue pour cette ligne du plan." },
+    { item:"On compare le temps passé sur une tâche avant et après avoir utilisé l'IA.", correct:'temps',
+      explain:"C'est l'indicateur de temps gagné, mesuré après la mise en œuvre, sur une tâche comparable." },
+    { item:"On relit le résultat produit avec l'aide de l'IA pour vérifier qu'il reste aussi clair et complet qu'avant.", correct:'qualite',
+      explain:"C'est l'indicateur de qualité : le résultat reste-t-il au moins aussi bon qu'avant, une fois relu." },
+    { item:"On demande à la personne concernée si le résultat produit avec l'aide de l'IA lui convient autant qu'avant.", correct:'satisfaction',
+      explain:"C'est l'indicateur de satisfaction, la sienne et celle de la personne qui reçoit le résultat." }
+  ];
+  var obsIdx = 0, obsScore = 0;
+  var obsNumEl = document.getElementById('obsNum'), obsScoreEl = document.getElementById('obsScore');
+  var obsItemTxt = document.getElementById('obsItemTxt'), obsGrid = document.getElementById('obsGrid');
+  var obsFb = document.getElementById('obsFb'), obsNextBtn = document.getElementById('obsNextBtn');
+  OBSCATS.forEach(function(cat){
+    var b = document.createElement('button');
+    b.className = 'qopt'; b.textContent = cat.label; b.dataset.key = cat.key;
+    b.addEventListener('click', function(){ handleObsChoice(cat.key); });
+    obsGrid.appendChild(b);
+  });
+  function renderObsRound(i){
+    var r = OBSROUNDS[i];
+    obsNumEl.textContent = i+1; obsScoreEl.textContent = obsScore;
+    obsItemTxt.textContent = r.item;
+    [].slice.call(obsGrid.children).forEach(function(b){ b.classList.remove('picked-good','picked-bad','reveal-good'); b.disabled = false; });
+    obsFb.className = 'fb'; obsFb.textContent = '';
+    obsNextBtn.hidden = true;
+  }
+  function handleObsChoice(key){
+    var r = OBSROUNDS[obsIdx];
+    var ok = key === r.correct;
+    [].slice.call(obsGrid.children).forEach(function(b){
+      b.disabled = true;
+      if(b.dataset.key === key){ b.classList.add(ok ? 'picked-good' : 'picked-bad'); }
+      if(b.dataset.key === r.correct){ b.classList.add('reveal-good'); }
+    });
+    obsFb.className = 'fb show ' + (ok ? 'good' : 'bad');
+    obsFb.innerHTML = "<span class='head'>"+(ok ? 'Bon choix' : 'À ajuster')+"</span>" + r.explain;
+    if(ok){ obsScore++; obsScoreEl.textContent = obsScore; }
+    if(obsIdx < OBSROUNDS.length - 1){
+      obsNextBtn.hidden = false; obsNextBtn.textContent = 'Manche suivante';
+    } else {
+      var done = document.createElement('p');
+      done.className = 'fb show good'; done.style.marginTop = '10px';
+      done.innerHTML = "<span class='head'>Terminé</span>Un obstacle se prépare avant la mise en œuvre ; un indicateur se mesure après. Les confondre revient soit à ne rien anticiper, soit à ne jamais savoir si le plan fonctionne.";
+      obsFb.insertAdjacentElement('afterend', done);
+    }
+  }
+  obsNextBtn.addEventListener('click', function(){ obsIdx++; renderObsRound(obsIdx); });
+  renderObsRound(0);
+
+  /* ---- calculette de valorisation ---- */
+  var cMin = document.getElementById('cMin'), cFreq = document.getElementById('cFreq'), cRate = document.getElementById('cRate');
+  var outWeek = document.getElementById('outWeek'), outMonth = document.getElementById('outMonth');
+  function fmtEuro(n){
+    var r = Math.round(n * 100) / 100;
+    var s = r.toFixed(2).replace('.', ',').replace(',00','');
+    return s + ' €';
+  }
+  function updateCalc(){
+    var min = parseFloat(cMin.value) || 0;
+    var freq = parseFloat(cFreq.value) || 0;
+    var rate = parseFloat(cRate.value) || 0;
+    var hoursPerWeek = (min / 60) * freq;
+    var weekVal = hoursPerWeek * rate;
+    var monthVal = weekVal * 4.33;
+    outWeek.textContent = fmtEuro(weekVal);
+    outMonth.textContent = fmtEuro(monthVal);
+  }
+  [cMin, cFreq, cRate].forEach(function(el){ el.addEventListener('input', updateCalc); });
+  updateCalc();
+</script>
+</body>
+</html>

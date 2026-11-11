@@ -1,0 +1,3849 @@
+{
+  "name": "lesson2_5-commune",
+  "source": "../docs/formation-rs6776/lecon-2.5/script-video-commune.md",
+  "voice": "341b4807e5e6455fa88f34bda5d6eeea",
+  "model": "heygen-voice-1-turbo-free",
+  "total": 264.1748072562358,
+  "avatarSeconds": 57.60866213151927,
+  "scenes": [
+    {
+      "id": "1",
+      "title": "Un premier résultat, et après ?",
+      "avatar": "full",
+      "text": "Bonjour. Vous avez produit un texte, puis un visuel. Mais un premier résultat généré n'est qu'une hypothèse de travail, pas une version finale. Alors, comment passer de ce premier jet à une version que vous pouvez défendre, sans croire qu'une simple reformulation suffit à la rendre exacte ?",
+      "audio": "generated/lesson2_5-commune/scene-1.wav",
+      "duration": 16.02392290249433,
+      "words": [
+        {
+          "w": "Bonjour.",
+          "start": 0.299,
+          "end": 1.024
+        },
+        {
+          "w": "Vous",
+          "start": 1.365,
+          "end": 1.493
+        },
+        {
+          "w": "avez",
+          "start": 1.536,
+          "end": 1.664
+        },
+        {
+          "w": "produit",
+          "start": 1.707,
+          "end": 1.963
+        },
+        {
+          "w": "un",
+          "start": 2.005,
+          "end": 2.048
+        },
+        {
+          "w": "texte,",
+          "start": 2.091,
+          "end": 2.539
+        },
+        {
+          "w": "puis",
+          "start": 2.645,
+          "end": 2.816
+        },
+        {
+          "w": "un",
+          "start": 2.859,
+          "end": 2.901
+        },
+        {
+          "w": "visuel.",
+          "start": 2.944,
+          "end": 3.563
+        },
+        {
+          "w": "Mais",
+          "start": 3.883,
+          "end": 4.096
+        },
+        {
+          "w": "un",
+          "start": 4.139,
+          "end": 4.181
+        },
+        {
+          "w": "premier",
+          "start": 4.224,
+          "end": 4.437
+        },
+        {
+          "w": "résultat",
+          "start": 4.48,
+          "end": 4.821
+        },
+        {
+          "w": "généré",
+          "start": 4.864,
+          "end": 5.205
+        },
+        {
+          "w": "n'est",
+          "start": 5.248,
+          "end": 5.376
+        },
+        {
+          "w": "qu'une",
+          "start": 5.419,
+          "end": 5.547
+        },
+        {
+          "w": "hypothèse",
+          "start": 5.589,
+          "end": 5.973
+        },
+        {
+          "w": "de",
+          "start": 6.016,
+          "end": 6.101
+        },
+        {
+          "w": "travail,",
+          "start": 6.144,
+          "end": 6.656
+        },
+        {
+          "w": "pas",
+          "start": 6.827,
+          "end": 6.955
+        },
+        {
+          "w": "une",
+          "start": 6.997,
+          "end": 7.04
+        },
+        {
+          "w": "version",
+          "start": 7.083,
+          "end": 7.211
+        },
+        {
+          "w": "finale.",
+          "start": 7.381,
+          "end": 7.864
+        },
+        {
+          "w": "Alors,",
+          "start": 8.091,
+          "end": 8.603
+        },
+        {
+          "w": "comment",
+          "start": 8.816,
+          "end": 9.072
+        },
+        {
+          "w": "passer",
+          "start": 9.2,
+          "end": 9.456
+        },
+        {
+          "w": "de",
+          "start": 9.499,
+          "end": 9.584
+        },
+        {
+          "w": "ce",
+          "start": 9.627,
+          "end": 9.669
+        },
+        {
+          "w": "premier",
+          "start": 9.712,
+          "end": 10.096
+        },
+        {
+          "w": "jet",
+          "start": 10.139,
+          "end": 10.309
+        },
+        {
+          "w": "à",
+          "start": 10.395,
+          "end": 10.565
+        },
+        {
+          "w": "une",
+          "start": 10.608,
+          "end": 10.651
+        },
+        {
+          "w": "version",
+          "start": 10.693,
+          "end": 10.864
+        },
+        {
+          "w": "que",
+          "start": 11.077,
+          "end": 11.163
+        },
+        {
+          "w": "vous",
+          "start": 11.205,
+          "end": 11.291
+        },
+        {
+          "w": "pouvez",
+          "start": 11.333,
+          "end": 11.504
+        },
+        {
+          "w": "défendre,",
+          "start": 11.547,
+          "end": 12.251
+        },
+        {
+          "w": "sans",
+          "start": 12.443,
+          "end": 12.656
+        },
+        {
+          "w": "croire",
+          "start": 12.699,
+          "end": 12.955
+        },
+        {
+          "w": "qu'une",
+          "start": 13.04,
+          "end": 13.168
+        },
+        {
+          "w": "simple",
+          "start": 13.211,
+          "end": 13.467
+        },
+        {
+          "w": "reformulation",
+          "start": 13.637,
+          "end": 14.149
+        },
+        {
+          "w": "suffit",
+          "start": 14.363,
+          "end": 14.747
+        },
+        {
+          "w": "à",
+          "start": 14.789,
+          "end": 14.832
+        },
+        {
+          "w": "la",
+          "start": 14.875,
+          "end": 14.917
+        },
+        {
+          "w": "rendre",
+          "start": 14.96,
+          "end": 15.088
+        },
+        {
+          "w": "exacte",
+          "start": 15.173,
+          "end": 15.515
+        },
+        {
+          "w": "?",
+          "start": 15.6,
+          "end": 15.685
+        }
+      ],
+      "avatarVideo": "generated/lesson2_5-commune/avatar-1.mp4",
+      "avatarVideoId": "34ae251bdadb96bd2c2eeb7cbe7d2ace",
+      "avatarDuration": 15.92
+    },
+    {
+      "id": "2",
+      "title": "L'objectif de la leçon",
+      "avatar": "none",
+      "text": "Dans cette leçon, vous allez apprendre à transformer un premier résultat en version contrôlée : vérifier d'abord le fond, définir des critères d'acceptation, cibler les changements, comparer les versions, et garder la trace de vos corrections. Cinq angles pratiques vous aideront à diagnostiquer le texte. C'est exactement ce que demande le cinquième exercice de l'écrit : un prompt d'optimisation complet, et un contenu optimisé conforme au besoin.",
+      "audio": "generated/lesson2_5-commune/scene-2.wav",
+      "duration": 24.190839002267573,
+      "words": [
+        {
+          "w": "Dans",
+          "start": 0.256,
+          "end": 0.427
+        },
+        {
+          "w": "cette",
+          "start": 0.469,
+          "end": 0.64
+        },
+        {
+          "w": "leçon,",
+          "start": 0.683,
+          "end": 1.024
+        },
+        {
+          "w": "vous",
+          "start": 1.152,
+          "end": 1.451
+        },
+        {
+          "w": "allez",
+          "start": 1.493,
+          "end": 1.621
+        },
+        {
+          "w": "apprendre",
+          "start": 1.664,
+          "end": 2.005
+        },
+        {
+          "w": "à",
+          "start": 2.048,
+          "end": 2.091
+        },
+        {
+          "w": "transformer",
+          "start": 2.133,
+          "end": 2.517
+        },
+        {
+          "w": "un",
+          "start": 2.688,
+          "end": 2.773
+        },
+        {
+          "w": "premier",
+          "start": 2.816,
+          "end": 3.2
+        },
+        {
+          "w": "résultat",
+          "start": 3.243,
+          "end": 3.669
+        },
+        {
+          "w": "en",
+          "start": 3.797,
+          "end": 3.883
+        },
+        {
+          "w": "version",
+          "start": 3.925,
+          "end": 4.053
+        },
+        {
+          "w": "contrôlée",
+          "start": 4.309,
+          "end": 4.821
+        },
+        {
+          "w": ":",
+          "start": 4.864,
+          "end": 4.907
+        },
+        {
+          "w": "vérifier",
+          "start": 4.949,
+          "end": 5.333
+        },
+        {
+          "w": "d'abord",
+          "start": 5.376,
+          "end": 5.632
+        },
+        {
+          "w": "le",
+          "start": 5.675,
+          "end": 5.717
+        },
+        {
+          "w": "fond,",
+          "start": 5.76,
+          "end": 6.101
+        },
+        {
+          "w": "définir",
+          "start": 6.315,
+          "end": 6.741
+        },
+        {
+          "w": "des",
+          "start": 6.784,
+          "end": 6.869
+        },
+        {
+          "w": "critères",
+          "start": 6.912,
+          "end": 7.168
+        },
+        {
+          "w": "d'acceptation,",
+          "start": 7.211,
+          "end": 7.915
+        },
+        {
+          "w": "cibler",
+          "start": 8.192,
+          "end": 8.576
+        },
+        {
+          "w": "les",
+          "start": 8.619,
+          "end": 8.704
+        },
+        {
+          "w": "changements,",
+          "start": 8.747,
+          "end": 9.323
+        },
+        {
+          "w": "comparer",
+          "start": 9.515,
+          "end": 9.899
+        },
+        {
+          "w": "les",
+          "start": 9.941,
+          "end": 9.984
+        },
+        {
+          "w": "versions,",
+          "start": 10.027,
+          "end": 10.502
+        },
+        {
+          "w": "et",
+          "start": 10.594,
+          "end": 10.722
+        },
+        {
+          "w": "garder",
+          "start": 10.764,
+          "end": 11.105
+        },
+        {
+          "w": "la",
+          "start": 11.148,
+          "end": 11.233
+        },
+        {
+          "w": "trace",
+          "start": 11.276,
+          "end": 11.489
+        },
+        {
+          "w": "de",
+          "start": 11.532,
+          "end": 11.617
+        },
+        {
+          "w": "vos",
+          "start": 11.66,
+          "end": 11.745
+        },
+        {
+          "w": "corrections.",
+          "start": 11.788,
+          "end": 12.407
+        },
+        {
+          "w": "Cinq",
+          "start": 12.77,
+          "end": 13.068
+        },
+        {
+          "w": "angles",
+          "start": 13.153,
+          "end": 13.367
+        },
+        {
+          "w": "pratiques",
+          "start": 13.409,
+          "end": 13.921
+        },
+        {
+          "w": "vous",
+          "start": 13.964,
+          "end": 14.135
+        },
+        {
+          "w": "aideront",
+          "start": 14.178,
+          "end": 14.434
+        },
+        {
+          "w": "à",
+          "start": 14.519,
+          "end": 14.562
+        },
+        {
+          "w": "diagnostiquer",
+          "start": 14.604,
+          "end": 15.287
+        },
+        {
+          "w": "le",
+          "start": 15.329,
+          "end": 15.372
+        },
+        {
+          "w": "texte.",
+          "start": 15.415,
+          "end": 15.944
+        },
+        {
+          "w": "C'est",
+          "start": 16.175,
+          "end": 16.389
+        },
+        {
+          "w": "exactement",
+          "start": 16.431,
+          "end": 17.029
+        },
+        {
+          "w": "ce",
+          "start": 17.071,
+          "end": 17.114
+        },
+        {
+          "w": "que",
+          "start": 17.157,
+          "end": 17.285
+        },
+        {
+          "w": "demande",
+          "start": 17.327,
+          "end": 17.541
+        },
+        {
+          "w": "le",
+          "start": 17.583,
+          "end": 17.626
+        },
+        {
+          "w": "cinquième",
+          "start": 17.669,
+          "end": 18.095
+        },
+        {
+          "w": "exercice",
+          "start": 18.18,
+          "end": 18.522
+        },
+        {
+          "w": "de",
+          "start": 18.564,
+          "end": 18.607
+        },
+        {
+          "w": "l'écrit",
+          "start": 18.65,
+          "end": 18.991
+        },
+        {
+          "w": ":",
+          "start": 19.034,
+          "end": 19.162
+        },
+        {
+          "w": "un",
+          "start": 19.204,
+          "end": 19.588
+        },
+        {
+          "w": "prompt",
+          "start": 19.631,
+          "end": 19.887
+        },
+        {
+          "w": "d'optimisation",
+          "start": 19.93,
+          "end": 20.527
+        },
+        {
+          "w": "complet,",
+          "start": 20.698,
+          "end": 21.167
+        },
+        {
+          "w": "et",
+          "start": 21.295,
+          "end": 21.551
+        },
+        {
+          "w": "un",
+          "start": 21.594,
+          "end": 21.679
+        },
+        {
+          "w": "contenu",
+          "start": 21.722,
+          "end": 22.063
+        },
+        {
+          "w": "optimisé",
+          "start": 22.106,
+          "end": 22.703
+        },
+        {
+          "w": "conforme",
+          "start": 22.831,
+          "end": 23.343
+        },
+        {
+          "w": "au",
+          "start": 23.386,
+          "end": 23.428
+        },
+        {
+          "w": "besoin.",
+          "start": 23.471,
+          "end": 24.016
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "title": "Le fond d'abord",
+      "avatar": "none",
+      "text": "Commencez toujours par le fond. Comparez le premier résultat aux sources et au besoin : faits, chiffres, noms, omissions, raisonnement, ton, confidentialité, droits et accessibilité. Un texte faux ne s'embellit pas : il se corrige, à partir d'une source identifiée. La fluidité ne constitue pas une validation. Une fois le fond juste, et seulement alors, on travaille la forme.",
+      "audio": "generated/lesson2_5-commune/scene-3.wav",
+      "duration": 21.51544217687075,
+      "words": [
+        {
+          "w": "Commencez",
+          "start": 0.299,
+          "end": 0.725
+        },
+        {
+          "w": "toujours",
+          "start": 0.768,
+          "end": 1.152
+        },
+        {
+          "w": "par",
+          "start": 1.195,
+          "end": 1.28
+        },
+        {
+          "w": "le",
+          "start": 1.323,
+          "end": 1.365
+        },
+        {
+          "w": "fond.",
+          "start": 1.408,
+          "end": 1.92
+        },
+        {
+          "w": "Comparez",
+          "start": 2.219,
+          "end": 2.517
+        },
+        {
+          "w": "le",
+          "start": 2.56,
+          "end": 2.603
+        },
+        {
+          "w": "premier",
+          "start": 2.645,
+          "end": 2.944
+        },
+        {
+          "w": "résultat",
+          "start": 2.987,
+          "end": 3.371
+        },
+        {
+          "w": "aux",
+          "start": 3.413,
+          "end": 3.541
+        },
+        {
+          "w": "sources",
+          "start": 3.584,
+          "end": 3.84
+        },
+        {
+          "w": "et",
+          "start": 3.925,
+          "end": 3.968
+        },
+        {
+          "w": "au",
+          "start": 4.011,
+          "end": 4.053
+        },
+        {
+          "w": "besoin",
+          "start": 4.096,
+          "end": 4.437
+        },
+        {
+          "w": ":",
+          "start": 4.565,
+          "end": 4.608
+        },
+        {
+          "w": "faits,",
+          "start": 4.651,
+          "end": 5.013
+        },
+        {
+          "w": "chiffres,",
+          "start": 5.12,
+          "end": 5.675
+        },
+        {
+          "w": "noms,",
+          "start": 5.76,
+          "end": 6.059
+        },
+        {
+          "w": "omissions,",
+          "start": 6.187,
+          "end": 6.805
+        },
+        {
+          "w": "raisonnement,",
+          "start": 6.912,
+          "end": 7.616
+        },
+        {
+          "w": "ton,",
+          "start": 7.765,
+          "end": 8.043
+        },
+        {
+          "w": "confidentialité,",
+          "start": 8.192,
+          "end": 9.152
+        },
+        {
+          "w": "droits",
+          "start": 9.259,
+          "end": 9.6
+        },
+        {
+          "w": "et",
+          "start": 9.643,
+          "end": 9.771
+        },
+        {
+          "w": "accessibilité.",
+          "start": 9.813,
+          "end": 10.642
+        },
+        {
+          "w": "Un",
+          "start": 10.789,
+          "end": 10.917
+        },
+        {
+          "w": "texte",
+          "start": 10.959,
+          "end": 11.215
+        },
+        {
+          "w": "faux",
+          "start": 11.301,
+          "end": 11.599
+        },
+        {
+          "w": "ne",
+          "start": 11.642,
+          "end": 11.685
+        },
+        {
+          "w": "s'embellit",
+          "start": 11.727,
+          "end": 12.111
+        },
+        {
+          "w": "pas",
+          "start": 12.154,
+          "end": 12.325
+        },
+        {
+          "w": ":",
+          "start": 12.367,
+          "end": 12.41
+        },
+        {
+          "w": "il",
+          "start": 12.453,
+          "end": 12.538
+        },
+        {
+          "w": "se",
+          "start": 12.581,
+          "end": 12.666
+        },
+        {
+          "w": "corrige,",
+          "start": 12.709,
+          "end": 13.263
+        },
+        {
+          "w": "à",
+          "start": 13.434,
+          "end": 13.519
+        },
+        {
+          "w": "partir",
+          "start": 13.562,
+          "end": 13.818
+        },
+        {
+          "w": "d'une",
+          "start": 13.861,
+          "end": 13.989
+        },
+        {
+          "w": "source",
+          "start": 14.031,
+          "end": 14.202
+        },
+        {
+          "w": "identifiée.",
+          "start": 14.373,
+          "end": 15.098
+        },
+        {
+          "w": "La",
+          "start": 15.269,
+          "end": 15.397
+        },
+        {
+          "w": "fluidité",
+          "start": 15.439,
+          "end": 15.951
+        },
+        {
+          "w": "ne",
+          "start": 15.994,
+          "end": 16.037
+        },
+        {
+          "w": "constitue",
+          "start": 16.079,
+          "end": 16.463
+        },
+        {
+          "w": "pas",
+          "start": 16.506,
+          "end": 16.634
+        },
+        {
+          "w": "une",
+          "start": 16.677,
+          "end": 16.762
+        },
+        {
+          "w": "validation.",
+          "start": 16.805,
+          "end": 17.445
+        },
+        {
+          "w": "Une",
+          "start": 17.743,
+          "end": 17.829
+        },
+        {
+          "w": "fois",
+          "start": 17.871,
+          "end": 18.042
+        },
+        {
+          "w": "le",
+          "start": 18.085,
+          "end": 18.127
+        },
+        {
+          "w": "fond",
+          "start": 18.17,
+          "end": 18.341
+        },
+        {
+          "w": "juste,",
+          "start": 18.383,
+          "end": 18.789
+        },
+        {
+          "w": "et",
+          "start": 18.938,
+          "end": 19.023
+        },
+        {
+          "w": "seulement",
+          "start": 19.066,
+          "end": 19.407
+        },
+        {
+          "w": "alors,",
+          "start": 19.45,
+          "end": 19.77
+        },
+        {
+          "w": "on",
+          "start": 19.919,
+          "end": 20.175
+        },
+        {
+          "w": "travaille",
+          "start": 20.218,
+          "end": 20.517
+        },
+        {
+          "w": "la",
+          "start": 20.559,
+          "end": 20.645
+        },
+        {
+          "w": "forme.",
+          "start": 20.687,
+          "end": 21.315
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "title": "Corriger ou repartir",
+      "avatar": "none",
+      "text": "Une correction ciblée préserve souvent mieux les passages déjà validés qu'une régénération complète. Mais si la conversation dérive, si les consignes se contredisent, ou si le texte de départ est trop fragile, repartez d'une source propre dans un nouvel échange. Dans les deux cas, conservez la version de départ, la consigne de correction et la version obtenue : c'est ce qui vous permet de comparer précisément.",
+      "audio": "generated/lesson2_5-commune/scene-4.wav",
+      "duration": 21.822403628117915,
+      "words": [
+        {
+          "w": "Une",
+          "start": 0.256,
+          "end": 0.427
+        },
+        {
+          "w": "correction",
+          "start": 0.469,
+          "end": 0.725
+        },
+        {
+          "w": "ciblée",
+          "start": 0.896,
+          "end": 1.323
+        },
+        {
+          "w": "préserve",
+          "start": 1.451,
+          "end": 1.963
+        },
+        {
+          "w": "souvent",
+          "start": 2.133,
+          "end": 2.389
+        },
+        {
+          "w": "mieux",
+          "start": 2.432,
+          "end": 2.688
+        },
+        {
+          "w": "les",
+          "start": 2.731,
+          "end": 2.773
+        },
+        {
+          "w": "passages",
+          "start": 2.816,
+          "end": 3.157
+        },
+        {
+          "w": "déjà",
+          "start": 3.2,
+          "end": 3.499
+        },
+        {
+          "w": "validés",
+          "start": 3.541,
+          "end": 3.925
+        },
+        {
+          "w": "qu'une",
+          "start": 4.011,
+          "end": 4.395
+        },
+        {
+          "w": "régénération",
+          "start": 4.437,
+          "end": 4.907
+        },
+        {
+          "w": "complète.",
+          "start": 5.077,
+          "end": 5.585
+        },
+        {
+          "w": "Mais",
+          "start": 5.752,
+          "end": 5.923
+        },
+        {
+          "w": "si",
+          "start": 5.965,
+          "end": 6.093
+        },
+        {
+          "w": "la",
+          "start": 6.136,
+          "end": 6.179
+        },
+        {
+          "w": "conversation",
+          "start": 6.221,
+          "end": 6.563
+        },
+        {
+          "w": "dérive,",
+          "start": 6.691,
+          "end": 7.267
+        },
+        {
+          "w": "si",
+          "start": 7.502,
+          "end": 7.672
+        },
+        {
+          "w": "les",
+          "start": 7.715,
+          "end": 7.758
+        },
+        {
+          "w": "consignes",
+          "start": 7.8,
+          "end": 8.27
+        },
+        {
+          "w": "se",
+          "start": 8.312,
+          "end": 8.355
+        },
+        {
+          "w": "contredisent,",
+          "start": 8.398,
+          "end": 9.165
+        },
+        {
+          "w": "ou",
+          "start": 9.251,
+          "end": 9.464
+        },
+        {
+          "w": "si",
+          "start": 9.507,
+          "end": 9.635
+        },
+        {
+          "w": "le",
+          "start": 9.678,
+          "end": 9.72
+        },
+        {
+          "w": "texte",
+          "start": 9.763,
+          "end": 10.019
+        },
+        {
+          "w": "de",
+          "start": 10.104,
+          "end": 10.147
+        },
+        {
+          "w": "départ",
+          "start": 10.19,
+          "end": 10.488
+        },
+        {
+          "w": "est",
+          "start": 10.531,
+          "end": 10.573
+        },
+        {
+          "w": "trop",
+          "start": 10.616,
+          "end": 10.744
+        },
+        {
+          "w": "fragile,",
+          "start": 10.787,
+          "end": 11.405
+        },
+        {
+          "w": "repartez",
+          "start": 11.683,
+          "end": 12.152
+        },
+        {
+          "w": "d'une",
+          "start": 12.195,
+          "end": 12.366
+        },
+        {
+          "w": "source",
+          "start": 12.408,
+          "end": 12.451
+        },
+        {
+          "w": "propre",
+          "start": 12.664,
+          "end": 13.005
+        },
+        {
+          "w": "dans",
+          "start": 13.091,
+          "end": 13.219
+        },
+        {
+          "w": "un",
+          "start": 13.261,
+          "end": 13.304
+        },
+        {
+          "w": "nouvel",
+          "start": 13.347,
+          "end": 13.518
+        },
+        {
+          "w": "échange.",
+          "start": 13.56,
+          "end": 14.171
+        },
+        {
+          "w": "Dans",
+          "start": 14.484,
+          "end": 14.612
+        },
+        {
+          "w": "les",
+          "start": 14.655,
+          "end": 14.74
+        },
+        {
+          "w": "deux",
+          "start": 14.783,
+          "end": 14.911
+        },
+        {
+          "w": "cas,",
+          "start": 14.954,
+          "end": 15.274
+        },
+        {
+          "w": "conservez",
+          "start": 15.466,
+          "end": 15.85
+        },
+        {
+          "w": "la",
+          "start": 15.892,
+          "end": 15.977
+        },
+        {
+          "w": "version",
+          "start": 16.02,
+          "end": 16.148
+        },
+        {
+          "w": "de",
+          "start": 16.319,
+          "end": 16.404
+        },
+        {
+          "w": "départ,",
+          "start": 16.447,
+          "end": 16.895
+        },
+        {
+          "w": "la",
+          "start": 17.044,
+          "end": 17.172
+        },
+        {
+          "w": "consigne",
+          "start": 17.215,
+          "end": 17.599
+        },
+        {
+          "w": "de",
+          "start": 17.642,
+          "end": 17.684
+        },
+        {
+          "w": "correction",
+          "start": 17.727,
+          "end": 17.94
+        },
+        {
+          "w": "et",
+          "start": 18.239,
+          "end": 18.58
+        },
+        {
+          "w": "la",
+          "start": 18.623,
+          "end": 18.666
+        },
+        {
+          "w": "version",
+          "start": 18.708,
+          "end": 18.879
+        },
+        {
+          "w": "obtenue",
+          "start": 19.049,
+          "end": 19.476
+        },
+        {
+          "w": ":",
+          "start": 19.519,
+          "end": 19.561
+        },
+        {
+          "w": "c'est",
+          "start": 19.604,
+          "end": 19.775
+        },
+        {
+          "w": "ce",
+          "start": 19.817,
+          "end": 19.903
+        },
+        {
+          "w": "qui",
+          "start": 19.945,
+          "end": 20.031
+        },
+        {
+          "w": "vous",
+          "start": 20.073,
+          "end": 20.159
+        },
+        {
+          "w": "permet",
+          "start": 20.201,
+          "end": 20.287
+        },
+        {
+          "w": "de",
+          "start": 20.329,
+          "end": 20.372
+        },
+        {
+          "w": "comparer",
+          "start": 20.415,
+          "end": 20.713
+        },
+        {
+          "w": "précisément.",
+          "start": 20.756,
+          "end": 21.648
+        }
+      ]
+    },
+    {
+      "id": "5",
+      "title": "Cinq angles de correction",
+      "avatar": "none",
+      "text": "Pour diagnostiquer, utilisez cinq angles. La contrainte : longueur, nombre d'éléments, mots interdits ou imposés. Le contexte et les sources : les faits et les limites que le texte doit intégrer. Le style : le registre et le ton. Le format : l'organisation visuelle, liste, sous-titres, tableau. Et l'accessibilité : réduire les obstacles de lecture, d'écoute ou de compréhension. Concrètement : pas plus de cent mots, cite la section de la politique validée, passe au tutoiement, ajoute des sous-titres, une idée par phrase. Ces angles se recouvrent : une phrase plus courte touche au style et à l'accessibilité. L'important est de transformer améliore ça en critères observables.",
+      "audio": "generated/lesson2_5-commune/scene-5.wav",
+      "duration": 39.56755102040816,
+      "words": [
+        {
+          "w": "Pour",
+          "start": 0.299,
+          "end": 0.469
+        },
+        {
+          "w": "diagnostiquer,",
+          "start": 0.512,
+          "end": 1.173
+        },
+        {
+          "w": "utilisez",
+          "start": 1.237,
+          "end": 1.963
+        },
+        {
+          "w": "cinq",
+          "start": 2.005,
+          "end": 2.261
+        },
+        {
+          "w": "angles.",
+          "start": 2.304,
+          "end": 2.816
+        },
+        {
+          "w": "La",
+          "start": 3.029,
+          "end": 3.2
+        },
+        {
+          "w": "contrainte",
+          "start": 3.243,
+          "end": 3.712
+        },
+        {
+          "w": ":",
+          "start": 3.755,
+          "end": 3.883
+        },
+        {
+          "w": "longueur,",
+          "start": 3.925,
+          "end": 4.523
+        },
+        {
+          "w": "nombre",
+          "start": 4.693,
+          "end": 4.949
+        },
+        {
+          "w": "d'éléments,",
+          "start": 5.035,
+          "end": 5.611
+        },
+        {
+          "w": "mots",
+          "start": 5.803,
+          "end": 6.059
+        },
+        {
+          "w": "interdits",
+          "start": 6.144,
+          "end": 6.571
+        },
+        {
+          "w": "ou",
+          "start": 6.613,
+          "end": 6.699
+        },
+        {
+          "w": "imposés.",
+          "start": 6.741,
+          "end": 7.339
+        },
+        {
+          "w": "Le",
+          "start": 7.552,
+          "end": 7.637
+        },
+        {
+          "w": "contexte",
+          "start": 7.68,
+          "end": 8.064
+        },
+        {
+          "w": "et",
+          "start": 8.149,
+          "end": 8.192
+        },
+        {
+          "w": "les",
+          "start": 8.235,
+          "end": 8.277
+        },
+        {
+          "w": "sources",
+          "start": 8.32,
+          "end": 8.619
+        },
+        {
+          "w": ":",
+          "start": 8.832,
+          "end": 8.875
+        },
+        {
+          "w": "les",
+          "start": 8.917,
+          "end": 9.045
+        },
+        {
+          "w": "faits",
+          "start": 9.088,
+          "end": 9.301
+        },
+        {
+          "w": "et",
+          "start": 9.387,
+          "end": 9.429
+        },
+        {
+          "w": "les",
+          "start": 9.472,
+          "end": 9.557
+        },
+        {
+          "w": "limites",
+          "start": 9.6,
+          "end": 9.856
+        },
+        {
+          "w": "que",
+          "start": 9.941,
+          "end": 10.027
+        },
+        {
+          "w": "le",
+          "start": 10.069,
+          "end": 10.112
+        },
+        {
+          "w": "texte",
+          "start": 10.155,
+          "end": 10.368
+        },
+        {
+          "w": "doit",
+          "start": 10.453,
+          "end": 10.581
+        },
+        {
+          "w": "intégrer.",
+          "start": 10.624,
+          "end": 11.152
+        },
+        {
+          "w": "Le",
+          "start": 11.296,
+          "end": 11.466
+        },
+        {
+          "w": "style",
+          "start": 11.509,
+          "end": 11.808
+        },
+        {
+          "w": ":",
+          "start": 11.936,
+          "end": 12.021
+        },
+        {
+          "w": "le",
+          "start": 12.064,
+          "end": 12.235
+        },
+        {
+          "w": "registre",
+          "start": 12.277,
+          "end": 12.746
+        },
+        {
+          "w": "et",
+          "start": 12.874,
+          "end": 12.96
+        },
+        {
+          "w": "le",
+          "start": 13.002,
+          "end": 13.088
+        },
+        {
+          "w": "ton.",
+          "start": 13.13,
+          "end": 13.578
+        },
+        {
+          "w": "Le",
+          "start": 13.856,
+          "end": 14.027
+        },
+        {
+          "w": "format",
+          "start": 14.069,
+          "end": 14.453
+        },
+        {
+          "w": ":",
+          "start": 14.496,
+          "end": 14.539
+        },
+        {
+          "w": "l'organisation",
+          "start": 14.581,
+          "end": 15.05
+        },
+        {
+          "w": "visuelle,",
+          "start": 15.221,
+          "end": 15.797
+        },
+        {
+          "w": "liste,",
+          "start": 15.947,
+          "end": 16.48
+        },
+        {
+          "w": "sous-titres,",
+          "start": 16.587,
+          "end": 17.269
+        },
+        {
+          "w": "tableau.",
+          "start": 17.355,
+          "end": 17.866
+        },
+        {
+          "w": "Et",
+          "start": 18.08,
+          "end": 18.378
+        },
+        {
+          "w": "l'accessibilité",
+          "start": 18.421,
+          "end": 19.232
+        },
+        {
+          "w": ":",
+          "start": 19.317,
+          "end": 19.36
+        },
+        {
+          "w": "réduire",
+          "start": 19.402,
+          "end": 19.744
+        },
+        {
+          "w": "les",
+          "start": 19.787,
+          "end": 19.872
+        },
+        {
+          "w": "obstacles",
+          "start": 19.915,
+          "end": 20.341
+        },
+        {
+          "w": "de",
+          "start": 20.384,
+          "end": 20.427
+        },
+        {
+          "w": "lecture,",
+          "start": 20.469,
+          "end": 21.045
+        },
+        {
+          "w": "d'écoute",
+          "start": 21.195,
+          "end": 21.621
+        },
+        {
+          "w": "ou",
+          "start": 21.792,
+          "end": 21.92
+        },
+        {
+          "w": "de",
+          "start": 21.962,
+          "end": 22.005
+        },
+        {
+          "w": "compréhension.",
+          "start": 22.048,
+          "end": 22.782
+        },
+        {
+          "w": "Concrètement",
+          "start": 23.131,
+          "end": 23.686
+        },
+        {
+          "w": ":",
+          "start": 23.729,
+          "end": 23.814
+        },
+        {
+          "w": "pas",
+          "start": 23.857,
+          "end": 23.985
+        },
+        {
+          "w": "plus",
+          "start": 24.027,
+          "end": 24.198
+        },
+        {
+          "w": "de",
+          "start": 24.241,
+          "end": 24.284
+        },
+        {
+          "w": "cent",
+          "start": 24.326,
+          "end": 24.582
+        },
+        {
+          "w": "mots,",
+          "start": 24.625,
+          "end": 25.03
+        },
+        {
+          "w": "cite",
+          "start": 25.222,
+          "end": 25.436
+        },
+        {
+          "w": "la",
+          "start": 25.478,
+          "end": 25.606
+        },
+        {
+          "w": "section",
+          "start": 25.649,
+          "end": 25.734
+        },
+        {
+          "w": "de",
+          "start": 25.948,
+          "end": 26.033
+        },
+        {
+          "w": "la",
+          "start": 26.076,
+          "end": 26.118
+        },
+        {
+          "w": "politique",
+          "start": 26.161,
+          "end": 26.459
+        },
+        {
+          "w": "validée,",
+          "start": 26.502,
+          "end": 27.078
+        },
+        {
+          "w": "passe",
+          "start": 27.27,
+          "end": 27.483
+        },
+        {
+          "w": "au",
+          "start": 27.526,
+          "end": 27.611
+        },
+        {
+          "w": "tutoiement,",
+          "start": 27.654,
+          "end": 28.23
+        },
+        {
+          "w": "ajoute",
+          "start": 28.422,
+          "end": 28.721
+        },
+        {
+          "w": "des",
+          "start": 28.764,
+          "end": 28.849
+        },
+        {
+          "w": "sous-titres,",
+          "start": 28.892,
+          "end": 29.489
+        },
+        {
+          "w": "une",
+          "start": 29.574,
+          "end": 29.873
+        },
+        {
+          "w": "idée",
+          "start": 29.916,
+          "end": 30.086
+        },
+        {
+          "w": "par",
+          "start": 30.129,
+          "end": 30.214
+        },
+        {
+          "w": "phrase.",
+          "start": 30.257,
+          "end": 30.892
+        },
+        {
+          "w": "Ces",
+          "start": 31.229,
+          "end": 31.399
+        },
+        {
+          "w": "angles",
+          "start": 31.442,
+          "end": 31.741
+        },
+        {
+          "w": "se",
+          "start": 31.783,
+          "end": 31.869
+        },
+        {
+          "w": "recouvrent",
+          "start": 31.911,
+          "end": 32.423
+        },
+        {
+          "w": ":",
+          "start": 32.466,
+          "end": 32.509
+        },
+        {
+          "w": "une",
+          "start": 32.551,
+          "end": 32.637
+        },
+        {
+          "w": "phrase",
+          "start": 32.722,
+          "end": 32.935
+        },
+        {
+          "w": "plus",
+          "start": 32.978,
+          "end": 33.149
+        },
+        {
+          "w": "courte",
+          "start": 33.191,
+          "end": 33.447
+        },
+        {
+          "w": "touche",
+          "start": 33.618,
+          "end": 33.789
+        },
+        {
+          "w": "au",
+          "start": 33.831,
+          "end": 33.917
+        },
+        {
+          "w": "style",
+          "start": 33.959,
+          "end": 34.258
+        },
+        {
+          "w": "et",
+          "start": 34.386,
+          "end": 34.429
+        },
+        {
+          "w": "à",
+          "start": 34.471,
+          "end": 34.514
+        },
+        {
+          "w": "l'accessibilité.",
+          "start": 34.557,
+          "end": 35.495
+        },
+        {
+          "w": "L'important",
+          "start": 35.709,
+          "end": 36.05
+        },
+        {
+          "w": "est",
+          "start": 36.263,
+          "end": 36.306
+        },
+        {
+          "w": "de",
+          "start": 36.349,
+          "end": 36.391
+        },
+        {
+          "w": "transformer",
+          "start": 36.434,
+          "end": 36.903
+        },
+        {
+          "w": "améliore",
+          "start": 37.202,
+          "end": 37.757
+        },
+        {
+          "w": "ça",
+          "start": 37.842,
+          "end": 38.013
+        },
+        {
+          "w": "en",
+          "start": 38.098,
+          "end": 38.269
+        },
+        {
+          "w": "critères",
+          "start": 38.311,
+          "end": 38.653
+        },
+        {
+          "w": "observables.",
+          "start": 38.695,
+          "end": 39.368
+        }
+      ]
+    },
+    {
+      "id": "6",
+      "title": "Le prompt d'optimisation complet",
+      "avatar": "none",
+      "text": "Un prompt d'optimisation complet identifie la version à corriger, le besoin et le public, les sources de vérité, ce qu'il faut conserver, ce qu'il faut modifier, les critères d'acceptation et le résultat attendu. Demandez aussi un bref relevé des changements et des points à confirmer, sans le prendre pour une preuve. Ensuite, vérifiez chaque critère vous-même : comptez pour une limite, revenez à la source pour un fait, et faites tester par une personne du public quand c'est possible. Ce gabarit est réutilisable : il suffit d'en remplir chaque ligne.",
+      "audio": "generated/lesson2_5-commune/scene-6.wav",
+      "duration": 29.989319727891157,
+      "words": [
+        {
+          "w": "Un",
+          "start": 0.213,
+          "end": 0.427
+        },
+        {
+          "w": "prompt",
+          "start": 0.469,
+          "end": 0.683
+        },
+        {
+          "w": "d'optimisation",
+          "start": 0.725,
+          "end": 1.237
+        },
+        {
+          "w": "complet",
+          "start": 1.451,
+          "end": 1.835
+        },
+        {
+          "w": "identifie",
+          "start": 2.091,
+          "end": 2.688
+        },
+        {
+          "w": "la",
+          "start": 2.731,
+          "end": 2.773
+        },
+        {
+          "w": "version",
+          "start": 2.816,
+          "end": 2.944
+        },
+        {
+          "w": "à",
+          "start": 3.157,
+          "end": 3.243
+        },
+        {
+          "w": "corriger,",
+          "start": 3.285,
+          "end": 3.776
+        },
+        {
+          "w": "le",
+          "start": 3.925,
+          "end": 4.053
+        },
+        {
+          "w": "besoin",
+          "start": 4.096,
+          "end": 4.437
+        },
+        {
+          "w": "et",
+          "start": 4.48,
+          "end": 4.523
+        },
+        {
+          "w": "le",
+          "start": 4.565,
+          "end": 4.608
+        },
+        {
+          "w": "public,",
+          "start": 4.651,
+          "end": 5.013
+        },
+        {
+          "w": "les",
+          "start": 5.291,
+          "end": 5.547
+        },
+        {
+          "w": "sources",
+          "start": 5.589,
+          "end": 5.845
+        },
+        {
+          "w": "de",
+          "start": 5.931,
+          "end": 5.973
+        },
+        {
+          "w": "vérité,",
+          "start": 6.016,
+          "end": 6.613
+        },
+        {
+          "w": "ce",
+          "start": 6.784,
+          "end": 6.912
+        },
+        {
+          "w": "qu'il",
+          "start": 6.955,
+          "end": 7.083
+        },
+        {
+          "w": "faut",
+          "start": 7.125,
+          "end": 7.211
+        },
+        {
+          "w": "conserver,",
+          "start": 7.253,
+          "end": 7.957
+        },
+        {
+          "w": "ce",
+          "start": 8.107,
+          "end": 8.192
+        },
+        {
+          "w": "qu'il",
+          "start": 8.235,
+          "end": 8.363
+        },
+        {
+          "w": "faut",
+          "start": 8.405,
+          "end": 8.533
+        },
+        {
+          "w": "modifier,",
+          "start": 8.576,
+          "end": 9.195
+        },
+        {
+          "w": "les",
+          "start": 9.387,
+          "end": 9.557
+        },
+        {
+          "w": "critères",
+          "start": 9.6,
+          "end": 9.899
+        },
+        {
+          "w": "d'acceptation",
+          "start": 9.941,
+          "end": 10.368
+        },
+        {
+          "w": "et",
+          "start": 10.667,
+          "end": 11.008
+        },
+        {
+          "w": "le",
+          "start": 11.051,
+          "end": 11.093
+        },
+        {
+          "w": "résultat",
+          "start": 11.136,
+          "end": 11.52
+        },
+        {
+          "w": "attendu.",
+          "start": 11.563,
+          "end": 12.049
+        },
+        {
+          "w": "Demandez",
+          "start": 12.194,
+          "end": 12.578
+        },
+        {
+          "w": "aussi",
+          "start": 12.62,
+          "end": 12.706
+        },
+        {
+          "w": "un",
+          "start": 12.919,
+          "end": 13.047
+        },
+        {
+          "w": "bref",
+          "start": 13.089,
+          "end": 13.303
+        },
+        {
+          "w": "relevé",
+          "start": 13.388,
+          "end": 13.687
+        },
+        {
+          "w": "des",
+          "start": 13.729,
+          "end": 13.815
+        },
+        {
+          "w": "changements",
+          "start": 13.857,
+          "end": 14.242
+        },
+        {
+          "w": "et",
+          "start": 14.412,
+          "end": 14.455
+        },
+        {
+          "w": "des",
+          "start": 14.498,
+          "end": 14.583
+        },
+        {
+          "w": "points",
+          "start": 14.626,
+          "end": 14.839
+        },
+        {
+          "w": "à",
+          "start": 14.882,
+          "end": 14.924
+        },
+        {
+          "w": "confirmer,",
+          "start": 14.967,
+          "end": 15.628
+        },
+        {
+          "w": "sans",
+          "start": 15.777,
+          "end": 15.991
+        },
+        {
+          "w": "le",
+          "start": 16.034,
+          "end": 16.076
+        },
+        {
+          "w": "prendre",
+          "start": 16.119,
+          "end": 16.375
+        },
+        {
+          "w": "pour",
+          "start": 16.418,
+          "end": 16.546
+        },
+        {
+          "w": "une",
+          "start": 16.588,
+          "end": 16.631
+        },
+        {
+          "w": "preuve.",
+          "start": 16.716,
+          "end": 17.205
+        },
+        {
+          "w": "Ensuite,",
+          "start": 17.481,
+          "end": 18.078
+        },
+        {
+          "w": "vérifiez",
+          "start": 18.292,
+          "end": 18.804
+        },
+        {
+          "w": "chaque",
+          "start": 18.846,
+          "end": 19.06
+        },
+        {
+          "w": "critère",
+          "start": 19.145,
+          "end": 19.486
+        },
+        {
+          "w": "vous-même",
+          "start": 19.529,
+          "end": 19.87
+        },
+        {
+          "w": ":",
+          "start": 19.998,
+          "end": 20.169
+        },
+        {
+          "w": "comptez",
+          "start": 20.212,
+          "end": 20.511
+        },
+        {
+          "w": "pour",
+          "start": 20.553,
+          "end": 20.639
+        },
+        {
+          "w": "une",
+          "start": 20.681,
+          "end": 20.767
+        },
+        {
+          "w": "limite,",
+          "start": 20.809,
+          "end": 21.279
+        },
+        {
+          "w": "revenez",
+          "start": 21.492,
+          "end": 21.876
+        },
+        {
+          "w": "à",
+          "start": 21.919,
+          "end": 21.961
+        },
+        {
+          "w": "la",
+          "start": 22.004,
+          "end": 22.047
+        },
+        {
+          "w": "source",
+          "start": 22.089,
+          "end": 22.26
+        },
+        {
+          "w": "pour",
+          "start": 22.388,
+          "end": 22.516
+        },
+        {
+          "w": "un",
+          "start": 22.558,
+          "end": 22.601
+        },
+        {
+          "w": "fait,",
+          "start": 22.644,
+          "end": 23.006
+        },
+        {
+          "w": "et",
+          "start": 23.156,
+          "end": 23.369
+        },
+        {
+          "w": "faites",
+          "start": 23.412,
+          "end": 23.54
+        },
+        {
+          "w": "tester",
+          "start": 23.625,
+          "end": 23.966
+        },
+        {
+          "w": "par",
+          "start": 24.009,
+          "end": 24.095
+        },
+        {
+          "w": "une",
+          "start": 24.137,
+          "end": 24.223
+        },
+        {
+          "w": "personne",
+          "start": 24.265,
+          "end": 24.564
+        },
+        {
+          "w": "du",
+          "start": 24.607,
+          "end": 24.692
+        },
+        {
+          "w": "public",
+          "start": 24.735,
+          "end": 24.863
+        },
+        {
+          "w": "quand",
+          "start": 25.076,
+          "end": 25.247
+        },
+        {
+          "w": "c'est",
+          "start": 25.289,
+          "end": 25.417
+        },
+        {
+          "w": "possible.",
+          "start": 25.46,
+          "end": 25.961
+        },
+        {
+          "w": "Ce",
+          "start": 26.248,
+          "end": 26.376
+        },
+        {
+          "w": "gabarit",
+          "start": 26.419,
+          "end": 26.76
+        },
+        {
+          "w": "est",
+          "start": 26.803,
+          "end": 26.845
+        },
+        {
+          "w": "réutilisable",
+          "start": 26.888,
+          "end": 27.485
+        },
+        {
+          "w": ":",
+          "start": 27.613,
+          "end": 27.784
+        },
+        {
+          "w": "il",
+          "start": 27.827,
+          "end": 28.125
+        },
+        {
+          "w": "suffit",
+          "start": 28.168,
+          "end": 28.424
+        },
+        {
+          "w": "d'en",
+          "start": 28.467,
+          "end": 28.595
+        },
+        {
+          "w": "remplir",
+          "start": 28.637,
+          "end": 28.893
+        },
+        {
+          "w": "chaque",
+          "start": 28.979,
+          "end": 29.149
+        },
+        {
+          "w": "ligne.",
+          "start": 29.235,
+          "end": 29.789
+        }
+      ]
+    },
+    {
+      "id": "7",
+      "title": "Exemple : vulgariser un texte technique",
+      "avatar": "none",
+      "text": "Le cours en donne un exemple. Un paragraphe sur le chiffrement de bout en bout, écrit pour un public technique, doit devenir une notification de soixante mots maximum pour des novices. Le prompt conserve l'idée vérifiée et ses limites, passe à un langage courant, ajoute une comparaison présentée comme une analogie, et fixe la longueur. Il demande enfin le nombre de mots, et les points qui nécessitent encore une validation technique. Résultat : une enveloppe fermée avant l'envoi, que seuls les appareils des participants savent normalement ouvrir. Le fond est préservé, et les réserves restent visibles.",
+      "audio": "generated/lesson2_5-commune/scene-7.wav",
+      "duration": 32.75748299319728,
+      "words": [
+        {
+          "w": "Le",
+          "start": 0.299,
+          "end": 0.427
+        },
+        {
+          "w": "cours",
+          "start": 0.469,
+          "end": 0.683
+        },
+        {
+          "w": "en",
+          "start": 0.725,
+          "end": 0.768
+        },
+        {
+          "w": "donne",
+          "start": 0.811,
+          "end": 0.939
+        },
+        {
+          "w": "un",
+          "start": 0.981,
+          "end": 1.024
+        },
+        {
+          "w": "exemple.",
+          "start": 1.067,
+          "end": 1.685
+        },
+        {
+          "w": "Un",
+          "start": 1.92,
+          "end": 2.176
+        },
+        {
+          "w": "paragraphe",
+          "start": 2.219,
+          "end": 2.688
+        },
+        {
+          "w": "sur",
+          "start": 2.731,
+          "end": 2.816
+        },
+        {
+          "w": "le",
+          "start": 2.859,
+          "end": 2.901
+        },
+        {
+          "w": "chiffrement",
+          "start": 2.944,
+          "end": 3.371
+        },
+        {
+          "w": "de",
+          "start": 3.413,
+          "end": 3.499
+        },
+        {
+          "w": "bout",
+          "start": 3.541,
+          "end": 3.669
+        },
+        {
+          "w": "en",
+          "start": 3.712,
+          "end": 3.84
+        },
+        {
+          "w": "bout,",
+          "start": 3.883,
+          "end": 4.117
+        },
+        {
+          "w": "écrit",
+          "start": 4.224,
+          "end": 4.651
+        },
+        {
+          "w": "pour",
+          "start": 4.693,
+          "end": 4.821
+        },
+        {
+          "w": "un",
+          "start": 4.864,
+          "end": 4.907
+        },
+        {
+          "w": "public",
+          "start": 4.949,
+          "end": 5.035
+        },
+        {
+          "w": "technique,",
+          "start": 5.248,
+          "end": 5.824
+        },
+        {
+          "w": "doit",
+          "start": 6.059,
+          "end": 6.229
+        },
+        {
+          "w": "devenir",
+          "start": 6.272,
+          "end": 6.485
+        },
+        {
+          "w": "une",
+          "start": 6.571,
+          "end": 6.656
+        },
+        {
+          "w": "notification",
+          "start": 6.699,
+          "end": 7.125
+        },
+        {
+          "w": "de",
+          "start": 7.424,
+          "end": 7.509
+        },
+        {
+          "w": "soixante",
+          "start": 7.552,
+          "end": 8.021
+        },
+        {
+          "w": "mots",
+          "start": 8.149,
+          "end": 8.32
+        },
+        {
+          "w": "maximum",
+          "start": 8.363,
+          "end": 8.789
+        },
+        {
+          "w": "pour",
+          "start": 8.917,
+          "end": 9.045
+        },
+        {
+          "w": "des",
+          "start": 9.088,
+          "end": 9.173
+        },
+        {
+          "w": "novices.",
+          "start": 9.216,
+          "end": 9.717
+        },
+        {
+          "w": "Le",
+          "start": 10.005,
+          "end": 10.091
+        },
+        {
+          "w": "prompt",
+          "start": 10.133,
+          "end": 10.347
+        },
+        {
+          "w": "conserve",
+          "start": 10.389,
+          "end": 10.731
+        },
+        {
+          "w": "l'idée",
+          "start": 10.859,
+          "end": 11.072
+        },
+        {
+          "w": "vérifiée",
+          "start": 11.115,
+          "end": 11.627
+        },
+        {
+          "w": "et",
+          "start": 11.755,
+          "end": 11.883
+        },
+        {
+          "w": "ses",
+          "start": 11.925,
+          "end": 12.011
+        },
+        {
+          "w": "limites,",
+          "start": 12.053,
+          "end": 12.523
+        },
+        {
+          "w": "passe",
+          "start": 12.736,
+          "end": 12.95
+        },
+        {
+          "w": "à",
+          "start": 12.992,
+          "end": 13.078
+        },
+        {
+          "w": "un",
+          "start": 13.12,
+          "end": 13.163
+        },
+        {
+          "w": "langage",
+          "start": 13.206,
+          "end": 13.419
+        },
+        {
+          "w": "courant,",
+          "start": 13.547,
+          "end": 13.973
+        },
+        {
+          "w": "ajoute",
+          "start": 14.101,
+          "end": 14.656
+        },
+        {
+          "w": "une",
+          "start": 14.699,
+          "end": 14.742
+        },
+        {
+          "w": "comparaison",
+          "start": 14.827,
+          "end": 15.168
+        },
+        {
+          "w": "présentée",
+          "start": 15.339,
+          "end": 15.808
+        },
+        {
+          "w": "comme",
+          "start": 15.851,
+          "end": 15.936
+        },
+        {
+          "w": "une",
+          "start": 15.979,
+          "end": 16.021
+        },
+        {
+          "w": "analogie,",
+          "start": 16.064,
+          "end": 16.683
+        },
+        {
+          "w": "et",
+          "start": 16.832,
+          "end": 17.046
+        },
+        {
+          "w": "fixe",
+          "start": 17.088,
+          "end": 17.302
+        },
+        {
+          "w": "la",
+          "start": 17.344,
+          "end": 17.43
+        },
+        {
+          "w": "longueur.",
+          "start": 17.472,
+          "end": 18.02
+        },
+        {
+          "w": "Il",
+          "start": 18.355,
+          "end": 18.483
+        },
+        {
+          "w": "demande",
+          "start": 18.526,
+          "end": 18.739
+        },
+        {
+          "w": "enfin",
+          "start": 18.782,
+          "end": 19.038
+        },
+        {
+          "w": "le",
+          "start": 19.081,
+          "end": 19.166
+        },
+        {
+          "w": "nombre",
+          "start": 19.209,
+          "end": 19.379
+        },
+        {
+          "w": "de",
+          "start": 19.465,
+          "end": 19.55
+        },
+        {
+          "w": "mots,",
+          "start": 19.593,
+          "end": 19.891
+        },
+        {
+          "w": "et",
+          "start": 20.019,
+          "end": 20.318
+        },
+        {
+          "w": "les",
+          "start": 20.361,
+          "end": 20.403
+        },
+        {
+          "w": "points",
+          "start": 20.446,
+          "end": 20.659
+        },
+        {
+          "w": "qui",
+          "start": 20.702,
+          "end": 20.787
+        },
+        {
+          "w": "nécessitent",
+          "start": 20.83,
+          "end": 21.214
+        },
+        {
+          "w": "encore",
+          "start": 21.257,
+          "end": 21.47
+        },
+        {
+          "w": "une",
+          "start": 21.513,
+          "end": 21.555
+        },
+        {
+          "w": "validation",
+          "start": 21.641,
+          "end": 21.939
+        },
+        {
+          "w": "technique.",
+          "start": 22.11,
+          "end": 22.771
+        },
+        {
+          "w": "Résultat",
+          "start": 23.134,
+          "end": 23.646
+        },
+        {
+          "w": ":",
+          "start": 23.774,
+          "end": 23.817
+        },
+        {
+          "w": "une",
+          "start": 23.859,
+          "end": 24.201
+        },
+        {
+          "w": "enveloppe",
+          "start": 24.286,
+          "end": 24.585
+        },
+        {
+          "w": "fermée",
+          "start": 24.67,
+          "end": 25.054
+        },
+        {
+          "w": "avant",
+          "start": 25.097,
+          "end": 25.267
+        },
+        {
+          "w": "l'envoi,",
+          "start": 25.31,
+          "end": 25.865
+        },
+        {
+          "w": "que",
+          "start": 26.078,
+          "end": 26.206
+        },
+        {
+          "w": "seuls",
+          "start": 26.249,
+          "end": 26.547
+        },
+        {
+          "w": "les",
+          "start": 26.59,
+          "end": 26.633
+        },
+        {
+          "w": "appareils",
+          "start": 26.675,
+          "end": 27.059
+        },
+        {
+          "w": "des",
+          "start": 27.102,
+          "end": 27.187
+        },
+        {
+          "w": "participants",
+          "start": 27.23,
+          "end": 27.742
+        },
+        {
+          "w": "savent",
+          "start": 27.785,
+          "end": 27.998
+        },
+        {
+          "w": "normalement",
+          "start": 28.041,
+          "end": 28.425
+        },
+        {
+          "w": "ouvrir.",
+          "start": 28.467,
+          "end": 29.053
+        },
+        {
+          "w": "Le",
+          "start": 29.34,
+          "end": 29.425
+        },
+        {
+          "w": "fond",
+          "start": 29.468,
+          "end": 29.681
+        },
+        {
+          "w": "est",
+          "start": 29.724,
+          "end": 29.809
+        },
+        {
+          "w": "préservé,",
+          "start": 29.852,
+          "end": 30.556
+        },
+        {
+          "w": "et",
+          "start": 30.748,
+          "end": 30.961
+        },
+        {
+          "w": "les",
+          "start": 31.004,
+          "end": 31.089
+        },
+        {
+          "w": "réserves",
+          "start": 31.132,
+          "end": 31.473
+        },
+        {
+          "w": "restent",
+          "start": 31.601,
+          "end": 31.814
+        },
+        {
+          "w": "visibles.",
+          "start": 31.9,
+          "end": 32.583
+        }
+      ]
+    },
+    {
+      "id": "8",
+      "title": "Quand les exigences se contredisent",
+      "avatar": "none",
+      "text": "Parfois, deux exigences sont incompatibles : ajouter une règle tout en gardant exactement la même longueur, par exemple. Ne demandez pas au modèle de masquer ce conflit. Protégez d'abord l'exactitude, la sécurité, la légalité et les informations indispensables. Respectez ensuite la finalité et les besoins d'accès du public, puis les contraintes compatibles. Le style vient en dernier. Si deux exigences restent impossibles ensemble, demandez un arbitrage : négocier la longueur, ou prévoir un lien vers une explication complémentaire, plutôt que supprimer en silence une limite importante. Et arrêtez d'optimiser quand une nouvelle itération ne change plus que l'esthétique.",
+      "audio": "generated/lesson2_5-commune/scene-8.wav",
+      "duration": 36.72310657596372,
+      "words": [
+        {
+          "w": "Parfois,",
+          "start": 0.299,
+          "end": 0.917
+        },
+        {
+          "w": "deux",
+          "start": 1.109,
+          "end": 1.408
+        },
+        {
+          "w": "exigences",
+          "start": 1.451,
+          "end": 1.92
+        },
+        {
+          "w": "sont",
+          "start": 2.091,
+          "end": 2.176
+        },
+        {
+          "w": "incompatibles",
+          "start": 2.219,
+          "end": 2.816
+        },
+        {
+          "w": ":",
+          "start": 2.859,
+          "end": 2.901
+        },
+        {
+          "w": "ajouter",
+          "start": 2.944,
+          "end": 3.2
+        },
+        {
+          "w": "une",
+          "start": 3.243,
+          "end": 3.285
+        },
+        {
+          "w": "règle",
+          "start": 3.371,
+          "end": 3.627
+        },
+        {
+          "w": "tout",
+          "start": 3.712,
+          "end": 4.011
+        },
+        {
+          "w": "en",
+          "start": 4.053,
+          "end": 4.139
+        },
+        {
+          "w": "gardant",
+          "start": 4.181,
+          "end": 4.48
+        },
+        {
+          "w": "exactement",
+          "start": 4.523,
+          "end": 5.291
+        },
+        {
+          "w": "la",
+          "start": 5.333,
+          "end": 5.376
+        },
+        {
+          "w": "même",
+          "start": 5.419,
+          "end": 5.547
+        },
+        {
+          "w": "longueur,",
+          "start": 5.589,
+          "end": 5.973
+        },
+        {
+          "w": "par",
+          "start": 6.059,
+          "end": 6.101
+        },
+        {
+          "w": "exemple.",
+          "start": 6.144,
+          "end": 6.805
+        },
+        {
+          "w": "Ne",
+          "start": 7.083,
+          "end": 7.168
+        },
+        {
+          "w": "demandez",
+          "start": 7.211,
+          "end": 7.509
+        },
+        {
+          "w": "pas",
+          "start": 7.552,
+          "end": 7.68
+        },
+        {
+          "w": "au",
+          "start": 7.723,
+          "end": 7.765
+        },
+        {
+          "w": "modèle",
+          "start": 7.808,
+          "end": 8.064
+        },
+        {
+          "w": "de",
+          "start": 8.107,
+          "end": 8.149
+        },
+        {
+          "w": "masquer",
+          "start": 8.192,
+          "end": 8.491
+        },
+        {
+          "w": "ce",
+          "start": 8.533,
+          "end": 8.619
+        },
+        {
+          "w": "conflit.",
+          "start": 8.661,
+          "end": 9.153
+        },
+        {
+          "w": "Protégez",
+          "start": 9.303,
+          "end": 9.772
+        },
+        {
+          "w": "d'abord",
+          "start": 9.815,
+          "end": 10.071
+        },
+        {
+          "w": "l'exactitude,",
+          "start": 10.113,
+          "end": 10.903
+        },
+        {
+          "w": "la",
+          "start": 11.052,
+          "end": 11.137
+        },
+        {
+          "w": "sécurité,",
+          "start": 11.18,
+          "end": 11.905
+        },
+        {
+          "w": "la",
+          "start": 12.076,
+          "end": 12.204
+        },
+        {
+          "w": "légalité",
+          "start": 12.247,
+          "end": 12.844
+        },
+        {
+          "w": "et",
+          "start": 12.972,
+          "end": 13.271
+        },
+        {
+          "w": "les",
+          "start": 13.313,
+          "end": 13.356
+        },
+        {
+          "w": "informations",
+          "start": 13.399,
+          "end": 13.783
+        },
+        {
+          "w": "indispensables.",
+          "start": 13.953,
+          "end": 14.828
+        },
+        {
+          "w": "Respectez",
+          "start": 15.063,
+          "end": 15.745
+        },
+        {
+          "w": "ensuite",
+          "start": 15.788,
+          "end": 16.001
+        },
+        {
+          "w": "la",
+          "start": 16.087,
+          "end": 16.172
+        },
+        {
+          "w": "finalité",
+          "start": 16.215,
+          "end": 16.769
+        },
+        {
+          "w": "et",
+          "start": 16.855,
+          "end": 16.897
+        },
+        {
+          "w": "les",
+          "start": 16.94,
+          "end": 16.983
+        },
+        {
+          "w": "besoins",
+          "start": 17.025,
+          "end": 17.324
+        },
+        {
+          "w": "d'accès",
+          "start": 17.367,
+          "end": 17.665
+        },
+        {
+          "w": "du",
+          "start": 17.708,
+          "end": 17.751
+        },
+        {
+          "w": "public,",
+          "start": 17.793,
+          "end": 18.199
+        },
+        {
+          "w": "puis",
+          "start": 18.476,
+          "end": 18.689
+        },
+        {
+          "w": "les",
+          "start": 18.732,
+          "end": 18.775
+        },
+        {
+          "w": "contraintes",
+          "start": 18.817,
+          "end": 19.201
+        },
+        {
+          "w": "compatibles.",
+          "start": 19.244,
+          "end": 19.927
+        },
+        {
+          "w": "Le",
+          "start": 20.097,
+          "end": 20.183
+        },
+        {
+          "w": "style",
+          "start": 20.225,
+          "end": 20.481
+        },
+        {
+          "w": "vient",
+          "start": 20.567,
+          "end": 20.737
+        },
+        {
+          "w": "en",
+          "start": 20.78,
+          "end": 20.823
+        },
+        {
+          "w": "dernier.",
+          "start": 20.865,
+          "end": 21.41
+        },
+        {
+          "w": "Si",
+          "start": 21.657,
+          "end": 21.828
+        },
+        {
+          "w": "deux",
+          "start": 21.87,
+          "end": 22.084
+        },
+        {
+          "w": "exigences",
+          "start": 22.126,
+          "end": 22.596
+        },
+        {
+          "w": "restent",
+          "start": 22.724,
+          "end": 22.98
+        },
+        {
+          "w": "impossibles",
+          "start": 23.022,
+          "end": 23.534
+        },
+        {
+          "w": "ensemble,",
+          "start": 23.577,
+          "end": 24.11
+        },
+        {
+          "w": "demandez",
+          "start": 24.302,
+          "end": 24.729
+        },
+        {
+          "w": "un",
+          "start": 24.772,
+          "end": 24.814
+        },
+        {
+          "w": "arbitrage",
+          "start": 24.857,
+          "end": 25.326
+        },
+        {
+          "w": ":",
+          "start": 25.497,
+          "end": 25.54
+        },
+        {
+          "w": "négocier",
+          "start": 25.582,
+          "end": 25.881
+        },
+        {
+          "w": "la",
+          "start": 25.924,
+          "end": 26.009
+        },
+        {
+          "w": "longueur,",
+          "start": 26.052,
+          "end": 26.478
+        },
+        {
+          "w": "ou",
+          "start": 26.649,
+          "end": 26.862
+        },
+        {
+          "w": "prévoir",
+          "start": 26.905,
+          "end": 27.246
+        },
+        {
+          "w": "un",
+          "start": 27.289,
+          "end": 27.374
+        },
+        {
+          "w": "lien",
+          "start": 27.417,
+          "end": 27.588
+        },
+        {
+          "w": "vers",
+          "start": 27.673,
+          "end": 27.801
+        },
+        {
+          "w": "une",
+          "start": 27.844,
+          "end": 27.886
+        },
+        {
+          "w": "explication",
+          "start": 27.929,
+          "end": 28.313
+        },
+        {
+          "w": "complémentaire,",
+          "start": 28.484,
+          "end": 29.316
+        },
+        {
+          "w": "plutôt",
+          "start": 29.55,
+          "end": 29.849
+        },
+        {
+          "w": "que",
+          "start": 29.892,
+          "end": 29.934
+        },
+        {
+          "w": "supprimer",
+          "start": 29.977,
+          "end": 30.361
+        },
+        {
+          "w": "en",
+          "start": 30.404,
+          "end": 30.489
+        },
+        {
+          "w": "silence",
+          "start": 30.532,
+          "end": 30.83
+        },
+        {
+          "w": "une",
+          "start": 31.001,
+          "end": 31.044
+        },
+        {
+          "w": "limite",
+          "start": 31.086,
+          "end": 31.342
+        },
+        {
+          "w": "importante.",
+          "start": 31.428,
+          "end": 32.118
+        },
+        {
+          "w": "Et",
+          "start": 32.425,
+          "end": 32.553
+        },
+        {
+          "w": "arrêtez",
+          "start": 32.595,
+          "end": 33.065
+        },
+        {
+          "w": "d'optimiser",
+          "start": 33.107,
+          "end": 33.705
+        },
+        {
+          "w": "quand",
+          "start": 33.747,
+          "end": 33.875
+        },
+        {
+          "w": "une",
+          "start": 33.918,
+          "end": 34.046
+        },
+        {
+          "w": "nouvelle",
+          "start": 34.089,
+          "end": 34.387
+        },
+        {
+          "w": "itération",
+          "start": 34.43,
+          "end": 34.771
+        },
+        {
+          "w": "ne",
+          "start": 35.027,
+          "end": 35.112
+        },
+        {
+          "w": "change",
+          "start": 35.155,
+          "end": 35.326
+        },
+        {
+          "w": "plus",
+          "start": 35.411,
+          "end": 35.582
+        },
+        {
+          "w": "que",
+          "start": 35.624,
+          "end": 35.71
+        },
+        {
+          "w": "l'esthétique.",
+          "start": 35.752,
+          "end": 36.523
+        }
+      ]
+    },
+    {
+      "id": "9",
+      "title": "À vous",
+      "avatar": "pip",
+      "text": "À vous. Faites d'abord les exercices de l'onglet Playground. Puis, dans Exercices prompts, améliorez un même prompt sur plusieurs tentatives : le correcteur indique quels problèmes sont corrigés, partiellement corrigés ou toujours présents. Enfin, dans le Studio, menez une conversation d'optimisation sur un texte fictif, avec le gabarit de la leçon. Le chat Gemini ne consomme pas votre budget IA.",
+      "audio": "generated/lesson2_5-commune/scene-9.wav",
+      "duration": 22.402902494331066,
+      "words": [
+        {
+          "w": "À",
+          "start": 0.256,
+          "end": 0.469
+        },
+        {
+          "w": "vous.",
+          "start": 0.512,
+          "end": 0.875
+        },
+        {
+          "w": "Faites",
+          "start": 1.152,
+          "end": 1.323
+        },
+        {
+          "w": "d'abord",
+          "start": 1.365,
+          "end": 1.664
+        },
+        {
+          "w": "les",
+          "start": 1.707,
+          "end": 1.792
+        },
+        {
+          "w": "exercices",
+          "start": 1.835,
+          "end": 2.304
+        },
+        {
+          "w": "de",
+          "start": 2.347,
+          "end": 2.432
+        },
+        {
+          "w": "l'onglet",
+          "start": 2.475,
+          "end": 2.731
+        },
+        {
+          "w": "Playground.",
+          "start": 2.773,
+          "end": 3.417
+        },
+        {
+          "w": "Puis,",
+          "start": 3.633,
+          "end": 3.953
+        },
+        {
+          "w": "dans",
+          "start": 4.06,
+          "end": 4.273
+        },
+        {
+          "w": "Exercices",
+          "start": 4.316,
+          "end": 4.742
+        },
+        {
+          "w": "prompts,",
+          "start": 4.828,
+          "end": 5.297
+        },
+        {
+          "w": "améliorez",
+          "start": 5.425,
+          "end": 6.108
+        },
+        {
+          "w": "un",
+          "start": 6.151,
+          "end": 6.193
+        },
+        {
+          "w": "même",
+          "start": 6.236,
+          "end": 6.449
+        },
+        {
+          "w": "prompt",
+          "start": 6.535,
+          "end": 6.748
+        },
+        {
+          "w": "sur",
+          "start": 6.876,
+          "end": 7.004
+        },
+        {
+          "w": "plusieurs",
+          "start": 7.046,
+          "end": 7.345
+        },
+        {
+          "w": "tentatives",
+          "start": 7.431,
+          "end": 7.686
+        },
+        {
+          "w": ":",
+          "start": 8.028,
+          "end": 8.113
+        },
+        {
+          "w": "le",
+          "start": 8.156,
+          "end": 8.497
+        },
+        {
+          "w": "correcteur",
+          "start": 8.54,
+          "end": 8.966
+        },
+        {
+          "w": "indique",
+          "start": 9.052,
+          "end": 9.265
+        },
+        {
+          "w": "quels",
+          "start": 9.393,
+          "end": 9.607
+        },
+        {
+          "w": "problèmes",
+          "start": 9.692,
+          "end": 10.033
+        },
+        {
+          "w": "sont",
+          "start": 10.076,
+          "end": 10.204
+        },
+        {
+          "w": "corrigés,",
+          "start": 10.246,
+          "end": 10.78
+        },
+        {
+          "w": "partiellement",
+          "start": 10.929,
+          "end": 11.356
+        },
+        {
+          "w": "corrigés",
+          "start": 11.399,
+          "end": 11.868
+        },
+        {
+          "w": "ou",
+          "start": 11.953,
+          "end": 12.039
+        },
+        {
+          "w": "toujours",
+          "start": 12.081,
+          "end": 12.337
+        },
+        {
+          "w": "présents.",
+          "start": 12.38,
+          "end": 12.903
+        },
+        {
+          "w": "Enfin,",
+          "start": 13.127,
+          "end": 13.639
+        },
+        {
+          "w": "dans",
+          "start": 13.767,
+          "end": 13.938
+        },
+        {
+          "w": "le",
+          "start": 13.981,
+          "end": 14.023
+        },
+        {
+          "w": "Studio,",
+          "start": 14.066,
+          "end": 14.599
+        },
+        {
+          "w": "menez",
+          "start": 14.834,
+          "end": 15.09
+        },
+        {
+          "w": "une",
+          "start": 15.133,
+          "end": 15.175
+        },
+        {
+          "w": "conversation",
+          "start": 15.218,
+          "end": 15.559
+        },
+        {
+          "w": "d'optimisation",
+          "start": 15.73,
+          "end": 16.327
+        },
+        {
+          "w": "sur",
+          "start": 16.583,
+          "end": 16.711
+        },
+        {
+          "w": "un",
+          "start": 16.754,
+          "end": 16.797
+        },
+        {
+          "w": "texte",
+          "start": 16.839,
+          "end": 17.095
+        },
+        {
+          "w": "fictif,",
+          "start": 17.138,
+          "end": 17.735
+        },
+        {
+          "w": "avec",
+          "start": 17.906,
+          "end": 18.162
+        },
+        {
+          "w": "le",
+          "start": 18.247,
+          "end": 18.333
+        },
+        {
+          "w": "gabarit",
+          "start": 18.375,
+          "end": 18.717
+        },
+        {
+          "w": "de",
+          "start": 18.759,
+          "end": 18.802
+        },
+        {
+          "w": "la",
+          "start": 18.845,
+          "end": 18.887
+        },
+        {
+          "w": "leçon.",
+          "start": 18.93,
+          "end": 19.442
+        },
+        {
+          "w": "Le",
+          "start": 19.741,
+          "end": 19.869
+        },
+        {
+          "w": "chat",
+          "start": 19.911,
+          "end": 20.082
+        },
+        {
+          "w": "Gemini",
+          "start": 20.167,
+          "end": 20.509
+        },
+        {
+          "w": "ne",
+          "start": 20.551,
+          "end": 20.637
+        },
+        {
+          "w": "consomme",
+          "start": 20.679,
+          "end": 21.021
+        },
+        {
+          "w": "pas",
+          "start": 21.063,
+          "end": 21.191
+        },
+        {
+          "w": "votre",
+          "start": 21.234,
+          "end": 21.447
+        },
+        {
+          "w": "budget",
+          "start": 21.49,
+          "end": 21.831
+        },
+        {
+          "w": "IA.",
+          "start": 21.874,
+          "end": 22.203
+        }
+      ],
+      "avatarVideo": "generated/lesson2_5-commune/avatar-9.mp4",
+      "avatarVideoId": "de7705453efdc53e4384d2812d481bbc",
+      "avatarDuration": 22.28
+    },
+    {
+      "id": "10",
+      "title": "Clôture",
+      "avatar": "full",
+      "text": "Retenez trois choses. Le fond se vérifie avant la forme. Un bon prompt d'optimisation transforme améliore ça en critères observables. Et c'est la comparaison documentée, pas l'impression de fluidité, qui rend le résultat défendable. Validez le quiz. Il ne vous reste plus que la mission de fin de module, Mission IA : contenu et optimisation.",
+      "audio": "generated/lesson2_5-commune/scene-10.wav",
+      "duration": 19.181836734693878,
+      "words": [
+        {
+          "w": "Retenez",
+          "start": 0.299,
+          "end": 0.64
+        },
+        {
+          "w": "trois",
+          "start": 0.683,
+          "end": 0.853
+        },
+        {
+          "w": "choses.",
+          "start": 0.896,
+          "end": 1.451
+        },
+        {
+          "w": "Le",
+          "start": 1.707,
+          "end": 1.792
+        },
+        {
+          "w": "fond",
+          "start": 1.877,
+          "end": 2.048
+        },
+        {
+          "w": "se",
+          "start": 2.091,
+          "end": 2.219
+        },
+        {
+          "w": "vérifie",
+          "start": 2.261,
+          "end": 2.645
+        },
+        {
+          "w": "avant",
+          "start": 2.688,
+          "end": 2.859
+        },
+        {
+          "w": "la",
+          "start": 2.901,
+          "end": 2.944
+        },
+        {
+          "w": "forme.",
+          "start": 2.987,
+          "end": 3.541
+        },
+        {
+          "w": "Un",
+          "start": 3.755,
+          "end": 4.011
+        },
+        {
+          "w": "bon",
+          "start": 4.053,
+          "end": 4.224
+        },
+        {
+          "w": "prompt",
+          "start": 4.267,
+          "end": 4.48
+        },
+        {
+          "w": "d'optimisation",
+          "start": 4.523,
+          "end": 4.992
+        },
+        {
+          "w": "transforme",
+          "start": 5.248,
+          "end": 5.803
+        },
+        {
+          "w": "améliore",
+          "start": 5.845,
+          "end": 6.272
+        },
+        {
+          "w": "ça",
+          "start": 6.357,
+          "end": 6.485
+        },
+        {
+          "w": "en",
+          "start": 6.528,
+          "end": 6.613
+        },
+        {
+          "w": "critères",
+          "start": 6.656,
+          "end": 6.912
+        },
+        {
+          "w": "observables.",
+          "start": 6.955,
+          "end": 7.618
+        },
+        {
+          "w": "Et",
+          "start": 7.813,
+          "end": 7.898
+        },
+        {
+          "w": "c'est",
+          "start": 7.941,
+          "end": 8.069
+        },
+        {
+          "w": "la",
+          "start": 8.111,
+          "end": 8.154
+        },
+        {
+          "w": "comparaison",
+          "start": 8.197,
+          "end": 8.581
+        },
+        {
+          "w": "documentée,",
+          "start": 8.709,
+          "end": 9.413
+        },
+        {
+          "w": "pas",
+          "start": 9.52,
+          "end": 9.648
+        },
+        {
+          "w": "l'impression",
+          "start": 9.69,
+          "end": 9.903
+        },
+        {
+          "w": "de",
+          "start": 10.074,
+          "end": 10.117
+        },
+        {
+          "w": "fluidité,",
+          "start": 10.159,
+          "end": 10.842
+        },
+        {
+          "w": "qui",
+          "start": 11.013,
+          "end": 11.141
+        },
+        {
+          "w": "rend",
+          "start": 11.184,
+          "end": 11.269
+        },
+        {
+          "w": "le",
+          "start": 11.312,
+          "end": 11.354
+        },
+        {
+          "w": "résultat",
+          "start": 11.397,
+          "end": 11.738
+        },
+        {
+          "w": "défendable.",
+          "start": 11.781,
+          "end": 12.442
+        },
+        {
+          "w": "Validez",
+          "start": 12.677,
+          "end": 13.104
+        },
+        {
+          "w": "le",
+          "start": 13.146,
+          "end": 13.189
+        },
+        {
+          "w": "quiz.",
+          "start": 13.232,
+          "end": 13.743
+        },
+        {
+          "w": "Il",
+          "start": 14.085,
+          "end": 14.17
+        },
+        {
+          "w": "ne",
+          "start": 14.213,
+          "end": 14.298
+        },
+        {
+          "w": "vous",
+          "start": 14.341,
+          "end": 14.426
+        },
+        {
+          "w": "reste",
+          "start": 14.469,
+          "end": 14.597
+        },
+        {
+          "w": "plus",
+          "start": 14.682,
+          "end": 14.853
+        },
+        {
+          "w": "que",
+          "start": 14.896,
+          "end": 14.938
+        },
+        {
+          "w": "la",
+          "start": 14.981,
+          "end": 15.066
+        },
+        {
+          "w": "mission",
+          "start": 15.109,
+          "end": 15.194
+        },
+        {
+          "w": "de",
+          "start": 15.408,
+          "end": 15.493
+        },
+        {
+          "w": "fin",
+          "start": 15.536,
+          "end": 15.706
+        },
+        {
+          "w": "de",
+          "start": 15.749,
+          "end": 15.791
+        },
+        {
+          "w": "module,",
+          "start": 15.834,
+          "end": 16.303
+        },
+        {
+          "w": "Mission",
+          "start": 16.474,
+          "end": 16.858
+        },
+        {
+          "w": "IA",
+          "start": 16.901,
+          "end": 17.2
+        },
+        {
+          "w": ":",
+          "start": 17.37,
+          "end": 17.413
+        },
+        {
+          "w": "contenu",
+          "start": 17.456,
+          "end": 17.882
+        },
+        {
+          "w": "et",
+          "start": 17.968,
+          "end": 18.053
+        },
+        {
+          "w": "optimisation.",
+          "start": 18.096,
+          "end": 18.982
+        }
+      ],
+      "avatarVideo": "generated/lesson2_5-commune/avatar-10.mp4",
+      "avatarVideoId": "09f2b97a7b18e791486bd7ed3f96fff1",
+      "avatarDuration": 19.08
+    }
+  ]
+}

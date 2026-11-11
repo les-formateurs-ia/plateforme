@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Playground optimisation de contenus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#F7F7FA; --surface:#fff; --ink:#1b1a17; --ink-2:#4a4741; --ink-3:#7c786f;
+  --rule:#e4e1d9; --rule-2:#efece5; --accent:#1f4e46; --accent-soft:#eef3f1;
+  --ok:#2c6a48; --ok-soft:#eef4ef; --warn:#8a6519; --warn-soft:#faf4e7;
+  --alert:#963428; --alert-soft:#fbf1ef;
+  --serif:'Funnel Display',Georgia,'Iowan Old Style','Times New Roman',serif;
+  --sans:'Funnel Display',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+}
+body{font-family:var(--sans);font-size:15.5px;line-height:1.62;color:var(--ink);background:var(--paper);padding:0 22px 80px}
+.wrap{width:100%;margin:0 auto}
+
+.hero{margin:0 auto;padding:52px 0 28px;border-bottom:1px solid var(--rule)}
+.eyebrow{font-size:.78rem;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px}
+h1{font-family:var(--serif);font-size:1.95rem;font-weight:800;color:var(--ink);margin-bottom:14px}
+.lede{font-size:1rem;color:var(--ink-2);}
+
+main{margin:0 auto;padding-top:10px}
+.exercise{margin-top:44px;background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:26px 28px}
+.exercise h2{font-family:var(--serif);font-size:1.32rem;font-weight:700;color:var(--ink);padding-left:12px;border-left:4px solid var(--accent);margin-bottom:10px}
+.exercise > p.instructions{color:var(--ink-2);margin-bottom:20px;}
+
+fieldset{border:1px solid var(--rule-2);border-radius:10px;padding:16px 18px;margin-bottom:16px;background:var(--paper)}
+legend{font-size:.94rem;color:var(--ink-2);padding:0 6px;font-weight:500}
+legend .who{font-weight:700;color:var(--ink)}
+.options{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.option{display:flex;align-items:flex-start;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background .12s}
+.option:hover{background:var(--rule-2)}
+.option input{margin-top:4px;flex-shrink:0}
+.option span{font-size:.93rem}
+.option.selected-ok{background:var(--ok-soft)}
+.option.selected-bad{background:var(--alert-soft)}
+.option.reveal-correct{outline:1.5px dashed var(--ok)}
+
+.fb{font-size:.88rem;margin-top:10px;padding:10px 12px;border-radius:8px;display:none}
+.fb.show{display:block}
+.fb.ok{background:var(--ok-soft);color:var(--ok)}
+.fb.alert{background:var(--alert-soft);color:var(--alert)}
+
+.exercise-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:6px;padding-top:16px;border-top:1px dashed var(--rule)}
+.btn{font-family:var(--sans);font-size:.9rem;font-weight:700;padding:10px 20px;border-radius:999px;border:1.5px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}
+.btn:hover{opacity:.92}
+.btn.ghost{background:#fff;color:var(--accent)}
+.score-display{font-size:.92rem;color:var(--ink-2)}
+.score-display strong{color:var(--accent);font-size:1.05rem}
+.pass-msg{margin-top:12px;padding:10px 14px;border-radius:8px;font-size:.9rem;font-weight:600;display:none}
+.pass-msg.show{display:block}
+.pass-msg.ok{background:var(--ok-soft);color:var(--ok)}
+.pass-msg.warn{background:var(--warn-soft);color:var(--warn)}
+
+.card{background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:16px 18px;margin-bottom:16px}
+.card .label{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;font-weight:700;color:var(--ink-3);margin-bottom:6px}
+.card p{max-width:none;margin:0}
+
+textarea{width:100%;min-height:140px;font-family:var(--sans);font-size:.95rem;line-height:1.55;color:var(--ink);border:1px solid var(--rule);border-radius:10px;padding:14px;resize:vertical;background:#fff}
+textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+.autosave-note{font-size:.78rem;color:var(--ink-3);margin-top:8px}
+.corrige{margin-top:16px;border-top:1px dashed var(--rule);padding-top:16px}
+.corrige-body{display:none;margin-top:12px}
+.corrige-body.show{display:block}
+
+footer.closing{margin:56px auto 0;padding-top:20px;border-top:1px solid var(--rule);font-size:.85rem;color:var(--ink-3)}
+
+@media (max-width:640px){
+  h1{font-size:1.55rem}
+  .exercise{padding:18px}
+  .exercise-footer{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div class="eyebrow">Playground</div>
+  <h1>Optimiser des contenus, cas pratiques</h1>
+  <p class="lede">Mettez en pratique les cinq leviers d'optimisation sur des cas fictifs, tous liés au même contexte&nbsp;: Aravix Industries déploie un nouveau module de gestion des demandes d'absence dans son logiciel SIRH, et un même guide de prise en main doit être décliné pour des publics différents. Chaque exercice a son propre bouton de correction et son propre score.</p>
+</header>
+
+<main>
+
+<section class="exercise" id="ex1">
+  <h2>Exercice 1 &middot; Quel levier pour quel besoin&nbsp;?</h2>
+  <p class="instructions">Pour chaque situation, le contenu généré est correct sur le fond mais ne convient pas tel quel. Choisissez l'angle de correction le plus directement décrit. Plusieurs angles peuvent se recouvrir dans un projet réel&nbsp;: la réponse sert ici de point de départ, pas d'étiquette exclusive.</p>
+
+  <fieldset data-fieldset="ex1-a">
+    <legend><span class="who">Josette Bellanger</span>, opératrice de production, peu à l'aise avec l'informatique, doit suivre une notice pour poser une demande d'absence. Le contenu généré est correct mais utilise des termes comme « workflow de validation » et « référentiel congés ».</legend>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex1-a" value="contrainte" data-ok="false" data-why="Rien n'indique ici une limite de longueur ou un élément imposé : le problème n'est pas une contrainte, c'est le vocabulaire employé."> <span>Contrainte</span></label>
+      <label class="option"><input type="radio" name="ex1-a" value="contexte" data-ok="false" data-why="Aucune information de fond ne manque : le contenu est complet, seul son habillage pose problème."> <span>Contexte</span></label>
+      <label class="option"><input type="radio" name="ex1-a" value="style" data-ok="true" data-why="Le style regroupe le registre et le vocabulaire employés. Remplacer « workflow de validation » et « référentiel congés » par des mots courants relève directement de ce levier."> <span>Style</span></label>
+      <label class="option"><input type="radio" name="ex1-a" value="format" data-ok="false" data-why="La structuration du contenu n'est pas en cause ici, c'est le choix des mots qui pose problème."> <span>Format</span></label>
+      <label class="option"><input type="radio" name="ex1-a" value="accessibilite" data-ok="false" data-why="L'accessibilité peut aussi bénéficier d'un vocabulaire clair. Ici, le défaut explicitement observé est le registre lexical : « style » est donc le premier angle, à compléter par un test utilisateur."> <span>Accessibilité</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex1-b">
+    <legend><span class="who">Karim Lasfar</span>, manager d'atelier, valide des demandes d'absence entre deux réunions. Le guide rédigé pour les référents RH fait 3 pages avec le détail de chaque écran ; Karim n'a besoin que des 3 actions à effectuer pour valider une demande.</legend>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex1-b" value="contrainte" data-ok="true" data-why="La demande fixe un nombre précis d'éléments à conserver, 3 actions, et exclut le reste : c'est une limite formelle, donc le levier contrainte."> <span>Contrainte</span></label>
+      <label class="option"><input type="radio" name="ex1-b" value="contexte" data-ok="false" data-why="Il ne s'agit pas d'ajouter une information de fond, mais au contraire d'en retirer, dans une limite précise."> <span>Contexte</span></label>
+      <label class="option"><input type="radio" name="ex1-b" value="style" data-ok="false" data-why="Rien n'indique un problème de registre ou de ton : le guide est trop long, pas mal écrit."> <span>Style</span></label>
+      <label class="option"><input type="radio" name="ex1-b" value="format" data-ok="false" data-why="La mise en forme pourra aider une fois la contrainte de nombre fixée, mais ce qui définit le besoin ici est bien la limite à 3 actions, pas la présentation."> <span>Format</span></label>
+      <label class="option"><input type="radio" name="ex1-b" value="accessibilite" data-ok="false" data-why="Aucun besoin de lecture ou d'écoute particulier n'est mentionné pour Karim."> <span>Accessibilité</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex1-c">
+    <legend><span class="who">Odile Rambert</span>, référente RH, constate que le guide omet une règle de la politique fictive validée, version 3&nbsp;: toute demande déposée moins de 48&nbsp;heures avant la date de début nécessite l'accord exprès du manager. Cette règle et sa source doivent apparaître.</legend>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex1-c" value="contrainte" data-ok="false" data-why="Il ne s'agit pas de fixer une limite au contenu lui-même, mais d'ajouter une information de fond qui manque."> <span>Contrainte</span></label>
+      <label class="option"><input type="radio" name="ex1-c" value="contexte" data-ok="true" data-why="Une règle de fond manque. Il faut l'ajouter depuis la source validée, citer sa version et ne rien inventer : c'est l'angle contexte et sources."> <span>Contexte</span></label>
+      <label class="option"><input type="radio" name="ex1-c" value="style" data-ok="false" data-why="Le ton ou le registre du guide n'est pas en cause : c'est une information qui manque, pas une façon de l'exprimer."> <span>Style</span></label>
+      <label class="option"><input type="radio" name="ex1-c" value="format" data-ok="false" data-why="La structuration du guide n'est pas le problème : une information est absente, quelle que soit la mise en forme."> <span>Format</span></label>
+      <label class="option"><input type="radio" name="ex1-c" value="accessibilite" data-ok="false" data-why="Aucun besoin de lecture ou d'écoute particulier n'est en jeu ici."> <span>Accessibilité</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex1-d">
+    <legend>Le guide doit être publié sur l'intranet d'Aravix Industries&nbsp;: le service communication demande des étapes numérotées et les actions clés en gras, plutôt que des paragraphes continus. Aucune information ne doit être ajoutée ni retirée.</legend>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex1-d" value="contrainte" data-ok="false" data-why="Aucune limite de longueur ou de nombre n'est imposée : c'est l'organisation visuelle qui doit changer."> <span>Contrainte</span></label>
+      <label class="option"><input type="radio" name="ex1-d" value="contexte" data-ok="false" data-why="La consigne précise justement qu'aucune information ne doit être ajoutée ni retirée : ce n'est pas le contexte qui est concerné."> <span>Contexte</span></label>
+      <label class="option"><input type="radio" name="ex1-d" value="style" data-ok="false" data-why="Rien n'indique un changement de registre ou de ton, seulement une réorganisation visuelle."> <span>Style</span></label>
+      <label class="option"><input type="radio" name="ex1-d" value="format" data-ok="true" data-why="Étapes numérotées, mise en gras des actions clés : c'est la structuration et la mise en forme du contenu qui changent, exactement le levier format."> <span>Format</span></label>
+      <label class="option"><input type="radio" name="ex1-d" value="accessibilite" data-ok="false" data-why="Une structure explicite peut aussi améliorer l'accessibilité. Ici, la transformation demandée porte directement sur l'organisation visuelle : format est le premier angle."> <span>Accessibilité</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex1-e">
+    <legend>Le guide doit pouvoir être lu à voix haute par un logiciel de synthèse vocale, pour un collaborateur qui l'écoute plutôt qu'il ne le lit à l'écran.</legend>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex1-e" value="contrainte" data-ok="false" data-why="Aucune limite de longueur ou de nombre d'éléments n'est demandée."> <span>Contrainte</span></label>
+      <label class="option"><input type="radio" name="ex1-e" value="contexte" data-ok="false" data-why="Aucune information de fond ne manque, c'est la manière dont le contenu sera reçu qui change."> <span>Contexte</span></label>
+      <label class="option"><input type="radio" name="ex1-e" value="style" data-ok="false" data-why="Le registre n'est pas la première chose en cause ici : c'est un besoin de lecture particulier qui prime."> <span>Style</span></label>
+      <label class="option"><input type="radio" name="ex1-e" value="format" data-ok="false" data-why="La structure et les intitulés comptent aussi pour la navigation avec une technologie d'assistance. Le besoin explicitement donné est toutefois l'accès en lecture audio : accessibilité est le premier angle."> <span>Format</span></label>
+      <label class="option"><input type="radio" name="ex1-e" value="accessibilite" data-ok="true" data-why="Adapter un contenu pour qu'il reste compréhensible dans un mode de lecture particulier, ici l'écoute, relève du levier accessibilité."> <span>Accessibilité</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <div class="exercise-footer">
+    <button class="btn" data-correct-ex="ex1">Corriger mes réponses</button>
+    <span class="score-display">Score&nbsp;: <strong data-score="ex1">0 / 5</strong> &middot; seuil de réussite&nbsp;: 80%</span>
+  </div>
+  <div class="pass-msg" data-pass="ex1"></div>
+</section>
+
+<section class="exercise" id="ex2">
+  <h2>Exercice 2 &middot; Cette version répond-elle au besoin&nbsp;?</h2>
+  <p class="instructions">Le contexte et le public visé sont donnés avant la version optimisée proposée. Jugez si elle répond réellement au besoin.</p>
+
+  <fieldset data-fieldset="ex2-a">
+    <legend><span class="who">Odile Rambert</span> doit recevoir un guide complet couvrant tous les cas particuliers (absence proratisée, congé sans solde...), sans limite de longueur imposée.</legend>
+    <div class="card" style="margin:10px 0"><span class="label">Version optimisée proposée</span><p>Le guide a été réduit à une seule page ne couvrant que les cas standards, les cas particuliers ont été retirés.</p></div>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex2-a" value="oui" data-ok="false" data-why="Aucune contrainte de longueur n'avait été demandée : couper les cas particuliers retire une information nécessaire au public référent RH sans justification. Ce n'est pas adapté."> <span>Adaptée</span></label>
+      <label class="option"><input type="radio" name="ex2-a" value="non" data-ok="true" data-why="Aucune contrainte de longueur n'avait été demandée : couper les cas particuliers retire une information nécessaire au public référent RH sans justification. Ce n'est pas adapté."> <span>Pas adaptée</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex2-b">
+    <legend>Une affiche doit être imprimée au format A5 pour l'espace de pause, contrainte imposée&nbsp;: 120 mots maximum, aucune liste à puces, la mise en page graphique étant déjà fixée par le service communication.</legend>
+    <div class="card" style="margin:10px 0"><span class="label">Version optimisée proposée</span><p>110 mots au total, mais le texte est présenté sous forme de liste à puces pour plus de lisibilité.</p></div>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex2-b" value="oui" data-ok="false" data-why="La contrainte de format imposée, aucune liste à puces, n'est pas respectée, même si la longueur est correcte : une contrainte explicite se respecte intégralement."> <span>Adaptée</span></label>
+      <label class="option"><input type="radio" name="ex2-b" value="non" data-ok="true" data-why="La contrainte de format imposée, aucune liste à puces, n'est pas respectée, même si la longueur est correcte : une contrainte explicite se respecte intégralement."> <span>Pas adaptée</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex2-c">
+    <legend>Le guide destiné à <span class="who">Josette Bellanger</span> doit lui permettre de déposer seule une demande d'absence, sans aide.</legend>
+    <div class="card" style="margin:10px 0"><span class="label">Version optimisée proposée</span><p>4 étapes numérotées, une action par ligne, vocabulaire courant, aucun terme d'écran technique du type « workflow ».</p></div>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex2-c" value="oui" data-ok="true" data-why="Étapes numérotées, vocabulaire courant, une action par ligne : exactement ce dont Josette a besoin pour agir seule, sans détail technique superflu."> <span>Adaptée</span></label>
+      <label class="option"><input type="radio" name="ex2-c" value="non" data-ok="false" data-why="Étapes numérotées, vocabulaire courant, une action par ligne : exactement ce dont Josette a besoin pour agir seule, sans détail technique superflu."> <span>Pas adaptée</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex2-d">
+    <legend><span class="who">Karim Lasfar</span> doit pouvoir valider une demande en moins d'une minute entre deux réunions.</legend>
+    <div class="card" style="margin:10px 0"><span class="label">Version optimisée proposée</span><p>Reformulée avec un ton dynamique et quelques émojis, mais toujours organisée en un unique paragraphe de 15 lignes.</p></div>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex2-d" value="oui" data-ok="false" data-why="Le style a changé mais ni le format ni la longueur, qui restent le véritable obstacle pour Karim : un ton plus dynamique ne fait pas gagner de temps de lecture à lui seul."> <span>Adaptée</span></label>
+      <label class="option"><input type="radio" name="ex2-d" value="non" data-ok="true" data-why="Le style a changé mais ni le format ni la longueur, qui restent le véritable obstacle pour Karim : un ton plus dynamique ne fait pas gagner de temps de lecture à lui seul."> <span>Pas adaptée</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex2-e">
+    <legend><span class="who">Odile Rambert</span> doit conserver l'intégralité des cas particuliers du guide référent RH, mais souhaite retrouver chaque cas plus rapidement.</legend>
+    <div class="card" style="margin:10px 0"><span class="label">Version optimisée proposée</span><p>Même contenu, réorganisé en tableau avec une ligne par cas particulier et une colonne « action à effectuer », rien n'a été supprimé.</p></div>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex2-e" value="oui" data-ok="true" data-why="Le format a été amélioré (tableau, une ligne par cas) sans toucher au fond, exactement ce qu'Odile demandait : retrouver l'information plus vite sans en perdre."> <span>Adaptée</span></label>
+      <label class="option"><input type="radio" name="ex2-e" value="non" data-ok="false" data-why="Le format a été amélioré (tableau, une ligne par cas) sans toucher au fond, exactement ce qu'Odile demandait : retrouver l'information plus vite sans en perdre."> <span>Pas adaptée</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <div class="exercise-footer">
+    <button class="btn" data-correct-ex="ex2">Corriger mes réponses</button>
+    <span class="score-display">Score&nbsp;: <strong data-score="ex2">0 / 5</strong> &middot; seuil de réussite&nbsp;: 80%</span>
+  </div>
+  <div class="pass-msg" data-pass="ex2"></div>
+</section>
+
+<section class="exercise" id="ex3">
+  <h2>Exercice 3 &middot; Repérer un prompt d'optimisation complet</h2>
+  <p class="instructions">Pour chaque situation, un seul prompt relie la version de départ, la source, ce qui change, ce qui reste, les critères d'acceptation et la sortie attendue.</p>
+
+  <fieldset data-fieldset="ex3-a">
+    <legend>Le guide référent RH doit être adapté pour <span class="who">Karim Lasfar</span> (manager d'atelier, besoin de valider vite).</legend>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex3-a" value="a" data-ok="false" data-why="Trop vague : « plus simple » ne dit pas ce qui doit changer, ni ce qui doit rester, ni le format attendu."> <span>« Rends ce guide plus simple pour Karim. »</span></label>
+      <label class="option"><input type="radio" name="ex3-a" value="b" data-ok="false" data-why="Ne porte que sur le style, sans préciser de contrainte de longueur ni de format de sortie, alors que le vrai problème de Karim est la longueur du guide."> <span>« Utilise un ton plus sympa. »</span></label>
+      <label class="option"><input type="radio" name="ex3-a" value="c" data-ok="true" data-why="Le prompt identifie la source, protège les trois actions validées, fixe une ligne par action et demande un relevé des écarts."> <span>« À partir de la version validée jointe, conserve les 3 actions et leur ordre. Présente une check-list d'une action par ligne, 12 mots maximum par ligne, remplace “workflow” par “circuit de validation”, ton direct et professionnel. N'ajoute aucun fait. Puis liste les changements et les points à confirmer. »</span></label>
+      <label class="option"><input type="radio" name="ex3-a" value="d" data-ok="false" data-why="Contredit le principe même de l'optimisation : on ne repart pas de zéro, on ajuste le contenu déjà généré."> <span>« Réécris entièrement un nouveau guide pour Karim, sans repartir du guide existant. »</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex3-b">
+    <legend>Le guide référent RH doit être adapté pour <span class="who">Josette Bellanger</span> (peu à l'aise avec l'informatique).</legend>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex3-b" value="a" data-ok="false" data-why="Repartir de zéro pour un « débutant total » ignore le contenu déjà validé : ce n'est pas une optimisation, c'est une nouvelle génération non maîtrisée."> <span>« Repars de zéro et écris un guide pour un débutant total en informatique. »</span></label>
+      <label class="option"><input type="radio" name="ex3-b" value="b" data-ok="true" data-why="Le prompt protège les actions validées, cible les termes définis, fixe des critères mesurables et prévoit les points qui ne peuvent pas être simplifiés sans risque."> <span>« À partir de la version validée jointe, conserve les 4 actions et leur ordre. Remplace “workflow” par “circuit de validation” et explique tout autre terme nécessaire entre parenthèses. Numérote une action par ligne, 12 mots maximum par action. N'invente rien ; signale tout terme impossible à simplifier. »</span></label>
+      <label class="option"><input type="radio" name="ex3-b" value="c" data-ok="false" data-why="« Simplifie » ne précise ni ce qui doit rester, ni le format attendu : l'IA doit deviner."> <span>« Simplifie ce guide. »</span></label>
+      <label class="option"><input type="radio" name="ex3-b" value="d" data-ok="false" data-why="Josette a besoin d'un contenu plus court et plus clair, pas de plus d'explications : ce prompt va dans la mauvaise direction et reste vague."> <span>« Ajoute plus d'explications. »</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex3-c">
+    <legend>Le guide référent RH doit intégrer la règle issue de la politique fictive validée, version 3, pour <span class="who">Odile Rambert</span>&nbsp;: accord exprès du manager lorsque la demande est déposée moins de 48&nbsp;heures avant la date de début.</legend>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex3-c" value="a" data-ok="false" data-why="« Ajoute des informations » ne dit pas laquelle, ni où, ni ce qui doit rester inchangé."> <span>« Ajoute des informations. »</span></label>
+      <label class="option"><input type="radio" name="ex3-c" value="b" data-ok="false" data-why="Retirer une explication déjà présente et correcte n'est pas ce qui est demandé : le contenu existant sur la validation en deux temps doit être conservé, pas supprimé."> <span>« Récris le guide sans mentionner la validation en deux temps déjà expliquée. »</span></label>
+      <label class="option"><input type="radio" name="ex3-c" value="c" data-ok="false" data-why="« Plus complet » ne précise ni l'information à ajouter, ni où l'insérer, ni ce qui doit rester identique."> <span>« Rends le guide plus complet. »</span></label>
+      <label class="option"><input type="radio" name="ex3-c" value="d" data-ok="true" data-why="Le prompt cite la source, reproduit la règle sans l'altérer, protège le contenu validé et demande de signaler un conflit de longueur au lieu de le masquer."> <span>« À partir du guide validé et de la politique version 3 jointe, conserve les informations existantes. Ajoute exactement la règle suivante dans la section Délais : “Toute demande déposée moins de 48 heures avant la date de début nécessite l'accord exprès du manager.” Cite la version 3. Garde le ton et le format ; si la limite de longueur ne peut plus être respectée, signale le conflit sans supprimer d'information. Puis liste les modifications. »</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <div class="exercise-footer">
+    <button class="btn" data-correct-ex="ex3">Corriger mes réponses</button>
+    <span class="score-display">Score&nbsp;: <strong data-score="ex3">0 / 3</strong> &middot; seuil de réussite&nbsp;: 80%</span>
+  </div>
+  <div class="pass-msg" data-pass="ex3"></div>
+</section>
+
+<section class="exercise" id="ex4">
+  <h2>Exercice 4 &middot; À vous d'optimiser (à remettre)</h2>
+  <p class="instructions">Votre brouillon est sauvegardé automatiquement dans ce navigateur. Remettez au formateur le texte de départ, votre prompt, la version optimisée, un relevé des changements et votre propre vérification critère par critère.</p>
+
+  <div class="card">
+    <span class="label">Contenu généré, à optimiser</span>
+    <p>« Une fois votre demande d'absence soumise via le portail SIRH, un accusé de réception automatique vous est transmis par messagerie électronique. Ce message confirme l'enregistrement de la requête dans le système et précise qu'elle sera soumise à validation hiérarchique dans un délai de traitement pouvant atteindre 48 heures ouvrées, conformément au paramétrage du workflow d'approbation en vigueur chez Aravix Industries. Aucune action complémentaire n'est requise de la part du demandeur à ce stade du processus. »</p>
+  </div>
+
+  <p class="instructions" style="margin-top:-6px">Public visé&nbsp;: un nouvel arrivant chez Aravix Industries, en poste depuis une semaine, qui n'a jamais utilisé le SIRH et lit ce message sur son téléphone pendant sa pause. Rédigez d'abord vos critères, puis le prompt et la version optimisée. Comparez enfin chaque information au texte source et expliquez les changements.</p>
+
+  <label for="ex4-textarea" style="display:block;font-size:.85rem;color:var(--ink-3);margin-bottom:6px">Vos critères, votre prompt, la version optimisée et votre vérification</label>
+  <textarea id="ex4-textarea" placeholder="Critères d'acceptation :&#10;Prompt de correction :&#10;Version optimisée :&#10;Relevé des changements :&#10;Vérification par rapport à la source :"></textarea>
+  <p class="autosave-note">Votre brouillon est enregistré automatiquement pendant que vous écrivez.</p>
+
+  <div class="corrige">
+    <button class="btn ghost" id="ex4-reveal">Voir un corrigé indicatif</button>
+    <div class="corrige-body" id="ex4-corrige-body">
+      <div class="card">
+        <span class="label">Une version possible</span>
+        <p>« Votre demande d'absence est enregistrée. Vous recevrez un e-mail de confirmation. Elle sera envoyée à votre manager, qui peut avoir jusqu'à 48&nbsp;heures ouvrées pour répondre. Pour le moment, vous n'avez rien d'autre à faire. »</p>
+      </div>
+      <div class="card">
+        <span class="label">Justification indicative</span>
+        <p><strong>Style&nbsp;:</strong> vocabulaire courant, sans « workflow d'approbation ». <strong>Contrainte&nbsp;:</strong> cinq phrases courtes. <strong>Format et accessibilité&nbsp;:</strong> une idée principale par phrase. <strong>Vérification&nbsp;:</strong> enregistrement, e-mail, validation par le manager, délai exact de 48&nbsp;heures ouvrées et absence d'action immédiate sont conservés ; aucune promesse de réponse sous deux jours calendaires n'a été ajoutée.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="closing">
+  Toutes les entreprises, personnes et données chiffrées de cet exercice sont fictives.
+</footer>
+
+</div>
+
+<script>
+(function(){
+  function correctExercise(exId){
+    var section = document.getElementById(exId);
+    var fieldsets = section.querySelectorAll('fieldset');
+    var score = 0;
+    var total = fieldsets.length;
+
+    fieldsets.forEach(function(fs){
+      var options = fs.querySelectorAll('.option');
+      var checked = fs.querySelector('input[type=radio]:checked');
+      var fb = fs.querySelector('.fb');
+
+      options.forEach(function(opt){
+        opt.classList.remove('selected-ok','selected-bad','reveal-correct');
+      });
+
+      if (!checked) {
+        fb.textContent = 'Pas de réponse sélectionnée.';
+        fb.className = 'fb show alert';
+        var correctOpt = fs.querySelector('input[data-ok="true"]');
+        if (correctOpt) { correctOpt.closest('.option').classList.add('reveal-correct'); }
+        return;
+      }
+
+      var ok = checked.getAttribute('data-ok') === 'true';
+      var why = checked.getAttribute('data-why');
+      var chosenLabel = checked.closest('.option');
+
+      if (ok) {
+        score += 1;
+        chosenLabel.classList.add('selected-ok');
+        fb.textContent = 'Bonne réponse. ' + why;
+        fb.className = 'fb show ok';
+      } else {
+        chosenLabel.classList.add('selected-bad');
+        var correct = fs.querySelector('input[data-ok="true"]');
+        if (correct) { correct.closest('.option').classList.add('reveal-correct'); }
+        fb.textContent = 'À revoir. ' + why;
+        fb.className = 'fb show alert';
+      }
+    });
+
+    var scoreEl = section.querySelector('[data-score="' + exId + '"]');
+    scoreEl.textContent = score + ' / ' + total;
+
+    var pct = total > 0 ? (score / total) * 100 : 0;
+    var passEl = section.querySelector('[data-pass="' + exId + '"]');
+    if (pct >= 80) {
+      passEl.textContent = 'Seuil atteint (' + Math.round(pct) + '%). Bon travail.';
+      passEl.className = 'pass-msg show ok';
+    } else {
+      passEl.textContent = 'Sous le seuil de réussite (' + Math.round(pct) + '%). Relisez les explications ci-dessus et retentez.';
+      passEl.className = 'pass-msg show warn';
+    }
+  }
+
+  document.querySelectorAll('[data-correct-ex]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      correctExercise(btn.getAttribute('data-correct-ex'));
+    });
+  });
+
+  // Exercice 4 : autosave + corrigé masqué
+  var STORAGE_KEY = 'nathalie_playground_2_5_ex4';
+  var textarea = document.getElementById('ex4-textarea');
+
+  try {
+    var saved = window.localStorage.getItem(STORAGE_KEY);
+    if (saved) { textarea.value = saved; }
+  } catch (e) { /* stockage local indisponible, on continue sans autosave */ }
+
+  textarea.addEventListener('input', function(){
+    try {
+      window.localStorage.setItem(STORAGE_KEY, textarea.value);
+    } catch (e) { /* stockage local indisponible */ }
+  });
+
+  var revealBtn = document.getElementById('ex4-reveal');
+  var corrigeBody = document.getElementById('ex4-corrige-body');
+  revealBtn.addEventListener('click', function(){
+    var isShown = corrigeBody.classList.toggle('show');
+    revealBtn.textContent = isShown ? 'Masquer le corrigé indicatif' : 'Voir un corrigé indicatif';
+  });
+})();
+</script>
+
+</body>
+</html>

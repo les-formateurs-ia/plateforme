@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Playground : prompts avancés</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#F7F7FA; --surface:#fff; --ink:#1b1a17; --ink-2:#4a4741; --ink-3:#7c786f;
+  --rule:#e4e1d9; --rule-2:#efece5; --accent:#1f4e46; --accent-soft:#eef3f1;
+  --ok:#2c6a48; --ok-soft:#eef4ef; --warn:#8a6519; --warn-soft:#faf4e7;
+  --alert:#963428; --alert-soft:#fbf1ef;
+  --serif:'Funnel Display',Georgia,'Iowan Old Style','Times New Roman',serif;
+  --sans:'Funnel Display',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+}
+body{font-family:var(--sans);font-size:15.5px;line-height:1.65;color:var(--ink);background:var(--paper);padding:0 22px 80px}
+.wrap{width:100%;margin:0 auto}  /* JAMAIS de max-width plafonné sur .wrap */
+
+header.intro{margin:0 auto;padding-top:40px}
+header.intro h1{font-family:var(--serif);font-weight:700;font-size:1.9rem;color:var(--ink);margin-bottom:14px}
+header.intro p{color:var(--ink-2)}
+
+main{margin:0 auto}
+
+.exercise{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:24px 26px;margin-top:36px}
+.exercise h2{font-family:var(--serif);font-weight:700;font-size:1.25rem;color:var(--accent);margin-bottom:8px}
+.exercise > .intro-ex{color:var(--ink-2);margin-bottom:18px}
+.ctx{background:var(--accent-soft);border-radius:8px;padding:10px 14px;margin-bottom:10px;font-size:.93rem;color:var(--ink-2)}
+.prompt-box{font-family:'Courier New',monospace;font-size:.9rem;background:var(--rule-2);border-radius:6px;padding:10px 12px;margin-bottom:8px;white-space:pre-wrap}
+.out-box{font-size:.9rem;color:var(--ink-2);border-left:3px solid var(--rule);padding-left:12px;margin-bottom:14px}
+
+fieldset{border:none;border-top:1px solid var(--rule-2);padding-top:16px;margin-bottom:18px}
+legend{font-weight:700;padding:0;margin-bottom:10px}
+label{display:block;background:var(--rule-2);border-radius:6px;padding:9px 12px;margin-bottom:6px;cursor:pointer;font-size:.94rem}
+label:hover{background:var(--accent-soft)}
+input[type=radio]{margin-right:8px}
+
+.item-feedback{display:none;margin-top:6px;padding:8px 12px;border-radius:6px;font-size:.87rem}
+.item-feedback.show{display:block}
+.item-feedback.ok{background:var(--ok-soft);color:var(--ok)}
+.item-feedback.ko{background:var(--alert-soft);color:var(--alert)}
+
+.actions{display:flex;align-items:center;gap:16px;margin-top:8px;flex-wrap:wrap}
+button{font-family:var(--sans);background:var(--accent);color:#fff;border:none;border-radius:7px;padding:10px 20px;font-size:.94rem;font-weight:700;cursor:pointer}
+button:hover{opacity:.9}
+button.secondary{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.result-box{display:none;margin-top:16px;padding:12px 16px;border-radius:8px;font-weight:700}
+.result-box.show{display:block}
+.result-box.pass{background:var(--ok-soft);color:var(--ok)}
+.result-box.fail{background:var(--warn-soft);color:var(--warn)}
+
+textarea{width:100%;min-height:150px;font-family:var(--sans);font-size:.95rem;color:var(--ink);background:var(--rule-2);border:1px solid var(--rule);border-radius:8px;padding:12px;resize:vertical}
+.save-hint{font-size:.8rem;color:var(--ink-3);margin-top:6px}
+.corrige{display:none;margin-top:16px;background:var(--accent-soft);border-radius:8px;padding:14px 16px;font-size:.92rem;color:var(--ink-2)}
+.corrige.show{display:block}
+
+.closing-note{margin:44px auto 0;color:var(--ink-3);font-size:.88rem;text-align:center}
+
+@media (max-width:480px){
+  header.intro h1{font-size:1.5rem}
+  .exercise{padding:18px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="intro">
+<h1>Playground : prompts avancés</h1>
+<p>Trois mises en situation pour pratiquer ce qui vient d'être vu : diagnostiquer un prompt insuffisant, enchaîner les bonnes étapes sur une tâche à plusieurs sections, et rédiger vos propres instructions réutilisables.</p>
+</header>
+
+<main>
+
+<section class="exercise" id="ex1">
+<h2>Exercice 1 : diagnostiquer le prompt</h2>
+<p class="intro-ex">Vous préparez, pour Distribution Arkady, les supports de formation à TalentPass, leur nouvel outil de recrutement interne. Chaque situation ci-dessous montre un prompt et son résultat. Identifiez l'élément qui lui manque.</p>
+
+<fieldset data-ex="1" data-q="1">
+<div class="ctx">Vous rédigez un e-mail annonçant le passage à TalentPass aux recruteurs, une équipe plutôt réticente aux nouveaux outils.</div>
+<div class="prompt-box">Rédige un e-mail annonçant le passage à TalentPass aux recruteurs.</div>
+<div class="out-box">Résultat : un message correct mais au ton institutionnel et distant, alors qu'un ton de collègue à collègue, plus rassurant, aurait mieux fonctionné auprès de cette équipe.</div>
+<legend>Quel élément manque ?</legend>
+<label><input type="radio" name="e1q1" value="1" data-ok="true"> Rôle</label>
+<label><input type="radio" name="e1q1" value="2" data-ok="false"> Cible</label>
+<label><input type="radio" name="e1q1" value="3" data-ok="false"> Format</label>
+<label><input type="radio" name="e1q1" value="4" data-ok="false"> Contexte</label>
+<div class="item-feedback" data-fb="e1q1"></div>
+</fieldset>
+
+<fieldset data-ex="1" data-q="2">
+<div class="ctx">Le support doit s'adresser à la fois aux recruteurs internes et aux managers qui valident les embauches, avec des besoins différents.</div>
+<div class="prompt-box">Rédige un support de présentation de TalentPass.</div>
+<div class="out-box">Résultat : un support unique, au même niveau de détail partout, qui ne distingue pas ce que les recruteurs doivent savoir de ce qui concerne seulement les managers.</div>
+<legend>Quel élément manque ?</legend>
+<label><input type="radio" name="e1q2" value="1" data-ok="false"> Rôle</label>
+<label><input type="radio" name="e1q2" value="2" data-ok="true"> Cible</label>
+<label><input type="radio" name="e1q2" value="3" data-ok="false"> Format</label>
+<label><input type="radio" name="e1q2" value="4" data-ok="false"> Objectif</label>
+<div class="item-feedback" data-fb="e1q2"></div>
+</fieldset>
+
+<fieldset data-ex="1" data-q="3">
+<div class="ctx">Vous devez livrer une fiche mémo courte, à imprimer et à afficher près des postes des recruteurs.</div>
+<div class="prompt-box">Rédige une fiche mémo sur la publication d'une offre dans TalentPass.</div>
+<div class="out-box">Résultat : un contenu juste sur le fond, mais présenté en plusieurs longs paragraphes, impossible à faire tenir sur une fiche d'une page.</div>
+<legend>Quel élément manque ?</legend>
+<label><input type="radio" name="e1q3" value="1" data-ok="false"> Contexte</label>
+<label><input type="radio" name="e1q3" value="2" data-ok="false"> Objectif</label>
+<label><input type="radio" name="e1q3" value="3" data-ok="true"> Format</label>
+<label><input type="radio" name="e1q3" value="4" data-ok="false"> Cible</label>
+<div class="item-feedback" data-fb="e1q3"></div>
+</fieldset>
+
+<fieldset data-ex="1" data-q="4">
+<div class="ctx">Distribution Arkady remplace un processus de recrutement encore géré par e-mail et tableurs partagés.</div>
+<div class="prompt-box">Rédige un message pour annoncer TalentPass aux recruteurs.</div>
+<div class="out-box">Résultat : un message correct sur la forme, qui ne rassure sur rien de précis puisqu'il ignore ce que ce changement remplace concrètement au quotidien.</div>
+<legend>Quel élément manque ?</legend>
+<label><input type="radio" name="e1q4" value="1" data-ok="false"> Format</label>
+<label><input type="radio" name="e1q4" value="2" data-ok="false"> Objectif</label>
+<label><input type="radio" name="e1q4" value="3" data-ok="true"> Contexte</label>
+<label><input type="radio" name="e1q4" value="4" data-ok="false"> Cible</label>
+<div class="item-feedback" data-fb="e1q4"></div>
+</fieldset>
+
+<div class="actions">
+<button type="button" data-correct-ex="1">Corriger mes réponses</button>
+<span class="save-hint">Seuil de réussite : 80 %</span>
+</div>
+<div class="result-box" data-result="1"></div>
+</section>
+
+<section class="exercise" id="ex2">
+<h2>Exercice 2 : enchaîner les bonnes étapes</h2>
+<p class="intro-ex">Pour le Groupe hôtelier Cantelou, vous devez produire un support à trois volets sur PlanRH, leur nouvel outil de gestion des plannings : un guide de prise en main, une FAQ, et une fiche de dépannage rapide. Choisissez, à chaque étape, la meilleure suite.</p>
+
+<fieldset data-ex="2" data-q="1">
+<div class="ctx">Rien n'a encore été rédigé.</div>
+<legend>Quelle est la meilleure première étape ?</legend>
+<label><input type="radio" name="e2q1" value="1" data-ok="false"> Rédiger d'un coup le guide, la FAQ et la fiche de dépannage dans un seul prompt très détaillé</label>
+<label><input type="radio" name="e2q1" value="2" data-ok="true"> Demander uniquement le plan : les trois documents, leur contenu prévu et l'ordre logique</label>
+<label><input type="radio" name="e2q1" value="3" data-ok="false"> Commencer directement par la fiche de dépannage, plus courte à rédiger</label>
+<label><input type="radio" name="e2q1" value="4" data-ok="false"> Laisser l'outil choisir seul, sans aucune indication sur les documents attendus</label>
+<div class="item-feedback" data-fb="e2q1"></div>
+</fieldset>
+
+<fieldset data-ex="2" data-q="2">
+<div class="ctx">Le plan est validé : guide de prise en main, puis FAQ, puis fiche de dépannage.</div>
+<legend>Une fois le plan validé, quelle est la meilleure étape suivante ?</legend>
+<label><input type="radio" name="e2q2" value="1" data-ok="true"> Rédiger un prompt pour le guide de prise en main seul, en rappelant le plan validé comme contexte</label>
+<label><input type="radio" name="e2q2" value="2" data-ok="false"> Redemander le plan une seconde fois pour vérifier qu'il est toujours bon</label>
+<label><input type="radio" name="e2q2" value="3" data-ok="false"> Rédiger la FAQ et la fiche de dépannage ensemble, en pensant que le guide suivra logiquement</label>
+<label><input type="radio" name="e2q2" value="4" data-ok="false"> Ouvrir une conversation entièrement nouvelle, sans reprendre le plan validé</label>
+<div class="item-feedback" data-fb="e2q2"></div>
+</fieldset>
+
+<fieldset data-ex="2" data-q="3">
+<div class="ctx">Le guide de prise en main est rédigé, mais son ton vous semble trop technique pour des employés d'hôtel peu familiers du jargon RH.</div>
+<legend>Quel est le bon réflexe pour corriger ce défaut ?</legend>
+<label><input type="radio" name="e2q3" value="1" data-ok="true"> Relancer, dans le même échange, un prompt qui précise seulement le ton attendu (formulations simples, sans jargon)</label>
+<label><input type="radio" name="e2q3" value="2" data-ok="false"> Réécrire entièrement le prompt initial, dans une nouvelle conversation</label>
+<label><input type="radio" name="e2q3" value="3" data-ok="false"> Laisser tel quel : un ton un peu technique ne posera pas de problème</label>
+<label><input type="radio" name="e2q3" value="4" data-ok="false"> Demander un guide sur un tout autre sujet pour comparer les styles obtenus</label>
+<div class="item-feedback" data-fb="e2q3"></div>
+</fieldset>
+
+<fieldset data-ex="2" data-q="4">
+<div class="ctx">Les trois documents sont rédigés séparément.</div>
+<legend>Quelle est la dernière étape avant de livrer le support complet ?</legend>
+<label><input type="radio" name="e2q4" value="1" data-ok="false"> Livrer directement les trois documents tels quels, chacun ayant déjà été validé séparément</label>
+<label><input type="radio" name="e2q4" value="2" data-ok="true"> Lancer une relecture globale assistée, puis vérifier humainement cohérence, sources, omissions et exactitude avant livraison</label>
+<label><input type="radio" name="e2q4" value="3" data-ok="false"> Faire traduire l'ensemble dans une autre langue avant toute relecture</label>
+<label><input type="radio" name="e2q4" value="4" data-ok="false"> Refaire entièrement le plan de zéro par précaution</label>
+<div class="item-feedback" data-fb="e2q4"></div>
+</fieldset>
+
+<div class="actions">
+<button type="button" data-correct-ex="2">Corriger mes réponses</button>
+<span class="save-hint">Seuil de réussite : 80 %</span>
+</div>
+<div class="result-box" data-result="2"></div>
+</section>
+
+<section class="exercise" id="ex3">
+<h2>Exercice 3 : rédiger vos instructions réutilisables</h2>
+<p class="intro-ex">Rédigez une consigne réutilisable pour découper un support de formation en étapes. Elle doit prévoir les sources autorisées, un arrêt pour validation du plan, un critère de contrôle par section et une vérification finale. Votre brouillon est sauvegardé dans ce navigateur ; conservez-le pour l'échange avec le formateur.</p>
+<textarea id="ex3-text" placeholder="Quand je te demande de préparer un support de formation à plusieurs sections..."></textarea>
+<p class="save-hint" data-save-status>Brouillon non enregistré pour l'instant.</p>
+<div class="actions">
+<button type="button" class="secondary" id="ex3-toggle-corrige">Voir un corrigé indicatif</button>
+</div>
+<div class="corrige" id="ex3-corrige">
+<strong>Corrigé indicatif</strong> : une version possible, la vôtre peut être différente et tout aussi valable.
+<p style="margin-top:8px">« Quand je te demande un support en plusieurs sections, commence par lister les informations manquantes et les sources autorisées. Propose uniquement le plan avec l'objectif de chaque section, puis attends ma validation. Rédige ensuite une section à la fois en rappelant le plan et les sources ; distingue ce qui vient d'une source de ce qui est une proposition et n'invente aucun parcours logiciel. Après chaque section, fournis une checklist de conformité. Termine par une recherche des contradictions, répétitions et omissions ; je valide le livrable final. »</p>
+</div>
+</section>
+
+</main>
+
+<p class="closing-note">Toutes les entreprises, personnes et données chiffrées de cet exercice sont fictives.</p>
+
+</div>
+
+<script>
+(function(){
+  function gradeExercise(exNum){
+    var fieldsets = document.querySelectorAll('fieldset[data-ex="' + exNum + '"]');
+    var correct = 0;
+    var total = fieldsets.length;
+    fieldsets.forEach(function(fs){
+      var name = fs.querySelector('input[type=radio]').name;
+      var checked = fs.querySelector('input[name="' + name + '"]:checked');
+      var fb = fs.querySelector('[data-fb]');
+      if(!checked){
+        fb.className = 'item-feedback show ko';
+        fb.textContent = 'Pas de réponse sélectionnée.';
+        return;
+      }
+      var ok = checked.getAttribute('data-ok') === 'true';
+      if(ok) correct++;
+      fb.className = 'item-feedback show ' + (ok ? 'ok' : 'ko');
+      fb.textContent = ok ? 'Correct.' : 'À revoir : relisez le contexte et le résultat obtenu.';
+    });
+    var pct = total ? Math.round((correct / total) * 100) : 0;
+    var resultBox = document.querySelector('[data-result="' + exNum + '"]');
+    resultBox.className = 'result-box show ' + (pct >= 80 ? 'pass' : 'fail');
+    resultBox.textContent = 'Score : ' + correct + '/' + total + ' (' + pct + ' %) ' +
+      (pct >= 80 ? '(seuil de 80 % atteint).' : '(en dessous du seuil de 80 %, revoyez les réponses marquées à revoir).');
+  }
+
+  document.querySelectorAll('[data-correct-ex]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      gradeExercise(btn.getAttribute('data-correct-ex'));
+    });
+  });
+
+  var corrigeBtn = document.getElementById('ex3-toggle-corrige');
+  var corrigeBox = document.getElementById('ex3-corrige');
+  if(corrigeBtn){
+    corrigeBtn.addEventListener('click', function(){
+      var show = corrigeBox.classList.toggle('show');
+      corrigeBtn.textContent = show ? 'Masquer le corrigé indicatif' : 'Voir un corrigé indicatif';
+    });
+  }
+
+  var STORAGE_KEY = 'nathalie_playground_2_2_ex3';
+  var textarea = document.getElementById('ex3-text');
+  var status = document.querySelector('[data-save-status]');
+  if(textarea){
+    try{
+      var saved = localStorage.getItem(STORAGE_KEY);
+      if(saved){
+        textarea.value = saved;
+        status.textContent = 'Brouillon restauré depuis votre dernière visite.';
+      }
+    }catch(e){}
+    textarea.addEventListener('input', function(){
+      try{
+        localStorage.setItem(STORAGE_KEY, textarea.value);
+        status.textContent = 'Brouillon enregistré automatiquement.';
+      }catch(e){
+        status.textContent = 'Enregistrement automatique indisponible dans ce navigateur.';
+      }
+    });
+  }
+})();
+</script>
+</body>
+</html>

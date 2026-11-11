@@ -1,0 +1,41 @@
+/* Briques visuelles des Playgrounds et Fiches de révision natifs (charte : dégradé iris). */
+
+.pg-iris-border {
+  position: relative;
+  border-radius: 14px;
+  padding: 1px;
+  background: var(--grad-iris);
+  background-size: 200% 100%;
+  animation: pg-shift 9s ease-in-out infinite alternate;
+}
+.pg-iris-border > .pg-inner { border-radius: 13px; height: 100%; }
+
+.pg-tile {
+  position: relative;
+  border-radius: 14px;
+  transition: transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s ease, border-color .25s ease;
+}
+.pg-tile:hover { transform: translateY(-3px); }
+.pg-tile:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+.pg-glow {
+  position: absolute; inset: auto -30% -60% auto; width: 70%; aspect-ratio: 1;
+  border-radius: 50%; filter: blur(40px); opacity: .45; pointer-events: none;
+}
+
+.pg-token { display: inline-block; animation: pg-token-in .45s cubic-bezier(.2,.8,.2,1) both; }
+.pg-float { animation: pg-float 6s ease-in-out infinite; }
+.pg-pop { animation: pg-pop .35s cubic-bezier(.2,.8,.2,1) both; }
+.pg-orbit { animation: pg-spin 60s linear infinite; transform-origin: 50% 50%; }
+.pg-counter { animation: pg-spin 60s linear infinite reverse; transform-origin: 50% 50%; }
+
+@keyframes pg-shift { from { background-position: 0% 50%; } to { background-position: 100% 50%; } }
+@keyframes pg-token-in { from { opacity: 0; transform: translateY(6px) scale(.96); filter: blur(3px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes pg-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes pg-pop { from { opacity: 0; transform: scale(.97) translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes pg-spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .pg-iris-border, .pg-token, .pg-float, .pg-pop, .pg-orbit, .pg-counter { animation: none !important; }
+  .pg-tile:hover { transform: none; }
+}

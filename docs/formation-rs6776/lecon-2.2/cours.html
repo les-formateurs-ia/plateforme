@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompts avancés : méthode pour les tâches complexes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#F7F7FA; --surface:#fff; --ink:#1b1a17; --ink-2:#4a4741; --ink-3:#7c786f;
+  --rule:#e4e1d9; --rule-2:#efece5; --accent:#1f4e46; --accent-soft:#eef3f1;
+  --ok:#2c6a48; --ok-soft:#eef4ef; --warn:#8a6519; --warn-soft:#faf4e7;
+  --alert:#963428; --alert-soft:#fbf1ef;
+  --serif:'Funnel Display',Georgia,'Iowan Old Style','Times New Roman',serif;
+  --sans:'Funnel Display',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+}
+body{font-family:var(--sans);font-size:15.5px;line-height:1.65;color:var(--ink);background:var(--paper);padding:0 22px 80px}
+.wrap{width:100%;margin:0 auto}  /* JAMAIS de max-width plafonné sur .wrap */
+
+header.intro{margin:0 auto;padding-top:40px}
+header.intro h1{font-family:var(--serif);font-weight:700;font-size:2rem;line-height:1.2;color:var(--ink);margin-bottom:18px}
+header.intro p{color:var(--ink-2);font-size:1.05rem}
+
+main{margin:0 auto}
+
+section{margin-top:52px}
+section h2{font-family:var(--serif);font-weight:700;font-size:1.4rem;color:var(--accent);border-bottom:2px solid var(--rule);padding-bottom:10px;margin-bottom:18px}
+section p{margin-bottom:14px}
+section ul, section ol{margin:0 0 16px 1.4em}
+section li{margin-bottom:8px}
+strong{color:var(--ink);font-weight:700}
+em{color:var(--accent);font-style:italic}
+
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:18px 20px;margin:16px 0}
+.card.bad{background:var(--alert-soft);border-color:#e6c9c2}
+.card.good{background:var(--ok-soft);border-color:#c9dfcf}
+.card .tag{display:inline-block;font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-bottom:8px}
+.card.bad .tag{color:var(--alert)}
+.card.good .tag{color:var(--ok)}
+.card .prompt{font-family:'Courier New',monospace;font-size:.92rem;background:var(--rule-2);border-radius:6px;padding:10px 12px;margin:8px 0;white-space:pre-wrap}
+.card .output{font-size:.95rem;color:var(--ink-2)}
+
+table{width:100%;border-collapse:collapse;margin:18px 0;font-size:.94rem}
+caption{text-align:left;font-size:.85rem;color:var(--ink-3);margin-bottom:8px}
+th,td{border:1px solid var(--rule);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--accent-soft);color:var(--accent);font-weight:700}
+tbody tr:nth-child(even){background:var(--rule-2)}
+
+.game{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:22px 24px;margin:18px 0}
+.game .round{display:none}
+.game .round.active{display:block}
+.game .round-label{font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);font-weight:700;margin-bottom:10px}
+.game .ctx{background:var(--accent-soft);border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:.94rem;color:var(--ink-2)}
+.game .prompt-box{font-family:'Courier New',monospace;font-size:.9rem;background:var(--rule-2);border-radius:6px;padding:10px 12px;margin-bottom:8px;white-space:pre-wrap}
+.game .out-box{font-size:.92rem;color:var(--ink-2);border-left:3px solid var(--rule);padding-left:12px;margin-bottom:16px}
+.game fieldset{border:none;margin-bottom:14px}
+.game legend{font-weight:700;margin-bottom:10px}
+.game label{display:block;background:var(--rule-2);border-radius:6px;padding:8px 12px;margin-bottom:6px;cursor:pointer}
+.game label:hover{background:var(--accent-soft)}
+.game input[type=radio]{margin-right:8px}
+.game button{font-family:var(--sans);background:var(--accent);color:#fff;border:none;border-radius:7px;padding:9px 18px;font-size:.92rem;font-weight:700;cursor:pointer}
+.game button:hover{opacity:.9}
+.game button.secondary{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.game .feedback{display:none;margin-top:12px;padding:12px 14px;border-radius:8px;font-size:.93rem}
+.game .feedback.show{display:block}
+.game .feedback.ok{background:var(--ok-soft);color:var(--ok)}
+.game .feedback.ko{background:var(--alert-soft);color:var(--alert)}
+.game .revealed{display:none;margin-top:14px;border-top:1px dashed var(--rule);padding-top:14px}
+.game .revealed.show{display:block}
+.game .nav{display:flex;justify-content:space-between;align-items:center;margin-top:16px}
+.game .score{font-size:.85rem;color:var(--ink-3)}
+
+.closing{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:24px 26px;margin-top:60px;margin-bottom:20px}
+.closing h2{border-bottom:none;padding-bottom:0}
+.closing p{color:var(--ink-2)}
+
+@media (max-width:480px){
+  header.intro h1{font-size:1.6rem}
+  section h2{font-size:1.2rem}
+  .game{padding:16px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="intro">
+<h1>Prompts avancés : méthode pour les tâches complexes</h1>
+<p>À l'issue de ce contenu, vous saurez découper une tâche trop ambitieuse pour un seul prompt en une suite d'étapes reliées, corriger un prompt insatisfaisant en ciblant ce qui lui manque plutôt qu'en le réécrivant, donner des exemples pour calibrer un résultat, lire un prompt d'un œil critique, et configurer un espace réutilisable qui applique votre méthode automatiquement.</p>
+</header>
+
+<main>
+
+<section>
+<h2>Ce qu'une structure simple ne suffit plus à couvrir</h2>
+<p>La structure en cinq éléments reste utile pour toute demande. Pour une tâche longue, interdépendante ou risquée, l'enchaînement par étapes ajoute surtout des points de contrôle. Un prompt unique peut suffire à un livrable court ; découpez lorsque vous devez valider le plan, les sources ou une section avant d'investir dans la suite.</p>
+<p>Le symptôme est reconnaissable : un prompt long, qui tente de tout préciser d'un coup, produit une réponse qui touche à tout sans traiter aucun point en profondeur. Chaque section reçoit des phrases interchangeables, et corriger un seul passage oblige à relancer l'ensemble. Ce n'est pas un manque de compétence du modèle : c'est la <em>dilution des instructions</em>, un prompt trop chargé perd en précision sur chacune de ses exigences.</p>
+</section>
+
+<section>
+<h2>Découper une tâche complexe en étapes</h2>
+<p>La méthode consiste à remplacer un prompt trop chargé par une suite de demandes ciblées. Vous pouvez rester dans le même fil, mais rappelez à chaque étape le plan validé, les sources et les contraintes critiques : l'historique visible ne garantit pas que chaque détail ancien sera correctement mobilisé.</p>
+<ol>
+<li><strong>Cadrer le plan avant de rédiger.</strong> Un premier prompt demande uniquement la structure attendue : la liste des sections, leur ordre, ce que chacune doit couvrir. Rien n'est encore rédigé, ce qui permet de corriger l'architecture à moindre coût.</li>
+<li><strong>Rédiger section par section, en donnant le plan validé comme contexte.</strong> Chaque prompt suivant porte sur une seule section, en rappelant sa place dans l'ensemble. Le modèle produit un contenu plus dense en concentrant son attention sur un périmètre restreint.</li>
+<li><strong>Relire et harmoniser l'ensemble en dernière étape.</strong> Un dernier prompt demande une relecture globale : uniformiser le ton, éviter les répétitions, vérifier la cohérence du vocabulaire.</li>
+</ol>
+<p>Ce découpage porte un nom que vous croiserez dans la documentation des outils : le <em>prompt chaining</em>, l'enchaînement de prompts. Mieux vaut plusieurs demandes courtes et ciblées qu'une seule qui essaie de tout obtenir d'un coup.</p>
+</section>
+
+<section>
+<h2>Itérer sur un prompt plutôt que le refaire de zéro</h2>
+<p>Face à une réponse décevante, le réflexe le plus coûteux consiste à tout réécrire. Mieux vaut diagnostiquer quel élément de la structure en cinq points fait défaut, puis ne corriger que celui-ci, dans le même échange : le modèle garde le contexte déjà établi.</p>
+<div class="card bad">
+<span class="tag">Avant : prompt insuffisant</span>
+<div class="prompt">Rédige une annonce pour présenter le nouveau logiciel interne aux salariés.</div>
+<p class="output">Résultat obtenu : un texte correct dans la forme mais générique, qui ne dit rien de ce que les salariés redoutent dans ce type de changement.</p>
+</div>
+<p>Le diagnostic porte ici sur le <strong>contexte</strong> : rien n'indique ce que ce changement remplace, ni ce qui inquiète les destinataires. Il suffit d'ajouter l'information manquante.</p>
+<div class="card good">
+<span class="tag">Après : un seul élément corrigé</span>
+<div class="prompt">Rédige une annonce pour présenter le nouveau logiciel interne aux salariés.
+Contexte : ce logiciel remplace un outil utilisé depuis huit ans ; la principale
+crainte exprimée en amont porte sur la perte des données déjà saisies.</div>
+<p class="output">Résultat attendu : l'annonce reconnaît cette crainte et demande de confirmer la méthode de migration. Elle ne doit promettre la conservation des données que si une source validée l'établit.</p>
+</div>
+<p>Préciser un seul élément, plutôt que relancer une demande complète, coûte moins de temps et donne une base plus stable d'un essai à l'autre.</p>
+</section>
+
+<section>
+<h2>Donner des exemples pour calibrer le résultat attendu</h2>
+<p>Quand une consigne écrite peine à fixer un style précis, montrer un ou deux exemples du résultat attendu est souvent plus efficace que d'en décrire les critères en abstrait. Cette technique porte un nom : le <em>few-shot</em>, par opposition au <em>zero-shot</em> d'un prompt sans exemple, qui laisse le modèle interpréter seul le niveau attendu.</p>
+<p>Un exemple bien choisi transmet la longueur, le degré de formalité ou la structure. Plusieurs exemples <em>diversifiés</em> peuvent mieux faire ressortir l'invariant qu'un seul, mais ils consomment du contexte et peuvent introduire un biais. Utilisez uniquement des exemples autorisés, fictifs ou nettoyés, puis énoncez explicitement ce qu'il faut imiter et ce qu'il ne faut pas reproduire.</p>
+</section>
+
+<section>
+<h2>Constatez l'effet du diagnostic</h2>
+<p>Chaque manche montre un prompt et son résultat décevant. Repérez l'élément manquant avant de révéler la correction.</p>
+<div class="game" id="game">
+
+<div class="round active" data-round="1">
+<p class="round-label">1 / 3</p>
+<div class="ctx">Un support de formation doit être rédigé pour un nouveau logiciel de gestion des temps.</div>
+<div class="prompt-box">Rédige le plan d'un support de formation sur ce logiciel.</div>
+<p class="out-box">Résultat : un plan en trois parties génériques, aussi valable pour un expert que pour un grand débutant.</p>
+<fieldset data-round-fieldset="1">
+<legend>Élément manquant ?</legend>
+<label><input type="radio" name="r1" value="1" data-ok="false"> Rôle</label>
+<label><input type="radio" name="r1" value="2" data-ok="true"> Cible</label>
+<label><input type="radio" name="r1" value="3" data-ok="false"> Objectif</label>
+<label><input type="radio" name="r1" value="4" data-ok="false"> Format</label>
+</fieldset>
+<button type="button" data-check="1">Valider ma réponse</button>
+<div class="feedback" data-feedback="1"></div>
+<div class="revealed" data-reveal="1">
+<p class="round-label">Une ligne ajoutée</p>
+<div class="prompt-box">+ Cible : des utilisateurs finaux qui n'ont jamais utilisé ce type de
+logiciel, dans le cadre de leur poste habituel.</div>
+<p class="out-box">Résultat : le plan démarre par le vocabulaire de base et traite les erreurs d'un premier usage.</p>
+<button type="button" class="secondary" data-next="2">Manche suivante</button>
+</div>
+</div>
+
+<div class="round" data-round="2">
+<p class="round-label">2 / 3</p>
+<div class="ctx">Une FAQ doit accompagner le lancement d'un nouvel outil de demande de congés.</div>
+<div class="prompt-box">Rédige une FAQ sur ce nouvel outil.</div>
+<p class="out-box">Résultat : un unique paragraphe de plusieurs centaines de mots, questions mélangées, sans séparation visible.</p>
+<fieldset data-round-fieldset="2">
+<legend>Élément manquant ?</legend>
+<label><input type="radio" name="r2" value="1" data-ok="false"> Contexte</label>
+<label><input type="radio" name="r2" value="2" data-ok="false"> Objectif</label>
+<label><input type="radio" name="r2" value="3" data-ok="true"> Format</label>
+<label><input type="radio" name="r2" value="4" data-ok="false"> Rôle</label>
+</fieldset>
+<button type="button" data-check="2">Valider ma réponse</button>
+<div class="feedback" data-feedback="2"></div>
+<div class="revealed" data-reveal="2">
+<p class="round-label">Une ligne ajoutée</p>
+<div class="prompt-box">+ Format : 8 questions numérotées, réponse de 2-3 phrases maximum, dans
+un tableau à deux colonnes question/réponse.</div>
+<p class="out-box">Résultat : une FAQ scannable en quelques secondes, chaque question isolée dans sa propre ligne.</p>
+<button type="button" class="secondary" data-next="3">Manche suivante</button>
+</div>
+</div>
+
+<div class="round" data-round="3">
+<p class="round-label">3 / 3</p>
+<div class="ctx">Un message d'annonce déjà rédigé doit être retravaillé avant diffusion.</div>
+<div class="prompt-box">Réécris ce message pour qu'il soit meilleur.</div>
+<p class="out-box">Résultat : une version reformulée, ni pire ni meilleure, sans critère clair d'amélioration.</p>
+<fieldset data-round-fieldset="3">
+<legend>Élément manquant ?</legend>
+<label><input type="radio" name="r3" value="1" data-ok="true"> Objectif</label>
+<label><input type="radio" name="r3" value="2" data-ok="false"> Cible</label>
+<label><input type="radio" name="r3" value="3" data-ok="false"> Contexte</label>
+<label><input type="radio" name="r3" value="4" data-ok="false"> Format</label>
+</fieldset>
+<button type="button" data-check="3">Valider ma réponse</button>
+<div class="feedback" data-feedback="3"></div>
+<div class="revealed" data-reveal="3">
+<p class="round-label">Une ligne ajoutée</p>
+<div class="prompt-box">+ Objectif : tenir en moins de 80 mots et rassurer sur la conservation
+des données lors du changement d'outil.</div>
+<p class="out-box">Résultat : un texte court, centré sur l'inquiétude réelle, critère vérifiable phrase par phrase.</p>
+<button type="button" class="secondary" data-next="done">Voir mon score</button>
+</div>
+</div>
+
+<div class="round" data-round="done">
+<p class="round-label">Résultat</p>
+<p class="score" data-score-final></p>
+<p>Dans les trois cas, un seul élément manquait, jamais le prompt entier.</p>
+</div>
+
+</div>
+</section>
+
+<section>
+<h2>Lire un prompt existant d'un œil critique</h2>
+<p>Analyser un prompt écrit par quelqu'un d'autre, ou retrouvé dans un ancien échange, demande la même grille que pour en rédiger un : vérifier que chacun des cinq éléments y figure de façon exploitable, pas seulement en filigrane.</p>
+<table>
+<caption>Repères pour évaluer un prompt déjà écrit</caption>
+<thead><tr><th>Élément</th><th>Question à se poser</th><th>Signal d'alerte fréquent</th></tr></thead>
+<tbody>
+<tr><td>Rôle</td><td>Sous quelle posture le modèle doit-il répondre ?</td><td>Ton neutre par défaut, aucune posture donnée</td></tr>
+<tr><td>Cible</td><td>À qui le résultat doit-il s'adresser ?</td><td>Un même plan conviendrait à un débutant comme à un expert</td></tr>
+<tr><td>Objectif</td><td>Quel critère vérifiable de réussite ?</td><td>« Meilleur » ou « plus clair » sans préciser selon quoi</td></tr>
+<tr><td>Contexte</td><td>Les informations utiles sont-elles données ?</td><td>Le résultat dépend d'un élément que seul l'auteur connaît</td></tr>
+<tr><td>Format</td><td>La forme attendue est-elle précisée ?</td><td>Réponse correcte sur le fond mais inutilisable telle quelle</td></tr>
+</tbody>
+</table>
+<p>Répondre « oui » aux cinq colonnes n'assure pas la perfection, mais élimine la plupart des causes d'un résultat décevant.</p>
+</section>
+
+<section>
+<h2>Se construire un assistant personnel d'aide à la rédaction de prompts</h2>
+<p>Relire cette grille à chaque rédaction fonctionne, mais demande un effort qu'on peut automatiser en partie : la plupart des outils proposent un espace de réglages qui s'applique de lui-même à chaque nouvelle conversation.</p>
+<p>Deux formes courantes existent, selon l'outil et l'offre. Des <strong>instructions personnalisées</strong> orientent plusieurs conversations d'un compte. Un <strong>espace de travail dédié</strong>, souvent appelé Project, rassemble des instructions et fichiers pour un usage précis. Il facilite l'organisation, mais vous devez encore contrôler ses membres, fichiers, mémoire, liens de partage et règles de conservation.</p>
+<div class="card good">
+<span class="tag">Exemple de contenu à placer dans ce type d'espace</span>
+<div class="prompt">Quand je te demande de rédiger un prompt, structure toujours ta proposition
+en cinq blocs : Rôle, Cible, Objectif, Contexte, Format. Si l'un d'eux te
+manque pour produire un prompt exploitable, pose la question correspondante
+avant de rédiger quoi que ce soit, plutôt que de deviner. Une fois le
+prompt validé, propose aussi une version courte, réutilisable pour une
+variante proche.</div>
+</div>
+<p>La création, le partage et la publication d'un assistant personnalisé dépendent du plan et des réglages administrateur. Ne mémorisez pas une règle de disponibilité susceptible de changer : vérifiez l'interface et la documentation officielle du compte utilisé. La méthode, elle, reste réutilisable dans un modèle de prompt conservé localement.</p>
+<table>
+<caption>Où configurer un espace réutilisable, selon l'outil</caption>
+<thead><tr><th>Outil</th><th>Fonctionnalité</th><th>Où la trouver</th></tr></thead>
+<tbody>
+<tr><td>ChatGPT (chatgpt.com)</td><td>Instructions personnalisées</td><td>Paramètres, rubrique Personnalisation</td></tr>
+<tr><td>ChatGPT (chatgpt.com)</td><td>Projects, avec fichiers de référence</td><td>Bouton « Projects », barre latérale</td></tr>
+<tr><td>Claude (claude.ai)</td><td>Projects, avec fichiers de référence</td><td>Bouton « Projects », barre latérale</td></tr>
+<tr><td>Gemini (gemini.google.com)</td><td>Gems, assistant configuré</td><td>Menu « Gems »</td></tr>
+</tbody>
+</table>
+</section>
+
+<section class="closing">
+<h2>Pour aller plus loin</h2>
+<p>Cette section approfondit au-delà de ce qui est nécessaire pour suivre la suite du programme ; la sauter ne bloque rien pour les leçons suivantes.</p>
+<p>Les fonctions de personnalisation changent rapidement : nom, disponibilité, partage et publication varient selon l'éditeur, le plan, la région et l'administration du compte. Conservez donc une copie maîtrisée de vos instructions et notez la date de vérification des fonctions utilisées. Ne transférez pas automatiquement les fichiers ou réglages d'un client dans l'espace d'un autre.</p>
+<p>Quelle que soit l'interface — Project, assistant personnalisé, Gem ou modèle local — le cycle reste le même : tester sur un cas représentatif, observer l'écart, corriger une consigne à la fois, vérifier les sources et réévaluer le modèle de prompt lorsqu'un contexte change.</p>
+</section>
+
+</main>
+</div>
+
+<script>
+(function(){
+  var rounds = ['1','2','3','done'];
+  var scores = {};
+
+  function showRound(id){
+    document.querySelectorAll('.round').forEach(function(r){
+      r.classList.toggle('active', r.getAttribute('data-round') === id);
+    });
+    if(id === 'done'){
+      var correct = 0, total = 0;
+      Object.keys(scores).forEach(function(k){ total++; if(scores[k]) correct++; });
+      var el = document.querySelector('[data-score-final]');
+      if(el){ el.textContent = 'Score : ' + correct + ' bonne(s) réponse(s) sur ' + total + '.'; }
+    }
+  }
+
+  document.querySelectorAll('[data-check]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var n = btn.getAttribute('data-check');
+      var fieldset = document.querySelector('[data-round-fieldset="' + n + '"]');
+      var checked = fieldset.querySelector('input[type=radio]:checked');
+      var feedback = document.querySelector('[data-feedback="' + n + '"]');
+      var reveal = document.querySelector('[data-reveal="' + n + '"]');
+      if(!checked){
+        feedback.className = 'feedback show ko';
+        feedback.textContent = 'Choisissez une réponse avant de valider.';
+        return;
+      }
+      var ok = checked.getAttribute('data-ok') === 'true';
+      scores[n] = ok;
+      feedback.className = 'feedback show ' + (ok ? 'ok' : 'ko');
+      feedback.textContent = ok
+        ? 'Correct. Cet élément expliquait bien le résultat obtenu.'
+        : 'Pas tout à fait : regardez le prompt affiné ci-dessous pour comparer.';
+      reveal.classList.add('show');
+    });
+  });
+
+  document.querySelectorAll('[data-next]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      showRound(btn.getAttribute('data-next'));
+    });
+  });
+})();
+</script>
+</body>
+</html>

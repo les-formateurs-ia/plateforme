@@ -19,3 +19,6 @@ supabase/.temp/
 # Export Digiforma et son script d'import : données personnelles, hors dépôt
 ExportDigiforma/
 supabase/scripts/import_digiforma.sql
+
+# Sauvegardes de données d'élèves (jamais dans Git)
+tmp/rs6776-backups/

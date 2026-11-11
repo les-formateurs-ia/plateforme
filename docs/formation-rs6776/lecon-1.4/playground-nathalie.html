@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Playground personnalisé de Nathalie</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --paper:#F7F7FA;
+      --surface:#ffffff;
+      --ink:#1b1a17;
+      --ink-2:#4a4741;
+      --ink-3:#7c786f;
+      --rule:#e4e1d9;
+      --rule-2:#efece5;
+      --accent:#1f4e46;
+      --accent-soft:#eef3f1;
+      --ok:#2c6a48;
+      --ok-soft:#eef4ef;
+      --warn:#8a6519;
+      --warn-soft:#faf4e7;
+      --alert:#963428;
+      --alert-soft:#fbf1ef;
+      --serif:'Funnel Display',Georgia,'Iowan Old Style','Times New Roman',serif;
+      --sans:'Funnel Display',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    }
+    html{scroll-behavior:smooth}
+    body{
+      font-family:var(--sans);font-size:15.5px;color:var(--ink);background:var(--paper);
+      line-height:1.65;-webkit-font-smoothing:antialiased;
+    }
+    a{color:var(--accent)}
+    button,input,textarea{font:inherit}
+    .skip{position:absolute;left:-9999px;top:0;background:var(--surface);color:var(--ink);padding:12px;z-index:10}
+    .skip:focus{left:12px}
+
+    .wrap{width:100%;margin:0 auto;padding:0 22px 80px}
+
+    header.top{padding:44px 0 26px;border-bottom:1px solid var(--rule)}
+    header.top h1{
+      font-family:var(--serif);font-size:clamp(28px,4.5vw,37px);line-height:1.2;font-weight:400;
+      letter-spacing:-.01em;margin-bottom:12px;max-width:28ch;
+    }
+    header.top .sub{font-size:15px;color:var(--ink-2);}
+
+    .intro{font-size:16.5px;color:var(--ink-2);margin:26px 0}
+
+    .exercise{margin-top:44px}
+    .exercise h2{
+      font-family:var(--serif);font-size:23px;font-weight:400;line-height:1.3;
+      letter-spacing:-.01em;padding-bottom:12px;border-bottom:1px solid var(--rule);margin-bottom:18px;
+    }
+    .exercise h2 .num{color:var(--accent);font-size:15px;font-family:var(--sans);font-weight:600;letter-spacing:.06em;display:block;margin-bottom:4px;text-transform:uppercase}
+    .instruction{color:var(--ink-2);margin:4px 0 22px;font-size:15px;}
+
+    fieldset{border:1px solid var(--rule);border-radius:3px;margin:16px 0;padding:18px 20px;background:var(--surface)}
+    fieldset.correct{border-color:var(--ok);background:var(--ok-soft)}
+    fieldset.incorrect{border-color:var(--warn);background:var(--warn-soft)}
+    legend{font-weight:600;padding:0 8px;max-width:94%;font-size:15px}
+    .choices{display:grid;gap:7px;margin-top:12px}
+    label.choice{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:3px;cursor:pointer;font-size:14.5px;color:var(--ink-2)}
+    label.choice:hover{background:var(--accent-soft)}
+    input[type="radio"]{width:1.1rem;height:1.1rem;margin-top:.2rem;accent-color:var(--accent);flex:0 0 auto}
+    .feedback{min-height:1.5em;margin:.7rem 0 0;font-weight:500;font-size:14.5px;line-height:1.6}
+    .correct .feedback{color:var(--ok)}
+    .incorrect .feedback{color:var(--warn)}
+
+    .aside{border-left:2px solid var(--rule);padding:2px 0 2px 20px;margin:22px 0;font-size:15px;color:var(--ink-2);}
+    .aside .lab{display:block;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);margin-bottom:5px;font-weight:600}
+    .aside.caution{border-left-color:var(--alert)}
+    .aside.caution .lab{color:var(--alert)}
+    .aside.key{border-left-color:var(--accent)}
+    .aside.key .lab{color:var(--accent)}
+    .aside strong{color:var(--ink);font-weight:600}
+    .aside em{font-style:italic}
+
+    .toolbar{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:34px;padding-top:22px;border-top:1px solid var(--rule)}
+    .btn{font:inherit;font-size:14.5px;font-weight:500;border-radius:3px;padding:10px 20px;border:1px solid var(--accent);cursor:pointer;transition:.15s}
+    .btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+    .btn-primary{background:var(--accent);color:#fff}
+    .btn-primary:hover{background:#173b35}
+    .ex-score{font-size:14px;font-weight:600;color:var(--ink-2);margin-left:auto}
+    .score-good{color:var(--ok)}
+    .score-review{color:var(--warn)}
+
+    footer{margin-top:60px;padding-top:22px;border-top:1px solid var(--rule);font-size:12.5px;color:var(--ink-3);line-height:1.7;}
+
+    @media(max-width:700px){
+      .ex-score{width:100%;margin-left:0}
+      header.top h1{font-size:27px}
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#contenu">Aller au playground</a>
+
+  <div class="wrap">
+    <header class="top">
+      <h1>Nathalie, entraînez-vous à reconnaître ce qu'il faut protéger</h1>
+      <p class="sub">Ce playground reprend votre quotidien de consultante SIRH indépendante, en mission chez plusieurs clients en parallèle. Toutes les données proposées sont fictives : n'utilisez aucune information réelle de vos clients.</p>
+    </header>
+
+    <main id="contenu">
+      <p class="intro">Deux temps : classer des informations selon leur niveau de protection et leur provenance, puis vérifier vos décisions de réutilisation. Ici, « donnée sensible » garde son sens juridique strict ; les autres contenus sont appelés informations à protéger.</p>
+
+      <div class="aside key">
+        <span class="lab">Un repère avant de commencer</span>
+        Pour vous, l'interne, c'est votre propre activité : vos tarifs, votre méthode, votre liste de clients. Tout le reste est externe, y compris ce qu'un client considère lui-même comme interne chez lui.
+      </div>
+
+      <form id="quiz" novalidate>
+        <section class="exercise" aria-labelledby="ex1-title">
+          <h2 id="ex1-title"><span class="num">Exercice 1</span>À protéger, et pour qui ?</h2>
+          <p class="instruction">Pour chaque information, choisissez son niveau de protection dans ce contexte et sa provenance de votre point de vue.</p>
+
+          <fieldset data-answer="safe" data-ok="Exact pour la confidentialité : le nom est déjà public. Avant réutilisation, vérifiez néanmoins la version, l'exactitude, les droits et la finalité." data-why="Public ne signifie pas libre de droits ni toujours à jour. La catégorie indique seulement qu'aucune restriction de confidentialité n'est visible dans ce scénario fictif.">
+            <legend>1. Le nom de la solution SIRH que vous recommandez le plus souvent, déjà mentionné sur votre propre site professionnel.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="q1" value="safe"> Public, pas de restriction de confidentialité indiquée</label>
+              <label class="choice"><input type="radio" name="q1" value="int"> À protéger, interne</label>
+              <label class="choice"><input type="radio" name="q1" value="ext"> À protéger, externe</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <fieldset data-answer="int" data-ok="Exact. C'est une information commerciale non encore communiquée, interne et à protéger — sans être une donnée sensible au sens de l'article 9." data-why="Cette information concerne votre propre activité ; son caractère confidentiel vient du contexte de négociation.">
+            <legend>2. Le montant de votre tarif journalier, que vous n'avez pas encore communiqué à un nouveau prospect.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="q2" value="safe"> Public, pas de restriction de confidentialité indiquée</label>
+              <label class="choice"><input type="radio" name="q2" value="int"> À protéger, interne</label>
+              <label class="choice"><input type="radio" name="q2" value="ext"> À protéger, externe</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <fieldset data-answer="ext" data-ok="Exact. Ces informations concernent le personnel d'un client, un tiers pour vous : sensibles et externes, même si ce client les considère comme internes chez lui." data-why="Le fait que cette information soit interne pour le client ne change rien à sa provenance de votre point de vue : elle concerne un tiers, elle est donc externe pour vous.">
+            <legend>3. L'organigramme complet d'un client, avec les noms et fonctions de chaque salarié, transmis pour préparer un paramétrage SIRH.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="q3" value="safe"> Public, pas de restriction de confidentialité indiquée</label>
+              <label class="choice"><input type="radio" name="q3" value="int"> À protéger, interne</label>
+              <label class="choice"><input type="radio" name="q3" value="ext"> À protéger, externe</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <fieldset data-answer="ext" data-ok="Exact. Même si aucune personne n'est identifiable, l'interface, la configuration ou le contenu peut rester confidentiel et appartenir au client source. Une autorisation explicite est nécessaire avant de l'utiliser chez un autre client." data-why="Anonymiser les personnes ne transfère ni les droits de réutilisation ni la propriété du support. La capture reste une information externe à protéger tant que le client n'a pas autorisé cet usage.">
+            <legend>4. Une capture d'écran du tableau de bord SIRH d'un client, entièrement anonymisée, utilisée pour illustrer une méthode générale auprès d'un autre client.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="q4" value="safe"> Public, pas de restriction de confidentialité indiquée</label>
+              <label class="choice"><input type="radio" name="q4" value="int"> À protéger, interne</label>
+              <label class="choice"><input type="radio" name="q4" value="ext"> À protéger, externe</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <div class="toolbar no-print">
+            <button class="btn btn-primary grade-btn" type="button">Corriger mes réponses</button>
+            <div class="ex-score" role="status" aria-live="polite">Répondez aux 4 questions</div>
+          </div>
+        </section>
+
+        <section class="exercise" aria-labelledby="ex2-title">
+          <h2 id="ex2-title"><span class="num">Exercice 2</span>Est-ce déjà le bon réflexe ?</h2>
+          <p class="instruction">Vous travaillez avec plusieurs structures clientes en parallèle. Pour chaque comportement décrit, dites s'il s'agit déjà du bon réflexe.</p>
+
+          <fieldset data-answer="oui" data-ok="Exact. Lire un document fragment par fragment, plutôt que de le juger dans son ensemble, est exactement le réflexe vu dans cette leçon." data-why="Juger un document dans son ensemble, sans repasser sur chaque nom, chaque chiffre et chaque situation individuelle, risque de laisser passer un fragment sensible noyé dans un contenu par ailleurs anodin.">
+            <legend>1. Avant de coller un compte-rendu de réunion dans un outil d'IA, vous relisez chaque nom, chaque chiffre et chaque situation individuelle qu'il contient, plutôt que de juger le document dans son ensemble.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="p1" value="oui"> Oui, bon réflexe</label>
+              <label class="choice"><input type="radio" name="p1" value="non"> Non, pas encore</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <fieldset data-answer="non" data-ok="Exact. Interne au client ne veut pas dire non sensible : cette information reste une donnée externe, sensible, de votre point de vue." data-why="Le fait qu'une information soit interne pour le client dont elle parle ne change rien à sa provenance de votre point de vue : elle concerne un tiers, donc elle reste externe, et sa sensibilité propre n'a pas disparu.">
+            <legend>2. Parce qu'une information concerne le personnel d'un de vos clients, vous considérez qu'elle est interne à ce client, et qu'elle ne présente donc pas de risque particulier pour vous.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="p2" value="oui"> Oui, bon réflexe</label>
+              <label class="choice"><input type="radio" name="p2" value="non"> Non, pas encore</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <fieldset data-answer="non" data-ok="Exact. Mélanger, dans le même échange, des données de deux clients différents revient à ne plus cloisonner ce qui devrait rester séparé." data-why="Même sans intention, faire avancer deux missions dans la même conversation expose à mêler des informations qui n'ont pas à se croiser : le cloisonnement se fait mission par mission, pas seulement entre vous et l'extérieur.">
+            <legend>3. Vous utilisez la même conversation avec un outil d'IA pour avancer sur deux missions différentes, chez deux clients différents, le même après-midi.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="p3" value="oui"> Oui, bon réflexe</label>
+              <label class="choice"><input type="radio" name="p3" value="non"> Non, pas encore</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <fieldset data-answer="non" data-ok="Exact. Une information publique n'est pas nécessairement libre de droits, exacte, actuelle ou autorisée pour la finalité envisagée. Vérifiez la source, la date, les droits et les données personnelles résiduelles." data-why="Le caractère public réduit un risque de confidentialité, mais ne supprime pas les autres contrôles avant réutilisation.">
+            <legend>4. Vous considérez qu'une information déjà publique, par exemple déjà présente sur le site internet d'un client, ne nécessite plus de précaution particulière avant d'être réutilisée.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="p4" value="oui"> Oui, bon réflexe</label>
+              <label class="choice"><input type="radio" name="p4" value="non"> Non, pas encore</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <div class="toolbar no-print">
+            <button class="btn btn-primary grade-btn" type="button">Corriger mes réponses</button>
+            <div class="ex-score" role="status" aria-live="polite">Répondez aux 4 questions</div>
+          </div>
+        </section>
+      </form>
+    </main>
+
+    <footer>
+      Toutes les entreprises, personnes et données de cet exercice sont fictives. Ce support ne remplace pas la politique interne de vos clients ni les consignes de leur DSI ou de leur DPO.
+    </footer>
+  </div>
+
+  <script>
+    document.querySelectorAll('.grade-btn').forEach((btn) => {
+      const section = btn.closest('.exercise');
+      const fieldsets = [...section.querySelectorAll('fieldset[data-answer]')];
+      const scoreEl = section.querySelector('.ex-score');
+      const threshold = Math.max(1, Math.ceil(fieldsets.length * 0.8));
+
+      btn.addEventListener('click', () => {
+        let score = 0;
+        let answered = 0;
+        fieldsets.forEach((fieldset) => {
+          const selected = fieldset.querySelector('input:checked');
+          const feedback = fieldset.querySelector('.feedback');
+          fieldset.classList.remove('correct', 'incorrect');
+          if (!selected) {
+            feedback.textContent = 'Choisissez une réponse.';
+            fieldset.classList.add('incorrect');
+            return;
+          }
+          answered += 1;
+          if (selected.value === fieldset.dataset.answer) {
+            score += 1;
+            fieldset.classList.add('correct');
+            feedback.textContent = fieldset.dataset.ok;
+          } else {
+            fieldset.classList.add('incorrect');
+            feedback.textContent = `À revoir. ${fieldset.dataset.why}`;
+          }
+        });
+        scoreEl.className = 'ex-score ' + (score >= threshold ? 'score-good' : 'score-review');
+        if (answered < fieldsets.length) {
+          scoreEl.textContent = `${answered}/${fieldsets.length} réponses données. Score provisoire : ${score}/${fieldsets.length}.`;
+        } else if (score === fieldsets.length) {
+          scoreEl.textContent = `${score}/${fieldsets.length}. Tout est juste.`;
+        } else if (score >= threshold) {
+          scoreEl.textContent = `${score}/${fieldsets.length}. Relisez les retours en couleur, puis continuez.`;
+        } else {
+          scoreEl.textContent = `${score}/${fieldsets.length}. Relisez les retours en couleur avant de poursuivre.`;
+        }
+        section.querySelector('.incorrect')?.scrollIntoView({ behavior:'smooth', block:'center' });
+      });
+    });
+  </script>
+</body>
+</html>

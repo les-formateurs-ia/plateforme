@@ -1,0 +1,1676 @@
+{
+  "name": "lesson1_4-nathalie",
+  "source": "../docs/formation-rs6776/lecon-1.4/script-video-nathalie.md",
+  "voice": "341b4807e5e6455fa88f34bda5d6eeea",
+  "model": "heygen-voice-1-turbo-free",
+  "total": 102.35038548752834,
+  "avatarSeconds": 32.438095238095244,
+  "scenes": [
+    {
+      "id": "1",
+      "title": "Accroche",
+      "avatar": "full",
+      "text": "Bonjour Nathalie. Le RGPD et la CNIL, vous connaissez. Les définitions de la vidéo de la leçon, vous les avez. Mais vous êtes indépendante, et vous intervenez chez plusieurs clients en parallèle. Alors appliquons ces définitions à votre position : entre votre activité et chaque client.",
+      "audio": "generated/lesson1_4-nathalie/scene-1.wav",
+      "duration": 15.311224489795919,
+      "words": [
+        {
+          "w": "Bonjour",
+          "start": 0.299,
+          "end": 0.597
+        },
+        {
+          "w": "Nathalie.",
+          "start": 0.64,
+          "end": 1.195
+        },
+        {
+          "w": "Le",
+          "start": 1.451,
+          "end": 1.664
+        },
+        {
+          "w": "RGPD",
+          "start": 1.749,
+          "end": 2.219
+        },
+        {
+          "w": "et",
+          "start": 2.261,
+          "end": 2.304
+        },
+        {
+          "w": "la",
+          "start": 2.347,
+          "end": 2.389
+        },
+        {
+          "w": "CNIL,",
+          "start": 2.432,
+          "end": 2.816
+        },
+        {
+          "w": "vous",
+          "start": 2.944,
+          "end": 3.115
+        },
+        {
+          "w": "connaissez.",
+          "start": 3.157,
+          "end": 3.605
+        },
+        {
+          "w": "Les",
+          "start": 3.712,
+          "end": 3.797
+        },
+        {
+          "w": "définitions",
+          "start": 3.84,
+          "end": 4.139
+        },
+        {
+          "w": "de",
+          "start": 4.309,
+          "end": 4.352
+        },
+        {
+          "w": "la",
+          "start": 4.395,
+          "end": 4.437
+        },
+        {
+          "w": "vidéo",
+          "start": 4.48,
+          "end": 4.736
+        },
+        {
+          "w": "de",
+          "start": 4.779,
+          "end": 4.821
+        },
+        {
+          "w": "la",
+          "start": 4.864,
+          "end": 4.907
+        },
+        {
+          "w": "leçon,",
+          "start": 4.949,
+          "end": 5.355
+        },
+        {
+          "w": "vous",
+          "start": 5.504,
+          "end": 5.632
+        },
+        {
+          "w": "les",
+          "start": 5.675,
+          "end": 5.717
+        },
+        {
+          "w": "avez.",
+          "start": 5.76,
+          "end": 6.251
+        },
+        {
+          "w": "Mais",
+          "start": 6.485,
+          "end": 6.613
+        },
+        {
+          "w": "vous",
+          "start": 6.656,
+          "end": 6.741
+        },
+        {
+          "w": "êtes",
+          "start": 6.784,
+          "end": 6.955
+        },
+        {
+          "w": "indépendante,",
+          "start": 6.997,
+          "end": 7.616
+        },
+        {
+          "w": "et",
+          "start": 7.765,
+          "end": 7.851
+        },
+        {
+          "w": "vous",
+          "start": 7.893,
+          "end": 7.979
+        },
+        {
+          "w": "intervenez",
+          "start": 8.064,
+          "end": 8.491
+        },
+        {
+          "w": "chez",
+          "start": 8.533,
+          "end": 8.619
+        },
+        {
+          "w": "plusieurs",
+          "start": 8.661,
+          "end": 9.003
+        },
+        {
+          "w": "clients",
+          "start": 9.045,
+          "end": 9.344
+        },
+        {
+          "w": "en",
+          "start": 9.387,
+          "end": 9.429
+        },
+        {
+          "w": "parallèle.",
+          "start": 9.472,
+          "end": 10.068
+        },
+        {
+          "w": "Alors",
+          "start": 10.281,
+          "end": 10.537
+        },
+        {
+          "w": "appliquons",
+          "start": 10.579,
+          "end": 10.878
+        },
+        {
+          "w": "ces",
+          "start": 10.921,
+          "end": 11.049
+        },
+        {
+          "w": "définitions",
+          "start": 11.091,
+          "end": 11.39
+        },
+        {
+          "w": "à",
+          "start": 11.603,
+          "end": 11.646
+        },
+        {
+          "w": "votre",
+          "start": 11.689,
+          "end": 11.817
+        },
+        {
+          "w": "position",
+          "start": 11.859,
+          "end": 12.158
+        },
+        {
+          "w": ":",
+          "start": 12.457,
+          "end": 12.585
+        },
+        {
+          "w": "entre",
+          "start": 12.627,
+          "end": 12.926
+        },
+        {
+          "w": "votre",
+          "start": 13.011,
+          "end": 13.182
+        },
+        {
+          "w": "activité",
+          "start": 13.225,
+          "end": 13.779
+        },
+        {
+          "w": "et",
+          "start": 13.993,
+          "end": 14.163
+        },
+        {
+          "w": "chaque",
+          "start": 14.206,
+          "end": 14.462
+        },
+        {
+          "w": "client.",
+          "start": 14.59,
+          "end": 15.142
+        }
+      ],
+      "avatarVideo": "generated/lesson1_4-nathalie/avatar-1.mp4",
+      "avatarVideoId": "c2f82de199f6579a1773a99675c71316",
+      "avatarDuration": 15.2
+    },
+    {
+      "id": "2",
+      "title": "Votre interne, c'est votre activité",
+      "avatar": "none",
+      "text": "Pour vous, l'interne, c'est votre propre activité : vos tarifs, votre méthode, votre liste de clients. Tout le reste est externe, y compris ce qu'un client considère comme interne chez lui. L'organigramme qu'il vous transmet pour préparer un paramétrage, avec les noms et les fonctions de ses salariés, est pour vous une information externe à protéger.",
+      "audio": "generated/lesson1_4-nathalie/scene-2.wav",
+      "duration": 18.99607709750567,
+      "words": [
+        {
+          "w": "Pour",
+          "start": 0.256,
+          "end": 0.469
+        },
+        {
+          "w": "vous,",
+          "start": 0.512,
+          "end": 0.811
+        },
+        {
+          "w": "l'interne,",
+          "start": 0.939,
+          "end": 1.707
+        },
+        {
+          "w": "c'est",
+          "start": 1.835,
+          "end": 2.091
+        },
+        {
+          "w": "votre",
+          "start": 2.133,
+          "end": 2.261
+        },
+        {
+          "w": "propre",
+          "start": 2.347,
+          "end": 2.603
+        },
+        {
+          "w": "activité",
+          "start": 2.645,
+          "end": 3.157
+        },
+        {
+          "w": ":",
+          "start": 3.243,
+          "end": 3.328
+        },
+        {
+          "w": "vos",
+          "start": 3.371,
+          "end": 3.499
+        },
+        {
+          "w": "tarifs,",
+          "start": 3.541,
+          "end": 4.096
+        },
+        {
+          "w": "votre",
+          "start": 4.181,
+          "end": 4.395
+        },
+        {
+          "w": "méthode,",
+          "start": 4.437,
+          "end": 4.992
+        },
+        {
+          "w": "votre",
+          "start": 5.163,
+          "end": 5.376
+        },
+        {
+          "w": "liste",
+          "start": 5.461,
+          "end": 5.675
+        },
+        {
+          "w": "de",
+          "start": 5.717,
+          "end": 5.76
+        },
+        {
+          "w": "clients.",
+          "start": 5.845,
+          "end": 6.251
+        },
+        {
+          "w": "Tout",
+          "start": 6.357,
+          "end": 6.528
+        },
+        {
+          "w": "le",
+          "start": 6.571,
+          "end": 6.613
+        },
+        {
+          "w": "reste",
+          "start": 6.656,
+          "end": 6.827
+        },
+        {
+          "w": "est",
+          "start": 6.869,
+          "end": 6.912
+        },
+        {
+          "w": "externe,",
+          "start": 6.955,
+          "end": 7.552
+        },
+        {
+          "w": "y",
+          "start": 7.68,
+          "end": 7.893
+        },
+        {
+          "w": "compris",
+          "start": 7.936,
+          "end": 8.235
+        },
+        {
+          "w": "ce",
+          "start": 8.277,
+          "end": 8.363
+        },
+        {
+          "w": "qu'un",
+          "start": 8.405,
+          "end": 8.533
+        },
+        {
+          "w": "client",
+          "start": 8.576,
+          "end": 8.789
+        },
+        {
+          "w": "considère",
+          "start": 8.832,
+          "end": 9.216
+        },
+        {
+          "w": "comme",
+          "start": 9.301,
+          "end": 9.429
+        },
+        {
+          "w": "interne",
+          "start": 9.472,
+          "end": 9.899
+        },
+        {
+          "w": "chez",
+          "start": 9.984,
+          "end": 10.112
+        },
+        {
+          "w": "lui.",
+          "start": 10.155,
+          "end": 10.447
+        },
+        {
+          "w": "L'organigramme",
+          "start": 10.611,
+          "end": 11.293
+        },
+        {
+          "w": "qu'il",
+          "start": 11.336,
+          "end": 11.464
+        },
+        {
+          "w": "vous",
+          "start": 11.507,
+          "end": 11.592
+        },
+        {
+          "w": "transmet",
+          "start": 11.635,
+          "end": 12.062
+        },
+        {
+          "w": "pour",
+          "start": 12.104,
+          "end": 12.232
+        },
+        {
+          "w": "préparer",
+          "start": 12.275,
+          "end": 12.659
+        },
+        {
+          "w": "un",
+          "start": 12.701,
+          "end": 12.744
+        },
+        {
+          "w": "paramétrage,",
+          "start": 12.787,
+          "end": 13.555
+        },
+        {
+          "w": "avec",
+          "start": 13.768,
+          "end": 14.067
+        },
+        {
+          "w": "les",
+          "start": 14.152,
+          "end": 14.238
+        },
+        {
+          "w": "noms",
+          "start": 14.28,
+          "end": 14.451
+        },
+        {
+          "w": "et",
+          "start": 14.621,
+          "end": 14.664
+        },
+        {
+          "w": "les",
+          "start": 14.707,
+          "end": 14.749
+        },
+        {
+          "w": "fonctions",
+          "start": 14.792,
+          "end": 14.963
+        },
+        {
+          "w": "de",
+          "start": 15.176,
+          "end": 15.219
+        },
+        {
+          "w": "ses",
+          "start": 15.261,
+          "end": 15.389
+        },
+        {
+          "w": "salariés,",
+          "start": 15.432,
+          "end": 15.965
+        },
+        {
+          "w": "est",
+          "start": 16.029,
+          "end": 16.371
+        },
+        {
+          "w": "pour",
+          "start": 16.413,
+          "end": 16.541
+        },
+        {
+          "w": "vous",
+          "start": 16.584,
+          "end": 16.712
+        },
+        {
+          "w": "une",
+          "start": 16.755,
+          "end": 16.84
+        },
+        {
+          "w": "information",
+          "start": 16.883,
+          "end": 17.224
+        },
+        {
+          "w": "externe",
+          "start": 17.395,
+          "end": 17.95
+        },
+        {
+          "w": "à",
+          "start": 17.992,
+          "end": 18.078
+        },
+        {
+          "w": "protéger.",
+          "start": 18.078,
+          "end": 18.796
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "title": "Pendant vos formations",
+      "avatar": "none",
+      "text": "Vous le vivez pendant vos formations aux utilisateurs : une fiche salarié ou un bulletin de paie réel peut rester visible à l'écran. Pour le client, ce sont ses données internes. Pour vous, ce sont des données personnelles externes, et un bulletin peut révéler des informations particulièrement encadrées. La bonne démonstration utilise un environnement de test et des profils fictifs.",
+      "audio": "generated/lesson1_4-nathalie/scene-3.wav",
+      "duration": 19.553356009070296,
+      "words": [
+        {
+          "w": "Vous",
+          "start": 0.299,
+          "end": 0.469
+        },
+        {
+          "w": "le",
+          "start": 0.512,
+          "end": 0.555
+        },
+        {
+          "w": "vivez",
+          "start": 0.597,
+          "end": 0.811
+        },
+        {
+          "w": "pendant",
+          "start": 0.853,
+          "end": 1.024
+        },
+        {
+          "w": "vos",
+          "start": 1.067,
+          "end": 1.152
+        },
+        {
+          "w": "formations",
+          "start": 1.195,
+          "end": 1.451
+        },
+        {
+          "w": "aux",
+          "start": 1.664,
+          "end": 1.749
+        },
+        {
+          "w": "utilisateurs",
+          "start": 1.792,
+          "end": 2.389
+        },
+        {
+          "w": ":",
+          "start": 2.475,
+          "end": 2.517
+        },
+        {
+          "w": "une",
+          "start": 2.56,
+          "end": 2.944
+        },
+        {
+          "w": "fiche",
+          "start": 2.987,
+          "end": 3.2
+        },
+        {
+          "w": "salarié",
+          "start": 3.285,
+          "end": 3.712
+        },
+        {
+          "w": "ou",
+          "start": 3.84,
+          "end": 3.925
+        },
+        {
+          "w": "un",
+          "start": 3.968,
+          "end": 4.011
+        },
+        {
+          "w": "bulletin",
+          "start": 4.053,
+          "end": 4.352
+        },
+        {
+          "w": "de",
+          "start": 4.395,
+          "end": 4.437
+        },
+        {
+          "w": "paie",
+          "start": 4.48,
+          "end": 4.651
+        },
+        {
+          "w": "réel",
+          "start": 4.736,
+          "end": 5.035
+        },
+        {
+          "w": "peut",
+          "start": 5.12,
+          "end": 5.461
+        },
+        {
+          "w": "rester",
+          "start": 5.504,
+          "end": 5.76
+        },
+        {
+          "w": "visible",
+          "start": 5.803,
+          "end": 6.101
+        },
+        {
+          "w": "à",
+          "start": 6.229,
+          "end": 6.528
+        },
+        {
+          "w": "l'écran.",
+          "start": 6.613,
+          "end": 6.869
+        },
+        {
+          "w": "Pour",
+          "start": 6.912,
+          "end": 6.997
+        },
+        {
+          "w": "le",
+          "start": 7.04,
+          "end": 7.083
+        },
+        {
+          "w": "client,",
+          "start": 7.125,
+          "end": 7.552
+        },
+        {
+          "w": "ce",
+          "start": 7.723,
+          "end": 7.851
+        },
+        {
+          "w": "sont",
+          "start": 7.893,
+          "end": 8.021
+        },
+        {
+          "w": "ses",
+          "start": 8.064,
+          "end": 8.149
+        },
+        {
+          "w": "données",
+          "start": 8.192,
+          "end": 8.448
+        },
+        {
+          "w": "internes.",
+          "start": 8.491,
+          "end": 9.002
+        },
+        {
+          "w": "Pour",
+          "start": 9.171,
+          "end": 9.342
+        },
+        {
+          "w": "vous,",
+          "start": 9.384,
+          "end": 9.768
+        },
+        {
+          "w": "ce",
+          "start": 9.982,
+          "end": 10.11
+        },
+        {
+          "w": "sont",
+          "start": 10.152,
+          "end": 10.28
+        },
+        {
+          "w": "des",
+          "start": 10.323,
+          "end": 10.366
+        },
+        {
+          "w": "données",
+          "start": 10.409,
+          "end": 10.579
+        },
+        {
+          "w": "personnelles",
+          "start": 10.622,
+          "end": 11.006
+        },
+        {
+          "w": "externes,",
+          "start": 11.049,
+          "end": 11.795
+        },
+        {
+          "w": "et",
+          "start": 11.944,
+          "end": 12.072
+        },
+        {
+          "w": "un",
+          "start": 12.115,
+          "end": 12.158
+        },
+        {
+          "w": "bulletin",
+          "start": 12.2,
+          "end": 12.499
+        },
+        {
+          "w": "peut",
+          "start": 12.585,
+          "end": 12.67
+        },
+        {
+          "w": "révéler",
+          "start": 12.713,
+          "end": 13.011
+        },
+        {
+          "w": "des",
+          "start": 13.054,
+          "end": 13.139
+        },
+        {
+          "w": "informations",
+          "start": 13.182,
+          "end": 13.523
+        },
+        {
+          "w": "particulièrement",
+          "start": 13.736,
+          "end": 14.419
+        },
+        {
+          "w": "encadrées.",
+          "start": 14.462,
+          "end": 15.123
+        },
+        {
+          "w": "La",
+          "start": 15.358,
+          "end": 15.571
+        },
+        {
+          "w": "bonne",
+          "start": 15.614,
+          "end": 15.784
+        },
+        {
+          "w": "démonstration",
+          "start": 15.827,
+          "end": 16.254
+        },
+        {
+          "w": "utilise",
+          "start": 16.467,
+          "end": 16.766
+        },
+        {
+          "w": "un",
+          "start": 16.851,
+          "end": 16.936
+        },
+        {
+          "w": "environnement",
+          "start": 16.979,
+          "end": 17.406
+        },
+        {
+          "w": "de",
+          "start": 17.448,
+          "end": 17.534
+        },
+        {
+          "w": "test",
+          "start": 17.576,
+          "end": 17.79
+        },
+        {
+          "w": "et",
+          "start": 18.046,
+          "end": 18.131
+        },
+        {
+          "w": "des",
+          "start": 18.174,
+          "end": 18.302
+        },
+        {
+          "w": "profils",
+          "start": 18.345,
+          "end": 18.601
+        },
+        {
+          "w": "fictifs.",
+          "start": 18.643,
+          "end": 19.353
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "title": "Vos propres informations",
+      "avatar": "none",
+      "text": "Dans l'autre sens, vos tarifs, votre méthode et votre liste de clients ne sont pas des données sensibles au sens du RGPD. Ce sont pourtant des informations commerciales à protéger. Un tarif journalier pas encore communiqué à un prospect, par exemple. Surtout quand deux de vos clients évoluent dans le même secteur.",
+      "audio": "generated/lesson1_4-nathalie/scene-4.wav",
+      "duration": 16.232902494331064,
+      "words": [
+        {
+          "w": "Dans",
+          "start": 0.299,
+          "end": 0.469
+        },
+        {
+          "w": "l'autre",
+          "start": 0.512,
+          "end": 0.768
+        },
+        {
+          "w": "sens,",
+          "start": 0.811,
+          "end": 1.195
+        },
+        {
+          "w": "vos",
+          "start": 1.451,
+          "end": 1.664
+        },
+        {
+          "w": "tarifs,",
+          "start": 1.707,
+          "end": 2.325
+        },
+        {
+          "w": "votre",
+          "start": 2.389,
+          "end": 2.645
+        },
+        {
+          "w": "méthode",
+          "start": 2.688,
+          "end": 3.072
+        },
+        {
+          "w": "et",
+          "start": 3.2,
+          "end": 3.243
+        },
+        {
+          "w": "votre",
+          "start": 3.285,
+          "end": 3.456
+        },
+        {
+          "w": "liste",
+          "start": 3.541,
+          "end": 3.755
+        },
+        {
+          "w": "de",
+          "start": 3.84,
+          "end": 3.883
+        },
+        {
+          "w": "clients",
+          "start": 3.968,
+          "end": 4.267
+        },
+        {
+          "w": "ne",
+          "start": 4.48,
+          "end": 4.693
+        },
+        {
+          "w": "sont",
+          "start": 4.736,
+          "end": 4.907
+        },
+        {
+          "w": "pas",
+          "start": 4.949,
+          "end": 5.035
+        },
+        {
+          "w": "des",
+          "start": 5.077,
+          "end": 5.12
+        },
+        {
+          "w": "données",
+          "start": 5.163,
+          "end": 5.376
+        },
+        {
+          "w": "sensibles",
+          "start": 5.419,
+          "end": 5.931
+        },
+        {
+          "w": "au",
+          "start": 5.973,
+          "end": 6.016
+        },
+        {
+          "w": "sens",
+          "start": 6.059,
+          "end": 6.187
+        },
+        {
+          "w": "du",
+          "start": 6.229,
+          "end": 6.315
+        },
+        {
+          "w": "RGPD.",
+          "start": 6.357,
+          "end": 7.061
+        },
+        {
+          "w": "Ce",
+          "start": 7.296,
+          "end": 7.467
+        },
+        {
+          "w": "sont",
+          "start": 7.509,
+          "end": 7.595
+        },
+        {
+          "w": "pourtant",
+          "start": 7.637,
+          "end": 7.851
+        },
+        {
+          "w": "des",
+          "start": 7.893,
+          "end": 7.936
+        },
+        {
+          "w": "informations",
+          "start": 7.979,
+          "end": 8.363
+        },
+        {
+          "w": "commerciales",
+          "start": 8.533,
+          "end": 9.088
+        },
+        {
+          "w": "à",
+          "start": 9.131,
+          "end": 9.173
+        },
+        {
+          "w": "protéger.",
+          "start": 9.216,
+          "end": 9.728
+        },
+        {
+          "w": "Un",
+          "start": 9.856,
+          "end": 9.984
+        },
+        {
+          "w": "tarif",
+          "start": 10.027,
+          "end": 10.24
+        },
+        {
+          "w": "journalier",
+          "start": 10.325,
+          "end": 10.624
+        },
+        {
+          "w": "pas",
+          "start": 10.795,
+          "end": 10.923
+        },
+        {
+          "w": "encore",
+          "start": 10.966,
+          "end": 11.179
+        },
+        {
+          "w": "communiqué",
+          "start": 11.222,
+          "end": 11.691
+        },
+        {
+          "w": "à",
+          "start": 11.733,
+          "end": 11.819
+        },
+        {
+          "w": "un",
+          "start": 11.861,
+          "end": 11.904
+        },
+        {
+          "w": "prospect,",
+          "start": 11.947,
+          "end": 12.373
+        },
+        {
+          "w": "par",
+          "start": 12.459,
+          "end": 12.587
+        },
+        {
+          "w": "exemple.",
+          "start": 12.63,
+          "end": 13.205
+        },
+        {
+          "w": "Surtout",
+          "start": 13.483,
+          "end": 13.781
+        },
+        {
+          "w": "quand",
+          "start": 13.824,
+          "end": 13.952
+        },
+        {
+          "w": "deux",
+          "start": 13.995,
+          "end": 14.165
+        },
+        {
+          "w": "de",
+          "start": 14.208,
+          "end": 14.251
+        },
+        {
+          "w": "vos",
+          "start": 14.293,
+          "end": 14.379
+        },
+        {
+          "w": "clients",
+          "start": 14.421,
+          "end": 14.678
+        },
+        {
+          "w": "évoluent",
+          "start": 14.72,
+          "end": 15.019
+        },
+        {
+          "w": "dans",
+          "start": 15.062,
+          "end": 15.36
+        },
+        {
+          "w": "le",
+          "start": 15.403,
+          "end": 15.445
+        },
+        {
+          "w": "même",
+          "start": 15.445,
+          "end": 15.445
+        },
+        {
+          "w": "secteur.",
+          "start": 15.445,
+          "end": 16.033
+        }
+      ]
+    },
+    {
+      "id": "5",
+      "title": "Un client, un échange",
+      "avatar": "none",
+      "text": "Le réflexe qui en découle : ne mélangez jamais, dans un même échange avec un outil d'IA, les informations d'un client avec celles d'un autre, ni vos données avec celles d'une mission en cours. Une même conversation pour deux clients, le même après-midi, ce n'est pas encore le bon réflexe.",
+      "audio": "generated/lesson1_4-nathalie/scene-5.wav",
+      "duration": 15.129954648526077,
+      "words": [
+        {
+          "w": "Le",
+          "start": 0.299,
+          "end": 0.427
+        },
+        {
+          "w": "réflexe",
+          "start": 0.469,
+          "end": 0.811
+        },
+        {
+          "w": "qui",
+          "start": 0.853,
+          "end": 0.939
+        },
+        {
+          "w": "en",
+          "start": 0.981,
+          "end": 1.024
+        },
+        {
+          "w": "découle",
+          "start": 1.067,
+          "end": 1.408
+        },
+        {
+          "w": ":",
+          "start": 1.579,
+          "end": 1.621
+        },
+        {
+          "w": "ne",
+          "start": 1.664,
+          "end": 1.835
+        },
+        {
+          "w": "mélangez",
+          "start": 1.877,
+          "end": 2.304
+        },
+        {
+          "w": "jamais,",
+          "start": 2.347,
+          "end": 2.795
+        },
+        {
+          "w": "dans",
+          "start": 2.901,
+          "end": 3.029
+        },
+        {
+          "w": "un",
+          "start": 3.072,
+          "end": 3.2
+        },
+        {
+          "w": "même",
+          "start": 3.243,
+          "end": 3.413
+        },
+        {
+          "w": "échange",
+          "start": 3.456,
+          "end": 3.755
+        },
+        {
+          "w": "avec",
+          "start": 3.883,
+          "end": 4.011
+        },
+        {
+          "w": "un",
+          "start": 4.053,
+          "end": 4.181
+        },
+        {
+          "w": "outil",
+          "start": 4.224,
+          "end": 4.437
+        },
+        {
+          "w": "d'IA,",
+          "start": 4.48,
+          "end": 4.907
+        },
+        {
+          "w": "les",
+          "start": 5.077,
+          "end": 5.248
+        },
+        {
+          "w": "informations",
+          "start": 5.291,
+          "end": 5.632
+        },
+        {
+          "w": "d'un",
+          "start": 5.76,
+          "end": 5.888
+        },
+        {
+          "w": "client",
+          "start": 5.931,
+          "end": 6.229
+        },
+        {
+          "w": "avec",
+          "start": 6.315,
+          "end": 6.443
+        },
+        {
+          "w": "celles",
+          "start": 6.485,
+          "end": 6.656
+        },
+        {
+          "w": "d'un",
+          "start": 6.699,
+          "end": 6.827
+        },
+        {
+          "w": "autre,",
+          "start": 6.869,
+          "end": 7.339
+        },
+        {
+          "w": "ni",
+          "start": 7.509,
+          "end": 7.68
+        },
+        {
+          "w": "vos",
+          "start": 7.723,
+          "end": 7.851
+        },
+        {
+          "w": "données",
+          "start": 7.893,
+          "end": 8.192
+        },
+        {
+          "w": "avec",
+          "start": 8.235,
+          "end": 8.405
+        },
+        {
+          "w": "celles",
+          "start": 8.448,
+          "end": 8.619
+        },
+        {
+          "w": "d'une",
+          "start": 8.661,
+          "end": 8.789
+        },
+        {
+          "w": "mission",
+          "start": 8.832,
+          "end": 8.917
+        },
+        {
+          "w": "en",
+          "start": 9.131,
+          "end": 9.216
+        },
+        {
+          "w": "cours.",
+          "start": 9.259,
+          "end": 9.655
+        },
+        {
+          "w": "Une",
+          "start": 9.839,
+          "end": 10.052
+        },
+        {
+          "w": "même",
+          "start": 10.095,
+          "end": 10.308
+        },
+        {
+          "w": "conversation",
+          "start": 10.351,
+          "end": 10.735
+        },
+        {
+          "w": "pour",
+          "start": 10.948,
+          "end": 11.076
+        },
+        {
+          "w": "deux",
+          "start": 11.119,
+          "end": 11.332
+        },
+        {
+          "w": "clients,",
+          "start": 11.375,
+          "end": 11.823
+        },
+        {
+          "w": "le",
+          "start": 11.972,
+          "end": 12.1
+        },
+        {
+          "w": "même",
+          "start": 12.143,
+          "end": 12.313
+        },
+        {
+          "w": "après-midi,",
+          "start": 12.356,
+          "end": 13.018
+        },
+        {
+          "w": "ce",
+          "start": 13.252,
+          "end": 13.338
+        },
+        {
+          "w": "n'est",
+          "start": 13.38,
+          "end": 13.508
+        },
+        {
+          "w": "pas",
+          "start": 13.551,
+          "end": 13.679
+        },
+        {
+          "w": "encore",
+          "start": 13.722,
+          "end": 13.977
+        },
+        {
+          "w": "le",
+          "start": 14.02,
+          "end": 14.063
+        },
+        {
+          "w": "bon",
+          "start": 14.105,
+          "end": 14.191
+        },
+        {
+          "w": "réflexe.",
+          "start": 14.233,
+          "end": 14.955
+        }
+      ]
+    },
+    {
+      "id": "6",
+      "title": "À vous",
+      "avatar": "pip",
+      "text": "Dans le Playground, vous classerez quatre informations de votre quotidien selon leur niveau de protection et leur provenance, de votre point de vue. Puis vous vérifierez vos réflexes quand vous travaillez pour plusieurs clients. Gardez ce repère, votre activité d'un côté, chaque client de l'autre : la prochaine leçon vous donnera les méthodes pour les protéger.",
+      "audio": "generated/lesson1_4-nathalie/scene-6.wav",
+      "duration": 17.12687074829932,
+      "words": [
+        {
+          "w": "Dans",
+          "start": 0.299,
+          "end": 0.469
+        },
+        {
+          "w": "le",
+          "start": 0.512,
+          "end": 0.555
+        },
+        {
+          "w": "Playground,",
+          "start": 0.597,
+          "end": 1.173
+        },
+        {
+          "w": "vous",
+          "start": 1.408,
+          "end": 1.536
+        },
+        {
+          "w": "classerez",
+          "start": 1.579,
+          "end": 1.92
+        },
+        {
+          "w": "quatre",
+          "start": 1.963,
+          "end": 2.261
+        },
+        {
+          "w": "informations",
+          "start": 2.304,
+          "end": 2.645
+        },
+        {
+          "w": "de",
+          "start": 2.859,
+          "end": 2.944
+        },
+        {
+          "w": "votre",
+          "start": 2.987,
+          "end": 3.115
+        },
+        {
+          "w": "quotidien",
+          "start": 3.157,
+          "end": 3.627
+        },
+        {
+          "w": "selon",
+          "start": 3.755,
+          "end": 4.011
+        },
+        {
+          "w": "leur",
+          "start": 4.053,
+          "end": 4.181
+        },
+        {
+          "w": "niveau",
+          "start": 4.224,
+          "end": 4.48
+        },
+        {
+          "w": "de",
+          "start": 4.523,
+          "end": 4.565
+        },
+        {
+          "w": "protection",
+          "start": 4.608,
+          "end": 4.864
+        },
+        {
+          "w": "et",
+          "start": 5.163,
+          "end": 5.205
+        },
+        {
+          "w": "leur",
+          "start": 5.248,
+          "end": 5.333
+        },
+        {
+          "w": "provenance,",
+          "start": 5.376,
+          "end": 6.016
+        },
+        {
+          "w": "de",
+          "start": 6.229,
+          "end": 6.315
+        },
+        {
+          "w": "votre",
+          "start": 6.357,
+          "end": 6.528
+        },
+        {
+          "w": "point",
+          "start": 6.613,
+          "end": 6.741
+        },
+        {
+          "w": "de",
+          "start": 6.784,
+          "end": 6.827
+        },
+        {
+          "w": "vue.",
+          "start": 6.869,
+          "end": 7.096
+        },
+        {
+          "w": "Puis",
+          "start": 7.238,
+          "end": 7.537
+        },
+        {
+          "w": "vous",
+          "start": 7.58,
+          "end": 7.708
+        },
+        {
+          "w": "vérifierez",
+          "start": 7.75,
+          "end": 8.177
+        },
+        {
+          "w": "vos",
+          "start": 8.22,
+          "end": 8.305
+        },
+        {
+          "w": "réflexes",
+          "start": 8.348,
+          "end": 8.732
+        },
+        {
+          "w": "quand",
+          "start": 8.774,
+          "end": 8.86
+        },
+        {
+          "w": "vous",
+          "start": 8.902,
+          "end": 8.988
+        },
+        {
+          "w": "travaillez",
+          "start": 9.03,
+          "end": 9.329
+        },
+        {
+          "w": "pour",
+          "start": 9.372,
+          "end": 9.5
+        },
+        {
+          "w": "plusieurs",
+          "start": 9.542,
+          "end": 9.884
+        },
+        {
+          "w": "clients.",
+          "start": 9.926,
+          "end": 10.417
+        },
+        {
+          "w": "Gardez",
+          "start": 10.609,
+          "end": 10.908
+        },
+        {
+          "w": "ce",
+          "start": 10.95,
+          "end": 11.036
+        },
+        {
+          "w": "repère,",
+          "start": 11.078,
+          "end": 11.526
+        },
+        {
+          "w": "votre",
+          "start": 11.718,
+          "end": 11.932
+        },
+        {
+          "w": "activité",
+          "start": 11.974,
+          "end": 12.273
+        },
+        {
+          "w": "d'un",
+          "start": 12.316,
+          "end": 12.444
+        },
+        {
+          "w": "côté,",
+          "start": 12.486,
+          "end": 12.892
+        },
+        {
+          "w": "chaque",
+          "start": 13.041,
+          "end": 13.254
+        },
+        {
+          "w": "client",
+          "start": 13.382,
+          "end": 13.638
+        },
+        {
+          "w": "de",
+          "start": 13.681,
+          "end": 13.724
+        },
+        {
+          "w": "l'autre",
+          "start": 13.766,
+          "end": 14.022
+        },
+        {
+          "w": ":",
+          "start": 14.108,
+          "end": 14.193
+        },
+        {
+          "w": "la",
+          "start": 14.236,
+          "end": 14.534
+        },
+        {
+          "w": "prochaine",
+          "start": 14.577,
+          "end": 14.833
+        },
+        {
+          "w": "leçon",
+          "start": 14.876,
+          "end": 15.174
+        },
+        {
+          "w": "vous",
+          "start": 15.217,
+          "end": 15.345
+        },
+        {
+          "w": "donnera",
+          "start": 15.388,
+          "end": 15.601
+        },
+        {
+          "w": "les",
+          "start": 15.644,
+          "end": 15.686
+        },
+        {
+          "w": "méthodes",
+          "start": 15.729,
+          "end": 16.028
+        },
+        {
+          "w": "pour",
+          "start": 16.07,
+          "end": 16.156
+        },
+        {
+          "w": "les",
+          "start": 16.198,
+          "end": 16.284
+        },
+        {
+          "w": "protéger.",
+          "start": 16.326,
+          "end": 16.952
+        }
+      ],
+      "avatarVideo": "generated/lesson1_4-nathalie/avatar-6.mp4",
+      "avatarVideoId": "470003357885ea5159aa4458dee6bd51",
+      "avatarDuration": 17
+    }
+  ]
+}

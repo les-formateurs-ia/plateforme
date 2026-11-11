@@ -1,0 +1,1916 @@
+{
+  "name": "lesson2_2-nathalie",
+  "source": "../docs/formation-rs6776/lecon-2.2/script-video-nathalie.md",
+  "voice": "341b4807e5e6455fa88f34bda5d6eeea",
+  "model": "heygen-voice-1-turbo-free",
+  "total": 118.30619047619048,
+  "avatarSeconds": 34.60204081632653,
+  "scenes": [
+    {
+      "id": "1",
+      "title": "Accroche",
+      "avatar": "full",
+      "text": "Bonjour Nathalie. Ce que vous livrez le plus souvent n'est pas une demande courte : c'est un support de formation complet, en plusieurs modules, pour un nouveau logiciel chez un client. Appliquons la méthode de la leçon à ce livrable, avec des points de validation à chaque étape.",
+      "audio": "generated/lesson2_2-nathalie/scene-1.wav",
+      "duration": 14.282426303854875,
+      "words": [
+        {
+          "w": "Bonjour",
+          "start": 0.256,
+          "end": 0.597
+        },
+        {
+          "w": "Nathalie.",
+          "start": 0.64,
+          "end": 1.237
+        },
+        {
+          "w": "Ce",
+          "start": 1.536,
+          "end": 1.664
+        },
+        {
+          "w": "que",
+          "start": 1.707,
+          "end": 1.749
+        },
+        {
+          "w": "vous",
+          "start": 1.792,
+          "end": 1.92
+        },
+        {
+          "w": "livrez",
+          "start": 1.963,
+          "end": 2.133
+        },
+        {
+          "w": "le",
+          "start": 2.176,
+          "end": 2.219
+        },
+        {
+          "w": "plus",
+          "start": 2.261,
+          "end": 2.432
+        },
+        {
+          "w": "souvent",
+          "start": 2.475,
+          "end": 2.731
+        },
+        {
+          "w": "n'est",
+          "start": 2.773,
+          "end": 2.901
+        },
+        {
+          "w": "pas",
+          "start": 2.944,
+          "end": 3.115
+        },
+        {
+          "w": "une",
+          "start": 3.157,
+          "end": 3.243
+        },
+        {
+          "w": "demande",
+          "start": 3.328,
+          "end": 3.584
+        },
+        {
+          "w": "courte",
+          "start": 3.669,
+          "end": 4.011
+        },
+        {
+          "w": ":",
+          "start": 4.096,
+          "end": 4.139
+        },
+        {
+          "w": "c'est",
+          "start": 4.181,
+          "end": 4.352
+        },
+        {
+          "w": "un",
+          "start": 4.395,
+          "end": 4.48
+        },
+        {
+          "w": "support",
+          "start": 4.523,
+          "end": 4.651
+        },
+        {
+          "w": "de",
+          "start": 4.821,
+          "end": 4.907
+        },
+        {
+          "w": "formation",
+          "start": 4.949,
+          "end": 5.205
+        },
+        {
+          "w": "complet,",
+          "start": 5.376,
+          "end": 5.973
+        },
+        {
+          "w": "en",
+          "start": 6.101,
+          "end": 6.187
+        },
+        {
+          "w": "plusieurs",
+          "start": 6.229,
+          "end": 6.528
+        },
+        {
+          "w": "modules,",
+          "start": 6.613,
+          "end": 7.104
+        },
+        {
+          "w": "pour",
+          "start": 7.296,
+          "end": 7.424
+        },
+        {
+          "w": "un",
+          "start": 7.467,
+          "end": 7.552
+        },
+        {
+          "w": "nouveau",
+          "start": 7.595,
+          "end": 7.851
+        },
+        {
+          "w": "logiciel",
+          "start": 7.893,
+          "end": 8.277
+        },
+        {
+          "w": "chez",
+          "start": 8.32,
+          "end": 8.448
+        },
+        {
+          "w": "un",
+          "start": 8.491,
+          "end": 8.576
+        },
+        {
+          "w": "client.",
+          "start": 8.619,
+          "end": 9.014
+        },
+        {
+          "w": "Appliquons",
+          "start": 9.154,
+          "end": 9.666
+        },
+        {
+          "w": "la",
+          "start": 9.709,
+          "end": 9.794
+        },
+        {
+          "w": "méthode",
+          "start": 9.837,
+          "end": 10.05
+        },
+        {
+          "w": "de",
+          "start": 10.093,
+          "end": 10.178
+        },
+        {
+          "w": "la",
+          "start": 10.221,
+          "end": 10.306
+        },
+        {
+          "w": "leçon",
+          "start": 10.349,
+          "end": 10.605
+        },
+        {
+          "w": "à",
+          "start": 10.69,
+          "end": 10.733
+        },
+        {
+          "w": "ce",
+          "start": 10.775,
+          "end": 10.861
+        },
+        {
+          "w": "livrable,",
+          "start": 10.903,
+          "end": 11.437
+        },
+        {
+          "w": "avec",
+          "start": 11.629,
+          "end": 11.885
+        },
+        {
+          "w": "des",
+          "start": 11.927,
+          "end": 12.055
+        },
+        {
+          "w": "points",
+          "start": 12.098,
+          "end": 12.269
+        },
+        {
+          "w": "de",
+          "start": 12.311,
+          "end": 12.354
+        },
+        {
+          "w": "validation",
+          "start": 12.397,
+          "end": 12.781
+        },
+        {
+          "w": "à",
+          "start": 13.037,
+          "end": 13.122
+        },
+        {
+          "w": "chaque",
+          "start": 13.165,
+          "end": 13.378
+        },
+        {
+          "w": "étape.",
+          "start": 13.421,
+          "end": 14.108
+        }
+      ],
+      "avatarVideo": "generated/lesson2_2-nathalie/avatar-1.mp4",
+      "avatarVideoId": "1508c77c3fb1fdde6af03b128c3f99cb",
+      "avatarDuration": 14.16
+    },
+    {
+      "id": "2",
+      "title": "Votre risque principal",
+      "avatar": "none",
+      "text": "Si vous demandez d'un coup le plan, le contenu de chaque module et la mise en forme, chaque module reçoit quelques phrases interchangeables. Pour vous, le vrai risque est ailleurs : valider trop tard une architecture bancale, ou laisser passer une fonctionnalité du logiciel que l'outil a inventée. Ce n'est pas un manque de compétence du modèle : ce sont vos instructions qui se concurrencent.",
+      "audio": "generated/lesson2_2-nathalie/scene-2.wav",
+      "duration": 19.0940589569161,
+      "words": [
+        {
+          "w": "Si",
+          "start": 0.299,
+          "end": 0.469
+        },
+        {
+          "w": "vous",
+          "start": 0.512,
+          "end": 0.597
+        },
+        {
+          "w": "demandez",
+          "start": 0.64,
+          "end": 0.853
+        },
+        {
+          "w": "d'un",
+          "start": 0.896,
+          "end": 1.024
+        },
+        {
+          "w": "coup",
+          "start": 1.067,
+          "end": 1.237
+        },
+        {
+          "w": "le",
+          "start": 1.28,
+          "end": 1.365
+        },
+        {
+          "w": "plan,",
+          "start": 1.408,
+          "end": 1.792
+        },
+        {
+          "w": "le",
+          "start": 1.963,
+          "end": 2.048
+        },
+        {
+          "w": "contenu",
+          "start": 2.091,
+          "end": 2.389
+        },
+        {
+          "w": "de",
+          "start": 2.432,
+          "end": 2.475
+        },
+        {
+          "w": "chaque",
+          "start": 2.517,
+          "end": 2.688
+        },
+        {
+          "w": "module",
+          "start": 2.773,
+          "end": 3.072
+        },
+        {
+          "w": "et",
+          "start": 3.115,
+          "end": 3.157
+        },
+        {
+          "w": "la",
+          "start": 3.2,
+          "end": 3.243
+        },
+        {
+          "w": "mise",
+          "start": 3.285,
+          "end": 3.413
+        },
+        {
+          "w": "en",
+          "start": 3.456,
+          "end": 3.541
+        },
+        {
+          "w": "forme,",
+          "start": 3.584,
+          "end": 4.075
+        },
+        {
+          "w": "chaque",
+          "start": 4.267,
+          "end": 4.523
+        },
+        {
+          "w": "module",
+          "start": 4.608,
+          "end": 4.907
+        },
+        {
+          "w": "reçoit",
+          "start": 4.992,
+          "end": 5.291
+        },
+        {
+          "w": "quelques",
+          "start": 5.333,
+          "end": 5.675
+        },
+        {
+          "w": "phrases",
+          "start": 5.717,
+          "end": 5.973
+        },
+        {
+          "w": "interchangeables.",
+          "start": 6.016,
+          "end": 6.785
+        },
+        {
+          "w": "Pour",
+          "start": 7,
+          "end": 7.171
+        },
+        {
+          "w": "vous,",
+          "start": 7.213,
+          "end": 7.491
+        },
+        {
+          "w": "le",
+          "start": 7.597,
+          "end": 7.811
+        },
+        {
+          "w": "vrai",
+          "start": 7.853,
+          "end": 8.024
+        },
+        {
+          "w": "risque",
+          "start": 8.067,
+          "end": 8.28
+        },
+        {
+          "w": "est",
+          "start": 8.323,
+          "end": 8.365
+        },
+        {
+          "w": "ailleurs",
+          "start": 8.408,
+          "end": 8.749
+        },
+        {
+          "w": ":",
+          "start": 8.877,
+          "end": 8.92
+        },
+        {
+          "w": "valider",
+          "start": 8.963,
+          "end": 9.176
+        },
+        {
+          "w": "trop",
+          "start": 9.304,
+          "end": 9.475
+        },
+        {
+          "w": "tard",
+          "start": 9.517,
+          "end": 9.688
+        },
+        {
+          "w": "une",
+          "start": 9.816,
+          "end": 9.859
+        },
+        {
+          "w": "architecture",
+          "start": 9.901,
+          "end": 10.371
+        },
+        {
+          "w": "bancale,",
+          "start": 10.413,
+          "end": 10.904
+        },
+        {
+          "w": "ou",
+          "start": 11.011,
+          "end": 11.267
+        },
+        {
+          "w": "laisser",
+          "start": 11.309,
+          "end": 11.48
+        },
+        {
+          "w": "passer",
+          "start": 11.523,
+          "end": 11.779
+        },
+        {
+          "w": "une",
+          "start": 11.821,
+          "end": 11.864
+        },
+        {
+          "w": "fonctionnalité",
+          "start": 11.907,
+          "end": 12.504
+        },
+        {
+          "w": "du",
+          "start": 12.547,
+          "end": 12.632
+        },
+        {
+          "w": "logiciel",
+          "start": 12.675,
+          "end": 13.101
+        },
+        {
+          "w": "que",
+          "start": 13.187,
+          "end": 13.272
+        },
+        {
+          "w": "l'outil",
+          "start": 13.315,
+          "end": 13.571
+        },
+        {
+          "w": "a",
+          "start": 13.613,
+          "end": 13.699
+        },
+        {
+          "w": "inventée.",
+          "start": 13.741,
+          "end": 14.335
+        },
+        {
+          "w": "Ce",
+          "start": 14.544,
+          "end": 14.629
+        },
+        {
+          "w": "n'est",
+          "start": 14.672,
+          "end": 14.842
+        },
+        {
+          "w": "pas",
+          "start": 14.885,
+          "end": 14.97
+        },
+        {
+          "w": "un",
+          "start": 15.013,
+          "end": 15.098
+        },
+        {
+          "w": "manque",
+          "start": 15.141,
+          "end": 15.397
+        },
+        {
+          "w": "de",
+          "start": 15.44,
+          "end": 15.482
+        },
+        {
+          "w": "compétence",
+          "start": 15.525,
+          "end": 15.952
+        },
+        {
+          "w": "du",
+          "start": 16.037,
+          "end": 16.122
+        },
+        {
+          "w": "modèle",
+          "start": 16.165,
+          "end": 16.421
+        },
+        {
+          "w": ":",
+          "start": 16.592,
+          "end": 16.634
+        },
+        {
+          "w": "ce",
+          "start": 16.677,
+          "end": 16.805
+        },
+        {
+          "w": "sont",
+          "start": 16.848,
+          "end": 16.976
+        },
+        {
+          "w": "vos",
+          "start": 17.018,
+          "end": 17.104
+        },
+        {
+          "w": "instructions",
+          "start": 17.146,
+          "end": 17.573
+        },
+        {
+          "w": "qui",
+          "start": 17.829,
+          "end": 17.915
+        },
+        {
+          "w": "se",
+          "start": 17.957,
+          "end": 18.043
+        },
+        {
+          "w": "concurrencent.",
+          "start": 18.085,
+          "end": 18.894
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "title": "Votre chaîne, module par module",
+      "avatar": "none",
+      "text": "Votre chaîne tient en trois temps. D'abord, uniquement la liste des modules, leur ordre et ce que chacun couvre : vous la validez avant d'écrire une ligne. Corriger un plan coûte bien moins cher qu'un module rédigé de travers. Ensuite, un module à la fois, en rappelant le plan, vos sources et les contraintes. Enfin, une relecture globale pour harmoniser le ton, puis votre contrôle écran par écran avant toute livraison.",
+      "audio": "generated/lesson2_2-nathalie/scene-3.wav",
+      "duration": 22.97891156462585,
+      "words": [
+        {
+          "w": "Votre",
+          "start": 0.299,
+          "end": 0.555
+        },
+        {
+          "w": "chaîne",
+          "start": 0.597,
+          "end": 0.811
+        },
+        {
+          "w": "tient",
+          "start": 0.896,
+          "end": 1.067
+        },
+        {
+          "w": "en",
+          "start": 1.109,
+          "end": 1.195
+        },
+        {
+          "w": "trois",
+          "start": 1.237,
+          "end": 1.408
+        },
+        {
+          "w": "temps.",
+          "start": 1.451,
+          "end": 1.771
+        },
+        {
+          "w": "D'abord,",
+          "start": 1.877,
+          "end": 2.389
+        },
+        {
+          "w": "uniquement",
+          "start": 2.517,
+          "end": 3.029
+        },
+        {
+          "w": "la",
+          "start": 3.072,
+          "end": 3.157
+        },
+        {
+          "w": "liste",
+          "start": 3.2,
+          "end": 3.371
+        },
+        {
+          "w": "des",
+          "start": 3.456,
+          "end": 3.541
+        },
+        {
+          "w": "modules,",
+          "start": 3.584,
+          "end": 4.032
+        },
+        {
+          "w": "leur",
+          "start": 4.224,
+          "end": 4.395
+        },
+        {
+          "w": "ordre",
+          "start": 4.565,
+          "end": 4.779
+        },
+        {
+          "w": "et",
+          "start": 4.864,
+          "end": 4.949
+        },
+        {
+          "w": "ce",
+          "start": 4.992,
+          "end": 5.077
+        },
+        {
+          "w": "que",
+          "start": 5.12,
+          "end": 5.163
+        },
+        {
+          "w": "chacun",
+          "start": 5.205,
+          "end": 5.504
+        },
+        {
+          "w": "couvre",
+          "start": 5.547,
+          "end": 5.931
+        },
+        {
+          "w": ":",
+          "start": 5.973,
+          "end": 6.016
+        },
+        {
+          "w": "vous",
+          "start": 6.059,
+          "end": 6.187
+        },
+        {
+          "w": "la",
+          "start": 6.229,
+          "end": 6.272
+        },
+        {
+          "w": "validez",
+          "start": 6.315,
+          "end": 6.699
+        },
+        {
+          "w": "avant",
+          "start": 6.741,
+          "end": 6.955
+        },
+        {
+          "w": "d'écrire",
+          "start": 6.997,
+          "end": 7.253
+        },
+        {
+          "w": "une",
+          "start": 7.296,
+          "end": 7.339
+        },
+        {
+          "w": "ligne.",
+          "start": 7.381,
+          "end": 7.778
+        },
+        {
+          "w": "Corriger",
+          "start": 7.92,
+          "end": 8.303
+        },
+        {
+          "w": "un",
+          "start": 8.346,
+          "end": 8.474
+        },
+        {
+          "w": "plan",
+          "start": 8.517,
+          "end": 8.688
+        },
+        {
+          "w": "coûte",
+          "start": 8.773,
+          "end": 8.944
+        },
+        {
+          "w": "bien",
+          "start": 9.072,
+          "end": 9.328
+        },
+        {
+          "w": "moins",
+          "start": 9.37,
+          "end": 9.498
+        },
+        {
+          "w": "cher",
+          "start": 9.541,
+          "end": 9.797
+        },
+        {
+          "w": "qu'un",
+          "start": 9.925,
+          "end": 10.053
+        },
+        {
+          "w": "module",
+          "start": 10.095,
+          "end": 10.351
+        },
+        {
+          "w": "rédigé",
+          "start": 10.394,
+          "end": 10.693
+        },
+        {
+          "w": "de",
+          "start": 10.736,
+          "end": 10.778
+        },
+        {
+          "w": "travers.",
+          "start": 10.821,
+          "end": 11.397
+        },
+        {
+          "w": "Ensuite,",
+          "start": 11.674,
+          "end": 12.186
+        },
+        {
+          "w": "un",
+          "start": 12.314,
+          "end": 12.613
+        },
+        {
+          "w": "module",
+          "start": 12.655,
+          "end": 12.869
+        },
+        {
+          "w": "à",
+          "start": 12.912,
+          "end": 12.954
+        },
+        {
+          "w": "la",
+          "start": 12.997,
+          "end": 13.04
+        },
+        {
+          "w": "fois,",
+          "start": 13.082,
+          "end": 13.424
+        },
+        {
+          "w": "en",
+          "start": 13.552,
+          "end": 13.637
+        },
+        {
+          "w": "rappelant",
+          "start": 13.68,
+          "end": 13.978
+        },
+        {
+          "w": "le",
+          "start": 14.021,
+          "end": 14.063
+        },
+        {
+          "w": "plan,",
+          "start": 14.106,
+          "end": 14.49
+        },
+        {
+          "w": "vos",
+          "start": 14.661,
+          "end": 14.874
+        },
+        {
+          "w": "sources",
+          "start": 14.917,
+          "end": 15.216
+        },
+        {
+          "w": "et",
+          "start": 15.386,
+          "end": 15.514
+        },
+        {
+          "w": "les",
+          "start": 15.557,
+          "end": 15.6
+        },
+        {
+          "w": "contraintes.",
+          "start": 15.642,
+          "end": 16.364
+        },
+        {
+          "w": "Enfin,",
+          "start": 16.658,
+          "end": 17.128
+        },
+        {
+          "w": "une",
+          "start": 17.256,
+          "end": 17.341
+        },
+        {
+          "w": "relecture",
+          "start": 17.426,
+          "end": 17.81
+        },
+        {
+          "w": "globale",
+          "start": 17.853,
+          "end": 18.237
+        },
+        {
+          "w": "pour",
+          "start": 18.365,
+          "end": 18.493
+        },
+        {
+          "w": "harmoniser",
+          "start": 18.536,
+          "end": 19.005
+        },
+        {
+          "w": "le",
+          "start": 19.048,
+          "end": 19.09
+        },
+        {
+          "w": "ton,",
+          "start": 19.133,
+          "end": 19.517
+        },
+        {
+          "w": "puis",
+          "start": 19.73,
+          "end": 19.901
+        },
+        {
+          "w": "votre",
+          "start": 19.944,
+          "end": 20.114
+        },
+        {
+          "w": "contrôle",
+          "start": 20.2,
+          "end": 20.584
+        },
+        {
+          "w": "écran",
+          "start": 20.626,
+          "end": 20.925
+        },
+        {
+          "w": "par",
+          "start": 21.01,
+          "end": 21.096
+        },
+        {
+          "w": "écran",
+          "start": 21.181,
+          "end": 21.437
+        },
+        {
+          "w": "avant",
+          "start": 21.65,
+          "end": 21.906
+        },
+        {
+          "w": "toute",
+          "start": 21.949,
+          "end": 22.12
+        },
+        {
+          "w": "livraison.",
+          "start": 22.12,
+          "end": 22.804
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "title": "Corriger sans mélanger les clients",
+      "avatar": "none",
+      "text": "Un module vous déçoit ? Repérez ce qui manque, souvent le contexte ou le format, ajoutez cette seule précision et comparez avec la version précédente. Vous gardez ainsi les passages déjà validés. Mais si le fil contient une hypothèse fausse, ou le contexte d'un autre client, ouvrez au contraire un espace propre, avec les seuls éléments validés.",
+      "audio": "generated/lesson2_2-nathalie/scene-4.wav",
+      "duration": 18.450408163265305,
+      "words": [
+        {
+          "w": "Un",
+          "start": 0.213,
+          "end": 0.427
+        },
+        {
+          "w": "module",
+          "start": 0.469,
+          "end": 0.725
+        },
+        {
+          "w": "vous",
+          "start": 0.768,
+          "end": 0.853
+        },
+        {
+          "w": "déçoit",
+          "start": 0.896,
+          "end": 1.152
+        },
+        {
+          "w": "?",
+          "start": 1.195,
+          "end": 1.323
+        },
+        {
+          "w": "Repérez",
+          "start": 1.664,
+          "end": 2.005
+        },
+        {
+          "w": "ce",
+          "start": 2.048,
+          "end": 2.091
+        },
+        {
+          "w": "qui",
+          "start": 2.133,
+          "end": 2.261
+        },
+        {
+          "w": "manque,",
+          "start": 2.304,
+          "end": 2.709
+        },
+        {
+          "w": "souvent",
+          "start": 2.901,
+          "end": 3.157
+        },
+        {
+          "w": "le",
+          "start": 3.2,
+          "end": 3.243
+        },
+        {
+          "w": "contexte",
+          "start": 3.285,
+          "end": 3.755
+        },
+        {
+          "w": "ou",
+          "start": 3.797,
+          "end": 3.84
+        },
+        {
+          "w": "le",
+          "start": 3.883,
+          "end": 3.925
+        },
+        {
+          "w": "format,",
+          "start": 3.968,
+          "end": 4.48
+        },
+        {
+          "w": "ajoutez",
+          "start": 4.608,
+          "end": 5.163
+        },
+        {
+          "w": "cette",
+          "start": 5.205,
+          "end": 5.333
+        },
+        {
+          "w": "seule",
+          "start": 5.376,
+          "end": 5.632
+        },
+        {
+          "w": "précision",
+          "start": 5.675,
+          "end": 6.101
+        },
+        {
+          "w": "et",
+          "start": 6.272,
+          "end": 6.443
+        },
+        {
+          "w": "comparez",
+          "start": 6.485,
+          "end": 6.912
+        },
+        {
+          "w": "avec",
+          "start": 6.955,
+          "end": 7.083
+        },
+        {
+          "w": "la",
+          "start": 7.125,
+          "end": 7.211
+        },
+        {
+          "w": "version",
+          "start": 7.253,
+          "end": 7.339
+        },
+        {
+          "w": "précédente.",
+          "start": 7.509,
+          "end": 8.277
+        },
+        {
+          "w": "Vous",
+          "start": 8.576,
+          "end": 8.747
+        },
+        {
+          "w": "gardez",
+          "start": 8.789,
+          "end": 9.045
+        },
+        {
+          "w": "ainsi",
+          "start": 9.088,
+          "end": 9.259
+        },
+        {
+          "w": "les",
+          "start": 9.301,
+          "end": 9.387
+        },
+        {
+          "w": "passages",
+          "start": 9.429,
+          "end": 9.728
+        },
+        {
+          "w": "déjà",
+          "start": 9.813,
+          "end": 10.112
+        },
+        {
+          "w": "validés.",
+          "start": 10.155,
+          "end": 10.6
+        },
+        {
+          "w": "Mais",
+          "start": 10.704,
+          "end": 10.832
+        },
+        {
+          "w": "si",
+          "start": 10.874,
+          "end": 11.002
+        },
+        {
+          "w": "le",
+          "start": 11.045,
+          "end": 11.088
+        },
+        {
+          "w": "fil",
+          "start": 11.13,
+          "end": 11.301
+        },
+        {
+          "w": "contient",
+          "start": 11.386,
+          "end": 11.685
+        },
+        {
+          "w": "une",
+          "start": 11.728,
+          "end": 11.77
+        },
+        {
+          "w": "hypothèse",
+          "start": 11.813,
+          "end": 12.197
+        },
+        {
+          "w": "fausse,",
+          "start": 12.24,
+          "end": 12.688
+        },
+        {
+          "w": "ou",
+          "start": 12.88,
+          "end": 13.05
+        },
+        {
+          "w": "le",
+          "start": 13.093,
+          "end": 13.136
+        },
+        {
+          "w": "contexte",
+          "start": 13.178,
+          "end": 13.562
+        },
+        {
+          "w": "d'un",
+          "start": 13.605,
+          "end": 13.776
+        },
+        {
+          "w": "autre",
+          "start": 13.818,
+          "end": 13.946
+        },
+        {
+          "w": "client,",
+          "start": 14.032,
+          "end": 14.458
+        },
+        {
+          "w": "ouvrez",
+          "start": 14.544,
+          "end": 15.098
+        },
+        {
+          "w": "au",
+          "start": 15.141,
+          "end": 15.184
+        },
+        {
+          "w": "contraire",
+          "start": 15.226,
+          "end": 15.525
+        },
+        {
+          "w": "un",
+          "start": 15.568,
+          "end": 15.61
+        },
+        {
+          "w": "espace",
+          "start": 15.653,
+          "end": 15.909
+        },
+        {
+          "w": "propre,",
+          "start": 15.994,
+          "end": 16.485
+        },
+        {
+          "w": "avec",
+          "start": 16.634,
+          "end": 16.848
+        },
+        {
+          "w": "les",
+          "start": 16.89,
+          "end": 16.976
+        },
+        {
+          "w": "seuls",
+          "start": 17.018,
+          "end": 17.274
+        },
+        {
+          "w": "éléments",
+          "start": 17.317,
+          "end": 17.616
+        },
+        {
+          "w": "validés.",
+          "start": 17.658,
+          "end": 18.25
+        }
+      ]
+    },
+    {
+      "id": "5",
+      "title": "Vos exemples, votre espace",
+      "avatar": "none",
+      "text": "Pour fixer le ton sur tous les modules, donnez un ou deux extraits déjà validés, nettoyés de toute information client. Puis configurez un espace réutilisable : structure toujours le plan en modules numérotés, avec un objectif d'apprentissage chacun ; si le niveau des utilisateurs n'est pas précisé, pose la question. Un espace distinct ne garantit pas le cloisonnement : vérifiez ses membres, ses fichiers et sa mémoire pour chaque client.",
+      "audio": "generated/lesson2_2-nathalie/scene-5.wav",
+      "duration": 23.18077097505669,
+      "words": [
+        {
+          "w": "Pour",
+          "start": 0.299,
+          "end": 0.469
+        },
+        {
+          "w": "fixer",
+          "start": 0.512,
+          "end": 0.811
+        },
+        {
+          "w": "le",
+          "start": 0.853,
+          "end": 0.896
+        },
+        {
+          "w": "ton",
+          "start": 0.939,
+          "end": 1.109
+        },
+        {
+          "w": "sur",
+          "start": 1.152,
+          "end": 1.323
+        },
+        {
+          "w": "tous",
+          "start": 1.365,
+          "end": 1.579
+        },
+        {
+          "w": "les",
+          "start": 1.621,
+          "end": 1.707
+        },
+        {
+          "w": "modules,",
+          "start": 1.749,
+          "end": 2.197
+        },
+        {
+          "w": "donnez",
+          "start": 2.389,
+          "end": 2.773
+        },
+        {
+          "w": "un",
+          "start": 2.816,
+          "end": 2.987
+        },
+        {
+          "w": "ou",
+          "start": 3.029,
+          "end": 3.072
+        },
+        {
+          "w": "deux",
+          "start": 3.115,
+          "end": 3.285
+        },
+        {
+          "w": "extraits",
+          "start": 3.328,
+          "end": 3.712
+        },
+        {
+          "w": "déjà",
+          "start": 3.755,
+          "end": 4.011
+        },
+        {
+          "w": "validés,",
+          "start": 4.053,
+          "end": 4.544
+        },
+        {
+          "w": "nettoyés",
+          "start": 4.651,
+          "end": 5.205
+        },
+        {
+          "w": "de",
+          "start": 5.248,
+          "end": 5.333
+        },
+        {
+          "w": "toute",
+          "start": 5.376,
+          "end": 5.632
+        },
+        {
+          "w": "information",
+          "start": 5.675,
+          "end": 5.973
+        },
+        {
+          "w": "client.",
+          "start": 6.144,
+          "end": 6.594
+        },
+        {
+          "w": "Puis",
+          "start": 6.745,
+          "end": 6.958
+        },
+        {
+          "w": "configurez",
+          "start": 7.001,
+          "end": 7.513
+        },
+        {
+          "w": "un",
+          "start": 7.555,
+          "end": 7.598
+        },
+        {
+          "w": "espace",
+          "start": 7.641,
+          "end": 7.897
+        },
+        {
+          "w": "réutilisable",
+          "start": 7.982,
+          "end": 8.579
+        },
+        {
+          "w": ":",
+          "start": 8.75,
+          "end": 8.921
+        },
+        {
+          "w": "structure",
+          "start": 9.091,
+          "end": 9.518
+        },
+        {
+          "w": "toujours",
+          "start": 9.603,
+          "end": 9.945
+        },
+        {
+          "w": "le",
+          "start": 9.987,
+          "end": 10.03
+        },
+        {
+          "w": "plan",
+          "start": 10.073,
+          "end": 10.243
+        },
+        {
+          "w": "en",
+          "start": 10.286,
+          "end": 10.371
+        },
+        {
+          "w": "modules",
+          "start": 10.414,
+          "end": 10.627
+        },
+        {
+          "w": "numérotés,",
+          "start": 10.67,
+          "end": 11.31
+        },
+        {
+          "w": "avec",
+          "start": 11.395,
+          "end": 11.694
+        },
+        {
+          "w": "un",
+          "start": 11.737,
+          "end": 11.822
+        },
+        {
+          "w": "objectif",
+          "start": 11.865,
+          "end": 12.121
+        },
+        {
+          "w": "d'apprentissage",
+          "start": 12.291,
+          "end": 12.846
+        },
+        {
+          "w": "chacun",
+          "start": 12.931,
+          "end": 13.273
+        },
+        {
+          "w": ";",
+          "start": 13.315,
+          "end": 13.486
+        },
+        {
+          "w": "si",
+          "start": 13.742,
+          "end": 13.913
+        },
+        {
+          "w": "le",
+          "start": 13.955,
+          "end": 13.998
+        },
+        {
+          "w": "niveau",
+          "start": 14.041,
+          "end": 14.211
+        },
+        {
+          "w": "des",
+          "start": 14.254,
+          "end": 14.339
+        },
+        {
+          "w": "utilisateurs",
+          "start": 14.382,
+          "end": 14.937
+        },
+        {
+          "w": "n'est",
+          "start": 14.979,
+          "end": 15.107
+        },
+        {
+          "w": "pas",
+          "start": 15.15,
+          "end": 15.235
+        },
+        {
+          "w": "précisé,",
+          "start": 15.278,
+          "end": 15.875
+        },
+        {
+          "w": "pose",
+          "start": 16.046,
+          "end": 16.174
+        },
+        {
+          "w": "la",
+          "start": 16.259,
+          "end": 16.302
+        },
+        {
+          "w": "question.",
+          "start": 16.345,
+          "end": 16.785
+        },
+        {
+          "w": "Un",
+          "start": 17.098,
+          "end": 17.269
+        },
+        {
+          "w": "espace",
+          "start": 17.311,
+          "end": 17.567
+        },
+        {
+          "w": "distinct",
+          "start": 17.61,
+          "end": 18.037
+        },
+        {
+          "w": "ne",
+          "start": 18.079,
+          "end": 18.122
+        },
+        {
+          "w": "garantit",
+          "start": 18.165,
+          "end": 18.549
+        },
+        {
+          "w": "pas",
+          "start": 18.591,
+          "end": 18.677
+        },
+        {
+          "w": "le",
+          "start": 18.719,
+          "end": 18.762
+        },
+        {
+          "w": "cloisonnement",
+          "start": 18.805,
+          "end": 19.274
+        },
+        {
+          "w": ":",
+          "start": 19.317,
+          "end": 19.359
+        },
+        {
+          "w": "vérifiez",
+          "start": 19.402,
+          "end": 19.786
+        },
+        {
+          "w": "ses",
+          "start": 19.829,
+          "end": 19.914
+        },
+        {
+          "w": "membres,",
+          "start": 19.957,
+          "end": 20.383
+        },
+        {
+          "w": "ses",
+          "start": 20.469,
+          "end": 20.597
+        },
+        {
+          "w": "fichiers",
+          "start": 20.639,
+          "end": 21.023
+        },
+        {
+          "w": "et",
+          "start": 21.151,
+          "end": 21.279
+        },
+        {
+          "w": "sa",
+          "start": 21.322,
+          "end": 21.407
+        },
+        {
+          "w": "mémoire",
+          "start": 21.45,
+          "end": 21.834
+        },
+        {
+          "w": "pour",
+          "start": 21.919,
+          "end": 22.047
+        },
+        {
+          "w": "chaque",
+          "start": 22.133,
+          "end": 22.303
+        },
+        {
+          "w": "client.",
+          "start": 22.431,
+          "end": 22.981
+        }
+      ]
+    },
+    {
+      "id": "6",
+      "title": "À vous",
+      "avatar": "pip",
+      "text": "Dans le Playground, diagnostiquez quatre prompts autour d'un outil de recrutement fictif, enchaînez les étapes d'un support en trois volets, puis rédigez votre consigne réutilisable. Et pour votre prochain support, conservez trois preuves : le plan validé, une section avec sa source, et votre checklist finale. Gardez votre consigne : elle servira à l'échange avec le formateur.",
+      "audio": "generated/lesson2_2-nathalie/scene-6.wav",
+      "duration": 20.319614512471656,
+      "words": [
+        {
+          "w": "Dans",
+          "start": 0.299,
+          "end": 0.469
+        },
+        {
+          "w": "le",
+          "start": 0.512,
+          "end": 0.555
+        },
+        {
+          "w": "Playground,",
+          "start": 0.597,
+          "end": 1.195
+        },
+        {
+          "w": "diagnostiquez",
+          "start": 1.451,
+          "end": 2.133
+        },
+        {
+          "w": "quatre",
+          "start": 2.176,
+          "end": 2.432
+        },
+        {
+          "w": "prompts",
+          "start": 2.517,
+          "end": 2.901
+        },
+        {
+          "w": "autour",
+          "start": 2.987,
+          "end": 3.157
+        },
+        {
+          "w": "d'un",
+          "start": 3.2,
+          "end": 3.328
+        },
+        {
+          "w": "outil",
+          "start": 3.371,
+          "end": 3.627
+        },
+        {
+          "w": "de",
+          "start": 3.669,
+          "end": 3.712
+        },
+        {
+          "w": "recrutement",
+          "start": 3.755,
+          "end": 4.096
+        },
+        {
+          "w": "fictif,",
+          "start": 4.139,
+          "end": 4.736
+        },
+        {
+          "w": "enchaînez",
+          "start": 4.949,
+          "end": 5.461
+        },
+        {
+          "w": "les",
+          "start": 5.504,
+          "end": 5.547
+        },
+        {
+          "w": "étapes",
+          "start": 5.589,
+          "end": 5.845
+        },
+        {
+          "w": "d'un",
+          "start": 5.888,
+          "end": 6.016
+        },
+        {
+          "w": "support",
+          "start": 6.059,
+          "end": 6.229
+        },
+        {
+          "w": "en",
+          "start": 6.4,
+          "end": 6.485
+        },
+        {
+          "w": "trois",
+          "start": 6.528,
+          "end": 6.699
+        },
+        {
+          "w": "volets,",
+          "start": 6.741,
+          "end": 7.189
+        },
+        {
+          "w": "puis",
+          "start": 7.381,
+          "end": 7.552
+        },
+        {
+          "w": "rédigez",
+          "start": 7.595,
+          "end": 7.979
+        },
+        {
+          "w": "votre",
+          "start": 8.021,
+          "end": 8.192
+        },
+        {
+          "w": "consigne",
+          "start": 8.277,
+          "end": 8.661
+        },
+        {
+          "w": "réutilisable.",
+          "start": 8.704,
+          "end": 9.494
+        },
+        {
+          "w": "Et",
+          "start": 9.686,
+          "end": 9.814
+        },
+        {
+          "w": "pour",
+          "start": 9.856,
+          "end": 9.942
+        },
+        {
+          "w": "votre",
+          "start": 9.984,
+          "end": 10.155
+        },
+        {
+          "w": "prochain",
+          "start": 10.198,
+          "end": 10.496
+        },
+        {
+          "w": "support,",
+          "start": 10.539,
+          "end": 11.008
+        },
+        {
+          "w": "conservez",
+          "start": 11.307,
+          "end": 11.819
+        },
+        {
+          "w": "trois",
+          "start": 11.862,
+          "end": 12.075
+        },
+        {
+          "w": "preuves",
+          "start": 12.118,
+          "end": 12.459
+        },
+        {
+          "w": ":",
+          "start": 12.544,
+          "end": 12.672
+        },
+        {
+          "w": "le",
+          "start": 12.715,
+          "end": 12.843
+        },
+        {
+          "w": "plan",
+          "start": 12.886,
+          "end": 13.056
+        },
+        {
+          "w": "validé,",
+          "start": 13.099,
+          "end": 13.59
+        },
+        {
+          "w": "une",
+          "start": 13.739,
+          "end": 13.867
+        },
+        {
+          "w": "section",
+          "start": 13.91,
+          "end": 14.038
+        },
+        {
+          "w": "avec",
+          "start": 14.294,
+          "end": 14.422
+        },
+        {
+          "w": "sa",
+          "start": 14.464,
+          "end": 14.592
+        },
+        {
+          "w": "source,",
+          "start": 14.635,
+          "end": 15.019
+        },
+        {
+          "w": "et",
+          "start": 15.232,
+          "end": 15.36
+        },
+        {
+          "w": "votre",
+          "start": 15.403,
+          "end": 15.531
+        },
+        {
+          "w": "checklist",
+          "start": 15.616,
+          "end": 15.958
+        },
+        {
+          "w": "finale.",
+          "start": 16.128,
+          "end": 16.683
+        },
+        {
+          "w": "Gardez",
+          "start": 16.982,
+          "end": 17.28
+        },
+        {
+          "w": "votre",
+          "start": 17.323,
+          "end": 17.494
+        },
+        {
+          "w": "consigne",
+          "start": 17.536,
+          "end": 17.92
+        },
+        {
+          "w": ":",
+          "start": 17.963,
+          "end": 18.006
+        },
+        {
+          "w": "elle",
+          "start": 18.048,
+          "end": 18.134
+        },
+        {
+          "w": "servira",
+          "start": 18.176,
+          "end": 18.56
+        },
+        {
+          "w": "à",
+          "start": 18.603,
+          "end": 18.688
+        },
+        {
+          "w": "l'échange",
+          "start": 18.731,
+          "end": 18.987
+        },
+        {
+          "w": "avec",
+          "start": 19.03,
+          "end": 19.158
+        },
+        {
+          "w": "le",
+          "start": 19.2,
+          "end": 19.286
+        },
+        {
+          "w": "formateur.",
+          "start": 19.328,
+          "end": 20.12
+        }
+      ],
+      "avatarVideo": "generated/lesson2_2-nathalie/avatar-6.mp4",
+      "avatarVideoId": "175140b36d38d20320be02b4c84d3f98",
+      "avatarDuration": 20.2
+    }
+  ]
+}

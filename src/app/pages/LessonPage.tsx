@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 import {
-  ChevronRight, ChevronLeft, Mic, Send, Sparkles, MessageSquare, CheckCircle, X, Lightbulb, Monitor, Loader2, Network, RotateCcw, Play, Brain, Zap, Clock, BookOpen, Headphones, Wand2, Bot, Code, Upload, Pencil, AudioLines, Video, Phone, PhoneOff,
+  ChevronRight, ChevronLeft, Mic, Send, Sparkles, MessageSquare, CheckCircle, X, Lightbulb, Monitor, Loader2, Network, RotateCcw, Play, Brain, Zap, Clock, BookOpen, Headphones, Wand2, Bot, Code, Upload, Pencil, AudioLines, Video, Phone, PhoneOff, ListChecks, ChevronDown,
 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { supabase } from "@/app/lib/supabase/client";
@@ -34,6 +34,8 @@ import { LessonVideo } from "@/app/components/lesson/LessonVideo";
 import { LessonPodcast } from "@/app/components/lesson/LessonPodcast";
 import { LessonVoiceAgent } from "@/app/components/lesson/LessonVoiceAgent";
 import { GT } from "@/app/components/common/GT";
+import { parsePlaygroundMarker } from "@/app/playgrounds/registry";
+import { NativePlayground } from "@/app/playgrounds/NativePlayground";
 import { burst, sparkLine } from "@/app/lib/particles/burst";
 
 const DEFAULT_AI = "Je suis ton Copilote IA. Pose-moi n'importe quelle question sur cette leçon ou sur comment l'appliquer à ton métier 👋";
@@ -85,7 +87,7 @@ export function LessonPage() {
   // (l'aperçu du cours) plutôt que de forcer une redirection vers "/lessons".
   const goBack = () => { if (isStaff(role)) navigate(-1); else navigate("/lessons"); };
 
-  type LTab = "video" | "customVideo" | "mindmap" | "podcast" | "avatar" | "html" | "agent";
+  type LTab = "video" | "customVideo" | "revision" | "mindmap" | "podcast" | "avatar" | "html" | "agent";
   const [tab, setTab] = useState<LTab>("video");
   const [htmlEditing, setHtmlEditing] = useState(false);
   const [htmlDraft, setHtmlDraft] = useState("");
@@ -149,6 +151,15 @@ export function LessonPage() {
   const [lessonLoading, setLessonLoading] = useState(true);
   const [lessonError, setLessonError] = useState<string | null>(null);
   const [access, setAccess] = useState<"checking" | "granted" | "denied">("checking");
+  // Playground natif (composant React du dépôt) désigné par un marqueur dans
+  // customHtmlContent — voir src/app/playgrounds/registry.ts.
+  const nativePlayground = useMemo(() => parsePlaygroundMarker(lesson?.customHtmlContent), [lesson?.customHtmlContent]);
+  // Fiche de révision native : quand elle existe, le cours complet (qui reste la
+  // source des IA — podcast, agent, Copilote, correcteurs) est replié par défaut.
+  const revisionSheet = nativePlayground?.entry.Revision ?? null;
+  // Playground HTML : tout le contenu, ou ce qui suit le marqueur (fiche native + Playground HTML).
+  const playgroundHtml = nativePlayground ? nativePlayground.html : lesson?.customHtmlContent ?? "";
+  const [courseOpen, setCourseOpen] = useState(false);
   // Scopé à la formation de CETTE leçon (pas "la formation active" de l'utilisateur) —
   // sinon un admin/élève inscrit à plusieurs cours resterait bloqué sur une leçon
   // d'un cours différent de celui utilisé pour calculer sa progression "active".
@@ -177,7 +188,7 @@ export function LessonPage() {
   // Mindmap masquée partout pour le moment (onglet retiré ci-dessous) — le code de
   // génération/lecture reste en place, comme pour l'onglet "Vidéo IA" plus haut.
   useEffect(() => {
-    if (lesson && !lesson.videoUrl && tab === "video") setTab("podcast");
+    if (lesson && !lesson.videoUrl && tab === "video") setTab(revisionSheet ? "revision" : "podcast");
   }, [lesson, tab]);
 
   // Leçon "Mission" : brouillon existant (s'il y en a un) affiché à la place
@@ -806,6 +817,7 @@ export function LessonPage() {
   const TABS: { id: LTab; Icon: typeof Monitor; label: string }[] = [
     ...(lesson?.videoUrl ? [{ id: "video" as const, Icon: Monitor, label: "Vidéo" }] : []),
     ...(lesson?.customVideoUrl ? [{ id: "customVideo" as const, Icon: Video, label: "Votre vidéo personnalisée" }] : []),
+    ...(revisionSheet ? [{ id: "revision" as const, Icon: ListChecks, label: "Fiche de révision" }] : []),
     { id: "podcast", Icon: Headphones, label: "Podcast" },
     { id: "html", Icon: Code, label: "Playground" },
     { id: "agent", Icon: AudioLines, label: "Agent" },
@@ -908,8 +920,29 @@ export function LessonPage() {
             </div>
           </div>
 
-          {tab === "html" ? (
-            <div className="relative rounded-2xl overflow-hidden" style={{ minHeight: "78vh", height: htmlEditing || !lesson.customHtmlContent ? "78vh" : undefined, background: htmlTheme.background, border: `1px solid ${th.sep}` }}>
+          {tab === "revision" && revisionSheet && nativePlayground ? (
+            <NativePlayground component={revisionSheet} params={nativePlayground.params} lessonTitle={lesson.title} />
+          ) : tab === "html" && nativePlayground && !nativePlayground.html && !htmlEditing ? (
+            <div className="relative">
+              {nativePlayground.params.pg === "non" || !nativePlayground.entry.Component ? (
+                // Marqueur « pg=non » : fiche de révision seule, pas encore de Playground pour cette copie.
+                <div className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl" style={{ minHeight: "40vh", border: `1px solid ${th.sep}` }}>
+                  <Code className="w-6 h-6" style={{ color: th.fg3 }} />
+                  <p className="text-sm" style={{ color: th.fg3 }}>Pas encore de page Playground pour cette leçon.</p>
+                  <p className="text-xs" style={{ color: th.fg3, opacity: 0.7 }}>Bientôt disponible.</p>
+                </div>
+              ) : (
+                <NativePlayground component={nativePlayground.entry.Component!} params={nativePlayground.params} lessonTitle={lesson.title} />
+              )}
+              {role === "admin" && (
+                <button onClick={startEditHtml} className="sweep absolute top-0 right-0 inline-flex items-center gap-1.5 rounded-[2px] px-3.5 min-h-9 text-xs font-semibold"
+                  style={{ background: th.card, border: `1px solid ${th.ink}`, color: th.fg }}>
+                  <Pencil className="w-3 h-3" />Modifier
+                </button>
+              )}
+            </div>
+          ) : tab === "html" ? (
+            <div className="relative rounded-2xl overflow-hidden" style={{ minHeight: "78vh", height: htmlEditing || !playgroundHtml ? "78vh" : undefined, background: htmlTheme.background, border: `1px solid ${th.sep}` }}>
               {htmlEditing ? (
                 <div className="absolute inset-0 flex flex-col gap-3 p-5">
                   <textarea
@@ -937,7 +970,7 @@ export function LessonPage() {
                     </div>
                   </div>
                 </div>
-              ) : lesson.customHtmlContent ? (
+              ) : playgroundHtml ? (
                 <>
                   {!htmlIframeLoaded && (
                     <div className="absolute inset-0 flex items-center justify-center gap-2 text-sm" style={{ background: htmlTheme.background, color: th.fg3 }}>
@@ -947,9 +980,9 @@ export function LessonPage() {
                   {platformAuthChecked && (
                     <iframe
                       ref={htmlIframeRef}
-                      key={lesson.customHtmlContent}
+                      key={playgroundHtml}
                       onLoad={() => setHtmlIframeLoaded(true)}
-                      srcDoc={injectAutoResize(platformAccessToken ? injectPlatformAuth(htmlTheme.withTheme(lesson.customHtmlContent), platformAccessToken) : htmlTheme.withTheme(lesson.customHtmlContent))}
+                      srcDoc={injectAutoResize(platformAccessToken ? injectPlatformAuth(htmlTheme.withTheme(playgroundHtml), platformAccessToken) : htmlTheme.withTheme(playgroundHtml))}
                       sandbox="allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"
                       title={`${lesson.title} — HTML`}
                       className="block w-full border-0"
@@ -1084,22 +1117,36 @@ export function LessonPage() {
               <div>
                 <div className="flex items-center gap-2.5 mb-4">
                   <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: `${th.gradShadow(0.1)}`, border: `1px solid ${th.gradShadow(0.2)}` }}><BookOpen className="w-4 h-4" style={{ color: th.navAC }} /></div>
-                  <span className="text-sm font-black" style={{ color: th.fg }}>Cours</span>
+                  <span className="text-sm font-black" style={{ color: th.fg }}>{revisionSheet ? "Cours complet" : "Cours"}</span>
+                  {revisionSheet && (
+                    <button onClick={() => setCourseOpen((v) => !v)} aria-expanded={courseOpen}
+                      className="ml-auto inline-flex items-center gap-1.5 text-xs font-semibold hover:opacity-70" style={{ color: th.fg2 }}>
+                      {courseOpen ? "Masquer" : "Lire le cours complet"}
+                      <ChevronDown className="w-3.5 h-3.5 transition-transform" style={{ transform: courseOpen ? "rotate(180deg)" : undefined }} />
+                    </button>
+                  )}
                 </div>
+                {revisionSheet && !courseOpen && (
+                  <p className="text-sm" style={{ color: th.fg3 }}>
+                    L'essentiel est dans l'onglet{" "}
+                    <button onClick={() => { setTab("revision"); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="underline font-semibold" style={{ color: th.fg }}>Fiche de révision</button>.
+                    Le cours complet reste disponible pour approfondir.
+                  </p>
+                )}
                 {/* Rendu "Playground" : vrai document HTML dans une iframe sandboxée (comme
                     l'onglet Playground plus haut) au lieu d'un fragment injecté dans la page —
                     le <style>/<script> du formateur s'exécute tel quel. L'iframe se
                     redimensionne elle-même (postMessage, cf. injectAutoResize) pour épouser la
                     hauteur du contenu : pas de hauteur fixe, pas de scroll propre, seul le
                     scroll de la page reste actif. */}
-                <iframe
+                {(!revisionSheet || courseOpen) && <iframe
                   ref={courseIframeRef}
                   key={lesson.id}
                   title={`${lesson.title} — Cours`}
                   srcDoc={injectAutoResize(htmlTheme.withTheme(courseHtml))}
                   sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
                   style={{ width: "100%", height: courseIframeHeight, border: 0, display: "block", background: htmlTheme.background }}
-                />
+                />}
               </div>
             )}
           </div>

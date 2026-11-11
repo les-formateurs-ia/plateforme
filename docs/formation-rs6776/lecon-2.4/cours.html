@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Créer des contenus visuels avec l'IA générative</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#F7F7FA; --surface:#fff; --ink:#1b1a17; --ink-2:#4a4741; --ink-3:#7c786f;
+  --rule:#e4e1d9; --rule-2:#efece5; --accent:#1f4e46; --accent-soft:#eef3f1;
+  --ok:#2c6a48; --ok-soft:#eef4ef; --warn:#8a6519; --warn-soft:#faf4e7;
+  --alert:#963428; --alert-soft:#fbf1ef;
+  --serif:'Funnel Display',Georgia,'Iowan Old Style','Times New Roman',serif;
+  --sans:'Funnel Display',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+}
+body{font-family:var(--sans);font-size:15.5px;line-height:1.65;color:var(--ink);background:var(--paper);padding:0 22px 80px}
+.wrap{width:100%;margin:0 auto}
+header.top{margin:0 auto;padding:48px 0 18px}
+header.top p.eyebrow{font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:10px}
+header.top h1{font-family:var(--serif);font-weight:700;font-size:2.05rem;line-height:1.2;color:var(--ink);margin-bottom:14px}
+p.lead{font-size:1.05rem;line-height:1.7;color:var(--ink-2);margin:0 auto 10px}
+
+main{margin:0 auto}
+
+h2{font-family:var(--serif);font-weight:700;font-size:1.38rem;color:var(--accent);margin:46px 0 14px;padding-top:20px;border-top:1px solid var(--rule)}
+main > h2:first-of-type{border-top:none;padding-top:0}
+p{margin:0 0 14px}
+strong{color:var(--ink);font-weight:700}
+em{font-style:italic;color:var(--ink)}
+ul,ol{margin:0 0 16px 22px}
+li{margin-bottom:6px}
+
+table{width:100%;border-collapse:collapse;margin:14px 0 24px;font-size:14.5px;background:var(--surface);border:1px solid var(--rule)}
+caption{text-align:left;font-size:13px;color:var(--ink-3);margin-bottom:8px}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--rule-2);vertical-align:top}
+thead th{background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--rule)}
+tbody tr:last-child td{border-bottom:none}
+tbody th{font-weight:600;background:var(--rule-2)/* fallback */;white-space:nowrap}
+td code, .sitecode{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--accent-soft);color:var(--accent);padding:2px 7px;border-radius:4px;font-size:13.5px}
+
+.callout{border:1px solid var(--rule);background:var(--surface);border-left:4px solid var(--accent);border-radius:6px;padding:16px 18px;margin:20px 0}
+.callout p:last-child{margin-bottom:0}
+
+/* jeu de décision */
+section.game{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:24px 24px 20px;margin-top:14px}
+section.game > h2{margin-top:0;padding-top:0;border-top:none}
+.scenarios{display:flex;flex-direction:column;gap:14px;margin-top:16px}
+.scenario{border:1px solid var(--rule);border-radius:8px;padding:16px 18px;background:var(--paper)}
+.scenario .contexte{font-size:14.5px;color:var(--ink-2);margin-bottom:12px}
+.scenario .contexte strong{color:var(--ink)}
+.choix{display:flex;gap:10px;flex-wrap:wrap}
+.choix button{font-family:var(--sans);font-size:14.5px;font-weight:600;padding:9px 18px;border-radius:999px;border:1.5px solid var(--accent);background:var(--surface);color:var(--accent);cursor:pointer;transition:background .15s,color .15s}
+.choix button:hover:not(:disabled){background:var(--accent-soft)}
+.choix button:disabled{cursor:default;opacity:.55}
+.choix button.chosen{background:var(--accent);color:#fff}
+.scenario.answered.correct .choix button.chosen{background:var(--ok);border-color:var(--ok);color:#fff}
+.scenario.answered.incorrect .choix button.chosen{background:var(--alert);border-color:var(--alert);color:#fff}
+.reveal{margin-top:12px;padding:12px 14px;border-radius:6px;font-size:14px;line-height:1.6}
+.scenario.answered.correct .reveal{background:var(--ok-soft);color:#204d33}
+.scenario.answered.incorrect .reveal{background:var(--alert-soft);color:#7a291f}
+.reveal .verdict{display:block;font-weight:700;margin-bottom:4px;text-transform:uppercase;font-size:12px;letter-spacing:.04em}
+.tally{margin-top:18px;font-size:14px;font-weight:600;color:var(--ink-2)}
+.tally.done{color:var(--accent)}
+
+section.aller-plus-loin{margin-top:44px;padding:24px 26px;background:var(--accent-soft);border:1px solid var(--rule);border-radius:10px}
+section.aller-plus-loin h2{margin-top:0;padding-top:0;border-top:none;color:var(--accent)}
+section.aller-plus-loin p.cadrage{font-style:italic;color:var(--ink-2);font-size:14px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--rule)}
+
+footer.foot{margin:56px auto 0;padding-top:18px;border-top:1px solid var(--rule);font-size:12.5px;color:var(--ink-3)}
+
+@media (max-width:600px){
+  header.top h1{font-size:1.6rem}
+  h2{font-size:1.2rem}
+  .choix{flex-direction:column}
+  .choix button{width:100%;text-align:center}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <p class="eyebrow">Prompt engineering et contenus visuels</p>
+  <h1>Créer et valider un contenu visuel avec l'IA générative</h1>
+  <p class="lead">À la fin de cette partie, vous savez cadrer un besoin visuel, choisir un environnement autorisé, rédiger un prompt testable et contrôler le résultat avant diffusion. Microsoft Copilot et Adobe Firefly servent d'exemples : aucun nom d'outil ne remplace la vérification des droits, des conditions de l'offre, de la confidentialité, de l'accessibilité et de la conformité à la charte graphique.</p>
+</header>
+
+<main>
+
+<h2>Choisir un environnement, pas un « meilleur outil »</h2>
+<p><strong>Microsoft Copilot</strong> peut s'insérer dans l'écosystème Microsoft et convenir à un besoin rapide dans un environnement déjà approuvé. <strong>Adobe Firefly</strong> peut s'insérer dans un flux de production Adobe et offrir des fonctions de génération et de retouche dédiées. Les capacités, modèles, quotas, intégrations et protections contractuelles varient selon l'offre et évoluent : vérifiez le compte réellement utilisé au lieu de supposer qu'une marque donne partout les mêmes garanties.</p>
+<p>Avant le premier prompt, répondez à six questions : qui verra le visuel ; quelles données ou références entreront dans l'outil ; quelle charte et quelles contraintes techniques s'appliquent ; quels droits faut-il détenir sur les entrées et la sortie ; quelle traçabilité doit être conservée ; qui validera le résultat ? Si l'outil, les données ou l'usage ne sont pas autorisés, n'importez rien et employez un jeu de données fictif.</p>
+
+<h2>Droits d'usage : distinguer positionnement, contrat et contrôle</h2>
+<p>Adobe présente les modèles Firefly conçus pour la production comme entraînés sur des contenus autorisés, par exemple Adobe Stock sous licence et des contenus du domaine public. Ce positionnement peut réduire certains risques, mais l'expression <em>commercially safe</em> n'est pas une autorisation juridique universelle. Les éventuelles protections ou indemnisations dépendent du produit, de l'offre, du territoire, du respect des conditions et du type de sortie.</p>
+<p>De son côté, Microsoft publie ses propres conditions et peut proposer des engagements différents selon le service et l'offre. Pour les deux éditeurs, vous restez responsable des éléments fournis dans le prompt et des références importées : logos, photographies, marques, données personnelles, créations de tiers ou informations client. Avant un usage externe, vérifiez les conditions en vigueur, les règles de l'organisation et, si l'enjeu le justifie, faites valider le livrable par la personne compétente.</p>
+
+<h2>Content Credentials : une piste de provenance, pas une preuve absolue</h2>
+<p>Certains contenus et exports peuvent intégrer des <em>Content Credentials</em> fondés sur le standard C2PA. Ces informations peuvent documenter l'outil utilisé et certaines étapes de l'historique. Elles ne prouvent ni la véracité du visuel, ni l'existence de tous les droits, ni l'absence de biais. Elles peuvent aussi être perdues lors d'une capture d'écran, d'une conversion ou d'une publication qui ne les préserve pas.</p>
+<p>Conservez donc aussi un dossier de preuve : besoin initial, références et autorisations, prompt, paramètres utiles, fichier source, export original, contrôles effectués, date, version de l'outil et nom du valideur.</p>
+
+<h2>Rédiger un prompt visuel testable</h2>
+<p>Un prompt exploitable décrit : <strong>la finalité et le public</strong>, <strong>le sujet</strong>, <strong>la composition</strong>, <strong>le style</strong>, <strong>les contraintes de marque</strong>, <strong>le format technique</strong> et <strong>les exclusions</strong>. Exemple : « Pour la page de garde d'un guide interne destiné à des managers, créer une illustration sobre d'un atelier collaboratif, vue isométrique, personnages divers sans visage identifiable, palette bleu nuit et vert d'eau, zone vide en haut pour ajouter le titre dans l'outil de mise en page, format paysage 16:9, sans logo, sans texte intégré, sans reproduire le style d'un artiste nommé. »</p>
+<p>Générez d'abord des variantes, choisissez selon une grille préparée, puis retouchez. Vérifiez notamment les détails incohérents, les personnes et stéréotypes, les symboles, les marques, la lisibilité, les dimensions et l'adéquation au message. Ajoutez le texte final et le texte alternatif dans un outil adapté : une image séduisante mais trompeuse, illisible ou inaccessible n'est pas un livrable abouti.</p>
+
+<h2>Comparatif à vérifier sur l'offre réellement utilisée</h2>
+<table>
+<thead><tr><th>Critère</th><th>Microsoft Copilot</th><th>Adobe Firefly</th></tr></thead>
+<tbody>
+<tr><th>Flux de travail</th><td>Intégration possible à des services Microsoft selon l'offre</td><td>Intégration possible à des applications Adobe selon l'offre</td></tr>
+<tr><th>Production</th><td>Génération rapide et fonctions variables selon le point d'accès</td><td>Génération et retouche dans un environnement orienté création</td></tr>
+<tr><th>Droits et protections</th><td>Lire les conditions du service et de l'offre concernés</td><td>Positionnement Firefly et protections éventuelles à vérifier selon le produit et l'offre</td></tr>
+<tr><th>Provenance</th><td>Vérifier si le format et le parcours d'export conservent des informations de provenance</td><td>Content Credentials possibles sur certains contenus et exports ; vérifier leur présence après export</td></tr>
+</tbody>
+</table>
+
+<h2>Accéder aux services officiels</h2>
+<p>Ne créez pas systématiquement un compte supplémentaire. Utilisez d'abord l'environnement validé par l'organisation, activez l'authentification multifacteur lorsqu'elle est disponible, vérifiez les paramètres de données et consultez les conditions correspondant à l'offre.</p>
+<table>
+<thead><tr><th>Outil</th><th>Éditeur</th><th>Accès officiel à vérifier</th></tr></thead>
+<tbody>
+<tr><th>Adobe Firefly</th><td>Adobe</td><td><span class="sitecode">firefly.adobe.com</span></td></tr>
+<tr><th>Microsoft Copilot</th><td>Microsoft</td><td><span class="sitecode">copilot.com</span> ou l'accès fourni par l'organisation</td></tr>
+</tbody>
+</table>
+
+<section class="game" id="jeu-decision">
+<h2>À vous de choisir : outil ou arrêt avant génération ?</h2>
+<p>Le bon choix peut être Copilot, Firefly ou aucun des deux tant que le cadre n'est pas clarifié. Utilisez uniquement les faits donnés dans chaque situation.</p>
+<div class="scenarios">
+
+<article class="scenario" data-correct="copilot">
+  <p class="contexte"><strong>Contexte :</strong> vous avez besoin d'une icône abstraite pour une slide interne. L'environnement Microsoft de l'organisation est autorisé, aucune donnée ni référence tierce n'est nécessaire et le visuel sera supprimé après la réunion.</p>
+  <div class="choix">
+    <button type="button" data-choice="copilot">Copilot</button>
+    <button type="button" data-choice="firefly">Firefly</button>
+    <button type="button" data-choice="none">Aucun pour l'instant</button>
+  </div>
+  <p class="reveal" hidden><span class="verdict"></span>Copilot répond au besoin dans l'environnement déjà autorisé. Il faut néanmoins contrôler le visuel avant de l'intégrer.</p>
+</article>
+
+<article class="scenario" data-correct="firefly">
+  <p class="contexte"><strong>Contexte :</strong> le client exige un fichier retouchable dans son flux Adobe et la conservation des informations de provenance. L'offre Firefly utilisée est approuvée ; les références et leurs droits ont été vérifiés.</p>
+  <div class="choix">
+    <button type="button" data-choice="copilot">Copilot</button>
+    <button type="button" data-choice="firefly">Firefly</button>
+    <button type="button" data-choice="none">Aucun pour l'instant</button>
+  </div>
+  <p class="reveal" hidden><span class="verdict"></span>Firefly correspond au flux explicitement demandé et autorisé. Après export, vérifiez que les informations de provenance attendues sont bien présentes et conservez le dossier de preuve.</p>
+</article>
+
+<article class="scenario" data-correct="none">
+  <p class="contexte"><strong>Contexte :</strong> un collègue propose d'importer la photo d'une salariée et un logo client pour créer une publicité. Vous ne savez pas si les personnes et le client ont autorisé cet usage.</p>
+  <div class="choix">
+    <button type="button" data-choice="copilot">Copilot</button>
+    <button type="button" data-choice="firefly">Firefly</button>
+    <button type="button" data-choice="none">Aucun pour l'instant</button>
+  </div>
+  <p class="reveal" hidden><span class="verdict"></span>Arrêtez-vous avant l'import. Il faut clarifier l'autorisation portant sur la photographie, le logo, la génération et la diffusion ; le choix d'un éditeur ne régularise pas les entrées.</p>
+</article>
+
+<article class="scenario" data-correct="none">
+  <p class="contexte"><strong>Contexte :</strong> le visuel doit reproduire exactement un processus réglementaire de douze étapes et chaque libellé doit être parfaitement exact, mais personne n'a encore fourni la source validée.</p>
+  <div class="choix">
+    <button type="button" data-choice="copilot">Copilot</button>
+    <button type="button" data-choice="firefly">Firefly</button>
+    <button type="button" data-choice="none">Aucun pour l'instant</button>
+  </div>
+  <p class="reveal" hidden><span class="verdict"></span>Il manque d'abord la source validée. Pour un schéma factuel, construisez ensuite la structure dans un outil de diagramme et utilisez éventuellement l'IA pour des éléments décoratifs contrôlés.</p>
+</article>
+
+<article class="scenario" data-correct="copilot">
+  <p class="contexte"><strong>Contexte :</strong> les deux outils sont autorisés, mais votre équipe travaille dans Microsoft 365 et souhaite seulement comparer trois pistes de composition fictives avant de décider s'il faut une production graphique.</p>
+  <div class="choix">
+    <button type="button" data-choice="copilot">Copilot</button>
+    <button type="button" data-choice="firefly">Firefly</button>
+    <button type="button" data-choice="none">Aucun pour l'instant</button>
+  </div>
+  <p class="reveal" hidden><span class="verdict"></span>Copilot est un choix proportionné pour cette exploration dans l'environnement existant. Le passage éventuel en production déclenchera une nouvelle vérification des exigences.</p>
+</article>
+
+</div>
+<p class="tally" id="tally-jeu">0 situation traitée sur 5.</p>
+</section>
+
+<section class="aller-plus-loin">
+<h2>Pour aller plus loin</h2>
+<p class="cadrage">Cette section approfondit au-delà de ce qui est nécessaire pour suivre la suite du programme ; la sauter ne bloque rien pour les leçons suivantes.</p>
+<p><strong>C2PA</strong> est un standard technique ouvert pour attacher à un média des informations de provenance et d'historique signées. Un lecteur compatible peut vérifier l'intégrité de ces déclarations, mais il ne déduit pas que la scène représentée est vraie ou que toutes les autorisations juridiques existent.</p>
+<p>Conservez l'original exporté et vérifiez les informations après chaque conversion. Si elles disparaissent, votre registre de production — brief, sources, droits, prompt, contrôles, validation et version livrée — reste indispensable.</p>
+<p>Enfin, la génération d'images n'est pas toujours la bonne technique. Pour un organigramme, une procédure ou un graphique chiffré, un outil de diagramme ou de datavisualisation relié à une source vérifiée offre souvent davantage de précision, d'accessibilité et de facilité de mise à jour.</p>
+</section>
+
+</main>
+
+<footer class="foot measure">
+  <p>À vérifier au moment de l'usage : pages officielles Adobe Firefly et Content Credentials, conditions de l'offre Adobe concernée, documentation et conditions Microsoft Copilot, standard C2PA, politique de l'organisation et droits attachés aux contenus utilisés.</p>
+</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var scenarios = document.querySelectorAll(".scenario");
+  var tally = document.getElementById("tally-jeu");
+  var total = scenarios.length;
+  var answered = 0;
+
+  scenarios.forEach(function(sc){
+    var correct = sc.getAttribute("data-correct");
+    var buttons = sc.querySelectorAll(".choix button");
+    var reveal = sc.querySelector(".reveal");
+    var verdict = reveal.querySelector(".verdict");
+
+    buttons.forEach(function(btn){
+      btn.addEventListener("click", function(){
+        if (sc.classList.contains("answered")) { return; }
+        var choice = btn.getAttribute("data-choice");
+        var isCorrect = (choice === correct);
+
+        buttons.forEach(function(b){ b.disabled = true; });
+        btn.classList.add("chosen");
+
+        sc.classList.add("answered");
+        sc.classList.add(isCorrect ? "correct" : "incorrect");
+        verdict.textContent = isCorrect ? "Bon choix" : "À revoir";
+        reveal.hidden = false;
+
+        answered += 1;
+        if (answered < total) {
+          tally.textContent = answered + " situation" + (answered > 1 ? "s" : "") + " traitée" + (answered > 1 ? "s" : "") + " sur " + total + ".";
+        } else {
+          tally.textContent = "Les " + total + " situations sont traitées. Retenez la méthode : besoin, autorisations, données, droits, format, traçabilité et validation, plutôt qu'une préférence figée pour un outil.";
+          tally.classList.add("done");
+        }
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>

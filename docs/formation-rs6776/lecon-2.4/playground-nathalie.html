@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Playground : du brief au visuel validé</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#F7F7FA; --surface:#fff; --ink:#1b1a17; --ink-2:#4a4741; --ink-3:#7c786f;
+  --rule:#e4e1d9; --rule-2:#efece5; --accent:#1f4e46; --accent-soft:#eef3f1;
+  --ok:#2c6a48; --ok-soft:#eef4ef; --warn:#8a6519; --warn-soft:#faf4e7;
+  --alert:#963428; --alert-soft:#fbf1ef;
+  --serif:'Funnel Display',Georgia,'Iowan Old Style','Times New Roman',serif;
+  --sans:'Funnel Display',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+}
+body{font-family:var(--sans);font-size:15.5px;line-height:1.65;color:var(--ink);background:var(--paper);padding:0 22px 80px}
+.wrap{width:100%;margin:0 auto}
+
+header.top{margin:0 auto;padding:44px 0 10px}
+header.top p.eyebrow{font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:10px}
+header.top h1{font-family:var(--serif);font-weight:700;font-size:1.9rem;line-height:1.22;color:var(--ink);margin-bottom:12px}
+header.top p.lead{font-size:1.02rem;color:var(--ink-2);}
+
+main{margin:0 auto}
+
+section.exo{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:26px 26px 22px;margin:30px 0}
+section.exo h2{font-family:var(--serif);font-weight:700;font-size:1.28rem;color:var(--accent);margin-bottom:6px}
+section.exo p.consigne{color:var(--ink-2);font-size:14.5px;margin-bottom:18px}
+
+fieldset{border:1px solid var(--rule);border-radius:8px;padding:16px 18px;margin-bottom:16px;background:var(--paper)}
+legend{font-weight:600;font-size:14.5px;padding:0 6px;color:var(--ink)}
+.option{display:flex;align-items:flex-start;gap:9px;padding:7px 0;border-bottom:1px solid var(--rule-2);font-size:14.5px}
+.option:last-of-type{border-bottom:none}
+.option input{margin-top:4px;flex:0 0 auto}
+.option label{flex:1}
+.why{display:none;margin-top:5px;padding:8px 10px;border-radius:6px;font-size:13.5px;line-height:1.55}
+fieldset.checked .why.show{display:block}
+.option.opt-correct .why{background:var(--ok-soft);color:#204d33}
+.option.opt-incorrect .why{background:var(--alert-soft);color:#7a291f}
+fieldset.checked .option.is-correct-choice > label{color:var(--ok);font-weight:600}
+fieldset.checked .option.is-wrong-choice > label{color:var(--alert);font-weight:600}
+fieldset.checked .option.is-actual-correct:not(.is-correct-choice) > label{color:var(--ok)}
+
+.exo-actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:8px}
+button.grade{font-family:var(--sans);font-size:14.5px;font-weight:700;padding:10px 22px;border-radius:999px;border:none;background:var(--accent);color:#fff;cursor:pointer}
+button.grade:hover{opacity:.92}
+.score{font-size:14.5px;font-weight:700;color:var(--ink-2)}
+.score.pass{color:var(--ok)}
+.score.fail{color:var(--alert)}
+
+textarea{width:100%;min-height:130px;font-family:var(--sans);font-size:14.5px;line-height:1.55;color:var(--ink);border:1px solid var(--rule);border-radius:8px;padding:12px 14px;resize:vertical;background:var(--surface)}
+textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+.autosave-note{font-size:12.5px;color:var(--ink-3);margin-top:6px}
+button.corrige-toggle{font-family:var(--sans);font-size:13.5px;font-weight:700;padding:8px 16px;border-radius:999px;border:1.5px solid var(--accent);background:var(--surface);color:var(--accent);cursor:pointer;margin-top:12px}
+.corrige{display:none;margin-top:12px;padding:14px 16px;background:var(--accent-soft);border-radius:8px;font-size:14px;line-height:1.6}
+.corrige.show{display:block}
+
+footer.foot{margin:44px auto 0;padding-top:18px;border-top:1px solid var(--rule);font-size:13px;color:var(--ink-3);font-style:italic}
+
+@media (max-width:600px){
+  header.top h1{font-size:1.5rem}
+  section.exo{padding:20px 18px 18px}
+  .exo-actions{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <p class="eyebrow">Playground</p>
+  <h1>Du brief au visuel validé : à vous de produire</h1>
+  <p class="lead">Trois exercices pour choisir un environnement à partir de faits vérifiables, contrôler les risques puis créer un visuel accompagné de son dossier de preuve. Toutes les situations et organisations citées sont fictives.</p>
+</header>
+
+<main>
+
+<section class="exo" id="exo1">
+  <h2>Exercice 1 · Choisir l'outil selon le contexte</h2>
+  <p class="consigne">Pour chaque situation, choisissez l'environnement le plus adapté parmi les deux options déjà autorisées, puis cliquez sur « Corriger mes réponses ». Seuil de réussite : 80 %.</p>
+
+  <fieldset data-qid="e1q1">
+    <legend>« Ferronix RH » demande des illustrations retouchables dans son flux Adobe et la conservation des informations de provenance. Firefly est approuvé, l'offre a été vérifiée et aucune référence tierce n'est utilisée.</legend>
+    <div class="option">
+      <input type="radio" name="e1q1" id="e1q1a" value="copilot" data-ok="false">
+      <label for="e1q1a">Microsoft Copilot
+        <span class="why">Copilot pourrait générer une image, mais ne répond pas ici au flux Adobe et à la méthode de provenance explicitement demandés.</span>
+      </label>
+    </div>
+    <div class="option">
+      <input type="radio" name="e1q1" id="e1q1b" value="firefly" data-ok="true">
+      <label for="e1q1b">Adobe Firefly
+        <span class="why">Firefly correspond au flux demandé et autorisé. Il faudra encore vérifier les Content Credentials après export et contrôler le visuel.</span>
+      </label>
+    </div>
+  </fieldset>
+
+  <fieldset data-qid="e1q2">
+    <legend>Pour une slide interne provisoire, le « Cabinet Solerys » autorise son environnement Microsoft 365. L'icône est abstraite, sans donnée ni référence importée, et elle sera supprimée après la réunion.</legend>
+    <div class="option">
+      <input type="radio" name="e1q2" id="e1q2a" value="copilot" data-ok="true">
+      <label for="e1q2a">Microsoft Copilot
+        <span class="why">Copilot est proportionné dans l'environnement déjà autorisé. Le caractère interne ne dispense pas d'un contrôle visuel.</span>
+      </label>
+    </div>
+    <div class="option">
+      <input type="radio" name="e1q2" id="e1q2b" value="firefly" data-ok="false">
+      <label for="e1q2b">Adobe Firefly
+        <span class="why">Firefly pourrait convenir, mais n'apporte pas ici d'avantage lié au flux de travail demandé.</span>
+      </label>
+    </div>
+  </fieldset>
+
+  <fieldset data-qid="e1q3">
+    <legend>« Atelier Kerdanet Formation » diffuse une bannière publique. Son environnement Microsoft est approuvé pour cet usage, les conditions de l'offre ont été vérifiées, le brief ne contient aucune référence tierce et le client n'impose pas de flux Adobe.</legend>
+    <div class="option">
+      <input type="radio" name="e1q3" id="e1q3a" value="copilot" data-ok="true">
+      <label for="e1q3a">Microsoft Copilot
+        <span class="why">Copilot peut être retenu puisque l'usage, l'offre, les entrées et le flux sont explicitement validés. Une diffusion externe n'impose pas à elle seule Firefly.</span>
+      </label>
+    </div>
+    <div class="option">
+      <input type="radio" name="e1q3" id="e1q3b" value="firefly" data-ok="false">
+      <label for="e1q3b">Adobe Firefly
+        <span class="why">Firefly serait possible s'il était lui aussi autorisé, mais le simple caractère public ne rend pas ce choix automatiquement supérieur.</span>
+      </label>
+    </div>
+  </fieldset>
+
+  <fieldset data-qid="e1q4">
+    <legend>Pour préparer un rendez-vous fictif, la consultante veut trois pistes de composition à usage interne. Les deux outils sont autorisés, mais toute l'équipe travaille dans Microsoft 365 et aucun travail de retouche avancé n'est demandé.</legend>
+    <div class="option">
+      <input type="radio" name="e1q4" id="e1q4a" value="copilot" data-ok="true">
+      <label for="e1q4a">Microsoft Copilot
+        <span class="why">Copilot réduit ici les changements d'environnement et répond au besoin d'exploration. Les variantes devront quand même être comparées à une grille.</span>
+      </label>
+    </div>
+    <div class="option">
+      <input type="radio" name="e1q4" id="e1q4b" value="firefly" data-ok="false">
+      <label for="e1q4b">Adobe Firefly
+        <span class="why">Firefly pourrait produire les variantes, mais son flux de retouche dédié n'est pas requis dans ce scénario.</span>
+      </label>
+    </div>
+  </fieldset>
+
+  <fieldset data-qid="e1q5">
+    <legend>Un guide client doit suivre un flux Adobe validé et conserver des métadonnées C2PA vérifiables. L'offre Firefly concernée, les conditions et les références sont approuvées par le client.</legend>
+    <div class="option">
+      <input type="radio" name="e1q5" id="e1q5a" value="copilot" data-ok="false">
+      <label for="e1q5a">Microsoft Copilot
+        <span class="why">Copilot ne correspond pas au flux et au format de preuve expressément retenus dans ce brief.</span>
+      </label>
+    </div>
+    <div class="option">
+      <input type="radio" name="e1q5" id="e1q5b" value="firefly" data-ok="true">
+      <label for="e1q5b">Adobe Firefly
+        <span class="why">Firefly correspond aux exigences données. Les métadonnées doivent être contrôlées après export et accompagnées du brief, des droits, du prompt et de la validation.</span>
+      </label>
+    </div>
+  </fieldset>
+
+  <div class="exo-actions">
+    <button type="button" class="grade" data-exo="exo1">Corriger mes réponses</button>
+    <span class="score" id="score-exo1">Score : non calculé</span>
+  </div>
+</section>
+
+<section class="exo" id="exo2">
+  <h2>Exercice 2 · Auditer une production visuelle</h2>
+  <p class="consigne">Une seule bonne réponse par question. Seuil de réussite : 80 %.</p>
+
+  <fieldset data-qid="e2q1">
+    <legend>Adobe présente une offre comme adaptée à la production commerciale. Quelle conclusion est rigoureuse ?</legend>
+    <div class="option"><input type="radio" name="e2q1" value="a" data-ok="false"><label>Tout résultat est automatiquement libre de droits dans tous les pays<span class="why">Un positionnement commercial n'est pas une autorisation juridique universelle.</span></label></div>
+    <div class="option"><input type="radio" name="e2q1" value="b" data-ok="true"><label>Il faut encore vérifier le produit, l'offre, les conditions, les entrées et le résultat<span class="why">Les protections éventuelles sont conditionnelles et ne couvrent pas automatiquement les contenus importés ou tous les usages.</span></label></div>
+    <div class="option"><input type="radio" name="e2q1" value="c" data-ok="false"><label>Aucun contrôle humain n'est nécessaire<span class="why">Les anomalies, biais, marques, informations trompeuses et contraintes du brief doivent être contrôlés.</span></label></div>
+    <div class="option"><input type="radio" name="e2q1" value="d" data-ok="false"><label>Les logos trouvés en ligne peuvent être importés sans autorisation<span class="why">L'utilisateur reste responsable des droits attachés aux références qu'il fournit.</span></label></div>
+  </fieldset>
+
+  <fieldset data-qid="e2q2">
+    <legend>Que permettent des Content Credentials valides ?</legend>
+    <div class="option"><input type="radio" name="e2q2" value="a" data-ok="false"><label>Prouver que la scène représentée s'est réellement produite<span class="why">La provenance déclarée ne prouve pas la véracité de la scène.</span></label></div>
+    <div class="option"><input type="radio" name="e2q2" value="b" data-ok="true"><label>Consulter des déclarations signées sur la provenance et certaines transformations<span class="why">Elles documentent une partie de la chaîne, dans les outils et formats compatibles.</span></label></div>
+    <div class="option"><input type="radio" name="e2q2" value="c" data-ok="false"><label>Garantir que toutes les autorisations juridiques existent<span class="why">Elles ne remplacent pas la vérification des droits et des conditions.</span></label></div>
+    <div class="option"><input type="radio" name="e2q2" value="d" data-ok="false"><label>Empêcher toute copie ou modification du fichier<span class="why">Il ne s'agit pas d'un verrou anticopie.</span></label></div>
+  </fieldset>
+
+  <fieldset data-qid="e2q3">
+    <legend>Vous voulez importer un portrait et un logo client dans le générateur. Quel est le premier contrôle ?</legend>
+    <div class="option"><input type="radio" name="e2q3" value="a" data-ok="false"><label>Choisir le modèle qui produit les couleurs les plus vives<span class="why">La qualité esthétique vient après les autorisations.</span></label></div>
+    <div class="option"><input type="radio" name="e2q3" value="b" data-ok="true"><label>Vérifier les autorisations sur les références, les données et l'usage prévu<span class="why">Le choix de l'éditeur ne régularise pas les contenus fournis par l'utilisateur.</span></label></div>
+    <div class="option"><input type="radio" name="e2q3" value="c" data-ok="false"><label>Renommer les fichiers avant import<span class="why">Changer un nom de fichier ne modifie ni le contenu ni les droits.</span></label></div>
+    <div class="option"><input type="radio" name="e2q3" value="d" data-ok="false"><label>Générer d'abord et demander l'autorisation après diffusion<span class="why">Les autorisations nécessaires doivent être clarifiées avant l'import et la diffusion.</span></label></div>
+  </fieldset>
+
+  <fieldset data-qid="e2q4">
+    <legend>Vous devez représenter exactement une procédure réglementaire. Quelle méthode est la plus fiable ?</legend>
+    <div class="option"><input type="radio" name="e2q4" value="a" data-ok="false"><label>Demander au générateur d'inventer les étapes manquantes<span class="why">Une procédure réglementaire doit venir d'une source validée.</span></label></div>
+    <div class="option"><input type="radio" name="e2q4" value="b" data-ok="true"><label>Valider la source et construire le schéma dans un outil de diagramme, puis contrôler chaque libellé<span class="why">La structure factuelle et le texte restent ainsi maîtrisables et modifiables.</span></label></div>
+    <div class="option"><input type="radio" name="e2q4" value="c" data-ok="false"><label>Choisir l'image la plus esthétique sans relire les libellés<span class="why">L'esthétique ne compense pas une erreur réglementaire.</span></label></div>
+    <div class="option"><input type="radio" name="e2q4" value="d" data-ok="false"><label>Ajouter « exact » dans le prompt et ne plus vérifier<span class="why">Une consigne d'exactitude ne constitue pas une garantie.</span></label></div>
+  </fieldset>
+
+  <fieldset data-qid="e2q5">
+    <legend>Quel dossier permet le mieux d'expliquer la production au formateur ou au client ?</legend>
+    <div class="option"><input type="radio" name="e2q5" value="a" data-ok="false"><label>Uniquement l'image finale<span class="why">Elle ne montre ni la demande, ni les droits, ni les contrôles.</span></label></div>
+    <div class="option"><input type="radio" name="e2q5" value="b" data-ok="true"><label>Brief, références et droits, prompt, variantes, original exporté, contrôles et validation<span class="why">Cet ensemble relie le besoin, le processus, les corrections et la décision finale.</span></label></div>
+    <div class="option"><input type="radio" name="e2q5" value="c" data-ok="false"><label>Une capture du logo de l'outil<span class="why">Le logo ne documente pas les entrées, le processus ni la validation.</span></label></div>
+    <div class="option"><input type="radio" name="e2q5" value="d" data-ok="false"><label>La promesse marketing de l'éditeur seule<span class="why">Elle ne prouve pas que l'usage concret respecte le brief et les conditions.</span></label></div>
+  </fieldset>
+
+  <div class="exo-actions">
+    <button type="button" class="grade" data-exo="exo2">Corriger mes réponses</button>
+    <span class="score" id="score-exo2">Score : non calculé</span>
+  </div>
+</section>
+
+<section class="exo" id="exo3">
+  <h2>Exercice 3 · Produire et documenter un visuel (à remettre)</h2>
+  <p class="consigne">À partir du brief fictif suivant, rédigez un prompt complet puis générez trois variantes dans un outil autorisé : page de garde d'un guide destiné à des managers, illustration sobre d'un atelier collaboratif, palette bleu nuit et vert d'eau, format 16:9, zone vide en haut pour le titre, aucun logo, aucun texte intégré, aucun visage identifiable et aucune imitation d'un artiste nommé. Dans la zone ci-dessous, consignez l'outil et l'offre, le prompt, vos critères, la variante retenue, les anomalies corrigées, le texte alternatif et la liste des preuves conservées. Joignez au formateur les trois variantes et la version finalisée.</p>
+  <textarea id="ex3-textarea" placeholder="Outil et offre vérifiés :&#10;Prompt :&#10;Critères de comparaison :&#10;Variante retenue et justification :&#10;Corrections :&#10;Texte alternatif :&#10;Preuves conservées :"></textarea>
+  <p class="autosave-note" id="ex3-autosave-note">Brouillon non enregistré pour le moment.</p>
+  <button type="button" class="corrige-toggle" id="ex3-toggle">Voir un corrigé indicatif</button>
+  <div class="corrige" id="ex3-corrige">
+    <p><strong>Critères attendus :</strong> le prompt reprend la finalité, le public, le sujet, la composition, le style, la palette, le format et les exclusions. La sélection s'appuie sur des critères observables : respect du brief, composition, cohérence des détails, absence de stéréotype ou de marque, lisibilité au format final et accessibilité. Le dossier conserve le brief, les références et droits éventuels, le prompt, les trois sorties, l'original exporté, les contrôles, la date, la version de l'outil et le valideur. Les Content Credentials, si elles existent, complètent ce dossier sans remplacer la vérification.</p>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <p>Toutes les entreprises, personnes et données chiffrées de cet exercice sont fictives.</p>
+</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  function gradeExercise(exoId){
+    var exo = document.getElementById(exoId);
+    var fieldsets = exo.querySelectorAll("fieldset");
+    var total = fieldsets.length;
+    var correct = 0;
+
+    fieldsets.forEach(function(fs){
+      fs.classList.add("checked");
+      var inputs = fs.querySelectorAll("input[type=radio]");
+      var checkedInput = fs.querySelector("input[type=radio]:checked");
+      var isCorrect = false;
+
+      inputs.forEach(function(inp){
+        var opt = inp.closest(".option");
+        opt.classList.remove("is-correct-choice", "is-wrong-choice", "is-actual-correct", "opt-correct", "opt-incorrect");
+        var okAttr = inp.getAttribute("data-ok") === "true";
+        var why = opt.querySelector(".why");
+
+        if (okAttr) {
+          opt.classList.add("is-actual-correct", "opt-correct");
+        }
+        if (inp.checked) {
+          if (okAttr) {
+            opt.classList.add("is-correct-choice");
+            isCorrect = true;
+          } else {
+            opt.classList.add("is-wrong-choice", "opt-incorrect");
+          }
+          if (why) { why.classList.add("show"); }
+        } else if (okAttr) {
+          if (why) { why.classList.add("show"); }
+        }
+      });
+
+      if (isCorrect) { correct += 1; }
+    });
+
+    var pct = total > 0 ? Math.round((correct / total) * 100) : 0;
+    var scoreEl = document.getElementById("score-" + exoId);
+    scoreEl.textContent = "Score : " + correct + " / " + total + " (" + pct + " %)";
+    scoreEl.classList.remove("pass", "fail");
+    scoreEl.classList.add(pct >= 80 ? "pass" : "fail");
+  }
+
+  document.querySelectorAll("button.grade").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      gradeExercise(btn.getAttribute("data-exo"));
+    });
+  });
+
+  // Exercice 3 : autosave localStorage + corrigé indicatif
+  var STORAGE_KEY = "nathalie_playground_2_4_ex3";
+  var textarea = document.getElementById("ex3-textarea");
+  var note = document.getElementById("ex3-autosave-note");
+
+  try {
+    var saved = window.localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      textarea.value = saved;
+      note.textContent = "Brouillon restauré depuis votre dernière visite.";
+    }
+  } catch (e) {
+    note.textContent = "Sauvegarde automatique indisponible dans ce navigateur.";
+  }
+
+  textarea.addEventListener("input", function(){
+    try {
+      window.localStorage.setItem(STORAGE_KEY, textarea.value);
+      var now = new Date();
+      var hh = String(now.getHours()).padStart(2, "0");
+      var mm = String(now.getMinutes()).padStart(2, "0");
+      note.textContent = "Brouillon enregistré automatiquement (" + hh + ":" + mm + ").";
+    } catch (e) {
+      note.textContent = "Sauvegarde automatique indisponible dans ce navigateur.";
+    }
+  });
+
+  var toggleBtn = document.getElementById("ex3-toggle");
+  var corrige = document.getElementById("ex3-corrige");
+  toggleBtn.addEventListener("click", function(){
+    var shown = corrige.classList.toggle("show");
+    toggleBtn.textContent = shown ? "Masquer le corrigé indicatif" : "Voir un corrigé indicatif";
+  });
+})();
+</script>
+</body>
+</html>

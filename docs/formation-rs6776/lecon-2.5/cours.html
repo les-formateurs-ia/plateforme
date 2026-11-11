@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Optimiser les contenus générés</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#F7F7FA; --surface:#fff; --ink:#1b1a17; --ink-2:#4a4741; --ink-3:#7c786f;
+  --rule:#e4e1d9; --rule-2:#efece5; --accent:#1f4e46; --accent-soft:#eef3f1;
+  --ok:#2c6a48; --ok-soft:#eef4ef; --warn:#8a6519; --warn-soft:#faf4e7;
+  --alert:#963428; --alert-soft:#fbf1ef;
+  --serif:'Funnel Display',Georgia,'Iowan Old Style','Times New Roman',serif;
+  --sans:'Funnel Display',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --lev-contrainte:#2A78D6; --lev-style:#EB6834; --lev-format:#1BAF7A;
+}
+body{font-family:var(--sans);font-size:15.5px;line-height:1.65;color:var(--ink);background:var(--paper);padding:0 22px 80px}
+.wrap{width:100%;margin:0 auto}
+
+.hero{margin:0 auto;padding:56px 0 30px;border-bottom:1px solid var(--rule)}
+.eyebrow{font-size:.78rem;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px}
+h1{font-family:var(--serif);font-size:2.15rem;font-weight:800;line-height:1.15;color:var(--ink);margin-bottom:18px}
+.lede{font-size:1.06rem;color:var(--ink-2);}
+
+main{margin:0 auto;padding-top:8px}
+section{margin-top:46px}
+h2{font-family:var(--serif);font-size:1.48rem;font-weight:700;color:var(--ink);margin-bottom:16px;padding-left:14px;border-left:4px solid var(--accent)}
+h3{font-size:1.08rem;font-weight:700;color:var(--ink);margin:20px 0 10px}
+p{margin-bottom:14px;}
+p.wide{max-width:none}
+ul,ol{margin:0 0 14px 22px;}
+li{margin-bottom:6px}
+strong{color:var(--ink);font-weight:700}
+em{font-style:italic;color:var(--accent)}
+
+table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--rule);border-radius:10px;overflow:hidden;margin:18px 0}
+caption{text-align:left;font-size:.85rem;color:var(--ink-3);margin-bottom:8px}
+th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--rule-2);vertical-align:top;font-size:.95rem}
+th{background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.03em}
+tr:last-child td{border-bottom:none}
+
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:20px 22px;margin:16px 0}
+.card h3{margin-top:0}
+.card.quote{border-left:4px solid var(--ink-3)}
+.card.prompt{border-left:4px solid var(--accent);background:var(--accent-soft)}
+.card.result{border-left:4px solid var(--ok);background:var(--ok-soft)}
+.card p{margin-bottom:8px}
+.card pre{white-space:pre-wrap;font-family:var(--sans);font-size:.96rem;line-height:1.6;color:var(--ink-2)}
+.label{display:inline-block;font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;font-weight:700;color:var(--ink-3);margin-bottom:8px}
+
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;padding:4px 10px;border-radius:999px;margin:2px 6px 2px 0}
+.tag.neutral{background:var(--rule-2);color:var(--ink-2)}
+.tag.contrainte{background:#E1ECF9;color:var(--lev-contrainte)}
+.tag.style{background:#FCEAE3;color:var(--lev-style)}
+.tag.format{background:#DFF4EC;color:#0d7c53}
+
+.justify-list{list-style:none;margin:14px 0;padding:0}
+.justify-list li{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:12px 16px;margin-bottom:8px}
+.justify-list li strong{color:var(--accent)}
+
+.priority-list{counter-reset:pr}
+.priority-list li{position:relative;padding-left:8px;list-style:none;margin-bottom:12px}
+.priority-list li::before{counter-increment:pr;content:counter(pr);display:inline-block;width:22px;height:22px;background:var(--accent);color:#fff;border-radius:50%;text-align:center;line-height:22px;font-size:.78rem;font-weight:700;margin-right:10px}
+
+.aside{background:var(--warn-soft);border:1px solid #ecd9ad;border-radius:10px;padding:14px 18px;font-size:.94rem;color:var(--ink-2);margin:16px 0}
+
+.game{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:24px;margin-top:18px}
+.round{border:1px solid var(--rule-2);border-radius:12px;padding:18px 20px;margin-bottom:16px;background:var(--paper)}
+.round .ctx{font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);font-weight:700;margin-bottom:6px}
+.round p{margin-bottom:10px}
+.round .proposal{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:12px 14px;font-style:italic;color:var(--ink-2)}
+.round-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.btn{font-family:var(--sans);font-size:.88rem;font-weight:700;padding:9px 18px;border-radius:999px;border:1.5px solid var(--accent);background:#fff;color:var(--accent);cursor:pointer;transition:background .15s}
+.btn:hover:not(:disabled){background:var(--accent-soft)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.primary{background:var(--accent);color:#fff}
+.feedback{margin-top:12px;padding:12px 14px;border-radius:8px;font-size:.92rem;display:none}
+.feedback.show{display:block}
+.feedback.ok{background:var(--ok-soft);color:var(--ok);border:1px solid #cfe6d8}
+.feedback.alert{background:var(--alert-soft);color:var(--alert);border:1px solid #efd3cd}
+.score-bar{display:flex;align-items:center;justify-content:space-between;margin-top:6px;padding-top:16px;border-top:1px dashed var(--rule)}
+.score-bar strong{font-size:1.05rem;color:var(--accent)}
+
+footer.closing{margin:60px auto 0;padding-top:20px;border-top:1px solid var(--rule);font-size:.85rem;color:var(--ink-3)}
+
+@media (max-width:640px){
+  h1{font-size:1.7rem}
+  .hero{padding:36px 0 24px}
+  .card{padding:16px}
+  th,td{padding:10px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div class="eyebrow">Optimisation de contenus IA</div>
+  <h1>Optimiser un contenu déjà généré</h1>
+  <p class="lede">À l'issue de ce contenu, vous saurez transformer un premier résultat en version contrôlée&nbsp;: vérifier d'abord le fond, définir des critères d'acceptation, cibler les changements, comparer les versions et conserver la trace de vos corrections. Cinq angles pratiques — <strong>contrainte</strong>, <strong>contexte et sources</strong>, <strong>style</strong>, <strong>format</strong>, <strong>accessibilité</strong> — vous aident à diagnostiquer le texte sans faire croire qu'une reformulation suffit à le rendre exact.</p>
+</header>
+
+<main>
+
+<section>
+<h2>Pourquoi optimiser un contenu déjà généré&nbsp;?</h2>
+<p>Le premier résultat obtenu auprès d'une IA générative est une hypothèse de travail. Commencez par le comparer aux sources et au besoin&nbsp;: faits, chiffres, noms, omissions, raisonnement, ton, confidentialité, droits et accessibilité. Un texte faux ne doit pas être « embelli »&nbsp;; il doit être corrigé à partir d'une source identifiée.</p>
+<p>Une correction ciblée préserve souvent mieux les passages déjà validés qu'une régénération complète. Mais si la conversation dérive, si les consignes se contredisent ou si le texte de départ est trop fragile, repartez d'une source propre dans un nouvel échange. Dans tous les cas, conservez la version de départ, la consigne de correction et la version obtenue afin de comparer précisément les changements.</p>
+</section>
+
+<section>
+<h2>Cinq angles de correction qui peuvent se recouvrir</h2>
+<p>Ces cinq angles sont une grille pratique, pas une taxonomie universelle. Une même correction peut relever de plusieurs angles&nbsp;: une phrase plus courte touche à la fois au style et à l'accessibilité ; un tableau demandé peut être à la fois un format et une contrainte. L'important est de transformer « améliore ça » en critères observables.</p>
+<table>
+<caption>Les cinq leviers et ce qu'ils modifient concrètement</caption>
+<thead><tr><th>Levier</th><th>Ce qu'il modifie</th><th>Exemple de consigne</th></tr></thead>
+<tbody>
+<tr><td><strong>Contrainte</strong></td><td>Les limites formelles imposées au contenu&nbsp;: longueur, nombre d'éléments, mots interdits ou imposés, présence obligatoire d'un élément.</td><td>« Pas plus de 100 mots » · « N'utilise jamais le mot &ldquo;simplement&rdquo; » · « Termine par un appel à l'action »</td></tr>
+<tr><td><strong>Contexte et sources</strong></td><td>Les faits, références et limites que le contenu doit intégrer pour rester exact et utile.</td><td>« À partir de la politique validée jointe, ajoute la règle et cite sa section » · « Si une donnée manque, écris “à confirmer” »</td></tr>
+<tr><td><strong>Style</strong></td><td>Le registre et le ton employés.</td><td>« Passe au tutoiement » · « Adopte un ton plus direct, moins commercial »</td></tr>
+<tr><td><strong>Format</strong></td><td>La structuration visuelle et l'organisation du contenu.</td><td>« Transforme les paragraphes en liste à puces » · « Ajoute des sous-titres » · « Présente en tableau »</td></tr>
+<tr><td><strong>Accessibilité</strong></td><td>La réduction des obstacles de lecture, d'écoute, de compréhension ou de navigation, selon le support et les utilisateurs.</td><td>« Adapte pour une lecture à voix haute » · « Utilise des intitulés explicites et une idée principale par phrase »</td></tr>
+</tbody>
+</table>
+<p>L'accessibilité sera développée pour elle-même plus loin dans votre parcours&nbsp;: elle figure ici comme un levier parmi les autres, à titre de repère, pas encore comme un sujet traité en profondeur.</p>
+</section>
+
+<section>
+<h2>Rédiger un prompt d'optimisation complet</h2>
+<p>Un prompt de correction s'appuie sur une version identifiée et précise&nbsp;: <strong>le besoin et le public</strong>, <strong>les sources de vérité</strong>, <strong>ce qui doit changer</strong>, <strong>ce qui doit rester</strong>, <strong>les critères d'acceptation</strong> et <strong>le format de sortie</strong>. Demandez aussi un bref relevé des modifications pour faciliter la comparaison, sans considérer ce relevé comme une preuve suffisante.</p>
+<div class="card prompt">
+<div class="label">Gabarit réutilisable</div>
+<pre>Version à corriger : [coller le contenu et indiquer sa version].
+Besoin et public : [usage réel].
+Sources de vérité : [documents ou faits autorisés ; ne rien inventer].
+Conserve : [éléments déjà vérifiés].
+Modifie : [changements précis].
+Critères d'acceptation : [exactitude, longueur, structure, termes, accessibilité...].
+Résultat attendu : [version corrigée, puis bref relevé des changements et points à confirmer].</pre>
+</div>
+<p>Après génération, contrôlez chaque critère vous-même. Pour une contrainte mesurable, comptez ou testez&nbsp;; pour un fait, revenez à la source&nbsp;; pour l'accessibilité et l'usage, faites si possible tester le contenu par une personne représentative du public.</p>
+</section>
+
+<section>
+<h2>Exemple travaillé&nbsp;: vulgariser un contenu technique</h2>
+<p>Voici un exemple complet, du contenu de départ jusqu'au résultat optimisé, avec la justification de chaque changement.</p>
+
+<div class="card quote">
+<div class="label">Contenu de départ, rédigé pour un public technique</div>
+<p>« Avec le chiffrement de bout en bout, un message est chiffré avant de quitter l'appareil de l'expéditeur et déchiffré sur celui du destinataire. Le fournisseur du service ne devrait pas disposer des clés nécessaires pour lire le contenu pendant le transport. La protection réelle dépend toutefois de l'implémentation, des appareils, de la gestion des clés et des éventuelles sauvegardes. »</p>
+</div>
+
+<h3>Le besoin</h3>
+<p>Le même contenu doit être compris par un public de novices en cryptographie, dans un format court adapté à une notification d'application (60 mots maximum), sans terme technique non expliqué.</p>
+
+<div class="card prompt">
+<div class="label">Prompt d'optimisation complet</div>
+<pre>Voici un contenu déjà généré, écrit pour un public technique : [coller le paragraphe ci-dessus].
+Conserve l'idée vérifiée que le contenu n'est normalement lisible que sur les appareils
+des participants, et conserve les limites liées à l'implémentation et aux sauvegardes.
+Modifie le style : passe à un langage courant, sans terme technique non expliqué
+(pas de "clé asymétrique", ni de "protocole cryptographique").
+Ajoute une comparaison concrète, clairement présentée comme une analogie et non comme
+une description technique complète.
+Contrainte : 60 mots maximum, un seul paragraphe, aucune liste.
+Résultat attendu : un brouillon de notification, suivi du nombre de mots et des points
+qui nécessitent encore une validation technique.</pre>
+</div>
+
+<div class="card result">
+<div class="label">Résultat optimisé</div>
+<p>« Le chiffrement de bout en bout agit comme une enveloppe fermée avant l'envoi&nbsp;: seuls les appareils des participants sont normalement équipés pour l'ouvrir. Le service qui transporte le message ne devrait donc pas le lire. Cette protection dépend toutefois de l'application, de vos appareils et de la façon dont les sauvegardes sont configurées. »</p>
+</div>
+
+<h3>Justification de chaque changement</h3>
+<ul class="justify-list">
+<li><span class="tag style">Style</span><strong>Vocabulaire.</strong> Plus de « clé asymétrique » ni de « protocole cryptographique », qui n'apportaient rien à un public novice et risquaient de faire décrocher la lecture dès la première phrase.</li>
+<li><span class="tag neutral">Contexte</span><strong>Comparaison.</strong> La boîte aux lettres à double clé, absente du contenu de départ, ancre un concept abstrait dans une image connue de tous.</li>
+<li><span class="tag contrainte">Contrainte</span><strong>Longueur.</strong> Ramenée sous les 60 mots imposés, en un seul paragraphe, sans liste, pour tenir dans le format d'une notification.</li>
+<li><span class="tag neutral">Fond préservé et nuancé.</span> L'objectif du chiffrement est conservé sans transformer une propriété attendue en garantie absolue ; les limites importantes restent visibles.</li>
+</ul>
+</section>
+
+<section>
+<h2>Prioriser les leviers quand ils sont en tension</h2>
+<p>Il arrive que les exigences soient incompatibles&nbsp;: ajouter une règle tout en gardant exactement la même longueur, par exemple. Ne demandez pas au modèle de masquer ce conflit. Signalez-le, protégez les exigences non négociables et proposez un arbitrage au commanditaire.</p>
+<ol class="priority-list">
+<li><strong>Protégez l'exactitude, la sécurité, la légalité et les informations indispensables.</strong> Une demande client ne justifie pas de les sacrifier.</li>
+<li><strong>Respectez les besoins d'accès du public et la finalité.</strong> Un contenu exact mais inutilisable échoue.</li>
+<li><strong>Appliquez les contraintes contractuelles et techniques compatibles.</strong> Si elles se contredisent, demandez une décision explicite.</li>
+<li><strong>Optimisez ensuite le style et l'esthétique.</strong> Ils servent la compréhension, sans masquer les limites ni modifier le fond validé.</li>
+</ol>
+<p>Dans l'exemple précédent, la limite de 60&nbsp;mots reste compatible avec une analogie et les réserves essentielles. Si elle ne l'était pas, il faudrait négocier la longueur ou prévoir un lien vers une explication complémentaire, plutôt que supprimer silencieusement une limite technique importante.</p>
+</section>
+
+<section>
+<h2>Sauriez-vous juger une optimisation&nbsp;?</h2>
+<p>Pour chacune des situations ci-dessous, le contexte et le public visé sont donnés avant la version optimisée proposée. Lisez le contexte, jugez si la version répond au besoin, puis découvrez le raisonnement.</p>
+
+<div class="game" id="judgeGame">
+
+  <div class="round" data-verdict="non" data-feedback="Le style a été allégé au niveau du vocabulaire, mais ni la longueur (contrainte) ni la structuration (format, étapes numérotées) n'ont été retravaillées. Pour un public qui n'a jamais suivi de formation informatique, la longueur et la mise en forme comptent autant que le choix des mots.">
+    <div class="ctx">Contexte connu</div>
+    <p>Une note technique sur une mise à jour logicielle doit être relue par des utilisateurs sans formation informatique, qui doivent juste savoir quoi faire.</p>
+    <div class="label">Version optimisée proposée</div>
+    <p class="proposal">Un texte de 15 lignes en un seul bloc, où chaque terme technique a été remplacé par un synonyme simple, sans réduire aucun des détails d'origine.</p>
+    <div class="round-actions">
+      <button class="btn" data-choice="oui">Adaptée</button>
+      <button class="btn" data-choice="non">Pas adaptée</button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="round" data-verdict="non" data-feedback="Une contrainte explicite, comme un mot interdit, est un critère binaire : elle est respectée ou elle ne l'est pas, indépendamment de la qualité du reste et même si la longueur est presque correcte.">
+    <div class="ctx">Contexte connu</div>
+    <p>Un texte pour un public de spécialistes doit respecter une charte&nbsp;: moins de 80&nbsp;mots, et le mot « simplement » interdit.</p>
+    <div class="label">Version optimisée proposée</div>
+    <p class="proposal">76 mots, ton adapté au public, mais le mot « simplement » apparaît une fois.</p>
+    <div class="round-actions">
+      <button class="btn" data-choice="oui">Adaptée</button>
+      <button class="btn" data-choice="non">Pas adaptée</button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="round" data-verdict="oui" data-feedback="À l'oral, des phrases courtes et un enchaînement explicite limitent l'effort de mémorisation et évitent de perdre le fil : un principe qui vaut particulièrement pour une lecture par synthèse vocale, mais pas seulement.">
+    <div class="ctx">Contexte connu</div>
+    <p>Un paragraphe doit pouvoir être lu par une synthèse vocale, pour un public qui l'écoute plutôt qu'il ne le lit.</p>
+    <div class="label">Version optimisée proposée</div>
+    <p class="proposal">Phrases courtes, une idée par phrase, connecteurs explicites (« d'abord », « ensuite », « enfin ») pour marquer chaque étape.</p>
+    <div class="round-actions">
+      <button class="btn" data-choice="oui">Adaptée</button>
+      <button class="btn" data-choice="non">Pas adaptée</button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="round" data-verdict="non" data-feedback="La description ne prouve pas que les mêmes informations sont conservées, ni que la longueur correspond au canal. Les émojis peuvent aussi modifier le ton ou gêner certains lecteurs. Il faut comparer les deux versions et tester des critères explicites.">
+    <div class="ctx">Contexte connu</div>
+    <p>Un contenu validé sur le fond doit passer sur un réseau social professionnel, ton dynamique pour un public jeune, sans changer les informations.</p>
+    <div class="label">Version optimisée proposée</div>
+    <p class="proposal">La personne affirme avoir gardé les mêmes informations, ajoute plusieurs émojis et indique seulement que le texte est « plus court ».</p>
+    <div class="round-actions">
+      <button class="btn" data-choice="oui">Adaptée</button>
+      <button class="btn" data-choice="non">Pas adaptée</button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="score-bar">
+    <span>Votre score</span>
+    <strong id="judgeScore">0 / 4</strong>
+  </div>
+</div>
+</section>
+
+<section>
+<h2>Pour aller plus loin</h2>
+<p>Cette section approfondit au-delà de ce qui est nécessaire pour suivre la suite du programme&nbsp;; la sauter ne bloque rien pour les leçons suivantes.</p>
+<p>Le style « vulgarisé » de l'exemple travaillé plus haut n'est pas qu'une question d'intuition&nbsp;: il existe depuis le 20&nbsp;juin 2023 une norme internationale dédiée à la clarté rédactionnelle, l'<strong>ISO 24495-1:2023</strong> (« Plain language, Part 1&nbsp;: Governing principles and guidelines »). Elle formalise les principes qui rendent un contenu compréhensible dès la première lecture par son public, quels que soient la langue ou le support&nbsp;: un repère objectif pour juger si une optimisation de style a réellement atteint son but, plutôt qu'une simple impression.</p>
+<p>Un principe voisin, mais pensé spécifiquement pour des publics en difficulté de lecture, dont certaines situations de handicap, existe depuis 2009 sous le nom de <strong>FALC</strong> (« Facile à Lire et à Comprendre »), porté à l'origine par le réseau européen Inclusion Europe puis diffusé en France notamment par l'Unapei. Le FALC va au-delà de la seule clarté&nbsp;: il impose des règles précises (une idée par phrase, un vocabulaire contrôlé, une mise en page aérée). Ce sujet, dont le FALC n'est qu'un exemple, sera traité pour lui-même plus loin dans votre parcours&nbsp;; il est mentionné ici pour montrer qu'un levier d'optimisation, poussé à son terme, peut devenir une discipline documentée avec ses propres règles.</p>
+<p>Optimiser a aussi un coût&nbsp;: chaque itération demande du temps de relecture. Un repère pour ne pas optimiser indéfiniment&nbsp;: arrêtez dès qu'une nouvelle itération ne change plus la compréhension ou l'usage réel du contenu, seulement son esthétique. La méthode reste la même du premier au centième contenu optimisé&nbsp;: repérer ce qui ne convient pas, isoler le ou les leviers concernés, écrire un prompt qui cible ce changement sans toucher au reste.</p>
+</section>
+
+</main>
+
+<footer class="closing">
+  Référentiel de la compétence « optimiser les contenus générés »&nbsp;: un prompt d'optimisation complet et un contenu optimisé conforme au besoin.
+</footer>
+
+</div>
+
+<script>
+(function(){
+  var rounds = document.querySelectorAll('#judgeGame .round');
+  var scoreEl = document.getElementById('judgeScore');
+  var score = 0;
+  var answered = 0;
+  var total = rounds.length;
+
+  rounds.forEach(function(round){
+    var verdict = round.getAttribute('data-verdict');
+    var feedbackText = round.getAttribute('data-feedback');
+    var buttons = round.querySelectorAll('.round-actions .btn');
+    var feedbackEl = round.querySelector('.feedback');
+
+    buttons.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var choice = btn.getAttribute('data-choice');
+        var correct = (choice === verdict);
+
+        buttons.forEach(function(b){ b.disabled = true; });
+
+        feedbackEl.textContent = (correct ? 'Bonne lecture. ' : 'À revoir. ') + feedbackText;
+        feedbackEl.classList.add('show');
+        feedbackEl.classList.add(correct ? 'ok' : 'alert');
+
+        if (correct) { score += 1; }
+        answered += 1;
+        scoreEl.textContent = score + ' / ' + total;
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

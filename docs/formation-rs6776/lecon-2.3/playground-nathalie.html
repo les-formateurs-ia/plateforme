@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entraînement rédaction IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#F7F7FA; --surface:#fff; --ink:#1b1a17; --ink-2:#4a4741; --ink-3:#7c786f;
+  --rule:#e4e1d9; --rule-2:#efece5; --accent:#1f4e46; --accent-soft:#eef3f1;
+  --ok:#2c6a48; --ok-soft:#eef4ef; --warn:#8a6519; --warn-soft:#faf4e7;
+  --alert:#963428; --alert-soft:#fbf1ef;
+  --serif:'Funnel Display',Georgia,'Iowan Old Style','Times New Roman',serif;
+  --sans:'Funnel Display',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+}
+body{font-family:var(--sans);font-size:15.5px;line-height:1.65;color:var(--ink);background:var(--paper);padding:0 22px 80px}
+.wrap{width:100%;margin:0 auto}  /* JAMAIS de max-width plafonné sur .wrap */
+
+header.lead{margin:0 auto;padding-top:46px}
+header.lead .kicker{font-size:12.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);font-weight:600}
+header.lead h1{font-family:var(--serif);font-weight:700;font-size:1.9rem;line-height:1.2;margin:10px 0 16px;color:var(--ink)}
+header.lead p{color:var(--ink-2)}
+
+main{margin:0 auto}
+section.ex{margin-top:48px;background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:24px 24px 26px}
+section.ex .ex-tag{display:inline-block;font-size:.76rem;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);font-weight:700;background:var(--accent-soft);border-radius:20px;padding:3px 12px;margin-bottom:10px}
+section.ex h2{font-family:var(--serif);font-weight:700;font-size:1.35rem;margin-bottom:8px}
+section.ex > p.intro{color:var(--ink-2);margin-bottom:18px}
+
+fieldset{border:none;border-top:1px solid var(--rule-2);padding:16px 0;margin:0}
+fieldset:first-of-type{border-top:none;padding-top:0}
+legend{font-weight:700;padding:0 0 10px;float:left;width:100%}
+.ctx{background:var(--rule-2);border-radius:8px;padding:10px 12px;margin:0 0 12px;font-size:.92rem;clear:both}
+.opt{display:block;margin:8px 0}
+.opt label{display:flex;gap:9px;align-items:flex-start;cursor:pointer;padding:8px 10px;border-radius:7px;border:1px solid transparent}
+.opt label:hover{background:var(--rule-2)}
+.opt input{margin-top:3px}
+fieldset.answered .opt label.pick-ok{background:var(--ok-soft);border-color:var(--ok)}
+fieldset.answered .opt label.pick-bad{background:var(--alert-soft);border-color:var(--alert)}
+.why{display:none;font-size:.88rem;margin-top:6px;padding:9px 11px;border-radius:7px;background:var(--rule-2);color:var(--ink-2)}
+fieldset.answered .why{display:block}
+
+.ex-actions{display:flex;align-items:center;justify-content:space-between;margin-top:20px;gap:14px;flex-wrap:wrap}
+button.check{font-family:var(--sans);background:var(--accent);color:#fff;border:none;border-radius:6px;padding:10px 20px;font-size:.94rem;cursor:pointer}
+button.check:disabled{opacity:.4;cursor:default}
+.score{font-weight:700;font-size:.95rem}
+.score.pass{color:var(--ok)}
+.score.fail{color:var(--alert)}
+.hint{font-size:.82rem;color:var(--ink-3)}
+
+textarea{width:100%;min-height:150px;font-family:var(--sans);font-size:.96rem;color:var(--ink);background:var(--surface);border:1.5px solid var(--rule);border-radius:8px;padding:12px 14px;resize:vertical}
+textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+.transcript-box{background:#fdfcf9;border:1px solid var(--rule);border-radius:8px;padding:14px 16px;font-size:.94rem;line-height:1.85;margin-bottom:16px}
+.reveal-btn{font-family:var(--sans);background:var(--surface);color:var(--accent);border:1.5px solid var(--accent);border-radius:6px;padding:9px 16px;font-size:.9rem;cursor:pointer;margin-top:14px}
+.corrige{display:none;margin-top:14px;background:var(--accent-soft);border:1px solid var(--accent);border-radius:8px;padding:14px 16px;font-size:.92rem}
+.corrige.show{display:block}
+.autosave-note{font-size:.78rem;color:var(--ink-3);margin-top:8px}
+
+footer{margin:60px auto 0;text-align:center;color:var(--ink-3);font-size:.85rem;font-style:italic}
+
+@media(max-width:520px){
+  header.lead h1{font-size:1.55rem}
+  section.ex{padding:18px 16px 20px}
+  legend{float:none}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<main>
+
+<header class="lead">
+  <span class="kicker">Entraînement personnalisé</span>
+  <h1>Rédaction IA et compte-rendu vérifiable : à votre tour, Nathalie</h1>
+  <p>Trois mises en situation pour appliquer la leçon : choisir un environnement selon le besoin et les autorisations, vérifier les contrôles indispensables, puis préparer une transcription fictive avant de produire un compte-rendu traçable.</p>
+</header>
+
+<section class="ex" id="ex1">
+  <span class="ex-tag">Exercice 1 · noté</span>
+  <h2>Quel outil ou quelle méthode choisir ?</h2>
+  <p class="intro">Cinq situations tirées de votre activité de consultante indépendante intervenant chez plusieurs clients en parallèle. Pour chacune, choisissez l'option la plus adaptée.</p>
+
+  <fieldset data-q="1">
+    <legend>1. Compte-rendu confidentiel</legend>
+    <div class="ctx">Vous envisagez d'enregistrer une session sur un module de gestion des temps pour en tirer un compte-rendu. Les échanges pourraient contenir des remarques nominatives sur des cas de paie réels.</div>
+    <div class="opt"><label><input type="radio" name="q1" data-ok="false" data-why="L'audio brut contient des éléments identifiants : l'envoyer tel quel à un service en ligne les expose d'emblée."> Envoyer l'enregistrement directement à un service de transcription en ligne pour aller vite.</label></div>
+    <div class="opt"><label><input type="radio" name="q1" data-ok="true" data-why="La chaîne commence avant l'enregistrement : cadre applicable, information, autorisation, accès, stockage et suppression. Elle continue avec un outil de transcription et un service de rédaction approuvés, la minimisation puis la validation."> Vérifier d'abord le cadre de l'enregistrement ; s'il est permis, utiliser une chaîne d'outils approuvés, contrôler et minimiser la transcription, puis vérifier le compte-rendu.</label></div>
+    <div class="opt"><label><input type="radio" name="q1" data-ok="false" data-why="Résumer de mémoire fait perdre en fidélité et en détails exploitables pour le client."> Résumer la session de mémoire, sans réécouter l'enregistrement.</label></div>
+    <div class="opt"><label><input type="radio" name="q1" data-ok="false" data-why="Transcrire en ligne sans rien modifier expose ensuite les mêmes éléments identifiants à l'IA qui rédige le compte-rendu."> Transcrire en ligne, puis envoyer le texte tel quel au client sans le relire.</label></div>
+    <div class="why"></div>
+  </fieldset>
+
+  <fieldset data-q="2">
+    <legend>2. Guide partagé avec le client</legend>
+    <div class="ctx">Pour un autre client, vous rédigez un passage de guide qui doit être coédité dans Google Docs. Le client confirme que Gemini est activé dans son offre Workspace et autorisé pour ce document.</div>
+    <div class="opt"><label><input type="radio" name="q2" data-ok="true" data-why="Dans ce contexte précis, l'intégration déjà activée et autorisée répond au besoin de collaboration directe."> Utiliser l'intégration Gemini prévue dans l'environnement Workspace du client.</label></div>
+    <div class="opt"><label><input type="radio" name="q2" data-ok="false" data-why="ChatGPT ne s'ouvre pas nativement dans un document Docs partagé de la même façon que Gemini."> Utiliser ChatGPT, pour la même raison.</label></div>
+    <div class="opt"><label><input type="radio" name="q2" data-ok="false" data-why="Les deux outils n'ont pas la même intégration bureautique : c'est justement ce qui les distingue sur ce point précis."> Peu importe l'outil, l'intégration bureautique est identique.</label></div>
+    <div class="opt"><label><input type="radio" name="q2" data-ok="false" data-why="Un outil de transcription ne répond pas au besoin de coédition d'un guide dans Google Docs."> Utiliser un outil de transcription hors ligne.</label></div>
+    <div class="why"></div>
+  </fieldset>
+
+  <fieldset data-q="3">
+    <legend>3. Évaluer un assistant préconfiguré</legend>
+    <div class="ctx">Vous trouvez dans un catalogue public un assistant qui promet de reformuler des guides clients dans un style pédagogique.</div>
+    <div class="opt"><label><input type="radio" name="q3" data-ok="false" data-why="La présence dans un catalogue public ne garantit ni l'autorisation interne ni la qualité."> Lui transmettre immédiatement un guide client complet.</label></div>
+    <div class="opt"><label><input type="radio" name="q3" data-ok="true" data-why="Le bon contrôle porte sur l'éditeur, les connexions, les données, les droits et la qualité mesurée sur un cas fictif."> Vérifier l'éditeur, les connexions et les données traitées, confirmer l'autorisation, puis le tester sur un extrait fictif avec des critères de réussite.</label></div>
+    <div class="opt"><label><input type="radio" name="q3" data-ok="false" data-why="Un avis positif ne remplace ni l'analyse des autorisations ni un test représentatif."> Se fier uniquement à sa note et aux avis du catalogue.</label></div>
+    <div class="opt"><label><input type="radio" name="q3" data-ok="false" data-why="Masquer le nom du fichier ne protège pas le contenu qu'il renferme."> Renommer le fichier client « test » avant de le transmettre.</label></div>
+    <div class="why"></div>
+  </fieldset>
+
+  <fieldset data-q="4">
+    <legend>4. Une correction ponctuelle et simple</legend>
+    <div class="ctx">Vous devez reformuler une seule phrase d'un guide pour la rendre plus claire : une tâche ponctuelle et simple.</div>
+    <div class="opt"><label><input type="radio" name="q4" data-ok="false" data-why="Le mode approfondi est utile pour une demande complexe à plusieurs contraintes, pas pour reformuler une phrase isolée."> Basculer sur le mode de raisonnement le plus approfondi de l'outil.</label></div>
+    <div class="opt"><label><input type="radio" name="q4" data-ok="true" data-why="Pour une tâche courante et simple, le mode rapide standard suffit largement."> Utiliser le mode rapide standard de l'outil.</label></div>
+    <div class="opt"><label><input type="radio" name="q4" data-ok="false" data-why="Créer un Project est adapté à un usage récurrent, pas à une reformulation ponctuelle isolée."> Créer un Project dédié avec des instructions permanentes avant de commencer.</label></div>
+    <div class="opt"><label><input type="radio" name="q4" data-ok="false" data-why="Changer d'outil n'a aucun rapport avec la difficulté réelle de la tâche."> Changer complètement d'outil.</label></div>
+    <div class="why"></div>
+  </fieldset>
+
+  <fieldset data-q="5">
+    <legend>5. Garder deux clients strictement séparés</legend>
+    <div class="ctx">Deux clients vous ont chacun transmis des contenus internes. Leur traitement dans ChatGPT est autorisé sous conditions et vous devez maintenir une séparation contrôlable.</div>
+    <div class="opt"><label><input type="radio" name="q5" data-ok="false" data-why="Mélanger les contenus de deux clients dans une seule conversation va justement à l'encontre du cloisonnement recherché."> Tout mélanger dans une seule conversation pour gagner du temps.</label></div>
+    <div class="opt"><label><input type="radio" name="q5" data-ok="true" data-why="Des espaces distincts facilitent l'organisation, à condition de vérifier également les membres, le partage, les fichiers, les paramètres de données et la suppression."> Utiliser un espace distinct par client et contrôler ses accès, partages, fichiers, paramètres de données et règles de suppression.</label></div>
+    <div class="opt"><label><input type="radio" name="q5" data-ok="false" data-why="Ne prendre aucune précaution revient à accepter le risque de mélanger les contenus de plusieurs clients."> Ne prendre aucune précaution particulière, l'outil s'en charge automatiquement.</label></div>
+    <div class="opt"><label><input type="radio" name="q5" data-ok="false" data-why="Supprimer sans organiser ne règle pas le besoin de séparer les contenus pendant qu'ils sont utilisés."> Supprimer les documents de chaque client après usage, sans les organiser.</label></div>
+    <div class="why"></div>
+  </fieldset>
+
+  <div class="ex-actions">
+    <button class="check" data-ex="ex1" data-total="5">Corriger mes réponses</button>
+    <span class="score" id="ex1-score"></span>
+  </div>
+  <p class="hint">Seuil de réussite : 80 % (4 bonnes réponses sur 5).</p>
+</section>
+
+<section class="ex" id="ex2">
+  <span class="ex-tag">Exercice 2 · noté</span>
+  <h2>Vrai ou faux ?</h2>
+  <p class="intro">Cinq affirmations sur le choix d'environnement et la transcription. Indiquez si chacune est vraie ou fausse.</p>
+
+  <fieldset data-q="1">
+    <legend>1.</legend>
+    <div class="ctx">La présence d'un assistant dans un catalogue public garantit qu'il est autorisé par votre organisation.</div>
+    <div class="opt"><label><input type="radio" name="v1" data-ok="false" data-why="Faux : il faut vérifier l'éditeur, les outils ou connexions, les données, les autorisations et la qualité."> Vrai</label></div>
+    <div class="opt"><label><input type="radio" name="v1" data-ok="true" data-why="Faux : il faut vérifier l'éditeur, les outils ou connexions, les données, les autorisations et la qualité."> Faux</label></div>
+    <div class="why"></div>
+  </fieldset>
+
+  <fieldset data-q="2">
+    <legend>2.</legend>
+    <div class="ctx">Une application annoncée comme locale n'a besoin d'aucune vérification supplémentaire.</div>
+    <div class="opt"><label><input type="radio" name="v2" data-ok="false" data-why="Faux : vérifiez le traitement réel, les envois secondaires, le stockage, les sauvegardes, les accès et la suppression."> Vrai</label></div>
+    <div class="opt"><label><input type="radio" name="v2" data-ok="true" data-why="Faux : vérifiez le traitement réel, les envois secondaires, le stockage, les sauvegardes, les accès et la suppression."> Faux</label></div>
+    <div class="why"></div>
+  </fieldset>
+
+  <fieldset data-q="3">
+    <legend>3.</legend>
+    <div class="ctx">Une intégration de Gemini à Google Workspace peut dépendre de l'offre et des réglages administrateur.</div>
+    <div class="opt"><label><input type="radio" name="v3" data-ok="true" data-why="Vrai : il faut vérifier l'offre, les fonctions activées et les droits du compte concerné."> Vrai</label></div>
+    <div class="opt"><label><input type="radio" name="v3" data-ok="false" data-why="Vrai : il faut vérifier l'offre, les fonctions activées et les droits du compte concerné."> Faux</label></div>
+    <div class="why"></div>
+  </fieldset>
+
+  <fieldset data-q="4">
+    <legend>4.</legend>
+    <div class="ctx">Créer un Project distinct suffit, à lui seul, à garantir la confidentialité et le cloisonnement d'un client.</div>
+    <div class="opt"><label><input type="radio" name="v4" data-ok="false" data-why="Faux : un Project organise le travail, mais les accès, partages, fichiers et paramètres doivent encore être contrôlés."> Vrai</label></div>
+    <div class="opt"><label><input type="radio" name="v4" data-ok="true" data-why="Faux : un Project organise le travail, mais les accès, partages, fichiers et paramètres doivent encore être contrôlés."> Faux</label></div>
+    <div class="why"></div>
+  </fieldset>
+
+  <fieldset data-q="5">
+    <legend>5.</legend>
+    <div class="ctx">Même avec un outil de transcription approuvé, les noms propres, les nombres, les locuteurs et les passages inaudibles doivent être contrôlés.</div>
+    <div class="opt"><label><input type="radio" name="v5" data-ok="true" data-why="Vrai : la transcription automatique peut contenir des erreurs et ne remplace pas l'écoute des passages importants."> Vrai</label></div>
+    <div class="opt"><label><input type="radio" name="v5" data-ok="false" data-why="Vrai : la transcription automatique peut contenir des erreurs et ne remplace pas l'écoute des passages importants."> Faux</label></div>
+    <div class="why"></div>
+  </fieldset>
+
+  <div class="ex-actions">
+    <button class="check" data-ex="ex2" data-total="5">Corriger mes réponses</button>
+    <span class="score" id="ex2-score"></span>
+  </div>
+  <p class="hint">Seuil de réussite : 80 % (4 bonnes réponses sur 5).</p>
+</section>
+
+<section class="ex" id="ex3">
+  <span class="ex-tag">Exercice 3 · non noté</span>
+  <h2>Préparer une transcription fictive pour un compte-rendu traçable</h2>
+  <p class="intro">Le formateur vous fournit l'extrait fictif ci-dessous. La finalité est un compte-rendu de pilotage ; le service de rédaction est autorisé pour les informations opérationnelles et budgétaires, mais les identités, coordonnées, motifs médicaux et données de facturation ne sont pas nécessaires. Réécrivez une version minimisée, justifiez chaque retrait ou généralisation, puis préparez le prompt de compte-rendu avec des repères source et des mentions « à confirmer ».</p>
+
+  <div class="transcript-box">
+    Bon, on fait le point sur le déploiement du module congés. Farida Ben
+    Slimane a signalé un souci de calcul sur les soldes de deux
+    collaborateurs. L'un des deux, Thibault Roche, est en arrêt longue
+    durée depuis mars, ce qui complique le suivi. Pour la suite, vous
+    pouvez joindre Farida au 07 45 12 98 33 ou par mail à
+    farida.benslimane@exemple-fictif.com. Le budget de la phase 2 du
+    déploiement est fixé à 18 500 euros. Le prestataire technique, Klaro
+    Systèmes, a transmis son numéro de SIRET, 501 234 987 00012, pour la
+    facturation. Pour le reste, on garde le même rythme : un point de
+    suivi toutes les deux semaines et un tableau de bord partagé mis à
+    jour chaque vendredi. Prochaine étape : corriger le paramétrage des
+    soldes avant la fin du mois.
+  </div>
+
+  <textarea id="ex3-textarea" placeholder="Votre version nettoyée, avec la justification de chaque retrait..."></textarea>
+  <p class="autosave-note" id="ex3-autosave-note">Votre brouillon est enregistré automatiquement dans ce navigateur.</p>
+
+  <button class="reveal-btn" id="ex3-reveal">Voir un corrigé indicatif</button>
+  <div class="corrige" id="ex3-corrige">
+    <strong>Corrigé indicatif</strong> (une version possible parmi d'autres) :
+    <p style="margin-top:8px">« Point sur le déploiement du module congés. La référente RH a signalé un problème de calcul sur les soldes de deux collaborateurs. Une indisponibilité prolongée affecte le suivi <em>(identités et motif médical retirés ; seul l'impact opérationnel nécessaire est conservé)</em>. Pour toute question, contacter la référente RH par le canal interne <em>(coordonnées directes retirées)</em>. Le budget de la phase 2 est fixé à 18 500 euros <em>(conservé parce qu'il est nécessaire à la finalité et autorisé dans ce scénario ; à réexaminer dans un autre contexte)</em>. Le prestataire a transmis ses informations de facturation <em>(nom et SIRET retirés car inutiles au compte-rendu ; ce retrait relève ici de la minimisation et de la confidentialité)</em>. Rythme de suivi inchangé : un point toutes les deux semaines et un tableau partagé mis à jour chaque vendredi. Prochaine étape : corriger le paramétrage des soldes avant la fin du mois ; responsable : à confirmer. »</p>
+    <p><strong>Prompt à joindre :</strong> demandez un brouillon fondé uniquement sur cet extrait, sans invention, avec les colonnes décision, action, responsable, échéance, statut confirmé ou à confirmer, et repère source. Comparez ensuite chaque ligne au texte avant remise au formateur.</p>
+  </div>
+</section>
+
+</main>
+</div>
+
+<footer>Toutes les entreprises, personnes et données chiffrées de cet exercice sont fictives.</footer>
+
+<script>
+(function(){
+"use strict";
+
+function scoreExercise(btn){
+  var exId = btn.dataset.ex;
+  var total = parseInt(btn.dataset.total, 10);
+  var section = document.getElementById(exId);
+  var fieldsets = section.querySelectorAll("fieldset");
+  var correct = 0;
+  var allAnswered = true;
+
+  fieldsets.forEach(function(fs){
+    var checked = fs.querySelector("input[type=radio]:checked");
+    var whyBox = fs.querySelector(".why");
+    fs.classList.add("answered");
+    var labels = fs.querySelectorAll(".opt label");
+    labels.forEach(function(l){ l.classList.remove("pick-ok","pick-bad"); });
+    if (!checked){
+      allAnswered = false;
+      whyBox.textContent = "Aucune réponse sélectionnée pour cette question.";
+      return;
+    }
+    var ok = checked.dataset.ok === "true";
+    var label = checked.closest("label");
+    label.classList.add(ok ? "pick-ok" : "pick-bad");
+    whyBox.textContent = checked.dataset.why;
+    if (ok) correct++;
+  });
+
+  var scoreEl = document.getElementById(exId + "-score");
+  var pct = Math.round((correct / total) * 100);
+  var pass = pct >= 80;
+  scoreEl.textContent = correct + " / " + total + " (" + pct + " %)" + (allAnswered ? "" : " : répondez à toutes les questions");
+  scoreEl.className = "score " + (pass ? "pass" : "fail");
+}
+
+document.querySelectorAll("button.check").forEach(function(btn){
+  btn.addEventListener("click", function(){ scoreExercise(btn); });
+});
+
+/* Exercice 3 : zone ouverte, autosave localStorage, corrigé masqué/révélé */
+var STORAGE_KEY = "nathalie_playground_2_3_ex3";
+var ta = document.getElementById("ex3-textarea");
+var note = document.getElementById("ex3-autosave-note");
+try {
+  var saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) ta.value = saved;
+} catch (e) { /* stockage indisponible, on continue sans autosave */ }
+
+ta.addEventListener("input", function(){
+  try {
+    localStorage.setItem(STORAGE_KEY, ta.value);
+    note.textContent = "Brouillon enregistré automatiquement dans ce navigateur.";
+  } catch (e) {
+    note.textContent = "Enregistrement automatique indisponible dans ce navigateur ; pensez à copier votre texte.";
+  }
+});
+
+document.getElementById("ex3-reveal").addEventListener("click", function(){
+  var box = document.getElementById("ex3-corrige");
+  var show = !box.classList.contains("show");
+  box.classList.toggle("show", show);
+  this.textContent = show ? "Masquer le corrigé indicatif" : "Voir un corrigé indicatif";
+});
+
+})();
+</script>
+</body>
+</html>

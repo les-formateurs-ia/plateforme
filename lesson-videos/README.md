@@ -57,3 +57,19 @@ Sources d'origine : `../source_video/` et `Bureau/VIDEOS NATHALIE/`.
 2. Créer `src/lessonN/` : `timeline.ts` (durée exacte de la source, scènes, caméra,
    effets sonores) + une scène par fichier, en restant hors de `AVATAR_ZONE`.
 3. Enregistrer la composition dans `src/Root.tsx` (une seule vidéo par leçon).
+
+## Formation RS6776 (voix et avatar HeyGen)
+
+Chaîne de production des vidéos de la formation RS6776 (règles : `docs/formation-rs6776/bible.md`).
+La clé HeyGen se passe par `export HEYGEN_API_KEY=…` (jamais écrite dans le dépôt).
+
+1. **Voix off** (gratuite en Turbo Free) : `node scripts/heygen-voice.mjs <script.md> <nom>`
+   → `public/generated/<nom>/scene-*.wav` (ignoré par Git) + `src/generated/<nom>.json`
+   (scènes, texte, durées, horodatage de chaque mot). Une scène inchangée n'est pas regénérée.
+2. **Avatar** (payant, ~0,10 $/s) : `node scripts/heygen-avatar.mjs <nom> --dry-run` pour le coût,
+   puis sans `--dry-run`. Seules les scènes « avatar plein cadre » ou « en médaillon » sont animées,
+   lèvres synchronisées sur la voix de l'étape 1 (Raul assis au bureau, moteur Avatar 6).
+3. **Montage** : `src/rs6776/` (timeline calée sur les mots, briques, fiches outils) et une
+   composition par vidéo, ex. `src/lesson1_1/Commune.tsx`. Les apparitions se calent avec
+   `cue(scène, "mot")`.
+4. **Rendu** : `npx remotion render RS6776-1-1-Commune out/rs6776-1-1-commune.mp4 --crf=18`.

@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reconnaître les informations à protéger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --paper:#F7F7FA; --surface:#fff; --ink:#1b1a17; --ink-2:#4a4741; --ink-3:#7c786f;
+    --rule:#e4e1d9; --rule-2:#efece5; --accent:#1f4e46; --accent-soft:#eef3f1;
+    --ok:#2c6a48; --ok-soft:#eef4ef; --warn:#8a6519; --warn-soft:#faf4e7;
+    --alert:#963428; --alert-soft:#fbf1ef;
+    --serif:'Funnel Display',Georgia,'Iowan Old Style','Times New Roman',serif;
+    --sans:'Funnel Display',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  body{font-family:var(--sans);font-size:15.5px;line-height:1.65;color:var(--ink);background:var(--paper);padding:0 22px 80px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;margin:0 auto}
+  header.top{padding:44px 0 26px;border-bottom:1px solid var(--rule)}
+  header.top h1{font-family:var(--serif);font-size:clamp(26px,4.5vw,34px);line-height:1.2;font-weight:400;letter-spacing:-.01em;margin-bottom:12px;max-width:30ch}
+  header.top .sub{font-size:15.5px;color:var(--ink-2);}
+  h2{font-family:var(--serif);font-size:24px;font-weight:400;line-height:1.3;letter-spacing:-.01em;margin:44px 0 16px;padding-bottom:10px;border-bottom:1px solid var(--rule)}
+  h3{font-size:12px;letter-spacing:.13em;text-transform:uppercase;font-weight:600;color:var(--ink-3);margin:30px 0 14px}
+  h4{font-family:var(--serif);font-size:17px;font-weight:400;margin-bottom:6px}
+  p+p{margin-top:12px}
+  strong{color:var(--ink);font-weight:600}
+  em{font-style:italic}
+  ul,ol{margin:14px 0 14px 20px;}
+  li{margin-bottom:8px}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14.5px}
+  th,td{border-bottom:1px solid var(--rule-2);padding:10px 12px 10px 0;text-align:left;vertical-align:top}
+  th{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:600;border-bottom:1px solid var(--rule)}
+
+  .aside{border-left:2px solid var(--rule);padding:2px 0 2px 20px;margin:22px 0;font-size:15px;color:var(--ink-2);}
+  .aside .lab{display:block;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);margin-bottom:5px;font-weight:600}
+  .aside.key{border-left-color:var(--accent)} .aside.key .lab{color:var(--accent)}
+  .aside.caution{border-left-color:var(--alert)} .aside.caution .lab{color:var(--alert)}
+  .aside.further{border-left-color:var(--warn)} .aside.further .lab{color:var(--warn)}
+
+  .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin:18px 0}
+  .cols>div{background:var(--surface);padding:18px 20px}
+  .cols p{font-size:14px;color:var(--ink-2);max-width:none}
+  .cols .tag{display:block;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px;font-weight:600}
+
+  .chip{display:inline-block;font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:600;padding:2px 7px;border-radius:3px;margin-left:5px;vertical-align:1px;white-space:nowrap}
+  .chip-int{background:var(--accent-soft);color:var(--accent)}
+  .chip-ext{background:var(--warn-soft);color:var(--warn)}
+  .chip-safe{background:var(--ok-soft);color:var(--ok)}
+
+  .exbox{border:1px solid var(--rule);padding:20px 22px;background:var(--surface);margin:18px 0}
+  .exbox .exlab{display:block;font-size:11px;letter-spacing:.13em;text-transform:uppercase;font-weight:600;color:var(--ink-3);margin-bottom:10px}
+  .exbox .promptline{font-family:var(--serif);font-style:italic;font-size:15.5px;color:var(--ink);line-height:1.7;max-width:none;padding:14px 16px;background:var(--paper);border-radius:3px}
+  .exbox ul{margin-top:14px}
+  .exbox li{font-size:14.5px;color:var(--ink-2)}
+
+  .game{background:var(--surface);border:1px solid var(--rule);padding:24px 26px;margin:22px 0}
+  .game .gamelab{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:10px}
+  .game .gameintro{font-size:14.5px;color:var(--ink-2);margin-bottom:18px;}
+  .roundhead{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--ink-3);margin:0 0 16px;letter-spacing:.02em}
+  .roundhead b{color:var(--accent)}
+  .askbox .q{font-family:var(--serif);font-size:16.5px;margin-bottom:14px;max-width:none}
+  .optgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule)}
+  .qopt{font:inherit;font-size:14px;text-align:center;padding:14px 12px;border:none;background:var(--surface);cursor:pointer;transition:.12s;color:var(--ink-2);border-top:3px solid transparent;line-height:1.35;font-weight:500}
+  .qopt:hover:not(:disabled){background:#fbfaf7}
+  .qopt:disabled{cursor:default}
+  .qopt.picked-good{border-top-color:var(--ok);background:var(--ok-soft);color:var(--ok);font-weight:600}
+  .qopt.picked-bad{border-top-color:var(--alert);background:var(--alert-soft)}
+  .qopt.reveal-good:not(.picked-good){border-top-color:var(--ok)}
+  .fb{margin-top:14px;font-size:14.5px;display:none;line-height:1.6;color:var(--ink-2);padding-left:20px;border-left:2px solid var(--rule);max-width:none}
+  .fb.show{display:block}
+  .fb.good{border-left-color:var(--ok)} .fb.bad{border-left-color:var(--warn)}
+  .fb .head{display:block;font-size:11px;letter-spacing:.13em;text-transform:uppercase;font-weight:600;margin-bottom:5px}
+  .fb.good .head{color:var(--ok)} .fb.bad .head{color:var(--warn)}
+  .gscore{font-size:13px;color:var(--ink-3);margin-top:18px}
+  .btn{font:inherit;font-size:14.5px;font-weight:500;border-radius:3px;padding:10px 20px;border:1px solid var(--accent);cursor:pointer;transition:.15s;background:none;color:var(--accent)}
+  .btn:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{background:#173b35}
+  .btn[hidden]{display:none}
+
+  .redact{background:var(--surface);border:1px solid var(--rule);padding:24px 26px;margin:22px 0}
+  .redact .gamelab{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:10px}
+  .redact .gameintro{font-size:14.5px;color:var(--ink-2);margin-bottom:18px;}
+  .rdtext{font-family:var(--serif);font-size:16px;line-height:1.9;color:var(--ink);max-width:none;background:var(--paper);border-radius:3px;padding:18px 20px}
+  .rdword{cursor:pointer;border-bottom:2px dotted var(--ink-3);padding:0 1px;border-radius:2px;transition:.12s}
+  .rdword:hover{background:var(--accent-soft)}
+  .rdword.picked{background:var(--alert-soft);text-decoration:line-through;text-decoration-color:var(--alert);border-bottom-color:transparent}
+  .rdword.ok-hit{background:var(--ok-soft);text-decoration:line-through;text-decoration-color:var(--ok);border-bottom-color:transparent;cursor:default}
+  .rdword.falsealarm{background:var(--warn-soft);text-decoration:line-through;text-decoration-color:var(--warn);border-bottom-color:transparent;cursor:default}
+  .rdword.missed{background:var(--alert-soft);outline:2px solid var(--alert);border-bottom-color:transparent;cursor:default}
+  .rdtoolbar{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:16px}
+  .rdscore{font-size:13px;color:var(--ink-3)}
+  .rdreview{margin-top:16px;display:none}
+  .rdreview.show{display:block}
+  .rdreview ul{margin:0;max-width:none;list-style:none}
+  .rdreview li{font-size:14px;color:var(--ink-2);margin-bottom:9px;padding-left:20px;position:relative;}
+  .rdreview li.hit::before{content:"\2713";color:var(--ok);position:absolute;left:0;font-weight:700}
+  .rdreview li.missitem::before{content:"!";color:var(--alert);position:absolute;left:2px;font-weight:700}
+  .rdreview li.falseitem::before{content:"\00D7";color:var(--warn);position:absolute;left:0;font-weight:700}
+
+  footer{margin-top:60px;padding-top:22px;border-top:1px solid var(--rule);font-size:12.5px;color:var(--ink-3);line-height:1.7;}
+  @media(max-width:600px){header.top h1{font-size:26px} h2{font-size:21px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <h1>Reconnaître les informations à protéger</h1>
+    <p class="sub">Cette leçon vous apprend à repérer les données personnelles, les informations confidentielles ou stratégiques et leur provenance. Elle distingue aussi le sens courant du mot « sensible » de sa définition juridique précise dans le RGPD.</p>
+  </header>
+
+  <h2>Quelles informations faut-il protéger ?</h2>
+  <p>Dans un contexte professionnel, une <strong>information à protéger</strong> est une information dont la divulgation, la perte ou l'usage détourné peut causer un préjudice à une personne, une organisation ou un client. Trois familles se rencontrent souvent :</p>
+  <div class="cols">
+    <div>
+      <span class="tag">Donnée personnelle</span>
+      <p>Identifie ou permet d'identifier une personne physique : nom, coordonnées, date de naissance, situation de santé, situation familiale, rémunération individuelle.</p>
+    </div>
+    <div>
+      <span class="tag">Information confidentielle</span>
+      <p>Couverte par un engagement de discrétion ou de secret professionnel : le contenu d'un contrat en négociation, un dossier client en cours, une information reçue sous condition de discrétion.</p>
+    </div>
+    <div>
+      <span class="tag">Information stratégique</span>
+      <p>Concerne le fonctionnement ou la position concurrentielle d'une structure : chiffres non publiés, méthode interne, code source, projet non annoncé.</p>
+    </div>
+  </div>
+  <p>Ces trois familles ne s'excluent pas : un compte-rendu d'entretien annuel peut être à la fois une donnée personnelle et une information confidentielle.</p>
+  <div class="aside caution"><span class="lab">Vocabulaire juridique</span>Au sens strict de l'article 9 du RGPD, les <strong>données sensibles</strong> sont certaines catégories de données personnelles bénéficiant d'une protection renforcée : origine raciale ou ethnique, opinions politiques, convictions religieuses ou philosophiques, appartenance syndicale, données génétiques ou biométriques utilisées pour identifier une personne, données de santé, vie sexuelle ou orientation sexuelle. Un tarif, un secret d'affaires ou un contrat confidentiel doit être protégé, mais ce n'est pas pour autant une « donnée sensible » au sens de l'article 9.</div>
+  <p>Le niveau de protection dépend aussi du <em>croisement</em> des éléments. Un prénom fictif isolé n'identifie personne réelle ; le même prénom associé à une date de naissance, une rémunération et un état de santé peut identifier une personne et révéler une donnée sensible au sens du RGPD.</p>
+
+  <h2>Données internes à l'entreprise, données externes</h2>
+  <p>Une deuxième distinction s'ajoute à la nature de la donnée : sa provenance. Une <strong>donnée interne</strong> concerne le fonctionnement propre de votre structure : sa stratégie, ses finances, ses méthodes, les informations personnelles de son propre personnel. Une <strong>donnée externe</strong> concerne un tiers à votre structure : un client, un prospect, un partenaire, un candidat à un recrutement, un fournisseur.</p>
+  <p>Cette distinction compte parce que l'enjeu d'une violation diffère selon le cas. La fuite d'une donnée interne affaiblit d'abord votre propre structure : un avantage concurrentiel dévoilé, une stratégie anticipée par un tiers. La fuite d'une donnée externe engage en plus votre responsabilité vis-à-vis d'un tiers qui vous a fait confiance : un client qui a communiqué ses coordonnées ou son projet en pensant qu'ils resteraient entre vous, et qui apprend qu'ils ont transité par un outil qu'il n'a pas validé.</p>
+  <p>Un point de vigilance fréquent : <strong>interne ne veut pas dire librement réutilisable.</strong> Les données personnelles des collaborateurs et les informations commerciales internes peuvent exiger une protection élevée. Nature, provenance, finalité et destinataires sont quatre questions distinctes.</p>
+
+  <div class="exbox">
+    <span class="exlab">Un exemple, phrase par phrase</span>
+    <p class="promptline">« Rédige un message pour informer l'équipe que Julien Blanc, actuellement en arrêt pour raisons médicales jusqu'au 15 mars, sera remplacé par intérim par Sophie Roux, dont le salaire vient d'être revalorisé à 42 000 euros, sur les dossiers du client Meranto dont le contrat représente 180 000 euros de chiffre d'affaires annuel. »</p>
+    <ul>
+      <li>Le nom et l'état de santé de Julien Blanc<span class="chip chip-int">donnée personnelle, interne</span> : il s'agit d'un collaborateur de la structure.</li>
+      <li>Le salaire de Sophie Roux<span class="chip chip-int">donnée personnelle, interne</span> : même raisonnement, une information individuelle qui concerne le personnel interne.</li>
+      <li>Le nom du client Meranto et le montant de son contrat<span class="chip chip-ext">information commerciale confidentielle, externe</span> : l'information concerne un tiers, et sa divulgation engagerait la confiance de ce client.</li>
+    </ul>
+    <p style="margin-top:14px">Une seule phrase, plusieurs informations à protéger pour des raisons différentes. Les reconnaître une à une précède toute décision sur leur traitement.</p>
+  </div>
+
+  <h2>Les risques concrets d'une violation</h2>
+  <p>Une violation de confidentialité ne prend pas toujours la forme spectaculaire d'un piratage. Dans un usage professionnel courant, elle prend le plus souvent l'une de ces formes :</p>
+  <ul>
+    <li><strong>La fuite vers l'extérieur</strong> : une donnée censée rester dans un cercle restreint se retrouve, par inadvertance, transmise à un tiers ou à un service qui n'aurait pas dû la recevoir.</li>
+    <li><strong>La rupture d'un engagement de confidentialité</strong> : un secret professionnel ou un contrat protégé par une clause de discrétion est reformulé et diffusé au-delà de ce qui était convenu.</li>
+    <li><strong>L'exposition disproportionnée d'une personne</strong> : une information personnelle, souvent une donnée de santé ou de situation personnelle, est communiquée sans lien avec l'objectif réellement poursuivi.</li>
+    <li><strong>La perte de confiance</strong> : au-delà du dommage immédiat, un client ou un collaborateur qui découvre qu'une donnée a transité par un canal qu'il n'a pas validé revoit la confiance qu'il accorde à la structure, parfois durablement.</li>
+  </ul>
+  <p>Un outil d'IA générative ajoute un canal à évaluer. Selon qu'il s'agit d'un service en ligne, d'une offre d'entreprise ou d'un outil local, les flux, la conservation, l'historique, l'entraînement et les accès diffèrent. Un projet ou une conversation séparée facilite l'organisation mais ne constitue pas, à lui seul, une garantie de confidentialité. Avant toute saisie, identifiez l'information, minimisez-la, vérifiez l'outil, l'offre, les réglages, les destinataires et l'autorisation applicable.</p>
+
+  <div class="game">
+    <div class="gamelab">Mini-jeu : à protéger, et de quelle provenance ?</div>
+    <p class="gameintro">Six manches. À chaque manche, une information rencontrée dans un contexte professionnel courant. Classez-la avant de découvrir l'explication.</p>
+    <div class="roundhead"><span>Manche <b id="sdNum">1</b>/6</span><span>Score : <b id="sdScore">0</b>/6</span></div>
+    <div class="askbox" id="sdGame">
+      <p class="q" id="sdItemTxt"></p>
+      <div class="optgrid" id="sdGrid"></div>
+      <p class="fb" id="sdFb"></p>
+      <button class="btn btn-primary" id="sdNextBtn" hidden>Manche suivante</button>
+    </div>
+  </div>
+
+  <h2>Un même contenu, plusieurs niveaux de lecture</h2>
+  <p>Un document professionnel mélange souvent des informations de niveaux différents : contenu public, information interne banale, donnée personnelle, secret d'accès ou conditions tarifaires confidentielles. Un classement global peut masquer un fragment critique. Lisez donc le document élément par élément, puis appliquez la règle la plus protectrice requise pour le traitement envisagé.</p>
+  <p>Le réflexe utile consiste à lire un contenu par fragments plutôt que dans son ensemble : à chaque information un peu précise (un nom, un chiffre, une date, une situation individuelle), se demander séparément si elle identifie quelqu'un, si elle est couverte par un engagement de discrétion, et à qui elle appartient. C'est cette lecture fragment par fragment qui a été appliquée à l'exemple plus haut, et qui reste la même quelle que soit la longueur ou la complexité du document.</p>
+
+  <div class="redact">
+    <div class="gamelab">Mini-jeu : repérez les informations à protéger</div>
+    <p class="gameintro">Un message professionnel courant. Activez chaque mot ou groupe de mots qui exige, selon vous, une précaution avant partage, puis vérifiez.</p>
+    <p class="rdtext" id="rdText">
+      Bonjour, peux-tu reformuler ce message pour le rendre plus synthétique ? Le 14 mars, <span class="rdword" data-sensitive="true" data-why="Le nom complet d'une personne permet de l'identifier directement : une donnée personnelle sensible.">Camille Dutertre</span>, notre cliente chez <span class="rdword" data-sensitive="true" data-why="Le nom de l'entreprise cliente est une donnée externe : sa divulgation engage la confidentialité commerciale envers ce client.">Aurelia Cosmétiques</span>, a signalé un retard de livraison sur la <span class="rdword" data-sensitive="true" data-why="Un numéro de commande précis associé à un montant identifie une transaction propre à ce client : une donnée commerciale sensible.">commande n°48213 d'un montant de 2 340 euros</span>. Elle est joignable au <span class="rdword" data-sensitive="true" data-why="Un numéro de téléphone personnel identifie directement une personne : une donnée personnelle sensible.">06 45 12 98 30</span> et souhaite être recontactée avant <span class="rdword" data-sensitive="false" data-why="Un jour de la semaine, seul, n'identifie personne et ne concerne aucune information confidentielle : ce n'est pas une donnée sensible.">vendredi</span>. Le produit concerné, une <span class="rdword" data-sensitive="false" data-why="Le type de produit reste une information commerciale générale, sans lien avec une personne précise : ce n'est pas une donnée sensible.">gamme de soins bio</span>, est <span class="rdword" data-sensitive="false" data-why="Une information déjà rendue publique par l'entreprise elle-même a perdu ce qui aurait justifié une précaution particulière : ce n'est plus une donnée sensible.">déjà référencée sur le catalogue public</span> de l'entreprise. Camille a aussi mentionné qu'<span class="rdword" data-sensitive="true" data-why="Une donnée de santé et de situation personnelle, sans lien avec la demande de livraison, que la cliente n'a de plus pas demandé à transmettre : une donnée sensible.">elle venait de reprendre le travail après un congé maternité</span>, information qu'elle n'a pas demandé à transmettre au <span class="rdword" data-sensitive="false" data-why="Le nom d'un service interne, seul, n'identifie personne et ne révèle rien de confidentiel : ce n'est pas une donnée sensible.">service logistique</span>.
+    </p>
+    <div class="rdtoolbar">
+      <button class="btn btn-primary" id="rdCheck" type="button">Vérifier mes choix</button>
+      <button class="btn" id="rdReset" type="button" hidden>Recommencer</button>
+      <span class="rdscore" id="rdScore">0 mot sélectionné</span>
+    </div>
+    <div class="rdreview" id="rdReview"></div>
+  </div>
+
+  <h2>Pour aller plus loin</h2>
+  <p>Cette section approfondit au-delà de ce qui est nécessaire pour suivre la suite du programme ; la sauter ne bloque rien pour les leçons suivantes.</p>
+  <p>Un cas réel illustre bien à quelle vitesse une donnée interne peut devenir une fuite externe par un usage individuel, sans intention de nuire. En mars 2023, une grande entreprise technologique coréenne a autorisé ses équipes d'ingénierie à utiliser ChatGPT pour les assister dans leurs tâches. En moins de trois semaines, au moins trois incidents distincts ont été recensés : des ingénieurs avaient collé du code source propriétaire et des comptes-rendus de réunions internes dans l'outil pour obtenir de l'aide, sans réaliser que ce contenu quittait alors le cadre de l'entreprise. La direction a rapidement restreint l'usage des outils d'IA générative grand public en interne. Aucune malveillance dans cet épisode : simplement des données internes et stratégiques saisies dans un outil externe, sans que la question de leur sensibilité ait été posée au moment de les saisir.</p>
+  <p>La CNIL recommande d'encadrer l'usage professionnel de l'IA générative : définir les usages permis, former les utilisateurs, éviter de transmettre des données personnelles ou confidentielles à un service non autorisé, vérifier les paramètres et évaluer les risques. Une anonymisation véritable peut réduire le champ du RGPD ; une simple suppression du nom ne suffit pas si la personne reste identifiable.</p>
+  <p>Cette logique de classification n'est pas propre à l'IA générative : elle est au cœur des démarches de sécurité de l'information plus larges. La norme <strong>ISO/IEC 27001</strong>, référence internationale en matière de management de la sécurité de l'information, consacre un contrôle spécifique (5.12, dans sa version 2022) à la classification des informations selon leur sensibilité, précisément pour que chaque donnée reçoive une protection proportionnée à ce qu'elle représente réellement, ni excessive ni insuffisante. Reconnaître une donnée sensible, comme vu dans cette leçon, est la première étape de cette même logique, qu'elle s'applique à un usage individuel ponctuel ou à la politique de sécurité de toute une structure.</p>
+
+  <footer>
+    Toutes les entreprises, personnes et données de cette leçon sont fictives.
+  </footer>
+</div>
+
+<script>
+  /* ---- mini-jeu : sensible / interne / externe (6 manches) ---- */
+  var SDCATS = [
+    { key:'safe', label:'Sans protection particulière ici' },
+    { key:'int', label:'À protéger, interne' },
+    { key:'ext', label:'À protéger, externe' }
+  ];
+  var SDROUNDS = [
+    { item:"Un modèle de trame de compte-rendu de réunion, vierge, sans aucun nom ni chiffre.", correct:'safe',
+      explain:"Ce document ne permet d'identifier ni un individu ni une structure précise : rien à protéger tant qu'il reste vierge." },
+    { item:"Le chiffre d'affaires prévisionnel de votre entreprise pour l'année prochaine, qui n'a pas encore été communiqué en interne.", correct:'int',
+      explain:"C'est une information stratégique non publiée de votre propre structure : elle est interne et à protéger." },
+    { item:"La liste des salariés d'une entreprise cliente, avec leur salaire brut mensuel.", correct:'ext',
+      explain:"Des données personnelles et confidentielles qui concernent un tiers, l'entreprise cliente : leur fuite engage votre responsabilité envers elle." },
+    { item:"Le nom d'un logiciel utilisé en interne, déjà cité dans une offre d'emploi publiée publiquement par l'entreprise.", correct:'safe',
+      explain:"Le nom est déjà public : il n'exige pas ici de confidentialité particulière. Vérifiez néanmoins l'exactitude, la source et les droits de réutilisation." },
+    { item:"Un extrait de contrat en cours de négociation avec un prospect, incluant le montant proposé.", correct:'ext',
+      explain:"Le prospect est un tiers et un montant en négociation relève d'une confidentialité commerciale : information externe à protéger." },
+    { item:"Le compte-rendu d'un entretien annuel interne, mentionnant l'état de santé d'un collaborateur.", correct:'int',
+      explain:"Une donnée personnelle sensible, mais qui concerne un membre du personnel de la structure elle-même : sensible et interne, pas externe." }
+  ];
+  var sdIdx = 0, sdScore = 0;
+  var sdNumEl = document.getElementById('sdNum'), sdScoreEl = document.getElementById('sdScore');
+  var sdItemTxt = document.getElementById('sdItemTxt'), sdGrid = document.getElementById('sdGrid');
+  var sdFb = document.getElementById('sdFb'), sdNextBtn = document.getElementById('sdNextBtn');
+  SDCATS.forEach(function(cat){
+    var b = document.createElement('button');
+    b.className = 'qopt'; b.textContent = cat.label; b.dataset.key = cat.key;
+    b.addEventListener('click', function(){ handleSdChoice(cat.key); });
+    sdGrid.appendChild(b);
+  });
+  function renderSdRound(i){
+    var r = SDROUNDS[i];
+    sdNumEl.textContent = i+1; sdScoreEl.textContent = sdScore;
+    sdItemTxt.textContent = r.item;
+    [].slice.call(sdGrid.children).forEach(function(b){ b.classList.remove('picked-good','picked-bad','reveal-good'); b.disabled = false; });
+    sdFb.className = 'fb'; sdFb.textContent = '';
+    sdNextBtn.hidden = true;
+  }
+  function handleSdChoice(key){
+    var r = SDROUNDS[sdIdx];
+    var ok = key === r.correct;
+    [].slice.call(sdGrid.children).forEach(function(b){
+      b.disabled = true;
+      if(b.dataset.key === key){ b.classList.add(ok ? 'picked-good' : 'picked-bad'); }
+      if(b.dataset.key === r.correct){ b.classList.add('reveal-good'); }
+    });
+    sdFb.className = 'fb show ' + (ok ? 'good' : 'bad');
+    sdFb.innerHTML = "<span class='head'>"+(ok ? 'Bon choix' : 'À ajuster')+"</span>" + r.explain;
+    if(ok){ sdScore++; sdScoreEl.textContent = sdScore; }
+    if(sdIdx < SDROUNDS.length - 1){
+      sdNextBtn.hidden = false; sdNextBtn.textContent = 'Manche suivante';
+    } else {
+      var done = document.createElement('p');
+      done.className = 'fb show good'; done.style.marginTop = '10px';
+      done.innerHTML = "<span class='head'>Terminé</span>Provenance, nature juridique et niveau de protection sont des questions séparées. Une information interne peut demander autant de protection qu'une information externe.";
+      sdFb.insertAdjacentElement('afterend', done);
+    }
+  }
+  sdNextBtn.addEventListener('click', function(){ sdIdx++; renderSdRound(sdIdx); });
+  renderSdRound(0);
+
+  /* ---- mini-jeu : repérer les données sensibles dans un texte ---- */
+  var rdWords = [].slice.call(document.querySelectorAll('#rdText .rdword'));
+  var rdCheckBtn = document.getElementById('rdCheck');
+  var rdResetBtn = document.getElementById('rdReset');
+  var rdScoreEl = document.getElementById('rdScore');
+  var rdReview = document.getElementById('rdReview');
+  var rdChecked = false;
+
+  function rdUpdateScoreLabel(){
+    if(rdChecked) return;
+    var n = rdWords.filter(function(w){ return w.classList.contains('picked'); }).length;
+    rdScoreEl.textContent = n + (n <= 1 ? ' mot sélectionné' : ' mots sélectionnés');
+  }
+  rdWords.forEach(function(w){
+    w.setAttribute('role','button');
+    w.setAttribute('tabindex','0');
+    w.addEventListener('click', function(){
+      if(rdChecked) return;
+      w.classList.toggle('picked');
+      rdUpdateScoreLabel();
+    });
+    w.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); w.click(); }
+    });
+  });
+  rdCheckBtn.addEventListener('click', function(){
+    rdChecked = true;
+    var hits = 0, misses = 0, falseAlarms = 0, total = 0;
+    var items = [];
+    rdWords.forEach(function(w){
+      var sensitive = w.dataset.sensitive === 'true';
+      var picked = w.classList.contains('picked');
+      w.classList.remove('picked');
+      if(sensitive){
+        total++;
+        if(picked){ hits++; w.classList.add('ok-hit'); items.push({cls:'hit', text:w.textContent, why:w.dataset.why}); }
+        else { misses++; w.classList.add('missed'); items.push({cls:'missitem', text:w.textContent, why:w.dataset.why}); }
+      } else if(picked){
+        falseAlarms++; w.classList.add('falsealarm'); items.push({cls:'falseitem', text:w.textContent, why:w.dataset.why});
+      }
+    });
+    rdScoreEl.textContent = hits + '/' + total + ' informations à protéger repérées, ' + falseAlarms + ' fausse' + (falseAlarms===1?'':'s') + ' alerte' + (falseAlarms===1?'':'s') + '.';
+    items.sort(function(a,b){ var order={hit:0,missitem:1,falseitem:2}; return order[a.cls]-order[b.cls]; });
+    rdReview.innerHTML = '<ul>' + items.map(function(it){
+      return '<li class="'+it.cls+'"><strong>'+it.text+'</strong> : '+it.why+'</li>';
+    }).join('') + '</ul>';
+    rdReview.classList.add('show');
+    rdCheckBtn.setAttribute('hidden','');
+    rdResetBtn.removeAttribute('hidden');
+  });
+  rdResetBtn.addEventListener('click', function(){
+    rdChecked = false;
+    rdWords.forEach(function(w){ w.classList.remove('picked','ok-hit','missed','falsealarm'); });
+    rdReview.classList.remove('show');
+    rdReview.innerHTML = '';
+    rdCheckBtn.removeAttribute('hidden');
+    rdResetBtn.setAttribute('hidden','');
+    rdUpdateScoreLabel();
+  });
+  rdUpdateScoreLabel();
+</script>
+</body>
+</html>

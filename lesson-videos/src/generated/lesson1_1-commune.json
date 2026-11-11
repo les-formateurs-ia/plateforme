@@ -1,0 +1,5202 @@
+{
+  "name": "lesson1_1-commune",
+  "source": "../docs/formation-rs6776/lecon-1.1/script-video-commune.md",
+  "voice": "341b4807e5e6455fa88f34bda5d6eeea",
+  "model": "heygen-voice-1-turbo-free",
+  "total": 330.58859410430836,
+  "avatarSeconds": 79.98324263038548,
+  "scenes": [
+    {
+      "id": "1",
+      "title": "Accueil",
+      "avatar": "full",
+      "text": "Bonjour, et bienvenue dans cette formation. Je suis Raul, et je vais vous accompagner jusqu'à la certification. Peut-être que vous utilisez déjà l'intelligence artificielle, peut-être pas encore. Dans les deux cas, notre objectif est le même : passer du réflexe à la méthode.",
+      "audio": "generated/lesson1_1-commune/scene-1.wav",
+      "duration": 14.10827664399093,
+      "words": [
+        {
+          "w": "Bonjour,",
+          "start": 0.256,
+          "end": 0.811
+        },
+        {
+          "w": "et",
+          "start": 0.981,
+          "end": 1.195
+        },
+        {
+          "w": "bienvenue",
+          "start": 1.237,
+          "end": 1.536
+        },
+        {
+          "w": "dans",
+          "start": 1.579,
+          "end": 1.664
+        },
+        {
+          "w": "cette",
+          "start": 1.707,
+          "end": 1.835
+        },
+        {
+          "w": "formation.",
+          "start": 1.877,
+          "end": 2.325
+        },
+        {
+          "w": "Je",
+          "start": 2.56,
+          "end": 2.645
+        },
+        {
+          "w": "suis",
+          "start": 2.688,
+          "end": 2.816
+        },
+        {
+          "w": "Raul,",
+          "start": 2.859,
+          "end": 3.264
+        },
+        {
+          "w": "et",
+          "start": 3.456,
+          "end": 3.541
+        },
+        {
+          "w": "je",
+          "start": 3.584,
+          "end": 3.627
+        },
+        {
+          "w": "vais",
+          "start": 3.669,
+          "end": 3.797
+        },
+        {
+          "w": "vous",
+          "start": 3.84,
+          "end": 4.096
+        },
+        {
+          "w": "accompagner",
+          "start": 4.139,
+          "end": 4.395
+        },
+        {
+          "w": "jusqu'à",
+          "start": 4.437,
+          "end": 4.651
+        },
+        {
+          "w": "la",
+          "start": 4.693,
+          "end": 4.736
+        },
+        {
+          "w": "certification.",
+          "start": 4.779,
+          "end": 5.504
+        },
+        {
+          "w": "Peut-être",
+          "start": 5.76,
+          "end": 6.016
+        },
+        {
+          "w": "que",
+          "start": 6.059,
+          "end": 6.144
+        },
+        {
+          "w": "vous",
+          "start": 6.187,
+          "end": 6.272
+        },
+        {
+          "w": "utilisez",
+          "start": 6.315,
+          "end": 6.741
+        },
+        {
+          "w": "déjà",
+          "start": 6.784,
+          "end": 7.04
+        },
+        {
+          "w": "l'intelligence",
+          "start": 7.083,
+          "end": 7.509
+        },
+        {
+          "w": "artificielle,",
+          "start": 7.595,
+          "end": 8.363
+        },
+        {
+          "w": "peut-être",
+          "start": 8.576,
+          "end": 8.875
+        },
+        {
+          "w": "pas",
+          "start": 8.96,
+          "end": 9.088
+        },
+        {
+          "w": "encore.",
+          "start": 9.131,
+          "end": 9.679
+        },
+        {
+          "w": "Dans",
+          "start": 9.886,
+          "end": 10.057
+        },
+        {
+          "w": "les",
+          "start": 10.1,
+          "end": 10.185
+        },
+        {
+          "w": "deux",
+          "start": 10.228,
+          "end": 10.356
+        },
+        {
+          "w": "cas,",
+          "start": 10.399,
+          "end": 10.697
+        },
+        {
+          "w": "notre",
+          "start": 10.868,
+          "end": 11.081
+        },
+        {
+          "w": "objectif",
+          "start": 11.124,
+          "end": 11.294
+        },
+        {
+          "w": "est",
+          "start": 11.508,
+          "end": 11.593
+        },
+        {
+          "w": "le",
+          "start": 11.636,
+          "end": 11.678
+        },
+        {
+          "w": "même",
+          "start": 11.721,
+          "end": 11.892
+        },
+        {
+          "w": ":",
+          "start": 11.934,
+          "end": 11.977
+        },
+        {
+          "w": "passer",
+          "start": 12.02,
+          "end": 12.276
+        },
+        {
+          "w": "du",
+          "start": 12.319,
+          "end": 12.404
+        },
+        {
+          "w": "réflexe",
+          "start": 12.447,
+          "end": 12.873
+        },
+        {
+          "w": "à",
+          "start": 13.044,
+          "end": 13.129
+        },
+        {
+          "w": "la",
+          "start": 13.172,
+          "end": 13.257
+        },
+        {
+          "w": "méthode.",
+          "start": 13.3,
+          "end": 13.939
+        }
+      ],
+      "avatarVideo": "generated/lesson1_1-commune/avatar-1.mp4",
+      "avatarVideoId": "1423f008fa5fa6e889c2bea6c0812706",
+      "avatarDuration": 14
+    },
+    {
+      "id": "2",
+      "title": "Le parcours",
+      "avatar": "none",
+      "text": "La formation suit trois modules : comprendre et planifier l'usage de l'IA sur votre poste, rédiger de bonnes consignes pour produire des contenus, puis rendre ces contenus accessibles et conformes. À la fin, une certification : six cas pratiques à l'écrit, puis une soutenance orale.",
+      "audio": "generated/lesson1_1-commune/scene-2.wav",
+      "duration": 15.222834467120181,
+      "words": [
+        {
+          "w": "La",
+          "start": 0.299,
+          "end": 0.469
+        },
+        {
+          "w": "formation",
+          "start": 0.512,
+          "end": 0.725
+        },
+        {
+          "w": "suit",
+          "start": 0.896,
+          "end": 1.067
+        },
+        {
+          "w": "trois",
+          "start": 1.152,
+          "end": 1.323
+        },
+        {
+          "w": "modules",
+          "start": 1.365,
+          "end": 1.621
+        },
+        {
+          "w": ":",
+          "start": 1.792,
+          "end": 1.835
+        },
+        {
+          "w": "comprendre",
+          "start": 1.877,
+          "end": 2.432
+        },
+        {
+          "w": "et",
+          "start": 2.475,
+          "end": 2.517
+        },
+        {
+          "w": "planifier",
+          "start": 2.56,
+          "end": 2.987
+        },
+        {
+          "w": "l'usage",
+          "start": 3.029,
+          "end": 3.328
+        },
+        {
+          "w": "de",
+          "start": 3.413,
+          "end": 3.456
+        },
+        {
+          "w": "l'IA",
+          "start": 3.499,
+          "end": 3.755
+        },
+        {
+          "w": "sur",
+          "start": 3.797,
+          "end": 3.925
+        },
+        {
+          "w": "votre",
+          "start": 3.968,
+          "end": 4.096
+        },
+        {
+          "w": "poste,",
+          "start": 4.181,
+          "end": 4.629
+        },
+        {
+          "w": "rédiger",
+          "start": 4.864,
+          "end": 5.333
+        },
+        {
+          "w": "de",
+          "start": 5.376,
+          "end": 5.461
+        },
+        {
+          "w": "bonnes",
+          "start": 5.504,
+          "end": 5.675
+        },
+        {
+          "w": "consignes",
+          "start": 5.717,
+          "end": 6.144
+        },
+        {
+          "w": "pour",
+          "start": 6.187,
+          "end": 6.315
+        },
+        {
+          "w": "produire",
+          "start": 6.357,
+          "end": 6.656
+        },
+        {
+          "w": "des",
+          "start": 6.699,
+          "end": 6.784
+        },
+        {
+          "w": "contenus,",
+          "start": 6.827,
+          "end": 7.36
+        },
+        {
+          "w": "puis",
+          "start": 7.552,
+          "end": 7.723
+        },
+        {
+          "w": "rendre",
+          "start": 7.765,
+          "end": 8.021
+        },
+        {
+          "w": "ces",
+          "start": 8.064,
+          "end": 8.192
+        },
+        {
+          "w": "contenus",
+          "start": 8.235,
+          "end": 8.576
+        },
+        {
+          "w": "accessibles",
+          "start": 8.619,
+          "end": 9.259
+        },
+        {
+          "w": "et",
+          "start": 9.301,
+          "end": 9.344
+        },
+        {
+          "w": "conformes.",
+          "start": 9.387,
+          "end": 9.898
+        },
+        {
+          "w": "À",
+          "start": 10.026,
+          "end": 10.24
+        },
+        {
+          "w": "la",
+          "start": 10.282,
+          "end": 10.325
+        },
+        {
+          "w": "fin,",
+          "start": 10.368,
+          "end": 10.752
+        },
+        {
+          "w": "une",
+          "start": 10.922,
+          "end": 11.05
+        },
+        {
+          "w": "certification",
+          "start": 11.136,
+          "end": 11.605
+        },
+        {
+          "w": ":",
+          "start": 11.904,
+          "end": 11.946
+        },
+        {
+          "w": "six",
+          "start": 11.989,
+          "end": 12.16
+        },
+        {
+          "w": "cas",
+          "start": 12.202,
+          "end": 12.33
+        },
+        {
+          "w": "pratiques",
+          "start": 12.373,
+          "end": 12.629
+        },
+        {
+          "w": "à",
+          "start": 12.672,
+          "end": 12.714
+        },
+        {
+          "w": "l'écrit,",
+          "start": 12.757,
+          "end": 13.29
+        },
+        {
+          "w": "puis",
+          "start": 13.482,
+          "end": 13.696
+        },
+        {
+          "w": "une",
+          "start": 13.824,
+          "end": 13.909
+        },
+        {
+          "w": "soutenance",
+          "start": 13.994,
+          "end": 14.378
+        },
+        {
+          "w": "orale.",
+          "start": 14.464,
+          "end": 15.023
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "title": "Comment fonctionne une leçon",
+      "avatar": "none",
+      "text": "Chaque leçon suit le même schéma : une vidéo comme celle-ci, une fiche de révision qui résume l'essentiel, un Playground pour pratiquer, puis un quiz. Il faut soixante-quinze pour cent de bonnes réponses pour débloquer la leçon suivante.",
+      "audio": "generated/lesson1_1-commune/scene-3.wav",
+      "duration": 12.23907029478458,
+      "words": [
+        {
+          "w": "Chaque",
+          "start": 0.256,
+          "end": 0.512
+        },
+        {
+          "w": "leçon",
+          "start": 0.597,
+          "end": 0.896
+        },
+        {
+          "w": "suit",
+          "start": 0.939,
+          "end": 1.152
+        },
+        {
+          "w": "le",
+          "start": 1.195,
+          "end": 1.237
+        },
+        {
+          "w": "même",
+          "start": 1.28,
+          "end": 1.408
+        },
+        {
+          "w": "schéma",
+          "start": 1.451,
+          "end": 1.707
+        },
+        {
+          "w": ":",
+          "start": 1.792,
+          "end": 1.92
+        },
+        {
+          "w": "une",
+          "start": 1.963,
+          "end": 2.048
+        },
+        {
+          "w": "vidéo",
+          "start": 2.133,
+          "end": 2.389
+        },
+        {
+          "w": "comme",
+          "start": 2.432,
+          "end": 2.56
+        },
+        {
+          "w": "celle-ci,",
+          "start": 2.603,
+          "end": 3.115
+        },
+        {
+          "w": "une",
+          "start": 3.285,
+          "end": 3.456
+        },
+        {
+          "w": "fiche",
+          "start": 3.499,
+          "end": 3.712
+        },
+        {
+          "w": "de",
+          "start": 3.755,
+          "end": 3.797
+        },
+        {
+          "w": "révision",
+          "start": 3.84,
+          "end": 4.053
+        },
+        {
+          "w": "qui",
+          "start": 4.309,
+          "end": 4.437
+        },
+        {
+          "w": "résume",
+          "start": 4.48,
+          "end": 4.693
+        },
+        {
+          "w": "l'essentiel,",
+          "start": 4.736,
+          "end": 5.397
+        },
+        {
+          "w": "un",
+          "start": 5.547,
+          "end": 5.803
+        },
+        {
+          "w": "Playground",
+          "start": 5.845,
+          "end": 6.229
+        },
+        {
+          "w": "pour",
+          "start": 6.357,
+          "end": 6.443
+        },
+        {
+          "w": "pratiquer,",
+          "start": 6.485,
+          "end": 7.083
+        },
+        {
+          "w": "puis",
+          "start": 7.211,
+          "end": 7.339
+        },
+        {
+          "w": "un",
+          "start": 7.381,
+          "end": 7.467
+        },
+        {
+          "w": "quiz.",
+          "start": 7.509,
+          "end": 7.959
+        },
+        {
+          "w": "Il",
+          "start": 8.196,
+          "end": 8.324
+        },
+        {
+          "w": "faut",
+          "start": 8.367,
+          "end": 8.537
+        },
+        {
+          "w": "soixante-quinze",
+          "start": 8.623,
+          "end": 9.177
+        },
+        {
+          "w": "pour",
+          "start": 9.22,
+          "end": 9.348
+        },
+        {
+          "w": "cent",
+          "start": 9.391,
+          "end": 9.519
+        },
+        {
+          "w": "de",
+          "start": 9.561,
+          "end": 9.647
+        },
+        {
+          "w": "bonnes",
+          "start": 9.689,
+          "end": 9.86
+        },
+        {
+          "w": "réponses",
+          "start": 9.903,
+          "end": 10.287
+        },
+        {
+          "w": "pour",
+          "start": 10.372,
+          "end": 10.5
+        },
+        {
+          "w": "débloquer",
+          "start": 10.543,
+          "end": 10.969
+        },
+        {
+          "w": "la",
+          "start": 11.012,
+          "end": 11.097
+        },
+        {
+          "w": "leçon",
+          "start": 11.14,
+          "end": 11.311
+        },
+        {
+          "w": "suivante.",
+          "start": 11.353,
+          "end": 12.039
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "title": "L'objectif de cette leçon",
+      "avatar": "full",
+      "text": "Dans cette première leçon, on pose les bases : ce qu'est l'intelligence artificielle générative, comment elle produit ses réponses, pourquoi elle peut se tromper, et quels sont les cinq outils de référence. C'est le socle du premier exercice de l'écrit, où vous choisirez des outils et justifierez vos choix.",
+      "audio": "generated/lesson1_1-commune/scene-4.wav",
+      "duration": 15.803333333333333,
+      "words": [
+        {
+          "w": "Dans",
+          "start": 0.256,
+          "end": 0.469
+        },
+        {
+          "w": "cette",
+          "start": 0.512,
+          "end": 0.64
+        },
+        {
+          "w": "première",
+          "start": 0.683,
+          "end": 0.939
+        },
+        {
+          "w": "leçon,",
+          "start": 0.981,
+          "end": 1.301
+        },
+        {
+          "w": "on",
+          "start": 1.365,
+          "end": 1.707
+        },
+        {
+          "w": "pose",
+          "start": 1.749,
+          "end": 1.92
+        },
+        {
+          "w": "les",
+          "start": 2.005,
+          "end": 2.048
+        },
+        {
+          "w": "bases",
+          "start": 2.091,
+          "end": 2.432
+        },
+        {
+          "w": ":",
+          "start": 2.475,
+          "end": 2.517
+        },
+        {
+          "w": "ce",
+          "start": 2.56,
+          "end": 2.645
+        },
+        {
+          "w": "qu'est",
+          "start": 2.688,
+          "end": 2.901
+        },
+        {
+          "w": "l'intelligence",
+          "start": 2.944,
+          "end": 3.371
+        },
+        {
+          "w": "artificielle",
+          "start": 3.413,
+          "end": 3.968
+        },
+        {
+          "w": "générative,",
+          "start": 4.011,
+          "end": 4.672
+        },
+        {
+          "w": "comment",
+          "start": 5.035,
+          "end": 5.163
+        },
+        {
+          "w": "elle",
+          "start": 5.291,
+          "end": 5.376
+        },
+        {
+          "w": "produit",
+          "start": 5.419,
+          "end": 5.675
+        },
+        {
+          "w": "ses",
+          "start": 5.717,
+          "end": 5.803
+        },
+        {
+          "w": "réponses,",
+          "start": 5.845,
+          "end": 6.421
+        },
+        {
+          "w": "pourquoi",
+          "start": 6.613,
+          "end": 6.955
+        },
+        {
+          "w": "elle",
+          "start": 6.997,
+          "end": 7.083
+        },
+        {
+          "w": "peut",
+          "start": 7.125,
+          "end": 7.211
+        },
+        {
+          "w": "se",
+          "start": 7.253,
+          "end": 7.296
+        },
+        {
+          "w": "tromper,",
+          "start": 7.339,
+          "end": 7.744
+        },
+        {
+          "w": "et",
+          "start": 7.851,
+          "end": 8.192
+        },
+        {
+          "w": "quels",
+          "start": 8.235,
+          "end": 8.363
+        },
+        {
+          "w": "sont",
+          "start": 8.405,
+          "end": 8.576
+        },
+        {
+          "w": "les",
+          "start": 8.619,
+          "end": 8.704
+        },
+        {
+          "w": "cinq",
+          "start": 8.747,
+          "end": 9.003
+        },
+        {
+          "w": "outils",
+          "start": 9.045,
+          "end": 9.259
+        },
+        {
+          "w": "de",
+          "start": 9.301,
+          "end": 9.344
+        },
+        {
+          "w": "référence.",
+          "start": 9.387,
+          "end": 10.001
+        },
+        {
+          "w": "C'est",
+          "start": 10.189,
+          "end": 10.402
+        },
+        {
+          "w": "le",
+          "start": 10.445,
+          "end": 10.53
+        },
+        {
+          "w": "socle",
+          "start": 10.573,
+          "end": 10.871
+        },
+        {
+          "w": "du",
+          "start": 10.999,
+          "end": 11.085
+        },
+        {
+          "w": "premier",
+          "start": 11.127,
+          "end": 11.469
+        },
+        {
+          "w": "exercice",
+          "start": 11.511,
+          "end": 11.895
+        },
+        {
+          "w": "de",
+          "start": 11.938,
+          "end": 12.023
+        },
+        {
+          "w": "l'écrit,",
+          "start": 12.066,
+          "end": 12.514
+        },
+        {
+          "w": "où",
+          "start": 12.663,
+          "end": 12.877
+        },
+        {
+          "w": "vous",
+          "start": 12.919,
+          "end": 13.047
+        },
+        {
+          "w": "choisirez",
+          "start": 13.09,
+          "end": 13.474
+        },
+        {
+          "w": "des",
+          "start": 13.517,
+          "end": 13.602
+        },
+        {
+          "w": "outils",
+          "start": 13.645,
+          "end": 13.986
+        },
+        {
+          "w": "et",
+          "start": 14.157,
+          "end": 14.327
+        },
+        {
+          "w": "justifierez",
+          "start": 14.37,
+          "end": 15.053
+        },
+        {
+          "w": "vos",
+          "start": 15.095,
+          "end": 15.181
+        },
+        {
+          "w": "choix.",
+          "start": 15.223,
+          "end": 15.603
+        }
+      ],
+      "avatarVideo": "generated/lesson1_1-commune/avatar-4.mp4",
+      "avatarVideoId": "63b6641ca5b1207196712c44078429e0",
+      "avatarDuration": 15.68
+    },
+    {
+      "id": "5",
+      "title": "Qu'est-ce que l'IA générative ?",
+      "avatar": "none",
+      "text": "Une intelligence artificielle générative est un modèle entraîné sur d'immenses quantités de textes, d'images ou de sons. Elle produit un contenu nouveau à partir d'une instruction écrite en langage courant. Cette instruction, on l'appelle un prompt. Contrairement à un logiciel classique, qui exécute toujours la même procédure, elle construit sa réponse à chaque fois, en fonction du contexte que vous lui donnez.",
+      "audio": "generated/lesson1_1-commune/scene-5.wav",
+      "duration": 20.958163265306123,
+      "words": [
+        {
+          "w": "Une",
+          "start": 0.256,
+          "end": 0.427
+        },
+        {
+          "w": "intelligence",
+          "start": 0.512,
+          "end": 0.853
+        },
+        {
+          "w": "artificielle",
+          "start": 0.939,
+          "end": 1.451
+        },
+        {
+          "w": "générative",
+          "start": 1.493,
+          "end": 1.835
+        },
+        {
+          "w": "est",
+          "start": 2.219,
+          "end": 2.389
+        },
+        {
+          "w": "un",
+          "start": 2.432,
+          "end": 2.517
+        },
+        {
+          "w": "modèle",
+          "start": 2.56,
+          "end": 2.816
+        },
+        {
+          "w": "entraîné",
+          "start": 2.859,
+          "end": 3.2
+        },
+        {
+          "w": "sur",
+          "start": 3.243,
+          "end": 3.371
+        },
+        {
+          "w": "d'immenses",
+          "start": 3.456,
+          "end": 4.011
+        },
+        {
+          "w": "quantités",
+          "start": 4.053,
+          "end": 4.395
+        },
+        {
+          "w": "de",
+          "start": 4.437,
+          "end": 4.48
+        },
+        {
+          "w": "textes,",
+          "start": 4.523,
+          "end": 5.013
+        },
+        {
+          "w": "d'images",
+          "start": 5.12,
+          "end": 5.547
+        },
+        {
+          "w": "ou",
+          "start": 5.717,
+          "end": 5.845
+        },
+        {
+          "w": "de",
+          "start": 5.888,
+          "end": 5.973
+        },
+        {
+          "w": "sons.",
+          "start": 6.016,
+          "end": 6.443
+        },
+        {
+          "w": "Elle",
+          "start": 6.613,
+          "end": 6.784
+        },
+        {
+          "w": "produit",
+          "start": 6.827,
+          "end": 7.083
+        },
+        {
+          "w": "un",
+          "start": 7.125,
+          "end": 7.211
+        },
+        {
+          "w": "contenu",
+          "start": 7.253,
+          "end": 7.595
+        },
+        {
+          "w": "nouveau",
+          "start": 7.637,
+          "end": 7.936
+        },
+        {
+          "w": "à",
+          "start": 8.021,
+          "end": 8.064
+        },
+        {
+          "w": "partir",
+          "start": 8.107,
+          "end": 8.405
+        },
+        {
+          "w": "d'une",
+          "start": 8.448,
+          "end": 8.576
+        },
+        {
+          "w": "instruction",
+          "start": 8.619,
+          "end": 8.875
+        },
+        {
+          "w": "écrite",
+          "start": 9.088,
+          "end": 9.344
+        },
+        {
+          "w": "en",
+          "start": 9.429,
+          "end": 9.472
+        },
+        {
+          "w": "langage",
+          "start": 9.515,
+          "end": 9.771
+        },
+        {
+          "w": "courant.",
+          "start": 9.813,
+          "end": 10.302
+        },
+        {
+          "w": "Cette",
+          "start": 10.448,
+          "end": 10.662
+        },
+        {
+          "w": "instruction,",
+          "start": 10.704,
+          "end": 11.088
+        },
+        {
+          "w": "on",
+          "start": 11.259,
+          "end": 11.515
+        },
+        {
+          "w": "l'appelle",
+          "start": 11.558,
+          "end": 11.814
+        },
+        {
+          "w": "un",
+          "start": 11.856,
+          "end": 11.899
+        },
+        {
+          "w": "prompt.",
+          "start": 11.942,
+          "end": 12.539
+        },
+        {
+          "w": "Contrairement",
+          "start": 12.88,
+          "end": 13.307
+        },
+        {
+          "w": "à",
+          "start": 13.35,
+          "end": 13.435
+        },
+        {
+          "w": "un",
+          "start": 13.478,
+          "end": 13.52
+        },
+        {
+          "w": "logiciel",
+          "start": 13.563,
+          "end": 13.904
+        },
+        {
+          "w": "classique,",
+          "start": 13.947,
+          "end": 14.544
+        },
+        {
+          "w": "qui",
+          "start": 14.715,
+          "end": 14.843
+        },
+        {
+          "w": "exécute",
+          "start": 14.886,
+          "end": 15.227
+        },
+        {
+          "w": "toujours",
+          "start": 15.312,
+          "end": 15.654
+        },
+        {
+          "w": "la",
+          "start": 15.696,
+          "end": 15.782
+        },
+        {
+          "w": "même",
+          "start": 15.824,
+          "end": 15.952
+        },
+        {
+          "w": "procédure,",
+          "start": 15.995,
+          "end": 16.507
+        },
+        {
+          "w": "elle",
+          "start": 16.635,
+          "end": 16.976
+        },
+        {
+          "w": "construit",
+          "start": 17.019,
+          "end": 17.403
+        },
+        {
+          "w": "sa",
+          "start": 17.446,
+          "end": 17.531
+        },
+        {
+          "w": "réponse",
+          "start": 17.574,
+          "end": 17.872
+        },
+        {
+          "w": "à",
+          "start": 17.958,
+          "end": 18.043
+        },
+        {
+          "w": "chaque",
+          "start": 18.086,
+          "end": 18.299
+        },
+        {
+          "w": "fois,",
+          "start": 18.384,
+          "end": 18.704
+        },
+        {
+          "w": "en",
+          "start": 18.811,
+          "end": 18.939
+        },
+        {
+          "w": "fonction",
+          "start": 18.982,
+          "end": 19.152
+        },
+        {
+          "w": "du",
+          "start": 19.28,
+          "end": 19.366
+        },
+        {
+          "w": "contexte",
+          "start": 19.408,
+          "end": 19.835
+        },
+        {
+          "w": "que",
+          "start": 19.92,
+          "end": 20.006
+        },
+        {
+          "w": "vous",
+          "start": 20.048,
+          "end": 20.176
+        },
+        {
+          "w": "lui",
+          "start": 20.219,
+          "end": 20.304
+        },
+        {
+          "w": "donnez.",
+          "start": 20.304,
+          "end": 20.758
+        }
+      ]
+    },
+    {
+      "id": "6",
+      "title": "Elle prédit, elle ne vérifie pas",
+      "avatar": "none",
+      "text": "Concrètement, l'outil ne va pas chercher une réponse toute faite. Il construit sa réponse morceau par morceau, en choisissant à chaque fois une suite probable, d'après ce qu'il a appris pendant son entraînement. Le résultat est souvent fluide. Mais une réponse fluide n'est pas une preuve d'exactitude : l'outil produit la suite la plus probable, pas une vérité vérifiée.",
+      "audio": "generated/lesson1_1-commune/scene-6.wav",
+      "duration": 18.32981859410431,
+      "words": [
+        {
+          "w": "Concrètement,",
+          "start": 0.256,
+          "end": 0.981
+        },
+        {
+          "w": "l'outil",
+          "start": 1.152,
+          "end": 1.493
+        },
+        {
+          "w": "ne",
+          "start": 1.536,
+          "end": 1.579
+        },
+        {
+          "w": "va",
+          "start": 1.621,
+          "end": 1.664
+        },
+        {
+          "w": "pas",
+          "start": 1.707,
+          "end": 1.792
+        },
+        {
+          "w": "chercher",
+          "start": 1.835,
+          "end": 2.091
+        },
+        {
+          "w": "une",
+          "start": 2.133,
+          "end": 2.176
+        },
+        {
+          "w": "réponse",
+          "start": 2.219,
+          "end": 2.475
+        },
+        {
+          "w": "toute",
+          "start": 2.517,
+          "end": 2.645
+        },
+        {
+          "w": "faite.",
+          "start": 2.731,
+          "end": 3.115
+        },
+        {
+          "w": "Il",
+          "start": 3.371,
+          "end": 3.541
+        },
+        {
+          "w": "construit",
+          "start": 3.584,
+          "end": 3.968
+        },
+        {
+          "w": "sa",
+          "start": 4.011,
+          "end": 4.096
+        },
+        {
+          "w": "réponse",
+          "start": 4.139,
+          "end": 4.48
+        },
+        {
+          "w": "morceau",
+          "start": 4.693,
+          "end": 5.077
+        },
+        {
+          "w": "par",
+          "start": 5.12,
+          "end": 5.248
+        },
+        {
+          "w": "morceau,",
+          "start": 5.291,
+          "end": 5.76
+        },
+        {
+          "w": "en",
+          "start": 5.845,
+          "end": 6.059
+        },
+        {
+          "w": "choisissant",
+          "start": 6.101,
+          "end": 6.528
+        },
+        {
+          "w": "à",
+          "start": 6.571,
+          "end": 6.613
+        },
+        {
+          "w": "chaque",
+          "start": 6.656,
+          "end": 6.827
+        },
+        {
+          "w": "fois",
+          "start": 6.912,
+          "end": 7.125
+        },
+        {
+          "w": "une",
+          "start": 7.168,
+          "end": 7.253
+        },
+        {
+          "w": "suite",
+          "start": 7.296,
+          "end": 7.467
+        },
+        {
+          "w": "probable,",
+          "start": 7.552,
+          "end": 8.128
+        },
+        {
+          "w": "d'après",
+          "start": 8.363,
+          "end": 8.661
+        },
+        {
+          "w": "ce",
+          "start": 8.704,
+          "end": 8.747
+        },
+        {
+          "w": "qu'il",
+          "start": 8.789,
+          "end": 8.917
+        },
+        {
+          "w": "a",
+          "start": 8.96,
+          "end": 9.003
+        },
+        {
+          "w": "appris",
+          "start": 9.045,
+          "end": 9.216
+        },
+        {
+          "w": "pendant",
+          "start": 9.259,
+          "end": 9.472
+        },
+        {
+          "w": "son",
+          "start": 9.515,
+          "end": 9.643
+        },
+        {
+          "w": "entraînement.",
+          "start": 9.643,
+          "end": 10.264
+        },
+        {
+          "w": "Le",
+          "start": 10.459,
+          "end": 10.672
+        },
+        {
+          "w": "résultat",
+          "start": 10.715,
+          "end": 11.056
+        },
+        {
+          "w": "est",
+          "start": 11.099,
+          "end": 11.142
+        },
+        {
+          "w": "souvent",
+          "start": 11.184,
+          "end": 11.398
+        },
+        {
+          "w": "fluide.",
+          "start": 11.441,
+          "end": 12.038
+        },
+        {
+          "w": "Mais",
+          "start": 12.379,
+          "end": 12.55
+        },
+        {
+          "w": "une",
+          "start": 12.592,
+          "end": 12.635
+        },
+        {
+          "w": "réponse",
+          "start": 12.678,
+          "end": 12.891
+        },
+        {
+          "w": "fluide",
+          "start": 12.976,
+          "end": 13.232
+        },
+        {
+          "w": "n'est",
+          "start": 13.318,
+          "end": 13.489
+        },
+        {
+          "w": "pas",
+          "start": 13.531,
+          "end": 13.617
+        },
+        {
+          "w": "une",
+          "start": 13.659,
+          "end": 13.745
+        },
+        {
+          "w": "preuve",
+          "start": 13.83,
+          "end": 14.043
+        },
+        {
+          "w": "d'exactitude",
+          "start": 14.086,
+          "end": 14.683
+        },
+        {
+          "w": ":",
+          "start": 14.768,
+          "end": 14.811
+        },
+        {
+          "w": "l'outil",
+          "start": 14.854,
+          "end": 15.11
+        },
+        {
+          "w": "produit",
+          "start": 15.152,
+          "end": 15.451
+        },
+        {
+          "w": "la",
+          "start": 15.494,
+          "end": 15.537
+        },
+        {
+          "w": "suite",
+          "start": 15.579,
+          "end": 15.75
+        },
+        {
+          "w": "la",
+          "start": 15.793,
+          "end": 15.878
+        },
+        {
+          "w": "plus",
+          "start": 15.921,
+          "end": 16.006
+        },
+        {
+          "w": "probable,",
+          "start": 16.049,
+          "end": 16.561
+        },
+        {
+          "w": "pas",
+          "start": 16.817,
+          "end": 16.945
+        },
+        {
+          "w": "une",
+          "start": 16.987,
+          "end": 17.073
+        },
+        {
+          "w": "vérité",
+          "start": 17.115,
+          "end": 17.414
+        },
+        {
+          "w": "vérifiée.",
+          "start": 17.456,
+          "end": 18.13
+        }
+      ]
+    },
+    {
+      "id": "7",
+      "title": "Trois notions à connaître",
+      "avatar": "none",
+      "text": "Trois notions expliquent le comportement de ces outils. Un : le texte est découpé en petits fragments, appelés tokens. Ils mesurent la longueur d'un échange et, pour certains services facturés à l'usage, son coût. Deux : la fenêtre de contexte. Un outil ne peut tenir compte que d'une quantité limitée de texte à la fois. Dans un échange très long, rappelez les consignes essentielles avant une tâche importante. Trois : la variabilité. Le même prompt, envoyé deux fois, donne rarement la même réponse. Régénérer donne un nouvel essai, pas une correction.",
+      "audio": "generated/lesson1_1-commune/scene-7.wav",
+      "duration": 29.18312925170068,
+      "words": [
+        {
+          "w": "Trois",
+          "start": 0.256,
+          "end": 0.512
+        },
+        {
+          "w": "notions",
+          "start": 0.555,
+          "end": 0.853
+        },
+        {
+          "w": "expliquent",
+          "start": 0.939,
+          "end": 1.28
+        },
+        {
+          "w": "le",
+          "start": 1.323,
+          "end": 1.408
+        },
+        {
+          "w": "comportement",
+          "start": 1.451,
+          "end": 1.877
+        },
+        {
+          "w": "de",
+          "start": 1.92,
+          "end": 2.005
+        },
+        {
+          "w": "ces",
+          "start": 2.048,
+          "end": 2.133
+        },
+        {
+          "w": "outils.",
+          "start": 2.176,
+          "end": 2.688
+        },
+        {
+          "w": "Un",
+          "start": 2.901,
+          "end": 3.328
+        },
+        {
+          "w": ":",
+          "start": 3.413,
+          "end": 3.541
+        },
+        {
+          "w": "le",
+          "start": 3.584,
+          "end": 3.669
+        },
+        {
+          "w": "texte",
+          "start": 3.712,
+          "end": 3.968
+        },
+        {
+          "w": "est",
+          "start": 4.011,
+          "end": 4.096
+        },
+        {
+          "w": "découpé",
+          "start": 4.139,
+          "end": 4.437
+        },
+        {
+          "w": "en",
+          "start": 4.48,
+          "end": 4.523
+        },
+        {
+          "w": "petits",
+          "start": 4.565,
+          "end": 4.779
+        },
+        {
+          "w": "fragments,",
+          "start": 4.821,
+          "end": 5.291
+        },
+        {
+          "w": "appelés",
+          "start": 5.376,
+          "end": 5.76
+        },
+        {
+          "w": "tokens.",
+          "start": 5.845,
+          "end": 6.443
+        },
+        {
+          "w": "Ils",
+          "start": 6.656,
+          "end": 6.784
+        },
+        {
+          "w": "mesurent",
+          "start": 6.827,
+          "end": 7.125
+        },
+        {
+          "w": "la",
+          "start": 7.168,
+          "end": 7.211
+        },
+        {
+          "w": "longueur",
+          "start": 7.253,
+          "end": 7.509
+        },
+        {
+          "w": "d'un",
+          "start": 7.552,
+          "end": 7.68
+        },
+        {
+          "w": "échange",
+          "start": 7.723,
+          "end": 8.021
+        },
+        {
+          "w": "et,",
+          "start": 8.235,
+          "end": 8.512
+        },
+        {
+          "w": "pour",
+          "start": 8.619,
+          "end": 8.789
+        },
+        {
+          "w": "certains",
+          "start": 8.832,
+          "end": 9.131
+        },
+        {
+          "w": "services",
+          "start": 9.173,
+          "end": 9.301
+        },
+        {
+          "w": "facturés",
+          "start": 9.472,
+          "end": 9.984
+        },
+        {
+          "w": "à",
+          "start": 10.155,
+          "end": 10.197
+        },
+        {
+          "w": "l'usage,",
+          "start": 10.24,
+          "end": 10.539
+        },
+        {
+          "w": "son",
+          "start": 10.667,
+          "end": 10.837
+        },
+        {
+          "w": "coût.",
+          "start": 10.88,
+          "end": 11.262
+        },
+        {
+          "w": "Deux",
+          "start": 11.389,
+          "end": 11.645
+        },
+        {
+          "w": ":",
+          "start": 11.687,
+          "end": 11.73
+        },
+        {
+          "w": "la",
+          "start": 11.773,
+          "end": 11.815
+        },
+        {
+          "w": "fenêtre",
+          "start": 11.858,
+          "end": 12.157
+        },
+        {
+          "w": "de",
+          "start": 12.199,
+          "end": 12.242
+        },
+        {
+          "w": "contexte.",
+          "start": 12.327,
+          "end": 12.925
+        },
+        {
+          "w": "Un",
+          "start": 13.095,
+          "end": 13.309
+        },
+        {
+          "w": "outil",
+          "start": 13.351,
+          "end": 13.565
+        },
+        {
+          "w": "ne",
+          "start": 13.607,
+          "end": 13.65
+        },
+        {
+          "w": "peut",
+          "start": 13.693,
+          "end": 13.821
+        },
+        {
+          "w": "tenir",
+          "start": 13.863,
+          "end": 14.034
+        },
+        {
+          "w": "compte",
+          "start": 14.119,
+          "end": 14.333
+        },
+        {
+          "w": "que",
+          "start": 14.375,
+          "end": 14.461
+        },
+        {
+          "w": "d'une",
+          "start": 14.503,
+          "end": 14.631
+        },
+        {
+          "w": "quantité",
+          "start": 14.674,
+          "end": 15.101
+        },
+        {
+          "w": "limitée",
+          "start": 15.143,
+          "end": 15.57
+        },
+        {
+          "w": "de",
+          "start": 15.613,
+          "end": 15.655
+        },
+        {
+          "w": "texte",
+          "start": 15.698,
+          "end": 15.869
+        },
+        {
+          "w": "à",
+          "start": 15.911,
+          "end": 15.954
+        },
+        {
+          "w": "la",
+          "start": 15.997,
+          "end": 16.039
+        },
+        {
+          "w": "fois.",
+          "start": 16.082,
+          "end": 16.487
+        },
+        {
+          "w": "Dans",
+          "start": 16.722,
+          "end": 16.85
+        },
+        {
+          "w": "un",
+          "start": 16.893,
+          "end": 16.978
+        },
+        {
+          "w": "échange",
+          "start": 17.021,
+          "end": 17.234
+        },
+        {
+          "w": "très",
+          "start": 17.319,
+          "end": 17.533
+        },
+        {
+          "w": "long,",
+          "start": 17.575,
+          "end": 17.81
+        },
+        {
+          "w": "rappelez",
+          "start": 17.959,
+          "end": 18.343
+        },
+        {
+          "w": "les",
+          "start": 18.386,
+          "end": 18.429
+        },
+        {
+          "w": "consignes",
+          "start": 18.471,
+          "end": 18.813
+        },
+        {
+          "w": "essentielles",
+          "start": 18.855,
+          "end": 19.453
+        },
+        {
+          "w": "avant",
+          "start": 19.495,
+          "end": 19.751
+        },
+        {
+          "w": "une",
+          "start": 19.794,
+          "end": 19.837
+        },
+        {
+          "w": "tâche",
+          "start": 19.879,
+          "end": 20.05
+        },
+        {
+          "w": "importante.",
+          "start": 20.135,
+          "end": 20.711
+        },
+        {
+          "w": "Trois",
+          "start": 20.946,
+          "end": 21.159
+        },
+        {
+          "w": ":",
+          "start": 21.202,
+          "end": 21.373
+        },
+        {
+          "w": "la",
+          "start": 21.415,
+          "end": 21.543
+        },
+        {
+          "w": "variabilité.",
+          "start": 21.586,
+          "end": 22.452
+        },
+        {
+          "w": "Le",
+          "start": 22.679,
+          "end": 22.807
+        },
+        {
+          "w": "même",
+          "start": 22.849,
+          "end": 23.02
+        },
+        {
+          "w": "prompt,",
+          "start": 23.063,
+          "end": 23.404
+        },
+        {
+          "w": "envoyé",
+          "start": 23.532,
+          "end": 23.873
+        },
+        {
+          "w": "deux",
+          "start": 23.916,
+          "end": 24.087
+        },
+        {
+          "w": "fois,",
+          "start": 24.129,
+          "end": 24.492
+        },
+        {
+          "w": "donne",
+          "start": 24.684,
+          "end": 24.897
+        },
+        {
+          "w": "rarement",
+          "start": 24.94,
+          "end": 25.239
+        },
+        {
+          "w": "la",
+          "start": 25.281,
+          "end": 25.324
+        },
+        {
+          "w": "même",
+          "start": 25.367,
+          "end": 25.537
+        },
+        {
+          "w": "réponse.",
+          "start": 25.58,
+          "end": 26.113
+        },
+        {
+          "w": "Régénérer",
+          "start": 26.391,
+          "end": 26.945
+        },
+        {
+          "w": "donne",
+          "start": 26.988,
+          "end": 27.116
+        },
+        {
+          "w": "un",
+          "start": 27.159,
+          "end": 27.201
+        },
+        {
+          "w": "nouvel",
+          "start": 27.244,
+          "end": 27.415
+        },
+        {
+          "w": "essai,",
+          "start": 27.457,
+          "end": 27.863
+        },
+        {
+          "w": "pas",
+          "start": 27.969,
+          "end": 28.097
+        },
+        {
+          "w": "une",
+          "start": 28.14,
+          "end": 28.225
+        },
+        {
+          "w": "correction.",
+          "start": 28.268,
+          "end": 28.983
+        }
+      ]
+    },
+    {
+      "id": "8",
+      "title": "L'hallucination",
+      "avatar": "none",
+      "text": "Cette mécanique explique la limite principale de ces outils : l'hallucination. Quand une information lui manque, l'outil peut produire une réponse plausible mais fausse, avec la même assurance qu'une réponse juste. Ce n'est pas un bug rare, c'est une conséquence directe de son fonctionnement. La règle pratique est simple : l'IA générative est très efficace pour transformer un texte que vous lui fournissez, reformuler, structurer, raccourcir. Dès qu'elle avance un fait que vous ne lui avez pas donné, vous vérifiez.",
+      "audio": "generated/lesson1_1-commune/scene-8.wav",
+      "duration": 26.837913832199547,
+      "words": [
+        {
+          "w": "Cette",
+          "start": 0.299,
+          "end": 0.512
+        },
+        {
+          "w": "mécanique",
+          "start": 0.555,
+          "end": 0.896
+        },
+        {
+          "w": "explique",
+          "start": 0.981,
+          "end": 1.365
+        },
+        {
+          "w": "la",
+          "start": 1.408,
+          "end": 1.493
+        },
+        {
+          "w": "limite",
+          "start": 1.536,
+          "end": 1.707
+        },
+        {
+          "w": "principale",
+          "start": 1.792,
+          "end": 2.261
+        },
+        {
+          "w": "de",
+          "start": 2.347,
+          "end": 2.389
+        },
+        {
+          "w": "ces",
+          "start": 2.432,
+          "end": 2.56
+        },
+        {
+          "w": "outils",
+          "start": 2.603,
+          "end": 2.944
+        },
+        {
+          "w": ":",
+          "start": 3.029,
+          "end": 3.115
+        },
+        {
+          "w": "l'hallucination.",
+          "start": 3.157,
+          "end": 3.989
+        },
+        {
+          "w": "Quand",
+          "start": 4.224,
+          "end": 4.395
+        },
+        {
+          "w": "une",
+          "start": 4.437,
+          "end": 4.48
+        },
+        {
+          "w": "information",
+          "start": 4.523,
+          "end": 4.864
+        },
+        {
+          "w": "lui",
+          "start": 5.035,
+          "end": 5.205
+        },
+        {
+          "w": "manque,",
+          "start": 5.248,
+          "end": 5.653
+        },
+        {
+          "w": "l'outil",
+          "start": 5.845,
+          "end": 6.272
+        },
+        {
+          "w": "peut",
+          "start": 6.315,
+          "end": 6.4
+        },
+        {
+          "w": "produire",
+          "start": 6.443,
+          "end": 6.699
+        },
+        {
+          "w": "une",
+          "start": 6.784,
+          "end": 6.827
+        },
+        {
+          "w": "réponse",
+          "start": 6.869,
+          "end": 7.211
+        },
+        {
+          "w": "plausible",
+          "start": 7.253,
+          "end": 7.68
+        },
+        {
+          "w": "mais",
+          "start": 7.851,
+          "end": 8.021
+        },
+        {
+          "w": "fausse,",
+          "start": 8.064,
+          "end": 8.576
+        },
+        {
+          "w": "avec",
+          "start": 8.747,
+          "end": 9.045
+        },
+        {
+          "w": "la",
+          "start": 9.088,
+          "end": 9.173
+        },
+        {
+          "w": "même",
+          "start": 9.216,
+          "end": 9.387
+        },
+        {
+          "w": "assurance",
+          "start": 9.429,
+          "end": 9.813
+        },
+        {
+          "w": "qu'une",
+          "start": 9.899,
+          "end": 10.069
+        },
+        {
+          "w": "réponse",
+          "start": 10.112,
+          "end": 10.368
+        },
+        {
+          "w": "juste.",
+          "start": 10.411,
+          "end": 10.854
+        },
+        {
+          "w": "Ce",
+          "start": 11.04,
+          "end": 11.126
+        },
+        {
+          "w": "n'est",
+          "start": 11.168,
+          "end": 11.296
+        },
+        {
+          "w": "pas",
+          "start": 11.339,
+          "end": 11.424
+        },
+        {
+          "w": "un",
+          "start": 11.467,
+          "end": 11.552
+        },
+        {
+          "w": "bug",
+          "start": 11.595,
+          "end": 11.723
+        },
+        {
+          "w": "rare,",
+          "start": 11.808,
+          "end": 12.192
+        },
+        {
+          "w": "c'est",
+          "start": 12.406,
+          "end": 12.619
+        },
+        {
+          "w": "une",
+          "start": 12.662,
+          "end": 12.747
+        },
+        {
+          "w": "conséquence",
+          "start": 12.79,
+          "end": 13.216
+        },
+        {
+          "w": "directe",
+          "start": 13.302,
+          "end": 13.771
+        },
+        {
+          "w": "de",
+          "start": 13.856,
+          "end": 13.899
+        },
+        {
+          "w": "son",
+          "start": 13.984,
+          "end": 14.07
+        },
+        {
+          "w": "fonctionnement.",
+          "start": 14.112,
+          "end": 14.855
+        },
+        {
+          "w": "La",
+          "start": 15.086,
+          "end": 15.214
+        },
+        {
+          "w": "règle",
+          "start": 15.256,
+          "end": 15.384
+        },
+        {
+          "w": "pratique",
+          "start": 15.47,
+          "end": 15.768
+        },
+        {
+          "w": "est",
+          "start": 15.811,
+          "end": 15.896
+        },
+        {
+          "w": "simple",
+          "start": 15.939,
+          "end": 16.152
+        },
+        {
+          "w": ":",
+          "start": 16.323,
+          "end": 16.451
+        },
+        {
+          "w": "l'IA",
+          "start": 16.494,
+          "end": 16.792
+        },
+        {
+          "w": "générative",
+          "start": 16.835,
+          "end": 17.176
+        },
+        {
+          "w": "est",
+          "start": 17.39,
+          "end": 17.475
+        },
+        {
+          "w": "très",
+          "start": 17.518,
+          "end": 17.816
+        },
+        {
+          "w": "efficace",
+          "start": 17.859,
+          "end": 18.286
+        },
+        {
+          "w": "pour",
+          "start": 18.414,
+          "end": 18.499
+        },
+        {
+          "w": "transformer",
+          "start": 18.542,
+          "end": 18.926
+        },
+        {
+          "w": "un",
+          "start": 19.054,
+          "end": 19.096
+        },
+        {
+          "w": "texte",
+          "start": 19.139,
+          "end": 19.395
+        },
+        {
+          "w": "que",
+          "start": 19.48,
+          "end": 19.523
+        },
+        {
+          "w": "vous",
+          "start": 19.566,
+          "end": 19.651
+        },
+        {
+          "w": "lui",
+          "start": 19.694,
+          "end": 19.779
+        },
+        {
+          "w": "fournissez,",
+          "start": 19.822,
+          "end": 20.483
+        },
+        {
+          "w": "reformuler,",
+          "start": 20.632,
+          "end": 21.422
+        },
+        {
+          "w": "structurer,",
+          "start": 21.571,
+          "end": 22.318
+        },
+        {
+          "w": "raccourcir.",
+          "start": 22.467,
+          "end": 23.363
+        },
+        {
+          "w": "Dès",
+          "start": 23.704,
+          "end": 23.832
+        },
+        {
+          "w": "qu'elle",
+          "start": 23.875,
+          "end": 24.046
+        },
+        {
+          "w": "avance",
+          "start": 24.088,
+          "end": 24.259
+        },
+        {
+          "w": "un",
+          "start": 24.302,
+          "end": 24.387
+        },
+        {
+          "w": "fait",
+          "start": 24.43,
+          "end": 24.643
+        },
+        {
+          "w": "que",
+          "start": 24.686,
+          "end": 24.771
+        },
+        {
+          "w": "vous",
+          "start": 24.814,
+          "end": 24.899
+        },
+        {
+          "w": "ne",
+          "start": 24.942,
+          "end": 24.984
+        },
+        {
+          "w": "lui",
+          "start": 25.027,
+          "end": 25.112
+        },
+        {
+          "w": "avez",
+          "start": 25.155,
+          "end": 25.24
+        },
+        {
+          "w": "pas",
+          "start": 25.283,
+          "end": 25.326
+        },
+        {
+          "w": "donné,",
+          "start": 25.368,
+          "end": 25.774
+        },
+        {
+          "w": "vous",
+          "start": 25.923,
+          "end": 26.051
+        },
+        {
+          "w": "vérifiez.",
+          "start": 26.094,
+          "end": 26.638
+        }
+      ]
+    },
+    {
+      "id": "9",
+      "title": "Cinq outils de référence",
+      "avatar": "none",
+      "text": "Passons aux outils. Cette formation s'appuie sur cinq outils de référence : ChatGPT, Claude, Gemini, Copilot et Firefly. Ils reposent sur des principes proches. Ce qui les distingue, ce sont leurs points forts, ce à quoi ils sont connectés, et leurs conditions d'accès. Voyons-les un par un.",
+      "audio": "generated/lesson1_1-commune/scene-9.wav",
+      "duration": 17.219750566893424,
+      "words": [
+        {
+          "w": "Passons",
+          "start": 0.256,
+          "end": 0.555
+        },
+        {
+          "w": "aux",
+          "start": 0.597,
+          "end": 0.725
+        },
+        {
+          "w": "outils.",
+          "start": 0.768,
+          "end": 1.344
+        },
+        {
+          "w": "Cette",
+          "start": 1.664,
+          "end": 1.877
+        },
+        {
+          "w": "formation",
+          "start": 1.92,
+          "end": 2.091
+        },
+        {
+          "w": "s'appuie",
+          "start": 2.304,
+          "end": 2.645
+        },
+        {
+          "w": "sur",
+          "start": 2.688,
+          "end": 2.816
+        },
+        {
+          "w": "cinq",
+          "start": 2.859,
+          "end": 3.115
+        },
+        {
+          "w": "outils",
+          "start": 3.157,
+          "end": 3.371
+        },
+        {
+          "w": "de",
+          "start": 3.413,
+          "end": 3.456
+        },
+        {
+          "w": "référence",
+          "start": 3.499,
+          "end": 3.925
+        },
+        {
+          "w": ":",
+          "start": 4.096,
+          "end": 4.139
+        },
+        {
+          "w": "ChatGPT,",
+          "start": 4.181,
+          "end": 4.928
+        },
+        {
+          "w": "Claude,",
+          "start": 5.035,
+          "end": 5.547
+        },
+        {
+          "w": "Gemini,",
+          "start": 5.717,
+          "end": 6.293
+        },
+        {
+          "w": "Copilot",
+          "start": 6.4,
+          "end": 6.869
+        },
+        {
+          "w": "et",
+          "start": 7.04,
+          "end": 7.211
+        },
+        {
+          "w": "Firefly.",
+          "start": 7.253,
+          "end": 8.043
+        },
+        {
+          "w": "Ils",
+          "start": 8.277,
+          "end": 8.491
+        },
+        {
+          "w": "reposent",
+          "start": 8.533,
+          "end": 8.832
+        },
+        {
+          "w": "sur",
+          "start": 8.875,
+          "end": 9.003
+        },
+        {
+          "w": "des",
+          "start": 9.045,
+          "end": 9.088
+        },
+        {
+          "w": "principes",
+          "start": 9.131,
+          "end": 9.429
+        },
+        {
+          "w": "proches.",
+          "start": 9.515,
+          "end": 10.018
+        },
+        {
+          "w": "Ce",
+          "start": 10.137,
+          "end": 10.265
+        },
+        {
+          "w": "qui",
+          "start": 10.308,
+          "end": 10.436
+        },
+        {
+          "w": "les",
+          "start": 10.478,
+          "end": 10.521
+        },
+        {
+          "w": "distingue,",
+          "start": 10.564,
+          "end": 11.225
+        },
+        {
+          "w": "ce",
+          "start": 11.417,
+          "end": 11.502
+        },
+        {
+          "w": "sont",
+          "start": 11.545,
+          "end": 11.716
+        },
+        {
+          "w": "leurs",
+          "start": 11.758,
+          "end": 11.844
+        },
+        {
+          "w": "points",
+          "start": 11.886,
+          "end": 12.057
+        },
+        {
+          "w": "forts,",
+          "start": 12.1,
+          "end": 12.59
+        },
+        {
+          "w": "ce",
+          "start": 12.825,
+          "end": 12.91
+        },
+        {
+          "w": "à",
+          "start": 12.996,
+          "end": 13.081
+        },
+        {
+          "w": "quoi",
+          "start": 13.124,
+          "end": 13.252
+        },
+        {
+          "w": "ils",
+          "start": 13.294,
+          "end": 13.337
+        },
+        {
+          "w": "sont",
+          "start": 13.38,
+          "end": 13.508
+        },
+        {
+          "w": "connectés,",
+          "start": 13.55,
+          "end": 14.212
+        },
+        {
+          "w": "et",
+          "start": 14.361,
+          "end": 14.446
+        },
+        {
+          "w": "leurs",
+          "start": 14.489,
+          "end": 14.617
+        },
+        {
+          "w": "conditions",
+          "start": 14.66,
+          "end": 14.958
+        },
+        {
+          "w": "d'accès.",
+          "start": 15.129,
+          "end": 15.662
+        },
+        {
+          "w": "Voyons-les",
+          "start": 15.854,
+          "end": 16.281
+        },
+        {
+          "w": "un",
+          "start": 16.324,
+          "end": 16.494
+        },
+        {
+          "w": "par",
+          "start": 16.537,
+          "end": 16.665
+        },
+        {
+          "w": "un.",
+          "start": 16.75,
+          "end": 17.045
+        }
+      ]
+    },
+    {
+      "id": "9a",
+      "title": "Fiche ChatGPT",
+      "avatar": "none",
+      "text": "ChatGPT, d'OpenAI, est l'outil polyvalent par excellence. Il brille par sa rédaction naturelle, la création d'images et la personnalisation, avec des assistants sur mesure. On l'utilise sur le web, sur mobile ou sur ordinateur. Il existe une version gratuite, des abonnements individuels et des offres pour les entreprises.",
+      "audio": "generated/lesson1_1-commune/scene-9a.wav",
+      "duration": 18.113718820861678,
+      "words": [
+        {
+          "w": "ChatGPT,",
+          "start": 0.256,
+          "end": 1.003
+        },
+        {
+          "w": "d'OpenAI,",
+          "start": 1.109,
+          "end": 1.771
+        },
+        {
+          "w": "est",
+          "start": 1.877,
+          "end": 2.133
+        },
+        {
+          "w": "l'outil",
+          "start": 2.176,
+          "end": 2.432
+        },
+        {
+          "w": "polyvalent",
+          "start": 2.475,
+          "end": 2.987
+        },
+        {
+          "w": "par",
+          "start": 3.029,
+          "end": 3.115
+        },
+        {
+          "w": "excellence.",
+          "start": 3.157,
+          "end": 3.819
+        },
+        {
+          "w": "Il",
+          "start": 4.096,
+          "end": 4.224
+        },
+        {
+          "w": "brille",
+          "start": 4.309,
+          "end": 4.608
+        },
+        {
+          "w": "par",
+          "start": 4.651,
+          "end": 4.779
+        },
+        {
+          "w": "sa",
+          "start": 4.821,
+          "end": 4.907
+        },
+        {
+          "w": "rédaction",
+          "start": 4.949,
+          "end": 5.163
+        },
+        {
+          "w": "naturelle,",
+          "start": 5.376,
+          "end": 5.973
+        },
+        {
+          "w": "la",
+          "start": 6.144,
+          "end": 6.272
+        },
+        {
+          "w": "création",
+          "start": 6.315,
+          "end": 6.571
+        },
+        {
+          "w": "d'images",
+          "start": 6.741,
+          "end": 7.083
+        },
+        {
+          "w": "et",
+          "start": 7.211,
+          "end": 7.253
+        },
+        {
+          "w": "la",
+          "start": 7.296,
+          "end": 7.339
+        },
+        {
+          "w": "personnalisation,",
+          "start": 7.381,
+          "end": 8.171
+        },
+        {
+          "w": "avec",
+          "start": 8.405,
+          "end": 8.619
+        },
+        {
+          "w": "des",
+          "start": 8.661,
+          "end": 8.747
+        },
+        {
+          "w": "assistants",
+          "start": 8.832,
+          "end": 9.173
+        },
+        {
+          "w": "sur",
+          "start": 9.216,
+          "end": 9.387
+        },
+        {
+          "w": "mesure.",
+          "start": 9.429,
+          "end": 9.898
+        },
+        {
+          "w": "On",
+          "start": 10.026,
+          "end": 10.197
+        },
+        {
+          "w": "l'utilise",
+          "start": 10.24,
+          "end": 10.624
+        },
+        {
+          "w": "sur",
+          "start": 10.709,
+          "end": 10.794
+        },
+        {
+          "w": "le",
+          "start": 10.837,
+          "end": 10.88
+        },
+        {
+          "w": "web,",
+          "start": 10.922,
+          "end": 11.285
+        },
+        {
+          "w": "sur",
+          "start": 11.477,
+          "end": 11.605
+        },
+        {
+          "w": "mobile",
+          "start": 11.648,
+          "end": 11.989
+        },
+        {
+          "w": "ou",
+          "start": 12.16,
+          "end": 12.245
+        },
+        {
+          "w": "sur",
+          "start": 12.288,
+          "end": 12.458
+        },
+        {
+          "w": "ordinateur.",
+          "start": 12.501,
+          "end": 13.205
+        },
+        {
+          "w": "Il",
+          "start": 13.44,
+          "end": 13.568
+        },
+        {
+          "w": "existe",
+          "start": 13.61,
+          "end": 13.866
+        },
+        {
+          "w": "une",
+          "start": 13.909,
+          "end": 13.952
+        },
+        {
+          "w": "version",
+          "start": 13.994,
+          "end": 14.122
+        },
+        {
+          "w": "gratuite,",
+          "start": 14.293,
+          "end": 14.869
+        },
+        {
+          "w": "des",
+          "start": 15.061,
+          "end": 15.189
+        },
+        {
+          "w": "abonnements",
+          "start": 15.232,
+          "end": 15.616
+        },
+        {
+          "w": "individuels",
+          "start": 15.658,
+          "end": 16.128
+        },
+        {
+          "w": "et",
+          "start": 16.298,
+          "end": 16.384
+        },
+        {
+          "w": "des",
+          "start": 16.426,
+          "end": 16.512
+        },
+        {
+          "w": "offres",
+          "start": 16.554,
+          "end": 16.81
+        },
+        {
+          "w": "pour",
+          "start": 16.853,
+          "end": 16.981
+        },
+        {
+          "w": "les",
+          "start": 17.024,
+          "end": 17.066
+        },
+        {
+          "w": "entreprises.",
+          "start": 17.109,
+          "end": 17.914
+        }
+      ]
+    },
+    {
+      "id": "9b",
+      "title": "Fiche Claude",
+      "avatar": "none",
+      "text": "Claude, de la société Anthropic, excelle en raisonnement et en rigueur : il suit précisément des consignes détaillées. C'est un très bon choix pour analyser de longs documents, rédiger des rapports de fond ou travailler sur du code. Il propose un accès gratuit limité, des abonnements, et des offres pour les équipes.",
+      "audio": "generated/lesson1_1-commune/scene-9b.wav",
+      "duration": 17.498390022675736,
+      "words": [
+        {
+          "w": "Claude,",
+          "start": 0.299,
+          "end": 0.768
+        },
+        {
+          "w": "de",
+          "start": 0.939,
+          "end": 1.067
+        },
+        {
+          "w": "la",
+          "start": 1.109,
+          "end": 1.195
+        },
+        {
+          "w": "société",
+          "start": 1.237,
+          "end": 1.579
+        },
+        {
+          "w": "Anthropic,",
+          "start": 1.621,
+          "end": 2.197
+        },
+        {
+          "w": "excelle",
+          "start": 2.304,
+          "end": 2.944
+        },
+        {
+          "w": "en",
+          "start": 2.987,
+          "end": 3.029
+        },
+        {
+          "w": "raisonnement",
+          "start": 3.072,
+          "end": 3.499
+        },
+        {
+          "w": "et",
+          "start": 3.541,
+          "end": 3.627
+        },
+        {
+          "w": "en",
+          "start": 3.669,
+          "end": 3.712
+        },
+        {
+          "w": "rigueur",
+          "start": 3.755,
+          "end": 4.053
+        },
+        {
+          "w": ":",
+          "start": 4.267,
+          "end": 4.309
+        },
+        {
+          "w": "il",
+          "start": 4.352,
+          "end": 4.651
+        },
+        {
+          "w": "suit",
+          "start": 4.693,
+          "end": 4.907
+        },
+        {
+          "w": "précisément",
+          "start": 4.949,
+          "end": 5.589
+        },
+        {
+          "w": "des",
+          "start": 5.632,
+          "end": 5.717
+        },
+        {
+          "w": "consignes",
+          "start": 5.76,
+          "end": 6.187
+        },
+        {
+          "w": "détaillées.",
+          "start": 6.229,
+          "end": 6.782
+        },
+        {
+          "w": "C'est",
+          "start": 6.864,
+          "end": 7.078
+        },
+        {
+          "w": "un",
+          "start": 7.12,
+          "end": 7.206
+        },
+        {
+          "w": "très",
+          "start": 7.248,
+          "end": 7.59
+        },
+        {
+          "w": "bon",
+          "start": 7.633,
+          "end": 7.675
+        },
+        {
+          "w": "choix",
+          "start": 7.718,
+          "end": 7.974
+        },
+        {
+          "w": "pour",
+          "start": 8.017,
+          "end": 8.145
+        },
+        {
+          "w": "analyser",
+          "start": 8.23,
+          "end": 8.614
+        },
+        {
+          "w": "de",
+          "start": 8.656,
+          "end": 8.742
+        },
+        {
+          "w": "longs",
+          "start": 8.784,
+          "end": 8.998
+        },
+        {
+          "w": "documents,",
+          "start": 9.04,
+          "end": 9.574
+        },
+        {
+          "w": "rédiger",
+          "start": 9.723,
+          "end": 10.235
+        },
+        {
+          "w": "des",
+          "start": 10.278,
+          "end": 10.32
+        },
+        {
+          "w": "rapports",
+          "start": 10.363,
+          "end": 10.619
+        },
+        {
+          "w": "de",
+          "start": 10.662,
+          "end": 10.747
+        },
+        {
+          "w": "fond",
+          "start": 10.79,
+          "end": 10.96
+        },
+        {
+          "w": "ou",
+          "start": 11.131,
+          "end": 11.259
+        },
+        {
+          "w": "travailler",
+          "start": 11.302,
+          "end": 11.643
+        },
+        {
+          "w": "sur",
+          "start": 11.686,
+          "end": 11.814
+        },
+        {
+          "w": "du",
+          "start": 11.857,
+          "end": 11.942
+        },
+        {
+          "w": "code.",
+          "start": 11.985,
+          "end": 12.454
+        },
+        {
+          "w": "Il",
+          "start": 12.795,
+          "end": 12.88
+        },
+        {
+          "w": "propose",
+          "start": 12.923,
+          "end": 13.222
+        },
+        {
+          "w": "un",
+          "start": 13.264,
+          "end": 13.35
+        },
+        {
+          "w": "accès",
+          "start": 13.393,
+          "end": 13.691
+        },
+        {
+          "w": "gratuit",
+          "start": 13.734,
+          "end": 14.075
+        },
+        {
+          "w": "limité,",
+          "start": 14.118,
+          "end": 14.651
+        },
+        {
+          "w": "des",
+          "start": 14.8,
+          "end": 14.928
+        },
+        {
+          "w": "abonnements,",
+          "start": 14.971,
+          "end": 15.59
+        },
+        {
+          "w": "et",
+          "start": 15.739,
+          "end": 15.91
+        },
+        {
+          "w": "des",
+          "start": 15.953,
+          "end": 16.081
+        },
+        {
+          "w": "offres",
+          "start": 16.123,
+          "end": 16.337
+        },
+        {
+          "w": "pour",
+          "start": 16.379,
+          "end": 16.507
+        },
+        {
+          "w": "les",
+          "start": 16.55,
+          "end": 16.635
+        },
+        {
+          "w": "équipes.",
+          "start": 16.678,
+          "end": 17.298
+        }
+      ]
+    },
+    {
+      "id": "9c",
+      "title": "Fiche Gemini",
+      "avatar": "none",
+      "text": "Google Gemini tire sa force de son intégration aux outils Google et de sa capacité à s'appuyer sur des informations récentes. Il traite aussi bien du texte que de l'audio ou de la vidéo. Il est idéal pour travailler directement depuis votre Drive. Il existe en version gratuite et en abonnement, et dans certaines offres Google Workspace.",
+      "audio": "generated/lesson1_1-commune/scene-9c.wav",
+      "duration": 17.684149659863944,
+      "words": [
+        {
+          "w": "Google",
+          "start": 0.256,
+          "end": 0.597
+        },
+        {
+          "w": "Gemini",
+          "start": 0.64,
+          "end": 0.981
+        },
+        {
+          "w": "tire",
+          "start": 1.109,
+          "end": 1.28
+        },
+        {
+          "w": "sa",
+          "start": 1.323,
+          "end": 1.451
+        },
+        {
+          "w": "force",
+          "start": 1.493,
+          "end": 1.749
+        },
+        {
+          "w": "de",
+          "start": 1.835,
+          "end": 1.92
+        },
+        {
+          "w": "son",
+          "start": 1.963,
+          "end": 2.048
+        },
+        {
+          "w": "intégration",
+          "start": 2.091,
+          "end": 2.475
+        },
+        {
+          "w": "aux",
+          "start": 2.688,
+          "end": 2.773
+        },
+        {
+          "w": "outils",
+          "start": 2.816,
+          "end": 3.029
+        },
+        {
+          "w": "Google",
+          "start": 3.072,
+          "end": 3.328
+        },
+        {
+          "w": "et",
+          "start": 3.499,
+          "end": 3.84
+        },
+        {
+          "w": "de",
+          "start": 3.883,
+          "end": 3.968
+        },
+        {
+          "w": "sa",
+          "start": 4.011,
+          "end": 4.096
+        },
+        {
+          "w": "capacité",
+          "start": 4.139,
+          "end": 4.608
+        },
+        {
+          "w": "à",
+          "start": 4.651,
+          "end": 4.693
+        },
+        {
+          "w": "s'appuyer",
+          "start": 4.736,
+          "end": 5.205
+        },
+        {
+          "w": "sur",
+          "start": 5.248,
+          "end": 5.333
+        },
+        {
+          "w": "des",
+          "start": 5.376,
+          "end": 5.461
+        },
+        {
+          "w": "informations",
+          "start": 5.504,
+          "end": 5.845
+        },
+        {
+          "w": "récentes.",
+          "start": 6.059,
+          "end": 6.677
+        },
+        {
+          "w": "Il",
+          "start": 6.912,
+          "end": 7.083
+        },
+        {
+          "w": "traite",
+          "start": 7.125,
+          "end": 7.253
+        },
+        {
+          "w": "aussi",
+          "start": 7.296,
+          "end": 7.424
+        },
+        {
+          "w": "bien",
+          "start": 7.552,
+          "end": 7.68
+        },
+        {
+          "w": "du",
+          "start": 7.723,
+          "end": 7.808
+        },
+        {
+          "w": "texte",
+          "start": 7.851,
+          "end": 8.192
+        },
+        {
+          "w": "que",
+          "start": 8.277,
+          "end": 8.363
+        },
+        {
+          "w": "de",
+          "start": 8.405,
+          "end": 8.448
+        },
+        {
+          "w": "l'audio",
+          "start": 8.491,
+          "end": 8.789
+        },
+        {
+          "w": "ou",
+          "start": 8.875,
+          "end": 8.917
+        },
+        {
+          "w": "de",
+          "start": 8.96,
+          "end": 9.003
+        },
+        {
+          "w": "la",
+          "start": 9.045,
+          "end": 9.088
+        },
+        {
+          "w": "vidéo.",
+          "start": 9.131,
+          "end": 9.568
+        },
+        {
+          "w": "Il",
+          "start": 9.665,
+          "end": 9.793
+        },
+        {
+          "w": "est",
+          "start": 9.835,
+          "end": 9.921
+        },
+        {
+          "w": "idéal",
+          "start": 9.963,
+          "end": 10.305
+        },
+        {
+          "w": "pour",
+          "start": 10.39,
+          "end": 10.518
+        },
+        {
+          "w": "travailler",
+          "start": 10.561,
+          "end": 10.945
+        },
+        {
+          "w": "directement",
+          "start": 10.987,
+          "end": 11.585
+        },
+        {
+          "w": "depuis",
+          "start": 11.627,
+          "end": 11.883
+        },
+        {
+          "w": "votre",
+          "start": 11.926,
+          "end": 12.054
+        },
+        {
+          "w": "Drive.",
+          "start": 12.139,
+          "end": 12.694
+        },
+        {
+          "w": "Il",
+          "start": 13.035,
+          "end": 13.121
+        },
+        {
+          "w": "existe",
+          "start": 13.163,
+          "end": 13.462
+        },
+        {
+          "w": "en",
+          "start": 13.505,
+          "end": 13.547
+        },
+        {
+          "w": "version",
+          "start": 13.59,
+          "end": 13.718
+        },
+        {
+          "w": "gratuite",
+          "start": 13.889,
+          "end": 14.273
+        },
+        {
+          "w": "et",
+          "start": 14.401,
+          "end": 14.443
+        },
+        {
+          "w": "en",
+          "start": 14.486,
+          "end": 14.529
+        },
+        {
+          "w": "abonnement,",
+          "start": 14.571,
+          "end": 15.147
+        },
+        {
+          "w": "et",
+          "start": 15.297,
+          "end": 15.467
+        },
+        {
+          "w": "dans",
+          "start": 15.51,
+          "end": 15.595
+        },
+        {
+          "w": "certaines",
+          "start": 15.638,
+          "end": 15.937
+        },
+        {
+          "w": "offres",
+          "start": 15.979,
+          "end": 16.278
+        },
+        {
+          "w": "Google",
+          "start": 16.363,
+          "end": 16.662
+        },
+        {
+          "w": "Workspace.",
+          "start": 16.705,
+          "end": 17.51
+        }
+      ]
+    },
+    {
+      "id": "9d",
+      "title": "Fiche Copilot",
+      "avatar": "none",
+      "text": "Microsoft Copilot a un atout majeur : dans sa version professionnelle, il s'appuie sur les mails, les réunions et les documents de votre entreprise. On l'utilise pour rédiger et mettre en forme dans Word, PowerPoint ou Excel, et pour résumer une réunion Teams. Il est accessible gratuitement sur le web, et en version complète avec une licence professionnelle.",
+      "audio": "generated/lesson1_1-commune/scene-9d.wav",
+      "duration": 18.879977324263038,
+      "words": [
+        {
+          "w": "Microsoft",
+          "start": 0.299,
+          "end": 0.725
+        },
+        {
+          "w": "Copilot",
+          "start": 0.853,
+          "end": 1.237
+        },
+        {
+          "w": "a",
+          "start": 1.323,
+          "end": 1.365
+        },
+        {
+          "w": "un",
+          "start": 1.408,
+          "end": 1.451
+        },
+        {
+          "w": "atout",
+          "start": 1.493,
+          "end": 1.749
+        },
+        {
+          "w": "majeur",
+          "start": 1.792,
+          "end": 2.176
+        },
+        {
+          "w": ":",
+          "start": 2.219,
+          "end": 2.261
+        },
+        {
+          "w": "dans",
+          "start": 2.304,
+          "end": 2.432
+        },
+        {
+          "w": "sa",
+          "start": 2.475,
+          "end": 2.56
+        },
+        {
+          "w": "version",
+          "start": 2.603,
+          "end": 2.688
+        },
+        {
+          "w": "professionnelle,",
+          "start": 2.859,
+          "end": 3.627
+        },
+        {
+          "w": "il",
+          "start": 3.797,
+          "end": 4.011
+        },
+        {
+          "w": "s'appuie",
+          "start": 4.053,
+          "end": 4.395
+        },
+        {
+          "w": "sur",
+          "start": 4.437,
+          "end": 4.565
+        },
+        {
+          "w": "les",
+          "start": 4.608,
+          "end": 4.651
+        },
+        {
+          "w": "mails,",
+          "start": 4.693,
+          "end": 5.12
+        },
+        {
+          "w": "les",
+          "start": 5.248,
+          "end": 5.376
+        },
+        {
+          "w": "réunions",
+          "start": 5.419,
+          "end": 5.803
+        },
+        {
+          "w": "et",
+          "start": 5.973,
+          "end": 6.144
+        },
+        {
+          "w": "les",
+          "start": 6.187,
+          "end": 6.272
+        },
+        {
+          "w": "documents",
+          "start": 6.315,
+          "end": 6.613
+        },
+        {
+          "w": "de",
+          "start": 6.656,
+          "end": 6.699
+        },
+        {
+          "w": "votre",
+          "start": 6.741,
+          "end": 6.912
+        },
+        {
+          "w": "entreprise.",
+          "start": 6.955,
+          "end": 7.576
+        },
+        {
+          "w": "On",
+          "start": 7.77,
+          "end": 7.898
+        },
+        {
+          "w": "l'utilise",
+          "start": 7.941,
+          "end": 8.325
+        },
+        {
+          "w": "pour",
+          "start": 8.367,
+          "end": 8.538
+        },
+        {
+          "w": "rédiger",
+          "start": 8.581,
+          "end": 9.008
+        },
+        {
+          "w": "et",
+          "start": 9.05,
+          "end": 9.093
+        },
+        {
+          "w": "mettre",
+          "start": 9.136,
+          "end": 9.306
+        },
+        {
+          "w": "en",
+          "start": 9.349,
+          "end": 9.434
+        },
+        {
+          "w": "forme",
+          "start": 9.477,
+          "end": 9.733
+        },
+        {
+          "w": "dans",
+          "start": 9.775,
+          "end": 9.903
+        },
+        {
+          "w": "Word,",
+          "start": 9.946,
+          "end": 10.33
+        },
+        {
+          "w": "PowerPoint",
+          "start": 10.501,
+          "end": 11.056
+        },
+        {
+          "w": "ou",
+          "start": 11.226,
+          "end": 11.269
+        },
+        {
+          "w": "Excel,",
+          "start": 11.312,
+          "end": 11.845
+        },
+        {
+          "w": "et",
+          "start": 12.037,
+          "end": 12.25
+        },
+        {
+          "w": "pour",
+          "start": 12.293,
+          "end": 12.421
+        },
+        {
+          "w": "résumer",
+          "start": 12.463,
+          "end": 12.848
+        },
+        {
+          "w": "une",
+          "start": 12.89,
+          "end": 12.933
+        },
+        {
+          "w": "réunion",
+          "start": 12.976,
+          "end": 13.274
+        },
+        {
+          "w": "Teams.",
+          "start": 13.317,
+          "end": 13.829
+        },
+        {
+          "w": "Il",
+          "start": 14.042,
+          "end": 14.127
+        },
+        {
+          "w": "est",
+          "start": 14.17,
+          "end": 14.213
+        },
+        {
+          "w": "accessible",
+          "start": 14.255,
+          "end": 14.639
+        },
+        {
+          "w": "gratuitement",
+          "start": 14.768,
+          "end": 15.28
+        },
+        {
+          "w": "sur",
+          "start": 15.322,
+          "end": 15.45
+        },
+        {
+          "w": "le",
+          "start": 15.493,
+          "end": 15.536
+        },
+        {
+          "w": "web,",
+          "start": 15.578,
+          "end": 15.898
+        },
+        {
+          "w": "et",
+          "start": 16.047,
+          "end": 16.261
+        },
+        {
+          "w": "en",
+          "start": 16.303,
+          "end": 16.346
+        },
+        {
+          "w": "version",
+          "start": 16.389,
+          "end": 16.474
+        },
+        {
+          "w": "complète",
+          "start": 16.688,
+          "end": 17.072
+        },
+        {
+          "w": "avec",
+          "start": 17.157,
+          "end": 17.285
+        },
+        {
+          "w": "une",
+          "start": 17.37,
+          "end": 17.456
+        },
+        {
+          "w": "licence",
+          "start": 17.498,
+          "end": 17.754
+        },
+        {
+          "w": "professionnelle.",
+          "start": 17.797,
+          "end": 18.68
+        }
+      ]
+    },
+    {
+      "id": "9e",
+      "title": "Fiche Firefly",
+      "avatar": "none",
+      "text": "Enfin, Adobe Firefly est l'outil de la création visuelle. Il génère des images de qualité, retouchables, et permet d'ajouter ou de supprimer des éléments dans une image. Il est intégré à Photoshop, Illustrator et Express. Il propose un accès gratuit limité, et il est inclus dans les offres Adobe.",
+      "audio": "generated/lesson1_1-commune/scene-9e.wav",
+      "duration": 17.335850340136055,
+      "words": [
+        {
+          "w": "Enfin,",
+          "start": 0.213,
+          "end": 0.747
+        },
+        {
+          "w": "Adobe",
+          "start": 0.853,
+          "end": 1.323
+        },
+        {
+          "w": "Firefly",
+          "start": 1.365,
+          "end": 1.92
+        },
+        {
+          "w": "est",
+          "start": 2.005,
+          "end": 2.176
+        },
+        {
+          "w": "l'outil",
+          "start": 2.219,
+          "end": 2.517
+        },
+        {
+          "w": "de",
+          "start": 2.56,
+          "end": 2.645
+        },
+        {
+          "w": "la",
+          "start": 2.688,
+          "end": 2.731
+        },
+        {
+          "w": "création",
+          "start": 2.773,
+          "end": 3.029
+        },
+        {
+          "w": "visuelle.",
+          "start": 3.2,
+          "end": 3.904
+        },
+        {
+          "w": "Il",
+          "start": 4.224,
+          "end": 4.352
+        },
+        {
+          "w": "génère",
+          "start": 4.395,
+          "end": 4.693
+        },
+        {
+          "w": "des",
+          "start": 4.736,
+          "end": 4.821
+        },
+        {
+          "w": "images",
+          "start": 4.864,
+          "end": 5.077
+        },
+        {
+          "w": "de",
+          "start": 5.12,
+          "end": 5.205
+        },
+        {
+          "w": "qualité,",
+          "start": 5.248,
+          "end": 5.803
+        },
+        {
+          "w": "retouchables,",
+          "start": 5.931,
+          "end": 6.613
+        },
+        {
+          "w": "et",
+          "start": 6.699,
+          "end": 6.912
+        },
+        {
+          "w": "permet",
+          "start": 6.955,
+          "end": 7.211
+        },
+        {
+          "w": "d'ajouter",
+          "start": 7.253,
+          "end": 7.68
+        },
+        {
+          "w": "ou",
+          "start": 7.723,
+          "end": 7.765
+        },
+        {
+          "w": "de",
+          "start": 7.808,
+          "end": 7.851
+        },
+        {
+          "w": "supprimer",
+          "start": 7.893,
+          "end": 8.363
+        },
+        {
+          "w": "des",
+          "start": 8.405,
+          "end": 8.491
+        },
+        {
+          "w": "éléments",
+          "start": 8.533,
+          "end": 8.875
+        },
+        {
+          "w": "dans",
+          "start": 8.917,
+          "end": 9.003
+        },
+        {
+          "w": "une",
+          "start": 9.045,
+          "end": 9.131
+        },
+        {
+          "w": "image.",
+          "start": 9.216,
+          "end": 9.643
+        },
+        {
+          "w": "Il",
+          "start": 9.899,
+          "end": 10.027
+        },
+        {
+          "w": "est",
+          "start": 10.069,
+          "end": 10.112
+        },
+        {
+          "w": "intégré",
+          "start": 10.155,
+          "end": 10.539
+        },
+        {
+          "w": "à",
+          "start": 10.581,
+          "end": 10.624
+        },
+        {
+          "w": "Photoshop,",
+          "start": 10.667,
+          "end": 11.221
+        },
+        {
+          "w": "Illustrator",
+          "start": 11.349,
+          "end": 11.819
+        },
+        {
+          "w": "et",
+          "start": 12.16,
+          "end": 12.373
+        },
+        {
+          "w": "Express.",
+          "start": 12.459,
+          "end": 12.921
+        },
+        {
+          "w": "Il",
+          "start": 13.084,
+          "end": 13.212
+        },
+        {
+          "w": "propose",
+          "start": 13.254,
+          "end": 13.553
+        },
+        {
+          "w": "un",
+          "start": 13.596,
+          "end": 13.681
+        },
+        {
+          "w": "accès",
+          "start": 13.724,
+          "end": 13.98
+        },
+        {
+          "w": "gratuit",
+          "start": 14.022,
+          "end": 14.364
+        },
+        {
+          "w": "limité,",
+          "start": 14.406,
+          "end": 15.068
+        },
+        {
+          "w": "et",
+          "start": 15.26,
+          "end": 15.473
+        },
+        {
+          "w": "il",
+          "start": 15.516,
+          "end": 15.558
+        },
+        {
+          "w": "est",
+          "start": 15.601,
+          "end": 15.644
+        },
+        {
+          "w": "inclus",
+          "start": 15.686,
+          "end": 15.985
+        },
+        {
+          "w": "dans",
+          "start": 16.028,
+          "end": 16.113
+        },
+        {
+          "w": "les",
+          "start": 16.156,
+          "end": 16.198
+        },
+        {
+          "w": "offres",
+          "start": 16.241,
+          "end": 16.454
+        },
+        {
+          "w": "Adobe.",
+          "start": 16.497,
+          "end": 17.136
+        }
+      ]
+    },
+    {
+      "id": "9f",
+      "title": "Comment choisir",
+      "avatar": "none",
+      "text": "Le bon choix ne dépend pas d'un classement. Il dépend de votre besoin, de l'environnement de travail déjà en place, et de ce que votre entreprise autorise. Les tarifs, eux, changent souvent : le Playground vous donne le lien vers la page officielle de chaque éditeur, à vérifier à chaque fois. C'est important, car dans le premier exercice de l'écrit, vous devrez justifier vos outils et chiffrer leur budget.",
+      "audio": "generated/lesson1_1-commune/scene-9f.wav",
+      "duration": 21.102585034013604,
+      "words": [
+        {
+          "w": "Le",
+          "start": 0.299,
+          "end": 0.427
+        },
+        {
+          "w": "bon",
+          "start": 0.469,
+          "end": 0.597
+        },
+        {
+          "w": "choix",
+          "start": 0.64,
+          "end": 0.896
+        },
+        {
+          "w": "ne",
+          "start": 0.939,
+          "end": 0.981
+        },
+        {
+          "w": "dépend",
+          "start": 1.024,
+          "end": 1.237
+        },
+        {
+          "w": "pas",
+          "start": 1.28,
+          "end": 1.408
+        },
+        {
+          "w": "d'un",
+          "start": 1.451,
+          "end": 1.579
+        },
+        {
+          "w": "classement.",
+          "start": 1.621,
+          "end": 2.176
+        },
+        {
+          "w": "Il",
+          "start": 2.389,
+          "end": 2.56
+        },
+        {
+          "w": "dépend",
+          "start": 2.603,
+          "end": 2.816
+        },
+        {
+          "w": "de",
+          "start": 2.859,
+          "end": 2.901
+        },
+        {
+          "w": "votre",
+          "start": 2.944,
+          "end": 3.157
+        },
+        {
+          "w": "besoin,",
+          "start": 3.243,
+          "end": 3.755
+        },
+        {
+          "w": "de",
+          "start": 3.883,
+          "end": 4.011
+        },
+        {
+          "w": "l'environnement",
+          "start": 4.053,
+          "end": 4.565
+        },
+        {
+          "w": "de",
+          "start": 4.608,
+          "end": 4.651
+        },
+        {
+          "w": "travail",
+          "start": 4.693,
+          "end": 4.992
+        },
+        {
+          "w": "déjà",
+          "start": 5.035,
+          "end": 5.291
+        },
+        {
+          "w": "en",
+          "start": 5.333,
+          "end": 5.419
+        },
+        {
+          "w": "place,",
+          "start": 5.461,
+          "end": 5.867
+        },
+        {
+          "w": "et",
+          "start": 6.101,
+          "end": 6.315
+        },
+        {
+          "w": "de",
+          "start": 6.357,
+          "end": 6.4
+        },
+        {
+          "w": "ce",
+          "start": 6.443,
+          "end": 6.485
+        },
+        {
+          "w": "que",
+          "start": 6.528,
+          "end": 6.571
+        },
+        {
+          "w": "votre",
+          "start": 6.613,
+          "end": 6.741
+        },
+        {
+          "w": "entreprise",
+          "start": 6.784,
+          "end": 7.168
+        },
+        {
+          "w": "autorise.",
+          "start": 7.211,
+          "end": 7.823
+        },
+        {
+          "w": "Les",
+          "start": 8.051,
+          "end": 8.222
+        },
+        {
+          "w": "tarifs,",
+          "start": 8.264,
+          "end": 8.755
+        },
+        {
+          "w": "eux,",
+          "start": 8.819,
+          "end": 9.182
+        },
+        {
+          "w": "changent",
+          "start": 9.374,
+          "end": 9.715
+        },
+        {
+          "w": "souvent",
+          "start": 9.758,
+          "end": 10.099
+        },
+        {
+          "w": ":",
+          "start": 10.142,
+          "end": 10.184
+        },
+        {
+          "w": "le",
+          "start": 10.227,
+          "end": 10.27
+        },
+        {
+          "w": "Playground",
+          "start": 10.312,
+          "end": 10.611
+        },
+        {
+          "w": "vous",
+          "start": 10.824,
+          "end": 10.91
+        },
+        {
+          "w": "donne",
+          "start": 10.952,
+          "end": 11.123
+        },
+        {
+          "w": "le",
+          "start": 11.166,
+          "end": 11.208
+        },
+        {
+          "w": "lien",
+          "start": 11.294,
+          "end": 11.464
+        },
+        {
+          "w": "vers",
+          "start": 11.55,
+          "end": 11.678
+        },
+        {
+          "w": "la",
+          "start": 11.72,
+          "end": 11.806
+        },
+        {
+          "w": "page",
+          "start": 11.848,
+          "end": 11.976
+        },
+        {
+          "w": "officielle",
+          "start": 12.019,
+          "end": 12.488
+        },
+        {
+          "w": "de",
+          "start": 12.531,
+          "end": 12.574
+        },
+        {
+          "w": "chaque",
+          "start": 12.616,
+          "end": 12.787
+        },
+        {
+          "w": "éditeur,",
+          "start": 12.872,
+          "end": 13.427
+        },
+        {
+          "w": "à",
+          "start": 13.598,
+          "end": 13.811
+        },
+        {
+          "w": "vérifier",
+          "start": 13.854,
+          "end": 14.195
+        },
+        {
+          "w": "à",
+          "start": 14.238,
+          "end": 14.28
+        },
+        {
+          "w": "chaque",
+          "start": 14.323,
+          "end": 14.408
+        },
+        {
+          "w": "fois.",
+          "start": 14.451,
+          "end": 14.829
+        },
+        {
+          "w": "C'est",
+          "start": 15.037,
+          "end": 15.251
+        },
+        {
+          "w": "important,",
+          "start": 15.293,
+          "end": 15.763
+        },
+        {
+          "w": "car",
+          "start": 16.019,
+          "end": 16.189
+        },
+        {
+          "w": "dans",
+          "start": 16.232,
+          "end": 16.317
+        },
+        {
+          "w": "le",
+          "start": 16.36,
+          "end": 16.403
+        },
+        {
+          "w": "premier",
+          "start": 16.445,
+          "end": 16.701
+        },
+        {
+          "w": "exercice",
+          "start": 16.744,
+          "end": 17.171
+        },
+        {
+          "w": "de",
+          "start": 17.213,
+          "end": 17.299
+        },
+        {
+          "w": "l'écrit,",
+          "start": 17.341,
+          "end": 17.747
+        },
+        {
+          "w": "vous",
+          "start": 17.896,
+          "end": 18.109
+        },
+        {
+          "w": "devrez",
+          "start": 18.152,
+          "end": 18.365
+        },
+        {
+          "w": "justifier",
+          "start": 18.408,
+          "end": 18.963
+        },
+        {
+          "w": "vos",
+          "start": 19.005,
+          "end": 19.091
+        },
+        {
+          "w": "outils",
+          "start": 19.133,
+          "end": 19.475
+        },
+        {
+          "w": "et",
+          "start": 19.645,
+          "end": 19.816
+        },
+        {
+          "w": "chiffrer",
+          "start": 19.859,
+          "end": 20.243
+        },
+        {
+          "w": "leur",
+          "start": 20.285,
+          "end": 20.371
+        },
+        {
+          "w": "budget.",
+          "start": 20.371,
+          "end": 20.928
+        }
+      ]
+    },
+    {
+      "id": "10",
+      "title": "À vous de jouer",
+      "avatar": "pip",
+      "text": "À vous, maintenant. Ouvrez l'onglet Playground : vous y verrez l'outil choisir ses mots et inventer une réponse, vous comparerez les fiches des cinq outils, et vous associerez des tâches au bon outil. Ensuite, dans le Studio, posez la même question à ChatGPT, à Claude et à Gemini, et comparez. Pour aller plus loin, le Battle Ground propose, dans la gamme Rapide, un défi intitulé Piège. Copilot et Firefly ne sont pas dans la plateforme : vous les découvrirez sur leur site dans la leçon sur l'installation des outils.",
+      "audio": "generated/lesson1_1-commune/scene-10.wav",
+      "duration": 28.46331065759637,
+      "words": [
+        {
+          "w": "À",
+          "start": 0.213,
+          "end": 0.427
+        },
+        {
+          "w": "vous,",
+          "start": 0.469,
+          "end": 0.725
+        },
+        {
+          "w": "maintenant.",
+          "start": 0.853,
+          "end": 1.344
+        },
+        {
+          "w": "Ouvrez",
+          "start": 1.493,
+          "end": 2.176
+        },
+        {
+          "w": "l'onglet",
+          "start": 2.219,
+          "end": 2.475
+        },
+        {
+          "w": "Playground",
+          "start": 2.517,
+          "end": 2.987
+        },
+        {
+          "w": ":",
+          "start": 3.157,
+          "end": 3.243
+        },
+        {
+          "w": "vous",
+          "start": 3.285,
+          "end": 3.584
+        },
+        {
+          "w": "y",
+          "start": 3.627,
+          "end": 3.712
+        },
+        {
+          "w": "verrez",
+          "start": 3.755,
+          "end": 3.968
+        },
+        {
+          "w": "l'outil",
+          "start": 4.011,
+          "end": 4.224
+        },
+        {
+          "w": "choisir",
+          "start": 4.267,
+          "end": 4.565
+        },
+        {
+          "w": "ses",
+          "start": 4.651,
+          "end": 4.779
+        },
+        {
+          "w": "mots",
+          "start": 4.821,
+          "end": 4.992
+        },
+        {
+          "w": "et",
+          "start": 5.12,
+          "end": 5.163
+        },
+        {
+          "w": "inventer",
+          "start": 5.205,
+          "end": 5.504
+        },
+        {
+          "w": "une",
+          "start": 5.547,
+          "end": 5.589
+        },
+        {
+          "w": "réponse,",
+          "start": 5.675,
+          "end": 6.251
+        },
+        {
+          "w": "vous",
+          "start": 6.443,
+          "end": 6.571
+        },
+        {
+          "w": "comparerez",
+          "start": 6.613,
+          "end": 7.04
+        },
+        {
+          "w": "les",
+          "start": 7.083,
+          "end": 7.168
+        },
+        {
+          "w": "fiches",
+          "start": 7.211,
+          "end": 7.424
+        },
+        {
+          "w": "des",
+          "start": 7.467,
+          "end": 7.552
+        },
+        {
+          "w": "cinq",
+          "start": 7.595,
+          "end": 7.723
+        },
+        {
+          "w": "outils,",
+          "start": 7.765,
+          "end": 8.192
+        },
+        {
+          "w": "et",
+          "start": 8.32,
+          "end": 8.576
+        },
+        {
+          "w": "vous",
+          "start": 8.619,
+          "end": 8.704
+        },
+        {
+          "w": "associerez",
+          "start": 8.747,
+          "end": 9.259
+        },
+        {
+          "w": "des",
+          "start": 9.301,
+          "end": 9.344
+        },
+        {
+          "w": "tâches",
+          "start": 9.387,
+          "end": 9.685
+        },
+        {
+          "w": "au",
+          "start": 9.728,
+          "end": 9.771
+        },
+        {
+          "w": "bon",
+          "start": 9.813,
+          "end": 9.899
+        },
+        {
+          "w": "outil.",
+          "start": 9.941,
+          "end": 10.363
+        },
+        {
+          "w": "Ensuite,",
+          "start": 10.487,
+          "end": 11.02
+        },
+        {
+          "w": "dans",
+          "start": 11.169,
+          "end": 11.297
+        },
+        {
+          "w": "le",
+          "start": 11.34,
+          "end": 11.383
+        },
+        {
+          "w": "Studio,",
+          "start": 11.425,
+          "end": 11.959
+        },
+        {
+          "w": "posez",
+          "start": 12.151,
+          "end": 12.492
+        },
+        {
+          "w": "la",
+          "start": 12.535,
+          "end": 12.578
+        },
+        {
+          "w": "même",
+          "start": 12.62,
+          "end": 12.791
+        },
+        {
+          "w": "question",
+          "start": 12.834,
+          "end": 12.961
+        },
+        {
+          "w": "à",
+          "start": 13.26,
+          "end": 13.345
+        },
+        {
+          "w": "ChatGPT,",
+          "start": 13.388,
+          "end": 14.156
+        },
+        {
+          "w": "à",
+          "start": 14.284,
+          "end": 14.37
+        },
+        {
+          "w": "Claude",
+          "start": 14.412,
+          "end": 14.711
+        },
+        {
+          "w": "et",
+          "start": 14.796,
+          "end": 14.882
+        },
+        {
+          "w": "à",
+          "start": 14.924,
+          "end": 14.967
+        },
+        {
+          "w": "Gemini,",
+          "start": 15.009,
+          "end": 15.479
+        },
+        {
+          "w": "et",
+          "start": 15.607,
+          "end": 15.82
+        },
+        {
+          "w": "comparez.",
+          "start": 15.863,
+          "end": 16.396
+        },
+        {
+          "w": "Pour",
+          "start": 16.546,
+          "end": 16.716
+        },
+        {
+          "w": "aller",
+          "start": 16.759,
+          "end": 16.887
+        },
+        {
+          "w": "plus",
+          "start": 16.93,
+          "end": 17.015
+        },
+        {
+          "w": "loin,",
+          "start": 17.058,
+          "end": 17.42
+        },
+        {
+          "w": "le",
+          "start": 17.612,
+          "end": 17.74
+        },
+        {
+          "w": "Battle",
+          "start": 17.783,
+          "end": 17.911
+        },
+        {
+          "w": "Ground",
+          "start": 18.039,
+          "end": 18.295
+        },
+        {
+          "w": "propose,",
+          "start": 18.465,
+          "end": 18.999
+        },
+        {
+          "w": "dans",
+          "start": 19.148,
+          "end": 19.319
+        },
+        {
+          "w": "la",
+          "start": 19.361,
+          "end": 19.404
+        },
+        {
+          "w": "gamme",
+          "start": 19.447,
+          "end": 19.617
+        },
+        {
+          "w": "Rapide,",
+          "start": 19.66,
+          "end": 20.108
+        },
+        {
+          "w": "un",
+          "start": 20.258,
+          "end": 20.471
+        },
+        {
+          "w": "défi",
+          "start": 20.514,
+          "end": 20.77
+        },
+        {
+          "w": "intitulé",
+          "start": 20.812,
+          "end": 21.282
+        },
+        {
+          "w": "Piège.",
+          "start": 21.324,
+          "end": 21.998
+        },
+        {
+          "w": "Copilot",
+          "start": 22.288,
+          "end": 22.714
+        },
+        {
+          "w": "et",
+          "start": 22.757,
+          "end": 22.8
+        },
+        {
+          "w": "Firefly",
+          "start": 22.842,
+          "end": 23.312
+        },
+        {
+          "w": "ne",
+          "start": 23.397,
+          "end": 23.482
+        },
+        {
+          "w": "sont",
+          "start": 23.525,
+          "end": 23.653
+        },
+        {
+          "w": "pas",
+          "start": 23.696,
+          "end": 23.781
+        },
+        {
+          "w": "dans",
+          "start": 23.824,
+          "end": 23.909
+        },
+        {
+          "w": "la",
+          "start": 23.952,
+          "end": 23.994
+        },
+        {
+          "w": "plateforme",
+          "start": 24.037,
+          "end": 24.464
+        },
+        {
+          "w": ":",
+          "start": 24.549,
+          "end": 24.634
+        },
+        {
+          "w": "vous",
+          "start": 24.72,
+          "end": 24.976
+        },
+        {
+          "w": "les",
+          "start": 25.018,
+          "end": 25.061
+        },
+        {
+          "w": "découvrirez",
+          "start": 25.104,
+          "end": 25.573
+        },
+        {
+          "w": "sur",
+          "start": 25.616,
+          "end": 25.701
+        },
+        {
+          "w": "leur",
+          "start": 25.744,
+          "end": 25.829
+        },
+        {
+          "w": "site",
+          "start": 25.872,
+          "end": 26.085
+        },
+        {
+          "w": "dans",
+          "start": 26.213,
+          "end": 26.384
+        },
+        {
+          "w": "la",
+          "start": 26.426,
+          "end": 26.469
+        },
+        {
+          "w": "leçon",
+          "start": 26.512,
+          "end": 26.81
+        },
+        {
+          "w": "sur",
+          "start": 26.853,
+          "end": 26.981
+        },
+        {
+          "w": "l'installation",
+          "start": 27.024,
+          "end": 27.408
+        },
+        {
+          "w": "des",
+          "start": 27.578,
+          "end": 27.664
+        },
+        {
+          "w": "outils.",
+          "start": 27.706,
+          "end": 28.263
+        }
+      ],
+      "avatarVideo": "generated/lesson1_1-commune/avatar-10.mp4",
+      "avatarVideoId": "679d610493950db6c7015f887d5f3e1a",
+      "avatarDuration": 28.36
+    },
+    {
+      "id": "11",
+      "title": "Clôture",
+      "avatar": "full",
+      "text": "Retenez trois choses. L'IA générative prédit, elle ne vérifie pas. Tokens, fenêtre de contexte et variabilité expliquent son comportement. Et le choix d'un outil dépend du contexte, pas d'un classement. Validez maintenant le quiz pour débloquer la suite. Dans la prochaine leçon, on passe de l'outil à vous : vous allez analyser votre propre poste, pour repérer les tâches que l'IA peut vraiment vous faire gagner.",
+      "audio": "generated/lesson1_1-commune/scene-11.wav",
+      "duration": 21.608321995464852,
+      "words": [
+        {
+          "w": "Retenez",
+          "start": 0.256,
+          "end": 0.64
+        },
+        {
+          "w": "trois",
+          "start": 0.683,
+          "end": 0.811
+        },
+        {
+          "w": "choses.",
+          "start": 0.853,
+          "end": 1.323
+        },
+        {
+          "w": "L'IA",
+          "start": 1.493,
+          "end": 1.877
+        },
+        {
+          "w": "générative",
+          "start": 1.92,
+          "end": 2.261
+        },
+        {
+          "w": "prédit,",
+          "start": 2.517,
+          "end": 2.965
+        },
+        {
+          "w": "elle",
+          "start": 3.115,
+          "end": 3.243
+        },
+        {
+          "w": "ne",
+          "start": 3.285,
+          "end": 3.328
+        },
+        {
+          "w": "vérifie",
+          "start": 3.371,
+          "end": 3.712
+        },
+        {
+          "w": "pas.",
+          "start": 3.755,
+          "end": 4.139
+        },
+        {
+          "w": "Tokens,",
+          "start": 4.395,
+          "end": 4.992
+        },
+        {
+          "w": "fenêtre",
+          "start": 5.248,
+          "end": 5.589
+        },
+        {
+          "w": "de",
+          "start": 5.675,
+          "end": 5.717
+        },
+        {
+          "w": "contexte",
+          "start": 5.803,
+          "end": 6.187
+        },
+        {
+          "w": "et",
+          "start": 6.229,
+          "end": 6.315
+        },
+        {
+          "w": "variabilité",
+          "start": 6.357,
+          "end": 6.955
+        },
+        {
+          "w": "expliquent",
+          "start": 6.997,
+          "end": 7.339
+        },
+        {
+          "w": "son",
+          "start": 7.381,
+          "end": 7.467
+        },
+        {
+          "w": "comportement.",
+          "start": 7.509,
+          "end": 8.213
+        },
+        {
+          "w": "Et",
+          "start": 8.448,
+          "end": 8.533
+        },
+        {
+          "w": "le",
+          "start": 8.576,
+          "end": 8.661
+        },
+        {
+          "w": "choix",
+          "start": 8.704,
+          "end": 8.875
+        },
+        {
+          "w": "d'un",
+          "start": 8.917,
+          "end": 9.045
+        },
+        {
+          "w": "outil",
+          "start": 9.088,
+          "end": 9.344
+        },
+        {
+          "w": "dépend",
+          "start": 9.387,
+          "end": 9.6
+        },
+        {
+          "w": "du",
+          "start": 9.643,
+          "end": 9.728
+        },
+        {
+          "w": "contexte,",
+          "start": 9.771,
+          "end": 10.368
+        },
+        {
+          "w": "pas",
+          "start": 10.539,
+          "end": 10.667
+        },
+        {
+          "w": "d'un",
+          "start": 10.709,
+          "end": 10.837
+        },
+        {
+          "w": "classement.",
+          "start": 10.837,
+          "end": 11.262
+        },
+        {
+          "w": "Validez",
+          "start": 11.346,
+          "end": 11.73
+        },
+        {
+          "w": "maintenant",
+          "start": 11.773,
+          "end": 12.029
+        },
+        {
+          "w": "le",
+          "start": 12.071,
+          "end": 12.114
+        },
+        {
+          "w": "quiz",
+          "start": 12.157,
+          "end": 12.413
+        },
+        {
+          "w": "pour",
+          "start": 12.541,
+          "end": 12.669
+        },
+        {
+          "w": "débloquer",
+          "start": 12.711,
+          "end": 13.053
+        },
+        {
+          "w": "la",
+          "start": 13.095,
+          "end": 13.138
+        },
+        {
+          "w": "suite.",
+          "start": 13.181,
+          "end": 13.586
+        },
+        {
+          "w": "Dans",
+          "start": 13.821,
+          "end": 13.991
+        },
+        {
+          "w": "la",
+          "start": 14.034,
+          "end": 14.077
+        },
+        {
+          "w": "prochaine",
+          "start": 14.119,
+          "end": 14.333
+        },
+        {
+          "w": "leçon,",
+          "start": 14.375,
+          "end": 14.781
+        },
+        {
+          "w": "on",
+          "start": 14.887,
+          "end": 15.143
+        },
+        {
+          "w": "passe",
+          "start": 15.186,
+          "end": 15.357
+        },
+        {
+          "w": "de",
+          "start": 15.399,
+          "end": 15.442
+        },
+        {
+          "w": "l'outil",
+          "start": 15.485,
+          "end": 15.826
+        },
+        {
+          "w": "à",
+          "start": 15.869,
+          "end": 15.911
+        },
+        {
+          "w": "vous",
+          "start": 15.954,
+          "end": 16.082
+        },
+        {
+          "w": ":",
+          "start": 16.125,
+          "end": 16.253
+        },
+        {
+          "w": "vous",
+          "start": 16.295,
+          "end": 16.466
+        },
+        {
+          "w": "allez",
+          "start": 16.509,
+          "end": 16.722
+        },
+        {
+          "w": "analyser",
+          "start": 16.765,
+          "end": 17.234
+        },
+        {
+          "w": "votre",
+          "start": 17.277,
+          "end": 17.447
+        },
+        {
+          "w": "propre",
+          "start": 17.49,
+          "end": 17.789
+        },
+        {
+          "w": "poste,",
+          "start": 17.874,
+          "end": 18.343
+        },
+        {
+          "w": "pour",
+          "start": 18.514,
+          "end": 18.685
+        },
+        {
+          "w": "repérer",
+          "start": 18.727,
+          "end": 19.111
+        },
+        {
+          "w": "les",
+          "start": 19.154,
+          "end": 19.239
+        },
+        {
+          "w": "tâches",
+          "start": 19.282,
+          "end": 19.538
+        },
+        {
+          "w": "que",
+          "start": 19.581,
+          "end": 19.666
+        },
+        {
+          "w": "l'IA",
+          "start": 19.709,
+          "end": 19.922
+        },
+        {
+          "w": "peut",
+          "start": 20.007,
+          "end": 20.135
+        },
+        {
+          "w": "vraiment",
+          "start": 20.178,
+          "end": 20.605
+        },
+        {
+          "w": "vous",
+          "start": 20.647,
+          "end": 20.775
+        },
+        {
+          "w": "faire",
+          "start": 20.818,
+          "end": 20.903
+        },
+        {
+          "w": "gagner.",
+          "start": 20.946,
+          "end": 21.408
+        }
+      ],
+      "avatarVideo": "generated/lesson1_1-commune/avatar-11.mp4",
+      "avatarVideoId": "44530fd88b48eee13ebeaf65d44965ce",
+      "avatarDuration": 21.48
+    }
+  ]
+}

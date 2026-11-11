@@ -5,3 +5,6 @@ dist
 
 # Ignore the output video from Git but not videos you import into src/.
 out
+
+# Médias générés par les scripts HeyGen (voix off, clips avatar)
+public/generated

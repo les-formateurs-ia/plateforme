@@ -1,0 +1,3729 @@
+{
+  "name": "lesson1_5-commune",
+  "source": "../docs/formation-rs6776/lecon-1.5/script-video-commune.md",
+  "voice": "341b4807e5e6455fa88f34bda5d6eeea",
+  "model": "heygen-voice-1-turbo-free",
+  "total": 255.2017006802721,
+  "avatarSeconds": 53.5052380952381,
+  "scenes": [
+    {
+      "id": "1",
+      "title": "Pont entrant",
+      "avatar": "full",
+      "text": "Bonjour. Dans la leçon précédente, vous avez appris à reconnaître les catégories de données à protéger. Savoir les repérer, c'est le préalable. Mais une fois repérées, qu'en faites-vous, concrètement, avant d'écrire votre prompt ? Ces données ne se protègent pas seules : il vous faut une méthode.",
+      "audio": "generated/lesson1_5-commune/scene-1.wav",
+      "duration": 15.5943537414966,
+      "words": [
+        {
+          "w": "Bonjour.",
+          "start": 0.299,
+          "end": 1.024
+        },
+        {
+          "w": "Dans",
+          "start": 1.365,
+          "end": 1.536
+        },
+        {
+          "w": "la",
+          "start": 1.579,
+          "end": 1.621
+        },
+        {
+          "w": "leçon",
+          "start": 1.664,
+          "end": 1.877
+        },
+        {
+          "w": "précédente,",
+          "start": 1.92,
+          "end": 2.517
+        },
+        {
+          "w": "vous",
+          "start": 2.603,
+          "end": 2.773
+        },
+        {
+          "w": "avez",
+          "start": 2.816,
+          "end": 2.987
+        },
+        {
+          "w": "appris",
+          "start": 3.029,
+          "end": 3.285
+        },
+        {
+          "w": "à",
+          "start": 3.328,
+          "end": 3.371
+        },
+        {
+          "w": "reconnaître",
+          "start": 3.413,
+          "end": 3.797
+        },
+        {
+          "w": "les",
+          "start": 3.883,
+          "end": 3.968
+        },
+        {
+          "w": "catégories",
+          "start": 4.011,
+          "end": 4.395
+        },
+        {
+          "w": "de",
+          "start": 4.523,
+          "end": 4.608
+        },
+        {
+          "w": "données",
+          "start": 4.651,
+          "end": 4.907
+        },
+        {
+          "w": "à",
+          "start": 4.949,
+          "end": 4.992
+        },
+        {
+          "w": "protéger.",
+          "start": 5.035,
+          "end": 5.589
+        },
+        {
+          "w": "Savoir",
+          "start": 5.76,
+          "end": 6.059
+        },
+        {
+          "w": "les",
+          "start": 6.101,
+          "end": 6.187
+        },
+        {
+          "w": "repérer,",
+          "start": 6.229,
+          "end": 6.699
+        },
+        {
+          "w": "c'est",
+          "start": 6.827,
+          "end": 6.955
+        },
+        {
+          "w": "le",
+          "start": 6.997,
+          "end": 7.04
+        },
+        {
+          "w": "préalable.",
+          "start": 7.083,
+          "end": 7.63
+        },
+        {
+          "w": "Mais",
+          "start": 7.835,
+          "end": 8.049
+        },
+        {
+          "w": "une",
+          "start": 8.091,
+          "end": 8.134
+        },
+        {
+          "w": "fois",
+          "start": 8.177,
+          "end": 8.305
+        },
+        {
+          "w": "repérées,",
+          "start": 8.347,
+          "end": 8.945
+        },
+        {
+          "w": "qu'en",
+          "start": 9.158,
+          "end": 9.286
+        },
+        {
+          "w": "faites-vous,",
+          "start": 9.329,
+          "end": 9.862
+        },
+        {
+          "w": "concrètement,",
+          "start": 10.011,
+          "end": 10.651
+        },
+        {
+          "w": "avant",
+          "start": 10.779,
+          "end": 11.121
+        },
+        {
+          "w": "d'écrire",
+          "start": 11.163,
+          "end": 11.462
+        },
+        {
+          "w": "votre",
+          "start": 11.505,
+          "end": 11.675
+        },
+        {
+          "w": "prompt",
+          "start": 11.761,
+          "end": 11.974
+        },
+        {
+          "w": "?",
+          "start": 12.102,
+          "end": 12.145
+        },
+        {
+          "w": "Ces",
+          "start": 12.614,
+          "end": 12.785
+        },
+        {
+          "w": "données",
+          "start": 12.827,
+          "end": 13.041
+        },
+        {
+          "w": "ne",
+          "start": 13.083,
+          "end": 13.126
+        },
+        {
+          "w": "se",
+          "start": 13.169,
+          "end": 13.211
+        },
+        {
+          "w": "protègent",
+          "start": 13.254,
+          "end": 13.553
+        },
+        {
+          "w": "pas",
+          "start": 13.595,
+          "end": 13.681
+        },
+        {
+          "w": "seules",
+          "start": 13.723,
+          "end": 13.979
+        },
+        {
+          "w": ":",
+          "start": 14.15,
+          "end": 14.193
+        },
+        {
+          "w": "il",
+          "start": 14.235,
+          "end": 14.321
+        },
+        {
+          "w": "vous",
+          "start": 14.363,
+          "end": 14.491
+        },
+        {
+          "w": "faut",
+          "start": 14.534,
+          "end": 14.619
+        },
+        {
+          "w": "une",
+          "start": 14.662,
+          "end": 14.705
+        },
+        {
+          "w": "méthode.",
+          "start": 14.79,
+          "end": 15.425
+        }
+      ],
+      "avatarVideo": "generated/lesson1_5-commune/avatar-1.mp4",
+      "avatarVideoId": "87dfabf607bb2ae9f124ee9a8a35ce02",
+      "avatarDuration": 15.48
+    },
+    {
+      "id": "2",
+      "title": "L'objectif de cette leçon",
+      "avatar": "none",
+      "text": "Cette leçon vous donne quatre réflexes complémentaires. Supprimer ce qui est inutile. Distinguer anonymisation et pseudonymisation. Utiliser uniquement un cadre autorisé, avec des accès limités. Et vérifier la sortie avant tout usage. C'est exactement ce que demande le troisième exercice de l'écrit : corriger un contenu, et justifier chacun de vos choix.",
+      "audio": "generated/lesson1_5-commune/scene-2.wav",
+      "duration": 20.575034013605443,
+      "words": [
+        {
+          "w": "Cette",
+          "start": 0.299,
+          "end": 0.512
+        },
+        {
+          "w": "leçon",
+          "start": 0.555,
+          "end": 0.811
+        },
+        {
+          "w": "vous",
+          "start": 0.853,
+          "end": 0.939
+        },
+        {
+          "w": "donne",
+          "start": 0.981,
+          "end": 1.109
+        },
+        {
+          "w": "quatre",
+          "start": 1.195,
+          "end": 1.451
+        },
+        {
+          "w": "réflexes",
+          "start": 1.536,
+          "end": 1.963
+        },
+        {
+          "w": "complémentaires.",
+          "start": 2.005,
+          "end": 2.944
+        },
+        {
+          "w": "Supprimer",
+          "start": 3.285,
+          "end": 3.712
+        },
+        {
+          "w": "ce",
+          "start": 3.755,
+          "end": 3.797
+        },
+        {
+          "w": "qui",
+          "start": 3.84,
+          "end": 3.925
+        },
+        {
+          "w": "est",
+          "start": 3.968,
+          "end": 4.011
+        },
+        {
+          "w": "inutile.",
+          "start": 4.053,
+          "end": 4.757
+        },
+        {
+          "w": "Distinguer",
+          "start": 5.077,
+          "end": 5.675
+        },
+        {
+          "w": "anonymisation",
+          "start": 5.717,
+          "end": 6.357
+        },
+        {
+          "w": "et",
+          "start": 6.656,
+          "end": 6.827
+        },
+        {
+          "w": "pseudonymisation.",
+          "start": 6.869,
+          "end": 7.829
+        },
+        {
+          "w": "Utiliser",
+          "start": 8.149,
+          "end": 8.875
+        },
+        {
+          "w": "uniquement",
+          "start": 8.917,
+          "end": 9.429
+        },
+        {
+          "w": "un",
+          "start": 9.472,
+          "end": 9.557
+        },
+        {
+          "w": "cadre",
+          "start": 9.6,
+          "end": 9.813
+        },
+        {
+          "w": "autorisé,",
+          "start": 9.899,
+          "end": 10.432
+        },
+        {
+          "w": "avec",
+          "start": 10.539,
+          "end": 10.837
+        },
+        {
+          "w": "des",
+          "start": 10.88,
+          "end": 10.965
+        },
+        {
+          "w": "accès",
+          "start": 11.008,
+          "end": 11.307
+        },
+        {
+          "w": "limités.",
+          "start": 11.349,
+          "end": 11.902
+        },
+        {
+          "w": "Et",
+          "start": 12.027,
+          "end": 12.155
+        },
+        {
+          "w": "vérifier",
+          "start": 12.198,
+          "end": 12.539
+        },
+        {
+          "w": "la",
+          "start": 12.582,
+          "end": 12.624
+        },
+        {
+          "w": "sortie",
+          "start": 12.667,
+          "end": 12.966
+        },
+        {
+          "w": "avant",
+          "start": 13.008,
+          "end": 13.179
+        },
+        {
+          "w": "tout",
+          "start": 13.222,
+          "end": 13.393
+        },
+        {
+          "w": "usage.",
+          "start": 13.435,
+          "end": 14.097
+        },
+        {
+          "w": "C'est",
+          "start": 14.459,
+          "end": 14.63
+        },
+        {
+          "w": "exactement",
+          "start": 14.672,
+          "end": 15.227
+        },
+        {
+          "w": "ce",
+          "start": 15.27,
+          "end": 15.312
+        },
+        {
+          "w": "que",
+          "start": 15.355,
+          "end": 15.441
+        },
+        {
+          "w": "demande",
+          "start": 15.483,
+          "end": 15.697
+        },
+        {
+          "w": "le",
+          "start": 15.739,
+          "end": 15.782
+        },
+        {
+          "w": "troisième",
+          "start": 15.825,
+          "end": 16.209
+        },
+        {
+          "w": "exercice",
+          "start": 16.251,
+          "end": 16.593
+        },
+        {
+          "w": "de",
+          "start": 16.635,
+          "end": 16.721
+        },
+        {
+          "w": "l'écrit",
+          "start": 16.763,
+          "end": 17.105
+        },
+        {
+          "w": ":",
+          "start": 17.19,
+          "end": 17.233
+        },
+        {
+          "w": "corriger",
+          "start": 17.275,
+          "end": 17.659
+        },
+        {
+          "w": "un",
+          "start": 17.702,
+          "end": 17.744
+        },
+        {
+          "w": "contenu,",
+          "start": 17.787,
+          "end": 18.342
+        },
+        {
+          "w": "et",
+          "start": 18.512,
+          "end": 18.683
+        },
+        {
+          "w": "justifier",
+          "start": 18.726,
+          "end": 19.195
+        },
+        {
+          "w": "chacun",
+          "start": 19.28,
+          "end": 19.622
+        },
+        {
+          "w": "de",
+          "start": 19.665,
+          "end": 19.707
+        },
+        {
+          "w": "vos",
+          "start": 19.75,
+          "end": 19.835
+        },
+        {
+          "w": "choix.",
+          "start": 19.878,
+          "end": 20.375
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "title": "D'abord, est-ce nécessaire ?",
+      "avatar": "none",
+      "text": "Face à une information réelle à protéger, la première question est simple : est-elle nécessaire à la tâche ? L'outil a-t-il vraiment besoin de cette précision ? Si elle n'est pas nécessaire, retirez-la. Si elle reste utile, réduisez sa précision, ou remplacez les identifiants. Et si les vraies informations doivent revenir dans le document final, réintégrez-les ensuite hors de l'outil, dans l'environnement autorisé, avec une nouvelle validation.",
+      "audio": "generated/lesson1_5-commune/scene-3.wav",
+      "duration": 23.56390022675737,
+      "words": [
+        {
+          "w": "Face",
+          "start": 0.299,
+          "end": 0.469
+        },
+        {
+          "w": "à",
+          "start": 0.555,
+          "end": 0.597
+        },
+        {
+          "w": "une",
+          "start": 0.64,
+          "end": 0.725
+        },
+        {
+          "w": "information",
+          "start": 0.768,
+          "end": 1.067
+        },
+        {
+          "w": "réelle",
+          "start": 1.28,
+          "end": 1.664
+        },
+        {
+          "w": "à",
+          "start": 1.707,
+          "end": 1.749
+        },
+        {
+          "w": "protéger,",
+          "start": 1.792,
+          "end": 2.347
+        },
+        {
+          "w": "la",
+          "start": 2.475,
+          "end": 2.731
+        },
+        {
+          "w": "première",
+          "start": 2.773,
+          "end": 2.987
+        },
+        {
+          "w": "question",
+          "start": 3.029,
+          "end": 3.115
+        },
+        {
+          "w": "est",
+          "start": 3.328,
+          "end": 3.371
+        },
+        {
+          "w": "simple",
+          "start": 3.413,
+          "end": 3.669
+        },
+        {
+          "w": ":",
+          "start": 3.84,
+          "end": 3.968
+        },
+        {
+          "w": "est-elle",
+          "start": 4.011,
+          "end": 4.608
+        },
+        {
+          "w": "nécessaire",
+          "start": 4.651,
+          "end": 5.163
+        },
+        {
+          "w": "à",
+          "start": 5.248,
+          "end": 5.291
+        },
+        {
+          "w": "la",
+          "start": 5.333,
+          "end": 5.376
+        },
+        {
+          "w": "tâche",
+          "start": 5.419,
+          "end": 5.632
+        },
+        {
+          "w": "?",
+          "start": 5.845,
+          "end": 5.888
+        },
+        {
+          "w": "L'outil",
+          "start": 6.144,
+          "end": 6.485
+        },
+        {
+          "w": "a-t-il",
+          "start": 6.528,
+          "end": 6.741
+        },
+        {
+          "w": "vraiment",
+          "start": 6.784,
+          "end": 7.125
+        },
+        {
+          "w": "besoin",
+          "start": 7.168,
+          "end": 7.467
+        },
+        {
+          "w": "de",
+          "start": 7.509,
+          "end": 7.595
+        },
+        {
+          "w": "cette",
+          "start": 7.637,
+          "end": 7.765
+        },
+        {
+          "w": "précision",
+          "start": 7.808,
+          "end": 8.192
+        },
+        {
+          "w": "?",
+          "start": 8.235,
+          "end": 8.405
+        },
+        {
+          "w": "Si",
+          "start": 8.619,
+          "end": 8.704
+        },
+        {
+          "w": "elle",
+          "start": 8.747,
+          "end": 8.832
+        },
+        {
+          "w": "n'est",
+          "start": 8.875,
+          "end": 9.045
+        },
+        {
+          "w": "pas",
+          "start": 9.088,
+          "end": 9.173
+        },
+        {
+          "w": "nécessaire,",
+          "start": 9.216,
+          "end": 9.813
+        },
+        {
+          "w": "retirez-la.",
+          "start": 9.941,
+          "end": 10.662
+        },
+        {
+          "w": "Si",
+          "start": 10.785,
+          "end": 10.913
+        },
+        {
+          "w": "elle",
+          "start": 10.956,
+          "end": 11.041
+        },
+        {
+          "w": "reste",
+          "start": 11.084,
+          "end": 11.254
+        },
+        {
+          "w": "utile,",
+          "start": 11.297,
+          "end": 11.745
+        },
+        {
+          "w": "réduisez",
+          "start": 11.937,
+          "end": 12.577
+        },
+        {
+          "w": "sa",
+          "start": 12.62,
+          "end": 12.705
+        },
+        {
+          "w": "précision,",
+          "start": 12.748,
+          "end": 13.324
+        },
+        {
+          "w": "ou",
+          "start": 13.473,
+          "end": 13.601
+        },
+        {
+          "w": "remplacez",
+          "start": 13.644,
+          "end": 14.113
+        },
+        {
+          "w": "les",
+          "start": 14.156,
+          "end": 14.198
+        },
+        {
+          "w": "identifiants.",
+          "start": 14.241,
+          "end": 14.985
+        },
+        {
+          "w": "Et",
+          "start": 15.217,
+          "end": 15.345
+        },
+        {
+          "w": "si",
+          "start": 15.388,
+          "end": 15.516
+        },
+        {
+          "w": "les",
+          "start": 15.559,
+          "end": 15.687
+        },
+        {
+          "w": "vraies",
+          "start": 15.729,
+          "end": 15.9
+        },
+        {
+          "w": "informations",
+          "start": 15.943,
+          "end": 16.327
+        },
+        {
+          "w": "doivent",
+          "start": 16.497,
+          "end": 16.711
+        },
+        {
+          "w": "revenir",
+          "start": 16.753,
+          "end": 17.052
+        },
+        {
+          "w": "dans",
+          "start": 17.095,
+          "end": 17.18
+        },
+        {
+          "w": "le",
+          "start": 17.223,
+          "end": 17.265
+        },
+        {
+          "w": "document",
+          "start": 17.308,
+          "end": 17.479
+        },
+        {
+          "w": "final,",
+          "start": 17.607,
+          "end": 18.076
+        },
+        {
+          "w": "réintégrez-les",
+          "start": 18.375,
+          "end": 19.1
+        },
+        {
+          "w": "ensuite",
+          "start": 19.143,
+          "end": 19.441
+        },
+        {
+          "w": "hors",
+          "start": 19.569,
+          "end": 19.74
+        },
+        {
+          "w": "de",
+          "start": 19.783,
+          "end": 19.868
+        },
+        {
+          "w": "l'outil,",
+          "start": 19.911,
+          "end": 20.316
+        },
+        {
+          "w": "dans",
+          "start": 20.423,
+          "end": 20.636
+        },
+        {
+          "w": "l'environnement",
+          "start": 20.679,
+          "end": 21.148
+        },
+        {
+          "w": "autorisé,",
+          "start": 21.191,
+          "end": 21.724
+        },
+        {
+          "w": "avec",
+          "start": 21.831,
+          "end": 22.087
+        },
+        {
+          "w": "une",
+          "start": 22.172,
+          "end": 22.257
+        },
+        {
+          "w": "nouvelle",
+          "start": 22.3,
+          "end": 22.556
+        },
+        {
+          "w": "validation.",
+          "start": 22.599,
+          "end": 23.364
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "title": "Anonymiser ou pseudonymiser",
+      "avatar": "none",
+      "text": "Attention à un piège fréquent. Remplacer un nom par Personne A ou Client X ne suffit pas toujours. L'anonymisation supprime le lien avec la personne de façon irréversible : plus aucun moyen, même indirect, de retrouver son identité. La pseudonymisation remplace le nom, mais une correspondance reste conservée quelque part, dans un tableau ou dans le document d'origine. La donnée reste alors personnelle, au sens du RGPD. À l'inverse, même pour une donnée réellement anonyme, les obligations de confidentialité ou de secret peuvent subsister. Et cette mesure n'autorise pas, à elle seule, l'envoi à un service d'IA. La finalité, l'offre, les réglages et la politique interne restent à vérifier.",
+      "audio": "generated/lesson1_5-commune/scene-4.wav",
+      "duration": 39.27578231292517,
+      "words": [
+        {
+          "w": "Attention",
+          "start": 0.256,
+          "end": 0.597
+        },
+        {
+          "w": "à",
+          "start": 0.768,
+          "end": 0.853
+        },
+        {
+          "w": "un",
+          "start": 0.896,
+          "end": 0.939
+        },
+        {
+          "w": "piège",
+          "start": 0.981,
+          "end": 1.152
+        },
+        {
+          "w": "fréquent.",
+          "start": 1.195,
+          "end": 1.6
+        },
+        {
+          "w": "Remplacer",
+          "start": 1.749,
+          "end": 2.432
+        },
+        {
+          "w": "un",
+          "start": 2.475,
+          "end": 2.56
+        },
+        {
+          "w": "nom",
+          "start": 2.603,
+          "end": 2.731
+        },
+        {
+          "w": "par",
+          "start": 2.773,
+          "end": 2.901
+        },
+        {
+          "w": "Personne",
+          "start": 2.944,
+          "end": 3.285
+        },
+        {
+          "w": "A",
+          "start": 3.328,
+          "end": 3.499
+        },
+        {
+          "w": "ou",
+          "start": 3.584,
+          "end": 3.669
+        },
+        {
+          "w": "Client",
+          "start": 3.712,
+          "end": 3.968
+        },
+        {
+          "w": "X",
+          "start": 4.053,
+          "end": 4.224
+        },
+        {
+          "w": "ne",
+          "start": 4.437,
+          "end": 4.565
+        },
+        {
+          "w": "suffit",
+          "start": 4.608,
+          "end": 4.864
+        },
+        {
+          "w": "pas",
+          "start": 4.907,
+          "end": 4.992
+        },
+        {
+          "w": "toujours.",
+          "start": 5.035,
+          "end": 5.565
+        },
+        {
+          "w": "L'anonymisation",
+          "start": 5.753,
+          "end": 6.393
+        },
+        {
+          "w": "supprime",
+          "start": 6.692,
+          "end": 7.033
+        },
+        {
+          "w": "le",
+          "start": 7.119,
+          "end": 7.204
+        },
+        {
+          "w": "lien",
+          "start": 7.247,
+          "end": 7.417
+        },
+        {
+          "w": "avec",
+          "start": 7.46,
+          "end": 7.588
+        },
+        {
+          "w": "la",
+          "start": 7.631,
+          "end": 7.716
+        },
+        {
+          "w": "personne",
+          "start": 7.759,
+          "end": 8.1
+        },
+        {
+          "w": "de",
+          "start": 8.185,
+          "end": 8.271
+        },
+        {
+          "w": "façon",
+          "start": 8.313,
+          "end": 8.612
+        },
+        {
+          "w": "irréversible",
+          "start": 8.655,
+          "end": 9.508
+        },
+        {
+          "w": ":",
+          "start": 9.593,
+          "end": 9.764
+        },
+        {
+          "w": "plus",
+          "start": 10.02,
+          "end": 10.191
+        },
+        {
+          "w": "aucun",
+          "start": 10.276,
+          "end": 10.532
+        },
+        {
+          "w": "moyen,",
+          "start": 10.575,
+          "end": 11.044
+        },
+        {
+          "w": "même",
+          "start": 11.172,
+          "end": 11.385
+        },
+        {
+          "w": "indirect,",
+          "start": 11.428,
+          "end": 11.94
+        },
+        {
+          "w": "de",
+          "start": 12.153,
+          "end": 12.281
+        },
+        {
+          "w": "retrouver",
+          "start": 12.324,
+          "end": 12.665
+        },
+        {
+          "w": "son",
+          "start": 12.708,
+          "end": 12.836
+        },
+        {
+          "w": "identité.",
+          "start": 12.879,
+          "end": 13.533
+        },
+        {
+          "w": "La",
+          "start": 13.761,
+          "end": 13.889
+        },
+        {
+          "w": "pseudonymisation",
+          "start": 13.932,
+          "end": 14.572
+        },
+        {
+          "w": "remplace",
+          "start": 14.871,
+          "end": 15.169
+        },
+        {
+          "w": "le",
+          "start": 15.255,
+          "end": 15.34
+        },
+        {
+          "w": "nom,",
+          "start": 15.383,
+          "end": 15.745
+        },
+        {
+          "w": "mais",
+          "start": 15.938,
+          "end": 16.108
+        },
+        {
+          "w": "une",
+          "start": 16.151,
+          "end": 16.194
+        },
+        {
+          "w": "correspondance",
+          "start": 16.236,
+          "end": 16.748
+        },
+        {
+          "w": "reste",
+          "start": 16.919,
+          "end": 17.132
+        },
+        {
+          "w": "conservée",
+          "start": 17.218,
+          "end": 17.687
+        },
+        {
+          "w": "quelque",
+          "start": 17.73,
+          "end": 17.858
+        },
+        {
+          "w": "part,",
+          "start": 17.943,
+          "end": 18.263
+        },
+        {
+          "w": "dans",
+          "start": 18.412,
+          "end": 18.583
+        },
+        {
+          "w": "un",
+          "start": 18.625,
+          "end": 18.711
+        },
+        {
+          "w": "tableau",
+          "start": 18.753,
+          "end": 19.052
+        },
+        {
+          "w": "ou",
+          "start": 19.18,
+          "end": 19.265
+        },
+        {
+          "w": "dans",
+          "start": 19.308,
+          "end": 19.393
+        },
+        {
+          "w": "le",
+          "start": 19.436,
+          "end": 19.479
+        },
+        {
+          "w": "document",
+          "start": 19.521,
+          "end": 19.735
+        },
+        {
+          "w": "d'origine.",
+          "start": 19.863,
+          "end": 20.567
+        },
+        {
+          "w": "La",
+          "start": 20.887,
+          "end": 21.1
+        },
+        {
+          "w": "donnée",
+          "start": 21.143,
+          "end": 21.399
+        },
+        {
+          "w": "reste",
+          "start": 21.442,
+          "end": 21.527
+        },
+        {
+          "w": "alors",
+          "start": 21.57,
+          "end": 21.74
+        },
+        {
+          "w": "personnelle,",
+          "start": 21.783,
+          "end": 22.444
+        },
+        {
+          "w": "au",
+          "start": 22.593,
+          "end": 22.679
+        },
+        {
+          "w": "sens",
+          "start": 22.721,
+          "end": 22.892
+        },
+        {
+          "w": "du",
+          "start": 22.977,
+          "end": 23.105
+        },
+        {
+          "w": "RGPD.",
+          "start": 23.148,
+          "end": 23.969
+        },
+        {
+          "w": "À",
+          "start": 24.192,
+          "end": 24.79
+        },
+        {
+          "w": "l'inverse,",
+          "start": 24.832,
+          "end": 25.046
+        },
+        {
+          "w": "même",
+          "start": 25.088,
+          "end": 25.302
+        },
+        {
+          "w": "pour",
+          "start": 25.344,
+          "end": 25.472
+        },
+        {
+          "w": "une",
+          "start": 25.515,
+          "end": 25.558
+        },
+        {
+          "w": "donnée",
+          "start": 25.643,
+          "end": 25.899
+        },
+        {
+          "w": "réellement",
+          "start": 25.942,
+          "end": 26.326
+        },
+        {
+          "w": "anonyme,",
+          "start": 26.368,
+          "end": 26.923
+        },
+        {
+          "w": "les",
+          "start": 27.136,
+          "end": 27.264
+        },
+        {
+          "w": "obligations",
+          "start": 27.307,
+          "end": 27.606
+        },
+        {
+          "w": "de",
+          "start": 27.819,
+          "end": 27.862
+        },
+        {
+          "w": "confidentialité",
+          "start": 27.904,
+          "end": 28.758
+        },
+        {
+          "w": "ou",
+          "start": 28.843,
+          "end": 28.928
+        },
+        {
+          "w": "de",
+          "start": 28.971,
+          "end": 29.014
+        },
+        {
+          "w": "secret",
+          "start": 29.056,
+          "end": 29.227
+        },
+        {
+          "w": "peuvent",
+          "start": 29.483,
+          "end": 29.739
+        },
+        {
+          "w": "subsister.",
+          "start": 29.782,
+          "end": 30.336
+        },
+        {
+          "w": "Et",
+          "start": 30.635,
+          "end": 30.72
+        },
+        {
+          "w": "cette",
+          "start": 30.763,
+          "end": 30.934
+        },
+        {
+          "w": "mesure",
+          "start": 30.976,
+          "end": 31.232
+        },
+        {
+          "w": "n'autorise",
+          "start": 31.275,
+          "end": 31.616
+        },
+        {
+          "w": "pas,",
+          "start": 31.702,
+          "end": 31.958
+        },
+        {
+          "w": "à",
+          "start": 32.086,
+          "end": 32.214
+        },
+        {
+          "w": "elle",
+          "start": 32.256,
+          "end": 32.342
+        },
+        {
+          "w": "seule,",
+          "start": 32.384,
+          "end": 32.832
+        },
+        {
+          "w": "l'envoi",
+          "start": 33.024,
+          "end": 33.408
+        },
+        {
+          "w": "à",
+          "start": 33.451,
+          "end": 33.494
+        },
+        {
+          "w": "un",
+          "start": 33.536,
+          "end": 33.579
+        },
+        {
+          "w": "service",
+          "start": 33.622,
+          "end": 33.792
+        },
+        {
+          "w": "d'IA.",
+          "start": 33.92,
+          "end": 34.44
+        },
+        {
+          "w": "La",
+          "start": 34.705,
+          "end": 34.875
+        },
+        {
+          "w": "finalité,",
+          "start": 34.918,
+          "end": 35.558
+        },
+        {
+          "w": "l'offre,",
+          "start": 35.728,
+          "end": 36.262
+        },
+        {
+          "w": "les",
+          "start": 36.368,
+          "end": 36.496
+        },
+        {
+          "w": "réglages",
+          "start": 36.539,
+          "end": 36.923
+        },
+        {
+          "w": "et",
+          "start": 37.094,
+          "end": 37.136
+        },
+        {
+          "w": "la",
+          "start": 37.179,
+          "end": 37.222
+        },
+        {
+          "w": "politique",
+          "start": 37.264,
+          "end": 37.606
+        },
+        {
+          "w": "interne",
+          "start": 37.734,
+          "end": 38.032
+        },
+        {
+          "w": "restent",
+          "start": 38.118,
+          "end": 38.331
+        },
+        {
+          "w": "à",
+          "start": 38.374,
+          "end": 38.416
+        },
+        {
+          "w": "vérifier.",
+          "start": 38.416,
+          "end": 39.106
+        }
+      ]
+    },
+    {
+      "id": "5",
+      "title": "Un prompt corrigé, pas à pas",
+      "avatar": "none",
+      "text": "Voyons un exemple. Une réclamation client à traiter, avec le nom de la cliente, son adresse mail, son entreprise, le montant de la commande, et même son IBAN. Le nom, le mail et l'entreprise sont retirés : la réponse peut rester générique jusqu'à l'envoi. L'IBAN est retiré entièrement, pas seulement masqué : une donnée bancaire n'a rien à faire dans un outil grand public, anonymisée ou non. Le montant exact devient une catégorie, une commande de niveau intermédiaire. Et la menace de résiliation est conservée, mais généralisée, car elle donne le bon ton à la réponse. Corriger, ce n'est pas tout supprimer : c'est retirer l'inutile, généraliser l'utile, et pouvoir le justifier.",
+      "audio": "generated/lesson1_5-commune/scene-5.wav",
+      "duration": 37.77961451247165,
+      "words": [
+        {
+          "w": "Voyons",
+          "start": 0.299,
+          "end": 0.597
+        },
+        {
+          "w": "un",
+          "start": 0.64,
+          "end": 0.683
+        },
+        {
+          "w": "exemple.",
+          "start": 0.725,
+          "end": 1.301
+        },
+        {
+          "w": "Une",
+          "start": 1.536,
+          "end": 1.749
+        },
+        {
+          "w": "réclamation",
+          "start": 1.792,
+          "end": 2.133
+        },
+        {
+          "w": "client",
+          "start": 2.304,
+          "end": 2.603
+        },
+        {
+          "w": "à",
+          "start": 2.645,
+          "end": 2.731
+        },
+        {
+          "w": "traiter,",
+          "start": 2.773,
+          "end": 3.115
+        },
+        {
+          "w": "avec",
+          "start": 3.328,
+          "end": 3.499
+        },
+        {
+          "w": "le",
+          "start": 3.541,
+          "end": 3.627
+        },
+        {
+          "w": "nom",
+          "start": 3.669,
+          "end": 3.797
+        },
+        {
+          "w": "de",
+          "start": 3.84,
+          "end": 3.883
+        },
+        {
+          "w": "la",
+          "start": 3.925,
+          "end": 3.968
+        },
+        {
+          "w": "cliente,",
+          "start": 4.011,
+          "end": 4.544
+        },
+        {
+          "w": "son",
+          "start": 4.693,
+          "end": 4.864
+        },
+        {
+          "w": "adresse",
+          "start": 4.907,
+          "end": 5.12
+        },
+        {
+          "w": "mail,",
+          "start": 5.205,
+          "end": 5.611
+        },
+        {
+          "w": "son",
+          "start": 5.803,
+          "end": 5.973
+        },
+        {
+          "w": "entreprise,",
+          "start": 6.016,
+          "end": 6.72
+        },
+        {
+          "w": "le",
+          "start": 6.912,
+          "end": 7.04
+        },
+        {
+          "w": "montant",
+          "start": 7.083,
+          "end": 7.339
+        },
+        {
+          "w": "de",
+          "start": 7.381,
+          "end": 7.424
+        },
+        {
+          "w": "la",
+          "start": 7.467,
+          "end": 7.509
+        },
+        {
+          "w": "commande,",
+          "start": 7.552,
+          "end": 8.043
+        },
+        {
+          "w": "et",
+          "start": 8.149,
+          "end": 8.448
+        },
+        {
+          "w": "même",
+          "start": 8.491,
+          "end": 8.619
+        },
+        {
+          "w": "son",
+          "start": 8.661,
+          "end": 8.789
+        },
+        {
+          "w": "IBAN.",
+          "start": 8.832,
+          "end": 9.28
+        },
+        {
+          "w": "Le",
+          "start": 9.473,
+          "end": 9.644
+        },
+        {
+          "w": "nom,",
+          "start": 9.686,
+          "end": 9.985
+        },
+        {
+          "w": "le",
+          "start": 10.113,
+          "end": 10.241
+        },
+        {
+          "w": "mail",
+          "start": 10.284,
+          "end": 10.497
+        },
+        {
+          "w": "et",
+          "start": 10.668,
+          "end": 10.71
+        },
+        {
+          "w": "l'entreprise",
+          "start": 10.753,
+          "end": 11.265
+        },
+        {
+          "w": "sont",
+          "start": 11.35,
+          "end": 11.521
+        },
+        {
+          "w": "retirés",
+          "start": 11.564,
+          "end": 12.033
+        },
+        {
+          "w": ":",
+          "start": 12.076,
+          "end": 12.204
+        },
+        {
+          "w": "la",
+          "start": 12.246,
+          "end": 12.588
+        },
+        {
+          "w": "réponse",
+          "start": 12.63,
+          "end": 12.886
+        },
+        {
+          "w": "peut",
+          "start": 12.972,
+          "end": 13.1
+        },
+        {
+          "w": "rester",
+          "start": 13.142,
+          "end": 13.398
+        },
+        {
+          "w": "générique",
+          "start": 13.441,
+          "end": 13.782
+        },
+        {
+          "w": "jusqu'à",
+          "start": 13.868,
+          "end": 14.124
+        },
+        {
+          "w": "l'envoi.",
+          "start": 14.166,
+          "end": 14.673
+        },
+        {
+          "w": "L'IBAN",
+          "start": 14.88,
+          "end": 15.307
+        },
+        {
+          "w": "est",
+          "start": 15.35,
+          "end": 15.393
+        },
+        {
+          "w": "retiré",
+          "start": 15.435,
+          "end": 15.777
+        },
+        {
+          "w": "entièrement,",
+          "start": 15.819,
+          "end": 16.438
+        },
+        {
+          "w": "pas",
+          "start": 16.544,
+          "end": 16.672
+        },
+        {
+          "w": "seulement",
+          "start": 16.715,
+          "end": 16.928
+        },
+        {
+          "w": "masqué",
+          "start": 16.971,
+          "end": 17.312
+        },
+        {
+          "w": ":",
+          "start": 17.355,
+          "end": 17.398
+        },
+        {
+          "w": "une",
+          "start": 17.441,
+          "end": 17.483
+        },
+        {
+          "w": "donnée",
+          "start": 17.526,
+          "end": 17.825
+        },
+        {
+          "w": "bancaire",
+          "start": 17.867,
+          "end": 18.081
+        },
+        {
+          "w": "n'a",
+          "start": 18.123,
+          "end": 18.251
+        },
+        {
+          "w": "rien",
+          "start": 18.294,
+          "end": 18.507
+        },
+        {
+          "w": "à",
+          "start": 18.55,
+          "end": 18.635
+        },
+        {
+          "w": "faire",
+          "start": 18.678,
+          "end": 18.891
+        },
+        {
+          "w": "dans",
+          "start": 18.934,
+          "end": 19.062
+        },
+        {
+          "w": "un",
+          "start": 19.105,
+          "end": 19.19
+        },
+        {
+          "w": "outil",
+          "start": 19.233,
+          "end": 19.403
+        },
+        {
+          "w": "grand",
+          "start": 19.446,
+          "end": 19.574
+        },
+        {
+          "w": "public,",
+          "start": 19.616,
+          "end": 20.001
+        },
+        {
+          "w": "anonymisée",
+          "start": 20.214,
+          "end": 20.854
+        },
+        {
+          "w": "ou",
+          "start": 20.896,
+          "end": 20.939
+        },
+        {
+          "w": "non.",
+          "start": 20.982,
+          "end": 21.323
+        },
+        {
+          "w": "Le",
+          "start": 21.579,
+          "end": 21.707
+        },
+        {
+          "w": "montant",
+          "start": 21.75,
+          "end": 22.006
+        },
+        {
+          "w": "exact",
+          "start": 22.134,
+          "end": 22.39
+        },
+        {
+          "w": "devient",
+          "start": 22.603,
+          "end": 22.859
+        },
+        {
+          "w": "une",
+          "start": 22.902,
+          "end": 22.945
+        },
+        {
+          "w": "catégorie,",
+          "start": 22.987,
+          "end": 23.627
+        },
+        {
+          "w": "une",
+          "start": 23.712,
+          "end": 23.883
+        },
+        {
+          "w": "commande",
+          "start": 23.926,
+          "end": 24.352
+        },
+        {
+          "w": "de",
+          "start": 24.395,
+          "end": 24.438
+        },
+        {
+          "w": "niveau",
+          "start": 24.48,
+          "end": 24.736
+        },
+        {
+          "w": "intermédiaire.",
+          "start": 24.822,
+          "end": 25.619
+        },
+        {
+          "w": "Et",
+          "start": 25.904,
+          "end": 26.032
+        },
+        {
+          "w": "la",
+          "start": 26.074,
+          "end": 26.117
+        },
+        {
+          "w": "menace",
+          "start": 26.16,
+          "end": 26.373
+        },
+        {
+          "w": "de",
+          "start": 26.416,
+          "end": 26.501
+        },
+        {
+          "w": "résiliation",
+          "start": 26.544,
+          "end": 26.885
+        },
+        {
+          "w": "est",
+          "start": 27.055,
+          "end": 27.141
+        },
+        {
+          "w": "conservée,",
+          "start": 27.183,
+          "end": 27.866
+        },
+        {
+          "w": "mais",
+          "start": 27.994,
+          "end": 28.25
+        },
+        {
+          "w": "généralisée,",
+          "start": 28.293,
+          "end": 29.082
+        },
+        {
+          "w": "car",
+          "start": 29.232,
+          "end": 29.36
+        },
+        {
+          "w": "elle",
+          "start": 29.402,
+          "end": 29.488
+        },
+        {
+          "w": "donne",
+          "start": 29.53,
+          "end": 29.658
+        },
+        {
+          "w": "le",
+          "start": 29.701,
+          "end": 29.829
+        },
+        {
+          "w": "bon",
+          "start": 29.872,
+          "end": 30.042
+        },
+        {
+          "w": "ton",
+          "start": 30.128,
+          "end": 30.298
+        },
+        {
+          "w": "à",
+          "start": 30.384,
+          "end": 30.469
+        },
+        {
+          "w": "la",
+          "start": 30.512,
+          "end": 30.554
+        },
+        {
+          "w": "réponse.",
+          "start": 30.597,
+          "end": 31.13
+        },
+        {
+          "w": "Corriger,",
+          "start": 31.365,
+          "end": 31.983
+        },
+        {
+          "w": "ce",
+          "start": 32.175,
+          "end": 32.303
+        },
+        {
+          "w": "n'est",
+          "start": 32.346,
+          "end": 32.602
+        },
+        {
+          "w": "pas",
+          "start": 32.645,
+          "end": 32.688
+        },
+        {
+          "w": "tout",
+          "start": 32.73,
+          "end": 32.816
+        },
+        {
+          "w": "supprimer",
+          "start": 32.858,
+          "end": 33.2
+        },
+        {
+          "w": ":",
+          "start": 33.242,
+          "end": 33.328
+        },
+        {
+          "w": "c'est",
+          "start": 33.37,
+          "end": 33.669
+        },
+        {
+          "w": "retirer",
+          "start": 33.712,
+          "end": 34.096
+        },
+        {
+          "w": "l'inutile,",
+          "start": 34.138,
+          "end": 34.714
+        },
+        {
+          "w": "généraliser",
+          "start": 34.906,
+          "end": 35.589
+        },
+        {
+          "w": "l'utile,",
+          "start": 35.632,
+          "end": 36.037
+        },
+        {
+          "w": "et",
+          "start": 36.186,
+          "end": 36.357
+        },
+        {
+          "w": "pouvoir",
+          "start": 36.4,
+          "end": 36.698
+        },
+        {
+          "w": "le",
+          "start": 36.741,
+          "end": 36.826
+        },
+        {
+          "w": "justifier.",
+          "start": 36.826,
+          "end": 37.58
+        }
+      ]
+    },
+    {
+      "id": "6",
+      "title": "Le moindre privilège",
+      "avatar": "none",
+      "text": "L'anonymisation protège la donnée au moment de la saisie. Une politique d'accès protège en amont. Son principe a un nom : le moindre privilège. Chaque personne, chaque compte, chaque outil ne reçoit que les droits strictement nécessaires. Concrètement : un compte professionnel distinct du compte personnel. Des autorisations limitées par outil ou par mission. Des accès révoqués en fin de mission, pour qu'un accès oublié ne serve pas longtemps après le besoin. Et des catégories de données interdites de saisie, quel que soit l'outil.",
+      "audio": "generated/lesson1_5-commune/scene-6.wav",
+      "duration": 28.78839002267574,
+      "words": [
+        {
+          "w": "L'anonymisation",
+          "start": 0.256,
+          "end": 0.981
+        },
+        {
+          "w": "protège",
+          "start": 1.237,
+          "end": 1.579
+        },
+        {
+          "w": "la",
+          "start": 1.621,
+          "end": 1.707
+        },
+        {
+          "w": "donnée",
+          "start": 1.749,
+          "end": 2.048
+        },
+        {
+          "w": "au",
+          "start": 2.091,
+          "end": 2.133
+        },
+        {
+          "w": "moment",
+          "start": 2.176,
+          "end": 2.219
+        },
+        {
+          "w": "de",
+          "start": 2.347,
+          "end": 2.389
+        },
+        {
+          "w": "la",
+          "start": 2.432,
+          "end": 2.475
+        },
+        {
+          "w": "saisie.",
+          "start": 2.517,
+          "end": 3.072
+        },
+        {
+          "w": "Une",
+          "start": 3.328,
+          "end": 3.456
+        },
+        {
+          "w": "politique",
+          "start": 3.541,
+          "end": 3.883
+        },
+        {
+          "w": "d'accès",
+          "start": 3.925,
+          "end": 4.267
+        },
+        {
+          "w": "protège",
+          "start": 4.309,
+          "end": 4.693
+        },
+        {
+          "w": "en",
+          "start": 4.736,
+          "end": 4.779
+        },
+        {
+          "w": "amont.",
+          "start": 4.821,
+          "end": 5.269
+        },
+        {
+          "w": "Son",
+          "start": 5.461,
+          "end": 5.632
+        },
+        {
+          "w": "principe",
+          "start": 5.675,
+          "end": 5.973
+        },
+        {
+          "w": "a",
+          "start": 6.059,
+          "end": 6.187
+        },
+        {
+          "w": "un",
+          "start": 6.229,
+          "end": 6.272
+        },
+        {
+          "w": "nom",
+          "start": 6.315,
+          "end": 6.485
+        },
+        {
+          "w": ":",
+          "start": 6.528,
+          "end": 6.613
+        },
+        {
+          "w": "le",
+          "start": 6.656,
+          "end": 6.784
+        },
+        {
+          "w": "moindre",
+          "start": 6.827,
+          "end": 7.168
+        },
+        {
+          "w": "privilège.",
+          "start": 7.253,
+          "end": 7.915
+        },
+        {
+          "w": "Chaque",
+          "start": 8.107,
+          "end": 8.363
+        },
+        {
+          "w": "personne,",
+          "start": 8.491,
+          "end": 9.024
+        },
+        {
+          "w": "chaque",
+          "start": 9.174,
+          "end": 9.43
+        },
+        {
+          "w": "compte,",
+          "start": 9.472,
+          "end": 9.877
+        },
+        {
+          "w": "chaque",
+          "start": 9.941,
+          "end": 10.283
+        },
+        {
+          "w": "outil",
+          "start": 10.325,
+          "end": 10.624
+        },
+        {
+          "w": "ne",
+          "start": 10.838,
+          "end": 11.008
+        },
+        {
+          "w": "reçoit",
+          "start": 11.051,
+          "end": 11.35
+        },
+        {
+          "w": "que",
+          "start": 11.392,
+          "end": 11.52
+        },
+        {
+          "w": "les",
+          "start": 11.605,
+          "end": 11.691
+        },
+        {
+          "w": "droits",
+          "start": 11.733,
+          "end": 11.904
+        },
+        {
+          "w": "strictement",
+          "start": 11.947,
+          "end": 12.416
+        },
+        {
+          "w": "nécessaires.",
+          "start": 12.459,
+          "end": 13.227
+        },
+        {
+          "w": "Concrètement",
+          "start": 13.44,
+          "end": 14.08
+        },
+        {
+          "w": ":",
+          "start": 14.123,
+          "end": 14.208
+        },
+        {
+          "w": "un",
+          "start": 14.251,
+          "end": 14.55
+        },
+        {
+          "w": "compte",
+          "start": 14.592,
+          "end": 14.763
+        },
+        {
+          "w": "professionnel",
+          "start": 14.806,
+          "end": 15.36
+        },
+        {
+          "w": "distinct",
+          "start": 15.531,
+          "end": 16
+        },
+        {
+          "w": "du",
+          "start": 16.043,
+          "end": 16.128
+        },
+        {
+          "w": "compte",
+          "start": 16.171,
+          "end": 16.299
+        },
+        {
+          "w": "personnel.",
+          "start": 16.341,
+          "end": 17.024
+        },
+        {
+          "w": "Des",
+          "start": 17.323,
+          "end": 17.451
+        },
+        {
+          "w": "autorisations",
+          "start": 17.494,
+          "end": 17.878
+        },
+        {
+          "w": "limitées",
+          "start": 18.134,
+          "end": 18.517
+        },
+        {
+          "w": "par",
+          "start": 18.56,
+          "end": 18.645
+        },
+        {
+          "w": "outil",
+          "start": 18.688,
+          "end": 18.944
+        },
+        {
+          "w": "ou",
+          "start": 19.072,
+          "end": 19.2
+        },
+        {
+          "w": "par",
+          "start": 19.243,
+          "end": 19.371
+        },
+        {
+          "w": "mission.",
+          "start": 19.413,
+          "end": 19.87
+        },
+        {
+          "w": "Des",
+          "start": 20.241,
+          "end": 20.411
+        },
+        {
+          "w": "accès",
+          "start": 20.454,
+          "end": 20.795
+        },
+        {
+          "w": "révoqués",
+          "start": 20.838,
+          "end": 21.222
+        },
+        {
+          "w": "en",
+          "start": 21.265,
+          "end": 21.307
+        },
+        {
+          "w": "fin",
+          "start": 21.35,
+          "end": 21.435
+        },
+        {
+          "w": "de",
+          "start": 21.478,
+          "end": 21.521
+        },
+        {
+          "w": "mission,",
+          "start": 21.563,
+          "end": 21.926
+        },
+        {
+          "w": "pour",
+          "start": 22.203,
+          "end": 22.374
+        },
+        {
+          "w": "qu'un",
+          "start": 22.417,
+          "end": 22.545
+        },
+        {
+          "w": "accès",
+          "start": 22.587,
+          "end": 22.843
+        },
+        {
+          "w": "oublié",
+          "start": 22.886,
+          "end": 23.227
+        },
+        {
+          "w": "ne",
+          "start": 23.27,
+          "end": 23.355
+        },
+        {
+          "w": "serve",
+          "start": 23.398,
+          "end": 23.569
+        },
+        {
+          "w": "pas",
+          "start": 23.654,
+          "end": 23.825
+        },
+        {
+          "w": "longtemps",
+          "start": 23.867,
+          "end": 24.209
+        },
+        {
+          "w": "après",
+          "start": 24.251,
+          "end": 24.465
+        },
+        {
+          "w": "le",
+          "start": 24.507,
+          "end": 24.55
+        },
+        {
+          "w": "besoin.",
+          "start": 24.593,
+          "end": 25.019
+        },
+        {
+          "w": "Et",
+          "start": 25.233,
+          "end": 25.318
+        },
+        {
+          "w": "des",
+          "start": 25.361,
+          "end": 25.489
+        },
+        {
+          "w": "catégories",
+          "start": 25.531,
+          "end": 25.83
+        },
+        {
+          "w": "de",
+          "start": 25.958,
+          "end": 26.043
+        },
+        {
+          "w": "données",
+          "start": 26.086,
+          "end": 26.342
+        },
+        {
+          "w": "interdites",
+          "start": 26.427,
+          "end": 26.811
+        },
+        {
+          "w": "de",
+          "start": 26.854,
+          "end": 26.982
+        },
+        {
+          "w": "saisie,",
+          "start": 27.025,
+          "end": 27.43
+        },
+        {
+          "w": "quel",
+          "start": 27.537,
+          "end": 27.707
+        },
+        {
+          "w": "que",
+          "start": 27.75,
+          "end": 27.878
+        },
+        {
+          "w": "soit",
+          "start": 27.921,
+          "end": 28.006
+        },
+        {
+          "w": "l'outil.",
+          "start": 28.049,
+          "end": 28.588
+        }
+      ]
+    },
+    {
+      "id": "7",
+      "title": "La liste d'exclusion",
+      "avatar": "none",
+      "text": "Une politique prudente exclut des services grand public non approuvés les secrets d'authentification, les clés et les mots de passe, les coordonnées bancaires réelles, les dossiers de santé et les informations couvertes par un secret professionnel. Une solution locale ou contractuellement autorisée peut relever d'un autre cadre. Mais un secret d'accès réel ne doit jamais être fourni au modèle. Et toute exception concernant des données personnelles exige une analyse et des garanties formelles.",
+      "audio": "generated/lesson1_5-commune/scene-7.wav",
+      "duration": 27.12816326530612,
+      "words": [
+        {
+          "w": "Une",
+          "start": 0.256,
+          "end": 0.384
+        },
+        {
+          "w": "politique",
+          "start": 0.469,
+          "end": 0.811
+        },
+        {
+          "w": "prudente",
+          "start": 0.896,
+          "end": 1.323
+        },
+        {
+          "w": "exclut",
+          "start": 1.451,
+          "end": 1.92
+        },
+        {
+          "w": "des",
+          "start": 1.963,
+          "end": 2.005
+        },
+        {
+          "w": "services",
+          "start": 2.048,
+          "end": 2.219
+        },
+        {
+          "w": "grand",
+          "start": 2.432,
+          "end": 2.56
+        },
+        {
+          "w": "public",
+          "start": 2.603,
+          "end": 2.773
+        },
+        {
+          "w": "non",
+          "start": 3.029,
+          "end": 3.157
+        },
+        {
+          "w": "approuvés",
+          "start": 3.2,
+          "end": 3.669
+        },
+        {
+          "w": "les",
+          "start": 3.797,
+          "end": 4.224
+        },
+        {
+          "w": "secrets",
+          "start": 4.267,
+          "end": 4.565
+        },
+        {
+          "w": "d'authentification,",
+          "start": 4.608,
+          "end": 5.525
+        },
+        {
+          "w": "les",
+          "start": 5.888,
+          "end": 6.101
+        },
+        {
+          "w": "clés",
+          "start": 6.144,
+          "end": 6.4
+        },
+        {
+          "w": "et",
+          "start": 6.485,
+          "end": 6.528
+        },
+        {
+          "w": "les",
+          "start": 6.571,
+          "end": 6.613
+        },
+        {
+          "w": "mots",
+          "start": 6.656,
+          "end": 6.827
+        },
+        {
+          "w": "de",
+          "start": 6.869,
+          "end": 6.912
+        },
+        {
+          "w": "passe,",
+          "start": 6.955,
+          "end": 7.317
+        },
+        {
+          "w": "les",
+          "start": 7.552,
+          "end": 7.723
+        },
+        {
+          "w": "coordonnées",
+          "start": 7.765,
+          "end": 8.235
+        },
+        {
+          "w": "bancaires",
+          "start": 8.277,
+          "end": 8.619
+        },
+        {
+          "w": "réelles,",
+          "start": 8.661,
+          "end": 9.174
+        },
+        {
+          "w": "les",
+          "start": 9.303,
+          "end": 9.516
+        },
+        {
+          "w": "dossiers",
+          "start": 9.559,
+          "end": 9.772
+        },
+        {
+          "w": "de",
+          "start": 9.815,
+          "end": 9.857
+        },
+        {
+          "w": "santé",
+          "start": 9.9,
+          "end": 10.241
+        },
+        {
+          "w": "et",
+          "start": 10.412,
+          "end": 10.796
+        },
+        {
+          "w": "les",
+          "start": 10.839,
+          "end": 10.924
+        },
+        {
+          "w": "informations",
+          "start": 10.967,
+          "end": 11.351
+        },
+        {
+          "w": "couvertes",
+          "start": 11.521,
+          "end": 11.991
+        },
+        {
+          "w": "par",
+          "start": 12.033,
+          "end": 12.161
+        },
+        {
+          "w": "un",
+          "start": 12.204,
+          "end": 12.289
+        },
+        {
+          "w": "secret",
+          "start": 12.332,
+          "end": 12.46
+        },
+        {
+          "w": "professionnel.",
+          "start": 12.631,
+          "end": 13.377
+        },
+        {
+          "w": "Une",
+          "start": 13.612,
+          "end": 13.697
+        },
+        {
+          "w": "solution",
+          "start": 13.783,
+          "end": 13.996
+        },
+        {
+          "w": "locale",
+          "start": 14.209,
+          "end": 14.551
+        },
+        {
+          "w": "ou",
+          "start": 14.721,
+          "end": 14.807
+        },
+        {
+          "w": "contractuellement",
+          "start": 14.849,
+          "end": 15.489
+        },
+        {
+          "w": "autorisée",
+          "start": 15.532,
+          "end": 16.087
+        },
+        {
+          "w": "peut",
+          "start": 16.343,
+          "end": 16.599
+        },
+        {
+          "w": "relever",
+          "start": 16.641,
+          "end": 16.897
+        },
+        {
+          "w": "d'un",
+          "start": 16.94,
+          "end": 17.068
+        },
+        {
+          "w": "autre",
+          "start": 17.111,
+          "end": 17.239
+        },
+        {
+          "w": "cadre.",
+          "start": 17.324,
+          "end": 17.91
+        },
+        {
+          "w": "Mais",
+          "start": 18.154,
+          "end": 18.368
+        },
+        {
+          "w": "un",
+          "start": 18.41,
+          "end": 18.453
+        },
+        {
+          "w": "secret",
+          "start": 18.496,
+          "end": 18.624
+        },
+        {
+          "w": "d'accès",
+          "start": 18.794,
+          "end": 19.093
+        },
+        {
+          "w": "réel",
+          "start": 19.136,
+          "end": 19.392
+        },
+        {
+          "w": "ne",
+          "start": 19.52,
+          "end": 19.648
+        },
+        {
+          "w": "doit",
+          "start": 19.691,
+          "end": 19.861
+        },
+        {
+          "w": "jamais",
+          "start": 19.904,
+          "end": 20.288
+        },
+        {
+          "w": "être",
+          "start": 20.331,
+          "end": 20.416
+        },
+        {
+          "w": "fourni",
+          "start": 20.544,
+          "end": 20.843
+        },
+        {
+          "w": "au",
+          "start": 20.885,
+          "end": 20.928
+        },
+        {
+          "w": "modèle.",
+          "start": 20.971,
+          "end": 21.504
+        },
+        {
+          "w": "Et",
+          "start": 21.781,
+          "end": 21.866
+        },
+        {
+          "w": "toute",
+          "start": 21.909,
+          "end": 22.165
+        },
+        {
+          "w": "exception",
+          "start": 22.25,
+          "end": 22.634
+        },
+        {
+          "w": "concernant",
+          "start": 22.677,
+          "end": 23.146
+        },
+        {
+          "w": "des",
+          "start": 23.189,
+          "end": 23.274
+        },
+        {
+          "w": "données",
+          "start": 23.317,
+          "end": 23.53
+        },
+        {
+          "w": "personnelles",
+          "start": 23.573,
+          "end": 24
+        },
+        {
+          "w": "exige",
+          "start": 24.085,
+          "end": 24.811
+        },
+        {
+          "w": "une",
+          "start": 24.896,
+          "end": 24.939
+        },
+        {
+          "w": "analyse",
+          "start": 25.024,
+          "end": 25.451
+        },
+        {
+          "w": "et",
+          "start": 25.578,
+          "end": 25.664
+        },
+        {
+          "w": "des",
+          "start": 25.706,
+          "end": 25.792
+        },
+        {
+          "w": "garanties",
+          "start": 25.834,
+          "end": 26.218
+        },
+        {
+          "w": "formelles.",
+          "start": 26.261,
+          "end": 26.928
+        }
+      ]
+    },
+    {
+      "id": "8",
+      "title": "La revue manuelle",
+      "avatar": "none",
+      "text": "Dernier réflexe : relire. Même avec un prompt bien corrigé et un accès bien cadré, la réponse peut poser problème, pour trois raisons. Une donnée peut réapparaître. L'outil peut ajouter un détail inventé, absent de votre demande. Et le ton peut rester inadapté à un usage professionnel. La correction du prompt réduit le risque en amont. La revue manuelle vérifie ce qui en sort réellement, et corrige ce qui doit l'être avant tout usage.",
+      "audio": "generated/lesson1_5-commune/scene-8.wav",
+      "duration": 24.585578231292516,
+      "words": [
+        {
+          "w": "Dernier",
+          "start": 0.256,
+          "end": 0.64
+        },
+        {
+          "w": "réflexe",
+          "start": 0.683,
+          "end": 1.067
+        },
+        {
+          "w": ":",
+          "start": 1.237,
+          "end": 1.28
+        },
+        {
+          "w": "relire.",
+          "start": 1.323,
+          "end": 2.027
+        },
+        {
+          "w": "Même",
+          "start": 2.304,
+          "end": 2.56
+        },
+        {
+          "w": "avec",
+          "start": 2.603,
+          "end": 2.731
+        },
+        {
+          "w": "un",
+          "start": 2.773,
+          "end": 2.859
+        },
+        {
+          "w": "prompt",
+          "start": 2.901,
+          "end": 3.115
+        },
+        {
+          "w": "bien",
+          "start": 3.157,
+          "end": 3.328
+        },
+        {
+          "w": "corrigé",
+          "start": 3.371,
+          "end": 3.84
+        },
+        {
+          "w": "et",
+          "start": 3.925,
+          "end": 4.053
+        },
+        {
+          "w": "un",
+          "start": 4.096,
+          "end": 4.139
+        },
+        {
+          "w": "accès",
+          "start": 4.181,
+          "end": 4.48
+        },
+        {
+          "w": "bien",
+          "start": 4.523,
+          "end": 4.651
+        },
+        {
+          "w": "cadré,",
+          "start": 4.693,
+          "end": 5.163
+        },
+        {
+          "w": "la",
+          "start": 5.333,
+          "end": 5.504
+        },
+        {
+          "w": "réponse",
+          "start": 5.547,
+          "end": 5.845
+        },
+        {
+          "w": "peut",
+          "start": 5.888,
+          "end": 6.016
+        },
+        {
+          "w": "poser",
+          "start": 6.059,
+          "end": 6.272
+        },
+        {
+          "w": "problème,",
+          "start": 6.315,
+          "end": 6.784
+        },
+        {
+          "w": "pour",
+          "start": 6.912,
+          "end": 7.04
+        },
+        {
+          "w": "trois",
+          "start": 7.125,
+          "end": 7.339
+        },
+        {
+          "w": "raisons.",
+          "start": 7.381,
+          "end": 7.829
+        },
+        {
+          "w": "Une",
+          "start": 8.064,
+          "end": 8.277
+        },
+        {
+          "w": "donnée",
+          "start": 8.32,
+          "end": 8.661
+        },
+        {
+          "w": "peut",
+          "start": 8.704,
+          "end": 8.789
+        },
+        {
+          "w": "réapparaître.",
+          "start": 8.789,
+          "end": 9.534
+        },
+        {
+          "w": "L'outil",
+          "start": 9.725,
+          "end": 10.066
+        },
+        {
+          "w": "peut",
+          "start": 10.109,
+          "end": 10.194
+        },
+        {
+          "w": "ajouter",
+          "start": 10.237,
+          "end": 10.535
+        },
+        {
+          "w": "un",
+          "start": 10.578,
+          "end": 10.621
+        },
+        {
+          "w": "détail",
+          "start": 10.663,
+          "end": 10.919
+        },
+        {
+          "w": "inventé,",
+          "start": 11.005,
+          "end": 11.687
+        },
+        {
+          "w": "absent",
+          "start": 11.815,
+          "end": 12.199
+        },
+        {
+          "w": "de",
+          "start": 12.242,
+          "end": 12.327
+        },
+        {
+          "w": "votre",
+          "start": 12.37,
+          "end": 12.541
+        },
+        {
+          "w": "demande.",
+          "start": 12.583,
+          "end": 13.159
+        },
+        {
+          "w": "Et",
+          "start": 13.437,
+          "end": 13.522
+        },
+        {
+          "w": "le",
+          "start": 13.565,
+          "end": 13.65
+        },
+        {
+          "w": "ton",
+          "start": 13.693,
+          "end": 13.863
+        },
+        {
+          "w": "peut",
+          "start": 13.906,
+          "end": 14.077
+        },
+        {
+          "w": "rester",
+          "start": 14.119,
+          "end": 14.375
+        },
+        {
+          "w": "inadapté",
+          "start": 14.418,
+          "end": 15.015
+        },
+        {
+          "w": "à",
+          "start": 15.101,
+          "end": 15.143
+        },
+        {
+          "w": "un",
+          "start": 15.186,
+          "end": 15.229
+        },
+        {
+          "w": "usage",
+          "start": 15.271,
+          "end": 15.527
+        },
+        {
+          "w": "professionnel.",
+          "start": 15.57,
+          "end": 16.317
+        },
+        {
+          "w": "La",
+          "start": 16.551,
+          "end": 16.722
+        },
+        {
+          "w": "correction",
+          "start": 16.765,
+          "end": 16.978
+        },
+        {
+          "w": "du",
+          "start": 17.149,
+          "end": 17.234
+        },
+        {
+          "w": "prompt",
+          "start": 17.277,
+          "end": 17.575
+        },
+        {
+          "w": "réduit",
+          "start": 17.618,
+          "end": 17.917
+        },
+        {
+          "w": "le",
+          "start": 17.959,
+          "end": 18.002
+        },
+        {
+          "w": "risque",
+          "start": 18.045,
+          "end": 18.258
+        },
+        {
+          "w": "en",
+          "start": 18.301,
+          "end": 18.386
+        },
+        {
+          "w": "amont.",
+          "start": 18.429,
+          "end": 18.868
+        },
+        {
+          "w": "La",
+          "start": 19.095,
+          "end": 19.266
+        },
+        {
+          "w": "revue",
+          "start": 19.308,
+          "end": 19.522
+        },
+        {
+          "w": "manuelle",
+          "start": 19.564,
+          "end": 19.906
+        },
+        {
+          "w": "vérifie",
+          "start": 19.948,
+          "end": 20.332
+        },
+        {
+          "w": "ce",
+          "start": 20.375,
+          "end": 20.503
+        },
+        {
+          "w": "qui",
+          "start": 20.546,
+          "end": 20.631
+        },
+        {
+          "w": "en",
+          "start": 20.674,
+          "end": 20.716
+        },
+        {
+          "w": "sort",
+          "start": 20.759,
+          "end": 20.93
+        },
+        {
+          "w": "réellement,",
+          "start": 20.972,
+          "end": 21.612
+        },
+        {
+          "w": "et",
+          "start": 21.74,
+          "end": 21.954
+        },
+        {
+          "w": "corrige",
+          "start": 21.996,
+          "end": 22.38
+        },
+        {
+          "w": "ce",
+          "start": 22.508,
+          "end": 22.594
+        },
+        {
+          "w": "qui",
+          "start": 22.636,
+          "end": 22.764
+        },
+        {
+          "w": "doit",
+          "start": 22.807,
+          "end": 22.892
+        },
+        {
+          "w": "l'être",
+          "start": 22.935,
+          "end": 23.148
+        },
+        {
+          "w": "avant",
+          "start": 23.234,
+          "end": 23.404
+        },
+        {
+          "w": "tout",
+          "start": 23.447,
+          "end": 23.618
+        },
+        {
+          "w": "usage.",
+          "start": 23.66,
+          "end": 24.386
+        }
+      ]
+    },
+    {
+      "id": "9",
+      "title": "À vous de jouer",
+      "avatar": "pip",
+      "text": "À vous, maintenant. Ouvrez l'onglet Playground pour vous entraîner à corriger des prompts et à justifier chaque choix. Ensuite, dans le Studio, ouvrez le chat Gemini, qui ne consomme pas votre budget IA. Soumettez-lui uniquement un texte que vous avez anonymisé ou rendu fictif. Puis relisez sa réponse, comme si vous deviez l'envoyer.",
+      "audio": "generated/lesson1_5-commune/scene-9.wav",
+      "duration": 18.70582766439909,
+      "words": [
+        {
+          "w": "À",
+          "start": 0.213,
+          "end": 0.469
+        },
+        {
+          "w": "vous,",
+          "start": 0.512,
+          "end": 0.747
+        },
+        {
+          "w": "maintenant.",
+          "start": 0.853,
+          "end": 1.493
+        },
+        {
+          "w": "Ouvrez",
+          "start": 1.792,
+          "end": 2.133
+        },
+        {
+          "w": "l'onglet",
+          "start": 2.176,
+          "end": 2.432
+        },
+        {
+          "w": "Playground",
+          "start": 2.475,
+          "end": 2.944
+        },
+        {
+          "w": "pour",
+          "start": 3.115,
+          "end": 3.243
+        },
+        {
+          "w": "vous",
+          "start": 3.285,
+          "end": 3.371
+        },
+        {
+          "w": "entraîner",
+          "start": 3.413,
+          "end": 3.755
+        },
+        {
+          "w": "à",
+          "start": 3.797,
+          "end": 3.883
+        },
+        {
+          "w": "corriger",
+          "start": 3.925,
+          "end": 4.224
+        },
+        {
+          "w": "des",
+          "start": 4.267,
+          "end": 4.352
+        },
+        {
+          "w": "prompts",
+          "start": 4.395,
+          "end": 4.693
+        },
+        {
+          "w": "et",
+          "start": 4.821,
+          "end": 4.864
+        },
+        {
+          "w": "à",
+          "start": 4.907,
+          "end": 4.949
+        },
+        {
+          "w": "justifier",
+          "start": 4.992,
+          "end": 5.461
+        },
+        {
+          "w": "chaque",
+          "start": 5.504,
+          "end": 5.717
+        },
+        {
+          "w": "choix.",
+          "start": 5.803,
+          "end": 6.229
+        },
+        {
+          "w": "Ensuite,",
+          "start": 6.443,
+          "end": 6.955
+        },
+        {
+          "w": "dans",
+          "start": 7.083,
+          "end": 7.211
+        },
+        {
+          "w": "le",
+          "start": 7.253,
+          "end": 7.296
+        },
+        {
+          "w": "Studio,",
+          "start": 7.339,
+          "end": 7.787
+        },
+        {
+          "w": "ouvrez",
+          "start": 7.851,
+          "end": 8.405
+        },
+        {
+          "w": "le",
+          "start": 8.448,
+          "end": 8.491
+        },
+        {
+          "w": "chat",
+          "start": 8.533,
+          "end": 8.747
+        },
+        {
+          "w": "Gemini,",
+          "start": 8.789,
+          "end": 9.301
+        },
+        {
+          "w": "qui",
+          "start": 9.429,
+          "end": 9.515
+        },
+        {
+          "w": "ne",
+          "start": 9.557,
+          "end": 9.643
+        },
+        {
+          "w": "consomme",
+          "start": 9.685,
+          "end": 10.027
+        },
+        {
+          "w": "pas",
+          "start": 10.069,
+          "end": 10.112
+        },
+        {
+          "w": "votre",
+          "start": 10.155,
+          "end": 10.368
+        },
+        {
+          "w": "budget",
+          "start": 10.411,
+          "end": 10.709
+        },
+        {
+          "w": "IA.",
+          "start": 10.752,
+          "end": 11.047
+        },
+        {
+          "w": "Soumettez-lui",
+          "start": 11.172,
+          "end": 11.769
+        },
+        {
+          "w": "uniquement",
+          "start": 11.812,
+          "end": 12.239
+        },
+        {
+          "w": "un",
+          "start": 12.324,
+          "end": 12.409
+        },
+        {
+          "w": "texte",
+          "start": 12.452,
+          "end": 12.793
+        },
+        {
+          "w": "que",
+          "start": 12.921,
+          "end": 12.964
+        },
+        {
+          "w": "vous",
+          "start": 13.007,
+          "end": 13.134
+        },
+        {
+          "w": "avez",
+          "start": 13.177,
+          "end": 13.348
+        },
+        {
+          "w": "anonymisé",
+          "start": 13.39,
+          "end": 14.03
+        },
+        {
+          "w": "ou",
+          "start": 14.159,
+          "end": 14.287
+        },
+        {
+          "w": "rendu",
+          "start": 14.329,
+          "end": 14.585
+        },
+        {
+          "w": "fictif.",
+          "start": 14.628,
+          "end": 15.161
+        },
+        {
+          "w": "Puis",
+          "start": 15.396,
+          "end": 15.652
+        },
+        {
+          "w": "relisez",
+          "start": 15.865,
+          "end": 16.206
+        },
+        {
+          "w": "sa",
+          "start": 16.249,
+          "end": 16.334
+        },
+        {
+          "w": "réponse,",
+          "start": 16.377,
+          "end": 16.953
+        },
+        {
+          "w": "comme",
+          "start": 17.188,
+          "end": 17.401
+        },
+        {
+          "w": "si",
+          "start": 17.444,
+          "end": 17.486
+        },
+        {
+          "w": "vous",
+          "start": 17.529,
+          "end": 17.614
+        },
+        {
+          "w": "deviez",
+          "start": 17.657,
+          "end": 17.87
+        },
+        {
+          "w": "l'envoyer.",
+          "start": 17.87,
+          "end": 18.506
+        }
+      ],
+      "avatarVideo": "generated/lesson1_5-commune/avatar-9.mp4",
+      "avatarVideoId": "1564ce0c94db51a7c938634793166664",
+      "avatarDuration": 18.6
+    },
+    {
+      "id": "10",
+      "title": "Clôture",
+      "avatar": "full",
+      "text": "Retenez trois choses. Retirez l'inutile, généralisez l'utile. Un pseudonyme n'est pas une anonymisation. Et le moindre privilège, comme la relecture, s'appliquent à chaque usage. Validez le quiz pour débloquer la suite. Vos règles sont posées : dans la prochaine leçon, vous assemblerez tâches, outils et règles dans un seul plan d'actions.",
+      "audio": "generated/lesson1_5-commune/scene-10.wav",
+      "duration": 19.205056689342403,
+      "words": [
+        {
+          "w": "Retenez",
+          "start": 0.256,
+          "end": 0.64
+        },
+        {
+          "w": "trois",
+          "start": 0.683,
+          "end": 0.853
+        },
+        {
+          "w": "choses.",
+          "start": 0.896,
+          "end": 1.429
+        },
+        {
+          "w": "Retirez",
+          "start": 1.664,
+          "end": 2.091
+        },
+        {
+          "w": "l'inutile,",
+          "start": 2.133,
+          "end": 2.752
+        },
+        {
+          "w": "généralisez",
+          "start": 2.987,
+          "end": 3.584
+        },
+        {
+          "w": "l'utile.",
+          "start": 3.627,
+          "end": 4.267
+        },
+        {
+          "w": "Un",
+          "start": 4.565,
+          "end": 4.651
+        },
+        {
+          "w": "pseudonyme",
+          "start": 4.693,
+          "end": 5.163
+        },
+        {
+          "w": "n'est",
+          "start": 5.205,
+          "end": 5.333
+        },
+        {
+          "w": "pas",
+          "start": 5.376,
+          "end": 5.504
+        },
+        {
+          "w": "une",
+          "start": 5.547,
+          "end": 5.632
+        },
+        {
+          "w": "anonymisation.",
+          "start": 5.717,
+          "end": 6.464
+        },
+        {
+          "w": "Et",
+          "start": 6.699,
+          "end": 6.784
+        },
+        {
+          "w": "le",
+          "start": 6.827,
+          "end": 6.869
+        },
+        {
+          "w": "moindre",
+          "start": 6.912,
+          "end": 7.168
+        },
+        {
+          "w": "privilège,",
+          "start": 7.253,
+          "end": 7.936
+        },
+        {
+          "w": "comme",
+          "start": 8.149,
+          "end": 8.277
+        },
+        {
+          "w": "la",
+          "start": 8.32,
+          "end": 8.405
+        },
+        {
+          "w": "relecture,",
+          "start": 8.448,
+          "end": 9.088
+        },
+        {
+          "w": "s'appliquent",
+          "start": 9.259,
+          "end": 9.685
+        },
+        {
+          "w": "à",
+          "start": 9.728,
+          "end": 9.771
+        },
+        {
+          "w": "chaque",
+          "start": 9.813,
+          "end": 9.984
+        },
+        {
+          "w": "usage.",
+          "start": 10.027,
+          "end": 10.539
+        },
+        {
+          "w": "Validez",
+          "start": 10.795,
+          "end": 11.264
+        },
+        {
+          "w": "le",
+          "start": 11.307,
+          "end": 11.349
+        },
+        {
+          "w": "quiz",
+          "start": 11.392,
+          "end": 11.563
+        },
+        {
+          "w": "pour",
+          "start": 11.648,
+          "end": 11.776
+        },
+        {
+          "w": "débloquer",
+          "start": 11.819,
+          "end": 12.16
+        },
+        {
+          "w": "la",
+          "start": 12.203,
+          "end": 12.245
+        },
+        {
+          "w": "suite.",
+          "start": 12.288,
+          "end": 12.643
+        },
+        {
+          "w": "Vos",
+          "start": 12.828,
+          "end": 12.999
+        },
+        {
+          "w": "règles",
+          "start": 13.042,
+          "end": 13.212
+        },
+        {
+          "w": "sont",
+          "start": 13.298,
+          "end": 13.426
+        },
+        {
+          "w": "posées",
+          "start": 13.468,
+          "end": 13.767
+        },
+        {
+          "w": ":",
+          "start": 13.81,
+          "end": 13.938
+        },
+        {
+          "w": "dans",
+          "start": 14.194,
+          "end": 14.407
+        },
+        {
+          "w": "la",
+          "start": 14.45,
+          "end": 14.492
+        },
+        {
+          "w": "prochaine",
+          "start": 14.535,
+          "end": 14.663
+        },
+        {
+          "w": "leçon,",
+          "start": 14.706,
+          "end": 14.898
+        },
+        {
+          "w": "vous",
+          "start": 14.962,
+          "end": 15.09
+        },
+        {
+          "w": "assemblerez",
+          "start": 15.132,
+          "end": 15.602
+        },
+        {
+          "w": "tâches,",
+          "start": 15.644,
+          "end": 16.092
+        },
+        {
+          "w": "outils",
+          "start": 16.284,
+          "end": 16.668
+        },
+        {
+          "w": "et",
+          "start": 16.839,
+          "end": 16.967
+        },
+        {
+          "w": "règles",
+          "start": 17.01,
+          "end": 17.394
+        },
+        {
+          "w": "dans",
+          "start": 17.436,
+          "end": 17.65
+        },
+        {
+          "w": "un",
+          "start": 17.692,
+          "end": 17.863
+        },
+        {
+          "w": "seul",
+          "start": 17.906,
+          "end": 18.119
+        },
+        {
+          "w": "plan",
+          "start": 18.162,
+          "end": 18.332
+        },
+        {
+          "w": "d'actions.",
+          "start": 18.375,
+          "end": 19.005
+        }
+      ],
+      "avatarVideo": "generated/lesson1_5-commune/avatar-10.mp4",
+      "avatarVideoId": "8b3877846f39e9a12effb4b3384a035a",
+      "avatarDuration": 19.08
+    }
+  ]
+}

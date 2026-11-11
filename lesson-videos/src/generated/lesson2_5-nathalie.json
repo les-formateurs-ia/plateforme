@@ -1,0 +1,1811 @@
+{
+  "name": "lesson2_5-nathalie",
+  "source": "../docs/formation-rs6776/lecon-2.5/script-video-nathalie.md",
+  "voice": "341b4807e5e6455fa88f34bda5d6eeea",
+  "model": "heygen-voice-1-turbo-free",
+  "total": 117.11238095238096,
+  "avatarSeconds": 35.51473922902494,
+  "scenes": [
+    {
+      "id": "1",
+      "title": "Accroche",
+      "avatar": "full",
+      "text": "Bonjour Nathalie. Prenons un guide SIRH déjà rédigé pour un référent RH. Vous voulez en tirer une version courte, pour un manager qui doit seulement valider une demande. Le défi n'est pas de rendre le texte plus séduisant : c'est de réduire l'effort, sans perdre une étape, une condition ou une limite importante.",
+      "audio": "generated/lesson2_5-nathalie/scene-1.wav",
+      "duration": 17.23848072562358,
+      "words": [
+        {
+          "w": "Bonjour",
+          "start": 0.299,
+          "end": 0.597
+        },
+        {
+          "w": "Nathalie.",
+          "start": 0.64,
+          "end": 1.195
+        },
+        {
+          "w": "Prenons",
+          "start": 1.451,
+          "end": 1.749
+        },
+        {
+          "w": "un",
+          "start": 1.792,
+          "end": 1.877
+        },
+        {
+          "w": "guide",
+          "start": 1.92,
+          "end": 2.091
+        },
+        {
+          "w": "SIRH",
+          "start": 2.176,
+          "end": 2.816
+        },
+        {
+          "w": "déjà",
+          "start": 3.115,
+          "end": 3.371
+        },
+        {
+          "w": "rédigé",
+          "start": 3.413,
+          "end": 3.84
+        },
+        {
+          "w": "pour",
+          "start": 3.883,
+          "end": 4.011
+        },
+        {
+          "w": "un",
+          "start": 4.053,
+          "end": 4.139
+        },
+        {
+          "w": "référent",
+          "start": 4.181,
+          "end": 4.565
+        },
+        {
+          "w": "RH.",
+          "start": 4.608,
+          "end": 5.12
+        },
+        {
+          "w": "Vous",
+          "start": 5.419,
+          "end": 5.589
+        },
+        {
+          "w": "voulez",
+          "start": 5.675,
+          "end": 5.845
+        },
+        {
+          "w": "en",
+          "start": 5.888,
+          "end": 6.4
+        },
+        {
+          "w": "tirer",
+          "start": 6.443,
+          "end": 6.784
+        },
+        {
+          "w": "une",
+          "start": 6.827,
+          "end": 6.869
+        },
+        {
+          "w": "version",
+          "start": 6.912,
+          "end": 6.955
+        },
+        {
+          "w": "courte,",
+          "start": 6.997,
+          "end": 7.125
+        },
+        {
+          "w": "pour",
+          "start": 7.168,
+          "end": 7.296
+        },
+        {
+          "w": "un",
+          "start": 7.339,
+          "end": 7.381
+        },
+        {
+          "w": "manager",
+          "start": 7.424,
+          "end": 7.637
+        },
+        {
+          "w": "qui",
+          "start": 7.851,
+          "end": 7.936
+        },
+        {
+          "w": "doit",
+          "start": 7.979,
+          "end": 8.107
+        },
+        {
+          "w": "seulement",
+          "start": 8.149,
+          "end": 8.533
+        },
+        {
+          "w": "valider",
+          "start": 8.576,
+          "end": 8.789
+        },
+        {
+          "w": "une",
+          "start": 8.96,
+          "end": 9.003
+        },
+        {
+          "w": "demande.",
+          "start": 9.045,
+          "end": 9.544
+        },
+        {
+          "w": "Le",
+          "start": 9.743,
+          "end": 9.956
+        },
+        {
+          "w": "défi",
+          "start": 9.999,
+          "end": 10.255
+        },
+        {
+          "w": "n'est",
+          "start": 10.298,
+          "end": 10.426
+        },
+        {
+          "w": "pas",
+          "start": 10.468,
+          "end": 10.511
+        },
+        {
+          "w": "de",
+          "start": 10.554,
+          "end": 10.596
+        },
+        {
+          "w": "rendre",
+          "start": 10.639,
+          "end": 10.895
+        },
+        {
+          "w": "le",
+          "start": 10.938,
+          "end": 11.023
+        },
+        {
+          "w": "texte",
+          "start": 11.066,
+          "end": 11.279
+        },
+        {
+          "w": "plus",
+          "start": 11.364,
+          "end": 11.535
+        },
+        {
+          "w": "séduisant",
+          "start": 11.578,
+          "end": 11.962
+        },
+        {
+          "w": ":",
+          "start": 12.004,
+          "end": 12.132
+        },
+        {
+          "w": "c'est",
+          "start": 12.175,
+          "end": 12.388
+        },
+        {
+          "w": "de",
+          "start": 12.431,
+          "end": 12.474
+        },
+        {
+          "w": "réduire",
+          "start": 12.516,
+          "end": 12.9
+        },
+        {
+          "w": "l'effort,",
+          "start": 12.943,
+          "end": 13.37
+        },
+        {
+          "w": "sans",
+          "start": 13.626,
+          "end": 13.796
+        },
+        {
+          "w": "perdre",
+          "start": 13.839,
+          "end": 14.095
+        },
+        {
+          "w": "une",
+          "start": 14.18,
+          "end": 14.223
+        },
+        {
+          "w": "étape,",
+          "start": 14.266,
+          "end": 14.671
+        },
+        {
+          "w": "une",
+          "start": 14.82,
+          "end": 14.906
+        },
+        {
+          "w": "condition",
+          "start": 14.948,
+          "end": 15.247
+        },
+        {
+          "w": "ou",
+          "start": 15.503,
+          "end": 15.802
+        },
+        {
+          "w": "une",
+          "start": 15.844,
+          "end": 15.887
+        },
+        {
+          "w": "limite",
+          "start": 15.93,
+          "end": 16.143
+        },
+        {
+          "w": "importante.",
+          "start": 16.271,
+          "end": 17.038
+        }
+      ],
+      "avatarVideo": "generated/lesson2_5-nathalie/avatar-1.mp4",
+      "avatarVideoId": "580c4e5ad562a221cfd11f96492a5425",
+      "avatarDuration": 17.12
+    },
+    {
+      "id": "2",
+      "title": "La source validée d'abord",
+      "avatar": "none",
+      "text": "Commencez par identifier la version validée et sa source. Comparez-lui le premier résultat : étapes présentes, ordre, règles, délais, termes d'écran, public et usage. Marquez chaque écart : la source validée reste votre référence à chaque itération. Si le texte contient déjà des erreurs de fond, corrigez-les avant de toucher au ton.",
+      "audio": "generated/lesson2_5-nathalie/scene-2.wav",
+      "duration": 18.403968253968255,
+      "words": [
+        {
+          "w": "Commencez",
+          "start": 0.299,
+          "end": 0.725
+        },
+        {
+          "w": "par",
+          "start": 0.768,
+          "end": 0.853
+        },
+        {
+          "w": "identifier",
+          "start": 0.896,
+          "end": 1.323
+        },
+        {
+          "w": "la",
+          "start": 1.365,
+          "end": 1.451
+        },
+        {
+          "w": "version",
+          "start": 1.493,
+          "end": 1.621
+        },
+        {
+          "w": "validée",
+          "start": 1.835,
+          "end": 2.261
+        },
+        {
+          "w": "et",
+          "start": 2.304,
+          "end": 2.347
+        },
+        {
+          "w": "sa",
+          "start": 2.389,
+          "end": 2.475
+        },
+        {
+          "w": "source.",
+          "start": 2.517,
+          "end": 2.944
+        },
+        {
+          "w": "Comparez-lui",
+          "start": 3.2,
+          "end": 3.669
+        },
+        {
+          "w": "le",
+          "start": 3.712,
+          "end": 3.755
+        },
+        {
+          "w": "premier",
+          "start": 3.797,
+          "end": 4.139
+        },
+        {
+          "w": "résultat",
+          "start": 4.181,
+          "end": 4.565
+        },
+        {
+          "w": ":",
+          "start": 4.608,
+          "end": 4.693
+        },
+        {
+          "w": "étapes",
+          "start": 4.736,
+          "end": 5.035
+        },
+        {
+          "w": "présentes,",
+          "start": 5.12,
+          "end": 5.632
+        },
+        {
+          "w": "ordre,",
+          "start": 5.76,
+          "end": 6.251
+        },
+        {
+          "w": "règles,",
+          "start": 6.357,
+          "end": 6.827
+        },
+        {
+          "w": "délais,",
+          "start": 6.912,
+          "end": 7.488
+        },
+        {
+          "w": "termes",
+          "start": 7.68,
+          "end": 7.851
+        },
+        {
+          "w": "d'écran,",
+          "start": 7.936,
+          "end": 8.405
+        },
+        {
+          "w": "public",
+          "start": 8.533,
+          "end": 8.704
+        },
+        {
+          "w": "et",
+          "start": 9.045,
+          "end": 9.259
+        },
+        {
+          "w": "usage.",
+          "start": 9.259,
+          "end": 9.783
+        },
+        {
+          "w": "Marquez",
+          "start": 10.009,
+          "end": 10.351
+        },
+        {
+          "w": "chaque",
+          "start": 10.393,
+          "end": 10.521
+        },
+        {
+          "w": "écart",
+          "start": 10.564,
+          "end": 10.863
+        },
+        {
+          "w": ":",
+          "start": 10.991,
+          "end": 11.033
+        },
+        {
+          "w": "la",
+          "start": 11.076,
+          "end": 11.161
+        },
+        {
+          "w": "source",
+          "start": 11.204,
+          "end": 11.332
+        },
+        {
+          "w": "validée",
+          "start": 11.503,
+          "end": 11.887
+        },
+        {
+          "w": "reste",
+          "start": 11.929,
+          "end": 12.143
+        },
+        {
+          "w": "votre",
+          "start": 12.228,
+          "end": 12.399
+        },
+        {
+          "w": "référence",
+          "start": 12.484,
+          "end": 12.953
+        },
+        {
+          "w": "à",
+          "start": 13.039,
+          "end": 13.081
+        },
+        {
+          "w": "chaque",
+          "start": 13.124,
+          "end": 13.337
+        },
+        {
+          "w": "itération.",
+          "start": 13.38,
+          "end": 13.999
+        },
+        {
+          "w": "Si",
+          "start": 14.319,
+          "end": 14.447
+        },
+        {
+          "w": "le",
+          "start": 14.489,
+          "end": 14.575
+        },
+        {
+          "w": "texte",
+          "start": 14.617,
+          "end": 14.831
+        },
+        {
+          "w": "contient",
+          "start": 14.916,
+          "end": 15.172
+        },
+        {
+          "w": "déjà",
+          "start": 15.215,
+          "end": 15.471
+        },
+        {
+          "w": "des",
+          "start": 15.513,
+          "end": 15.599
+        },
+        {
+          "w": "erreurs",
+          "start": 15.641,
+          "end": 15.855
+        },
+        {
+          "w": "de",
+          "start": 15.897,
+          "end": 15.94
+        },
+        {
+          "w": "fond,",
+          "start": 15.983,
+          "end": 16.431
+        },
+        {
+          "w": "corrigez-les",
+          "start": 16.665,
+          "end": 17.177
+        },
+        {
+          "w": "avant",
+          "start": 17.22,
+          "end": 17.348
+        },
+        {
+          "w": "de",
+          "start": 17.391,
+          "end": 17.433
+        },
+        {
+          "w": "toucher",
+          "start": 17.476,
+          "end": 17.732
+        },
+        {
+          "w": "au",
+          "start": 17.775,
+          "end": 17.817
+        },
+        {
+          "w": "ton.",
+          "start": 17.86,
+          "end": 18.229
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "title": "Les cinq angles, sur votre guide",
+      "avatar": "none",
+      "text": "Utilisez ensuite les cinq angles comme une grille, sans chercher une catégorie exclusive. Limiter la sortie à trois actions, c'est une contrainte. Conserver une règle tirée de la politique validée relève du contexte et des sources. Une check-list touche au format, le vocabulaire au style. Et des intitulés et un ordre explicites améliorent aussi l'accessibilité. Ce qui compte, ce sont des critères que vous pouvez vérifier.",
+      "audio": "generated/lesson2_5-nathalie/scene-3.wav",
+      "duration": 22.549342403628117,
+      "words": [
+        {
+          "w": "Utilisez",
+          "start": 0.256,
+          "end": 0.725
+        },
+        {
+          "w": "ensuite",
+          "start": 0.768,
+          "end": 1.067
+        },
+        {
+          "w": "les",
+          "start": 1.152,
+          "end": 1.237
+        },
+        {
+          "w": "cinq",
+          "start": 1.28,
+          "end": 1.493
+        },
+        {
+          "w": "angles",
+          "start": 1.579,
+          "end": 1.877
+        },
+        {
+          "w": "comme",
+          "start": 1.963,
+          "end": 2.091
+        },
+        {
+          "w": "une",
+          "start": 2.133,
+          "end": 2.219
+        },
+        {
+          "w": "grille,",
+          "start": 2.261,
+          "end": 2.795
+        },
+        {
+          "w": "sans",
+          "start": 3.029,
+          "end": 3.2
+        },
+        {
+          "w": "chercher",
+          "start": 3.243,
+          "end": 3.541
+        },
+        {
+          "w": "une",
+          "start": 3.584,
+          "end": 3.627
+        },
+        {
+          "w": "catégorie",
+          "start": 3.669,
+          "end": 4.139
+        },
+        {
+          "w": "exclusive.",
+          "start": 4.181,
+          "end": 4.885
+        },
+        {
+          "w": "Limiter",
+          "start": 5.12,
+          "end": 5.376
+        },
+        {
+          "w": "la",
+          "start": 5.504,
+          "end": 5.632
+        },
+        {
+          "w": "sortie",
+          "start": 5.675,
+          "end": 5.931
+        },
+        {
+          "w": "à",
+          "start": 5.973,
+          "end": 6.016
+        },
+        {
+          "w": "trois",
+          "start": 6.059,
+          "end": 6.229
+        },
+        {
+          "w": "actions,",
+          "start": 6.272,
+          "end": 6.656
+        },
+        {
+          "w": "c'est",
+          "start": 6.912,
+          "end": 7.04
+        },
+        {
+          "w": "une",
+          "start": 7.083,
+          "end": 7.168
+        },
+        {
+          "w": "contrainte.",
+          "start": 7.211,
+          "end": 7.83
+        },
+        {
+          "w": "Conserver",
+          "start": 8.022,
+          "end": 8.534
+        },
+        {
+          "w": "une",
+          "start": 8.576,
+          "end": 8.619
+        },
+        {
+          "w": "règle",
+          "start": 8.662,
+          "end": 8.875
+        },
+        {
+          "w": "tirée",
+          "start": 8.96,
+          "end": 9.259
+        },
+        {
+          "w": "de",
+          "start": 9.302,
+          "end": 9.344
+        },
+        {
+          "w": "la",
+          "start": 9.387,
+          "end": 9.43
+        },
+        {
+          "w": "politique",
+          "start": 9.472,
+          "end": 9.771
+        },
+        {
+          "w": "validée",
+          "start": 9.814,
+          "end": 10.24
+        },
+        {
+          "w": "relève",
+          "start": 10.411,
+          "end": 10.838
+        },
+        {
+          "w": "du",
+          "start": 10.88,
+          "end": 10.966
+        },
+        {
+          "w": "contexte",
+          "start": 11.008,
+          "end": 11.392
+        },
+        {
+          "w": "et",
+          "start": 11.435,
+          "end": 11.478
+        },
+        {
+          "w": "des",
+          "start": 11.52,
+          "end": 11.563
+        },
+        {
+          "w": "sources.",
+          "start": 11.606,
+          "end": 12.139
+        },
+        {
+          "w": "Une",
+          "start": 12.374,
+          "end": 12.502
+        },
+        {
+          "w": "check-list",
+          "start": 12.544,
+          "end": 12.928
+        },
+        {
+          "w": "touche",
+          "start": 13.056,
+          "end": 13.312
+        },
+        {
+          "w": "au",
+          "start": 13.355,
+          "end": 13.398
+        },
+        {
+          "w": "format,",
+          "start": 13.44,
+          "end": 13.931
+        },
+        {
+          "w": "le",
+          "start": 14.08,
+          "end": 14.208
+        },
+        {
+          "w": "vocabulaire",
+          "start": 14.251,
+          "end": 14.678
+        },
+        {
+          "w": "au",
+          "start": 14.72,
+          "end": 14.763
+        },
+        {
+          "w": "style.",
+          "start": 14.806,
+          "end": 15.254
+        },
+        {
+          "w": "Et",
+          "start": 15.488,
+          "end": 15.574
+        },
+        {
+          "w": "des",
+          "start": 15.616,
+          "end": 15.744
+        },
+        {
+          "w": "intitulés",
+          "start": 15.787,
+          "end": 16.256
+        },
+        {
+          "w": "et",
+          "start": 16.299,
+          "end": 16.384
+        },
+        {
+          "w": "un",
+          "start": 16.427,
+          "end": 16.47
+        },
+        {
+          "w": "ordre",
+          "start": 16.512,
+          "end": 16.768
+        },
+        {
+          "w": "explicites",
+          "start": 16.811,
+          "end": 17.28
+        },
+        {
+          "w": "améliorent",
+          "start": 17.408,
+          "end": 18.006
+        },
+        {
+          "w": "aussi",
+          "start": 18.048,
+          "end": 18.134
+        },
+        {
+          "w": "l'accessibilité.",
+          "start": 18.134,
+          "end": 19.132
+        },
+        {
+          "w": "Ce",
+          "start": 19.447,
+          "end": 19.532
+        },
+        {
+          "w": "qui",
+          "start": 19.575,
+          "end": 19.745
+        },
+        {
+          "w": "compte,",
+          "start": 19.788,
+          "end": 20.193
+        },
+        {
+          "w": "ce",
+          "start": 20.385,
+          "end": 20.513
+        },
+        {
+          "w": "sont",
+          "start": 20.556,
+          "end": 20.641
+        },
+        {
+          "w": "des",
+          "start": 20.684,
+          "end": 20.769
+        },
+        {
+          "w": "critères",
+          "start": 20.812,
+          "end": 21.153
+        },
+        {
+          "w": "que",
+          "start": 21.239,
+          "end": 21.324
+        },
+        {
+          "w": "vous",
+          "start": 21.367,
+          "end": 21.452
+        },
+        {
+          "w": "pouvez",
+          "start": 21.495,
+          "end": 21.665
+        },
+        {
+          "w": "vérifier.",
+          "start": 21.708,
+          "end": 22.349
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "title": "Votre prompt pour le manager",
+      "avatar": "none",
+      "text": "Votre prompt identifie la version, le public manager et la source de vérité. Il demande de conserver les trois actions et leur ordre, de remplacer un terme défini, et de produire une action par ligne avec une limite de mots. Il interdit d'inventer, demande de signaler tout point impossible à respecter, et exige un relevé des changements, que vous vérifierez vous-même.",
+      "audio": "generated/lesson2_5-nathalie/scene-4.wav",
+      "duration": 19.553356009070296,
+      "words": [
+        {
+          "w": "Votre",
+          "start": 0.299,
+          "end": 0.555
+        },
+        {
+          "w": "prompt",
+          "start": 0.597,
+          "end": 0.896
+        },
+        {
+          "w": "identifie",
+          "start": 0.981,
+          "end": 1.365
+        },
+        {
+          "w": "la",
+          "start": 1.408,
+          "end": 1.451
+        },
+        {
+          "w": "version,",
+          "start": 1.493,
+          "end": 1.899
+        },
+        {
+          "w": "le",
+          "start": 2.176,
+          "end": 2.304
+        },
+        {
+          "w": "public",
+          "start": 2.347,
+          "end": 2.475
+        },
+        {
+          "w": "manager",
+          "start": 2.645,
+          "end": 2.901
+        },
+        {
+          "w": "et",
+          "start": 3.285,
+          "end": 3.413
+        },
+        {
+          "w": "la",
+          "start": 3.456,
+          "end": 3.541
+        },
+        {
+          "w": "source",
+          "start": 3.584,
+          "end": 3.712
+        },
+        {
+          "w": "de",
+          "start": 3.883,
+          "end": 3.925
+        },
+        {
+          "w": "vérité.",
+          "start": 3.968,
+          "end": 4.608
+        },
+        {
+          "w": "Il",
+          "start": 4.864,
+          "end": 4.992
+        },
+        {
+          "w": "demande",
+          "start": 5.035,
+          "end": 5.248
+        },
+        {
+          "w": "de",
+          "start": 5.291,
+          "end": 5.376
+        },
+        {
+          "w": "conserver",
+          "start": 5.419,
+          "end": 5.845
+        },
+        {
+          "w": "les",
+          "start": 5.888,
+          "end": 5.931
+        },
+        {
+          "w": "trois",
+          "start": 5.973,
+          "end": 6.144
+        },
+        {
+          "w": "actions",
+          "start": 6.187,
+          "end": 6.315
+        },
+        {
+          "w": "et",
+          "start": 6.613,
+          "end": 6.656
+        },
+        {
+          "w": "leur",
+          "start": 6.699,
+          "end": 6.827
+        },
+        {
+          "w": "ordre,",
+          "start": 6.869,
+          "end": 7.339
+        },
+        {
+          "w": "de",
+          "start": 7.509,
+          "end": 7.637
+        },
+        {
+          "w": "remplacer",
+          "start": 7.68,
+          "end": 8.107
+        },
+        {
+          "w": "un",
+          "start": 8.149,
+          "end": 8.192
+        },
+        {
+          "w": "terme",
+          "start": 8.235,
+          "end": 8.448
+        },
+        {
+          "w": "défini,",
+          "start": 8.491,
+          "end": 9.024
+        },
+        {
+          "w": "et",
+          "start": 9.131,
+          "end": 9.387
+        },
+        {
+          "w": "de",
+          "start": 9.429,
+          "end": 9.472
+        },
+        {
+          "w": "produire",
+          "start": 9.515,
+          "end": 9.771
+        },
+        {
+          "w": "une",
+          "start": 9.856,
+          "end": 9.899
+        },
+        {
+          "w": "action",
+          "start": 9.941,
+          "end": 9.984
+        },
+        {
+          "w": "par",
+          "start": 10.24,
+          "end": 10.368
+        },
+        {
+          "w": "ligne",
+          "start": 10.411,
+          "end": 10.709
+        },
+        {
+          "w": "avec",
+          "start": 10.752,
+          "end": 10.965
+        },
+        {
+          "w": "une",
+          "start": 11.008,
+          "end": 11.093
+        },
+        {
+          "w": "limite",
+          "start": 11.136,
+          "end": 11.349
+        },
+        {
+          "w": "de",
+          "start": 11.392,
+          "end": 11.563
+        },
+        {
+          "w": "mots.",
+          "start": 11.605,
+          "end": 11.878
+        },
+        {
+          "w": "Il",
+          "start": 11.981,
+          "end": 12.109
+        },
+        {
+          "w": "interdit",
+          "start": 12.237,
+          "end": 12.493
+        },
+        {
+          "w": "d'inventer,",
+          "start": 12.535,
+          "end": 13.175
+        },
+        {
+          "w": "demande",
+          "start": 13.346,
+          "end": 13.73
+        },
+        {
+          "w": "de",
+          "start": 13.773,
+          "end": 13.815
+        },
+        {
+          "w": "signaler",
+          "start": 13.858,
+          "end": 14.242
+        },
+        {
+          "w": "tout",
+          "start": 14.285,
+          "end": 14.455
+        },
+        {
+          "w": "point",
+          "start": 14.498,
+          "end": 14.711
+        },
+        {
+          "w": "impossible",
+          "start": 14.754,
+          "end": 15.181
+        },
+        {
+          "w": "à",
+          "start": 15.309,
+          "end": 15.351
+        },
+        {
+          "w": "respecter,",
+          "start": 15.394,
+          "end": 15.991
+        },
+        {
+          "w": "et",
+          "start": 16.162,
+          "end": 16.29
+        },
+        {
+          "w": "exige",
+          "start": 16.333,
+          "end": 16.759
+        },
+        {
+          "w": "un",
+          "start": 16.845,
+          "end": 16.887
+        },
+        {
+          "w": "relevé",
+          "start": 16.93,
+          "end": 17.229
+        },
+        {
+          "w": "des",
+          "start": 17.271,
+          "end": 17.357
+        },
+        {
+          "w": "changements,",
+          "start": 17.399,
+          "end": 17.869
+        },
+        {
+          "w": "que",
+          "start": 17.997,
+          "end": 18.082
+        },
+        {
+          "w": "vous",
+          "start": 18.125,
+          "end": 18.21
+        },
+        {
+          "w": "vérifierez",
+          "start": 18.253,
+          "end": 18.679
+        },
+        {
+          "w": "vous-même.",
+          "start": 18.722,
+          "end": 19.353
+        }
+      ]
+    },
+    {
+      "id": "5",
+      "title": "Le conflit des quarante-huit heures",
+      "avatar": "none",
+      "text": "Dans le cas du Playground, le client veut ajouter la règle des quarante-huit heures en gardant exactement la même longueur. Ne cachez pas le conflit : une demande client ne justifie jamais de sacrifier une information indispensable. Protégez la règle validée, et proposez soit une longueur supérieure, soit un renvoi vers une explication. L'IA peut formuler les options. C'est le commanditaire qui choisit.",
+      "audio": "generated/lesson2_5-nathalie/scene-5.wav",
+      "duration": 21.09097505668934,
+      "words": [
+        {
+          "w": "Dans",
+          "start": 0.299,
+          "end": 0.427
+        },
+        {
+          "w": "le",
+          "start": 0.469,
+          "end": 0.512
+        },
+        {
+          "w": "cas",
+          "start": 0.555,
+          "end": 0.683
+        },
+        {
+          "w": "du",
+          "start": 0.725,
+          "end": 0.811
+        },
+        {
+          "w": "Playground,",
+          "start": 0.853,
+          "end": 1.429
+        },
+        {
+          "w": "le",
+          "start": 1.664,
+          "end": 1.835
+        },
+        {
+          "w": "client",
+          "start": 1.877,
+          "end": 2.133
+        },
+        {
+          "w": "veut",
+          "start": 2.176,
+          "end": 2.304
+        },
+        {
+          "w": "ajouter",
+          "start": 2.347,
+          "end": 2.603
+        },
+        {
+          "w": "la",
+          "start": 2.645,
+          "end": 2.731
+        },
+        {
+          "w": "règle",
+          "start": 2.773,
+          "end": 2.987
+        },
+        {
+          "w": "des",
+          "start": 3.072,
+          "end": 3.157
+        },
+        {
+          "w": "quarante-huit",
+          "start": 3.2,
+          "end": 3.627
+        },
+        {
+          "w": "heures",
+          "start": 3.712,
+          "end": 3.883
+        },
+        {
+          "w": "en",
+          "start": 4.053,
+          "end": 4.181
+        },
+        {
+          "w": "gardant",
+          "start": 4.224,
+          "end": 4.48
+        },
+        {
+          "w": "exactement",
+          "start": 4.523,
+          "end": 5.376
+        },
+        {
+          "w": "la",
+          "start": 5.419,
+          "end": 5.504
+        },
+        {
+          "w": "même",
+          "start": 5.547,
+          "end": 5.675
+        },
+        {
+          "w": "longueur.",
+          "start": 5.717,
+          "end": 6.208
+        },
+        {
+          "w": "Ne",
+          "start": 6.443,
+          "end": 6.571
+        },
+        {
+          "w": "cachez",
+          "start": 6.614,
+          "end": 6.784
+        },
+        {
+          "w": "pas",
+          "start": 6.827,
+          "end": 6.955
+        },
+        {
+          "w": "le",
+          "start": 6.997,
+          "end": 7.04
+        },
+        {
+          "w": "conflit",
+          "start": 7.083,
+          "end": 7.381
+        },
+        {
+          "w": ":",
+          "start": 7.424,
+          "end": 7.51
+        },
+        {
+          "w": "une",
+          "start": 7.552,
+          "end": 7.638
+        },
+        {
+          "w": "demande",
+          "start": 7.68,
+          "end": 7.936
+        },
+        {
+          "w": "client",
+          "start": 8.021,
+          "end": 8.32
+        },
+        {
+          "w": "ne",
+          "start": 8.363,
+          "end": 8.448
+        },
+        {
+          "w": "justifie",
+          "start": 8.491,
+          "end": 8.875
+        },
+        {
+          "w": "jamais",
+          "start": 8.918,
+          "end": 9.302
+        },
+        {
+          "w": "de",
+          "start": 9.344,
+          "end": 9.387
+        },
+        {
+          "w": "sacrifier",
+          "start": 9.43,
+          "end": 9.899
+        },
+        {
+          "w": "une",
+          "start": 9.941,
+          "end": 9.984
+        },
+        {
+          "w": "information",
+          "start": 10.027,
+          "end": 10.368
+        },
+        {
+          "w": "indispensable.",
+          "start": 10.539,
+          "end": 11.413
+        },
+        {
+          "w": "Protégez",
+          "start": 11.733,
+          "end": 12.16
+        },
+        {
+          "w": "la",
+          "start": 12.203,
+          "end": 12.245
+        },
+        {
+          "w": "règle",
+          "start": 12.288,
+          "end": 12.459
+        },
+        {
+          "w": "validée,",
+          "start": 12.544,
+          "end": 13.056
+        },
+        {
+          "w": "et",
+          "start": 13.184,
+          "end": 13.398
+        },
+        {
+          "w": "proposez",
+          "start": 13.44,
+          "end": 13.824
+        },
+        {
+          "w": "soit",
+          "start": 13.867,
+          "end": 14.08
+        },
+        {
+          "w": "une",
+          "start": 14.123,
+          "end": 14.165
+        },
+        {
+          "w": "longueur",
+          "start": 14.208,
+          "end": 14.464
+        },
+        {
+          "w": "supérieure,",
+          "start": 14.507,
+          "end": 15.211
+        },
+        {
+          "w": "soit",
+          "start": 15.403,
+          "end": 15.659
+        },
+        {
+          "w": "un",
+          "start": 15.701,
+          "end": 15.744
+        },
+        {
+          "w": "renvoi",
+          "start": 15.787,
+          "end": 16.043
+        },
+        {
+          "w": "vers",
+          "start": 16.085,
+          "end": 16.213
+        },
+        {
+          "w": "une",
+          "start": 16.256,
+          "end": 16.299
+        },
+        {
+          "w": "explication.",
+          "start": 16.341,
+          "end": 17.034
+        },
+        {
+          "w": "L'IA",
+          "start": 17.342,
+          "end": 17.726
+        },
+        {
+          "w": "peut",
+          "start": 17.768,
+          "end": 17.939
+        },
+        {
+          "w": "formuler",
+          "start": 17.982,
+          "end": 18.366
+        },
+        {
+          "w": "les",
+          "start": 18.409,
+          "end": 18.451
+        },
+        {
+          "w": "options.",
+          "start": 18.494,
+          "end": 18.878
+        },
+        {
+          "w": "C'est",
+          "start": 19.177,
+          "end": 19.39
+        },
+        {
+          "w": "le",
+          "start": 19.433,
+          "end": 19.475
+        },
+        {
+          "w": "commanditaire",
+          "start": 19.518,
+          "end": 20.073
+        },
+        {
+          "w": "qui",
+          "start": 20.158,
+          "end": 20.243
+        },
+        {
+          "w": "choisit.",
+          "start": 20.286,
+          "end": 20.891
+        }
+      ]
+    },
+    {
+      "id": "6",
+      "title": "À vous",
+      "avatar": "pip",
+      "text": "Dans le Playground, un même guide fictif se décline pour trois publics : choisissez les leviers, jugez les versions et repérez le prompt complet. Puis optimisez un message pour un nouvel arrivant qui le lit sur son téléphone. Gardez source, prompt, version optimisée, relevé et vérification : ils serviront à la mission.",
+      "audio": "generated/lesson2_5-nathalie/scene-6.wav",
+      "duration": 18.276258503401362,
+      "words": [
+        {
+          "w": "Dans",
+          "start": 0.256,
+          "end": 0.469
+        },
+        {
+          "w": "le",
+          "start": 0.512,
+          "end": 0.555
+        },
+        {
+          "w": "Playground,",
+          "start": 0.597,
+          "end": 1.109
+        },
+        {
+          "w": "un",
+          "start": 1.28,
+          "end": 1.536
+        },
+        {
+          "w": "même",
+          "start": 1.579,
+          "end": 1.792
+        },
+        {
+          "w": "guide",
+          "start": 1.877,
+          "end": 2.005
+        },
+        {
+          "w": "fictif",
+          "start": 2.091,
+          "end": 2.475
+        },
+        {
+          "w": "se",
+          "start": 2.56,
+          "end": 2.645
+        },
+        {
+          "w": "décline",
+          "start": 2.688,
+          "end": 2.987
+        },
+        {
+          "w": "pour",
+          "start": 3.072,
+          "end": 3.157
+        },
+        {
+          "w": "trois",
+          "start": 3.243,
+          "end": 3.413
+        },
+        {
+          "w": "publics",
+          "start": 3.456,
+          "end": 3.755
+        },
+        {
+          "w": ":",
+          "start": 4.011,
+          "end": 4.053
+        },
+        {
+          "w": "choisissez",
+          "start": 4.096,
+          "end": 4.736
+        },
+        {
+          "w": "les",
+          "start": 4.779,
+          "end": 4.821
+        },
+        {
+          "w": "leviers,",
+          "start": 4.864,
+          "end": 5.333
+        },
+        {
+          "w": "jugez",
+          "start": 5.461,
+          "end": 5.803
+        },
+        {
+          "w": "les",
+          "start": 5.845,
+          "end": 5.973
+        },
+        {
+          "w": "versions",
+          "start": 6.016,
+          "end": 6.357
+        },
+        {
+          "w": "et",
+          "start": 6.443,
+          "end": 6.784
+        },
+        {
+          "w": "repérez",
+          "start": 6.827,
+          "end": 7.253
+        },
+        {
+          "w": "le",
+          "start": 7.296,
+          "end": 7.339
+        },
+        {
+          "w": "prompt",
+          "start": 7.381,
+          "end": 7.595
+        },
+        {
+          "w": "complet.",
+          "start": 7.68,
+          "end": 8.171
+        },
+        {
+          "w": "Puis",
+          "start": 8.32,
+          "end": 8.533
+        },
+        {
+          "w": "optimisez",
+          "start": 8.576,
+          "end": 9.131
+        },
+        {
+          "w": "un",
+          "start": 9.173,
+          "end": 9.216
+        },
+        {
+          "w": "message",
+          "start": 9.259,
+          "end": 9.429
+        },
+        {
+          "w": "pour",
+          "start": 9.685,
+          "end": 9.813
+        },
+        {
+          "w": "un",
+          "start": 9.856,
+          "end": 9.899
+        },
+        {
+          "w": "nouvel",
+          "start": 9.941,
+          "end": 10.155
+        },
+        {
+          "w": "arrivant",
+          "start": 10.197,
+          "end": 10.539
+        },
+        {
+          "w": "qui",
+          "start": 10.581,
+          "end": 10.709
+        },
+        {
+          "w": "le",
+          "start": 10.752,
+          "end": 10.795
+        },
+        {
+          "w": "lit",
+          "start": 10.837,
+          "end": 10.965
+        },
+        {
+          "w": "sur",
+          "start": 11.008,
+          "end": 11.093
+        },
+        {
+          "w": "son",
+          "start": 11.136,
+          "end": 11.264
+        },
+        {
+          "w": "téléphone.",
+          "start": 11.264,
+          "end": 11.855
+        },
+        {
+          "w": "Gardez",
+          "start": 12.062,
+          "end": 12.403
+        },
+        {
+          "w": "source,",
+          "start": 12.446,
+          "end": 12.873
+        },
+        {
+          "w": "prompt,",
+          "start": 13.086,
+          "end": 13.598
+        },
+        {
+          "w": "version",
+          "start": 13.811,
+          "end": 14.025
+        },
+        {
+          "w": "optimisée,",
+          "start": 14.238,
+          "end": 14.963
+        },
+        {
+          "w": "relevé",
+          "start": 15.134,
+          "end": 15.518
+        },
+        {
+          "w": "et",
+          "start": 15.646,
+          "end": 15.774
+        },
+        {
+          "w": "vérification",
+          "start": 15.817,
+          "end": 16.286
+        },
+        {
+          "w": ":",
+          "start": 16.542,
+          "end": 16.585
+        },
+        {
+          "w": "ils",
+          "start": 16.627,
+          "end": 16.926
+        },
+        {
+          "w": "serviront",
+          "start": 16.969,
+          "end": 17.395
+        },
+        {
+          "w": "à",
+          "start": 17.438,
+          "end": 17.481
+        },
+        {
+          "w": "la",
+          "start": 17.523,
+          "end": 17.566
+        },
+        {
+          "w": "mission.",
+          "start": 17.609,
+          "end": 18.076
+        }
+      ],
+      "avatarVideo": "generated/lesson2_5-nathalie/avatar-6.mp4",
+      "avatarVideoId": "67adf0446d653e408dee9080bbd63ee3",
+      "avatarDuration": 18.16
+    }
+  ]
+}

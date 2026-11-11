@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap" rel="stylesheet">
+<title>Playground prompt engineering</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#F7F7FA; --surface:#fff; --ink:#1b1a17; --ink-2:#4a4741; --ink-3:#7c786f;
+  --rule:#e4e1d9; --rule-2:#efece5; --accent:#1f4e46; --accent-soft:#eef3f1;
+  --ok:#2c6a48; --ok-soft:#eef4ef; --warn:#8a6519; --warn-soft:#faf4e7;
+  --alert:#963428; --alert-soft:#fbf1ef;
+  --serif:'Funnel Display',Georgia,'Iowan Old Style','Times New Roman',serif;
+  --sans:'Funnel Display',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+}
+body{font-family:var(--sans);font-size:15.5px;line-height:1.65;color:var(--ink);background:var(--paper);padding:0 22px 80px}
+.wrap{width:100%;margin:0 auto}
+
+header.top{padding:40px 0 28px;border-bottom:1px solid var(--rule)}
+.content{margin:0 auto;padding-top:8px}
+.eyebrow{font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px}
+h1{font-family:var(--serif);font-weight:700;font-size:clamp(24px,4vw,34px);color:var(--ink);max-width:30ch}
+.lead{font-family:var(--serif);font-size:17px;color:var(--ink-2);margin-top:16px}
+
+.exercise{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:26px 28px;margin:28px 0}
+.exercise>h2{font-family:var(--serif);font-weight:700;font-size:20px;color:var(--ink);margin-bottom:6px}
+.exercise .scenario{font-size:14px;color:var(--ink-3);margin-bottom:20px;}
+
+fieldset{border:1px solid var(--rule-2);border-radius:10px;padding:16px 18px;margin-bottom:16px;background:var(--paper)}
+legend{font-family:var(--serif);font-size:15.5px;color:var(--ink);padding:0 6px;}
+.choices{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.choice{display:flex;align-items:flex-start;gap:9px;font-size:14.5px;color:var(--ink-2);cursor:pointer}
+.choice input{margin-top:4px;flex-shrink:0}
+.feedback{margin-top:10px;font-size:14px;min-height:18px}
+.feedback.ok{color:var(--ok)}
+.feedback.ko{color:var(--alert)}
+
+.exercise-controls{display:flex;align-items:center;gap:16px;margin-top:6px;flex-wrap:wrap}
+button{font-family:var(--sans);font-weight:700;font-size:14px;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:11px 20px;cursor:pointer;transition:background .15s ease}
+button:hover{background:#163c36}
+button.secondary{background:var(--surface);color:var(--accent);border:1px solid var(--accent)}
+button.secondary:hover{background:var(--accent-soft)}
+.score{font-weight:700;font-size:14.5px}
+.score.ok{color:var(--ok)}
+.score.ko{color:var(--alert)}
+
+.prompt-block{font-family:var(--serif);background:var(--rule-2);border-radius:8px;padding:14px 16px;margin:10px 0 18px;font-size:15px;color:var(--ink);}
+
+textarea.freeform{width:100%;min-height:170px;font-family:var(--sans);font-size:14.5px;line-height:1.55;color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:14px 16px;resize:vertical}
+.autosave-note{font-size:12.5px;color:var(--ink-3);margin-top:6px}
+.corrige{margin-top:16px;border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:8px;padding:16px 18px;font-size:14.5px;color:var(--ink-2)}
+.corrige p{margin-bottom:8px}
+.corrige p:last-child{margin-bottom:0}
+.corrige strong{color:var(--accent)}
+
+.closing-note{margin:36px 0 0;font-size:13px;color:var(--ink-3);text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div class="content">
+    <p class="eyebrow">Playground</p>
+    <h1>Mettre en pratique la structure en cinq éléments</h1>
+    <p class="lead">Trois exercices ancrés dans des situations de préparation de formation SIRH, pour manipuler directement Rôle, Cible, Objectif, Contexte et Format sur des cas proches de ce que vous rédigez réellement. Chaque exercice a son propre bouton de correction et son propre score.</p>
+  </div>
+</header>
+
+<div class="content">
+
+<div class="exercise" id="ex1">
+  <h2>Exercice 1 : repérer ce qui manque ou ce qui est présent</h2>
+  <p class="scenario">Vous préparez une session chez <strong>Cavarec Ingénierie</strong>, sur le module <strong>Entretiens annuels</strong> de l'outil SIRH <strong>Orbiane</strong>.</p>
+
+  <fieldset data-answer="contexte"
+    data-ok="Exact : le rôle, la cible, l'objectif et le format sont bien présents dans ce prompt, mais aucune information de fond (date, heure, lieu, durée de la session) n'est donnée. Le contexte est le seul élément totalement absent."
+    data-why="Regardez à nouveau : le rôle (consultante SIRH), la cible (les collaborateurs de Cavarec Ingénierie), l'objectif (rédiger la convocation) et le format (trois paragraphes, ton professionnel) sont bien présents dans ce prompt. C'est le contexte, la date, l'heure, le lieu et la durée de la session, qui manque entièrement.">
+    <legend>Vous rédigez ce prompt : "Tu es une consultante SIRH qui prépare les supports de formation. Ce mail s'adresse aux collaborateurs de Cavarec Ingénierie qui vont suivre la session sur le module Entretiens annuels d'Orbiane. Rédige une convocation à cette session. Présente le mail en trois courts paragraphes, ton professionnel et chaleureux." Quel élément de la structure est totalement absent de ce prompt ?</legend>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="ex1q1" value="role"> Rôle</label>
+      <label class="choice"><input type="radio" name="ex1q1" value="cible"> Cible</label>
+      <label class="choice"><input type="radio" name="ex1q1" value="objectif"> Objectif</label>
+      <label class="choice"><input type="radio" name="ex1q1" value="contexte"> Contexte</label>
+      <label class="choice"><input type="radio" name="ex1q1" value="format"> Format</label>
+    </div>
+    <p class="feedback" aria-live="polite"></p>
+  </fieldset>
+
+  <fieldset data-answer="objectif"
+    data-ok="Exact : cette phrase indique ce que le résultat doit accomplir — sélectionner et expliquer les trois étapes vues — sans mélanger la contrainte de présentation."
+    data-why="Le Rôle fixe la posture, la Cible désigne les salariés, l'Objectif demande de sélectionner et d'expliquer les trois étapes, et le Format impose une fiche à puces d'une page.">
+    <legend>Une collègue formatrice a rédigé ce prompt : "Tu es une consultante SIRH qui rédige des supports de formation. Cette fiche s'adresse aux salariés de Cavarec Ingénierie qui viennent de suivre la session sur le module Entretiens annuels d'Orbiane. Sélectionne et explique les trois étapes clés du processus vues en session afin qu'ils puissent les reproduire. Présente la réponse sous forme de fiche à puces, un titre par étape, sur une seule page recto." Quel fragment correspond à l'Objectif ?</legend>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="ex1q2" value="role"> "Tu es une consultante SIRH qui rédige des supports de formation."</label>
+      <label class="choice"><input type="radio" name="ex1q2" value="cible"> "Cette fiche s'adresse aux salariés de Cavarec Ingénierie..."</label>
+      <label class="choice"><input type="radio" name="ex1q2" value="objectif"> "Sélectionne et explique les trois étapes clés du processus vues en session afin qu'ils puissent les reproduire."</label>
+      <label class="choice"><input type="radio" name="ex1q2" value="format"> "Présente la réponse sous forme de fiche à puces, un titre par étape..."</label>
+    </div>
+    <p class="feedback" aria-live="polite"></p>
+  </fieldset>
+
+  <div class="exercise-controls">
+    <button type="button" class="btn-check" data-exercise="ex1">Corriger mes réponses</button>
+    <p class="score" data-exercise-score="ex1"></p>
+  </div>
+</div>
+
+<div class="exercise" id="ex2">
+  <h2>Exercice 2 : reconstruire un prompt et justifier vos choix</h2>
+  <p class="scenario">Toujours chez Cavarec Ingénierie, sur la session Entretiens annuels / Orbiane. Votre interlocutrice RH vous écrit simplement :</p>
+  <div class="prompt-block">"Peux-tu nous faire un mail pour prévenir tout le monde du changement de date de la session Orbiane ?"</div>
+  <p class="scenario">Ce n'est pas encore un prompt exploitable : c'est la demande brute de votre interlocutrice. À vous de le transformer en prompt structuré selon Rôle, Cible, Objectif, Contexte, Format, puis de justifier en quelques lignes ce que chaque ajout change concrètement par rapport à la demande brute ci-dessus. Cet exercice n'est pas noté automatiquement : rédigez votre réponse, puis comparez-la au corrigé indicatif.</p>
+
+  <textarea class="freeform" id="ex2-freeform" placeholder="Votre prompt reconstruit (les cinq éléments) puis votre justification..."></textarea>
+  <p class="autosave-note">Votre texte est sauvegardé automatiquement dans ce navigateur au fur et à mesure de la saisie.</p>
+
+  <div class="exercise-controls">
+    <button type="button" class="secondary" id="btn-reveal-ex2">Voir un corrigé indicatif</button>
+  </div>
+
+  <div class="corrige" id="corrige-ex2" hidden>
+    <p><strong>Rôle</strong> : Tu es une consultante SIRH qui rédige des communications aux collaborateurs pour le compte de ses clients.</p>
+    <p><strong>Cible</strong> : Ce mail s'adresse à l'ensemble des collaborateurs de Cavarec Ingénierie déjà inscrits à la session sur le module Entretiens annuels d'Orbiane.</p>
+    <p><strong>Objectif</strong> : Rédige un mail annonçant le changement de date de cette session et invitant chacun à noter la nouvelle date dans son agenda.</p>
+    <p><strong>Contexte</strong> : La session initialement prévue le [date] est reportée au [nouvelle date], même heure, même lieu ; la raison du report n'a pas besoin d'être détaillée.</p>
+    <p><strong>Format</strong> : Mail court, trois paragraphes maximum, ton professionnel et rassurant, objet du mail inclus.</p>
+    <p><strong>Justification</strong> : chaque élément répond à une question que la demande brute laissait ouverte : qui écrit (Rôle), à qui (Cible), pour dire quoi exactement (Objectif), à partir de quelles informations réelles (Contexte), sous quelle forme (Format). La demande initiale ("un mail pour prévenir tout le monde") ne précisait aucun de ces points : le résultat obtenu aurait pu varier fortement en ton, en longueur et même dans la façon d'annoncer le changement.</p>
+  </div>
+</div>
+
+<div class="exercise" id="ex3">
+  <h2>Exercice 3 : vérifier qu'un résultat est adapté et conforme</h2>
+  <p class="scenario">Le prompt structuré de l'exercice précédent a été envoyé. Deux vérifications s'imposent avant d'envoyer le mail : le résultat est-il adapté au besoin, et conforme à ce qui a été demandé ?</p>
+
+  <fieldset data-answer="non_format"
+    data-ok="Exact : le fond du message peut être juste, mais la forme livrée ne correspond pas à ce qui avait été demandé. Un résultat conforme respecte la forme précisée dans le prompt, pas seulement le sujet traité."
+    data-why="Le sujet correct ne suffit pas à rendre un résultat conforme. Le prompt demandait explicitement une liste à puces de cinq points maximum ; un texte rédigé en un seul paragraphe de dix lignes ne respecte pas cette consigne de format, même si le contenu est par ailleurs juste.">
+    <legend>Le prompt envoyé demandait explicitement une réponse "sous forme de liste à puces, cinq points maximum". L'IA renvoie un texte rédigé, en un seul paragraphe de dix lignes, qui couvre bien le sujet demandé. Ce résultat est-il conforme au prompt ?</legend>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="ex3q1" value="oui_sujet"> Oui, puisque le sujet demandé est traité</label>
+      <label class="choice"><input type="radio" name="ex3q1" value="non_format"> Non, le format demandé n'est pas respecté</label>
+      <label class="choice"><input type="radio" name="ex3q1" value="oui_correct"> Oui, du moment que le contenu est correct</label>
+      <label class="choice"><input type="radio" name="ex3q1" value="non_role"> Non, c'est le rôle qui n'est pas respecté</label>
+    </div>
+    <p class="feedback" aria-live="polite"></p>
+  </fieldset>
+
+  <fieldset data-answer="non_cible"
+    data-ok="Exact : la cible demandait un ton rassurant et non technique. Des termes très techniques et un ton froid ne correspondent pas au destinataire visé, même si les cinq points attendus sont bien présents."
+    data-why="Le nombre de points attendus est respecté, mais ce n'est pas ce qui est en cause ici. Le ton employé (technique, froid) ne correspond pas à ce que la cible demandait (rassurant, non technique) : le résultat n'est donc pas adapté à son destinataire.">
+    <legend>Le même prompt demandait un ton rassurant et non technique, destiné à des salariés qui découvrent l'outil. La réponse obtenue liste bien cinq points, mais utilise des termes très techniques et un ton neutre, presque froid. Ce résultat est-il adapté à la cible visée ?</legend>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="ex3q2" value="oui_cinq"> Oui, puisque les cinq points attendus sont là</label>
+      <label class="choice"><input type="radio" name="ex3q2" value="non_cible"> Non, le ton ne correspond pas à la cible demandée</label>
+      <label class="choice"><input type="radio" name="ex3q2" value="oui_technique"> Oui, un ton technique est toujours préférable</label>
+    </div>
+    <p class="feedback" aria-live="polite"></p>
+  </fieldset>
+
+  <div class="exercise-controls">
+    <button type="button" class="btn-check" data-exercise="ex3">Corriger mes réponses</button>
+    <p class="score" data-exercise-score="ex3"></p>
+  </div>
+</div>
+
+<p class="closing-note">Toutes les entreprises, personnes et données chiffrées de cet exercice sont fictives.</p>
+
+</div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  function setupFieedback(fieldset) {
+    var answer = fieldset.getAttribute('data-answer');
+    var okText = fieldset.getAttribute('data-ok');
+    var whyText = fieldset.getAttribute('data-why');
+    var radios = fieldset.querySelectorAll('input[type="radio"]');
+    var feedback = fieldset.querySelector('.feedback');
+    for (var i = 0; i < radios.length; i++) {
+      radios[i].addEventListener('change', function () {
+        var checked = fieldset.querySelector('input[type="radio"]:checked');
+        if (!checked) { return; }
+        if (checked.value === answer) {
+          feedback.textContent = okText;
+          feedback.className = 'feedback ok';
+        } else {
+          feedback.textContent = whyText;
+          feedback.className = 'feedback ko';
+        }
+      });
+    }
+  }
+
+  var allFieldsets = document.querySelectorAll('.exercise fieldset');
+  for (var i = 0; i < allFieldsets.length; i++) {
+    setupFieedback(allFieldsets[i]);
+  }
+
+  var checkButtons = document.querySelectorAll('.btn-check');
+  for (var i = 0; i < checkButtons.length; i++) {
+    checkButtons[i].addEventListener('click', function () {
+      var exId = this.getAttribute('data-exercise');
+      var exerciseEl = document.getElementById(exId);
+      var fieldsets = exerciseEl.querySelectorAll('fieldset');
+      var total = fieldsets.length;
+      var correct = 0;
+      for (var j = 0; j < fieldsets.length; j++) {
+        var answer = fieldsets[j].getAttribute('data-answer');
+        var checked = fieldsets[j].querySelector('input[type="radio"]:checked');
+        if (checked && checked.value === answer) { correct++; }
+      }
+      var pct = total > 0 ? Math.round((correct / total) * 100) : 0;
+      var pass = pct >= 80;
+      var scoreEl = document.querySelector('[data-exercise-score="' + exId + '"]');
+      scoreEl.textContent = 'Score : ' + correct + ' / ' + total + ' (' + pct + ' %). ' + (pass ? 'Bon niveau de maîtrise sur cet exercice.' : 'Reprenez les questions en rouge avant de continuer.');
+      scoreEl.className = pass ? 'score ok' : 'score ko';
+    });
+  }
+
+  // Exercice 2 : zone libre avec autosave localStorage + corrigé masqué
+  var STORAGE_KEY = 'nathalie_playground_2_1_ex2';
+  var freeform = document.getElementById('ex2-freeform');
+  if (freeform) {
+    try {
+      var saved = window.localStorage.getItem(STORAGE_KEY);
+      if (saved) { freeform.value = saved; }
+    } catch (e) { /* stockage local indisponible : on continue sans autosave */ }
+
+    freeform.addEventListener('input', function () {
+      try {
+        window.localStorage.setItem(STORAGE_KEY, freeform.value);
+      } catch (e) { /* stockage local indisponible : on ignore silencieusement */ }
+    });
+  }
+
+  var btnReveal = document.getElementById('btn-reveal-ex2');
+  var corrige = document.getElementById('corrige-ex2');
+  if (btnReveal && corrige) {
+    btnReveal.addEventListener('click', function () {
+      var isHidden = corrige.hidden;
+      corrige.hidden = !isHidden;
+      btnReveal.textContent = isHidden ? 'Masquer le corrigé indicatif' : 'Voir un corrigé indicatif';
+    });
+  }
+})();
+</script>
+
+</body>
+</html>

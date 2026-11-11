@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Playground personnalisé de Nathalie</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --paper:#F7F7FA;
+      --surface:#ffffff;
+      --ink:#1b1a17;
+      --ink-2:#4a4741;
+      --ink-3:#7c786f;
+      --rule:#e4e1d9;
+      --rule-2:#efece5;
+      --accent:#1f4e46;
+      --accent-soft:#eef3f1;
+      --ok:#2c6a48;
+      --ok-soft:#eef4ef;
+      --warn:#8a6519;
+      --warn-soft:#faf4e7;
+      --alert:#963428;
+      --alert-soft:#fbf1ef;
+      --serif:'Funnel Display',Georgia,'Iowan Old Style','Times New Roman',serif;
+      --sans:'Funnel Display',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    }
+    html{scroll-behavior:smooth}
+    body{
+      font-family:var(--sans);font-size:15.5px;color:var(--ink);background:var(--paper);
+      line-height:1.65;-webkit-font-smoothing:antialiased;
+    }
+    a{color:var(--accent)}
+    button,input,textarea,select{font:inherit}
+    .skip{position:absolute;left:-9999px;top:0;background:var(--surface);color:var(--ink);padding:12px;z-index:10}
+    .skip:focus{left:12px}
+
+    .wrap{width:100%;margin:0 auto;padding:0 22px 80px}
+
+    header.top{padding:44px 0 26px;border-bottom:1px solid var(--rule)}
+    header.top h1{
+      font-family:var(--serif);font-size:clamp(28px,4.5vw,37px);line-height:1.2;font-weight:400;
+      letter-spacing:-.01em;margin-bottom:12px;max-width:28ch;
+    }
+    header.top .sub{font-size:15px;color:var(--ink-2);}
+
+    .intro{font-size:16.5px;color:var(--ink-2);margin:26px 0}
+
+    .exercise{margin-top:44px}
+    .exercise h2{
+      font-family:var(--serif);font-size:23px;font-weight:400;line-height:1.3;
+      letter-spacing:-.01em;padding-bottom:12px;border-bottom:1px solid var(--rule);margin-bottom:18px;
+    }
+    .exercise h2 .num{color:var(--accent);font-size:15px;font-family:var(--sans);font-weight:600;letter-spacing:.06em;display:block;margin-bottom:4px;text-transform:uppercase}
+    .instruction{color:var(--ink-2);margin:4px 0 22px;font-size:15px;}
+
+    fieldset{border:1px solid var(--rule);border-radius:3px;margin:16px 0;padding:18px 20px;background:var(--surface)}
+    fieldset.correct{border-color:var(--ok);background:var(--ok-soft)}
+    fieldset.incorrect{border-color:var(--warn);background:var(--warn-soft)}
+    legend{font-weight:600;padding:0 8px;max-width:94%;font-size:15px}
+    .choices{display:grid;gap:7px;margin-top:12px}
+    label.choice{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:3px;cursor:pointer;font-size:14.5px;color:var(--ink-2)}
+    label.choice:hover{background:var(--accent-soft)}
+    input[type="radio"]{width:1.1rem;height:1.1rem;margin-top:.2rem;accent-color:var(--accent);flex:0 0 auto}
+    .feedback{min-height:1.5em;margin:.7rem 0 0;font-weight:500;font-size:14.5px;line-height:1.6}
+    .correct .feedback{color:var(--ok)}
+    .incorrect .feedback{color:var(--warn)}
+
+    .aside{border-left:2px solid var(--rule);padding:2px 0 2px 20px;margin:22px 0;font-size:15px;color:var(--ink-2);}
+    .aside .lab{display:block;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);margin-bottom:5px;font-weight:600}
+    .aside.key{border-left-color:var(--accent)}
+    .aside.key .lab{color:var(--accent)}
+    .aside strong{color:var(--ink);font-weight:600}
+
+    .toolcard{border:1px solid var(--rule);background:var(--surface);padding:20px 22px;margin:16px 0}
+    .toolgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:10px}
+    .tf{display:flex;flex-direction:column;gap:5px}
+    .tf.full{grid-column:1/-1}
+    .tf label{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+    .tf select,.tf input{
+      width:100%;border:1px solid var(--rule);border-radius:3px;padding:9px 10px;
+      background:var(--paper);color:var(--ink);font:inherit;font-size:14.5px;
+    }
+    .tf select:focus,.tf input:focus{outline:none;border-color:var(--accent)}
+    .cardhead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px}
+    .cardname{font-family:var(--serif);font-size:19px}
+    .cardsite{font-size:12.5px;color:var(--ink-3)}
+    .donebox{display:flex;align-items:center;gap:8px;margin-top:12px}
+    .donebox input[type="checkbox"]{width:1.1rem;height:1.1rem;accent-color:var(--ok)}
+    .donebox label{font-size:14px;color:var(--ink-2)}
+
+    .toolbar{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:34px;padding-top:22px;border-top:1px solid var(--rule)}
+    .btn{font:inherit;font-size:14.5px;font-weight:500;border-radius:3px;padding:10px 20px;border:1px solid var(--accent);cursor:pointer;transition:.15s}
+    .btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+    .btn-primary{background:var(--accent);color:#fff}
+    .btn-primary:hover{background:#173b35}
+    .btn-ghost{background:none;color:var(--accent);border-color:var(--rule)}
+    .btn-ghost:hover{border-color:var(--accent)}
+    .ex-score{font-size:14px;font-weight:600;color:var(--ink-2);margin-left:auto}
+    .score-good{color:var(--ok)}
+    .score-review{color:var(--warn)}
+    .trackerNote{font-size:13.5px;color:var(--ink-3);margin-top:10px}
+    .summarybox{background:var(--accent-soft);border:1px solid var(--rule);padding:16px 20px;margin-top:20px;font-size:14.5px;color:var(--ink-2)}
+
+    footer{margin-top:60px;padding-top:22px;border-top:1px solid var(--rule);font-size:12.5px;color:var(--ink-3);line-height:1.7;}
+
+    @media(max-width:700px){
+      .ex-score{width:100%;margin-left:0}
+      header.top h1{font-size:27px}
+    }
+    @media print{
+      .toolbar,.skip,.no-print{display:none}
+      .exercise{break-inside:avoid}
+      body{background:#fff}
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#contenu">Aller au playground</a>
+
+  <div class="wrap">
+    <header class="top">
+      <h1>Nathalie, cadrez vos accès</h1>
+      <p class="sub">Vous travaillez avec plusieurs structures clientes : choisissez un accès autorisé selon le contexte et séparez strictement les comptes. Il n'est ni nécessaire ni souhaitable de créer un compte sur chaque outil.</p>
+    </header>
+
+    <main id="contenu">
+      <p class="intro">Trois temps : choisir l'accès adapté, vérifier vos réflexes de sécurité, puis documenter le statut réel des quatre outils — y compris « non retenu » ou « non autorisé ».</p>
+
+      <form id="quiz" novalidate>
+        <section class="exercise" aria-labelledby="ex1-title">
+          <h2 id="ex1-title"><span class="num">Exercice 1</span>Quel compte, pour quelle situation ?</h2>
+          <p class="instruction">Quatre situations tirées de votre activité de consultante SIRH freelance. Pour chacune, choisissez la meilleure décision.</p>
+
+          <fieldset data-answer="fourni" data-ok="Exact. Un accès fourni par une structure cliente a ses propres règles d'usage : le réutiliser évite de dupliquer un accès déjà en place, et respecte le cadre posé par cette structure." data-why="Créer un compte personnel supplémentaire n'apporte rien ici : l'accès existe déjà, avec des règles propres à cette structure qu'un compte personnel ne reproduirait pas.">
+            <legend>1. Une structure cliente vous donne accès à son environnement Microsoft 365, qui inclut Copilot, pour travailler sur ses documents.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="q1" value="fourni"> Utiliser cet accès fourni, sans créer de compte personnel supplémentaire pour cette mission</label>
+              <label class="choice"><input type="radio" name="q1" value="perso"> Créer quand même un compte Copilot personnel, par sécurité</label>
+              <label class="choice"><input type="radio" name="q1" value="ignorer"> Ignorer cet accès et continuer avec votre outil habituel</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <fieldset data-answer="google" data-ok="Exact, après avoir vérifié que le test et l'usage d'un compte personnel sont autorisés. Gemini repose sur un compte Google." data-why="Le type de compte technique ne remplace pas l'autorisation d'usage. Testez uniquement avec des données fictives et séparez les contextes clients.">
+            <legend>2. Vous voulez tester Google Gemini pour une tâche qui ne concerne aucun client en particulier.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="q2" value="google"> Après vérification du cadre, utiliser un compte Google dédié au test sur données fictives</label>
+              <label class="choice"><input type="radio" name="q2" value="email"> Créer un compte avec n'importe quelle adresse e-mail</label>
+              <label class="choice"><input type="radio" name="q2" value="attendre"> Attendre qu'un client vous en fournisse un</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <fieldset data-answer="sso" data-ok="Exact, si ce compte pivot est autorisé et protégé par une double authentification. Vous devez aussi savoir révoquer l'accès." data-why="Une connexion fédérée évite un mot de passe supplémentaire, mais rattache l'outil au compte choisi : contrôlez les autorisations et ne mélangez pas les clients.">
+            <legend>3. Vous voulez essayer rapidement ChatGPT sans créer un nouveau mot de passe de plus.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="q3" value="sso"> Vous connecter directement avec votre compte Google ou Microsoft déjà existant</label>
+              <label class="choice"><input type="radio" name="q3" value="nouveau"> Créer un compte avec une adresse e-mail et un nouveau mot de passe</label>
+              <label class="choice"><input type="radio" name="q3" value="attendre2"> Renoncer à tester l'outil pour l'instant</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <fieldset data-answer="gestionnaire" data-ok="Exact. Un gestionnaire de mots de passe génère et retient un secret distinct ; ajoutez la double authentification lorsqu'elle est disponible." data-why="Réutiliser le même mot de passe multiplie le risque en cas de fuite d'un seul service.">
+            <legend>4. Vous gérez plusieurs comptes autorisés et hésitez entre réutiliser le même mot de passe ou adopter une autre solution.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="q4" value="gestionnaire"> Utiliser un gestionnaire de mots de passe qui génère un mot de passe distinct pour chaque compte</label>
+              <label class="choice"><input type="radio" name="q4" value="meme"> Réutiliser le même mot de passe, plus simple à retenir</label>
+              <label class="choice"><input type="radio" name="q4" value="noter"> Noter tous les mots de passe identiques dans un fichier texte sur le bureau</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <div class="toolbar no-print">
+            <button class="btn btn-primary grade-btn" type="button">Corriger mes réponses</button>
+            <div class="ex-score" role="status" aria-live="polite">Répondez aux 4 questions</div>
+          </div>
+        </section>
+
+        <section class="exercise" aria-labelledby="ex2-title">
+          <h2 id="ex2-title"><span class="num">Exercice 2</span>Est-ce déjà le bon réflexe ?</h2>
+          <p class="instruction">Pour chaque comportement décrit, dites s'il s'agit déjà du bon réflexe.</p>
+
+          <fieldset data-answer="non" data-ok="Exact. Le mot de passe d'un accès fourni par un client n'a rien à faire sur un compte personnel : les deux doivent rester complètement séparés." data-why="Mélanger un identifiant fourni par un client avec un compte personnel expose ce client en cas de problème sur votre propre compte, et inversement.">
+            <legend>1. Un client vous transmet ses identifiants Microsoft 365 pour Copilot : vous réutilisez ce même mot de passe pour votre compte ChatGPT personnel.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="p1" value="oui"> Oui, bon réflexe</label>
+              <label class="choice"><input type="radio" name="p1" value="non"> Non, pas encore</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <fieldset data-answer="oui" data-ok="Exact. Cette information vous servira directement à compléter la colonne outil choisi de votre plan d'actions." data-why="Savoir si un compte est personnel ou fourni par un client conditionne ce que vous avez le droit d'y faire, et pour combien de temps il reste disponible.">
+            <legend>2. Pour chaque mission, vous notez si le compte utilisé est personnel ou fourni par le client.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="p2" value="oui"> Oui, bon réflexe</label>
+              <label class="choice"><input type="radio" name="p2" value="non"> Non, pas encore</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <fieldset data-answer="verifier" data-ok="Exact. Un accès fourni par une structure dépend souvent d'une activation par son administrateur : c'est le premier point à vérifier en cas de blocage." data-why="Un accès fourni par une structure ne fonctionne pas comme un compte personnel : le faire réinitialiser sans vérifier ce point revient à ignorer la cause la plus probable.">
+            <legend>3. L'accès à Copilot fourni par un client cesse soudainement de fonctionner. Quel est le premier réflexe ?</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="p3" value="verifier"> Vérifier auprès du client si son administrateur a modifié ou retiré cet accès</label>
+              <label class="choice"><input type="radio" name="p3" value="reinitialiser"> Réinitialiser directement le mot de passe sans en parler au client</label>
+              <label class="choice"><input type="radio" name="p3" value="creer"> Créer immédiatement un compte personnel de remplacement</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <fieldset data-answer="oui" data-ok="Exact. Cet accès reste révocable à tout moment depuis les paramètres de sécurité du compte pivot : le savoir permet de réagir vite en cas de doute." data-why="Un compte connecté via Google ou Microsoft reste sous le contrôle de ce compte pivot : vérifier qu'il peut être révoqué à tout moment est exactement le bon réflexe de sécurité.">
+            <legend>4. Vous savez que l'accès donné à un outil via « se connecter avec Google » peut être révoqué à tout moment depuis les paramètres de sécurité de ce compte Google.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="p4" value="oui"> Oui, bon réflexe</label>
+              <label class="choice"><input type="radio" name="p4" value="non"> Non, pas encore</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <div class="toolbar no-print">
+            <button class="btn btn-primary grade-btn" type="button">Corriger mes réponses</button>
+            <div class="ex-score" role="status" aria-live="polite">Répondez aux 4 questions</div>
+          </div>
+        </section>
+      </form>
+
+      <section class="exercise" aria-labelledby="ex3-title">
+        <h2 id="ex3-title"><span class="num">Exercice 3</span>Mon tableau de bord des comptes</h2>
+        <div class="aside key">
+          <span class="lab">À quoi ça sert</span>
+          Reportez dans votre plan uniquement l'outil retenu avec son propriétaire, son offre, son autorisation et la date de vérification. « Non retenu » est une décision valable.
+        </div>
+        <p class="instruction">Pour chacun des quatre outils, indiquez son statut réel sans créer de compte uniquement pour remplir le tableau.</p>
+
+        <div id="toolList"></div>
+
+        <div class="summarybox" id="summaryBox"></div>
+        <p class="trackerNote no-print">Vos réponses sont sauvegardées automatiquement dans ce navigateur au fur et à mesure. Pour en garder une copie durable, ou l'emporter sur un autre appareil, téléchargez-les avec le bouton ci-dessous.</p>
+
+        <div class="toolbar no-print">
+          <button class="btn btn-ghost" id="downloadBtn">Télécharger mon suivi</button>
+          <button class="btn btn-primary" id="printBtn">Imprimer ou enregistrer en PDF</button>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Toutes les entreprises, personnes et données de cet exercice sont fictives. Ce support ne remplace pas la politique interne de vos clients ni les consignes de leur DSI ou de leur DPO.
+    </footer>
+  </div>
+
+  <script>
+    /* =========== EXERCICES 1 ET 2 : correction par exercice =========== */
+    document.querySelectorAll('.grade-btn').forEach((btn) => {
+      const section = btn.closest('.exercise');
+      const fieldsets = [...section.querySelectorAll('fieldset[data-answer]')];
+      const scoreEl = section.querySelector('.ex-score');
+      const threshold = Math.max(1, Math.ceil(fieldsets.length * 0.8));
+
+      btn.addEventListener('click', () => {
+        let score = 0;
+        let answered = 0;
+        fieldsets.forEach((fieldset) => {
+          const selected = fieldset.querySelector('input:checked');
+          const feedback = fieldset.querySelector('.feedback');
+          fieldset.classList.remove('correct', 'incorrect');
+          if (!selected) {
+            feedback.textContent = 'Choisissez une réponse.';
+            fieldset.classList.add('incorrect');
+            return;
+          }
+          answered += 1;
+          if (selected.value === fieldset.dataset.answer) {
+            score += 1;
+            fieldset.classList.add('correct');
+            feedback.textContent = fieldset.dataset.ok;
+          } else {
+            fieldset.classList.add('incorrect');
+            feedback.textContent = `À revoir. ${fieldset.dataset.why}`;
+          }
+        });
+        scoreEl.className = 'ex-score ' + (score >= threshold ? 'score-good' : 'score-review');
+        if (answered < fieldsets.length) {
+          scoreEl.textContent = `${answered}/${fieldsets.length} réponses données. Score provisoire : ${score}/${fieldsets.length}.`;
+        } else if (score === fieldsets.length) {
+          scoreEl.textContent = `${score}/${fieldsets.length}. Tout est juste.`;
+        } else if (score >= threshold) {
+          scoreEl.textContent = `${score}/${fieldsets.length}. Relisez les retours en couleur, puis continuez.`;
+        } else {
+          scoreEl.textContent = `${score}/${fieldsets.length}. Relisez les retours en couleur avant de poursuivre.`;
+        }
+        section.querySelector('.incorrect')?.scrollIntoView({ behavior:'smooth', block:'center' });
+      });
+    });
+
+    /* =========== EXERCICE 3 : tableau de bord des comptes =========== */
+    var TOOLS_DEFAULT = [
+      { name:"ChatGPT", site:"chatgpt.com", statut:"", explore:false, note:"" },
+      { name:"Google Gemini", site:"gemini.google.com", statut:"", explore:false, note:"" },
+      { name:"Microsoft Copilot", site:"copilot.com", statut:"", explore:false, note:"" },
+      { name:"Adobe Firefly", site:"firefly.adobe.com", statut:"", explore:false, note:"" }
+    ];
+    var STATUTS = ["", "Autorisé — personnel gratuit", "Autorisé — personnel payant", "Autorisé — fourni par un client", "À étudier / validation requise", "Non retenu ou non autorisé"];
+
+    var STORAGE_KEY = "playground_nathalie_lecon1.4_comptes";
+    var TOOLS = TOOLS_DEFAULT.map(function(t){ return Object.assign({}, t); });
+
+    function loadState(){
+      try{
+        var raw = localStorage.getItem(STORAGE_KEY);
+        if(!raw) return null;
+        var data = JSON.parse(raw);
+        if(!data || !Array.isArray(data.tools)) return null;
+        return data;
+      } catch(e){ return null; }
+    }
+    var saved = loadState();
+    if(saved && saved.tools.length === TOOLS.length){ TOOLS = saved.tools; }
+
+    function saveState(){
+      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify({ v:1, tools: TOOLS })); }
+      catch(e){ /* stockage indisponible : la page continue sans sauvegarde automatique */ }
+    }
+
+    function drawTools(){
+      document.getElementById("toolList").innerHTML = TOOLS.map(function(t, i){
+        var opts = STATUTS.map(function(s){
+          return '<option value="'+s+'"'+(t.statut===s?' selected':'')+'>'+(s||"Choisissez...")+'</option>';
+        }).join("");
+        return '<div class="toolcard" data-i="'+i+'">'+
+          '<div class="cardhead"><span class="cardname">'+t.name+'</span><span class="cardsite">'+t.site+'</span></div>'+
+          '<div class="toolgrid">'+
+            '<div class="tf"><label>Statut du compte</label><select data-i="'+i+'" data-k="statut">'+opts+'</select></div>'+
+            '<div class="tf full"><label>Notes</label><input type="text" data-i="'+i+'" data-k="note" value="'+(t.note||"").replace(/"/g,'&quot;')+'" placeholder="Ex. compte fourni par tel client, à ne pas mélanger avec mon usage personnel"></div>'+
+          '</div>'+
+          '<div class="donebox"><input type="checkbox" id="explore-'+i+'" data-i="'+i+'" data-k="explore" '+(t.explore?'checked':'')+'><label for="explore-'+i+'">Interface explorée (commandes principales repérées)</label></div>'+
+        '</div>';
+      }).join("");
+      updateSummary();
+    }
+
+    function updateSummary(){
+      var created = TOOLS.filter(function(t){ return !!t.statut; }).length;
+      var explored = TOOLS.filter(function(t){ return t.explore; }).length;
+      document.getElementById("summaryBox").textContent =
+        created + " statut" + (created>1?"s":"") + " sur 4 renseigné" + (created>1?"s":"") + ", " +
+        explored + " interface" + (explored>1?"s":"") + " sur 4 explorée" + (explored>1?"s":"") + ".";
+    }
+
+    drawTools();
+
+    document.getElementById("toolList").addEventListener("input", function(e){
+      var t = e.target;
+      if(t.dataset.i === undefined) return;
+      var i = +t.dataset.i, k = t.dataset.k;
+      TOOLS[i][k] = t.type === "checkbox" ? t.checked : t.value;
+      saveState();
+      updateSummary();
+    });
+    document.getElementById("toolList").addEventListener("change", function(e){
+      var t = e.target;
+      if(t.dataset.i === undefined) return;
+      var i = +t.dataset.i, k = t.dataset.k;
+      TOOLS[i][k] = t.type === "checkbox" ? t.checked : t.value;
+      saveState();
+      updateSummary();
+    });
+
+    function buildSummaryText(){
+      var lines = ["Mon tableau de bord des comptes IA", ""];
+      TOOLS.forEach(function(t){
+        lines.push(t.name + " (" + t.site + ")");
+        lines.push("- Statut du compte : " + (t.statut || "à compléter"));
+        lines.push("- Interface explorée : " + (t.explore ? "oui" : "non"));
+        lines.push("- Notes : " + (t.note || "aucune"));
+        lines.push("");
+      });
+      return lines.join("\n");
+    }
+
+    document.getElementById("downloadBtn").addEventListener("click", function(){
+      var text = buildSummaryText();
+      var blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = "mon-tableau-de-bord-comptes-ia.txt";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+    });
+
+    document.getElementById("printBtn").addEventListener("click", function(){ window.print(); });
+  </script>
+</body>
+</html>

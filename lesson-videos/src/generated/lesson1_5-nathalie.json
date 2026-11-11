@@ -1,0 +1,1696 @@
+{
+  "name": "lesson1_5-nathalie",
+  "source": "../docs/formation-rs6776/lecon-1.5/script-video-nathalie.md",
+  "voice": "341b4807e5e6455fa88f34bda5d6eeea",
+  "model": "heygen-voice-1-turbo-free",
+  "total": 103.81895691609978,
+  "avatarSeconds": 29.582040816326533,
+  "scenes": [
+    {
+      "id": "1",
+      "title": "Accroche",
+      "avatar": "full",
+      "text": "Bonjour Nathalie. Vous avez vu les réflexes de la vidéo de la leçon : retirer, cloisonner, relire. Ils prennent un sens très concret au moment précis où vous préparez un guide ou un support de formation SIRH pour un client. C'est ce qu'on regarde ensemble.",
+      "audio": "generated/lesson1_5-nathalie/scene-1.wav",
+      "duration": 14.161836734693878,
+      "words": [
+        {
+          "w": "Bonjour",
+          "start": 0.299,
+          "end": 0.597
+        },
+        {
+          "w": "Nathalie.",
+          "start": 0.64,
+          "end": 1.237
+        },
+        {
+          "w": "Vous",
+          "start": 1.536,
+          "end": 1.707
+        },
+        {
+          "w": "avez",
+          "start": 1.749,
+          "end": 1.877
+        },
+        {
+          "w": "vu",
+          "start": 1.92,
+          "end": 2.005
+        },
+        {
+          "w": "les",
+          "start": 2.048,
+          "end": 2.091
+        },
+        {
+          "w": "réflexes",
+          "start": 2.133,
+          "end": 2.475
+        },
+        {
+          "w": "de",
+          "start": 2.517,
+          "end": 2.56
+        },
+        {
+          "w": "la",
+          "start": 2.603,
+          "end": 2.645
+        },
+        {
+          "w": "vidéo",
+          "start": 2.688,
+          "end": 2.987
+        },
+        {
+          "w": "de",
+          "start": 3.029,
+          "end": 3.072
+        },
+        {
+          "w": "la",
+          "start": 3.115,
+          "end": 3.2
+        },
+        {
+          "w": "leçon",
+          "start": 3.243,
+          "end": 3.541
+        },
+        {
+          "w": ":",
+          "start": 3.712,
+          "end": 3.797
+        },
+        {
+          "w": "retirer,",
+          "start": 3.84,
+          "end": 4.501
+        },
+        {
+          "w": "cloisonner,",
+          "start": 4.651,
+          "end": 5.312
+        },
+        {
+          "w": "relire.",
+          "start": 5.547,
+          "end": 6.145
+        },
+        {
+          "w": "Ils",
+          "start": 6.36,
+          "end": 6.574
+        },
+        {
+          "w": "prennent",
+          "start": 6.616,
+          "end": 6.83
+        },
+        {
+          "w": "un",
+          "start": 6.872,
+          "end": 6.915
+        },
+        {
+          "w": "sens",
+          "start": 6.957,
+          "end": 7.085
+        },
+        {
+          "w": "très",
+          "start": 7.213,
+          "end": 7.47
+        },
+        {
+          "w": "concret",
+          "start": 7.512,
+          "end": 7.896
+        },
+        {
+          "w": "au",
+          "start": 7.981,
+          "end": 8.067
+        },
+        {
+          "w": "moment",
+          "start": 8.11,
+          "end": 8.195
+        },
+        {
+          "w": "précis",
+          "start": 8.323,
+          "end": 8.792
+        },
+        {
+          "w": "où",
+          "start": 8.877,
+          "end": 9.005
+        },
+        {
+          "w": "vous",
+          "start": 9.048,
+          "end": 9.133
+        },
+        {
+          "w": "préparez",
+          "start": 9.176,
+          "end": 9.518
+        },
+        {
+          "w": "un",
+          "start": 9.56,
+          "end": 9.603
+        },
+        {
+          "w": "guide",
+          "start": 9.646,
+          "end": 9.859
+        },
+        {
+          "w": "ou",
+          "start": 9.944,
+          "end": 10.03
+        },
+        {
+          "w": "un",
+          "start": 10.072,
+          "end": 10.115
+        },
+        {
+          "w": "support",
+          "start": 10.158,
+          "end": 10.328
+        },
+        {
+          "w": "de",
+          "start": 10.456,
+          "end": 10.541
+        },
+        {
+          "w": "formation",
+          "start": 10.584,
+          "end": 10.84
+        },
+        {
+          "w": "SIRH",
+          "start": 11.053,
+          "end": 11.651
+        },
+        {
+          "w": "pour",
+          "start": 11.779,
+          "end": 11.907
+        },
+        {
+          "w": "un",
+          "start": 11.95,
+          "end": 11.992
+        },
+        {
+          "w": "client.",
+          "start": 12.035,
+          "end": 12.504
+        },
+        {
+          "w": "C'est",
+          "start": 12.675,
+          "end": 12.803
+        },
+        {
+          "w": "ce",
+          "start": 12.845,
+          "end": 12.888
+        },
+        {
+          "w": "qu'on",
+          "start": 12.931,
+          "end": 13.101
+        },
+        {
+          "w": "regarde",
+          "start": 13.144,
+          "end": 13.272
+        },
+        {
+          "w": "ensemble.",
+          "start": 13.315,
+          "end": 13.992
+        }
+      ],
+      "avatarVideo": "generated/lesson1_5-nathalie/avatar-1.mp4",
+      "avatarVideoId": "d8ce3d974996381dab09ea25a01cfeab",
+      "avatarDuration": 14.04
+    },
+    {
+      "id": "2",
+      "title": "Vos captures d'écran",
+      "avatar": "none",
+      "text": "Vous partez souvent d'une capture d'écran réelle du SIRH d'un client, avec un nom de salarié ou un montant de bulletin encore visible. Pour faire rédiger le texte d'accompagnement, ce nom et ce montant n'ont rien à faire dans le prompt. Et si l'image elle-même doit être transmise, créez d'abord une capture de démonstration entièrement fictive. Un cache posé sur une capture réelle peut être réversible, ou laisser d'autres identifiants.",
+      "audio": "generated/lesson1_5-nathalie/scene-2.wav",
+      "duration": 22.340362811791383,
+      "words": [
+        {
+          "w": "Vous",
+          "start": 0.299,
+          "end": 0.469
+        },
+        {
+          "w": "partez",
+          "start": 0.512,
+          "end": 0.725
+        },
+        {
+          "w": "souvent",
+          "start": 0.768,
+          "end": 0.981
+        },
+        {
+          "w": "d'une",
+          "start": 1.024,
+          "end": 1.152
+        },
+        {
+          "w": "capture",
+          "start": 1.195,
+          "end": 1.536
+        },
+        {
+          "w": "d'écran",
+          "start": 1.579,
+          "end": 1.877
+        },
+        {
+          "w": "réelle",
+          "start": 1.92,
+          "end": 2.261
+        },
+        {
+          "w": "du",
+          "start": 2.347,
+          "end": 2.432
+        },
+        {
+          "w": "SIRH",
+          "start": 2.475,
+          "end": 2.944
+        },
+        {
+          "w": "d'un",
+          "start": 3.029,
+          "end": 3.157
+        },
+        {
+          "w": "client,",
+          "start": 3.2,
+          "end": 3.605
+        },
+        {
+          "w": "avec",
+          "start": 3.755,
+          "end": 4.053
+        },
+        {
+          "w": "un",
+          "start": 4.096,
+          "end": 4.224
+        },
+        {
+          "w": "nom",
+          "start": 4.267,
+          "end": 4.352
+        },
+        {
+          "w": "de",
+          "start": 4.395,
+          "end": 4.437
+        },
+        {
+          "w": "salarié",
+          "start": 4.48,
+          "end": 4.907
+        },
+        {
+          "w": "ou",
+          "start": 5.077,
+          "end": 5.163
+        },
+        {
+          "w": "un",
+          "start": 5.205,
+          "end": 5.248
+        },
+        {
+          "w": "montant",
+          "start": 5.291,
+          "end": 5.589
+        },
+        {
+          "w": "de",
+          "start": 5.632,
+          "end": 5.675
+        },
+        {
+          "w": "bulletin",
+          "start": 5.717,
+          "end": 5.973
+        },
+        {
+          "w": "encore",
+          "start": 6.059,
+          "end": 6.272
+        },
+        {
+          "w": "visible.",
+          "start": 6.315,
+          "end": 6.824
+        },
+        {
+          "w": "Pour",
+          "start": 7.035,
+          "end": 7.206
+        },
+        {
+          "w": "faire",
+          "start": 7.248,
+          "end": 7.376
+        },
+        {
+          "w": "rédiger",
+          "start": 7.419,
+          "end": 7.76
+        },
+        {
+          "w": "le",
+          "start": 7.803,
+          "end": 7.846
+        },
+        {
+          "w": "texte",
+          "start": 7.888,
+          "end": 8.102
+        },
+        {
+          "w": "d'accompagnement,",
+          "start": 8.187,
+          "end": 8.955
+        },
+        {
+          "w": "ce",
+          "start": 9.168,
+          "end": 9.339
+        },
+        {
+          "w": "nom",
+          "start": 9.382,
+          "end": 9.552
+        },
+        {
+          "w": "et",
+          "start": 9.638,
+          "end": 9.68
+        },
+        {
+          "w": "ce",
+          "start": 9.723,
+          "end": 9.808
+        },
+        {
+          "w": "montant",
+          "start": 9.851,
+          "end": 10.15
+        },
+        {
+          "w": "n'ont",
+          "start": 10.192,
+          "end": 10.32
+        },
+        {
+          "w": "rien",
+          "start": 10.363,
+          "end": 10.534
+        },
+        {
+          "w": "à",
+          "start": 10.576,
+          "end": 10.662
+        },
+        {
+          "w": "faire",
+          "start": 10.704,
+          "end": 10.832
+        },
+        {
+          "w": "dans",
+          "start": 10.875,
+          "end": 10.96
+        },
+        {
+          "w": "le",
+          "start": 11.003,
+          "end": 11.046
+        },
+        {
+          "w": "prompt.",
+          "start": 11.088,
+          "end": 11.494
+        },
+        {
+          "w": "Et",
+          "start": 11.686,
+          "end": 11.771
+        },
+        {
+          "w": "si",
+          "start": 11.814,
+          "end": 11.942
+        },
+        {
+          "w": "l'image",
+          "start": 11.984,
+          "end": 12.24
+        },
+        {
+          "w": "elle-même",
+          "start": 12.326,
+          "end": 12.624
+        },
+        {
+          "w": "doit",
+          "start": 12.71,
+          "end": 12.838
+        },
+        {
+          "w": "être",
+          "start": 12.88,
+          "end": 13.051
+        },
+        {
+          "w": "transmise,",
+          "start": 13.136,
+          "end": 13.819
+        },
+        {
+          "w": "créez",
+          "start": 14.075,
+          "end": 14.374
+        },
+        {
+          "w": "d'abord",
+          "start": 14.416,
+          "end": 14.587
+        },
+        {
+          "w": "une",
+          "start": 14.63,
+          "end": 14.672
+        },
+        {
+          "w": "capture",
+          "start": 14.715,
+          "end": 15.056
+        },
+        {
+          "w": "de",
+          "start": 15.099,
+          "end": 15.184
+        },
+        {
+          "w": "démonstration",
+          "start": 15.227,
+          "end": 15.654
+        },
+        {
+          "w": "entièrement",
+          "start": 15.867,
+          "end": 16.422
+        },
+        {
+          "w": "fictive.",
+          "start": 16.464,
+          "end": 17.031
+        },
+        {
+          "w": "Un",
+          "start": 17.214,
+          "end": 17.427
+        },
+        {
+          "w": "cache",
+          "start": 17.47,
+          "end": 17.683
+        },
+        {
+          "w": "posé",
+          "start": 17.726,
+          "end": 17.982
+        },
+        {
+          "w": "sur",
+          "start": 18.025,
+          "end": 18.11
+        },
+        {
+          "w": "une",
+          "start": 18.153,
+          "end": 18.195
+        },
+        {
+          "w": "capture",
+          "start": 18.281,
+          "end": 18.579
+        },
+        {
+          "w": "réelle",
+          "start": 18.622,
+          "end": 19.006
+        },
+        {
+          "w": "peut",
+          "start": 19.049,
+          "end": 19.177
+        },
+        {
+          "w": "être",
+          "start": 19.22,
+          "end": 19.348
+        },
+        {
+          "w": "réversible,",
+          "start": 19.476,
+          "end": 20.222
+        },
+        {
+          "w": "ou",
+          "start": 20.372,
+          "end": 20.585
+        },
+        {
+          "w": "laisser",
+          "start": 20.628,
+          "end": 20.841
+        },
+        {
+          "w": "d'autres",
+          "start": 20.884,
+          "end": 21.097
+        },
+        {
+          "w": "identifiants.",
+          "start": 21.14,
+          "end": 22.14
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "title": "Retirer ou garder",
+      "avatar": "none",
+      "text": "Faites le tri, information par information. Le numéro de sécurité sociale d'un salarié sur une fiche de paie d'exemple : retiré entièrement. Le nom du module à documenter, la gestion des congés par exemple : gardé, l'outil en a besoin. Le nom d'un salarié dans la capture : retiré. Et le nom du client, dans un paragraphe de méthode qui ne le concerne pas : retiré aussi.",
+      "audio": "generated/lesson1_5-nathalie/scene-3.wav",
+      "duration": 21.09097505668934,
+      "words": [
+        {
+          "w": "Faites",
+          "start": 0.299,
+          "end": 0.469
+        },
+        {
+          "w": "le",
+          "start": 0.512,
+          "end": 0.64
+        },
+        {
+          "w": "tri,",
+          "start": 0.683,
+          "end": 0.96
+        },
+        {
+          "w": "information",
+          "start": 1.067,
+          "end": 1.579
+        },
+        {
+          "w": "par",
+          "start": 1.835,
+          "end": 2.005
+        },
+        {
+          "w": "information.",
+          "start": 2.048,
+          "end": 2.795
+        },
+        {
+          "w": "Le",
+          "start": 3.157,
+          "end": 3.243
+        },
+        {
+          "w": "numéro",
+          "start": 3.285,
+          "end": 3.584
+        },
+        {
+          "w": "de",
+          "start": 3.627,
+          "end": 3.669
+        },
+        {
+          "w": "sécurité",
+          "start": 3.712,
+          "end": 4.096
+        },
+        {
+          "w": "sociale",
+          "start": 4.139,
+          "end": 4.437
+        },
+        {
+          "w": "d'un",
+          "start": 4.523,
+          "end": 4.651
+        },
+        {
+          "w": "salarié",
+          "start": 4.693,
+          "end": 5.12
+        },
+        {
+          "w": "sur",
+          "start": 5.205,
+          "end": 5.333
+        },
+        {
+          "w": "une",
+          "start": 5.376,
+          "end": 5.461
+        },
+        {
+          "w": "fiche",
+          "start": 5.504,
+          "end": 5.76
+        },
+        {
+          "w": "de",
+          "start": 5.803,
+          "end": 5.888
+        },
+        {
+          "w": "paie",
+          "start": 5.931,
+          "end": 6.059
+        },
+        {
+          "w": "d'exemple",
+          "start": 6.101,
+          "end": 6.528
+        },
+        {
+          "w": ":",
+          "start": 6.571,
+          "end": 6.613
+        },
+        {
+          "w": "retiré",
+          "start": 6.656,
+          "end": 7.083
+        },
+        {
+          "w": "entièrement.",
+          "start": 7.083,
+          "end": 7.661
+        },
+        {
+          "w": "Le",
+          "start": 7.813,
+          "end": 7.941
+        },
+        {
+          "w": "nom",
+          "start": 7.984,
+          "end": 8.111
+        },
+        {
+          "w": "du",
+          "start": 8.154,
+          "end": 8.239
+        },
+        {
+          "w": "module",
+          "start": 8.282,
+          "end": 8.538
+        },
+        {
+          "w": "à",
+          "start": 8.581,
+          "end": 8.623
+        },
+        {
+          "w": "documenter,",
+          "start": 8.666,
+          "end": 9.264
+        },
+        {
+          "w": "la",
+          "start": 9.52,
+          "end": 9.775
+        },
+        {
+          "w": "gestion",
+          "start": 9.818,
+          "end": 10.117
+        },
+        {
+          "w": "des",
+          "start": 10.159,
+          "end": 10.245
+        },
+        {
+          "w": "congés",
+          "start": 10.287,
+          "end": 10.629
+        },
+        {
+          "w": "par",
+          "start": 10.671,
+          "end": 10.757
+        },
+        {
+          "w": "exemple",
+          "start": 10.8,
+          "end": 11.226
+        },
+        {
+          "w": ":",
+          "start": 11.312,
+          "end": 11.354
+        },
+        {
+          "w": "gardé,",
+          "start": 11.397,
+          "end": 11.951
+        },
+        {
+          "w": "l'outil",
+          "start": 12.122,
+          "end": 12.549
+        },
+        {
+          "w": "en",
+          "start": 12.591,
+          "end": 12.634
+        },
+        {
+          "w": "a",
+          "start": 12.677,
+          "end": 12.72
+        },
+        {
+          "w": "besoin.",
+          "start": 12.762,
+          "end": 13.295
+        },
+        {
+          "w": "Le",
+          "start": 13.53,
+          "end": 13.658
+        },
+        {
+          "w": "nom",
+          "start": 13.743,
+          "end": 13.829
+        },
+        {
+          "w": "d'un",
+          "start": 13.871,
+          "end": 13.999
+        },
+        {
+          "w": "salarié",
+          "start": 14.042,
+          "end": 14.426
+        },
+        {
+          "w": "dans",
+          "start": 14.469,
+          "end": 14.554
+        },
+        {
+          "w": "la",
+          "start": 14.597,
+          "end": 14.639
+        },
+        {
+          "w": "capture",
+          "start": 14.682,
+          "end": 15.066
+        },
+        {
+          "w": ":",
+          "start": 15.109,
+          "end": 15.152
+        },
+        {
+          "w": "retiré.",
+          "start": 15.194,
+          "end": 15.998
+        },
+        {
+          "w": "Et",
+          "start": 16.204,
+          "end": 16.375
+        },
+        {
+          "w": "le",
+          "start": 16.417,
+          "end": 16.46
+        },
+        {
+          "w": "nom",
+          "start": 16.503,
+          "end": 16.631
+        },
+        {
+          "w": "du",
+          "start": 16.673,
+          "end": 16.759
+        },
+        {
+          "w": "client,",
+          "start": 16.801,
+          "end": 17.207
+        },
+        {
+          "w": "dans",
+          "start": 17.313,
+          "end": 17.484
+        },
+        {
+          "w": "un",
+          "start": 17.527,
+          "end": 17.612
+        },
+        {
+          "w": "paragraphe",
+          "start": 17.655,
+          "end": 18.081
+        },
+        {
+          "w": "de",
+          "start": 18.124,
+          "end": 18.167
+        },
+        {
+          "w": "méthode",
+          "start": 18.209,
+          "end": 18.465
+        },
+        {
+          "w": "qui",
+          "start": 18.551,
+          "end": 18.679
+        },
+        {
+          "w": "ne",
+          "start": 18.721,
+          "end": 18.764
+        },
+        {
+          "w": "le",
+          "start": 18.807,
+          "end": 18.849
+        },
+        {
+          "w": "concerne",
+          "start": 18.892,
+          "end": 19.148
+        },
+        {
+          "w": "pas",
+          "start": 19.276,
+          "end": 19.447
+        },
+        {
+          "w": ":",
+          "start": 19.489,
+          "end": 19.66
+        },
+        {
+          "w": "retiré",
+          "start": 19.873,
+          "end": 20.343
+        },
+        {
+          "w": "aussi.",
+          "start": 20.385,
+          "end": 20.891
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "title": "Une conversation par client",
+      "avatar": "none",
+      "text": "Vous intervenez sur plusieurs SIRH, chez plusieurs clients. Gardez une conversation distincte pour chacun, jamais un même fil pour trois clients. Vérifiez aussi les fichiers joints, la mémoire et l'historique de chaque compte. Et quand une mission se termine, n'utilisez plus le compte que ce client vous avait ouvert, même au cas où.",
+      "audio": "generated/lesson1_5-nathalie/scene-4.wav",
+      "duration": 16.999160997732428,
+      "words": [
+        {
+          "w": "Vous",
+          "start": 0.256,
+          "end": 0.427
+        },
+        {
+          "w": "intervenez",
+          "start": 0.469,
+          "end": 0.939
+        },
+        {
+          "w": "sur",
+          "start": 0.981,
+          "end": 1.067
+        },
+        {
+          "w": "plusieurs",
+          "start": 1.109,
+          "end": 1.451
+        },
+        {
+          "w": "SIRH,",
+          "start": 1.536,
+          "end": 2.176
+        },
+        {
+          "w": "chez",
+          "start": 2.389,
+          "end": 2.517
+        },
+        {
+          "w": "plusieurs",
+          "start": 2.56,
+          "end": 2.859
+        },
+        {
+          "w": "clients.",
+          "start": 2.901,
+          "end": 3.456
+        },
+        {
+          "w": "Gardez",
+          "start": 3.712,
+          "end": 4.096
+        },
+        {
+          "w": "une",
+          "start": 4.139,
+          "end": 4.181
+        },
+        {
+          "w": "conversation",
+          "start": 4.224,
+          "end": 4.565
+        },
+        {
+          "w": "distincte",
+          "start": 4.736,
+          "end": 5.248
+        },
+        {
+          "w": "pour",
+          "start": 5.333,
+          "end": 5.419
+        },
+        {
+          "w": "chacun,",
+          "start": 5.461,
+          "end": 5.931
+        },
+        {
+          "w": "jamais",
+          "start": 6.059,
+          "end": 6.485
+        },
+        {
+          "w": "un",
+          "start": 6.528,
+          "end": 6.571
+        },
+        {
+          "w": "même",
+          "start": 6.613,
+          "end": 6.741
+        },
+        {
+          "w": "fil",
+          "start": 6.784,
+          "end": 6.997
+        },
+        {
+          "w": "pour",
+          "start": 7.083,
+          "end": 7.168
+        },
+        {
+          "w": "trois",
+          "start": 7.211,
+          "end": 7.381
+        },
+        {
+          "w": "clients.",
+          "start": 7.424,
+          "end": 7.828
+        },
+        {
+          "w": "Vérifiez",
+          "start": 7.975,
+          "end": 8.402
+        },
+        {
+          "w": "aussi",
+          "start": 8.445,
+          "end": 8.53
+        },
+        {
+          "w": "les",
+          "start": 8.658,
+          "end": 8.743
+        },
+        {
+          "w": "fichiers",
+          "start": 8.786,
+          "end": 8.999
+        },
+        {
+          "w": "joints,",
+          "start": 9.042,
+          "end": 9.426
+        },
+        {
+          "w": "la",
+          "start": 9.511,
+          "end": 9.639
+        },
+        {
+          "w": "mémoire",
+          "start": 9.682,
+          "end": 10.023
+        },
+        {
+          "w": "et",
+          "start": 10.237,
+          "end": 10.279
+        },
+        {
+          "w": "l'historique",
+          "start": 10.322,
+          "end": 10.706
+        },
+        {
+          "w": "de",
+          "start": 10.749,
+          "end": 10.834
+        },
+        {
+          "w": "chaque",
+          "start": 10.877,
+          "end": 11.005
+        },
+        {
+          "w": "compte.",
+          "start": 11.09,
+          "end": 11.602
+        },
+        {
+          "w": "Et",
+          "start": 11.901,
+          "end": 11.986
+        },
+        {
+          "w": "quand",
+          "start": 12.029,
+          "end": 12.114
+        },
+        {
+          "w": "une",
+          "start": 12.199,
+          "end": 12.242
+        },
+        {
+          "w": "mission",
+          "start": 12.285,
+          "end": 12.413
+        },
+        {
+          "w": "se",
+          "start": 12.583,
+          "end": 12.669
+        },
+        {
+          "w": "termine,",
+          "start": 12.711,
+          "end": 13.159
+        },
+        {
+          "w": "n'utilisez",
+          "start": 13.309,
+          "end": 13.863
+        },
+        {
+          "w": "plus",
+          "start": 13.906,
+          "end": 14.077
+        },
+        {
+          "w": "le",
+          "start": 14.119,
+          "end": 14.162
+        },
+        {
+          "w": "compte",
+          "start": 14.205,
+          "end": 14.418
+        },
+        {
+          "w": "que",
+          "start": 14.503,
+          "end": 14.546
+        },
+        {
+          "w": "ce",
+          "start": 14.589,
+          "end": 14.674
+        },
+        {
+          "w": "client",
+          "start": 14.717,
+          "end": 15.015
+        },
+        {
+          "w": "vous",
+          "start": 15.058,
+          "end": 15.143
+        },
+        {
+          "w": "avait",
+          "start": 15.186,
+          "end": 15.314
+        },
+        {
+          "w": "ouvert,",
+          "start": 15.357,
+          "end": 15.783
+        },
+        {
+          "w": "même",
+          "start": 15.954,
+          "end": 16.167
+        },
+        {
+          "w": "au",
+          "start": 16.21,
+          "end": 16.295
+        },
+        {
+          "w": "cas",
+          "start": 16.338,
+          "end": 16.423
+        },
+        {
+          "w": "où.",
+          "start": 16.466,
+          "end": 16.799
+        }
+      ]
+    },
+    {
+      "id": "5",
+      "title": "Votre relecture",
+      "avatar": "none",
+      "text": "Enfin, relisez. Un paragraphe généré peut décrire un réglage qui n'existe pas dans la version du SIRH de ce client, ou réintroduire un nom que vous pensiez avoir retiré. Vous seule connaissez la configuration réelle de chaque client : ce contrôle final vous revient.",
+      "audio": "generated/lesson1_5-nathalie/scene-5.wav",
+      "duration": 13.80641723356009,
+      "words": [
+        {
+          "w": "Enfin,",
+          "start": 0.213,
+          "end": 0.789
+        },
+        {
+          "w": "relisez.",
+          "start": 0.939,
+          "end": 1.515
+        },
+        {
+          "w": "Un",
+          "start": 1.707,
+          "end": 1.877
+        },
+        {
+          "w": "paragraphe",
+          "start": 1.92,
+          "end": 2.304
+        },
+        {
+          "w": "généré",
+          "start": 2.347,
+          "end": 2.731
+        },
+        {
+          "w": "peut",
+          "start": 2.773,
+          "end": 2.901
+        },
+        {
+          "w": "décrire",
+          "start": 2.944,
+          "end": 3.2
+        },
+        {
+          "w": "un",
+          "start": 3.285,
+          "end": 3.328
+        },
+        {
+          "w": "réglage",
+          "start": 3.371,
+          "end": 3.669
+        },
+        {
+          "w": "qui",
+          "start": 3.755,
+          "end": 3.883
+        },
+        {
+          "w": "n'existe",
+          "start": 3.925,
+          "end": 4.181
+        },
+        {
+          "w": "pas",
+          "start": 4.267,
+          "end": 4.437
+        },
+        {
+          "w": "dans",
+          "start": 4.48,
+          "end": 4.565
+        },
+        {
+          "w": "la",
+          "start": 4.608,
+          "end": 4.693
+        },
+        {
+          "w": "version",
+          "start": 4.736,
+          "end": 4.821
+        },
+        {
+          "w": "du",
+          "start": 4.992,
+          "end": 5.077
+        },
+        {
+          "w": "SIRH",
+          "start": 5.12,
+          "end": 5.589
+        },
+        {
+          "w": "de",
+          "start": 5.632,
+          "end": 5.717
+        },
+        {
+          "w": "ce",
+          "start": 5.76,
+          "end": 5.803
+        },
+        {
+          "w": "client,",
+          "start": 5.845,
+          "end": 6.293
+        },
+        {
+          "w": "ou",
+          "start": 6.443,
+          "end": 6.613
+        },
+        {
+          "w": "réintroduire",
+          "start": 6.656,
+          "end": 7.211
+        },
+        {
+          "w": "un",
+          "start": 7.296,
+          "end": 7.339
+        },
+        {
+          "w": "nom",
+          "start": 7.381,
+          "end": 7.509
+        },
+        {
+          "w": "que",
+          "start": 7.595,
+          "end": 7.68
+        },
+        {
+          "w": "vous",
+          "start": 7.723,
+          "end": 7.851
+        },
+        {
+          "w": "pensiez",
+          "start": 7.893,
+          "end": 8.149
+        },
+        {
+          "w": "avoir",
+          "start": 8.192,
+          "end": 8.405
+        },
+        {
+          "w": "retiré.",
+          "start": 8.448,
+          "end": 8.991
+        },
+        {
+          "w": "Vous",
+          "start": 9.15,
+          "end": 9.321
+        },
+        {
+          "w": "seule",
+          "start": 9.364,
+          "end": 9.577
+        },
+        {
+          "w": "connaissez",
+          "start": 9.62,
+          "end": 9.961
+        },
+        {
+          "w": "la",
+          "start": 10.004,
+          "end": 10.046
+        },
+        {
+          "w": "configuration",
+          "start": 10.089,
+          "end": 10.473
+        },
+        {
+          "w": "réelle",
+          "start": 10.686,
+          "end": 10.985
+        },
+        {
+          "w": "de",
+          "start": 11.027,
+          "end": 11.113
+        },
+        {
+          "w": "chaque",
+          "start": 11.155,
+          "end": 11.326
+        },
+        {
+          "w": "client",
+          "start": 11.412,
+          "end": 11.71
+        },
+        {
+          "w": ":",
+          "start": 11.966,
+          "end": 12.009
+        },
+        {
+          "w": "ce",
+          "start": 12.052,
+          "end": 12.265
+        },
+        {
+          "w": "contrôle",
+          "start": 12.307,
+          "end": 12.649
+        },
+        {
+          "w": "final",
+          "start": 12.691,
+          "end": 12.819
+        },
+        {
+          "w": "vous",
+          "start": 12.99,
+          "end": 13.118
+        },
+        {
+          "w": "revient.",
+          "start": 13.118,
+          "end": 13.632
+        }
+      ]
+    },
+    {
+      "id": "6",
+      "title": "À vous",
+      "avatar": "pip",
+      "text": "Dans le Playground, vous trierez quatre informations tirées de vos supports, puis vous vérifierez vos réflexes. Le dernier exercice vous donne un prompt à corriger vous-même, avec la justification de chaque choix. Comparez ensuite avec le corrigé indicatif : c'est exactement l'exercice attendu à l'écrit.",
+      "audio": "generated/lesson1_5-nathalie/scene-6.wav",
+      "duration": 15.420204081632653,
+      "words": [
+        {
+          "w": "Dans",
+          "start": 0.299,
+          "end": 0.469
+        },
+        {
+          "w": "le",
+          "start": 0.512,
+          "end": 0.555
+        },
+        {
+          "w": "Playground,",
+          "start": 0.597,
+          "end": 1.173
+        },
+        {
+          "w": "vous",
+          "start": 1.408,
+          "end": 1.536
+        },
+        {
+          "w": "trierez",
+          "start": 1.579,
+          "end": 1.877
+        },
+        {
+          "w": "quatre",
+          "start": 1.92,
+          "end": 2.176
+        },
+        {
+          "w": "informations",
+          "start": 2.219,
+          "end": 2.56
+        },
+        {
+          "w": "tirées",
+          "start": 2.773,
+          "end": 3.115
+        },
+        {
+          "w": "de",
+          "start": 3.157,
+          "end": 3.2
+        },
+        {
+          "w": "vos",
+          "start": 3.243,
+          "end": 3.328
+        },
+        {
+          "w": "supports,",
+          "start": 3.371,
+          "end": 3.861
+        },
+        {
+          "w": "puis",
+          "start": 4.096,
+          "end": 4.309
+        },
+        {
+          "w": "vous",
+          "start": 4.352,
+          "end": 4.437
+        },
+        {
+          "w": "vérifierez",
+          "start": 4.48,
+          "end": 4.907
+        },
+        {
+          "w": "vos",
+          "start": 4.949,
+          "end": 5.035
+        },
+        {
+          "w": "réflexes.",
+          "start": 5.077,
+          "end": 5.653
+        },
+        {
+          "w": "Le",
+          "start": 5.803,
+          "end": 5.888
+        },
+        {
+          "w": "dernier",
+          "start": 5.931,
+          "end": 6.187
+        },
+        {
+          "w": "exercice",
+          "start": 6.272,
+          "end": 6.699
+        },
+        {
+          "w": "vous",
+          "start": 6.784,
+          "end": 6.912
+        },
+        {
+          "w": "donne",
+          "start": 6.955,
+          "end": 7.04
+        },
+        {
+          "w": "un",
+          "start": 7.083,
+          "end": 7.168
+        },
+        {
+          "w": "prompt",
+          "start": 7.211,
+          "end": 7.467
+        },
+        {
+          "w": "à",
+          "start": 7.509,
+          "end": 7.595
+        },
+        {
+          "w": "corriger",
+          "start": 7.637,
+          "end": 7.936
+        },
+        {
+          "w": "vous-même,",
+          "start": 7.979,
+          "end": 8.448
+        },
+        {
+          "w": "avec",
+          "start": 8.576,
+          "end": 8.875
+        },
+        {
+          "w": "la",
+          "start": 8.917,
+          "end": 9.003
+        },
+        {
+          "w": "justification",
+          "start": 9.045,
+          "end": 9.557
+        },
+        {
+          "w": "de",
+          "start": 9.771,
+          "end": 9.813
+        },
+        {
+          "w": "chaque",
+          "start": 9.856,
+          "end": 10.069
+        },
+        {
+          "w": "choix.",
+          "start": 10.155,
+          "end": 10.513
+        },
+        {
+          "w": "Comparez",
+          "start": 10.657,
+          "end": 11.041
+        },
+        {
+          "w": "ensuite",
+          "start": 11.084,
+          "end": 11.34
+        },
+        {
+          "w": "avec",
+          "start": 11.383,
+          "end": 11.511
+        },
+        {
+          "w": "le",
+          "start": 11.553,
+          "end": 11.639
+        },
+        {
+          "w": "corrigé",
+          "start": 11.681,
+          "end": 12.065
+        },
+        {
+          "w": "indicatif",
+          "start": 12.108,
+          "end": 12.535
+        },
+        {
+          "w": ":",
+          "start": 12.705,
+          "end": 12.748
+        },
+        {
+          "w": "c'est",
+          "start": 12.791,
+          "end": 12.919
+        },
+        {
+          "w": "exactement",
+          "start": 12.961,
+          "end": 13.687
+        },
+        {
+          "w": "l'exercice",
+          "start": 13.729,
+          "end": 14.199
+        },
+        {
+          "w": "attendu",
+          "start": 14.284,
+          "end": 14.583
+        },
+        {
+          "w": "à",
+          "start": 14.625,
+          "end": 14.668
+        },
+        {
+          "w": "l'écrit.",
+          "start": 14.711,
+          "end": 15.22
+        }
+      ],
+      "avatarVideo": "generated/lesson1_5-nathalie/avatar-6.mp4",
+      "avatarVideoId": "f0e1890ba56052457772b38135a10353",
+      "avatarDuration": 15.32
+    }
+  ]
+}

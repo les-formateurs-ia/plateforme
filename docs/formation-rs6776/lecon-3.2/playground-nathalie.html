@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Playground cadre légal IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#F7F7FA; --surface:#fff; --ink:#1b1a17; --ink-2:#4a4741; --ink-3:#7c786f;
+  --rule:#e4e1d9; --rule-2:#efece5; --accent:#1f4e46; --accent-soft:#eef3f1;
+  --ok:#2c6a48; --ok-soft:#eef4ef; --warn:#8a6519; --warn-soft:#faf4e7;
+  --alert:#963428; --alert-soft:#fbf1ef;
+  --serif:'Funnel Display',Georgia,'Iowan Old Style','Times New Roman',serif;
+  --sans:'Funnel Display',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+}
+body{font-family:var(--sans);font-size:15.5px;line-height:1.62;color:var(--ink);background:var(--paper);padding:0 22px 80px}
+.wrap{width:100%;margin:0 auto}
+
+.hero{margin:0 auto;padding:52px 0 28px;border-bottom:1px solid var(--rule)}
+.eyebrow{font-size:.78rem;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px}
+h1{font-family:var(--serif);font-size:1.95rem;font-weight:800;color:var(--ink);margin-bottom:14px}
+.lede{font-size:1rem;color:var(--ink-2)}
+
+main{margin:0 auto;padding-top:10px}
+.exercise{margin-top:44px;background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:26px 28px}
+.exercise h2{font-family:var(--serif);font-size:1.32rem;font-weight:700;color:var(--ink);padding-left:12px;border-left:4px solid var(--accent);margin-bottom:10px}
+.exercise > p.instructions{color:var(--ink-2);margin-bottom:20px}
+
+fieldset{border:1px solid var(--rule-2);border-radius:10px;padding:16px 18px;margin-bottom:16px;background:var(--paper)}
+legend{font-size:.94rem;color:var(--ink-2);padding:0 6px;font-weight:500}
+legend .who{font-weight:700;color:var(--ink)}
+.options{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.option{display:flex;align-items:flex-start;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background .12s}
+.option:hover{background:var(--rule-2)}
+.option input{margin-top:4px;flex-shrink:0}
+.option span{font-size:.93rem}
+.option.selected-ok{background:var(--ok-soft)}
+.option.selected-bad{background:var(--alert-soft)}
+.option.reveal-correct{outline:1.5px dashed var(--ok)}
+
+.fb{font-size:.88rem;margin-top:10px;padding:10px 12px;border-radius:8px;display:none}
+.fb.show{display:block}
+.fb.ok{background:var(--ok-soft);color:var(--ok)}
+.fb.alert{background:var(--alert-soft);color:var(--alert)}
+
+.exercise-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:6px;padding-top:16px;border-top:1px dashed var(--rule)}
+.btn{font-family:var(--sans);font-size:.9rem;font-weight:700;padding:10px 20px;border-radius:999px;border:1.5px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}
+.btn:hover{opacity:.92}
+.btn.ghost{background:#fff;color:var(--accent)}
+.score-display{font-size:.92rem;color:var(--ink-2)}
+.score-display strong{color:var(--accent);font-size:1.05rem}
+.pass-msg{margin-top:12px;padding:10px 14px;border-radius:8px;font-size:.9rem;font-weight:600;display:none}
+.pass-msg.show{display:block}
+.pass-msg.ok{background:var(--ok-soft);color:var(--ok)}
+.pass-msg.warn{background:var(--warn-soft);color:var(--warn)}
+
+.card{background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:16px 18px;margin-bottom:16px}
+.card .label{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;font-weight:700;color:var(--ink-3);margin-bottom:6px}
+.card p{margin:0}
+
+textarea{width:100%;min-height:140px;font-family:var(--sans);font-size:.95rem;line-height:1.55;color:var(--ink);border:1px solid var(--rule);border-radius:10px;padding:14px;resize:vertical;background:#fff}
+textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+.autosave-note{font-size:.78rem;color:var(--ink-3);margin-top:8px}
+.corrige{margin-top:16px;border-top:1px dashed var(--rule);padding-top:16px}
+.corrige-body{display:none;margin-top:12px}
+.corrige-body.show{display:block}
+
+footer.closing{margin:56px auto 0;padding-top:20px;border-top:1px solid var(--rule);font-size:.85rem;color:var(--ink-3)}
+
+@media (max-width:640px){
+  h1{font-size:1.55rem}
+  .exercise{padding:18px}
+  .exercise-footer{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div class="eyebrow">Playground</div>
+  <h1>IA Act et RGPD, cas pratiques de paramétrage</h1>
+  <p class="lede">Mettez en pratique la méthode de cette leçon sur des cas fictifs, tous liés au même contexte&nbsp;: vous accompagnez Tarnaud Logistique, une entreprise de transport, sur le paramétrage de son nouveau logiciel de recrutement, qui propose plusieurs options intégrant de l'IA générative. Chaque exercice a son propre bouton de correction et son propre score.</p>
+</header>
+
+<main>
+
+<section class="exercise" id="ex1">
+  <h2>Exercice 1 &middot; Quel régime principal de l'IA Act&nbsp;?</h2>
+  <p class="instructions">Pour chaque option, utilisez la grille pédagogique de la leçon&nbsp;: pratique interdite, haut risque, transparence spécifique (« limité » dans les réponses) ou risque faible/minimal. Vérifiez toujours ensuite les définitions et exceptions du texte, ainsi que les autres règles applicables.</p>
+
+  <fieldset data-fieldset="ex1-a">
+    <legend>Un chatbot est ajouté à la page carrières pour répondre aux questions fréquentes des candidats (horaires, adresse, documents à fournir). Il précise en début d'échange&nbsp;: « Je suis un assistant virtuel. »</legend>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex1-a" value="inacceptable" data-ok="false" data-why="Un chatbot d'assistance générale qui informe qu'il s'agit d'une IA n'a rien d'une pratique interdite."> <span>Inacceptable</span></label>
+      <label class="option"><input type="radio" name="ex1-a" value="eleve" data-ok="false" data-why="Ce chatbot ne prend aucune décision sur une candidature : il ne relève pas de la liste des usages à haut risque."> <span>Élevé</span></label>
+      <label class="option"><input type="radio" name="ex1-a" value="limite" data-ok="true" data-why="Ce système qui interagit directement avec des personnes relève d'une obligation de transparence spécifique : les candidats doivent savoir qu'ils échangent avec une IA, sauf si cela ressort déjà clairement du contexte. Cette obligation est ici respectée."> <span>Limité</span></label>
+      <label class="option"><input type="radio" name="ex1-a" value="minimal" data-ok="false" data-why="Un chatbot qui interagit directement avec des candidats reste soumis à l'obligation de transparence de l'IA Act : ce n'est pas un usage sans aucune obligation."> <span>Minimal</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex1-b">
+    <legend>Une option du logiciel analyse chaque CV reçu et attribue une note qui détermine directement quels candidats sont présélectionnés pour un entretien.</legend>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex1-b" value="inacceptable" data-ok="false" data-why="Cet usage reste autorisé sous conditions : il n'est pas interdit en tant que tel, contrairement à une pratique de risque inacceptable."> <span>Inacceptable</span></label>
+      <label class="option"><input type="radio" name="ex1-b" value="eleve" data-ok="true" data-why="Le recrutement figure explicitement dans la liste des usages à haut risque : gestion des risques, documentation et supervision humaine réelle sont exigées."> <span>Élevé</span></label>
+      <label class="option"><input type="radio" name="ex1-b" value="limite" data-ok="false" data-why="La seule transparence ne suffit pas ici : une note qui détermine directement une présélection relève du niveau élevé, pas du niveau limité."> <span>Limité</span></label>
+      <label class="option"><input type="radio" name="ex1-b" value="minimal" data-ok="false" data-why="Cette option influence directement le devenir d'une candidature réelle : elle ne peut pas être classée en risque minimal."> <span>Minimal</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex1-c">
+    <legend>Le service communication de Tarnaud Logistique utilise un outil d'IA générative pour rédiger des accroches marketing pour les annonces, sans lien avec l'évaluation d'un candidat précis.</legend>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex1-c" value="inacceptable" data-ok="false" data-why="Rédiger une accroche marketing n'a rien d'une pratique interdite."> <span>Inacceptable</span></label>
+      <label class="option"><input type="radio" name="ex1-c" value="eleve" data-ok="false" data-why="Aucune décision concernant une personne réelle n'est prise ici : ce n'est pas un usage à haut risque."> <span>Élevé</span></label>
+      <label class="option"><input type="radio" name="ex1-c" value="limite" data-ok="false" data-why="Ce contenu marketing ne relève pas d'une obligation de transparence spécifique de l'IA Act : c'est un usage courant sans enjeu pour une personne tierce."> <span>Limité</span></label>
+      <label class="option"><input type="radio" name="ex1-c" value="minimal" data-ok="true" data-why="Générer une accroche marketing, sans lien avec l'évaluation d'un candidat, relève de la majorité des usages courants d'assistants génératifs : risque minimal."> <span>Minimal</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex1-d">
+    <legend>Tarnaud Logistique envisage d'installer un système qui analyse en temps réel les expressions du visage des candidats pendant leurs entretiens, pour évaluer leur « motivation » et leur « stress », sans lien avec un besoin médical ou de sécurité.</legend>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex1-d" value="inacceptable" data-ok="true" data-why="La reconnaissance des émotions sur le lieu de travail, en dehors de tout motif médical ou de sécurité, fait partie des pratiques interdites par l'IA Act, quelle que soit l'intention affichée."> <span>Inacceptable</span></label>
+      <label class="option"><input type="radio" name="ex1-d" value="eleve" data-ok="false" data-why="Ce système n'est pas seulement encadré, il est purement et simplement interdit dans ce contexte, hors motif médical ou de sécurité : c'est un cas de risque inacceptable."> <span>Élevé</span></label>
+      <label class="option"><input type="radio" name="ex1-d" value="limite" data-ok="false" data-why="La seule transparence ne suffirait pas à rendre ce système licite : ce type d'usage est interdit, pas seulement encadré."> <span>Limité</span></label>
+      <label class="option"><input type="radio" name="ex1-d" value="minimal" data-ok="false" data-why="Ce système ne peut en aucun cas être qualifié de risque minimal : il relève des pratiques interdites."> <span>Minimal</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex1-e">
+    <legend>Une vidéo générée par IA montre la directrice réelle de Tarnaud Logistique visitant un entrepôt et tenant un discours qu'elle n'a jamais enregistré. Elle est publiée avec la mention visible « Vidéo générée par intelligence artificielle ».</legend>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex1-e" value="inacceptable" data-ok="false" data-why="La création d'un deepfake professionnel n'est pas automatiquement une pratique interdite, mais sa diffusion et les droits de la personne représentée doivent être contrôlés."> <span>Inacceptable</span></label>
+      <label class="option"><input type="radio" name="ex1-e" value="eleve" data-ok="false" data-why="Cette vidéo ne décide ni d'un recrutement ni d'un droit individuel : elle ne relève pas, pour ce seul motif, d'un usage à haut risque de l'annexe III."> <span>Élevé</span></label>
+      <label class="option"><input type="radio" name="ex1-e" value="limite" data-ok="true" data-why="La vidéo ressemble à une personne existante et peut paraître authentique : elle répond à la définition du deepfake. Le déployeur doit la signaler clairement au plus tard lors de la première exposition. Cette mention visible ne permet toutefois pas, à elle seule, de vérifier le marquage détectable par machine attendu du fournisseur ni les autres droits applicables."> <span>Limité</span></label>
+      <label class="option"><input type="radio" name="ex1-e" value="minimal" data-ok="false" data-why="Ce cas relève d'une obligation de transparence propre aux deepfakes. Une vidéo synthétique qui ne ressemble pas à une personne, un lieu ou un événement existant pourrait recevoir une autre analyse, mais ce n'est pas le cas décrit."> <span>Minimal</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <div class="exercise-footer">
+    <button class="btn" data-correct-ex="ex1">Corriger mes réponses</button>
+    <span class="score-display">Score&nbsp;: <strong data-score="ex1">0 / 5</strong> &middot; seuil de réussite&nbsp;: 80%</span>
+  </div>
+  <div class="pass-msg" data-pass="ex1"></div>
+</section>
+
+<section class="exercise" id="ex2">
+  <h2>Exercice 2 &middot; Cette mesure suffit-elle pour le point contrôlé&nbsp;?</h2>
+  <p class="instructions">Jugez chaque paramétrage au regard du point précis décrit. Une réponse « conforme » signifie seulement que ce contrôle est correctement traité&nbsp;: elle ne suffit jamais à déclarer l'ensemble du système conforme.</p>
+
+  <fieldset data-fieldset="ex2-a">
+    <legend>Le service RH souhaite gagner du temps sur les candidatures les plus faibles.</legend>
+    <div class="card" style="margin:10px 0"><span class="label">Paramétrage envisagé</span><p>Toute candidature notée en dessous de 30 sur 100 est automatiquement rejetée, sans relecture par un recruteur.</p></div>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex2-a" value="oui" data-ok="false" data-why="Le rejet est exclusivement automatisé et affecte fortement la candidature : l'article 22 du RGPD doit être analysé, avec ses exceptions et garanties. En parallèle, le système à haut risque doit permettre une supervision humaine effective au sens de l'IA Act. Un simple objectif de gain de temps ne satisfait aucune de ces exigences."> <span>Conforme</span></label>
+      <label class="option"><input type="radio" name="ex2-a" value="non" data-ok="true" data-why="Le rejet est exclusivement automatisé et affecte fortement la candidature : l'article 22 du RGPD doit être analysé, avec ses exceptions et garanties. En parallèle, le système à haut risque doit permettre une supervision humaine effective au sens de l'IA Act. Un simple objectif de gain de temps ne satisfait aucune de ces exigences."> <span>Pas conforme</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex2-b">
+    <legend>Une alternative est proposée pour tenir compte de cette même contrainte de temps.</legend>
+    <div class="card" style="margin:10px 0"><span class="label">Paramétrage envisagé</span><p>Le score sert uniquement à trier l'ordre d'affichage des candidatures pour le recruteur, qui reste tenu d'ouvrir et d'examiner chaque CV avant toute décision.</p></div>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex2-b" value="oui" data-ok="false" data-why="Ouvrir chaque CV ne démontre pas une supervision effective. L'ordre imposé par le score peut créer un biais d'automatisation. Il faut définir une revue indépendante, former la personne, lui donner le temps et l'autorité d'ignorer le score, puis tracer les désaccords et les décisions."> <span>Conforme</span></label>
+      <label class="option"><input type="radio" name="ex2-b" value="non" data-ok="true" data-why="Ouvrir chaque CV ne démontre pas une supervision effective. L'ordre imposé par le score peut créer un biais d'automatisation. Il faut définir une revue indépendante, former la personne, lui donner le temps et l'autorité d'ignorer le score, puis tracer les désaccords et les décisions."> <span>Pas conforme</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex2-c">
+    <legend>La durée de conservation des dossiers de candidats notés par l'outil n'a pas été modifiée depuis l'installation.</legend>
+    <div class="card" style="margin:10px 0"><span class="label">Paramétrage envisagé</span><p>Le réglage par défaut de l'éditeur est conservé tel quel&nbsp;: conservation illimitée des candidatures notées, y compris pour les candidats non retenus.</p></div>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex2-c" value="oui" data-ok="false" data-why="Le principe de limitation de la conservation du RGPD exige une durée définie et justifiée, jamais une conservation par défaut illimitée, quel que soit l'éditeur du logiciel."> <span>Conforme</span></label>
+      <label class="option"><input type="radio" name="ex2-c" value="non" data-ok="true" data-why="Le principe de limitation de la conservation du RGPD exige une durée définie et justifiée, jamais une conservation par défaut illimitée, quel que soit l'éditeur du logiciel."> <span>Pas conforme</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex2-d">
+    <legend>Le service juridique de Tarnaud Logistique doit informer les candidats de l'existence de ce traitement automatisé.</legend>
+    <div class="card" style="margin:10px 0"><span class="label">Paramétrage envisagé</span><p>La politique de confidentialité de la page carrières est mise à jour pour mentionner l'outil de notation, sa finalité, et la possibilité de demander une intervention humaine.</p></div>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex2-d" value="oui" data-ok="false" data-why="Ces trois informations sont nécessaires mais ne suffisent pas à valider la notice. Selon le traitement, il faut aussi préciser notamment la base légale, les données, les destinataires, la durée de conservation, les droits et le contact, ainsi que des informations utiles sur la logique et les conséquences de la décision automatisée."> <span>Conforme</span></label>
+      <label class="option"><input type="radio" name="ex2-d" value="non" data-ok="true" data-why="Ces trois informations sont nécessaires mais ne suffisent pas à valider la notice. Selon le traitement, il faut aussi préciser notamment la base légale, les données, les destinataires, la durée de conservation, les droits et le contact, ainsi que des informations utiles sur la logique et les conséquences de la décision automatisée."> <span>Pas conforme</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex2-e">
+    <legend>L'outil de notation a besoin de données pour fonctionner.</legend>
+    <div class="card" style="margin:10px 0"><span class="label">Paramétrage envisagé</span><p>Une analyse documentée relie chaque donnée transmise à un critère nécessaire du poste. Seules l'expérience et les compétences déclarées sont retenues. L'âge, la situation familiale, la photo et les variables indirectement discriminantes identifiées sont exclus, puis la liste des données et les résultats de biais sont revus régulièrement.</p></div>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex2-e" value="oui" data-ok="true" data-why="Pour le point contrôlé, la nécessité de chaque donnée est documentée, les données sans lien et les variables indirectement discriminantes sont écartées, et la revue est continue. Cela traite la minimisation et une partie du risque de biais, sans suffire à rendre tout le système conforme."> <span>Conforme</span></label>
+      <label class="option"><input type="radio" name="ex2-e" value="non" data-ok="false" data-why="Pour le point contrôlé, la nécessité de chaque donnée est documentée, les données sans lien et les variables indirectement discriminantes sont écartées, et la revue est continue. Cela traite la minimisation et une partie du risque de biais, sans suffire à rendre tout le système conforme."> <span>Pas conforme</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <div class="exercise-footer">
+    <button class="btn" data-correct-ex="ex2">Corriger mes réponses</button>
+    <span class="score-display">Score&nbsp;: <strong data-score="ex2">0 / 5</strong> &middot; seuil de réussite&nbsp;: 80%</span>
+  </div>
+  <div class="pass-msg" data-pass="ex2"></div>
+</section>
+
+<section class="exercise" id="ex3">
+  <h2>Exercice 3 &middot; Repérer un prompt utile pour votre mission</h2>
+  <p class="instructions">Pour chaque besoin rencontré dans votre mission de paramétrage chez Tarnaud Logistique, un seul prompt pose vraiment la bonne demande.</p>
+
+  <fieldset data-fieldset="ex3-a">
+    <legend>Expliquer au service RH de Tarnaud Logistique, qui n'est pas juriste, pourquoi le rejet automatique sous la note de 30 doit être désactivé.</legend>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex3-a" value="a" data-ok="false" data-why="Une note juridique brute risque d'être trop technique pour un public RH non juriste et ne propose aucune alternative concrète."> <span>« Rédige une note juridique complète sur l'article 6 de l'IA Act. »</span></label>
+      <label class="option"><input type="radio" name="ex3-a" value="b" data-ok="true" data-why="Le prompt sépare les deux cadres, demande une solution opérationnelle et impose des sources primaires datées. La réponse de l'IA restera un brouillon à vérifier par une personne compétente."> <span>« Explique en langage clair, pour une équipe RH non juriste, pourquoi ce rejet automatique exige une analyse séparée de l'article 22 du RGPD et de la supervision humaine prévue par l'IA Act. Présente les exceptions et garanties sans conclure automatiquement à une interdiction. Propose un paramétrage avec contrôle humain effectif. Cite les sources officielles, leur version et la date de consultation. Signale les points à valider par le DPO ou le juriste. »</span></label>
+      <label class="option"><input type="radio" name="ex3-a" value="c" data-ok="false" data-why="Cette formulation ne demande aucune explication ni alternative : elle ne permet pas au service RH de comprendre l'enjeu ni d'agir."> <span>« Dis-leur juste que c'est interdit. »</span></label>
+      <label class="option"><input type="radio" name="ex3-a" value="d" data-ok="false" data-why="Ce prompt ne mentionne ni la règle en cause, ni le paramétrage concerné : il est trop vague pour produire un message utile."> <span>« Écris un message pour le service RH sur l'intelligence artificielle. »</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex3-b">
+    <legend>Rédiger le paragraphe de la politique de confidentialité de Tarnaud Logistique qui informe les candidats de l'outil de notation.</legend>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex3-b" value="a" data-ok="false" data-why="Une phrase générique ne précise ni la finalité du traitement ni le droit à une intervention humaine, deux informations attendues par le RGPD."> <span>« Ajoute une phrase disant qu'on utilise de l'IA. »</span></label>
+      <label class="option"><input type="radio" name="ex3-b" value="b" data-ok="true" data-why="Le prompt liste les informations à couvrir et prévoit la relecture juridique. Il évite de demander à l'IA de déclarer elle-même la notice conforme."> <span>« Prépare un brouillon clair pour informer les candidats&nbsp;: finalité, base légale à confirmer, données utilisées, destinataires, durée de conservation, rôle de l'outil, informations utiles sur la logique et les conséquences, droits, intervention humaine, contestation et contact. N'invente aucune information absente. Signale chaque élément à compléter. Le DPO ou le service juridique validera le texte avant publication. »</span></label>
+      <label class="option"><input type="radio" name="ex3-b" value="c" data-ok="false" data-why="Cacher l'existence du traitement va à l'encontre de l'obligation de transparence du RGPD et de l'IA Act : ce n'est pas une option recevable."> <span>« Rédige ce paragraphe de façon à ce que les candidats ne remarquent pas cette mention. »</span></label>
+      <label class="option"><input type="radio" name="ex3-b" value="d" data-ok="false" data-why="Copier le texte d'un autre éditeur risque de ne pas correspondre au paramétrage réel choisi par Tarnaud Logistique, ni d'être vérifié pour ce contexte précis."> <span>« Copie la politique de confidentialité d'un logiciel concurrent. »</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex3-c">
+    <legend>Se doter d'une checklist personnelle à réutiliser sur vos prochaines missions de paramétrage de logiciels de recrutement.</legend>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex3-c" value="a" data-ok="false" data-why="« Fais-moi une checklist RGPD » ne mentionne ni l'IA Act, ni le contexte spécifique du recrutement, ni les points concrets de paramétrage."> <span>« Fais-moi une checklist RGPD. »</span></label>
+      <label class="option"><input type="radio" name="ex3-c" value="b" data-ok="true" data-why="Le prompt couvre la qualification, les rôles, les exigences opérationnelles, le RGPD, les biais et la preuve de veille. La checklist obtenue devra encore être vérifiée et adaptée au système réel."> <span>« Construis une checklist courte pour le paramétrage d'un logiciel de recrutement&nbsp;: finalité réelle, qualification IA Act et rôles fournisseur/déployeur, supervision humaine effective, qualité et minimisation des données, tests de biais, journaux et possibilité d'ignorer la sortie, base légale, article 22, analyse d'impact si nécessaire, conservation, information et droits des candidats. Pour chaque règle, demande une source officielle, sa version, son statut et sa date de consultation. »</span></label>
+      <label class="option"><input type="radio" name="ex3-c" value="c" data-ok="false" data-why="Une liste de fonctionnalités marketing ne couvre aucun des points de conformité identifiés dans cette leçon."> <span>« Liste-moi les fonctionnalités les plus vendeuses des logiciels de recrutement. »</span></label>
+      <label class="option"><input type="radio" name="ex3-c" value="d" data-ok="false" data-why="Une checklist trop générale sur l'intelligence artificielle, sans lien avec le recrutement ni avec les points précis de paramétrage, sera difficile à réutiliser concrètement."> <span>« Fais-moi une checklist générale sur l'intelligence artificielle en entreprise. »</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <div class="exercise-footer">
+    <button class="btn" data-correct-ex="ex3">Corriger mes réponses</button>
+    <span class="score-display">Score&nbsp;: <strong data-score="ex3">0 / 3</strong> &middot; seuil de réussite&nbsp;: 80%</span>
+  </div>
+  <div class="pass-msg" data-pass="ex3"></div>
+</section>
+
+<section class="exercise" id="ex4">
+  <h2>Exercice 4 &middot; À vous de corriger un paramétrage (à remettre)</h2>
+  <p class="instructions">Votre brouillon est sauvegardé automatiquement dans ce navigateur. Remettez au formateur votre analyse, votre paramétrage corrigé et votre prompt.</p>
+
+  <div class="card">
+    <span class="label">Configuration initiale proposée par l'éditeur du logiciel, chez Tarnaud Logistique</span>
+    <p>« L'option de notation automatique est activée pour tous les CV. Toute note inférieure à 45 entraîne un rejet sans relecture. Pour une candidate revenant d'un congé parental de 18&nbsp;mois, l'outil génère le commentaire “disponibilité familiale incertaine et parcours peu stable”, lui attribue 38 sur 100 et déclenche le refus. Le système reçoit l'intégralité du CV, y compris la date de naissance et la photo. La conservation est illimitée. Aucun test de biais, journal de désaccord humain, analyse d'impact ni information spécifique des candidats n'est prévu. »</p>
+  </div>
+
+  <p class="instructions" style="margin-top:-6px">Analysez séparément la qualification IA Act, la supervision humaine, l'article&nbsp;22 et les principes du RGPD, puis identifiez le biais discriminant contenu dans la sortie. Proposez des mesures préventives et correctives, une décision finale sur le déploiement et un prompt permettant de préparer votre note sans lui déléguer la conclusion juridique. Citez au moins deux sources primaires avec leur lien, leur version ou statut et leur date de consultation.</p>
+
+  <label for="ex4-textarea" style="display:block;font-size:.85rem;color:var(--ink-3);margin-bottom:6px">Votre qualification, l'analyse du biais, les mesures, les sources et votre prompt</label>
+  <textarea id="ex4-textarea" placeholder="Qualification IA Act et rôles :&#10;Analyse RGPD, article 22 et biais :&#10;Mesures et décision de déploiement :&#10;Sources, dates et statut des textes :&#10;Prompt utilisé pour préparer la note :"></textarea>
+  <p class="autosave-note">Votre brouillon est enregistré automatiquement pendant que vous écrivez.</p>
+
+  <div class="corrige">
+    <button class="btn ghost" id="ex4-reveal">Voir un corrigé indicatif</button>
+    <div class="corrige-body" id="ex4-corrige-body">
+      <div class="card">
+        <span class="label">Points de non-conformité</span>
+        <p>Le système de recrutement doit être qualifié au regard de l'article&nbsp;6 et de l'annexe&nbsp;III de l'IA Act. La supervision décrite n'est pas effective. Le rejet exclusivement automatisé et significatif impose une analyse de l'article&nbsp;22 du RGPD, de ses exceptions et de ses garanties. Le commentaire sur le congé parental transforme une situation familiale en jugement de disponibilité et de stabilité&nbsp;: il crée un risque discriminatoire et met en cause la loyauté, la minimisation et l'exactitude. S'ajoutent la collecte excessive, la conservation illimitée, l'absence d'information, de test de biais, de traçabilité et d'analyse d'impact lorsque celle-ci est requise.</p>
+      </div>
+      <div class="card">
+        <span class="label">Configuration corrigée recommandée</span>
+        <p>Suspendre l'activation tant que l'analyse n'est pas achevée. Définir la base légale et les rôles, réaliser l'analyse d'impact si les conditions sont réunies, exclure les données et variables sans nécessité démontrée, tester les biais sur des groupes pertinents et corriger le modèle ou renoncer si le risque n'est pas maîtrisé. Désactiver le rejet automatique. Confier la revue à des personnes formées, disposant du temps, des informations et de l'autorité nécessaires pour ignorer ou inverser la sortie, puis tracer leurs désaccords. Fixer la conservation, sécuriser les flux, informer les candidats et organiser leurs droits. Vérifier la recommandation dans le texte consolidé de l'IA Act et les ressources CNIL, en notant la date et le statut de chaque source.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="closing">
+  Toutes les entreprises, personnes et données chiffrées de cet exercice sont fictives.
+</footer>
+
+</div>
+
+<script>
+(function(){
+  document.querySelectorAll('.fb, .pass-msg').forEach(function(el){
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
+  });
+
+  function correctExercise(exId){
+    var section = document.getElementById(exId);
+    var fieldsets = section.querySelectorAll('fieldset');
+    var score = 0;
+    var total = fieldsets.length;
+
+    fieldsets.forEach(function(fs){
+      var options = fs.querySelectorAll('.option');
+      var checked = fs.querySelector('input[type=radio]:checked');
+      var fb = fs.querySelector('.fb');
+
+      options.forEach(function(opt){
+        opt.classList.remove('selected-ok','selected-bad','reveal-correct');
+      });
+
+      if (!checked) {
+        fb.textContent = 'Pas de réponse sélectionnée.';
+        fb.className = 'fb show alert';
+        var correctOpt = fs.querySelector('input[data-ok="true"]');
+        if (correctOpt) { correctOpt.closest('.option').classList.add('reveal-correct'); }
+        return;
+      }
+
+      var ok = checked.getAttribute('data-ok') === 'true';
+      var why = checked.getAttribute('data-why');
+      var chosenLabel = checked.closest('.option');
+
+      if (ok) {
+        score += 1;
+        chosenLabel.classList.add('selected-ok');
+        fb.textContent = 'Bonne réponse. ' + why;
+        fb.className = 'fb show ok';
+      } else {
+        chosenLabel.classList.add('selected-bad');
+        var correct = fs.querySelector('input[data-ok="true"]');
+        if (correct) { correct.closest('.option').classList.add('reveal-correct'); }
+        fb.textContent = 'À revoir. ' + why;
+        fb.className = 'fb show alert';
+      }
+    });
+
+    var scoreEl = section.querySelector('[data-score="' + exId + '"]');
+    scoreEl.setAttribute('aria-live', 'polite');
+    scoreEl.textContent = score + ' / ' + total;
+
+    var pct = total > 0 ? (score / total) * 100 : 0;
+    var passEl = section.querySelector('[data-pass="' + exId + '"]');
+    if (pct >= 80) {
+      passEl.textContent = 'Seuil atteint (' + Math.round(pct) + '%). Bon travail.';
+      passEl.className = 'pass-msg show ok';
+    } else {
+      passEl.textContent = 'Sous le seuil de réussite (' + Math.round(pct) + '%). Relisez les explications ci-dessus et retentez.';
+      passEl.className = 'pass-msg show warn';
+    }
+  }
+
+  document.querySelectorAll('[data-correct-ex]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      correctExercise(btn.getAttribute('data-correct-ex'));
+    });
+  });
+
+  var STORAGE_KEY = 'nathalie_playground_3_2_ex4';
+  var textarea = document.getElementById('ex4-textarea');
+
+  try {
+    var saved = window.localStorage.getItem(STORAGE_KEY);
+    if (saved) { textarea.value = saved; }
+  } catch (e) { /* stockage local indisponible, on continue sans autosave */ }
+
+  textarea.addEventListener('input', function(){
+    try {
+      window.localStorage.setItem(STORAGE_KEY, textarea.value);
+    } catch (e) { /* stockage local indisponible */ }
+  });
+
+  var revealBtn = document.getElementById('ex4-reveal');
+  var corrigeBody = document.getElementById('ex4-corrige-body');
+  revealBtn.addEventListener('click', function(){
+    var isShown = corrigeBody.classList.toggle('show');
+    revealBtn.textContent = isShown ? 'Masquer le corrigé indicatif' : 'Voir un corrigé indicatif';
+  });
+})();
+</script>
+
+</body>
+</html>

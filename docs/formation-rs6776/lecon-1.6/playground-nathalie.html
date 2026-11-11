@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Playground personnalisé de Nathalie</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --paper:#F7F7FA;
+      --surface:#ffffff;
+      --ink:#1b1a17;
+      --ink-2:#4a4741;
+      --ink-3:#7c786f;
+      --rule:#e4e1d9;
+      --rule-2:#efece5;
+      --accent:#1f4e46;
+      --accent-soft:#eef3f1;
+      --ok:#2c6a48;
+      --ok-soft:#eef4ef;
+      --warn:#8a6519;
+      --warn-soft:#faf4e7;
+      --alert:#963428;
+      --alert-soft:#fbf1ef;
+      --serif:'Funnel Display',Georgia,'Iowan Old Style','Times New Roman',serif;
+      --sans:'Funnel Display',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    }
+    html{scroll-behavior:smooth}
+    body{
+      font-family:var(--sans);font-size:15.5px;color:var(--ink);background:var(--paper);
+      line-height:1.65;-webkit-font-smoothing:antialiased;
+    }
+    a{color:var(--accent)}
+    button,input,textarea{font:inherit}
+    .skip{position:absolute;left:-9999px;top:0;background:var(--surface);color:var(--ink);padding:12px;z-index:10}
+    .skip:focus{left:12px}
+
+    .wrap{width:100%;margin:0 auto;padding:0 22px 80px}
+
+    header.top{padding:44px 0 26px;border-bottom:1px solid var(--rule)}
+    header.top h1{
+      font-family:var(--serif);font-size:clamp(28px,4.5vw,37px);line-height:1.2;font-weight:400;
+      letter-spacing:-.01em;margin-bottom:12px;max-width:28ch;
+    }
+    header.top .sub{font-size:15px;color:var(--ink-2);}
+
+    .intro{font-size:16.5px;color:var(--ink-2);margin:26px 0}
+
+    .exercise{margin-top:44px}
+    .exercise h2{
+      font-family:var(--serif);font-size:23px;font-weight:400;line-height:1.3;
+      letter-spacing:-.01em;padding-bottom:12px;border-bottom:1px solid var(--rule);margin-bottom:18px;
+    }
+    .exercise h2 .num{color:var(--accent);font-size:15px;font-family:var(--sans);font-weight:600;letter-spacing:.06em;display:block;margin-bottom:4px;text-transform:uppercase}
+    .instruction{color:var(--ink-2);margin:4px 0 22px;font-size:15px;}
+
+    fieldset{border:1px solid var(--rule);border-radius:3px;margin:16px 0;padding:18px 20px;background:var(--surface)}
+    fieldset.correct{border-color:var(--ok);background:var(--ok-soft)}
+    fieldset.incorrect{border-color:var(--warn);background:var(--warn-soft)}
+    legend{font-weight:600;padding:0 8px;max-width:94%;font-size:15px}
+    .choices{display:grid;gap:7px;margin-top:12px}
+    label.choice{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:3px;cursor:pointer;font-size:14.5px;color:var(--ink-2)}
+    label.choice:hover{background:var(--accent-soft)}
+    input[type="radio"]{width:1.1rem;height:1.1rem;margin-top:.2rem;accent-color:var(--accent);flex:0 0 auto}
+    .feedback{min-height:1.5em;margin:.7rem 0 0;font-weight:500;font-size:14.5px;line-height:1.6}
+    .correct .feedback{color:var(--ok)}
+    .incorrect .feedback{color:var(--warn)}
+
+    .aside{border-left:2px solid var(--rule);padding:2px 0 2px 20px;margin:22px 0;font-size:15px;color:var(--ink-2);}
+    .aside .lab{display:block;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);margin-bottom:5px;font-weight:600}
+    .aside.caution{border-left-color:var(--alert)}
+    .aside.caution .lab{color:var(--alert)}
+    .aside.key{border-left-color:var(--accent)}
+    .aside.key .lab{color:var(--accent)}
+    .aside strong{color:var(--ink);font-weight:600}
+    .aside em{font-style:italic}
+
+    h4{font-family:var(--serif);font-size:17px;font-weight:400;margin:22px 0 8px}
+
+    .plancard{border:1px solid var(--rule);background:var(--surface);padding:20px 22px;margin:16px 0;max-width:960px}
+    .plangrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:6px}
+    .pfield{display:flex;flex-direction:column;gap:5px}
+    .pfield.full{grid-column:1/-1}
+    .pfield label{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+    .pfield input,.pfield textarea{
+      width:100%;border:1px solid var(--rule);border-radius:3px;padding:9px 10px;
+      background:var(--paper);color:var(--ink);font:inherit;font-size:14.5px;
+    }
+    .pfield textarea{min-height:70px;resize:vertical}
+    .pfield input:focus,.pfield textarea:focus{outline:none;border-color:var(--accent)}
+    .cardhead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+    .cardnum{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);font-weight:600}
+    .rmrow{font:inherit;font-size:12.5px;background:none;border:none;color:var(--ink-3);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+    .rmrow:hover{color:var(--alert)}
+
+    .toolbar{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:34px;padding-top:22px;border-top:1px solid var(--rule)}
+    .btn{font:inherit;font-size:14.5px;font-weight:500;border-radius:3px;padding:10px 20px;border:1px solid var(--accent);cursor:pointer;transition:.15s}
+    .btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+    .btn-primary{background:var(--accent);color:#fff}
+    .btn-primary:hover{background:#173b35}
+    .btn-ghost{background:none;color:var(--accent);border-color:var(--rule)}
+    .btn-ghost:hover{border-color:var(--accent)}
+    .ex-score{font-size:14px;font-weight:600;color:var(--ink-2);margin-left:auto}
+    .score-good{color:var(--ok)}
+    .score-review{color:var(--warn)}
+    #planSaveNote{font-size:13.5px;color:var(--ink-3);margin-top:10px}
+
+    footer{margin-top:60px;padding-top:22px;border-top:1px solid var(--rule);font-size:12.5px;color:var(--ink-3);line-height:1.7;}
+
+    @media(max-width:700px){
+      .ex-score{width:100%;margin-left:0}
+      header.top h1{font-size:27px}
+    }
+    @media print{
+      .toolbar,.skip,.no-print,.rmrow{display:none}
+      .exercise{break-inside:avoid}
+      body{background:#fff}
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#contenu">Aller au playground</a>
+
+  <div class="wrap">
+    <header class="top">
+      <h1>Nathalie, construisez votre plan</h1>
+      <p class="sub">Ce playground reprend votre quotidien de consultante SIRH. Toutes les données proposées sont fictives sauf vos propres tâches, que vous avez déjà décrites : n'utilisez aucune information réelle de vos clients.</p>
+    </header>
+
+    <main id="contenu">
+      <p class="intro">Trois temps : prioriser les tâches qu'il vous reste à classer, vérifier vos réflexes sur votre activité multi-clients, puis construire les premières lignes de votre propre plan d'actions IA.</p>
+
+      <form id="quiz" novalidate>
+        <section class="exercise" aria-labelledby="ex1-title">
+          <h2 id="ex1-title"><span class="num">Exercice 1</span>Que faire de ces trois tâches ?</h2>
+          <p class="instruction">Vous avez déjà classé vos comptes-rendus, vos offres d'emploi et votre paramétrage SIRH dans une leçon précédente. Il reste trois tâches réelles de votre activité à passer par la même grille : impact d'un côté, risque de l'autre.</p>
+
+          <fieldset data-answer="now" data-ok="Exact. Volume élevé, structures qui reviennent, aucun nouvel outil à apprendre : les conditions d'une priorité immédiate sont réunies, sous réserve de rester vigilante sur les informations propres à chaque client." data-why="Un fort impact ET un risque faible ou maîtrisé : c'est le profil d'une tâche prioritaire maintenant, pas d'une tâche à garder pour plus tard.">
+            <legend>1. Vos mails clients, 4h par semaine : structures qui reviennent (confirmation de rendez-vous, relance, transmission d'informations), déjà traités quotidiennement avec l'aide de l'IA.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="q1" value="now"> Prioritaire maintenant</label>
+              <label class="choice"><input type="radio" name="q1" value="later"> Fort impact, plus tard</label>
+              <label class="choice"><input type="radio" name="q1" value="skip"> Pas encore une priorité</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <fieldset data-answer="skip" data-ok="Exact. Le risque est très faible, mais l'impact reste modeste face à vos autres tâches, et la rédaction d'un article engage davantage votre propre angle qu'un compte-rendu ou un mail type." data-why="Un risque faible ne suffit pas à lui seul : sans impact comparable à vos autres candidats, cette tâche n'a pas sa place parmi les toutes premières lignes du plan.">
+            <legend>2. Vos articles, 1h30 par semaine : rédaction qui engage votre propre point de vue, sans nom ni détail propre à un client.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="q2" value="now"> Prioritaire maintenant</label>
+              <label class="choice"><input type="radio" name="q2" value="later"> Fort impact, plus tard</label>
+              <label class="choice"><input type="radio" name="q2" value="skip"> Pas encore une priorité</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <fieldset data-answer="later" data-ok="Exact. Le volume est réel, mais des fiches salarié ou bulletins de paie réels restent visibles à l'écran pendant les sessions, et la relation pédagogique en direct reste fondamentalement humaine : l'IA n'y a qu'un rôle de préparation en amont." data-why="Un fort impact en temps ne suffit pas si le risque associé (fiches salarié visibles en session) reste élevé et si la nature même de la tâche limite ce que l'IA peut y apporter : elle reste sur la liste, mais après les tâches plus sûres.">
+            <legend>3. La formation des utilisateurs du SIRH chez vos clients, 3h par semaine : sessions en direct, avec parfois des fiches salarié ou des bulletins de paie réels visibles à l'écran pendant la démonstration.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="q3" value="now"> Prioritaire maintenant</label>
+              <label class="choice"><input type="radio" name="q3" value="later"> Fort impact, plus tard</label>
+              <label class="choice"><input type="radio" name="q3" value="skip"> Pas encore une priorité</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <div class="toolbar no-print">
+            <button class="btn btn-primary grade-btn" type="button">Corriger mes réponses</button>
+            <div class="ex-score" role="status" aria-live="polite">Répondez aux 3 questions</div>
+          </div>
+        </section>
+
+        <section class="exercise" aria-labelledby="ex2-title">
+          <h2 id="ex2-title"><span class="num">Exercice 2</span>Est-ce déjà le bon réflexe ?</h2>
+          <p class="instruction">Vous travaillez avec plusieurs structures clientes en parallèle. Pour chaque comportement décrit, dites s'il s'agit déjà du bon réflexe.</p>
+
+          <fieldset data-answer="non" data-ok="Exact. La méthode consiste à retenir deux à trois tâches pour commencer, pas l'ensemble d'un coup." data-why="Un plan qui liste trop de tâches en même temps ne se met généralement pas en œuvre : commencer petit est exactement le bon réflexe.">
+            <legend>1. Vous ajoutez vos six tâches réelles à votre plan en même temps, dès la première semaine.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="p1" value="oui"> Oui, bon réflexe</label>
+              <label class="choice"><input type="radio" name="p1" value="non"> Non, pas encore</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <fieldset data-answer="oui" data-ok="Exact. Cette validation se prépare avant la mise en œuvre, pas après coup." data-why="Demander l'accord d'un client avant de changer la façon dont vous traitez ses dossiers avec l'aide de l'IA est exactement la validation nécessaire vue dans la leçon.">
+            <legend>2. Avant de changer la façon dont vous traitez les dossiers d'un client avec l'aide de l'IA, vous lui demandez son accord.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="p2" value="oui"> Oui, bon réflexe</label>
+              <label class="choice"><input type="radio" name="p2" value="non"> Non, pas encore</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <fieldset data-answer="non" data-ok="Exact. Le budget éventuel doit être identifié avant de compter sur la justification prévue, pas découvert après coup." data-why="Retenir un outil sans avoir vérifié son coût revient à ignorer l'un des trois obstacles à anticiper avant la mise en œuvre.">
+            <legend>3. Pour une nouvelle mission, vous retenez un outil nécessitant un compte payant, sans avoir vérifié le coût de l'abonnement au préalable.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="p3" value="oui"> Oui, bon réflexe</label>
+              <label class="choice"><input type="radio" name="p3" value="non"> Non, pas encore</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <fieldset data-answer="oui" data-ok="Exact. C'est l'indicateur de temps gagné, mesuré sur une base comparable." data-why="Comparer le temps passé avant et après, sur une tâche comparable, est exactement la façon de mesurer cet indicateur.">
+            <legend>4. Vous comparez le temps passé sur un compte-rendu avant et après avoir utilisé l'IA, pour vérifier le gain réel.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="p4" value="oui"> Oui, bon réflexe</label>
+              <label class="choice"><input type="radio" name="p4" value="non"> Non, pas encore</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <fieldset data-answer="non" data-ok="Exact. Chaque structure a ses propres priorités, son propre budget et sa propre tolérance au risque : un choix validé pour l'une ne se transpose pas automatiquement à une autre." data-why="Reprendre tel quel un plan validé ailleurs revient à ignorer que chaque mission a son propre contexte, ce qui peut transposer par erreur un choix jamais vérifié pour ce client précis.">
+            <legend>5. Pour une nouvelle mission chez un client, vous reprenez tel quel le plan déjà validé chez un autre client.</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="p5" value="oui"> Oui, bon réflexe</label>
+              <label class="choice"><input type="radio" name="p5" value="non"> Non, pas encore</label>
+            </div><p class="feedback" aria-live="polite"></p>
+          </fieldset>
+
+          <div class="toolbar no-print">
+            <button class="btn btn-primary grade-btn" type="button">Corriger mes réponses</button>
+            <div class="ex-score" role="status" aria-live="polite">Répondez aux 5 questions</div>
+          </div>
+        </section>
+      </form>
+
+      <section class="exercise" aria-labelledby="ex3-title">
+        <h2 id="ex3-title"><span class="num">Exercice 3</span>Mon plan d'actions IA</h2>
+        <div class="aside key">
+          <span class="lab">Ce que ce plan mobilise</span>
+          Ce plan reprend les six éléments attendus et ajoute deux repères de pilotage : qui valide et comment la réussite sera mesurée par rapport à la situation de départ.
+        </div>
+        <p class="instruction">Trois hypothèses de départ sont proposées. Modifiez-les, chiffrez le gain attendu, indiquez le valideur, la référence actuelle et le critère d'arrêt ou de réussite. Un outil ou un prix non vérifié doit rester noté « à confirmer ».</p>
+
+        <div id="planList"></div>
+
+        <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap" class="no-print">
+          <button class="btn btn-ghost" id="addRow">Ajouter une ligne</button>
+        </div>
+        <p id="planSaveNote" class="no-print">Vos réponses sont sauvegardées automatiquement dans ce navigateur au fur et à mesure. Pour en garder une copie durable, ou l'emporter sur un autre appareil, téléchargez-les avec le bouton ci-dessous.</p>
+
+        <div class="toolbar no-print">
+          <button class="btn btn-ghost" id="downloadBtn">Télécharger mon plan</button>
+          <button class="btn btn-primary" id="printBtn">Imprimer ou enregistrer en PDF</button>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Toutes les entreprises, personnes et données chiffrées de cet exercice sont fictives. Ce support ne remplace pas la politique interne de vos clients ni les consignes de leur DSI ou de leur DPO.
+    </footer>
+  </div>
+
+  <script>
+    /* =========== EXERCICES 1 ET 2 : correction par exercice =========== */
+    document.querySelectorAll('.grade-btn').forEach((btn) => {
+      const section = btn.closest('.exercise');
+      const fieldsets = [...section.querySelectorAll('fieldset[data-answer]')];
+      const scoreEl = section.querySelector('.ex-score');
+      const threshold = Math.max(1, Math.ceil(fieldsets.length * 0.8));
+
+      btn.addEventListener('click', () => {
+        let score = 0;
+        let answered = 0;
+        fieldsets.forEach((fieldset) => {
+          const selected = fieldset.querySelector('input:checked');
+          const feedback = fieldset.querySelector('.feedback');
+          fieldset.classList.remove('correct', 'incorrect');
+          if (!selected) {
+            feedback.textContent = 'Choisissez une réponse.';
+            fieldset.classList.add('incorrect');
+            return;
+          }
+          answered += 1;
+          if (selected.value === fieldset.dataset.answer) {
+            score += 1;
+            fieldset.classList.add('correct');
+            feedback.textContent = fieldset.dataset.ok;
+          } else {
+            fieldset.classList.add('incorrect');
+            feedback.textContent = `À revoir. ${fieldset.dataset.why}`;
+          }
+        });
+        scoreEl.className = 'ex-score ' + (score >= threshold ? 'score-good' : 'score-review');
+        if (answered < fieldsets.length) {
+          scoreEl.textContent = `${answered}/${fieldsets.length} réponses données. Score provisoire : ${score}/${fieldsets.length}.`;
+        } else if (score === fieldsets.length) {
+          scoreEl.textContent = `${score}/${fieldsets.length}. Tout est juste.`;
+        } else if (score >= threshold) {
+          scoreEl.textContent = `${score}/${fieldsets.length}. Relisez les retours en couleur, puis continuez.`;
+        } else {
+          scoreEl.textContent = `${score}/${fieldsets.length}. Relisez les retours en couleur avant de poursuivre.`;
+        }
+        section.querySelector('.incorrect')?.scrollIntoView({ behavior:'smooth', block:'center' });
+      });
+    });
+
+    /* =========== EXERCICE 3 : mon plan d'actions IA =========== */
+    var DEFAULT_ROWS = [
+      { tache:"Rédiger mes comptes-rendus de réunion", freq:"Hebdomadaire",
+        outil:"Outil autorisé à confirmer",
+        justif:"Hypothèse : gagner 20 minutes par occurrence sur trois essais fictifs. Comparer le brouillon aux notes et relever toute erreur ou omission.",
+        budget:"À confirmer : offre, période et utilisateurs", delai:"",
+        validation:"Nathalie, avant toute diffusion", indicateur:"Référence à mesurer ; cible : temps total réduit et 0 erreur de décision, date ou montant sur 3 essais" },
+      { tache:"Rédiger et traiter mes mails clients", freq:"Hebdomadaire",
+        outil:"Outil autorisé à confirmer",
+        justif:"Hypothèse à chronométrer sur des cas fictifs. Contrôler le sens, les engagements, les destinataires et les informations à protéger.",
+        budget:"À confirmer : offre, période et utilisateurs", delai:"",
+        validation:"Nathalie, avant envoi", indicateur:"Référence à mesurer ; cible : temps total réduit, 0 engagement ou donnée ajoutés" },
+      { tache:"Rédiger des offres d'emploi", freq:"À chaque nouveau poste à pourvoir",
+        outil:"Outil à confirmer avec le client",
+        justif:"Structure connue, matière fournie par le brief client. Vérifier les éléments chiffrés (rémunération, avantages) avant envoi, un outil pouvant être tenté de les inventer.",
+        budget:"À préciser selon le client", delai:"",
+        validation:"Nathalie puis valideur client si requis", indicateur:"Référence à mesurer ; cible : 0 critère inventé ou discriminatoire, mentions et chiffres exacts" }
+    ];
+
+    var STORAGE_KEY = "playground_nathalie_lecon1.3_plan";
+    var ROWS = DEFAULT_ROWS.map(function(r){ return Object.assign({}, r); });
+
+    function loadState(){
+      try{
+        var raw = localStorage.getItem(STORAGE_KEY);
+        if(!raw) return null;
+        var data = JSON.parse(raw);
+        if(!data || !Array.isArray(data.rows)) return null;
+        return data;
+      } catch(e){ return null; }
+    }
+    var saved = loadState();
+    if(saved){ ROWS = saved.rows; }
+
+    function saveState(){
+      try{
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ v:1, rows: ROWS }));
+      } catch(e){ /* stockage indisponible : la page continue sans sauvegarde automatique */ }
+    }
+
+    function fieldHtml(i, key, label, type){
+      var val = (ROWS[i][key] || "").replace(/"/g, '&quot;');
+      if(type === 'textarea'){
+        return '<div class="pfield full"><label>'+label+'</label><textarea data-i="'+i+'" data-k="'+key+'">'+ (ROWS[i][key]||"") +'</textarea></div>';
+      }
+      return '<div class="pfield"><label>'+label+'</label><input type="text" data-i="'+i+'" data-k="'+key+'" value="'+val+'"></div>';
+    }
+
+    function drawRows(){
+      document.getElementById("planList").innerHTML = ROWS.map(function(r, i){
+        return '<div class="plancard" data-row="'+i+'">'+
+          '<div class="cardhead"><span class="cardnum">Ligne '+(i+1)+'</span>'+
+          (ROWS.length > 1 ? '<button class="rmrow" data-rm="'+i+'">Supprimer cette ligne</button>' : '')+
+          '</div>'+
+          '<div class="plangrid">'+
+            fieldHtml(i,'tache','Tâche cible') +
+            fieldHtml(i,'freq','Fréquence') +
+            fieldHtml(i,'outil','Outil choisi') +
+            fieldHtml(i,'budget','Budget éventuel') +
+            fieldHtml(i,'delai','Délai de mise en œuvre') +
+            fieldHtml(i,'validation','Responsable ou valideur') +
+            fieldHtml(i,'indicateur','Indicateur et situation de départ','textarea') +
+            fieldHtml(i,'justif','Justification','textarea') +
+          '</div>'+
+        '</div>';
+      }).join("");
+    }
+    drawRows();
+
+    document.getElementById("planList").addEventListener("input", function(e){
+      var t = e.target;
+      if(t.dataset.i === undefined) return;
+      ROWS[+t.dataset.i][t.dataset.k] = t.value;
+      saveState();
+    });
+
+    document.getElementById("planList").addEventListener("click", function(e){
+      var rm = e.target.closest("[data-rm]");
+      if(rm){
+        ROWS.splice(+rm.dataset.rm, 1);
+        drawRows();
+        saveState();
+      }
+    });
+
+    document.getElementById("addRow").addEventListener("click", function(){
+      ROWS.push({ tache:"", freq:"", outil:"", justif:"", budget:"", delai:"", validation:"", indicateur:"" });
+      drawRows();
+      saveState();
+    });
+
+    function buildSummaryText(){
+      var lines = ["Mon plan d'actions IA", ""];
+      ROWS.forEach(function(r, i){
+        lines.push("Ligne " + (i+1) + " : " + (r.tache || "(tâche non renseignée)"));
+        lines.push("- Fréquence : " + (r.freq || "à compléter"));
+        lines.push("- Outil choisi : " + (r.outil || "à compléter"));
+        lines.push("- Justification : " + (r.justif || "à compléter"));
+        lines.push("- Budget éventuel : " + (r.budget || "à compléter"));
+        lines.push("- Délai de mise en œuvre : " + (r.delai || "à compléter"));
+        lines.push("- Responsable ou valideur : " + (r.validation || "à compléter"));
+        lines.push("- Indicateur et situation de départ : " + (r.indicateur || "à compléter"));
+        lines.push("");
+      });
+      return lines.join("\n");
+    }
+
+    document.getElementById("downloadBtn").addEventListener("click", function(){
+      var text = buildSummaryText();
+      var blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = "mon-plan-actions-ia.txt";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+    });
+
+    document.getElementById("printBtn").addEventListener("click", function(){ window.print(); });
+  </script>
+</body>
+</html>

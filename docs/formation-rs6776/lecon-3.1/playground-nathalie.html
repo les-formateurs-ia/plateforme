@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Playground accessibilité</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#F7F7FA; --surface:#fff; --ink:#1b1a17; --ink-2:#4a4741; --ink-3:#7c786f;
+  --rule:#e4e1d9; --rule-2:#efece5; --accent:#1f4e46; --accent-soft:#eef3f1;
+  --ok:#2c6a48; --ok-soft:#eef4ef; --warn:#8a6519; --warn-soft:#faf4e7;
+  --alert:#963428; --alert-soft:#fbf1ef;
+  --serif:'Funnel Display',Georgia,'Iowan Old Style','Times New Roman',serif;
+  --sans:'Funnel Display',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+}
+body{font-family:var(--sans);font-size:15.5px;line-height:1.62;color:var(--ink);background:var(--paper);padding:0 22px 80px}
+.wrap{width:100%;margin:0 auto}
+
+.hero{margin:0 auto;padding:52px 0 28px;border-bottom:1px solid var(--rule)}
+.eyebrow{font-size:.78rem;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px}
+h1{font-family:var(--serif);font-size:1.95rem;font-weight:800;color:var(--ink);margin-bottom:14px}
+.lede{font-size:1rem;color:var(--ink-2)}
+
+main{margin:0 auto;padding-top:10px}
+.exercise{margin-top:44px;background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:26px 28px}
+.exercise h2{font-family:var(--serif);font-size:1.32rem;font-weight:700;color:var(--ink);padding-left:12px;border-left:4px solid var(--accent);margin-bottom:10px}
+.exercise > p.instructions{color:var(--ink-2);margin-bottom:20px}
+
+fieldset{border:1px solid var(--rule-2);border-radius:10px;padding:16px 18px;margin-bottom:16px;background:var(--paper)}
+legend{font-size:.94rem;color:var(--ink-2);padding:0 6px;font-weight:500}
+legend .who{font-weight:700;color:var(--ink)}
+.options{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.option{display:flex;align-items:flex-start;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background .12s}
+.option:hover{background:var(--rule-2)}
+.option input{margin-top:4px;flex-shrink:0}
+.option span{font-size:.93rem}
+.option.selected-ok{background:var(--ok-soft)}
+.option.selected-bad{background:var(--alert-soft)}
+.option.reveal-correct{outline:1.5px dashed var(--ok)}
+
+.fb{font-size:.88rem;margin-top:10px;padding:10px 12px;border-radius:8px;display:none}
+.fb.show{display:block}
+.fb.ok{background:var(--ok-soft);color:var(--ok)}
+.fb.alert{background:var(--alert-soft);color:var(--alert)}
+
+.exercise-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:6px;padding-top:16px;border-top:1px dashed var(--rule)}
+.btn{font-family:var(--sans);font-size:.9rem;font-weight:700;padding:10px 20px;border-radius:999px;border:1.5px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}
+.btn:hover{opacity:.92}
+.btn.ghost{background:#fff;color:var(--accent)}
+.score-display{font-size:.92rem;color:var(--ink-2)}
+.score-display strong{color:var(--accent);font-size:1.05rem}
+.pass-msg{margin-top:12px;padding:10px 14px;border-radius:8px;font-size:.9rem;font-weight:600;display:none}
+.pass-msg.show{display:block}
+.pass-msg.ok{background:var(--ok-soft);color:var(--ok)}
+.pass-msg.warn{background:var(--warn-soft);color:var(--warn)}
+
+.card{background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:16px 18px;margin-bottom:16px}
+.card .label{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;font-weight:700;color:var(--ink-3);margin-bottom:6px}
+.card p{margin:0}
+
+textarea{width:100%;min-height:140px;font-family:var(--sans);font-size:.95rem;line-height:1.55;color:var(--ink);border:1px solid var(--rule);border-radius:10px;padding:14px;resize:vertical;background:#fff}
+textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+.autosave-note{font-size:.78rem;color:var(--ink-3);margin-top:8px}
+.corrige{margin-top:16px;border-top:1px dashed var(--rule);padding-top:16px}
+.corrige-body{display:none;margin-top:12px}
+.corrige-body.show{display:block}
+
+footer.closing{margin:56px auto 0;padding-top:20px;border-top:1px solid var(--rule);font-size:.85rem;color:var(--ink-3)}
+
+@media (max-width:640px){
+  h1{font-size:1.55rem}
+  .exercise{padding:18px}
+  .exercise-footer{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div class="eyebrow">Playground</div>
+  <h1>Produire des contenus accessibles, cas pratiques</h1>
+  <p class="lede">Mettez en pratique la méthode de cette leçon sur des cas fictifs, tous liés au même contexte&nbsp;: vous accompagnez Brivelune Distribution, une enseigne de distribution qui recrute pour ses entrepôts et ses points de vente, sur la rédaction de ses offres et le paramétrage de son espace candidature en ligne. Chaque exercice a son propre bouton de correction et son propre score.</p>
+</header>
+
+<main>
+
+<section class="exercise" id="ex1">
+  <h2>Exercice 1 &middot; Quel besoin d'accessibilité est prioritaire&nbsp;?</h2>
+  <p class="instructions">Pour chaque situation, partez de l'obstacle décrit et choisissez le besoin principalement concerné&nbsp;: visuel, auditif ou cognitif. Ces catégories servent de repères pédagogiques&nbsp;; dans une situation réelle, plusieurs besoins peuvent se cumuler et la solution doit être vérifiée avec la personne concernée.</p>
+
+  <fieldset data-fieldset="ex1-a">
+    <legend>Sur l'espace candidature en ligne de Brivelune Distribution, le bouton pour postuler n'est qu'une icône de flèche, sans aucun texte associé. Un candidat aveugle utilisant un lecteur d'écran entend seulement « bouton » sans savoir à quoi il sert.</legend>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex1-a" value="visuel" data-ok="true" data-why="Un lecteur d'écran a besoin d'un texte associé à chaque bouton pour être utile : une icône seule, sans label, est un obstacle typique pour une personne aveugle ou malvoyante."> <span>Visuel</span></label>
+      <label class="option"><input type="radio" name="ex1-a" value="auditif" data-ok="false" data-why="Le son n'est pas en cause ici : le problème est l'absence de texte associé à un élément visuel, ce qui relève du handicap visuel."> <span>Auditif</span></label>
+      <label class="option"><input type="radio" name="ex1-a" value="cognitif" data-ok="false" data-why="Il ne s'agit pas d'une difficulté de compréhension du contenu, mais d'une absence totale d'information transmise par le lecteur d'écran : c'est un obstacle visuel."> <span>Cognitif</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex1-b">
+    <legend>Brivelune Distribution a publié une vidéo de présentation de ses entrepôts sur sa page carrières, sans aucun sous-titre. Un candidat sourd ne peut pas suivre ce que dit la personne interviewée.</legend>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex1-b" value="visuel" data-ok="false" data-why="Le candidat voit bien la vidéo : ce qui lui manque, c'est le contenu sonore, absent de toute retranscription visuelle."> <span>Visuel</span></label>
+      <label class="option"><input type="radio" name="ex1-b" value="auditif" data-ok="true" data-why="Sans sous-titres ni transcription, tout le contenu sonore de la vidéo est inaccessible à une personne sourde ou malentendante : c'est un obstacle auditif classique."> <span>Auditif</span></label>
+      <label class="option"><input type="radio" name="ex1-b" value="cognitif" data-ok="false" data-why="Le contenu n'est pas trop complexe à comprendre : il est simplement inaccessible sans le son, ce qui relève du handicap auditif."> <span>Cognitif</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex1-c">
+    <legend>Une offre pour un poste de préparateur de commandes chez Brivelune Distribution contient un paragraphe unique de 15 lignes, sans puces ni retours à la ligne, mêlant missions, avantages et conditions de travail. Un candidat dyslexique abandonne sa lecture au bout de trois lignes.</legend>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex1-c" value="visuel" data-ok="false" data-why="Dans ce cas, l'obstacle décrit porte d'abord sur le traitement d'un texte dense. Une mise en page illisible pourrait aussi créer un besoin visuel, mais ce n'est pas l'information donnée ici."> <span>Visuel</span></label>
+      <label class="option"><input type="radio" name="ex1-c" value="auditif" data-ok="false" data-why="Aucun contenu sonore n'est en cause ici : le texte est écrit, le problème est sa structure."> <span>Auditif</span></label>
+      <label class="option"><input type="radio" name="ex1-c" value="cognitif" data-ok="true" data-why="Le besoin prioritaire décrit concerne la compréhension et le traitement d'un texte dense. Des phrases courtes, une structure claire et des informations concrètes peuvent aider. Cela ne signifie pas que toute personne dyslexique a besoin de FALC, ni qu'un texte simplifié peut être appelé FALC sans la démarche de validation correspondante."> <span>Cognitif</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex1-d">
+    <legend>Une infographie « Vos avantages chez Brivelune Distribution » (mutuelle, primes, RTT) illustre la page carrières, sans aucun texte alternatif renseigné.</legend>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex1-d" value="visuel" data-ok="true" data-why="Sans texte alternatif, un lecteur d'écran ne transmet aucune information sur le contenu de l'infographie à une personne aveugle ou malvoyante : c'est un obstacle visuel."> <span>Visuel</span></label>
+      <label class="option"><input type="radio" name="ex1-d" value="auditif" data-ok="false" data-why="Aucun contenu sonore n'est concerné : l'infographie est un élément visuel, sans son."> <span>Auditif</span></label>
+      <label class="option"><input type="radio" name="ex1-d" value="cognitif" data-ok="false" data-why="Le problème n'est pas la complexité du contenu mais son absence totale de retranscription pour un lecteur d'écran : c'est un obstacle visuel."> <span>Cognitif</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex1-e">
+    <legend>Pour certains postes, Brivelune Distribution ne propose qu'un entretien téléphonique comme unique étape avant embauche, sans alternative écrite ni visio sous-titrée. Une candidate sourde ne peut pas postuler dans ces conditions.</legend>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex1-e" value="visuel" data-ok="false" data-why="Rien n'indique un obstacle de perception visuelle ici : le canal proposé, le téléphone, est simplement inaccessible sans le son."> <span>Visuel</span></label>
+      <label class="option"><input type="radio" name="ex1-e" value="auditif" data-ok="true" data-why="Un canal exclusivement téléphonique, sans alternative écrite ou visio sous-titrée, exclut de fait les candidats sourds ou malentendants : c'est un obstacle auditif, ici au niveau du processus de recrutement lui-même, pas seulement du contenu."> <span>Auditif</span></label>
+      <label class="option"><input type="radio" name="ex1-e" value="cognitif" data-ok="false" data-why="Ce n'est pas la complexité du contenu qui pose problème, mais l'absence de canal alternatif au téléphone."> <span>Cognitif</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <div class="exercise-footer">
+    <button class="btn" data-correct-ex="ex1">Corriger mes réponses</button>
+    <span class="score-display">Score&nbsp;: <strong data-score="ex1">0 / 5</strong> &middot; seuil de réussite&nbsp;: 80%</span>
+  </div>
+  <div class="pass-msg" data-pass="ex1"></div>
+</section>
+
+<section class="exercise" id="ex2">
+  <h2>Exercice 2 &middot; Cette correction répond-elle au besoin&nbsp;?</h2>
+  <p class="instructions">Le contexte est donné avant la correction apportée. Jugez si elle répond réellement au besoin d'accessibilité identifié.</p>
+
+  <fieldset data-fieldset="ex2-a">
+    <legend>Le bouton icône seule pour postuler (exercice 1a) doit devenir utilisable au clavier et au lecteur d'écran.</legend>
+    <div class="card" style="margin:10px 0"><span class="label">Correction apportée</span><p>Le bouton conserve son icône mais reçoit un texte associé « Postuler à cette offre », lu par le lecteur d'écran même si le texte visible reste l'icône.</p></div>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex2-a" value="oui" data-ok="true" data-why="Le lecteur d'écran annonce désormais clairement la fonction du bouton : c'est exactement ce qui manquait, l'apparence visuelle peut rester inchangée."> <span>Adaptée</span></label>
+      <label class="option"><input type="radio" name="ex2-a" value="non" data-ok="false" data-why="Le lecteur d'écran annonce désormais clairement la fonction du bouton : c'est exactement ce qui manquait, l'apparence visuelle peut rester inchangée."> <span>Pas adaptée</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex2-b">
+    <legend>La vidéo de présentation des entrepôts (exercice 1b) doit devenir suivable par une personne sourde.</legend>
+    <div class="card" style="margin:10px 0"><span class="label">Correction apportée</span><p>Des sous-titres synchronisés ont été ajoutés à la vidéo, et une transcription complète est également disponible en téléchargement sous le lecteur.</p></div>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex2-b" value="oui" data-ok="true" data-why="Les sous-titres synchronisés permettent de suivre la vidéo en temps réel, et la transcription offre une alternative pour retrouver un passage précis : les deux besoins sont couverts."> <span>Adaptée</span></label>
+      <label class="option"><input type="radio" name="ex2-b" value="non" data-ok="false" data-why="Les sous-titres synchronisés permettent de suivre la vidéo en temps réel, et la transcription offre une alternative pour retrouver un passage précis : les deux besoins sont couverts."> <span>Pas adaptée</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex2-c">
+    <legend>L'offre au paragraphe dense de 15 lignes (exercice 1c) doit devenir lisible par un candidat dyslexique.</legend>
+    <div class="card" style="margin:10px 0"><span class="label">Correction apportée</span><p>Le paragraphe a été transformé en trois listes à puces (missions, avantages, conditions), mais chaque puce reprend les phrases longues et le vocabulaire d'origine sans les raccourcir.</p></div>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex2-c" value="oui" data-ok="false" data-why="La structure en listes aide, mais le vrai obstacle pour une personne dyslexique tient aussi à la longueur des phrases et au vocabulaire employé, pas seulement à la mise en forme : ces deux points restent inchangés."> <span>Adaptée</span></label>
+      <label class="option"><input type="radio" name="ex2-c" value="non" data-ok="true" data-why="La structure en listes aide, mais le vrai obstacle pour une personne dyslexique tient aussi à la longueur des phrases et au vocabulaire employé, pas seulement à la mise en forme : ces deux points restent inchangés."> <span>Pas adaptée</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex2-d">
+    <legend>L'infographie « Vos avantages » sans texte alternatif (exercice 1d) doit devenir accessible à un lecteur d'écran.</legend>
+    <div class="card" style="margin:10px 0"><span class="label">Correction apportée</span><p>Le texte alternatif renseigné est désormais « Infographie avantages salariés », sans détail sur le contenu réel. Aucune description détaillée ni liste accessible des trois avantages n'est proposée dans la page.</p></div>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex2-d" value="oui" data-ok="false" data-why="Le texte alternatif répète seulement le titre. Pour une infographie complexe, il faut une alternative courte qui l'identifie, puis une description détaillée ou une liste accessible transmettant la mutuelle, les primes et les RTT."> <span>Adaptée</span></label>
+      <label class="option"><input type="radio" name="ex2-d" value="non" data-ok="true" data-why="Le texte alternatif répète seulement le titre. Pour une infographie complexe, il faut une alternative courte qui l'identifie, puis une description détaillée ou une liste accessible transmettant la mutuelle, les primes et les RTT."> <span>Pas adaptée</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex2-e">
+    <legend>Le processus reposant uniquement sur un entretien téléphonique (exercice 1e) doit devenir accessible à une candidate sourde.</legend>
+    <div class="card" style="margin:10px 0"><span class="label">Correction apportée</span><p>Un entretien par écrit (questionnaire détaillé) ou en visio sous-titrée est désormais proposé comme alternative explicite à l'entretien téléphonique, mentionnée dans l'offre.</p></div>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex2-e" value="oui" data-ok="true" data-why="Une alternative accessible et clairement annoncée dans l'offre permet à une candidate sourde de postuler dans les mêmes conditions que les autres candidats."> <span>Adaptée</span></label>
+      <label class="option"><input type="radio" name="ex2-e" value="non" data-ok="false" data-why="Une alternative accessible et clairement annoncée dans l'offre permet à une candidate sourde de postuler dans les mêmes conditions que les autres candidats."> <span>Pas adaptée</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <div class="exercise-footer">
+    <button class="btn" data-correct-ex="ex2">Corriger mes réponses</button>
+    <span class="score-display">Score&nbsp;: <strong data-score="ex2">0 / 5</strong> &middot; seuil de réussite&nbsp;: 80%</span>
+  </div>
+  <div class="pass-msg" data-pass="ex2"></div>
+</section>
+
+<section class="exercise" id="ex3">
+  <h2>Exercice 3 &middot; Repérer un prompt d'accessibilité complet</h2>
+  <p class="instructions">Pour chaque besoin, un seul prompt pose vraiment la contrainte d'accessibilité et précise ce qui doit être conservé.</p>
+
+  <fieldset data-fieldset="ex3-a">
+    <legend>Obtenir un texte alternatif utile pour l'infographie « Vos avantages chez Brivelune Distribution » (mutuelle, primes, RTT).</legend>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex3-a" value="a" data-ok="false" data-why="« Décris cette image » ne précise ni le public visé (lecteur d'écran) ni l'exigence de transmettre le contenu informatif plutôt que l'apparence."> <span>« Décris cette image. »</span></label>
+      <label class="option"><input type="radio" name="ex3-a" value="b" data-ok="true" data-why="Le prompt distingue l'alternative courte de l'équivalent détaillé dans la page, protège les trois informations utiles et interdit d'inventer des avantages absents de la source."> <span>« Voici une infographie présentant trois avantages salariés : mutuelle, primes, RTT. Propose un texte alternatif court qui identifie l'infographie et son message, puis une liste détaillée accessible à placer juste après l'image. Conserve exactement ces trois informations et n'en invente aucune. »</span></label>
+      <label class="option"><input type="radio" name="ex3-a" value="c" data-ok="false" data-why="Un simple titre répété n'apporte aucune information sur le contenu réel de l'infographie à une personne qui ne la voit pas."> <span>« Trouve-moi un titre court pour cette infographie. »</span></label>
+      <label class="option"><input type="radio" name="ex3-a" value="d" data-ok="false" data-why="Cette description reste purement visuelle et esthétique : elle ne transmet aucune des trois informations utiles à un candidat qui ne voit pas l'image."> <span>« Décris les couleurs et la mise en page de cette infographie. »</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex3-b">
+    <legend>Reformuler l'offre au paragraphe dense de 15 lignes pour un candidat dyslexique, sans perdre les missions, avantages et conditions déjà présents.</legend>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex3-b" value="a" data-ok="false" data-why="« Simplifie ce texte » ne précise ni les règles à appliquer, ni ce qui doit être conservé, ni le format de sortie attendu."> <span>« Simplifie ce texte. »</span></label>
+      <label class="option"><input type="radio" name="ex3-b" value="b" data-ok="false" data-why="Résumer risque de perdre des informations obligatoires (une mission, une condition) sans qu'aucune règle de structure ou de vocabulaire ne soit posée."> <span>« Résume ce texte en trois phrases. »</span></label>
+      <label class="option"><input type="radio" name="ex3-b" value="c" data-ok="true" data-why="Le prompt pose des règles de langage clair et d'accessibilité cognitive, protège les informations obligatoires et demande de signaler les ambiguïtés. La sortie reste un brouillon à tester ; elle ne peut être appelée FALC qu'après application complète de cette démarche, dont la participation de personnes en situation de handicap intellectuel."> <span>« Voici une offre d'emploi : [coller le texte]. Réécris-la avec une idée par phrase, un vocabulaire courant, en listes séparées pour les missions, les avantages et les conditions. Ne supprime et n'invente aucune information. Signale tout passage trop vague pour être reformulé fidèlement. Présente la sortie comme un brouillon à faire tester avant publication. »</span></label>
+      <label class="option"><input type="radio" name="ex3-b" value="d" data-ok="false" data-why="Un ton plus dynamique ne résout pas le problème identifié, qui porte sur la structure et la longueur des phrases, pas sur le registre."> <span>« Rends ce texte plus dynamique. »</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <fieldset data-fieldset="ex3-c">
+    <legend>Obtenir des sous-titres fiables pour la vidéo de présentation des entrepôts, avant publication.</legend>
+    <div class="options">
+      <label class="option"><input type="radio" name="ex3-c" value="a" data-ok="false" data-why="Publier des sous-titres générés automatiquement sans relecture risque de transmettre des erreurs, en particulier sur les noms propres ou les termes techniques."> <span>« Génère des sous-titres pour cette vidéo et publie-la directement. »</span></label>
+      <label class="option"><input type="radio" name="ex3-c" value="b" data-ok="true" data-why="Le prompt demande une première génération, mais prévoit explicitement une relecture humaine avant publication, en particulier sur les noms propres, ce qui est la bonne méthode."> <span>« Génère un premier jeu de sous-titres synchronisés pour cette vidéo à partir de sa bande son. Signale les passages où un nom propre ou un terme technique est incertain, pour que je les relise moi-même avant publication. »</span></label>
+      <label class="option"><input type="radio" name="ex3-c" value="c" data-ok="false" data-why="Une transcription seule, sans synchronisation ni sous-titres sur la vidéo elle-même, ne permet pas de suivre la vidéo en temps réel."> <span>« Fais-moi juste un résumé de ce qui est dit dans la vidéo. »</span></label>
+      <label class="option"><input type="radio" name="ex3-c" value="d" data-ok="false" data-why="Retirer le son ne résout rien : le problème est l'absence d'équivalent textuel du contenu sonore, pas la présence du son lui-même."> <span>« Retire le son de la vidéo pour éviter tout problème d'accessibilité. »</span></label>
+    </div>
+    <div class="fb"></div>
+  </fieldset>
+
+  <div class="exercise-footer">
+    <button class="btn" data-correct-ex="ex3">Corriger mes réponses</button>
+    <span class="score-display">Score&nbsp;: <strong data-score="ex3">0 / 3</strong> &middot; seuil de réussite&nbsp;: 80%</span>
+  </div>
+  <div class="pass-msg" data-pass="ex3"></div>
+</section>
+
+<section class="exercise" id="ex4">
+  <h2>Exercice 4 &middot; À vous d'adapter (à remettre)</h2>
+  <p class="instructions">Votre brouillon est sauvegardé automatiquement dans ce navigateur. Remettez au formateur le texte de départ, votre prompt, la version adaptée et votre propre vérification.</p>
+
+  <div class="card">
+    <span class="label">Extrait d'offre généré, à adapter</span>
+    <p>« Le titulaire du poste assurera la réception des candidatures entrantes, leur enregistrement dans le SIRH et la sollicitation des pièces manquantes dans un délai de 48&nbsp;heures. Après une relance restée sans réponse, le dossier sera signalé comme incomplet au responsable du recrutement, sans rejet automatique. Le poste implique des échanges avec les responsables d'entrepôt et le service RH. Une première expérience en logistique est appréciée mais ne constitue pas un prérequis. »</p>
+  </div>
+
+  <p class="instructions" style="margin-top:-6px">Public visé&nbsp;: une personne présentant un handicap cognitif qui rencontre des difficultés avec les phrases longues, les implicites et les consignes regroupant plusieurs actions. Rédigez vos critères fonctionnels, puis votre prompt et la version adaptée. Comparez chaque information au texte source, signalez tout ajout ou perte et expliquez comment vous feriez tester le résultat. Si vous souhaitez qualifier le document de FALC, précisez la participation de personnes en situation de handicap intellectuel à sa rédaction et à sa relecture.</p>
+
+  <label for="ex4-textarea" style="display:block;font-size:.85rem;color:var(--ink-3);margin-bottom:6px">Vos critères, votre prompt, la version adaptée et votre vérification</label>
+  <textarea id="ex4-textarea" placeholder="Critères d'accessibilité :&#10;Prompt d'adaptation :&#10;Version adaptée :&#10;Vérification par rapport à la source :"></textarea>
+  <p class="autosave-note">Votre brouillon est enregistré automatiquement pendant que vous écrivez.</p>
+
+  <div class="corrige">
+    <button class="btn ghost" id="ex4-reveal">Voir un corrigé indicatif</button>
+    <div class="corrige-body" id="ex4-corrige-body">
+      <div class="card">
+        <span class="label">Une version possible</span>
+        <p>« Vos missions&nbsp;:<br>Vous recevez les candidatures.<br>Vous enregistrez chaque candidature dans le logiciel SIRH.<br>S'il manque un document, vous le demandez dans les 48&nbsp;heures.<br>Si le document manque encore après votre relance, vous signalez le dossier au responsable du recrutement.<br>Vous ne rejetez pas automatiquement la candidature.<br>Vous échangez avec les responsables d'entrepôt et le service RH.<br>Vous pouvez postuler sans expérience en logistique. »</p>
+      </div>
+      <div class="card">
+        <span class="label">Justification indicative</span>
+        <p><strong>Vocabulaire&nbsp;:</strong> les verbes décrivent directement les actions attendues. <strong>Structure&nbsp;:</strong> une action par phrase et un ordre proche du déroulement du travail. <strong>Fond préservé&nbsp;:</strong> le SIRH, le délai exact de 48&nbsp;heures, la relance, le signalement sans rejet automatique, les interlocuteurs et le caractère facultatif de l'expérience sont conservés. Cette version relève du langage clair et de l'accessibilité cognitive&nbsp;; elle ne devient FALC qu'après application de la démarche de participation et de validation correspondante.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="closing">
+  Toutes les entreprises, personnes et données chiffrées de cet exercice sont fictives.
+</footer>
+
+</div>
+
+<script>
+(function(){
+  document.querySelectorAll('.fb, .pass-msg').forEach(function(el){
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
+  });
+
+  function correctExercise(exId){
+    var section = document.getElementById(exId);
+    var fieldsets = section.querySelectorAll('fieldset');
+    var score = 0;
+    var total = fieldsets.length;
+
+    fieldsets.forEach(function(fs){
+      var options = fs.querySelectorAll('.option');
+      var checked = fs.querySelector('input[type=radio]:checked');
+      var fb = fs.querySelector('.fb');
+
+      options.forEach(function(opt){
+        opt.classList.remove('selected-ok','selected-bad','reveal-correct');
+      });
+
+      if (!checked) {
+        fb.textContent = 'Pas de réponse sélectionnée.';
+        fb.className = 'fb show alert';
+        var correctOpt = fs.querySelector('input[data-ok="true"]');
+        if (correctOpt) { correctOpt.closest('.option').classList.add('reveal-correct'); }
+        return;
+      }
+
+      var ok = checked.getAttribute('data-ok') === 'true';
+      var why = checked.getAttribute('data-why');
+      var chosenLabel = checked.closest('.option');
+
+      if (ok) {
+        score += 1;
+        chosenLabel.classList.add('selected-ok');
+        fb.textContent = 'Bonne réponse. ' + why;
+        fb.className = 'fb show ok';
+      } else {
+        chosenLabel.classList.add('selected-bad');
+        var correct = fs.querySelector('input[data-ok="true"]');
+        if (correct) { correct.closest('.option').classList.add('reveal-correct'); }
+        fb.textContent = 'À revoir. ' + why;
+        fb.className = 'fb show alert';
+      }
+    });
+
+    var scoreEl = section.querySelector('[data-score="' + exId + '"]');
+    scoreEl.setAttribute('aria-live', 'polite');
+    scoreEl.textContent = score + ' / ' + total;
+
+    var pct = total > 0 ? (score / total) * 100 : 0;
+    var passEl = section.querySelector('[data-pass="' + exId + '"]');
+    if (pct >= 80) {
+      passEl.textContent = 'Seuil atteint (' + Math.round(pct) + '%). Bon travail.';
+      passEl.className = 'pass-msg show ok';
+    } else {
+      passEl.textContent = 'Sous le seuil de réussite (' + Math.round(pct) + '%). Relisez les explications ci-dessus et retentez.';
+      passEl.className = 'pass-msg show warn';
+    }
+  }
+
+  document.querySelectorAll('[data-correct-ex]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      correctExercise(btn.getAttribute('data-correct-ex'));
+    });
+  });
+
+  var STORAGE_KEY = 'nathalie_playground_3_1_ex4';
+  var textarea = document.getElementById('ex4-textarea');
+
+  try {
+    var saved = window.localStorage.getItem(STORAGE_KEY);
+    if (saved) { textarea.value = saved; }
+  } catch (e) { /* stockage local indisponible, on continue sans autosave */ }
+
+  textarea.addEventListener('input', function(){
+    try {
+      window.localStorage.setItem(STORAGE_KEY, textarea.value);
+    } catch (e) { /* stockage local indisponible */ }
+  });
+
+  var revealBtn = document.getElementById('ex4-reveal');
+  var corrigeBody = document.getElementById('ex4-corrige-body');
+  revealBtn.addEventListener('click', function(){
+    var isShown = corrigeBody.classList.toggle('show');
+    revealBtn.textContent = isShown ? 'Masquer le corrigé indicatif' : 'Voir un corrigé indicatif';
+  });
+})();
+</script>
+
+</body>
+</html>

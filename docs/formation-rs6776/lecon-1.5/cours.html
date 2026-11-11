@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sécuriser son usage de l'IA générative</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --paper:#F7F7FA; --surface:#fff; --ink:#1b1a17; --ink-2:#4a4741; --ink-3:#7c786f;
+    --rule:#e4e1d9; --rule-2:#efece5; --accent:#1f4e46; --accent-soft:#eef3f1;
+    --ok:#2c6a48; --ok-soft:#eef4ef; --warn:#8a6519; --warn-soft:#faf4e7;
+    --alert:#963428; --alert-soft:#fbf1ef;
+    --serif:'Funnel Display',Georgia,'Iowan Old Style','Times New Roman',serif;
+    --sans:'Funnel Display',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  body{font-family:var(--sans);font-size:15.5px;line-height:1.65;color:var(--ink);background:var(--paper);padding:0 22px 80px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;margin:0 auto}
+  header.top{padding:44px 0 26px;border-bottom:1px solid var(--rule)}
+  header.top h1{font-family:var(--serif);font-size:clamp(26px,4.5vw,34px);line-height:1.2;font-weight:400;letter-spacing:-.01em;margin-bottom:12px;max-width:30ch}
+  header.top .sub{font-size:15.5px;color:var(--ink-2);}
+  h2{font-family:var(--serif);font-size:24px;font-weight:400;line-height:1.3;letter-spacing:-.01em;margin:44px 0 16px;padding-bottom:10px;border-bottom:1px solid var(--rule)}
+  h3{font-size:12px;letter-spacing:.13em;text-transform:uppercase;font-weight:600;color:var(--ink-3);margin:30px 0 14px}
+  h4{font-family:var(--serif);font-size:17px;font-weight:400;margin-bottom:6px}
+  p+p{margin-top:12px}
+  strong{color:var(--ink);font-weight:600}
+  em{font-style:italic}
+  ul,ol{margin:14px 0 14px 20px;}
+  li{margin-bottom:8px}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14.5px}
+  th,td{border-bottom:1px solid var(--rule-2);padding:10px 12px 10px 0;text-align:left;vertical-align:top}
+  th{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:600;border-bottom:1px solid var(--rule)}
+
+  .aside{border-left:2px solid var(--rule);padding:2px 0 2px 20px;margin:22px 0;font-size:15px;color:var(--ink-2);}
+  .aside .lab{display:block;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);margin-bottom:5px;font-weight:600}
+  .aside.key{border-left-color:var(--accent)} .aside.key .lab{color:var(--accent)}
+  .aside.caution{border-left-color:var(--alert)} .aside.caution .lab{color:var(--alert)}
+  .aside.further{border-left-color:var(--warn)} .aside.further .lab{color:var(--warn)}
+
+  .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin:18px 0}
+  .cols>div{background:var(--surface);padding:18px 20px}
+  .cols p{font-size:14px;color:var(--ink-2);max-width:none}
+  .cols .tag{display:block;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px;font-weight:600}
+
+  .chip{display:inline-block;font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:600;padding:2px 7px;border-radius:3px;margin-left:5px;vertical-align:1px;white-space:nowrap}
+  .chip-int{background:var(--accent-soft);color:var(--accent)}
+  .chip-ext{background:var(--warn-soft);color:var(--warn)}
+  .chip-safe{background:var(--ok-soft);color:var(--ok)}
+
+  .exbox{border:1px solid var(--rule);padding:20px 22px;background:var(--surface);margin:18px 0}
+  .exbox .exlab{display:block;font-size:11px;letter-spacing:.13em;text-transform:uppercase;font-weight:600;color:var(--ink-3);margin-bottom:10px}
+  .exbox .promptline{font-family:var(--serif);font-style:italic;font-size:15.5px;color:var(--ink);line-height:1.7;max-width:none;padding:14px 16px;background:var(--paper);border-radius:3px}
+  .exbox .promptline.corrected{border-left:3px solid var(--ok)}
+  .exbox ul{margin-top:14px}
+  .exbox li{font-size:14.5px;color:var(--ink-2)}
+
+  .game{background:var(--surface);border:1px solid var(--rule);padding:24px 26px;margin:22px 0}
+  .game .gamelab{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:10px}
+  .game .gameintro{font-size:14.5px;color:var(--ink-2);margin-bottom:18px;}
+  .roundhead{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--ink-3);margin:0 0 16px;letter-spacing:.02em}
+  .roundhead b{color:var(--accent)}
+  .askbox .q{font-family:var(--serif);font-size:16.5px;margin-bottom:14px;max-width:none}
+  .optgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule)}
+  .qopt{font:inherit;font-size:14px;text-align:center;padding:14px 12px;border:none;background:var(--surface);cursor:pointer;transition:.12s;color:var(--ink-2);border-top:3px solid transparent;line-height:1.35;font-weight:500}
+  .qopt:hover:not(:disabled){background:#fbfaf7}
+  .qopt:disabled{cursor:default}
+  .qopt.picked-good{border-top-color:var(--ok);background:var(--ok-soft);color:var(--ok);font-weight:600}
+  .qopt.picked-bad{border-top-color:var(--alert);background:var(--alert-soft)}
+  .qopt.reveal-good:not(.picked-good){border-top-color:var(--ok)}
+  .fb{margin-top:14px;font-size:14.5px;display:none;line-height:1.6;color:var(--ink-2);padding-left:20px;border-left:2px solid var(--rule);max-width:none}
+  .fb.show{display:block}
+  .fb.good{border-left-color:var(--ok)} .fb.bad{border-left-color:var(--warn)}
+  .fb .head{display:block;font-size:11px;letter-spacing:.13em;text-transform:uppercase;font-weight:600;margin-bottom:5px}
+  .fb.good .head{color:var(--ok)} .fb.bad .head{color:var(--warn)}
+  .gscore{font-size:13px;color:var(--ink-3);margin-top:18px}
+  .btn{font:inherit;font-size:14.5px;font-weight:500;border-radius:3px;padding:10px 20px;border:1px solid var(--accent);cursor:pointer;transition:.15s;background:none;color:var(--accent)}
+  .btn:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{background:#173b35}
+  .btn[hidden]{display:none}
+
+  .redact{background:var(--surface);border:1px solid var(--rule);padding:24px 26px;margin:22px 0}
+  .redact .gamelab{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:10px}
+  .redact .gameintro{font-size:14.5px;color:var(--ink-2);margin-bottom:18px;}
+  .rdtext{font-family:var(--serif);font-size:16px;line-height:1.9;color:var(--ink);max-width:none;background:var(--paper);border-radius:3px;padding:18px 20px}
+  .rdword{cursor:pointer;border-bottom:2px dotted var(--ink-3);padding:0 1px;border-radius:2px;transition:.12s}
+  .rdword:hover{background:var(--accent-soft)}
+  .rdword.picked{background:var(--alert-soft);text-decoration:line-through;text-decoration-color:var(--alert);border-bottom-color:transparent}
+  .rdword.ok-hit{background:var(--ok-soft);text-decoration:line-through;text-decoration-color:var(--ok);border-bottom-color:transparent;cursor:default}
+  .rdword.falsealarm{background:var(--warn-soft);text-decoration:line-through;text-decoration-color:var(--warn);border-bottom-color:transparent;cursor:default}
+  .rdword.missed{background:var(--alert-soft);outline:2px solid var(--alert);border-bottom-color:transparent;cursor:default}
+  .rdtoolbar{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:16px}
+  .rdscore{font-size:13px;color:var(--ink-3)}
+  .rdreview{margin-top:16px;display:none}
+  .rdreview.show{display:block}
+  .rdreview ul{margin:0;max-width:none;list-style:none}
+  .rdreview li{font-size:14px;color:var(--ink-2);margin-bottom:9px;padding-left:20px;position:relative;}
+  .rdreview li.hit::before{content:"\2713";color:var(--ok);position:absolute;left:0;font-weight:700}
+  .rdreview li.missitem::before{content:"!";color:var(--alert);position:absolute;left:2px;font-weight:700}
+  .rdreview li.falseitem::before{content:"\00D7";color:var(--warn);position:absolute;left:0;font-weight:700}
+
+  footer{margin-top:60px;padding-top:22px;border-top:1px solid var(--rule);font-size:12.5px;color:var(--ink-3);line-height:1.7;}
+  @media(max-width:600px){header.top h1{font-size:26px} h2{font-size:21px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <h1>Sécuriser son usage de l'IA générative</h1>
+    <p class="sub">Savoir reconnaître une information à protéger est un préalable. Cette leçon donne quatre réflexes complémentaires : supprimer ce qui est inutile, distinguer anonymisation et pseudonymisation, utiliser uniquement un cadre autorisé avec des accès limités, puis vérifier la sortie avant tout usage.</p>
+  </header>
+
+  <h2>Anonymiser une donnée avant de la soumettre</h2>
+  <p>Quand une tâche implique une information réelle à protéger, demandez-vous d'abord si elle est nécessaire. Si elle ne l'est pas, retirez-la. Si elle reste utile, réduire sa précision ou remplacer les identifiants peut limiter le risque ; mais si vous conservez le document d'origine ou une table de correspondance, vous réalisez généralement une <strong>pseudonymisation</strong>, pas une anonymisation. La réintégration éventuelle des vraies informations se fait ensuite hors de l'outil, dans l'environnement autorisé, avec une nouvelle validation.</p>
+  <p>Un point mérite une attention particulière, souvent négligé dans la pratique : remplacer un nom par « Personne A » ou « Client X » ne suffit pas toujours à sortir réellement une donnée du champ du RGPD. Deux notions voisines se distinguent nettement :</p>
+  <table>
+    <tr><th>Anonymisation</th><th>Pseudonymisation</th></tr>
+    <tr><td>Le lien avec la personne est supprimé de façon <strong>irréversible</strong> : aucun moyen, même indirect, ne permet plus de revenir à son identité.</td><td>Le nom ou l'identifiant est remplacé, mais une <strong>correspondance</strong> reste conservée quelque part (un tableau, le document d'origine), permettant de retrouver la personne.</td></tr>
+    <tr><td>La législation sur les données personnelles ne s'applique plus à la donnée réellement anonyme. Les obligations de confidentialité, de propriété intellectuelle ou de secret peuvent néanmoins subsister.</td><td>La donnée <strong>reste une donnée personnelle</strong> au sens du RGPD, avec les obligations correspondantes.</td></tr>
+  </table>
+  <div class="aside key">
+    <span class="lab">À retenir</span>
+    Dans la pratique professionnelle courante, remplacer un nom par un identifiant générique alors que l'identité peut être retrouvée relève le plus souvent de la pseudonymisation. Cette mesure réduit certains risques mais n'autorise pas, à elle seule, l'envoi à un service d'IA : la finalité, la base juridique, le contrat, l'offre, les réglages et la politique interne restent à vérifier.
+  </div>
+
+  <h2>Un exemple travaillé, du prompt au prompt corrigé</h2>
+  <p>Connaître la règle ne suffit pas : il faut savoir la réappliquer, prompt en main, et être capable d'expliquer chaque choix. Voici comment ce raisonnement se traduit concrètement, sur une réclamation client à traiter.</p>
+  <div class="exbox">
+    <span class="exlab">Prompt initial, à ne pas envoyer tel quel</span>
+    <p class="promptline">« Réponds à cette réclamation client de façon empathique et propose un geste commercial : Amélie Kernaléguen, cliente depuis 2019, commande n°77452 d'un montant de 1 240 euros pour la société Bréhat Matériaux, insatisfaite d'un délai de livraison de trois semaines, menace de résilier son contrat annuel. Coordonnées : amelie.kernaleguen@brehatmateriaux.fr, IBAN FR76 3000 4008 2800 0123 4567 890 pour un éventuel remboursement. »</p>
+    <span class="exlab" style="margin-top:18px">Prompt corrigé</span>
+    <p class="promptline corrected">« Réponds à cette réclamation client de façon empathique et propose un geste commercial adapté à un retard de livraison de trois semaines sur une commande de niveau intermédiaire. La cliente est fidèle depuis plusieurs années et évoque une possible résiliation de son contrat annuel : le ton doit rassurer sans sur-promettre. »</p>
+    <ul>
+      <li><strong>Le nom, l'adresse mail et le nom de l'entreprise cliente</strong> ont été retirés : ils n'apportent rien à la rédaction d'une réponse, qui peut rester générique jusqu'à l'envoi final.</li>
+      <li><strong>L'IBAN</strong> a été retiré entièrement, pas seulement masqué : une donnée bancaire n'a aucune utilité pour rédiger une réponse empathique, et ce type de donnée ne devrait jamais être saisi dans un outil grand public, anonymisé ou non (voir la section suivante).</li>
+      <li><strong>Le montant exact de la commande</strong> a été remplacé par une catégorie (« niveau intermédiaire ») : suffisant pour calibrer le ton du geste commercial, sans exposer un chiffre précis.</li>
+      <li><strong>La menace de résiliation</strong> a été conservée, mais généralisée : cette information reste nécessaire pour que la réponse adopte le bon ton, contrairement aux données retirées ci-dessus qui, elles, n'étaient d'aucune utilité.</li>
+    </ul>
+    <p style="margin-top:14px">Corriger un prompt ne veut donc pas dire tout supprimer par prudence : c'est distinguer, information par information, ce qui est sensible ET utile (à généraliser) de ce qui est sensible et inutile (à retirer), et pouvoir justifier chaque choix.</p>
+  </div>
+
+  <div class="game">
+    <div class="gamelab">Mini-jeu : quel prompt corrigé retenir ?</div>
+    <p class="gameintro">Cinq manches. À chaque manche, une situation à corriger et deux options. Choisissez celle qui applique le bon réflexe.</p>
+    <div class="roundhead"><span>Manche <b id="pcNum">1</b>/5</span><span>Score : <b id="pcScore">0</b>/5</span></div>
+    <div class="askbox" id="pcGame">
+      <p class="q" id="pcItemTxt"></p>
+      <div class="optgrid" id="pcGrid"></div>
+      <p class="fb" id="pcFb"></p>
+      <button class="btn btn-primary" id="pcNextBtn" hidden>Manche suivante</button>
+    </div>
+  </div>
+
+  <h2>Restriction d'accès et politique interne de sécurité numérique</h2>
+  <p>L'anonymisation protège une donnée au moment où elle est saisie. Une politique d'accès claire protège en amont, en limitant qui peut utiliser quel outil, avec quelles données, et jusqu'à quand. Le principe qui structure cette politique porte un nom : le <em>moindre privilège</em>. Il consiste à n'accorder à chaque personne, chaque compte ou chaque outil que les droits strictement nécessaires à ce qu'il a réellement à faire, ni plus ni moins.</p>
+  <table>
+    <tr><th>Mesure</th><th>Ce qu'elle évite concrètement</th></tr>
+    <tr><td>Compte professionnel distinct du compte personnel</td><td>Qu'une donnée d'un client ou d'un employeur se retrouve associée à un historique personnel, hors du cadre professionnel.</td></tr>
+    <tr><td>Autorisations limitées par outil ou par mission</td><td>Qu'un outil ou qu'un intervenant ponctuel ait accès à davantage de données que ce que sa tâche précise exige.</td></tr>
+    <tr><td>Révocation des accès en fin de mission ou de collaboration</td><td>Qu'un accès resté actif par oubli soit utilisé, volontairement ou non, longtemps après que le besoin a disparu.</td></tr>
+    <tr><td>Catégories de données interdites de saisie, quel que soit l'outil</td><td>Que la question « faut-il anonymiser ceci ? » se pose sur une donnée qui n'aurait jamais dû être saisie du tout.</td></tr>
+  </table>
+  <div class="aside caution">
+    <span class="lab">Définir une liste d'exclusion pour les services grand public</span>
+    Une politique prudente exclut des services grand public non approuvés les secrets d'authentification, clés, mots de passe, coordonnées bancaires réelles, dossiers de santé et informations couvertes par un secret professionnel. Ce n'est pas une règle universelle visant tout système d'IA : une solution locale ou contractuellement autorisée peut relever d'un autre cadre. Mais un secret d'accès réel ne doit jamais être fourni au modèle, et toute exception concernant des données personnelles exige une analyse et des garanties formelles.
+  </div>
+
+  <h2>La revue manuelle : le dernier filet de sécurité</h2>
+  <p>Un prompt correctement anonymisé et envoyé depuis un accès bien cadré ne dispense pas de relire ce que l'outil produit en retour. Trois raisons à cela, cumulatives : une donnée peut malgré tout réapparaître dans la réponse, l'outil peut ajouter un détail inventé qui n'a jamais figuré dans la demande initiale, et le ton ou le contenu produit peuvent rester inadaptés à un usage professionnel réel. La correction d'un prompt réduit le risque en amont ; la revue manuelle vérifie ce qui en ressort réellement, et corrige ce qui doit l'être avant tout usage.</p>
+
+  <div class="redact">
+    <div class="gamelab">Mini-jeu : relisez cette réponse générée par l'IA</div>
+    <p class="gameintro">Voici ce que l'outil a produit à partir du prompt corrigé ci-dessus. Cliquez sur chaque passage qui doit être vérifié ou corrigé avant tout envoi, puis vérifiez vos choix.</p>
+    <p class="rdtext" id="rdText">
+      Bonjour <span class="rdword" data-sensitive="true" data-why="Le prénom de la cliente a été réintroduit alors que le prompt corrigé demandait de rester générique (« la cliente ») : une donnée identifiante s'est glissée dans la réponse malgré la correction en amont.">Amélie</span>, nous sommes vraiment désolés du <span class="rdword" data-sensitive="false" data-why="Cette information provient directement du prompt corrigé, qui mentionnait un retard de trois semaines : rien à signaler.">retard de trois semaines</span> sur votre commande. Vous êtes <span class="rdword" data-sensitive="true" data-why="Cette précision ne figurait pas dans le prompt corrigé, qui mentionnait seulement une fidélité « depuis plusieurs années » : l'IA a réintroduit un détail plus précis que ce qui avait été autorisé, à corriger avant tout envoi.">cliente depuis 2019</span> et vous envisagez de ne pas renouveler votre contrat annuel : nous comprenons votre frustration. Pour nous excuser, nous vous proposons <span class="rdword" data-sensitive="true" data-why="Un engagement commercial chiffré et précis, inventé par l'IA sans instruction en ce sens dans le prompt : à vérifier et valider avant d'être envoyé au nom de l'entreprise, sous peine de créer un engagement non autorisé.">un avoir de 15 %</span> ainsi qu'une <span class="rdword" data-sensitive="false" data-why="Un geste commercial resté générique, cohérent avec ce qui était demandé dans le prompt : rien d'inventé ni d'identifiant ici.">livraison prioritaire sur votre prochaine commande</span>. <span class="rdword" data-sensitive="true" data-why="Une explication interne détaillée, inventée de toutes pièces par l'IA : rien dans le prompt ne mentionnait un transporteur régional ni une durée de six mois. La diffuser telle quelle reviendrait à communiquer une information non vérifiée, potentiellement fausse, au nom de l'entreprise.">Notre équipe logistique a identifié un problème récurrent avec le transporteur régional que nous utilisons depuis six mois.</span> Nous restons <span class="rdword" data-sensitive="false" data-why="Une formule de politesse standard, sans donnée ni engagement précis : rien à signaler.">à votre disposition pour toute question</span>.
+    </p>
+    <div class="rdtoolbar">
+      <button class="btn btn-primary" id="rdCheck" type="button">Vérifier mes choix</button>
+      <button class="btn" id="rdReset" type="button" hidden>Recommencer</button>
+      <span class="rdscore" id="rdScore">0 passage sélectionné</span>
+    </div>
+    <div class="rdreview" id="rdReview"></div>
+  </div>
+
+  <h2>Pour aller plus loin</h2>
+  <p>Cette section approfondit au-delà de ce qui est nécessaire pour suivre la suite du programme ; la sauter ne bloque rien pour les leçons suivantes.</p>
+  <p>Le besoin de relecture systématique n'est pas propre aux données confidentielles : il concerne tout autant l'exactitude de ce qu'un outil d'IA générative produit. Un cas judiciaire américain, largement documenté, l'illustre bien. En juin 2023, dans l'affaire <em>Mata v. Avianca</em>, un tribunal fédéral de New York a sanctionné des avocats d'une amende de 5 000 dollars : leur mémoire juridique, rédigé avec l'aide de ChatGPT, citait plusieurs décisions de justice qui n'existaient tout simplement pas, l'outil ayant produit des références plausibles mais entièrement fictives. Le juge a retenu que les avocats avaient soumis ce texte sans jamais vérifier l'existence réelle des sources citées. Aucune donnée sensible en jeu dans cet épisode : un rappel que la relecture et la correction s'appliquent à tout contenu produit par une IA avant son usage, pas seulement à ce qu'il faut anonymiser.</p>
+  <p>La frontière entre anonymisation et pseudonymisation reste difficile à établir. Le Comité européen de la protection des données a adopté en juillet 2026 un projet de lignes directrices, soumis à consultation jusqu'au 30 octobre 2026. Son cadre teste trois risques : individualisation d'un enregistrement, corrélation avec d'autres informations et inférence. Si l'un subsiste, une analyse complémentaire est nécessaire. Remplacer un nom par « Personne A » ne suffit donc pas à conclure que la donnée est anonyme.</p>
+  <p>Sur le volet des accès, l'Agence nationale de la sécurité des systèmes d'information (ANSSI) publie un guide de référence pour les petites structures, <em>La cybersécurité pour les TPE/PME en treize questions</em>. Parmi ses recommandations : utiliser des comptes utilisateurs distincts des comptes disposant de droits d'administration, limiter les autorisations accordées à chaque outil au strict nécessaire pour l'usage prévu, et révoquer sans délai les accès d'une personne qui quitte une mission ou une structure. Le principe qui relie ces recommandations est celui déjà vu plus haut : le moindre privilège, appliqué cette fois à l'échelle de toute une organisation plutôt qu'à une seule saisie ponctuelle.</p>
+
+  <footer>
+    Toutes les entreprises, personnes et données de cette leçon sont fictives.
+  </footer>
+</div>
+
+<script>
+  /* ---- mini-jeu : quel prompt corrigé retenir (5 manches) ---- */
+  var PCROUNDS = [
+    { item:"Un client a partagé son IBAN pour un éventuel remboursement, alors que la tâche demandée est de rédiger une réponse empathique à sa réclamation.",
+      options:[
+        { key:'a', label:"Garder l'IBAN, en le masquant partiellement (…6789)" },
+        { key:'b', label:"Retirer l'IBAN du prompt : il n'est pas utile à la tâche demandée" }
+      ], correct:'b',
+      explain:"Un masquage partiel reste une donnée bancaire identifiable, et elle n'est de toute façon pas nécessaire pour rédiger une réponse empathique : la retirer entièrement est le bon réflexe, pas seulement la masquer." },
+    { item:"Un fichier remplace chaque salarié par un identifiant (« Salarié 12 », « Salarié 13 »...), mais une table de correspondance reste conservée dans un autre document du service RH.",
+      options:[
+        { key:'a', label:"Considérer ce fichier comme anonymisé, donc hors RGPD" },
+        { key:'b', label:"Considérer ce fichier comme pseudonymisé, donc toujours soumis au RGPD" }
+      ], correct:'b',
+      explain:"Tant qu'une table de correspondance permet de relier un identifiant à une personne précise, la donnée reste ré-identifiable : c'est une pseudonymisation, pas une anonymisation, et le RGPD continue de s'appliquer." },
+    { item:"Un prompt de reformulation mentionne le chiffre d'affaires exact d'un client : une précision utile pour calibrer le ton du message, mais pas sa valeur exacte.",
+      options:[
+        { key:'a', label:"Garder le chiffre exact, plus précis pour l'IA" },
+        { key:'b', label:"Remplacer le chiffre exact par une fourchette (ex. 100 000 à 150 000 euros)" }
+      ], correct:'b',
+      explain:"Corriger un prompt ne veut pas toujours dire tout supprimer : ici, une fourchette suffit à calibrer le ton recherché sans exposer le chiffre exact du client." },
+    { item:"Un message à toute l'équipe doit annoncer l'absence prolongée d'un collègue ; le prompt initial en précise le motif médical exact.",
+      options:[
+        { key:'a', label:"Garder le motif médical, il justifie la durée de l'absence" },
+        { key:'b', label:"Remplacer par « absence prévue jusqu'au [date] », sans motif" }
+      ], correct:'b',
+      explain:"Le motif médical est une donnée de santé sans utilité pour une simple annonce d'absence à l'équipe : elle n'a pas à y figurer, anonymisée ou non." },
+    { item:"Un compte-rendu interne, à usage strictement personnel, doit garder le nom du client pour être utile, mais il est rédigé avec l'aide d'un outil d'IA générative grand public, sans compte professionnel dédié.",
+      options:[
+        { key:'a', label:"Garder le nom réel du client dans le prompt envoyé à l'outil" },
+        { key:'b', label:"Remplacer le nom par « Client X » dans le prompt, et le réintégrer soi-même dans le compte-rendu final" }
+      ], correct:'b',
+      explain:"Le besoin de nommer le client concerne le document final, pas nécessairement ce qui est envoyé à l'outil : anonymiser le prompt puis réintégrer le nom soi-même après coup couvre les deux besoins à la fois." }
+  ];
+  var pcIdx = 0, pcScore = 0;
+  var pcNumEl = document.getElementById('pcNum'), pcScoreEl = document.getElementById('pcScore');
+  var pcItemTxt = document.getElementById('pcItemTxt'), pcGrid = document.getElementById('pcGrid');
+  var pcFb = document.getElementById('pcFb'), pcNextBtn = document.getElementById('pcNextBtn');
+  function renderPcRound(i){
+    var r = PCROUNDS[i];
+    pcNumEl.textContent = i+1; pcScoreEl.textContent = pcScore;
+    pcItemTxt.textContent = r.item;
+    pcGrid.innerHTML = '';
+    r.options.forEach(function(opt){
+      var b = document.createElement('button');
+      b.className = 'qopt'; b.textContent = opt.label; b.dataset.key = opt.key;
+      b.addEventListener('click', function(){ handlePcChoice(opt.key); });
+      pcGrid.appendChild(b);
+    });
+    pcFb.className = 'fb'; pcFb.textContent = '';
+    pcNextBtn.hidden = true;
+  }
+  function handlePcChoice(key){
+    var r = PCROUNDS[pcIdx];
+    var ok = key === r.correct;
+    [].slice.call(pcGrid.children).forEach(function(b){
+      b.disabled = true;
+      if(b.dataset.key === key){ b.classList.add(ok ? 'picked-good' : 'picked-bad'); }
+      if(b.dataset.key === r.correct){ b.classList.add('reveal-good'); }
+    });
+    pcFb.className = 'fb show ' + (ok ? 'good' : 'bad');
+    pcFb.innerHTML = "<span class='head'>"+(ok ? 'Bon choix' : 'À ajuster')+"</span>" + r.explain;
+    if(ok){ pcScore++; pcScoreEl.textContent = pcScore; }
+    if(pcIdx < PCROUNDS.length - 1){
+      pcNextBtn.hidden = false; pcNextBtn.textContent = 'Manche suivante';
+    } else {
+      var done = document.createElement('p');
+      done.className = 'fb show good'; done.style.marginTop = '10px';
+      done.innerHTML = "<span class='head'>Terminé</span>Corriger un prompt, c'est distinguer ce qui est inutile (à retirer) de ce qui est utile mais sensible (à généraliser ou à anonymiser) : la même question mérite une réponse différente selon le cas.";
+      pcFb.insertAdjacentElement('afterend', done);
+    }
+  }
+  pcNextBtn.addEventListener('click', function(){ pcIdx++; renderPcRound(pcIdx); });
+  renderPcRound(0);
+
+  /* ---- mini-jeu : relire une réponse générée par l'IA ---- */
+  var rdWords = [].slice.call(document.querySelectorAll('#rdText .rdword'));
+  var rdCheckBtn = document.getElementById('rdCheck');
+  var rdResetBtn = document.getElementById('rdReset');
+  var rdScoreEl = document.getElementById('rdScore');
+  var rdReview = document.getElementById('rdReview');
+  var rdChecked = false;
+
+  function rdUpdateScoreLabel(){
+    if(rdChecked) return;
+    var n = rdWords.filter(function(w){ return w.classList.contains('picked'); }).length;
+    rdScoreEl.textContent = n + (n <= 1 ? ' passage sélectionné' : ' passages sélectionnés');
+  }
+  rdWords.forEach(function(w){
+    w.addEventListener('click', function(){
+      if(rdChecked) return;
+      w.classList.toggle('picked');
+      rdUpdateScoreLabel();
+    });
+  });
+  rdCheckBtn.addEventListener('click', function(){
+    rdChecked = true;
+    var hits = 0, misses = 0, falseAlarms = 0, total = 0;
+    var items = [];
+    rdWords.forEach(function(w){
+      var toFix = w.dataset.sensitive === 'true';
+      var picked = w.classList.contains('picked');
+      w.classList.remove('picked');
+      if(toFix){
+        total++;
+        if(picked){ hits++; w.classList.add('ok-hit'); items.push({cls:'hit', text:w.textContent, why:w.dataset.why}); }
+        else { misses++; w.classList.add('missed'); items.push({cls:'missitem', text:w.textContent, why:w.dataset.why}); }
+      } else if(picked){
+        falseAlarms++; w.classList.add('falsealarm'); items.push({cls:'falseitem', text:w.textContent, why:w.dataset.why});
+      }
+    });
+    rdScoreEl.textContent = hits + '/' + total + ' passages à corriger repérés, ' + falseAlarms + ' fausse' + (falseAlarms===1?'':'s') + ' alerte' + (falseAlarms===1?'':'s') + '.';
+    items.sort(function(a,b){ var order={hit:0,missitem:1,falseitem:2}; return order[a.cls]-order[b.cls]; });
+    rdReview.innerHTML = '<ul>' + items.map(function(it){
+      return '<li class="'+it.cls+'"><strong>'+it.text+'</strong> : '+it.why+'</li>';
+    }).join('') + '</ul>';
+    rdReview.classList.add('show');
+    rdCheckBtn.setAttribute('hidden','');
+    rdResetBtn.removeAttribute('hidden');
+  });
+  rdResetBtn.addEventListener('click', function(){
+    rdChecked = false;
+    rdWords.forEach(function(w){ w.classList.remove('picked','ok-hit','missed','falsealarm'); });
+    rdReview.classList.remove('show');
+    rdReview.innerHTML = '';
+    rdCheckBtn.removeAttribute('hidden');
+    rdResetBtn.setAttribute('hidden','');
+    rdUpdateScoreLabel();
+  });
+  rdUpdateScoreLabel();
+</script>
+</body>
+</html>

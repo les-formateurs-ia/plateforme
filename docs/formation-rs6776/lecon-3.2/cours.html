@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cadre légal de l'IA générative</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#F7F7FA; --surface:#fff; --ink:#1b1a17; --ink-2:#4a4741; --ink-3:#7c786f;
+  --rule:#e4e1d9; --rule-2:#efece5; --accent:#1f4e46; --accent-soft:#eef3f1;
+  --ok:#2c6a48; --ok-soft:#eef4ef; --warn:#8a6519; --warn-soft:#faf4e7;
+  --alert:#963428; --alert-soft:#fbf1ef;
+  --serif:'Funnel Display',Georgia,'Iowan Old Style','Times New Roman',serif;
+  --sans:'Funnel Display',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+}
+body{font-family:var(--sans);font-size:15.5px;line-height:1.65;color:var(--ink);background:var(--paper);padding:0 22px 80px}
+.wrap{width:100%;margin:0 auto}
+
+.hero{margin:0 auto;padding:56px 0 30px;border-bottom:1px solid var(--rule)}
+.eyebrow{font-size:.78rem;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px}
+h1{font-family:var(--serif);font-size:2.15rem;font-weight:800;line-height:1.15;color:var(--ink);margin-bottom:18px}
+.lede{font-size:1.06rem;color:var(--ink-2)}
+
+main{margin:0 auto;padding-top:8px}
+section{margin-top:46px}
+h2{font-family:var(--serif);font-size:1.48rem;font-weight:700;color:var(--ink);margin-bottom:16px;padding-left:14px;border-left:4px solid var(--accent)}
+h3{font-size:1.08rem;font-weight:700;color:var(--ink);margin:20px 0 10px}
+p{margin-bottom:14px}
+ul,ol{margin:0 0 14px 22px}
+li{margin-bottom:6px}
+strong{color:var(--ink);font-weight:700}
+em{font-style:italic;color:var(--accent)}
+
+table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--rule);border-radius:10px;overflow:hidden;margin:18px 0}
+caption{text-align:left;font-size:.85rem;color:var(--ink-3);margin-bottom:8px}
+th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--rule-2);vertical-align:top;font-size:.95rem}
+th{background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.03em}
+tr:last-child td{border-bottom:none}
+
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:20px 22px;margin:16px 0}
+.card h3{margin-top:0}
+.card.quote{border-left:4px solid var(--ink-3)}
+.card.prompt{border-left:4px solid var(--accent);background:var(--accent-soft)}
+.card.result{border-left:4px solid var(--ok);background:var(--ok-soft)}
+.card p{margin-bottom:8px}
+.card pre{white-space:pre-wrap;font-family:var(--sans);font-size:.96rem;line-height:1.6;color:var(--ink-2)}
+.label{display:inline-block;font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;font-weight:700;color:var(--ink-3);margin-bottom:8px}
+
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;padding:4px 10px;border-radius:999px;margin:2px 6px 2px 0}
+.tag.neutral{background:var(--rule-2);color:var(--ink-2)}
+.tag.b1{background:#E1ECF9;color:#2A78D6}
+.tag.b2{background:#FCEAE3;color:#EB6834}
+.tag.b3{background:#DFF4EC;color:#0d7c53}
+.tag.alert{background:var(--alert-soft);color:var(--alert)}
+
+.justify-list{list-style:none;margin:14px 0;padding:0}
+.justify-list li{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:12px 16px;margin-bottom:8px}
+.justify-list li strong{color:var(--accent)}
+
+.aside{background:var(--warn-soft);border:1px solid #ecd9ad;border-radius:10px;padding:14px 18px;font-size:.94rem;color:var(--ink-2);margin:16px 0}
+
+.game{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:24px;margin-top:18px}
+.round{border:1px solid var(--rule-2);border-radius:12px;padding:18px 20px;margin-bottom:16px;background:var(--paper)}
+.round .ctx{font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);font-weight:700;margin-bottom:6px}
+.round p{margin-bottom:10px}
+.round .proposal{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:12px 14px;font-style:italic;color:var(--ink-2)}
+.round-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.btn{font-family:var(--sans);font-size:.88rem;font-weight:700;padding:9px 18px;border-radius:999px;border:1.5px solid var(--accent);background:#fff;color:var(--accent);cursor:pointer;transition:background .15s}
+.btn:hover:not(:disabled){background:var(--accent-soft)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.primary{background:var(--accent);color:#fff}
+.feedback{margin-top:12px;padding:12px 14px;border-radius:8px;font-size:.92rem;display:none}
+.feedback.show{display:block}
+.feedback.ok{background:var(--ok-soft);color:var(--ok);border:1px solid #cfe6d8}
+.feedback.alert{background:var(--alert-soft);color:var(--alert);border:1px solid #efd3cd}
+.score-bar{display:flex;align-items:center;justify-content:space-between;margin-top:6px;padding-top:16px;border-top:1px dashed var(--rule)}
+.score-bar strong{font-size:1.05rem;color:var(--accent)}
+
+footer.closing{margin:60px auto 0;padding-top:20px;border-top:1px solid var(--rule);font-size:.85rem;color:var(--ink-3)}
+
+@media (max-width:640px){
+  h1{font-size:1.7rem}
+  .hero{padding:36px 0 24px}
+  .card{padding:16px}
+  th,td{padding:10px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div class="eyebrow">Cadre légal de l'IA générative</div>
+  <h1>IA Act, RGPD et veille réglementaire</h1>
+  <p class="lede">À l'issue de ce contenu, vous saurez qualifier un usage au regard du règlement européen sur l'IA, articuler l'IA Act avec le RGPD dans un cas concret, distinguer supervision humaine et décision exclusivement automatisée, puis documenter une veille réglementaire à partir de sources officielles datées.</p>
+</header>
+
+<main>
+
+<section>
+<h2>Le règlement européen sur l'IA&nbsp;: une régulation par les risques</h2>
+<p>Le règlement (UE) 2024/1689, dit <strong>IA Act</strong>, encadre des systèmes et des modèles d'IA, leurs fournisseurs, leurs déployeurs et certains usages. Les obligations dépendent notamment de la fonction du système, de sa finalité prévue, du contexte d'utilisation et du risque pour les personnes. La grille en quatre niveaux ci-dessous est un repère pédagogique&nbsp;: le texte juridique distingue notamment des pratiques interdites, des systèmes à haut risque et des obligations de transparence qui ne se résument pas à une étiquette commerciale.</p>
+<table>
+<caption>Grille pédagogique pour qualifier un cas au regard de l'IA Act</caption>
+<thead><tr><th>Niveau</th><th>Définition</th><th>Exemple</th><th>Obligation principale</th></tr></thead>
+<tbody>
+<tr><td><strong>Inacceptable</strong></td><td>Pratiques interdites par l'article&nbsp;5, sous réserve des définitions et exceptions prévues par le texte.</td><td>Notation sociale entraînant un traitement préjudiciable injustifié, reconnaissance des émotions au travail hors motif médical ou de sécurité, ou identification biométrique à distance en temps réel dans l'espace public à des fins répressives hors exceptions strictes.</td><td>Ne pas déployer la pratique interdite et vérifier précisément son champ.</td></tr>
+<tr><td><strong>Élevé</strong></td><td>Systèmes relevant de l'article&nbsp;6 et des annexes, dont certains usages en recrutement et sélection.</td><td>Système destiné à analyser, filtrer ou évaluer des candidatures et à influencer une présélection.</td><td>Exigences variables selon le rôle&nbsp;: gestion des risques et des données, documentation et journaux, information, exactitude, robustesse, cybersécurité et supervision humaine effective.</td></tr>
+<tr><td><strong>Transparence spécifique</strong></td><td>Fonctions visées par l'article&nbsp;50, indépendamment de la présentation commerciale du risque.</td><td>Interaction directe avec un agent conversationnel, génération de contenu synthétique détectable, diffusion professionnelle d'un deepfake.</td><td>Obligations distinctes selon le rôle&nbsp;: information des personnes, marquage détectable par machine ou divulgation claire dans les cas prévus.</td></tr>
+<tr><td><strong>Faible ou minimal</strong></td><td>Usage qui n'est ni interdit, ni à haut risque, ni soumis à une obligation spécifique identifiée dans le cas étudié.</td><td>Préparer le brouillon d'un e-mail interne sans donnée sensible ni décision affectant une personne.</td><td>Pas d'exigence propre au niveau « haut risque », mais le RGPD, le droit du travail, la propriété intellectuelle ou les règles sectorielles peuvent toujours s'appliquer.</td></tr>
+</tbody>
+</table>
+<p>Le recrutement mérite une attention particulière&nbsp;: les systèmes destinés à analyser, filtrer ou évaluer des candidatures figurent parmi les usages à haut risque de l'annexe&nbsp;III, sous réserve de la qualification complète prévue par l'article&nbsp;6. L'article&nbsp;14 de l'IA Act exige une supervision humaine effective&nbsp;: les personnes chargées du contrôle doivent comprendre les limites du système et pouvoir ignorer, remplacer ou inverser sa sortie. Une exclusion fondée exclusivement sur un traitement automatisé produisant un effet juridique ou significatif relève en parallèle de <strong>l'article&nbsp;22 du RGPD</strong>, qui prévoit un principe, des exceptions et des garanties. Les deux analyses doivent être menées séparément puis articulées.</p>
+</section>
+
+<section>
+<h2>Le RGPD, un cadre déjà connu à mobiliser face à l'IA générative</h2>
+<p>Comme vu précédemment sur la confidentialité des données, le RGPD ne disparaît pas parce qu'un traitement passe par une IA générative&nbsp;: il continue de s'appliquer intégralement dès que des données à caractère personnel entrent dans l'échange. L'article&nbsp;5 du RGPD fixe sept principes, qui restent la grille de lecture la plus utile face à un nouvel usage impliquant de l'IA.</p>
+<table>
+<caption>Les sept principes de l'article 5 du RGPD, appliqués à l'IA générative</caption>
+<thead><tr><th>Principe</th><th>Ce qu'il implique avec une IA générative</th></tr></thead>
+<tbody>
+<tr><td><strong>Licéité, loyauté, transparence</strong></td><td>Une base légale doit exister avant tout traitement automatisé de données personnelles, et les personnes concernées doivent en être informées.</td></tr>
+<tr><td><strong>Limitation des finalités</strong></td><td>Des données de candidats collectées pour un poste précis ne peuvent pas être réutilisées pour entraîner ou alimenter un autre usage sans nouvelle base légale.</td></tr>
+<tr><td><strong>Minimisation des données</strong></td><td>Ne transmettre à un outil d'IA générative que les données strictement nécessaires à la tâche, jamais un dossier complet « pour aller plus vite ».</td></tr>
+<tr><td><strong>Exactitude</strong></td><td>Une IA générative peut halluciner un fait sur une personne réelle&nbsp;: tout contenu généré impliquant une personne doit être vérifié avant tout usage.</td></tr>
+<tr><td><strong>Limitation de la conservation</strong></td><td>Les échanges avec un outil d'IA générative, comme tout traitement, ne doivent pas être conservés au-delà de ce qui est nécessaire.</td></tr>
+<tr><td><strong>Intégrité et confidentialité</strong></td><td>Le choix de l'outil, ses conditions d'utilisation et l'endroit où les données transitent doivent être vérifiés avant tout usage professionnel.</td></tr>
+<tr><td><strong>Responsabilité</strong></td><td>C'est à l'organisation qui utilise l'outil de pouvoir démontrer sa conformité, pas à l'éditeur de l'outil d'IA de le garantir à sa place.</td></tr>
+</tbody>
+</table>
+<p>L'article&nbsp;22 du RGPD doit être ajouté à cette grille dès qu'une décision est fondée exclusivement sur un traitement automatisé et produit un effet juridique ou affecte la personne de manière significative. Le simple fait qu'un humain ouvre le dossier ne suffit pas&nbsp;: son intervention doit être compétente, réelle et capable de modifier la décision. <a href="https://www.cnil.fr/fr/profilage-et-decision-entierement-automatisee">Source&nbsp;: CNIL</a>.</p>
+</section>
+
+<section>
+<h3>Exemple travaillé&nbsp;: un outil de tri de candidatures</h3>
+<div class="card quote">
+<div class="label">Le cas</div>
+<p>Une entreprise souhaite utiliser un outil d'IA générative pour analyser automatiquement les CV reçus pour un poste et attribuer une note à chaque candidature, la note orientant directement qui sera convoqué en entretien.</p>
+</div>
+<ul class="justify-list">
+<li><span class="tag alert">IA Act</span><strong>Usage à haut risque à qualifier.</strong> L'analyse et le filtrage de candidatures figurent à l'annexe&nbsp;III. Il faut vérifier la finalité prévue, les rôles fournisseur et déployeur, puis appliquer les exigences pertinentes, dont une supervision humaine effective.</li>
+<li><span class="tag b1">RGPD · minimisation</span><strong>Ne transmettre que les données pertinentes pour le poste</strong>, jamais l'intégralité d'un dossier candidat par défaut.</li>
+<li><span class="tag b2">RGPD · exactitude</span><strong>Vérifier chaque note ou synthèse générée</strong> avant toute décision&nbsp;: un résumé halluciné d'un parcours peut désavantager injustement un candidat.</li>
+<li><span class="tag b3">RGPD · article 22 et transparence</span><strong>Déterminer si la décision est exclusivement automatisée et significative.</strong> Si l'article&nbsp;22 s'applique, identifier l'exception éventuellement mobilisée et mettre en place les garanties requises, dont la possibilité d'obtenir une intervention humaine et de contester la décision.</li>
+</ul>
+<p>Ce cas n'est pas théorique&nbsp;: la CNIL a fait du recrutement l'un de ses thèmes prioritaires de contrôle pour 2026. Elle vise notamment les systèmes de prise de décision automatisée, l'information des candidats et les durées de conservation. Cette priorité confirme l'intérêt d'une analyse documentée avant tout paramétrage. <a href="https://www.cnil.fr/fr/controles-prioritaires-2026">Source officielle&nbsp;: CNIL, 3&nbsp;avril&nbsp;2026</a>.</p>
+</section>
+
+<section>
+<h2>Organiser sa veille réglementaire</h2>
+<p><strong>État vérifié le 14&nbsp;septembre&nbsp;2026.</strong> L'AI Omnibus est entré en vigueur le 27&nbsp;juillet&nbsp;2026. Les exigences relatives aux systèmes à haut risque de l'annexe&nbsp;III s'appliquent à partir du 2&nbsp;décembre&nbsp;2027, et celles concernant les systèmes intégrés à des produits de l'annexe&nbsp;I à partir du 2&nbsp;août&nbsp;2028. L'article&nbsp;50 sur la transparence s'applique depuis le 2&nbsp;août&nbsp;2026, avec une période limitée jusqu'au 2&nbsp;décembre&nbsp;2026 pour le marquage de certains systèmes déjà mis sur le marché. Ces dates doivent être revérifiées avant toute recommandation à un client. <a href="https://digital-strategy.ec.europa.eu/en/news/ai-omnibus-enters-force">Source officielle&nbsp;: Commission européenne</a>.</p>
+<div class="aside">
+<span class="lab" style="display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--warn);font-weight:700;margin-bottom:4px">À retenir</span>
+Une date retenue aujourd'hui dans ce type de cadre peut changer dans les mois qui suivent, y compris après un accord annoncé comme acquis. Ne mémorisez jamais une échéance réglementaire comme définitive&nbsp;: vérifiez son état actuel avant de vous y fier, en particulier avant de conseiller un client sur cette base.
+</div>
+<p>Une veille minimale et réaliste s'appuie sur un nombre restreint de sources fiables, consultées régulièrement plutôt que mémorisées une fois pour toutes&nbsp;: le site de la <strong>CNIL</strong> pour l'actualité RGPD et ses positions sur l'IA, <strong>EUR-Lex</strong> pour le texte consolidé et à jour des règlements européens, <strong>Légifrance</strong> pour le droit français, et les publications du <strong>Bureau de l'IA</strong> (AI Office) de la Commission européenne pour le suivi spécifique de l'IA Act. Pour un métier donné, l'ordre professionnel ou la fédération sectorielle relaie souvent ces évolutions de façon déjà digérée pour le secteur concerné.</p>
+<p>Une IA générative peut aider à rechercher ou résumer un texte, y compris lorsqu'elle dispose d'un accès au web. Sa réponse ne constitue pas une source juridique&nbsp;: elle peut utiliser une version ancienne, confondre une proposition avec un texte en vigueur, mal citer un article ou omettre une exception. Vérifiez toujours l'affirmation dans une source primaire, puis notez le lien, la date de consultation, la version du texte et son statut juridique.</p>
+</section>
+
+<section>
+<h2>Sauriez-vous qualifier le régime principal&nbsp;?</h2>
+<p>Pour chaque situation, jugez la qualification proposée puis lisez le raisonnement. Cette activité donne un premier repère&nbsp;: une analyse professionnelle doit ensuite vérifier la finalité, les définitions, les exceptions, les rôles et les autres textes applicables.</p>
+
+<div class="game" id="riskGame">
+
+  <div class="round" data-verdict="oui" data-feedback="Correct : un usage créatif qui ne concerne aucune décision affectant une personne réelle, et qui ne figure pas dans la liste des usages à haut risque, relève bien du risque minimal.">
+    <div class="ctx">Contexte connu</div>
+    <p>Un éditeur de jeu vidéo utilise l'IA générative pour créer les dialogues de personnages secondaires, sans lien avec une décision affectant une personne réelle.</p>
+    <div class="label">Classification proposée</div>
+    <p class="proposal">Risque minimal.</p>
+    <div class="round-actions">
+      <button class="btn" data-choice="oui">Correcte</button>
+      <button class="btn" data-choice="non">À revoir</button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="round" data-verdict="non" data-feedback="Un système destiné à noter des candidatures et à influencer une présélection relève d'un usage de recrutement listé à haut risque. La transparence seule ne suffit pas : il faut notamment qualifier les rôles, appliquer les exigences pertinentes et organiser une supervision humaine effective. Si la décision est exclusivement automatisée et significative, l'article 22 du RGPD doit aussi être analysé.">
+    <div class="ctx">Contexte connu</div>
+    <p>Une entreprise utilise un outil d'IA pour trier et noter automatiquement les CV reçus pour un poste, la note influençant directement qui est retenu pour un entretien.</p>
+    <div class="label">Classification proposée</div>
+    <p class="proposal">Transparence spécifique&nbsp;: il suffit d'informer les candidats qu'une IA est utilisée.</p>
+    <div class="round-actions">
+      <button class="btn" data-choice="oui">Correcte</button>
+      <button class="btn" data-choice="non">À revoir</button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="round" data-verdict="oui" data-feedback="Correct pour ce point : un agent conversationnel qui interagit directement avec des personnes doit les informer qu'elles échangent avec une IA, sauf si cela est évident. Cette transparence ne dispense pas de vérifier les autres règles applicables au service.">
+    <div class="ctx">Contexte connu</div>
+    <p>Un site e-commerce ajoute un chatbot d'assistance client généraliste, qui précise en début de conversation qu'il s'agit d'une intelligence artificielle.</p>
+    <div class="label">Classification proposée</div>
+    <p class="proposal">Transparence spécifique&nbsp;: l'information sur l'interaction avec une IA est fournie.</p>
+    <div class="round-actions">
+      <button class="btn" data-choice="oui">Correcte</button>
+      <button class="btn" data-choice="non">À revoir</button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="round" data-verdict="non" data-feedback="La reconnaissance des émotions sur le lieu de travail est une pratique interdite, sauf lorsqu'elle répond à un motif médical ou de sécurité. Une simple documentation ou supervision humaine ne rend donc pas cet usage licite.">
+    <div class="ctx">Contexte connu</div>
+    <p>Une entreprise analyse les expressions du visage de ses salariés pour déduire leur motivation, sans motif médical ou de sécurité.</p>
+    <div class="label">Classification proposée</div>
+    <p class="proposal">Risque élevé, à condition de bien documenter le système et de prévoir une supervision humaine.</p>
+    <div class="round-actions">
+      <button class="btn" data-choice="oui">Correcte</button>
+      <button class="btn" data-choice="non">À revoir</button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="score-bar">
+    <span>Votre score</span>
+    <strong id="riskScore">0 / 4</strong>
+  </div>
+</div>
+</section>
+
+<section>
+<h2>Pour aller plus loin</h2>
+<p>Cette section approfondit au-delà de ce qui est nécessaire pour suivre la suite du programme&nbsp;; la sauter ne bloque rien pour les leçons suivantes.</p>
+<p>Deux cas montrent pourquoi il faut lire le dispositif d'une décision, et pas seulement son résumé. Le 1<sup>er</sup>&nbsp;octobre&nbsp;2025, le Garante italien a déclaré illicites certains traitements liés à <strong>ClothOff</strong> et imposé une limitation provisoire immédiate. L'autorité s'est référée à l'IA Act dans son raisonnement sur les deepfakes, mais le constat formel de violation repose sur les articles&nbsp;5 et&nbsp;25 du RGPD. Il serait donc inexact de présenter cette décision comme une sanction prononcée au titre de l'IA Act. <a href="https://www.garanteprivacy.it/home/docweb/-/docweb-display/docweb/10174164">Source officielle&nbsp;: Garante</a>.</p>
+<p>Pour <strong>Worldcoin</strong>, l'autorité bavaroise de protection des données a conclu en décembre&nbsp;2024 une première enquête par une décision imposant notamment une procédure d'effacement conforme, le recueil d'un consentement explicite pour certains traitements et la suppression de données collectées sans base légale suffisante. L'entreprise a annoncé un recours. La CNIL n'est pas l'autorité chef de file de ce dossier européen. <a href="https://www.lda.bayern.de/media/pm/pm2024_08_en.pdf">Source officielle&nbsp;: BayLDA, 19&nbsp;décembre&nbsp;2024</a>.</p>
+<p>Sur le plan méthodologique, la CNIL maintient depuis plusieurs années un programme de travail annuel et des fiches pratiques consacrées à l'IA, régulièrement mises à jour, ainsi qu'un guide dédié aux petites structures pour les aider à se mettre en conformité sans mobiliser un service juridique dédié&nbsp;: des ressources gratuites, à consulter directement plutôt que via un résumé produit par une IA générative, pour les raisons de fiabilité déjà évoquées plus haut.</p>
+</section>
+
+</main>
+
+<footer class="closing">
+  Compétence « appliquer le cadre légal de l'IA »&nbsp;: qualifier le système et les rôles au regard de l'IA Act, analyser séparément le RGPD et les biais, puis vérifier la conclusion dans des sources officielles datées.
+</footer>
+
+</div>
+
+<script>
+(function(){
+  var rounds = document.querySelectorAll('#riskGame .round');
+  var scoreEl = document.getElementById('riskScore');
+  var score = 0;
+  var answered = 0;
+  var total = rounds.length;
+
+  document.querySelectorAll('#riskGame .feedback').forEach(function(el){
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
+  });
+  scoreEl.setAttribute('aria-live', 'polite');
+
+  rounds.forEach(function(round){
+    var verdict = round.getAttribute('data-verdict');
+    var feedbackText = round.getAttribute('data-feedback');
+    var buttons = round.querySelectorAll('.round-actions .btn');
+    var feedbackEl = round.querySelector('.feedback');
+
+    buttons.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var choice = btn.getAttribute('data-choice');
+        var correct = (choice === verdict);
+
+        buttons.forEach(function(b){ b.disabled = true; });
+
+        feedbackEl.textContent = (correct ? 'Bonne lecture. ' : 'À revoir. ') + feedbackText;
+        feedbackEl.classList.add('show');
+        feedbackEl.classList.add(correct ? 'ok' : 'alert');
+
+        if (correct) { score += 1; }
+        answered += 1;
+        scoreEl.textContent = score + ' / ' + total;
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

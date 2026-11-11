@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Produire des contenus inclusifs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#F7F7FA; --surface:#fff; --ink:#1b1a17; --ink-2:#4a4741; --ink-3:#7c786f;
+  --rule:#e4e1d9; --rule-2:#efece5; --accent:#1f4e46; --accent-soft:#eef3f1;
+  --ok:#2c6a48; --ok-soft:#eef4ef; --warn:#8a6519; --warn-soft:#faf4e7;
+  --alert:#963428; --alert-soft:#fbf1ef;
+  --serif:'Funnel Display',Georgia,'Iowan Old Style','Times New Roman',serif;
+  --sans:'Funnel Display',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+}
+body{font-family:var(--sans);font-size:15.5px;line-height:1.65;color:var(--ink);background:var(--paper);padding:0 22px 80px}
+.wrap{width:100%;margin:0 auto}
+
+.hero{margin:0 auto;padding:56px 0 30px;border-bottom:1px solid var(--rule)}
+.eyebrow{font-size:.78rem;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px}
+h1{font-family:var(--serif);font-size:2.15rem;font-weight:800;line-height:1.15;color:var(--ink);margin-bottom:18px}
+.lede{font-size:1.06rem;color:var(--ink-2)}
+
+main{margin:0 auto;padding-top:8px}
+section{margin-top:46px}
+h2{font-family:var(--serif);font-size:1.48rem;font-weight:700;color:var(--ink);margin-bottom:16px;padding-left:14px;border-left:4px solid var(--accent)}
+h3{font-size:1.08rem;font-weight:700;color:var(--ink);margin:20px 0 10px}
+p{margin-bottom:14px}
+ul,ol{margin:0 0 14px 22px}
+li{margin-bottom:6px}
+strong{color:var(--ink);font-weight:700}
+em{font-style:italic;color:var(--accent)}
+
+table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--rule);border-radius:10px;overflow:hidden;margin:18px 0}
+caption{text-align:left;font-size:.85rem;color:var(--ink-3);margin-bottom:8px}
+th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--rule-2);vertical-align:top;font-size:.95rem}
+th{background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.03em}
+tr:last-child td{border-bottom:none}
+
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:20px 22px;margin:16px 0}
+.card h3{margin-top:0}
+.card.quote{border-left:4px solid var(--ink-3)}
+.card.prompt{border-left:4px solid var(--accent);background:var(--accent-soft)}
+.card.result{border-left:4px solid var(--ok);background:var(--ok-soft)}
+.card p{margin-bottom:8px}
+.card pre{white-space:pre-wrap;font-family:var(--sans);font-size:.96rem;line-height:1.6;color:var(--ink-2)}
+.label{display:inline-block;font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;font-weight:700;color:var(--ink-3);margin-bottom:8px}
+
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;padding:4px 10px;border-radius:999px;margin:2px 6px 2px 0}
+.tag.neutral{background:var(--rule-2);color:var(--ink-2)}
+.tag.b1{background:#E1ECF9;color:#2A78D6}
+.tag.b2{background:#FCEAE3;color:#EB6834}
+.tag.b3{background:#DFF4EC;color:#0d7c53}
+
+.justify-list{list-style:none;margin:14px 0;padding:0}
+.justify-list li{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:12px 16px;margin-bottom:8px}
+.justify-list li strong{color:var(--accent)}
+
+.aside{background:var(--warn-soft);border:1px solid #ecd9ad;border-radius:10px;padding:14px 18px;font-size:.94rem;color:var(--ink-2);margin:16px 0}
+
+.game{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:24px;margin-top:18px}
+.round{border:1px solid var(--rule-2);border-radius:12px;padding:18px 20px;margin-bottom:16px;background:var(--paper)}
+.round .ctx{font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);font-weight:700;margin-bottom:6px}
+.round p{margin-bottom:10px}
+.round .proposal{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:12px 14px;font-style:italic;color:var(--ink-2)}
+.round-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.btn{font-family:var(--sans);font-size:.88rem;font-weight:700;padding:9px 18px;border-radius:999px;border:1.5px solid var(--accent);background:#fff;color:var(--accent);cursor:pointer;transition:background .15s}
+.btn:hover:not(:disabled){background:var(--accent-soft)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.primary{background:var(--accent);color:#fff}
+.feedback{margin-top:12px;padding:12px 14px;border-radius:8px;font-size:.92rem;display:none}
+.feedback.show{display:block}
+.feedback.ok{background:var(--ok-soft);color:var(--ok);border:1px solid #cfe6d8}
+.feedback.alert{background:var(--alert-soft);color:var(--alert);border:1px solid #efd3cd}
+.score-bar{display:flex;align-items:center;justify-content:space-between;margin-top:6px;padding-top:16px;border-top:1px dashed var(--rule)}
+.score-bar strong{font-size:1.05rem;color:var(--accent)}
+
+footer.closing{margin:60px auto 0;padding-top:20px;border-top:1px solid var(--rule);font-size:.85rem;color:var(--ink-3)}
+
+@media (max-width:640px){
+  h1{font-size:1.7rem}
+  .hero{padding:36px 0 24px}
+  .card{padding:16px}
+  th,td{padding:10px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div class="eyebrow">Contenus inclusifs et accessibilité</div>
+  <h1>Produire des contenus accessibles à tous</h1>
+  <p class="lede">À l'issue de ce contenu, vous saurez pourquoi l'accessibilité numérique est une obligation et non une option, comment un outil d'IA générative peut vous aider concrètement à adapter un contenu pour une personne en situation de handicap visuel, auditif ou cognitif, et comment rédiger un prompt qui pose la bonne contrainte d'accessibilité plutôt que d'espérer qu'elle soit respectée par défaut.</p>
+</header>
+
+<main>
+
+<section>
+<h2>Pourquoi l'accessibilité numérique est une obligation, pas une option</h2>
+<p>En France, l'article&nbsp;47 de la loi du 11&nbsp;février 2005 pose une obligation d'accessibilité pour les services de communication au public en ligne entrant dans son champ d'application. Sa traduction opérationnelle est le <strong>RGAA</strong> (Référentiel général d'amélioration de l'accessibilité), construit à partir des <em>WCAG</em> (Web Content Accessibility Guidelines), la référence internationale pour l'accessibilité des contenus web.</p>
+<p>Depuis le 28&nbsp;juin 2025, le <strong>European Accessibility Act</strong> (EAA, ou « Acte européen sur l'accessibilité ») ajoute des exigences pour des catégories précises de produits et de services&nbsp;: notamment le commerce électronique, certains services bancaires, les télécommunications, l'accès aux médias audiovisuels, certains services de transport, les livres numériques et plusieurs terminaux. Il ne rend pas automatiquement tout contenu de toute entreprise privée soumis au même régime. Des exemptions et des dispositions transitoires existent. En France, la DGCCRF indique des amendes de 7&nbsp;500&nbsp;€ par infraction, cumulatives selon le nombre d'infractions constatées. Avant d'affirmer qu'un support relève de l'EAA, il faut donc vérifier le service concerné, l'acteur, les éventuelles exemptions et la règle nationale applicable. <a href="https://www.economie.gouv.fr/dgccrf/les-fiches-pratiques/professionnels-vos-produits-et-services-doivent-etre-conformes-la-directive-accessibilite">Source officielle&nbsp;: DGCCRF</a>.</p>
+<p>L'enjeu dépasse l'obligation juridique&nbsp;: un contenu inaccessible peut empêcher une personne aveugle ou malvoyante, sourde ou malentendante, ou présentant des difficultés cognitives d'accéder à une information, d'effectuer une démarche ou de prendre une décision. Concevoir une solution inclusive consiste à identifier un obstacle réel, puis à fournir un équivalent utilisable sans appauvrir l'information.</p>
+</section>
+
+<section>
+<h2>Handicap visuel&nbsp;: rendre un contenu lisible sans le voir, ou en le voyant mal</h2>
+<p>Deux familles de besoins coexistent&nbsp;: les personnes qui ne voient pas du tout, qui utilisent un lecteur d'écran pour naviguer, et les personnes malvoyantes, qui ont besoin d'un contraste suffisant et d'une taille de texte adaptable sans que la mise en page ne se casse.</p>
+<h3>Le texte alternatif (« alt »)</h3>
+<p>Un texte alternatif décrit la <strong>fonction ou le contenu utile</strong> d'une image pour quelqu'un qui ne la voit pas. Il ne recopie ni un nom de fichier (« image1.jpg » n'apporte rien à un lecteur d'écran), ni une information déjà fournie juste à côté. Une image purement décorative reçoit un texte alternatif vide. Pour un graphique ou une infographie complexe, le texte alternatif identifie brièvement le visuel et son message essentiel&nbsp;; les données et explications détaillées sont fournies dans le contenu voisin, par exemple sous la forme d'une description longue ou d'un tableau accessible.</p>
+<h3>Structure et contraste</h3>
+<p>Un lecteur d'écran se repère par les titres (<em>h1, h2, h3…</em>)&nbsp;: une hiérarchie de titres cohérente, sans saut de niveau, permet de naviguer directement vers la section recherchée plutôt que de tout écouter dans l'ordre. Pour une personne malvoyante, un contraste insuffisant entre le texte et son fond rend la lecture pénible, voire impossible&nbsp;; les référentiels d'accessibilité fixent des seuils précis (généralement un ratio de contraste minimal de 4,5&nbsp;pour&nbsp;1 pour un texte courant), à vérifier avec un outil dédié plutôt qu'à l'œil.</p>
+<p>Un outil d'IA générative peut aider à décrire une image existante ou proposer un premier texte alternatif à partir d'un contexte précis. Il ne remplace pas un contrôle d'accessibilité&nbsp;: le contraste se vérifie avec un outil dédié à partir des couleurs réellement utilisées, et le résultat se teste dans son support final.</p>
+<table>
+<caption>Quelques outils utiles pour l'accessibilité visuelle</caption>
+<thead><tr><th>Outil</th><th>Éditeur</th><th>Utilité pour l'accessibilité</th><th>Créer un compte</th></tr></thead>
+<tbody>
+<tr><td><strong>ChatGPT</strong></td><td>OpenAI</td><td>Décrit une image, aide à rédiger un texte alternatif à partir d'une description précise. Son intégration avec l'application Be&nbsp;My&nbsp;Eyes en fait un exemple documenté d'usage réel par des personnes aveugles ou malvoyantes au quotidien.</td><td>chatgpt.com</td></tr>
+<tr><td><strong>Microsoft Copilot</strong></td><td>Microsoft</td><td>Le vérificateur d'accessibilité intégré à Word et PowerPoint signale les textes alternatifs manquants et propose une suggestion à contrôler.</td><td>copilot.microsoft.com</td></tr>
+<tr><td><strong>Google Gemini</strong></td><td>Google</td><td>Peut décrire un visuel inséré dans un document Google Workspace, à titre de brouillon à vérifier.</td><td>gemini.google.com</td></tr>
+<tr><td><strong>Adobe Firefly</strong></td><td>Adobe</td><td>Peut proposer une description du visuel qu'il vient de générer, utile comme point de départ pour un texte alternatif.</td><td>firefly.adobe.com</td></tr>
+</tbody>
+</table>
+<p>Ce que produit l'outil reste un brouillon&nbsp;: une description générée automatiquement doit toujours être relue et corrigée par vous, en particulier pour vérifier qu'elle transmet bien l'information utile et non une simple liste d'éléments visuels sans hiérarchie.</p>
+</section>
+
+<section>
+<h2>Handicap auditif&nbsp;: rendre un contenu accessible sans le son, ou avec des repères visuels</h2>
+<p>Un contenu écrit peut lever l'obstacle lié au son, mais il n'est pas automatiquement accessible&nbsp;: sa structure, son vocabulaire et le support utilisé comptent aussi. Pour une vidéo, des <strong>sous-titres</strong> synchronisés donnent accès aux paroles et aux sons utiles, tandis qu'une <strong>transcription</strong> permet de parcourir le contenu sous forme textuelle. Lorsque des informations importantes sont uniquement visuelles, elles doivent également être verbalisées, audiodécrites ou intégrées à une transcription descriptive.</p>
+<p>Plusieurs outils d'IA générative savent transcrire un enregistrement audio en texte, ce qui accélère la production d'un premier jeu de sous-titres. Aucun ne garantit une transcription fiable à 100&nbsp;%, notamment pour les noms propres, les sigles, les termes techniques, l'identification des locuteurs ou les sons porteurs de sens. Les sous-titres doivent être relus, corrigés et vérifiés en situation avant publication.</p>
+</section>
+
+<section>
+<h2>Handicap cognitif&nbsp;: simplifier sans appauvrir, la méthode FALC</h2>
+<p>Pour certains publics présentant des difficultés de compréhension, le <strong>FALC</strong> (« Facile à Lire et à Comprendre ») propose une méthode documentée&nbsp;: une idée par phrase, un vocabulaire courant, l'explication des termes indispensables, des phrases courtes à la voix active, une mise en page aérée et des exemples concrets. Sa caractéristique essentielle est la participation effective de personnes en situation de handicap intellectuel à la rédaction et à la relecture. Sans cette participation, on peut parler de langage clair ou de texte simplifié, mais pas présenter la sortie d'une IA comme un document FALC validé. <a href="https://falc.unapei.org/la-marque-qualite-falc/">Source&nbsp;: Unapei</a>.</p>
+<p>Un prompt qui demande seulement « simplifie ce texte » ou « rends-le plus facile à lire » ne suffit pas. Une IA peut produire un premier brouillon si le besoin, les règles et les informations à préserver sont explicités. Il faut ensuite comparer la sortie au texte source, corriger les pertes ou ajouts, puis organiser une validation avec des personnes concernées lorsque le document doit relever de la démarche FALC.</p>
+
+<h3>Exemple travaillé&nbsp;: adapter une procédure interne</h3>
+<div class="card quote">
+<div class="label">Contenu de départ, rédigé pour un public de gestionnaires RH</div>
+<p>« La demande de télétravail occasionnel doit être formulée par écrit auprès du responsable hiérarchique direct au moins 48&nbsp;heures ouvrées avant la date souhaitée, sauf circonstance exceptionnelle dûment justifiée, et fera l'objet d'une validation expresse consignée dans l'outil de gestion des temps, à défaut de laquelle la demande est réputée refusée. »</p>
+</div>
+<div class="card prompt">
+<div class="label">Prompt pour préparer un brouillon selon les règles d'écriture FALC</div>
+<pre>Voici un texte de procédure interne : [coller le paragraphe ci-dessus].
+Prépare un brouillon selon les règles d'écriture FALC (Facile à Lire et à Comprendre) :
+une seule idée par phrase, des phrases courtes à la voix active,
+un vocabulaire courant (remplace ou explique tout terme administratif),
+une mise en page en liste plutôt qu'un paragraphe dense.
+Ne supprime aucune information obligatoire : le délai exact, le destinataire,
+l'exception justifiée, le mode de validation et la conséquence d'une absence de validation.
+Signale tout point que tu ne peux pas simplifier sans perdre de sens.
+Ne présente pas la sortie comme FALC validée : la participation de personnes
+en situation de handicap intellectuel doit encore être organisée.</pre>
+</div>
+<div class="card result">
+<div class="label">Résultat adapté</div>
+<p>« Vous voulez faire du télétravail un jour précis&nbsp;?<br>
+Écrivez à votre responsable au moins 48&nbsp;heures ouvrées avant ce jour.<br>
+Si une situation exceptionnelle vous empêche de respecter ce délai, expliquez-la dans votre demande.<br>
+Votre responsable doit accepter votre demande dans l'outil de gestion des temps.<br>
+Sans validation enregistrée dans cet outil, votre demande est refusée. »</p>
+</div>
+<h3>Justification de chaque changement</h3>
+<ul class="justify-list">
+<li><span class="tag b2">Style</span><strong>Une idée par phrase.</strong> Le délai, le destinataire, l'exception, la validation et la conséquence d'une absence de validation sont désormais séparés.</li>
+<li><span class="tag b1">Vocabulaire</span><strong>Termes courants.</strong> « Circonstance exceptionnelle dûment justifiée » est expliqué par une formulation directe, et « réputée refusée » devient « votre demande est refusée ».</li>
+<li><span class="tag b3">Structure</span><strong>Mise en page.</strong> Le passage à la ligne pour chaque idée remplace le paragraphe dense, ce qui facilite le repérage visuel autant que la compréhension.</li>
+<li><span class="tag neutral">Fond préservé</span> Le délai reste exactement fixé à 48&nbsp;heures ouvrées. Le destinataire, l'exception justifiée, la validation dans l'outil et la conséquence d'une absence de validation sont tous conservés.</li>
+</ul>
+</section>
+
+<section>
+<h2>Sauriez-vous diagnostiquer un problème d'accessibilité&nbsp;?</h2>
+<p>Pour chacune des situations ci-dessous, le contexte est donné avant la solution proposée. Lisez le contexte, jugez si la solution proposée est adaptée, puis découvrez le raisonnement.</p>
+
+<div class="game" id="diagGame">
+
+  <div class="round" data-verdict="non" data-feedback="Un lecteur d'écran lira le nom de fichier tel quel, lettre par lettre ou syllabe par syllabe selon le logiciel : cela n'apporte aucune information sur le contenu réel de l'infographie. Le texte alternatif doit décrire ce que l'image transmet, pas la nommer.">
+    <div class="ctx">Contexte connu</div>
+    <p>Une infographie vient d'être publiée sur un support interne. Elle est consultée par une personne aveugle à l'aide d'un lecteur d'écran.</p>
+    <div class="label">Solution proposée</div>
+    <p class="proposal">Le texte alternatif renseigné est « image1.jpg », soit le nom du fichier tel quel.</p>
+    <div class="round-actions">
+      <button class="btn" data-choice="oui">Adaptée</button>
+      <button class="btn" data-choice="non">Pas adaptée</button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="round" data-verdict="oui" data-feedback="C'est exactement le principe attendu : la couleur seule ne doit jamais être le seul vecteur d'une information, parce qu'elle est invisible ou indiscernable pour certains daltonismes. Une icône et un mot ajoutés à côté de la couleur rendent l'information accessible même sans percevoir le rouge.">
+    <div class="ctx">Contexte connu</div>
+    <p>Un tableau partagé avec toute une équipe signale une valeur sous un seuil critique. Certains membres de l'équipe ont une forme de daltonisme.</p>
+    <div class="label">Solution proposée</div>
+    <p class="proposal">Chaque cellule concernée affiche, en plus de la couleur rouge, une icône « ⚠ » et le mot « Sous seuil » à côté de la valeur.</p>
+    <div class="round-actions">
+      <button class="btn" data-choice="oui">Adaptée</button>
+      <button class="btn" data-choice="non">Pas adaptée</button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="round" data-verdict="non" data-feedback="Raccourcir un texte de moitié n'est pas la méthode FALC : les phrases restantes peuvent encore contenir plusieurs idées, et rien ne garantit qu'aucune information obligatoire n'a été perdue au passage. La méthode FALC repose sur des règles précises (une idée par phrase, vocabulaire courant) et sur une validation par le public concerné, pas sur la seule longueur du texte.">
+    <div class="ctx">Contexte connu</div>
+    <p>Une note interne destinée à des salariés en situation de handicap cognitif léger doit expliquer une nouvelle procédure de badge d'accès.</p>
+    <div class="label">Solution proposée</div>
+    <p class="proposal">Le texte d'origine, un paragraphe dense de douze lignes, a été raccourci de moitié en supprimant des phrases, sans autre changement.</p>
+    <div class="round-actions">
+      <button class="btn" data-choice="oui">Adaptée</button>
+      <button class="btn" data-choice="non">Pas adaptée</button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="round" data-verdict="non" data-feedback="Une transcription ou des sous-titres générés automatiquement constituent un bon point de départ, mais aucun outil ne garantit une reconnaissance fiable à 100 % des noms propres, sigles et termes techniques. Les publier sans relecture, c'est risquer de transmettre une information déformée à la personne qui compte justement sur ces sous-titres pour compenser l'absence de son.">
+    <div class="ctx">Contexte connu</div>
+    <p>Une vidéo de formation, destinée à un public incluant des salariés malentendants, vient d'être publiée sur l'intranet de l'entreprise.</p>
+    <div class="label">Solution proposée</div>
+    <p class="proposal">Des sous-titres générés automatiquement par un outil d'IA ont été ajoutés et publiés tels quels, sans relecture.</p>
+    <div class="round-actions">
+      <button class="btn" data-choice="oui">Adaptée</button>
+      <button class="btn" data-choice="non">Pas adaptée</button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="score-bar">
+    <span>Votre score</span>
+    <strong id="diagScore">0 / 4</strong>
+  </div>
+</div>
+</section>
+
+<section>
+<h2>Rédiger un prompt qui pose vraiment la contrainte d'accessibilité</h2>
+<p>Un outil d'IA générative ne produit pas un contenu accessible par défaut&nbsp;: il produit ce qu'on lui demande. La contrainte d'accessibilité doit donc être écrite explicitement dans le prompt, au même titre qu'une contrainte de longueur ou de ton, jamais supposée acquise.</p>
+<div class="card prompt">
+<div class="label">Gabarit réutilisable</div>
+<pre>Contenu à adapter : [coller le contenu et préciser son usage].
+Public et besoin d'accessibilité : [type de handicap ou de difficulté visé,
+par exemple lecteur d'écran, daltonisme, difficulté de lecture].
+Contrainte d'accessibilité précise : [structure de titres, texte alternatif,
+vocabulaire courant, une idée par phrase, contraste, sous-titres...].
+Conserve : [informations obligatoires à ne jamais perdre].
+Résultat attendu : [contenu adapté, puis points à faire valider
+par une personne concernée ou par un outil de contrôle avant publication].</pre>
+</div>
+<p>Après génération, le contrôle reste humain&nbsp;: comparer la sortie au contenu source, relire le texte alternatif, vérifier le contraste avec un outil dédié et tester le support avec les usages concernés. Si le résultat doit être présenté comme FALC, la participation de personnes en situation de handicap intellectuel fait partie de la démarche.</p>
+</section>
+
+<section>
+<h2>Pour aller plus loin</h2>
+<p>Cette section approfondit au-delà de ce qui est nécessaire pour suivre la suite du programme&nbsp;; la sauter ne bloque rien pour les leçons suivantes.</p>
+<p>Le RGAA actuellement en vigueur est la version 4.1.2. Une nouvelle version, le <strong>RGAA&nbsp;5</strong>, est en cours de préparation par la Direction interministérielle du numérique (Dinum) avec une publication annoncée pour la fin de l'année 2026&nbsp;; les travaux en cours sur la base du RGAA&nbsp;4.1.2 ne doivent en aucun cas être suspendus dans l'attente de cette nouvelle version. Une fois le RGAA&nbsp;5 publié, les déclarations d'accessibilité déjà réalisées resteront valables 18&nbsp;mois supplémentaires, dans la limite de 3&nbsp;ans depuis leur publication.</p>
+<p>En France, les contrôles liés aux produits et services couverts par l'European Accessibility Act ont commencé dès le 28&nbsp;juin 2025. La DGCCRF peut demander une mise en conformité, assortir son injonction d'une astreinte ou d'une mesure de publicité, et constater des contraventions de 5<sup>e</sup>&nbsp;classe punies de 7&nbsp;500&nbsp;€ par infraction. Ce régime précis ne doit pas être confondu avec les obligations d'accessibilité issues d'autres textes.</p>
+<p>Un repère utile au quotidien&nbsp;: l'accessibilité et la clarté rédactionnelle se recoupent souvent sans se confondre. Un contenu peut respecter une bonne structure de titres et un contraste suffisant tout en restant difficile à comprendre pour un public en difficulté de lecture&nbsp;; à l'inverse, un contenu FALC bien rédigé peut rester inaccessible à un lecteur d'écran si sa mise en page ignore la hiérarchie des titres. Les deux exigences se travaillent ensemble, jamais l'une en substitut de l'autre.</p>
+</section>
+
+</main>
+
+<footer class="closing">
+  Référentiel de la compétence « produire des contenus inclusifs »&nbsp;: adapter un contenu à une situation de handicap donnée, avec un prompt qui pose explicitement la contrainte d'accessibilité.
+</footer>
+
+</div>
+
+<script>
+(function(){
+  var rounds = document.querySelectorAll('#diagGame .round');
+  var scoreEl = document.getElementById('diagScore');
+  var score = 0;
+  var answered = 0;
+  var total = rounds.length;
+
+  document.querySelectorAll('#diagGame .feedback').forEach(function(el){
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
+  });
+  scoreEl.setAttribute('aria-live', 'polite');
+
+  rounds.forEach(function(round){
+    var verdict = round.getAttribute('data-verdict');
+    var feedbackText = round.getAttribute('data-feedback');
+    var buttons = round.querySelectorAll('.round-actions .btn');
+    var feedbackEl = round.querySelector('.feedback');
+
+    buttons.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var choice = btn.getAttribute('data-choice');
+        var correct = (choice === verdict);
+
+        buttons.forEach(function(b){ b.disabled = true; });
+
+        feedbackEl.textContent = (correct ? 'Bonne lecture. ' : 'À revoir. ') + feedbackText;
+        feedbackEl.classList.add('show');
+        feedbackEl.classList.add(correct ? 'ok' : 'alert');
+
+        if (correct) { score += 1; }
+        answered += 1;
+        scoreEl.textContent = score + ' / ' + total;
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

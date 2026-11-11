@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analyser son poste et identifier les tâches génératives automatisables</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --paper:#F7F7FA; --surface:#fff; --ink:#1b1a17; --ink-2:#4a4741; --ink-3:#7c786f;
+    --rule:#e4e1d9; --rule-2:#efece5; --accent:#1f4e46; --accent-soft:#eef3f1;
+    --ok:#2c6a48; --ok-soft:#eef4ef; --warn:#8a6519; --warn-soft:#faf4e7;
+    --alert:#963428; --alert-soft:#fbf1ef;
+    --serif:'Funnel Display',Georgia,'Iowan Old Style','Times New Roman',serif;
+    --sans:'Funnel Display',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  body{font-family:var(--sans);font-size:15.5px;line-height:1.65;color:var(--ink);background:var(--paper);padding:0 22px 80px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;margin:0 auto}
+  header.top{padding:44px 0 26px;border-bottom:1px solid var(--rule)}
+  header.top h1{font-family:var(--serif);font-size:clamp(26px,4.5vw,34px);line-height:1.2;font-weight:400;letter-spacing:-.01em;margin-bottom:12px;max-width:30ch}
+  header.top .sub{font-size:15.5px;color:var(--ink-2);}
+  h2{font-family:var(--serif);font-size:24px;font-weight:400;line-height:1.3;letter-spacing:-.01em;margin:44px 0 16px;padding-bottom:10px;border-bottom:1px solid var(--rule)}
+  h3{font-size:12px;letter-spacing:.13em;text-transform:uppercase;font-weight:600;color:var(--ink-3);margin:30px 0 14px}
+  h4{font-family:var(--serif);font-size:17px;font-weight:400;margin-bottom:6px}
+  p+p{margin-top:12px}
+  strong{color:var(--ink);font-weight:600}
+  em{font-style:italic}
+  ul,ol{margin:14px 0 14px 20px;}
+  li{margin-bottom:8px}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14.5px}
+  th,td{border-bottom:1px solid var(--rule-2);padding:10px 12px 10px 0;text-align:left;vertical-align:top}
+  th{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:600;border-bottom:1px solid var(--rule)}
+
+  .aside{border-left:2px solid var(--rule);padding:2px 0 2px 20px;margin:22px 0;font-size:15px;color:var(--ink-2);}
+  .aside .lab{display:block;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);margin-bottom:5px;font-weight:600}
+  .aside.key{border-left-color:var(--accent)} .aside.key .lab{color:var(--accent)}
+  .aside.caution{border-left-color:var(--alert)} .aside.caution .lab{color:var(--alert)}
+  .aside.further{border-left-color:var(--warn)} .aside.further .lab{color:var(--warn)}
+
+  .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin:18px 0}
+  .cols>div{background:var(--surface);padding:18px 20px}
+  .cols p{font-size:14px;color:var(--ink-2);max-width:none}
+  .cols .tag{display:block;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px;font-weight:600}
+
+  .game{background:var(--surface);border:1px solid var(--rule);padding:24px 26px;margin:22px 0}
+  .game .gamelab{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:10px}
+  .game .gameintro{font-size:14.5px;color:var(--ink-2);margin-bottom:18px;}
+  .askbox .q{font-family:var(--serif);font-size:17px;margin-bottom:14px}
+  .axislab{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px}
+  .quad{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);border:1px solid var(--rule)}
+  .qopt{font:inherit;font-size:14px;text-align:left;padding:14px 16px;border:none;background:var(--surface);cursor:pointer;transition:.12s;color:var(--ink-2);border-left:3px solid transparent;line-height:1.4}
+  .qopt .qname{display:block;font-weight:600;color:var(--ink);margin-bottom:3px}
+  .qopt .qdesc{display:block;font-size:12.5px;color:var(--ink-3)}
+  .qopt:hover:not(:disabled){background:#fbfaf7}
+  .qopt:disabled{cursor:default}
+  .qopt.picked-good{border-left-color:var(--ok);background:var(--ok-soft)}
+  .qopt.picked-bad{border-left-color:var(--alert);background:var(--alert-soft)}
+  .qopt.reveal-good:not(.picked-good){border-left-color:var(--ok)}
+  .fb{margin-top:14px;font-size:14.5px;display:none;line-height:1.6;color:var(--ink-2);padding-left:20px;border-left:2px solid var(--rule)}
+  .fb.show{display:block}
+  .fb.good{border-left-color:var(--ok)} .fb.bad{border-left-color:var(--warn)}
+  .fb .head{display:block;font-size:11px;letter-spacing:.13em;text-transform:uppercase;font-weight:600;margin-bottom:5px}
+  .fb.good .head{color:var(--ok)} .fb.bad .head{color:var(--warn)}
+  .gscore{font-size:13px;color:var(--ink-3);margin-top:18px}
+  .btn{font:inherit;font-size:14.5px;font-weight:500;border-radius:3px;padding:10px 20px;border:1px solid var(--accent);cursor:pointer;transition:.15s;background:none;color:var(--accent)}
+  .btn:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{background:#173b35}
+  .btn[hidden]{display:none}
+
+  footer{margin-top:60px;padding-top:22px;border-top:1px solid var(--rule);font-size:12.5px;color:var(--ink-3);line-height:1.7;}
+  @media(max-width:600px){header.top h1{font-size:26px} h2{font-size:21px} .quad{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <h1>Analyser son poste et identifier les tâches génératives automatisables</h1>
+    <p class="sub">Maintenant que vous savez ce que l'IA générative peut faire, cette leçon vous donne une méthode pour repérer, dans votre propre activité, les tâches où elle peut réellement vous faire gagner du temps, et pour reconnaître un quick win parmi elles.</p>
+  </header>
+
+  <h2>Une méthode plutôt qu'une intuition</h2>
+  <p>Une fois qu'on a compris ce qu'un outil d'IA générative sait faire, la tentation est grande de l'essayer un peu partout, au fil de l'humeur, sans se demander où il apporte vraiment quelque chose. Cette approche a deux défauts symétriques : soit elle disperse l'effort sur trop de fronts à la fois, sans qu'aucun ne produise un résultat mesurable, soit elle laisse passer de bons candidats simplement parce qu'ils sont trop routiniers pour qu'on pense à les questionner.</p>
+  <p>Une méthode transforme une impression vague, « ça pourrait sans doute m'aider quelque part », en une courte liste de candidats concrets, classés par priorité. C'est cette méthode que cette leçon vous propose, en deux temps : d'abord repérer vos tâches candidates, puis apprendre à reconnaître, parmi elles, celles qui constituent un <em>quick win</em>, c'est-à-dire un résultat rapide et peu coûteux à obtenir.</p>
+
+  <h2>Repérer vos tâches candidates : la méthode en 4 étapes</h2>
+  <p>Pour identifier les tâches à optimiser dans votre propre activité, procédez en quatre étapes :</p>
+  <ol>
+    <li><strong>Lister</strong> toutes les tâches récurrentes de votre poste sur une semaine type, sans les trier ni les juger à ce stade : l'objectif est d'abord d'obtenir une vue complète, pas une liste déjà filtrée par vos idées reçues sur ce qui « devrait » être automatisable.</li>
+    <li><strong>Chronométrer</strong>, même approximativement, le temps que chacune vous prend. Un ordre de grandeur hebdomadaire suffit : ce chiffre sert de base au calcul du gain potentiel, pas une mesure au chronomètre au geste près.</li>
+    <li><strong>Évaluer la répétitivité</strong> : une tâche que vous refaites chaque semaine avec une structure similaire (même point de départ, même type de résultat attendu) est un bon candidat. Une tâche qui change de nature à chaque occurrence, elle, se prête mal à un usage répété du même prompt.</li>
+    <li><strong>Croiser avec la faisabilité IA</strong> : la tâche produit-elle du texte, une image ou une synthèse à partir d'une matière que vous fournissez ? Si oui, elle est probablement automatisable, au moins partiellement. À l'inverse, une tâche qui relève du jugement, de la négociation ou de la décision reste de votre ressort, quel que soit le temps qu'elle vous prend.</li>
+  </ol>
+  <p>Quand plusieurs tâches semblent également prioritaires à l'issue de ces quatre étapes, croisez l'impact attendu, la répétitivité, la qualité mesurable du résultat et les informations à protéger. Une tâche fréquente, chronophage, vérifiable et réalisable avec des données fictives ou autorisées est un bon candidat pour démarrer. Une tâche plus ponctuelle, difficile à contrôler ou soumise à validation peut rester sur la liste sans être la première à traiter.</p>
+  <p>Avant toute saisie de données personnelles ou confidentielles, appliquez la politique de votre structure : minimisation, anonymisation réelle lorsque c'est possible, outil et compte autorisés, réglages vérifiés. Remplacer un nom par un code ne suffit pas toujours à anonymiser.</p>
+
+  <h2>Le quick win : viser l'impact avant la difficulté</h2>
+  <p>Une fois votre liste de tâches candidates posée, une question reste ouverte : par laquelle commencer ? La méthode des quatre étapes vous a donné le <strong>gain de temps estimé</strong> de chaque tâche. Il manque une seconde dimension pour trancher : la <strong>difficulté de mise en place</strong>, c'est-à-dire tout ce qui sépare l'idée de sa réalisation concrète (avoir déjà accès à un outil autorisé, ne pas avoir de compétence technique particulière à acquérir, ne dépendre d'aucune validation préalable d'un tiers, ne pas buter sur une donnée trop sensible pour un outil grand public).</p>
+  <p>Croisez ces deux dimensions et quatre profils de tâches apparaissent :</p>
+  <div class="cols">
+    <div>
+      <span class="tag" style="color:var(--ok)">Quick win</span>
+      <h4>Fort gain, faible difficulté</h4>
+      <p>Les autorisations et prérequis sont déjà réunis : vous pouvez mener un essai limité et mesurable. C'est souvent un bon point de départ, à condition que le résultat soit contrôlable et que le gain soit réellement vérifié.</p>
+    </div>
+    <div>
+      <span class="tag" style="color:var(--accent)">Projet à planifier</span>
+      <h4>Fort gain, difficulté élevée</h4>
+      <p>Le potentiel est réel, mais la mise en place suppose un choix d'outil, une validation, ou une réorganisation. À garder sur la liste, à traiter une fois les quick wins engagés.</p>
+    </div>
+    <div>
+      <span class="tag" style="color:var(--warn)">Amélioration mineure</span>
+      <h4>Faible gain, faible difficulté</h4>
+      <p>Facile, mais peu déterminant pris isolément. Un réflexe à adopter à l'occasion, pas un chantier qui mérite qu'on s'y attarde en priorité.</p>
+    </div>
+    <div>
+      <span class="tag">À écarter pour l'instant</span>
+      <h4>Faible gain, difficulté élevée</h4>
+      <p>Le rapport entre l'effort et le résultat ne justifie pas de s'y consacrer maintenant. Rien n'empêche d'y revenir plus tard, si le contexte change.</p>
+    </div>
+  </div>
+  <p>Commencer par un quick win permet d'obtenir un résultat mesurable rapidement lorsque les autorisations sont déjà acquises. Si aucun candidat ne respecte ces conditions, ne forcez pas le classement : préparez d'abord le cadre, les données fictives ou la validation nécessaires.</p>
+
+  <div class="game">
+    <div class="gamelab">Mini-jeu : quick win ou pas ?</div>
+    <p class="gameintro">Pour chaque tâche ci-dessous, vous connaissez déjà le contexte : à vous de la placer dans la bonne case avant de découvrir la réponse.</p>
+    <div class="askbox" id="quadGame">
+      <p class="q" id="qgTask"></p>
+      <div class="axislab" id="qgCounter"></div>
+      <div class="quad" id="qgOpts"></div>
+      <p class="fb" id="qgFb"></p>
+      <button class="btn btn-primary" id="qgNext" hidden>Tâche suivante</button>
+    </div>
+  </div>
+
+  <h2>Mauvais exemple, bon exemple</h2>
+  <p><strong>Mauvaise analyse</strong> : « Je vais utiliser l'IA pour tout mon travail, ça va me faire gagner du temps partout. » Trop vague, cela ne priorise rien, ignore la difficulté de mise en place de chaque tâche, et oublie que certaines (négociation, décision, relation client sensible) ne doivent pas être déléguées à l'IA.</p>
+  <p><strong>Bonne analyse</strong> : « Mes comptes-rendus de réunion me prennent deux heures par semaine. Je teste pendant trois occurrences sur des notes fictives, puis je compare le temps total, corrections comprises, et le nombre d'erreurs ou d'omissions. Si l'outil autorisé réduit le temps sans dégrader la qualité, ce sera mon quick win. » Précise, mesurable et prudente.</p>
+
+  <h2>Erreurs fréquentes</h2>
+  <ul>
+    <li>Confondre <strong>automatisation classique</strong> (macros, règles figées) et <strong>IA générative</strong> (qui génère du contenu nouveau à partir d'une matière fournie).</li>
+    <li>Vouloir tout optimiser d'un coup plutôt que commencer par un ou deux quick wins clairement identifiés.</li>
+    <li>Confondre un fort <strong>volume</strong> de travail avec un quick win : une tâche très chronophage mais complexe à déléguer sans validation reste un projet à planifier, pas un point de départ.</li>
+    <li>Oublier de vérifier si une tâche implique des données confidentielles avant de la confier à un outil, même quand elle semble par ailleurs être un excellent candidat.</li>
+  </ul>
+
+  <h2>Pour aller plus loin</h2>
+  <p>Cette section approfondit au-delà de ce qui est nécessaire pour suivre la suite du programme ; la sauter ne bloque rien pour les leçons suivantes.</p>
+  <p>Cette approche par quick win rejoint un outil plus ancien, utilisé bien au-delà de l'IA : la <em>matrice effort/impact</em>, employée depuis longtemps en gestion de projet et en amélioration continue (Lean, démarches qualité) pour prioriser n'importe quelle action, pas seulement celles qui touchent à l'IA générative. Le principe reste identique : croiser ce qu'une action rapporte et ce qu'elle coûte à mettre en œuvre, plutôt que de traiter toutes les idées sur un pied d'égalité.</p>
+  <p>Sur le terrain, l'ordre de grandeur du gain reste variable d'un métier à l'autre, mais des études commencent à le documenter précisément. Une étude Asterès pour la FAFCEA, publiée le 1ᵉʳ octobre 2024 auprès de chefs d'entreprise artisanale déjà utilisateurs d'IA générative, mesure un gain moyen de <strong>plus de deux heures par semaine</strong>, concentré sur les tâches de gestion : autour de -32 % de temps sur la création de supports de communication et sur la relation client, et des gains dépassant 40 % sur la gestion de trésorerie et les plannings. Ce sont exactement les caractéristiques d'un quick win telles que définies plus haut : des tâches répétitives, chronophages, et déjà à la portée d'un outil grand public sans compétence technique particulière.</p>
+  <p>Un dernier repère utile : un quick win réussi n'est pas une fin en soi, c'est un point de départ. Une fois qu'il est en place et qu'il tient dans la durée, il devient plus facile de justifier, chiffres à l'appui, le temps et éventuellement le budget nécessaires pour s'attaquer aux tâches classées « projet à planifier » plus haut.</p>
+
+  <footer>
+    Toutes les entreprises, personnes et données de cette leçon sont fictives.
+  </footer>
+</div>
+
+<script>
+  var QROUNDS = [
+    {
+      task: "Rédiger un compte-rendu de réunion à partir de vos notes prises en direct. Cette tâche revient chaque semaine, avec toujours la même structure attendue, et ne nécessite aucun outil particulier au-delà de ce que vous utilisez déjà.",
+      correct: "quickwin",
+      why: "Gain de temps potentiel élevé et faible difficulté si un outil est déjà autorisé. Validez ce classement par un essai sur données fictives, en mesurant le temps de préparation, de correction et de validation."
+    },
+    {
+      task: "Reformuler, une seule fois, un e-mail précis pour l'adapter à un interlocuteur plus formel. Le gain, sur ce cas isolé, reste modeste, même si c'est très simple et immédiat à faire.",
+      correct: "mineur",
+      why: "Difficulté quasi nulle, mais gain limité pris isolément : c'est une amélioration mineure, un bon réflexe à adopter au fil de l'eau, pas un chantier prioritaire en soi."
+    },
+    {
+      task: "Basculer l'ensemble du suivi client vers un nouvel outil intégrant une automatisation poussée des relances. Le gain potentiel est important une fois l'outil en place, mais il faut d'abord le choisir, y migrer les données existantes et former les personnes concernées.",
+      correct: "projet",
+      why: "Le gain visé est réel, mais la mise en place suppose plusieurs étapes lourdes (choix d'outil, migration, formation) : c'est un projet à planifier, pas un point de départ."
+    },
+    {
+      task: "Arbitrer, à la place de votre responsable, quel budget accorder à un projet stratégique du service. Ni la nature de cette tâche (un jugement, pas un texte à produire), ni votre accès aux informations nécessaires ne s'y prêtent.",
+      correct: "ecarter",
+      why: "Le gain via l'IA générative est quasi nul, puisque cette tâche relève de la décision et non de la production de contenu, et sa mise en place resterait de toute façon hors de votre portée : à écarter, pour l'instant comme pour plus tard."
+    }
+  ];
+  var QLABELS = {
+    quickwin: {n:"Quick win", d:"Fort gain, faible difficulté"},
+    projet: {n:"Projet à planifier", d:"Fort gain, difficulté élevée"},
+    mineur: {n:"Amélioration mineure", d:"Faible gain, faible difficulté"},
+    ecarter: {n:"À écarter pour l'instant", d:"Faible gain, difficulté élevée"}
+  };
+  var QORDER = ["quickwin","projet","mineur","ecarter"];
+  var qgIndex = 0;
+
+  function renderQRound(){
+    var round = QROUNDS[qgIndex];
+    document.getElementById("qgTask").textContent = round.task;
+    document.getElementById("qgCounter").textContent = "Tâche " + (qgIndex+1) + " / " + QROUNDS.length;
+    var optsEl = document.getElementById("qgOpts");
+    optsEl.innerHTML = QORDER.map(function(key){
+      var lab = QLABELS[key];
+      return '<button class="qopt" data-key="'+key+'"><span class="qname">'+lab.n+'</span><span class="qdesc">'+lab.d+'</span></button>';
+    }).join("");
+    document.getElementById("qgFb").className = "fb";
+    document.getElementById("qgFb").textContent = "";
+    document.getElementById("qgNext").hidden = true;
+  }
+
+  document.getElementById("qgOpts").addEventListener("click", function(e){
+    var btn = e.target.closest(".qopt");
+    if(!btn) return;
+    var round = QROUNDS[qgIndex];
+    var chosen = btn.dataset.key;
+    var buttons = [].slice.call(document.querySelectorAll("#qgOpts .qopt"));
+    buttons.forEach(function(b){ b.disabled = true; });
+    if(chosen === round.correct){
+      btn.classList.add("picked-good");
+    } else {
+      btn.classList.add("picked-bad");
+      buttons.forEach(function(b){ if(b.dataset.key === round.correct) b.classList.add("reveal-good"); });
+    }
+    var fb = document.getElementById("qgFb");
+    fb.className = "fb show " + (chosen === round.correct ? "good" : "bad");
+    fb.innerHTML = "<span class='head'>"+(chosen === round.correct ? "Exact" : "À revoir")+"</span>" + round.why;
+    var nextBtn = document.getElementById("qgNext");
+    if(qgIndex < QROUNDS.length - 1){
+      nextBtn.textContent = "Tâche suivante";
+      nextBtn.hidden = false;
+    } else {
+      nextBtn.hidden = true;
+      var done = document.createElement("p");
+      done.className = "fb show good";
+      done.style.marginTop = "10px";
+      done.innerHTML = "<span class='head'>Terminé</span>Vous avez passé en revue les quatre profils. Dans votre activité, privilégiez un quick win seulement si les autorisations sont acquises, le résultat vérifiable et le gain mesurable.";
+      fb.insertAdjacentElement("afterend", done);
+    }
+  });
+
+  document.getElementById("qgNext").addEventListener("click", function(){
+    qgIndex += 1;
+    renderQRound();
+  });
+
+  renderQRound();
+</script>
+</body>
+</html>

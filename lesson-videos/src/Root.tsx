@@ -12,6 +12,8 @@ import { DURATION_S as DURATION_L5 } from "./lesson5/timeline";
 import { Lesson6 } from "./lesson6/Lesson6";
 import { DURATION_S as DURATION_L6 } from "./lesson6/timeline";
 import { FPS, H, W } from "./theme";
+import { lessonDuration } from "./rs6776/LessonVideo";
+import { RS6776_VIDEOS } from "./rs6776/videos";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -65,6 +67,10 @@ export const RemotionRoot: React.FC = () => {
         width={W}
         height={H}
       />
+      {/* Formation RS6776 (docs/formation-rs6776) : durée calculée depuis la voix off. */}
+      {RS6776_VIDEOS.map((v) => (
+        <Composition key={v.id} id={v.id} component={v.component} durationInFrames={Math.ceil(lessonDuration(v.manifest) * FPS)} fps={FPS} width={W} height={H} />
+      ))}
     </>
   );
 };

@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendre l'IA générative et ses usages</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --paper:#F7F7FA; --surface:#fff; --ink:#1b1a17; --ink-2:#4a4741; --ink-3:#7c786f;
+    --rule:#e4e1d9; --rule-2:#efece5; --accent:#1f4e46; --accent-soft:#eef3f1;
+    --ok:#2c6a48; --ok-soft:#eef4ef; --warn:#8a6519; --warn-soft:#faf4e7;
+    --alert:#963428; --alert-soft:#fbf1ef;
+    --serif:'Funnel Display',Georgia,'Iowan Old Style','Times New Roman',serif;
+    --sans:'Funnel Display',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  body{font-family:var(--sans);font-size:15.5px;line-height:1.65;color:var(--ink);background:var(--paper);padding:0 22px 80px;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;margin:0 auto}
+  header.top{padding:44px 0 26px;border-bottom:1px solid var(--rule)}
+  header.top h1{font-family:var(--serif);font-size:clamp(26px,4.5vw,34px);line-height:1.2;font-weight:400;letter-spacing:-.01em;margin-bottom:12px;max-width:28ch}
+  header.top .sub{font-size:15.5px;color:var(--ink-2);}
+  h2{font-family:var(--serif);font-size:24px;font-weight:400;line-height:1.3;letter-spacing:-.01em;margin:44px 0 16px;padding-bottom:10px;border-bottom:1px solid var(--rule)}
+  h3{font-size:12px;letter-spacing:.13em;text-transform:uppercase;font-weight:600;color:var(--ink-3);margin:30px 0 14px}
+  h4{font-family:var(--serif);font-size:17px;font-weight:400;margin-bottom:6px}
+  p+p{margin-top:12px}
+  strong{color:var(--ink);font-weight:600}
+  em{font-style:italic}
+  ul,ol{margin:14px 0 14px 20px;}
+  li{margin-bottom:8px}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14.5px}
+  th,td{border-bottom:1px solid var(--rule-2);padding:10px 12px 10px 0;text-align:left;vertical-align:top}
+  th{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:600;border-bottom:1px solid var(--rule)}
+
+  .aside{border-left:2px solid var(--rule);padding:2px 0 2px 20px;margin:22px 0;font-size:15px;color:var(--ink-2);}
+  .aside .lab{display:block;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);margin-bottom:5px;font-weight:600}
+  .aside.key{border-left-color:var(--accent)} .aside.key .lab{color:var(--accent)}
+  .aside.caution{border-left-color:var(--alert)} .aside.caution .lab{color:var(--alert)}
+  .aside.further{border-left-color:var(--warn)} .aside.further .lab{color:var(--warn)}
+
+  .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin:18px 0}
+  .cols>div{background:var(--surface);padding:18px 20px}
+  .cols p{font-size:14px;color:var(--ink-2);max-width:none}
+  .cols .tag{display:block;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px;font-weight:600}
+
+  .game{background:var(--surface);border:1px solid var(--rule);padding:24px 26px;margin:22px 0}
+  .game .gamelab{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:10px}
+  .game .gameintro{font-size:14.5px;color:var(--ink-2);margin-bottom:18px;}
+  .askbox .q{font-family:var(--serif);font-size:17px;margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:1px;background:var(--rule);border:1px solid var(--rule)}
+  .opt{font:inherit;font-size:14.5px;text-align:left;padding:11px 14px;border:none;background:var(--surface);cursor:pointer;transition:.12s;color:var(--ink-2);border-left:3px solid transparent}
+  .opt:hover:not(:disabled){background:#fbfaf7;color:var(--ink)}
+  .opt:disabled{cursor:default;color:var(--ink-3)}
+  .probs{margin-top:14px;display:grid;gap:8px}
+  .probrow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;font-size:13.5px;color:var(--ink-2)}
+  .probrow .track{grid-column:1/-1;height:7px;background:var(--rule-2);border-radius:5px;overflow:hidden}
+  .probrow .fill{height:100%;background:var(--rule);border-radius:5px;transition:width .4s ease}
+  .probrow.top .fill{background:var(--ok)}
+  .probrow.mine:not(.top) .fill{background:var(--warn)}
+  .probrow .lbl{display:flex;justify-content:space-between;gap:10px}
+  .probrow .pct{font-family:var(--serif);color:var(--ink-3)}
+  .probrow.top .pct{color:var(--ok);font-weight:600}
+  .fb{margin-top:14px;font-size:14.5px;display:none;line-height:1.6;color:var(--ink-2);padding-left:20px;border-left:2px solid var(--rule)}
+  .fb.show{display:block}
+  .fb.good{border-left-color:var(--ok)} .fb.bad{border-left-color:var(--warn)}
+  .fb .head{display:block;font-size:11px;letter-spacing:.13em;text-transform:uppercase;font-weight:600;margin-bottom:5px}
+  .fb.good .head{color:var(--ok)} .fb.bad .head{color:var(--warn)}
+  .gscore{font-size:13px;color:var(--ink-3);margin-top:18px}
+  .btn{font:inherit;font-size:14.5px;font-weight:500;border-radius:3px;padding:10px 20px;border:1px solid var(--accent);cursor:pointer;transition:.15s;background:none;color:var(--accent)}
+  .btn:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{background:#173b35}
+  .answers{margin-top:16px;display:flex;flex-direction:column;gap:1px;background:var(--rule);border:1px solid var(--rule)}
+  .answers:empty{display:none}
+  .answer{background:var(--surface);padding:13px 15px}
+  .answer .n{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:4px;display:block}
+  .answer .a{font-size:14.5px;color:var(--ink)}
+  .askcount{font-size:13px;color:var(--ink-3);margin-top:12px}
+
+  footer{margin-top:60px;padding-top:22px;border-top:1px solid var(--rule);font-size:12.5px;color:var(--ink-3);line-height:1.7;}
+  @media(max-width:600px){header.top h1{font-size:26px} h2{font-size:21px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <h1>Comprendre l'IA générative et ses usages</h1>
+    <p class="sub">Cette leçon vous fait découvrir l'intelligence artificielle générative : ce qu'elle est, comment elle fonctionne concrètement, les outils majeurs qui la rendent accessible au quotidien, et des exemples d'utilisation sur un poste de travail.</p>
+  </header>
+
+  <h2>Qu'est-ce que l'IA générative ?</h2>
+  <p>Une IA générative est un modèle entraîné sur d'immenses quantités de texte, d'images ou de son, capable de <strong>produire du contenu nouveau</strong> (texte, image, audio) à partir d'une instruction en langage naturel, appelée un <em>prompt</em>. Contrairement à un logiciel classique qui exécute toujours la même procédure, elle génère une réponse différente à chaque fois, en fonction du contexte que vous lui donnez.</p>
+  <p>Concrètement, quand vous écrivez une consigne comme « Reformule ce texte en gardant un ton professionnel et direct », l'outil ne va pas chercher un modèle tout fait dans une base de données : il <strong>construit</strong> la réponse mot après mot, en s'appuyant sur des probabilités apprises durant son entraînement. C'est aussi ce qui explique qu'un résultat bien tourné puisse malgré tout contenir une erreur : l'outil produit la suite la plus probable, pas une vérité vérifiée.</p>
+
+  <h3>Trois notions à connaître</h3>
+  <p>Elles expliquent pourquoi ces outils se comportent ainsi, et les connaître change la façon de les utiliser :</p>
+  <ul>
+    <li><strong>Le découpage en tokens.</strong> Le texte n'est pas traité mot par mot mais en fragments appelés <em>tokens</em> (un mot courant compte souvent pour un token, un mot plus rare ou composé peut en compter plusieurs). Les tokens servent à mesurer la longueur d'un échange et, pour les services facturés à l'usage comme certaines interfaces de programmation, son coût. Un abonnement mensuel n'est pas nécessairement facturé token par token.</li>
+    <li><strong>La fenêtre de contexte.</strong> Chaque outil ne peut mobiliser qu'une quantité limitée de texte à la fois : votre prompt, une partie utile de l'historique et les documents joints, dans une limite propre au modèle et à l'offre. Sur un échange très long, les éléments anciens peuvent recevoir moins d'attention, être résumés automatiquement ou ne plus être disponibles au modèle. Même s'ils restent visibles à l'écran, reformulez les décisions et contraintes indispensables avant une tâche importante.</li>
+    <li><strong>La variabilité des réponses.</strong> Un même prompt, envoyé deux fois, donne rarement une réponse identique : à chaque mot généré, l'outil tire parmi les suites les plus probables plutôt que de choisir systématiquement la seule meilleure. C'est ce qui rend le bouton « régénérer » utile : il ne corrige rien, il retire simplement un nouvel essai.</li>
+  </ul>
+
+  <div class="game" aria-labelledby="game1lab">
+    <p class="gamelab" id="game1lab">À vous de jouer : comment elle choisit ses mots</p>
+    <p class="gameintro">Cette simulation pédagogique illustre la prédiction du texte : les pourcentages affichés ne proviennent pas d'un modèle réel. Devinez, à chaque phrase, le mot ou le groupe de mots que la simulation présente comme le plus probable, avant de découvrir la réponse.</p>
+    <div class="askbox">
+      <p style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:8px" id="roundN">Phrase 1 sur 4</p>
+      <p class="q" id="roundStem"></p>
+      <p style="font-size:13.5px;color:var(--ink-3);margin-bottom:4px">Quel mot ou groupe de mots l'outil choisirait-il le plus probablement pour continuer ?</p>
+      <div class="opts" id="roundOpts" role="group"></div>
+      <div class="probs" id="roundProbs" hidden></div>
+      <div class="fb" id="roundFb"></div>
+      <p class="gscore" id="roundScore" hidden></p>
+      <div style="margin-top:16px"><button class="btn" id="nextRound" hidden>Phrase suivante</button></div>
+    </div>
+    <div class="aside key" id="synth1" hidden>
+      <span class="lab">Ce qu'il faut retenir</span>
+      Le modèle ne connaît pas le monde comme une personne et ne vérifie pas spontanément chaque affirmation. Il génère des tokens à partir du contexte et de relations apprises ; certains modèles peuvent aussi décomposer un problème ou utiliser des outils. Changez la consigne ou les sources fournies, et la réponse peut changer.
+    </div>
+  </div>
+
+  <p>Cette mécanique explique aussi la limite centrale de ces outils : une <strong>hallucination</strong> n'est pas un bug isolé, c'est une conséquence directe du principe même de génération. L'outil produit la suite de mots la plus plausible compte tenu de son entraînement, sans vérifier ce qu'il avance contre une source à jour, sauf quand il active explicitement une recherche web pendant la réponse. Une information née après la date d'arrêt de son entraînement, ou trop rare dans les données utilisées pour l'entraîner, est un terrain particulièrement propice à l'erreur : la relecture humaine reste nécessaire précisément parce que le mécanisme qui produit une belle phrase est le même qui peut produire une belle erreur.</p>
+
+  <div class="game" aria-labelledby="game2lab">
+    <p class="gamelab" id="game2lab">À vous de jouer : provoquer une hallucination</p>
+    <p class="gameintro">Cette simulation force volontairement une réponse inventée pour rendre le risque visible. Dans un outil réel, le modèle peut aussi signaler qu'il ne sait pas, demander une source ou lancer une recherche si cette fonction est disponible. Posez plusieurs fois la même question fictive, puis observez ce qui change et ce qui devrait être vérifié.</p>
+    <div class="askbox">
+      <p class="q" id="askQ">Quelle est la date du prochain comité de pilotage du projet avec la société Verlane &amp; Associés ?</p>
+      <button class="btn btn-primary" id="askBtn">Demander à l'outil</button>
+      <div class="answers" id="answers"></div>
+      <p class="askcount" id="askCount" hidden></p>
+    </div>
+    <div class="aside key" id="synth2" hidden>
+      <span class="lab">Ce qu'il faut retenir</span>
+      L'IA générative est souvent efficace pour <strong>transformer un texte fourni</strong> : reformuler, structurer, raccourcir. Quand une information manque, elle peut produire un élément plausible mais faux : c'est une hallucination. Une recherche intégrée réduit parfois ce risque, sans remplacer le contrôle des sources et la validation humaine.
+    </div>
+  </div>
+
+  <h2>Les outils de référence</h2>
+  <p>Quatre outils couvrent l'essentiel d'un usage professionnel courant. Ils reposent sur des principes très proches, mais chacun se distingue par ce à quoi il est connecté, pas seulement par la qualité de ses réponses :</p>
+  <table>
+    <thead><tr><th>Outil</th><th>Éditeur</th><th>Modalités</th><th>Écosystème d'intégration</th><th>Point fort</th></tr></thead>
+    <tbody>
+      <tr><td>ChatGPT</td><td>OpenAI</td><td>Texte, image, code, analyse de fichiers</td><td>Autonome (navigateur, application), extensions tierces, interface de programmation</td><td>Polyvalence</td></tr>
+      <tr><td>Google Gemini</td><td>Google</td><td>Texte, image</td><td>Gmail, Docs, Sheets, Drive (Google Workspace)</td><td>Recherche d'informations récentes</td></tr>
+      <tr><td>Microsoft Copilot</td><td>Microsoft</td><td>Texte, image</td><td>Word, Excel, Outlook, Teams (Microsoft 365)</td><td>Ancrage dans les outils bureautiques</td></tr>
+      <tr><td>Adobe Firefly</td><td>Adobe</td><td>Génération et retouche d'images</td><td>Photoshop, Illustrator, Express (Creative Cloud)</td><td>Création visuelle intégrée à l'écosystème Adobe</td></tr>
+    </tbody>
+  </table>
+
+  <div class="cols">
+    <div>
+      <span class="tag">ChatGPT</span>
+      <p>Le plus autonome des quatre : il ne dépend d'aucun écosystème métier particulier et fonctionne aussi bien seul que connecté à d'autres logiciels via des extensions ou une interface de programmation. C'est aussi celui qui propose la plus grande variété de fonctions au-delà du texte : analyse de fichiers, génération de code, création d'images.</p>
+    </div>
+    <div>
+      <span class="tag">Google Gemini</span>
+      <p>Développé par le même éditeur que le moteur de recherche, il peut s'appuyer plus nativement sur une recherche web en temps réel pour ancrer certaines réponses dans une actualité récente. Sa force pratique tient surtout à son intégration directe dans Gmail, Docs et Sheets pour qui travaille déjà dans cet environnement.</p>
+    </div>
+    <div>
+      <span class="tag">Microsoft Copilot</span>
+      <p>Sa différence structurante : dans sa version professionnelle liée à un compte Microsoft 365 d'entreprise, il peut s'appuyer sur vos propres e-mails, réunions et documents internes pour produire une réponse contextualisée à votre environnement de travail réel, une capacité que les versions grand public de ChatGPT ou Gemini n'offrent pas de la même façon.</p>
+    </div>
+    <div>
+      <span class="tag">Adobe Firefly</span>
+      <p>Se distingue des trois autres par son orientation visuelle et son intégration à Photoshop, Illustrator et Express. Adobe communique sur des données d'entraînement sous licence ou relevant du domaine public ; les éventuelles protections contractuelles dépendent toutefois du plan, de la fonctionnalité et des conditions applicables. Elles ne dispensent jamais de vérifier la marque, le droit à l'image et le contexte d'utilisation.</p>
+    </div>
+  </div>
+
+  <p>Le choix dépend surtout du besoin, des connexions autorisées, de l'écosystème déjà utilisé, du niveau de confidentialité et des conditions du compte. Gemini peut être pertinent dans Google Workspace, Copilot dans un environnement Microsoft 365 correctement administré, ChatGPT pour des usages polyvalents et Firefly pour la création visuelle intégrée à l'écosystème Adobe. Aucun outil ne « s'impose » à lui seul : testez-le sur un cas fictif, vérifiez ses réglages et contrôlez le résultat.</p>
+  <p>Retenez simplement, à ce stade : <strong>ChatGPT et Gemini pour l'écrit, Copilot pour l'écrit intégré aux outils bureautiques, Firefly pour le visuel.</strong> Vous les installerez et configurerez en détail dans une prochaine leçon.</p>
+
+  <h2>Exemples d'usage par métier</h2>
+  <ul>
+    <li><strong>Assistanat / secrétariat</strong> : rédaction de comptes-rendus de réunion à partir de notes brutes, tri et synthèse d'e-mails, préparation de courriers types.</li>
+    <li><strong>Marketing / communication</strong> : rédaction de publications réseaux sociaux, génération de visuels d'accompagnement, déclinaison d'un même message en plusieurs formats.</li>
+    <li><strong>Ressources humaines</strong> : rédaction de fiches de poste, synthèse d'entretiens, reformulation d'annonces d'emploi.</li>
+    <li><strong>Juridique</strong> : résumé de documents contractuels longs, reformulation en langage clair d'une clause complexe (à toujours faire vérifier par un professionnel du droit).</li>
+  </ul>
+
+  <h2>Pour aller plus loin</h2>
+  <p>Cette section approfondit au-delà de ce qui est nécessaire pour suivre la suite du programme ; la sauter ne bloque rien pour les leçons suivantes.</p>
+  <p>Les outils vus dans cette leçon sont des assistants conversationnels : vous posez une question, ils répondent, et s'arrêtent là. Une catégorie différente, les <strong>agents IA</strong>, va plus loin : à partir d'un objectif donné, l'agent décompose lui-même la tâche en plusieurs étapes, peut utiliser des outils externes (recherche web, exécution de code, lecture de fichiers) sans qu'on le lui redemande à chaque étape, et revient avec un résultat construit en plusieurs actions enchaînées plutôt qu'une seule réponse. La frontière entre un assistant conversationnel évolué et un agent n'est pas toujours nette dans l'interface, mais le principe reste identifiable : un agent agit, un assistant conversationnel répond.</p>
+  <p>Sur la fiabilité, une nuance mérite d'être connue : certains outils peuvent activer une recherche web en cours de réponse pour vérifier une information récente ou peu certaine, ce qui réduit le risque d'hallucination sur ce point précis, sans l'éliminer pour autant sur le reste de la réponse. Savoir si cette recherche a été utilisée sur une réponse donnée, quand l'outil l'indique, est un signal utile pour calibrer votre niveau de vérification.</p>
+  <p>Enfin, un repère chiffré aide à se représenter concrètement une fenêtre de contexte : sur les outils grand public courants, elle se compte en dizaines à centaines de milliers de tokens, soit très schématiquement l'équivalent d'un document de plusieurs dizaines à quelques centaines de pages. Cette capacité progresse régulièrement et diffère d'un outil et d'une offre à l'autre : le chiffre exact est moins important que le réflexe de vérifier, pour un document volumineux, si l'outil que vous utilisez peut réellement le traiter en une fois.</p>
+
+  <footer>
+    Toutes les entreprises, personnes et données de cette leçon sont fictives.
+  </footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* =========== JEU 1 : PRÉDICTION DE MOTS =========== */
+var ROUNDS = [
+  { stem:"Bonjour, je vous confirme la bonne réception de votre", cands:[
+      {w:"message", p:34}, {w:"dossier", p:27}, {w:"demande", p:22}, {w:"courrier", p:17}
+    ]},
+  { stem:"Le compte-rendu vous sera transmis", cands:[
+      {w:"dans les meilleurs délais", p:32}, {w:"après validation", p:27}, {w:"cette semaine", p:24}, {w:"prochainement", p:17}
+    ]},
+  { stem:"Nous recherchons un profil", cands:[
+      {w:"motivé", p:31}, {w:"expérimenté", p:26}, {w:"rigoureux", p:23}, {w:"polyvalent", p:20}
+    ]},
+  { stem:"Merci de nous transmettre", cands:[
+      {w:"votre disponibilité", p:30}, {w:"les documents demandés", p:27}, {w:"votre réponse", p:25}, {w:"un retour", p:18}
+    ]}
+];
+var roundIdx = 0, roundDone = 0;
+
+function shuffle(arr){
+  var a = arr.slice();
+  for(var i=a.length-1;i>0;i--){
+    var j = Math.floor(Math.random()*(i+1));
+    var tmp=a[i]; a[i]=a[j]; a[j]=tmp;
+  }
+  return a;
+}
+
+function renderRound(){
+  var r = ROUNDS[roundIdx];
+  document.getElementById("roundN").textContent = "Phrase "+(roundIdx+1)+" sur "+ROUNDS.length;
+  document.getElementById("roundStem").textContent = "« "+r.stem+" … »";
+  var opts = document.getElementById("roundOpts");
+  var order = shuffle(r.cands);
+  opts.innerHTML = order.map(function(c){
+    return '<button class="opt" data-w="'+c.w+'">'+c.w+"</button>";
+  }).join("");
+  document.getElementById("roundProbs").hidden = true;
+  document.getElementById("roundProbs").innerHTML = "";
+  var fb = document.getElementById("roundFb");
+  fb.className = "fb"; fb.innerHTML = "";
+  document.getElementById("nextRound").hidden = true;
+}
+
+document.getElementById("roundOpts").addEventListener("click", function(e){
+  var b = e.target.closest(".opt");
+  if(!b || b.disabled) return;
+  var r = ROUNDS[roundIdx];
+  var picked = b.dataset.w;
+  var sorted = r.cands.slice().sort(function(a,b){ return b.p - a.p; });
+  var top = sorted[0].w;
+  var good = (picked === top);
+
+  document.querySelectorAll("#roundOpts .opt").forEach(function(o){ o.disabled = true; });
+
+  var probs = document.getElementById("roundProbs");
+  probs.hidden = false;
+  probs.innerHTML = sorted.map(function(c){
+    var cls = "probrow" + (c.w===top ? " top":"") + (c.w===picked ? " mine":"");
+    return '<div class="'+cls+'"><div class="lbl"><span>'+c.w+(c.w===picked?" (votre choix)":"")+'</span><span class="pct">'+c.p+" %</span></div>"+
+           '<div class="track"><div class="fill" style="width:'+c.p+'%"></div></div></div>';
+  }).join("");
+
+  var fb = document.getElementById("roundFb");
+  fb.className = "fb show " + (good ? "good":"bad");
+  fb.innerHTML = '<span class="head">'+(good ? "Vous aviez raison" : "Ce n'était pas celui-là")+"</span>"+
+    (good ? "C'est bien la suite la plus probable compte tenu du début de phrase."
+          : "La suite la plus probable était « "+top+" », avec "+sorted[0].p+" % de probabilité estimée.");
+
+  roundDone++;
+  var sc = document.getElementById("roundScore");
+  sc.hidden = false;
+  sc.textContent = roundDone+" phrase"+(roundDone>1?"s":"")+" sur "+ROUNDS.length+" essayée"+(roundDone>1?"s":"");
+
+  if(roundIdx < ROUNDS.length - 1){
+    document.getElementById("nextRound").hidden = false;
+  } else {
+    document.getElementById("synth1").hidden = false;
+  }
+});
+
+document.getElementById("nextRound").addEventListener("click", function(){
+  roundIdx++;
+  renderRound();
+});
+
+renderRound();
+
+/* =========== JEU 2 : PROVOQUER UNE HALLUCINATION =========== */
+var ASK_POOL = [
+  "Le prochain comité de pilotage est fixé au 3 avril à 10 h, en visioconférence.",
+  "D'après les informations disponibles, ce comité aurait lieu le 28 mars en fin de journée.",
+  "Le prochain comité semble prévu la semaine prochaine, probablement jeudi.",
+  "Ce comité est confirmé pour le 15 avril à 9 h 30.",
+  "Cette date n'apparaît pas encore fixée ; une échéance autour du 20 avril est probable.",
+  "Selon les échanges habituels, ce comité aurait lieu début avril, sans doute la première semaine."
+];
+var askPool = [], askCount = 0;
+
+function drawAnswer(){
+  if(askPool.length === 0) askPool = shuffle(ASK_POOL);
+  return askPool.pop();
+}
+
+document.getElementById("askBtn").addEventListener("click", function(){
+  askCount++;
+  var ans = drawAnswer();
+  var box = document.getElementById("answers");
+  var div = document.createElement("div");
+  div.className = "answer";
+  div.innerHTML = '<span class="n">Tentative '+askCount+'</span><span class="a">'+ans+"</span>";
+  box.insertBefore(div, box.firstChild);
+
+  var cnt = document.getElementById("askCount");
+  cnt.hidden = false;
+  cnt.textContent = askCount+" réponse"+(askCount>1?"s":"")+" obtenue"+(askCount>1?"s":"")+" à la même question, pour la même absence d'information.";
+
+  if(askCount >= 3){
+    document.getElementById("synth2").hidden = false;
+  }
+});
+
+})();
+</script>
+</body>
+</html>

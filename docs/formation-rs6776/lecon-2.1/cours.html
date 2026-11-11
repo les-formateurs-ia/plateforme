@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap" rel="stylesheet">
+<title>Les bases du prompt engineering</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#F7F7FA; --surface:#fff; --ink:#1b1a17; --ink-2:#4a4741; --ink-3:#7c786f;
+  --rule:#e4e1d9; --rule-2:#efece5; --accent:#1f4e46; --accent-soft:#eef3f1;
+  --ok:#2c6a48; --ok-soft:#eef4ef; --warn:#8a6519; --warn-soft:#faf4e7;
+  --alert:#963428; --alert-soft:#fbf1ef;
+  --serif:'Funnel Display',Georgia,'Iowan Old Style','Times New Roman',serif;
+  --sans:'Funnel Display',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+}
+body{font-family:var(--sans);font-size:15.5px;line-height:1.65;color:var(--ink);background:var(--paper);padding:0 22px 80px}
+.wrap{width:100%;margin:0 auto}
+
+header.top{padding:40px 0 28px;border-bottom:1px solid var(--rule)}
+.eyebrow{font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px}
+h1{font-family:var(--serif);font-weight:700;font-size:clamp(26px,4vw,38px);line-height:1.15;color:var(--ink);max-width:26ch}
+.lead{font-family:var(--serif);font-size:18px;line-height:1.6;color:var(--ink-2);margin-top:18px}
+
+.content{margin:0 auto;padding-top:8px}
+section{padding:38px 0;border-bottom:1px solid var(--rule-2)}
+section:last-of-type{border-bottom:none}
+h2{font-family:var(--serif);font-weight:700;font-size:23px;color:var(--ink);margin-bottom:16px;max-width:32ch}
+h3{font-family:var(--serif);font-weight:600;font-size:17px;color:var(--ink);margin:22px 0 10px}
+p{margin-bottom:14px}
+p:last-child{margin-bottom:0}
+strong{color:var(--ink);font-weight:700}
+em{font-style:italic;color:var(--accent)}
+ul, ol{margin:0 0 14px 22px}
+li{margin-bottom:6px}
+
+.table-wrap{overflow-x:auto;margin:20px 0 22px;border:1px solid var(--rule);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:560px;background:var(--surface)}
+th, td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--rule-2);vertical-align:top;font-size:14.5px}
+th{background:var(--accent-soft);color:var(--accent);font-weight:700;font-family:var(--serif);letter-spacing:.01em}
+tr:last-child td{border-bottom:none}
+td:first-child, th:first-child{font-weight:700;white-space:nowrap}
+
+.aside{border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:6px;padding:18px 20px;margin:22px 0;}
+.aside p{margin-bottom:0}
+.aside strong{color:var(--accent)}
+
+.game{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:22px 24px;margin:20px 0 24px;max-width:900px}
+.game-label{font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);font-weight:700;margin-bottom:8px}
+.game-prompt{font-family:var(--serif);font-size:17px;color:var(--ink);background:var(--rule-2);border-radius:8px;padding:12px 16px;margin-bottom:14px}
+.game p{max-width:none}
+button{font-family:var(--sans);font-weight:700;font-size:14px;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:11px 20px;cursor:pointer;transition:background .15s ease}
+button:hover{background:#163c36}
+button:active{transform:translateY(1px)}
+.game-output{margin-top:16px;min-height:20px}
+.game-tag{font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--accent);font-weight:700;margin-bottom:6px}
+.game-text{background:var(--accent-soft);border-radius:8px;padding:14px 16px;font-size:15px;color:var(--ink-2)}
+
+.frag{border:1px solid var(--rule);border-radius:10px;padding:16px 18px;margin-bottom:14px;background:var(--paper)}
+.frag-text{font-family:var(--serif);font-size:15.5px;color:var(--ink);margin-bottom:10px}
+.frag-select{font-family:var(--sans);font-size:14px;padding:8px 10px;border:1px solid var(--rule);border-radius:6px;background:var(--surface);color:var(--ink);min-width:180px}
+.frag-feedback{margin-top:10px;font-size:14px;min-height:18px}
+.frag-feedback.ok{color:var(--ok)}
+.frag-feedback.ko{color:var(--alert)}
+#classify-score{margin-top:16px;font-weight:700;font-size:14.5px}
+#classify-score.ok{color:var(--ok)}
+#classify-score.ko{color:var(--alert)}
+
+.tools-table td, .tools-table th{font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div class="content">
+    <p class="eyebrow">Prompt engineering</p>
+    <h1>Les bases du prompt engineering</h1>
+    <p class="lead">Un prompt efficace ne s'improvise pas : il répond à une structure précise, qui change concrètement ce que produit un modèle de langage. Ce texte présente cette structure en cinq éléments (Rôle, Cible, Objectif, Contexte, Format), la logique qui la rend efficace, et les pièges les plus courants à éviter. L'objectif n'est pas de mémoriser un acronyme, mais de comprendre pourquoi chacun de ces cinq éléments modifie réellement le résultat obtenu, et comment vérifier qu'un résultat produit correspond bien à ce qui était demandé.</p>
+  </div>
+</header>
+
+<div class="content">
+
+<section>
+  <h2>Prompt engineering : une compétence, pas un talent</h2>
+  <p>Un <em>prompt</em> est l'instruction envoyée à un modèle pour obtenir un résultat. Le <strong>prompt engineering</strong> consiste à expliciter le besoin, les données utiles, les contraintes et les critères de contrôle. Une bonne structure réduit les ambiguïtés et les reprises inutiles ; elle ne garantit ni un bon premier résultat ni l'exactitude du contenu.</p>
+  <p>Ce n'est pas une compétence réservée aux profils techniques. Un modèle de langage ne devine pas une intention non formulée : il complète statistiquement une suite de mots à partir de ce qui lui est effectivement fourni. Deux personnes qui utilisent le même outil peuvent obtenir des résultats très différents selon la seule façon dont elles formulent leur demande : la différence ne tient pas à l'outil, mais à la méthode de formulation, précisément ce que le prompt engineering rend reproductible.</p>
+  <p>Un prompt mal structuré augmente le temps de reprise et le risque de valider trop vite un résultat hors besoin. Un prompt bien structuré augmente la probabilité d'un contenu <strong>adapté</strong> et d'une forme <strong>conforme aux consignes</strong>. Ce sont des critères à vérifier après génération, pas des propriétés garanties par le prompt.</p>
+</section>
+
+<section>
+  <h2>Pourquoi un prompt vague produit un résultat imprévisible</h2>
+  <p>Un modèle de langage ne connaît, par défaut, ni le destinataire réel, ni les circonstances de la demande, ni la forme attendue du résultat. Quand un prompt ne précise aucun de ces éléments, le modèle les remplace par les choix les plus probables au regard de son entraînement, pas par votre contexte réel. Deux générations successives, à partir du même prompt incomplet, peuvent alors produire des résultats très différents en longueur, en ton ou en niveau de détail, sans qu'aucun des deux soit objectivement meilleur. Le jeu ci-dessous permet de le constater directement.</p>
+
+  <div class="game" id="game-variability">
+    <p class="game-label">Prompt volontairement incomplet, à tester</p>
+    <p class="game-prompt">"Écris un message pour informer l'équipe du changement."</p>
+    <p>Aucun destinataire, aucune circonstance et aucun format ne sont précisés. Cliquez plusieurs fois sur le bouton : chaque clic simule un résultat plausible que pourrait produire un modèle de langage face à ce même prompt, strictement inchangé entre deux clics.</p>
+    <button type="button" id="btn-variability">Générer un résultat possible</button>
+    <div class="game-output" id="variability-output" aria-live="polite"></div>
+  </div>
+
+  <p>Ce que ces générations mettent en évidence : ni la longueur, ni le ton, ni même le sujet exact du changement annoncé ne restent stables d'un essai à l'autre. Rien, dans le prompt initial, ne permettait au modèle de trancher entre ces options. La structure présentée dans la section suivante consiste précisément à fixer ces choix avant la génération, plutôt que de les découvrir une fois la réponse déjà produite.</p>
+</section>
+
+<section>
+  <h2>La structure en cinq éléments : Rôle, Cible, Objectif, Contexte, Format</h2>
+  <p>Un prompt structuré répond, dans l'ordre qui convient le mieux à la situation, à cinq questions distinctes. Traiter chacune séparément évite le principal piège : fusionner deux exigences différentes dans une même phrase, au risque d'en oublier une sans même s'en rendre compte.</p>
+
+  <div class="table-wrap">
+    <table class="tools-table">
+      <thead>
+        <tr><th>Élément</th><th>Répond à la question</th><th>Exemple</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Rôle</td><td>Quelle posture l'IA doit-elle adopter ?</td><td>"Tu es un formateur en sécurité informatique."</td></tr>
+        <tr><td>Cible</td><td>À qui le résultat s'adresse-t-il ?</td><td>"Ce message s'adresse à des nouveaux employés qui n'ont jamais suivi de formation cybersécurité."</td></tr>
+        <tr><td>Objectif</td><td>Qu'est-ce que le résultat doit accomplir précisément ?</td><td>"Rédige une liste de cinq réflexes essentiels à adopter dès leur premier jour."</td></tr>
+        <tr><td>Contexte</td><td>Quelles informations de fond sont nécessaires ?</td><td>"L'entreprise vient de subir une tentative de phishing ciblée sur les adresses email professionnelles."</td></tr>
+        <tr><td>Format</td><td>Sous quelle forme le résultat doit-il être livré ?</td><td>"Liste à puces, une phrase d'explication par réflexe, ton rassurant et non technique."</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p><strong>Rôle</strong> : la posture rédactionnelle attendue. Il peut orienter le vocabulaire, les angles et la structure, mais il ne donne au modèle ni qualification réelle ni accès à des sources fiables. « Agis comme un juriste » ne transforme jamais la sortie en avis juridique validé.</p>
+  <p><strong>Cible</strong> : le destinataire réel du résultat, distinct de la personne qui rédige le prompt. C'est l'élément le plus souvent oublié, parce qu'il semble aller de soi pour la personne qui écrit le prompt, alors qu'il ne va jamais de soi pour le modèle. Préciser la cible ajuste automatiquement le niveau de vocabulaire, la longueur tolérée et les précisions à développer ou au contraire à éviter.</p>
+  <p><strong>Objectif</strong> : ce que le résultat doit concrètement accomplir, à ne pas confondre avec une simple description de tâche. "Parler de la sécurité informatique" est une tâche vague ; "produire une liste de cinq réflexes activables dès le premier jour" est un objectif vérifiable, qui permet ensuite de juger si le résultat obtenu correspond réellement à la demande.</p>
+  <p><strong>Contexte</strong> : les informations de fond nécessaires pour que la réponse soit pertinente, pas seulement correcte dans l'absolu. Un contexte insuffisant produit une réponse générique, techniquement juste mais peu utilisable telle quelle ; un contexte excessif ou hors sujet dilue au contraire l'attention du modèle sur ce qui compte réellement. L'exercice consiste à donner ce qui change la réponse, pas tout ce que l'on sait du sujet.</p>
+  <p><strong>Format</strong> : la forme attendue du résultat, à savoir sa structure (liste, tableau, paragraphes), sa longueur, son registre de langue, et les éléments à inclure ou à exclure. C'est souvent l'élément le plus rentable à préciser rapidement : un format non spécifié oblige presque toujours à retravailler la mise en forme après coup, même quand le fond de la réponse était déjà satisfaisant.</p>
+
+  <div class="aside">
+    <p><strong>Point de vigilance.</strong> Certaines méthodes plus courtes résument ces cinq questions à une seule "tâche à accomplir", en fusionnant de fait la cible et l'objectif dans une même case. Le risque concret de ce raccourci : un prompt qui précise un rôle, un contexte et un format, mais qui se contente d'une tâche formulée en creux ("aide-moi à rédiger quelque chose sur ce sujet"), laisse le modèle deviner à la fois pour qui écrire et ce que le résultat doit précisément accomplir, deux inconnues au lieu d'une. Traiter cible et objectif comme deux décisions séparées, même quand chacune tient en une phrase courte, évite cet angle mort.</p>
+  </div>
+
+  <p>Quand une tâche revient régulièrement sous une forme proche, il devient possible de fixer un prompt type dont seul le contexte change d'une fois à l'autre, plutôt que de repartir de zéro à chaque fois.</p>
+
+  <h3>Vérifiez votre compréhension</h3>
+  <p>Reprenons l'exemple utilisé plus haut, fragment par fragment. Pour chacun, indiquez à quel élément de la structure il correspond : la correction s'affiche aussitôt.</p>
+
+  <div class="game" id="game-classify">
+    <div class="frag" data-answer="role">
+      <p class="frag-text">"Tu es un formateur en sécurité informatique."</p>
+      <select class="frag-select" aria-label="Élément correspondant à ce fragment">
+        <option value="">Choisir un élément...</option>
+        <option value="role">Rôle</option>
+        <option value="cible">Cible</option>
+        <option value="objectif">Objectif</option>
+        <option value="contexte">Contexte</option>
+        <option value="format">Format</option>
+      </select>
+      <p class="frag-feedback" aria-live="polite"></p>
+    </div>
+
+    <div class="frag" data-answer="cible">
+      <p class="frag-text">"Ce message s'adresse à des nouveaux employés qui n'ont jamais suivi de formation cybersécurité."</p>
+      <select class="frag-select" aria-label="Élément correspondant à ce fragment">
+        <option value="">Choisir un élément...</option>
+        <option value="role">Rôle</option>
+        <option value="cible">Cible</option>
+        <option value="objectif">Objectif</option>
+        <option value="contexte">Contexte</option>
+        <option value="format">Format</option>
+      </select>
+      <p class="frag-feedback" aria-live="polite"></p>
+    </div>
+
+    <div class="frag" data-answer="objectif">
+      <p class="frag-text">"Rédige une liste de cinq réflexes essentiels à adopter dès leur premier jour."</p>
+      <select class="frag-select" aria-label="Élément correspondant à ce fragment">
+        <option value="">Choisir un élément...</option>
+        <option value="role">Rôle</option>
+        <option value="cible">Cible</option>
+        <option value="objectif">Objectif</option>
+        <option value="contexte">Contexte</option>
+        <option value="format">Format</option>
+      </select>
+      <p class="frag-feedback" aria-live="polite"></p>
+    </div>
+
+    <div class="frag" data-answer="contexte">
+      <p class="frag-text">"L'entreprise vient de subir une tentative de phishing ciblée sur les adresses email professionnelles."</p>
+      <select class="frag-select" aria-label="Élément correspondant à ce fragment">
+        <option value="">Choisir un élément...</option>
+        <option value="role">Rôle</option>
+        <option value="cible">Cible</option>
+        <option value="objectif">Objectif</option>
+        <option value="contexte">Contexte</option>
+        <option value="format">Format</option>
+      </select>
+      <p class="frag-feedback" aria-live="polite"></p>
+    </div>
+
+    <div class="frag" data-answer="format">
+      <p class="frag-text">"Présente la réponse sous forme de liste à puces, avec pour chaque réflexe une phrase d'explication, dans un ton rassurant et non technique."</p>
+      <select class="frag-select" aria-label="Élément correspondant à ce fragment">
+        <option value="">Choisir un élément...</option>
+        <option value="role">Rôle</option>
+        <option value="cible">Cible</option>
+        <option value="objectif">Objectif</option>
+        <option value="contexte">Contexte</option>
+        <option value="format">Format</option>
+      </select>
+      <p class="frag-feedback" aria-live="polite"></p>
+    </div>
+
+    <button type="button" id="btn-classify">Vérifier mes réponses</button>
+    <p id="classify-score" aria-live="polite"></p>
+  </div>
+</section>
+
+<section>
+  <h2>D'un prompt structuré à un résultat vérifié</h2>
+  <p>Après génération, comparez la sortie au besoin et aux cinq éléments, puis effectuez un second contrôle indépendant : faits et sources, chiffres et dates, omissions, biais, confidentialité, droits et actions promises. Un résultat peut respecter parfaitement le format tout en étant faux, incomplet ou impropre à la diffusion. Documentez la correction apportée lorsque l'enjeu est important.</p>
+</section>
+
+<section>
+  <h2>Pour aller plus loin</h2>
+  <p>Cette section approfondit au-delà de ce qui est nécessaire pour suivre la suite du programme ; la sauter ne bloque rien pour les leçons suivantes.</p>
+
+  <p>Dans la plupart des outils actuels, l'instruction envoyée à un modèle peut se répartir sur deux canaux distincts : un <em>prompt système</em>, qui fixe une fois pour toutes le rôle et les règles générales de comportement du modèle pour l'ensemble d'une conversation, et un <em>prompt utilisateur</em>, qui porte la demande ponctuelle avec son contexte et son objectif propres. Séparer les deux évite de répéter à chaque message des consignes de rôle ou de format déjà valables pour tout l'échange. La documentation publique d'Anthropic sur l'ingénierie de prompt pour ses modèles recommande par ailleurs d'ajouter, quand c'est possible, trois à cinq exemples représentatifs du résultat attendu directement dans le prompt : cette technique, dite d'apprentissage à partir d'exemples (<em>few-shot prompting</em>), améliore souvent la conformité du format obtenu de façon plus fiable qu'une description purement verbale de ce format.</p>
+
+  <p>La même documentation propose un test simple pour juger de la clarté d'un prompt avant de l'envoyer, parfois désignée comme sa règle d'or : montrer le prompt tel quel à un collègue qui n'a aucun contexte sur la tâche, et lui demander de le suivre à la lettre. S'il serait perdu ou hésitant face à cette formulation, un modèle de langage le sera tout autant, puisqu'il ne dispose lui non plus d'aucune connaissance implicite du contexte réel. Anthropic résume cette idée par une image directe : traiter le modèle comme un employé brillant mais nouveau, qui n'a pas encore appris les habitudes et le vocabulaire interne d'une organisation. Plus l'explication est précise, meilleur est le résultat, quel que soit par ailleurs le niveau de compétence du modèle utilisé.</p>
+
+  <p>La structure en cinq éléments n'est ni unique ni rigide. CO-STAR, par exemple, distingue contexte, objectif, style, ton, audience et réponse. Les frontières peuvent se chevaucher : une limite de longueur relève souvent du format, même si elle rend aussi l'objectif mesurable. Ce qui compte est de ne laisser implicite aucune information qui change la sortie, puis de vérifier le résultat. Aucun acronyme ne remplace cette analyse.</p>
+</section>
+
+</div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var variabilityOutputs = [
+    {
+      tag: "Interprétation A : changement d'horaires, ton formel, message long",
+      text: "Madame, Monsieur, nous vous informons que les horaires d'ouverture du service seront modifiés à compter du mois prochain. Cette évolution vise à améliorer la disponibilité de l'équipe. Vous trouverez le détail des nouveaux créneaux en pièce jointe. Nous restons à votre disposition pour toute question. Cordialement."
+    },
+    {
+      tag: "Interprétation B : changement d'outil, ton informel, message court",
+      text: "Hello l'équipe ! Petit changement à partir de lundi : on bascule sur le nouvel outil de suivi. Rien à faire de votre côté pour l'instant, un point sera organisé cette semaine."
+    },
+    {
+      tag: "Interprétation C : réorganisation, registre très formel",
+      text: "À l'attention de l'ensemble du personnel. La direction porte à la connaissance de chacun qu'une réorganisation des équipes entrera en vigueur prochainement. Les responsables concernés communiqueront individuellement les détails applicables à leur périmètre."
+    },
+    {
+      tag: "Interprétation D : changement de lieu, format liste à puces",
+      text: "Ce qui change à partir de la semaine prochaine : nouvelle salle de réunion au deuxième étage, nouveau badge d'accès à récupérer à l'accueil, nouveau créneau pour la réunion d'équipe le jeudi à dix heures."
+    },
+    {
+      tag: "Interprétation E : notification très brève",
+      text: "Changement à venir. Détails à suivre prochainement. Merci de votre patience."
+    }
+  ];
+  var lastVariabilityIndex = -1;
+  var btnVariability = document.getElementById('btn-variability');
+  var outVariability = document.getElementById('variability-output');
+
+  if (btnVariability && outVariability) {
+    btnVariability.addEventListener('click', function () {
+      var idx;
+      if (variabilityOutputs.length === 1) {
+        idx = 0;
+      } else {
+        do {
+          idx = Math.floor(Math.random() * variabilityOutputs.length);
+        } while (idx === lastVariabilityIndex);
+      }
+      lastVariabilityIndex = idx;
+      var item = variabilityOutputs[idx];
+      outVariability.innerHTML = '<p class="game-tag">' + item.tag + '</p><p class="game-text">' + item.text + '</p>';
+    });
+  }
+
+  var explanations = {
+    role: "ce fragment fixe la posture que l'IA doit adopter : cela oriente le vocabulaire et le niveau d'expertise supposé de la réponse.",
+    cible: "ce fragment précise à qui le résultat s'adresse : cela ajuste le niveau de langage et la longueur tolérée.",
+    objectif: "ce fragment indique précisément ce que le résultat doit accomplir : condition nécessaire pour juger ensuite s'il est conforme.",
+    contexte: "ce fragment apporte l'information de fond sans laquelle la réponse resterait générique.",
+    format: "ce fragment fixe la forme attendue du résultat : structure, longueur et registre compris."
+  };
+  var labels = { role: 'Rôle', cible: 'Cible', objectif: 'Objectif', contexte: 'Contexte', format: 'Format' };
+
+  var frags = document.querySelectorAll('#game-classify .frag');
+  for (var i = 0; i < frags.length; i++) {
+    (function (frag) {
+      var select = frag.querySelector('.frag-select');
+      var feedback = frag.querySelector('.frag-feedback');
+      select.addEventListener('change', function () {
+        var answer = frag.getAttribute('data-answer');
+        var chosen = select.value;
+        if (!chosen) {
+          feedback.textContent = '';
+          feedback.className = 'frag-feedback';
+          return;
+        }
+        if (chosen === answer) {
+          feedback.textContent = 'Correct : ' + explanations[answer];
+          feedback.className = 'frag-feedback ok';
+        } else {
+          feedback.textContent = 'Pas tout à fait : il s\'agit en réalité de ' + labels[answer] + '. ' + explanations[answer];
+          feedback.className = 'frag-feedback ko';
+        }
+      });
+    })(frags[i]);
+  }
+
+  var btnClassify = document.getElementById('btn-classify');
+  var scoreEl = document.getElementById('classify-score');
+  if (btnClassify && scoreEl) {
+    btnClassify.addEventListener('click', function () {
+      var total = frags.length;
+      var correct = 0;
+      for (var j = 0; j < frags.length; j++) {
+        var select = frags[j].querySelector('.frag-select');
+        if (select.value === frags[j].getAttribute('data-answer')) {
+          correct++;
+        }
+      }
+      var pct = Math.round((correct / total) * 100);
+      var pass = pct >= 80;
+      scoreEl.textContent = 'Score : ' + correct + ' / ' + total + ' (' + pct + ' %). ' + (pass ? 'Bon niveau de maîtrise de la structure.' : 'Reprenez les fragments en rouge avant de continuer.');
+      scoreEl.className = pass ? 'score ok' : 'score ko';
+    });
+  }
+})();
+</script>
+
+</body>
+</html>

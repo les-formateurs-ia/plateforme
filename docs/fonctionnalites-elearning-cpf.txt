@@ -1,0 +1,1063 @@
+================================================================================
+  PLATEFORME E-LEARNING CPF — DESCRIPTION DÉTAILLÉE DES FONCTIONNALITÉS
+  Documentation de conception pédagogique
+  État du code au 11/11/2026
+================================================================================
+
+Ce document décrit ce que voit et fait un apprenant CPF sur la plateforme, et ce
+que l'auteur (admin / formateur) peut configurer. Il sert de référence pour
+concevoir une formation : structure, leçons, quiz, missions, exercices, Studio,
+Hub, Agent, certification, suivi CPF.
+
+Les libellés de l'interface sont cités « entre guillemets ».
+Les points marqués [!] sont des limites ou des pièges à connaître avant de
+concevoir le contenu.
+
+
+--------------------------------------------------------------------------------
+SOMMAIRE
+--------------------------------------------------------------------------------
+  0. L'essentiel pour concevoir une formation (à lire en premier)
+  1. Navigation de l'apprenant CPF
+  2. Structure d'une formation : modèle, modules, leçons
+  3. La leçon classique (vidéo, podcast, Playground, Agent, cours, Copilote, quiz)
+  4. La leçon « Mission » (mission de fin de module)
+  5. Côté auteur : éditeur de formation et éditeur de leçon
+  6. Les Exercices (« Pratiquer »)
+  7. Le Studio
+  8. Le Hub IA
+  9. Mon Agent IA
+ 10. Budget IA (crédits Runware)
+ 11. Certification RS6776
+ 12. Parcours CPF : de la conversion au tableau de bord
+ 13. Suivi du temps, assiduité et documents CPF
+ 14. Autres pages (Rendez-vous, Profil, Badges)
+ 15. Récapitulatif des limites et incohérences connues
+ 16. Check-list de conception d'une formation
+
+
+================================================================================
+0. L'ESSENTIEL POUR CONCEVOIR UNE FORMATION
+================================================================================
+
+ 1. Une leçon classique se valide UNIQUEMENT par son quiz, avec au moins 75 %
+    de bonnes réponses. Sans quiz, la leçon ne peut jamais être validée et le
+    parcours est bloqué. => Chaque leçon classique doit avoir au moins une
+    question.
+
+ 2. Le champ « Contenu du cours (HTML) » est le cœur de la leçon. Il est :
+      - affiché à l'élève sous les onglets ;
+      - la source du podcast, de la mindmap, de l'agent vocal, du Copilote et
+        de Mon Agent IA ;
+      - le RÉFÉRENTIEL DE CORRECTION des exercices de prompts et
+        d'images (l'IA sanctionne une méthode enseignée dans le cours et non
+        appliquée). Limite : 6 000 caractères pris en compte par leçon,
+        120 000 au total.
+    => Rédiger des règles et méthodes explicites dans le contenu du cours,
+       placées en début de leçon (au-delà de 6 000 caractères, le correcteur
+       ne lit plus).
+
+ 3. Il n'existe que 3 missions de fin de module, écrites dans le code :
+      - « Mission IA : stratégie et confidentialité »
+      - « Mission IA : contenu et optimisation »
+      - « Mission IA : conformité et accessibilité »
+    Une nouvelle mission nécessite un développement.
+
+ 4. Seul le premier module est ouvert automatiquement. Les suivants sont ouverts
+    à la main, élève par élève, par l'admin ou le formateur attitré. Terminer un
+    module n'ouvre PAS le suivant.
+
+ 5. Dans un module ouvert, les leçons se débloquent une par une, dans l'ordre.
+    [!] L'interface ne permet pas de réordonner les leçons : une nouvelle leçon
+    est toujours ajoutée en fin de module. Seuls les modules se réordonnent.
+    => Créer les leçons dans l'ordre définitif.
+
+ 6. Attribuer une formation crée une COPIE pour l'élève. Modifier le modèle
+    ensuite ne change rien pour les élèves déjà inscrits.
+
+ 7. Seul le temps passé DANS LES LEÇONS (onglet visible) compte dans les heures
+    réalisées (relevé de connexions, attestation d'assiduité). Le temps passé
+    dans les Exercices, le Studio, le Hub ou Mon Agent IA n'est pas compté.
+    => Pour qu'une activité pratique compte dans l'assiduité, l'intégrer dans
+       une leçon (Playground, mission, quiz).
+
+ 8. Les exercices de la rubrique « Exercices » sont transversaux : aucun n'est
+    rattaché à une leçon, aucun ne compte dans la progression ou la
+    certification, et le formateur ne voit pas les résultats.
+
+
+================================================================================
+1. NAVIGATION DE L'APPRENANT CPF
+================================================================================
+
+Barre latérale « Espace apprenant », groupée par intention :
+
+  « Apprendre »
+     - « Accueil »            /dashboard
+     - « Mes leçons »         /lessons
+     - « Ma certification »   /certification
+  « Pratiquer »
+     - « Exercices »          /practice
+     - « Le Studio »          /studio
+     - « Hub IA »             /hub
+  « Être accompagné »
+     - « Mon Agent IA »       /agent
+     - « Rendez-vous »        /calendar
+  « Mon profil »              /profile
+
+Bas de la barre : signalement d'incident, notifications, jauge « Budget IA
+Runware » (verte, orange > 70 %, rose > 90 %), avatar et profession.
+Une palette de commandes est disponible (sauf en mode examen).
+
+Cas particuliers :
+  - Avant la date d'ouverture de la formation : tout l'espace est remplacé par
+    un décompte (seul /profile reste accessible). Voir section 12.
+  - Pendant l'épreuve écrite de certification : seuls « Accueil » et
+    « Le Studio » restent. Pages autorisées : /dashboard, /certification,
+    /certification/ecrit, /studio, /studio/chatgpt, /studio/gemini,
+    /studio/claude, /studio/images, /profile. Leçons et Exercices fermés.
+
+
+================================================================================
+2. STRUCTURE D'UNE FORMATION
+================================================================================
+
+2.1 Modèle et copie
+-------------------
+  - On conçoit un MODÈLE de formation (« Gestion des formations »).
+  - On l'attribue à un élève depuis sa fiche : cela crée une copie complète
+    (modules, leçons, quiz, mission choisie, mindmap de référence).
+  - La copie peut être personnalisée pour cet élève seul (« Personnaliser la
+    formation ») sans toucher au modèle.
+  - Un modèle peut être recréé à partir de la copie personnalisée d'un élève
+    (structure + leçons + QCM uniquement, jamais les données de l'élève).
+
+2.2 Statuts d'un modèle
+-----------------------
+  « Brouillon » (draft), « Publié » (published), « Archivé » (archived),
+  « Génération… » (generating, temporaire).
+  Attribuables : brouillon et publié. Un modèle archivé n'est pas attribuable.
+
+2.3 Hiérarchie
+--------------
+  Formation  →  Modules (chapitres numérotés 01, 02…)  →  Leçons
+  Une leçon est soit « Leçon classique », soit « Mission ».
+
+2.4 Champs de la formation
+--------------------------
+  - « Nom » (obligatoire)
+  - « URL » (slug unique, généré depuis le nom, modifiable)
+  - « Description »
+  - « Durée (min) »
+  - « Statut »
+
+2.5 Règles de progression (vue élève « Mes leçons »)
+----------------------------------------------------
+  Phrase affichée : « Ton parcours module par module. Les leçons s'ouvrent dans
+  l'ordre : chaque leçon validée débloque la suivante. »
+
+  Par formation : « Formation · N modules · N leçons », barre de progression,
+  « x/y validées », « z% aux quiz » (moyenne des meilleurs scores), temps de
+  formation cumulé, bouton « Commencer » / « Reprendre : <titre> ».
+
+  Statuts de module : « Validé », « En cours », « Commencé », « À commencer »,
+  « Verrouillé ». Module fermé : « Ton formateur ouvrira ce module le moment
+  venu. »
+
+  Statuts de leçon : terminée, disponible, verrouillée. « À suivre » /
+  « À reprendre » sur la prochaine leçon. Durée affichée « N min ».
+
+  Durée d'un module = somme des durées des leçons (champ indicatif, rien n'est
+  contrôlé).
+
+  Fermer un module verrouille toutes ses leçons, même terminées ; la
+  progression est conservée.
+
+
+================================================================================
+3. LA LEÇON CLASSIQUE
+================================================================================
+
+3.1 Barre du haut
+-----------------
+  « Mes leçons », fil d'Ariane module › leçon, progression globale en %,
+  bouton « Leçon suivante » (si la leçon est validée et le module suivant
+  ouvert).
+
+3.2 Onglets
+-----------
+  « Vidéo »
+     Affiché si une vidéo a été envoyée. Lecteur intégré.
+     [!] Dans l'éditeur, la vidéo s'ajoute uniquement par envoi de fichier
+     (pas de champ URL YouTube/Vimeo, bien que le lecteur sache les lire).
+     Format recommandé : MP4 (H.264). Avertissement pour .mov, .hevc, .mkv,
+     .avi, .wmv. Format illisible : « La vidéo ne peut pas être lue ici » +
+     « Télécharger la vidéo ».
+
+  « Votre vidéo personnalisée »
+     Affiché si une vidéo personnalisée a été envoyée (même lecteur). Utile
+     pour une version adaptée à un élève dans sa copie de formation.
+
+  « Podcast »  (toujours affiché)
+     « Deux animateurs IA discutent du cours, adapté à ton profil. »
+     L'élève génère lui-même ses épisodes, à partir du contenu du cours.
+     5 formats :
+        « Analyse approfondie »    300–400 mots
+        « Briefing express »       150–220 mots
+        « Regard critique »        300–380 mots
+        « Débat contradictoire »   320–420 mots
+        « Mots tout simples »      280–380 mots
+     Sans contenu de cours : « Cette leçon n'a pas encore de contenu de
+     cours. » Quitter la page interrompt la génération. Seul le staff peut
+     « Régénérer ». Le « Prompt de référence (contenu IA) » de la leçon est
+     injecté dans le script du podcast.
+
+  « Playground »  (toujours affiché)
+     Page HTML interactive (champ « Playground (page HTML) ») affichée dans une
+     zone isolée, hauteur automatique. Permet des activités sur mesure :
+     simulateur, quiz interactif, exercice guidé, mini-application.
+     Une page Playground peut appeler l'IA de la plateforme.
+     Vide : « Pas encore de page Playground pour cette leçon. » /
+     « Bientôt disponible. »
+     [!] Seul un admin peut créer ou modifier le Playground (un formateur reçoit
+     une erreur). Import possible depuis un .txt ou .docx.
+
+  « Agent »  (toujours affiché)
+     Appel vocal en direct (Gemini Live) : « Démarrer l'appel », couper/ouvrir
+     le micro, « Raccrocher ». L'agent connaît le titre, le contenu du cours et
+     le profil de l'élève (métier, objectif, style pédagogique). L'appel est
+     coupé dès qu'on quitte l'onglet.
+
+  Onglets existants mais masqués actuellement : « Mindmap » (carte mentale
+  interactive) et « Vidéo IA » (avatar HeyGen).
+
+3.3 Bloc « Cours »
+------------------
+  Le HTML du « Contenu du cours » est affiché en pleine page sous les onglets,
+  comme un document complet (styles, tableaux et scripts acceptés).
+  [!] Toute section dont le titre commence par « Lien avec la certification »
+  est retirée automatiquement côté élève (utile pour garder des notes
+  internes dans le contenu, notamment à destination des IA).
+
+3.4 Copilote IA (panneau de droite, « Bêta »)
+---------------------------------------------
+  Ouvert par défaut sur ordinateur, fermé sur mobile. Une seule conversation par
+  formation, partagée avec l'onglet Agent et la page « Mon Agent IA ».
+  Actions rapides : « Reformule simplement », « Exemple pour mon métier »,
+  « Crash test 2 min ». Absent sur une leçon Mission.
+
+3.5 Fin de leçon et quiz
+------------------------
+  - Bouton « Terminer la leçon » (durée « N min » affichée à côté).
+  - Fenêtre « Bien joué. Place au quiz » : « N questions… Il faut 75 % de
+    bonnes réponses pour valider la leçon et débloquer la suivante. »
+    Choix « Commencer le quiz » ou « Plus tard ».
+  - Déroulé : une question par écran (« Question i/N »), réponses A, B, C…
+    Correction immédiate après chaque clic (vert / rouge), puis
+    « Explication » si renseignée. « Question suivante » / « Valider le quiz ».
+  - Score = bonnes réponses / nombre de questions.
+      Réussite (≥ 75 %) : « Leçon validée », « Bravo ! La leçon suivante est
+      débloquée. »
+      Échec : « Pas encore », « Il faut au moins 75 %… Relis le cours, puis
+      retente ta chance. », « Réessayer le quiz ».
+  - Tentatives illimitées ; chaque tentative est enregistrée, le meilleur score
+    est conservé. Une leçon validée le reste : « Leçon déjà validée »,
+    « Meilleur score : x% », « Refaire le quiz ».
+  - [!] Pas de chronomètre, pas de mélange des questions ni des réponses (ordre
+    de l'éditeur), pas de temps minimum avant le quiz.
+  - [!] Une seule bonne réponse par question (pas de QCM à réponses multiples).
+
+  Conseil de conception : avec un seuil de 75 %, un quiz de 4 questions exige
+  3 bonnes réponses, 5 questions → 4, 8 questions → 6, 10 questions → 8.
+  Varier la place de la bonne réponse : l'ordre n'est pas mélangé.
+
+3.6 Bas de page
+---------------
+  « Leçon précédente » / « Leçon suivante » ; si la suivante est verrouillée :
+  « Valide le quiz pour débloquer ».
+
+
+================================================================================
+4. LA LEÇON « MISSION » (FIN DE MODULE)
+================================================================================
+
+4.1 Ce que voit l'élève
+-----------------------
+  Uniquement la mission : pas d'onglets, pas de Copilote, pas de quiz.
+  Plan à gauche (« Introduction », un groupe par exercice, « Remise »), une
+  étape par écran, barre de progression, « x/y réponses ».
+
+  Étapes :
+    1. « Avant de commencer » : introduction + encadrés « Une étape à la
+       fois », « Enregistre quand tu veux », « Valide à la fin ».
+    2. « Le cas et les consignes » de chaque exercice.
+    3. Une étape par question (« Exercice 1 · Question 2 sur 4 ») avec rappel
+       repliable « Revoir le cas de l'exercice ».
+    4. La grille de notation.
+    5. « Récapitulatif et validation » (questions répondues / « Pas encore de
+       réponse »).
+
+4.2 Types de réponse possibles
+------------------------------
+  - Texte court (une ligne, avec texte indicatif)
+  - Zone de texte (5 lignes, ou 10 en version « haute »)
+  - Tableau (colonnes fixes, nombre de lignes de départ réglable, « Ajouter une
+    ligne », suppression)
+  - Image (une seule, « Importer le visuel final » ; réduite à 2000 px si
+    > 1,5 Mo)
+
+4.3 Enregistrement et validation
+--------------------------------
+  - « Enregistrer » ou Ctrl/Cmd+S ; enregistrement silencieux à chaque
+    changement d'étape ; alerte si l'élève ferme sans enregistrer.
+  - « Valider ma mission » → « Ta mission sera transformée en PDF et envoyée à
+    ton formateur. Tu ne pourras plus la modifier ensuite. »
+    Avertissement si des questions sont vides (non bloquant).
+  - Effets : PDF généré, mission verrouillée, notification + e-mail (avec PDF)
+    au formateur et aux admins, LEÇON MARQUÉE TERMINÉE (débloque la suivante).
+  - Écran final : « Bravo, mission envoyée ! Tu viens de terminer le module
+    "…" », boutons « Prendre rendez-vous avec mon formateur » et « Retour à
+    mes leçons ».
+  - Ensuite : lecture seule, « Mission envoyée — en attente de ton
+    formateur. »
+
+  [!] La mission n'est pas notée dans la plateforme : la correction se fait par
+  le formateur, en dehors (puis en rendez-vous).
+
+4.4 Ancien format
+-----------------
+  Une leçon Mission sans mission choisie affiche le HTML libre du contenu du
+  cours, avec « Enregistrer » et « Valider ma mission ».
+
+
+================================================================================
+5. CÔTÉ AUTEUR : ÉDITEURS
+================================================================================
+
+5.1 « Gestion des formations »
+------------------------------
+  « Modèles de formation — à attribuer aux élèves depuis la fiche élève. »
+  Cartes : nom, statut, description, « N modules », « N attributions ».
+  Icône œil « Visualiser comme un élève ». Corbeille (admin) avec
+  restauration ou suppression définitive.
+
+5.2 Éditeur de formation
+------------------------
+  - Champs de la formation (cf. 2.4).
+  - Passage à « Publié » : « Publier et générer » (génère la mindmap de
+    référence de chaque leçon), « Publier sans génération », « Annuler ».
+  - Modules : « Ajouter un module », titre modifiable directement, flèches
+    haut/bas, suppression (« Supprimer ce module et toutes ses leçons ? »).
+  - Dans une copie élève : interrupteur « Accès » par module (« Module ouvert à
+    l'élève. » / « Module fermé à l'élève. Sa progression est conservée. »).
+  - Leçons : liste titre + durée, suppression, « Ajouter une leçon » (en fin de
+    module, pas de réordonnancement).
+  - « Voir en tant qu'élève » : copie de prévisualisation personnelle, toutes
+    les leçons ouvertes (la progression affichée est celle du membre du staff).
+  - Admin, dans une copie élève : carte « Exercices pour vous » (exercices HTML
+    privés pour cet élève).
+  - Staff, sur « Mes leçons » : bouton « Générer du contenu IA » (sélection de
+    leçons → « Mindmap » ou « Podcast »).
+
+5.3 Éditeur de leçon
+--------------------
+  « Type de leçon » :
+     « Leçon classique » — « Vidéo, podcast, Playground, Agent, Copilote et
+     quiz. »
+     « Mission » — « Mission de fin de module : l'élève la remplit étape par
+     étape, l'enregistre puis la valide. »
+
+  Champs communs :
+     « Titre » (obligatoire) + « Identifiant » (slug unique dans le module)
+     « Durée (min) » (indicative)
+     « Contenu du cours (HTML) » (voir section 0, point 2)
+
+  Leçon Mission :
+     « Mission à réaliser » : choix parmi les 3 missions (résumé, « N exercices
+     · N questions · grille de notation »). Titre repris si vide.
+
+  Leçon classique :
+     « Vidéo » et « Vidéo personnalisée (optionnelle) » (envoi de fichier,
+       « Remplacer », « Supprimer »)
+     « Playground (page HTML) » + « Aperçu » (admin seulement)
+     « Prompt de référence (contenu IA — texte, podcast, mindmap) » : consigne
+       injectée dans la génération du podcast
+     « Prompt de référence (exercice pratique) » : [!] enregistré mais utilisé
+       nulle part actuellement
+     Quiz :
+       - « Intitulé de la question », au moins 2 réponses, une seule bonne
+         réponse, « Explication IA affichée après réponse (optionnel) »
+       - pas de limite de nombre de questions
+       - import CSV (virgule ou point-virgule) : colonnes question, reponse_1,
+         reponse_2…, bonne_reponse (numéro ou texte exact), explication
+         (optionnel). « Modèle CSV » téléchargeable.
+
+  Contrôles à l'enregistrement : « Titre et identifiant sont obligatoires. »,
+  « Une question du quiz est vide. », « …doit avoir au moins 2 réponses. »,
+  « …n'a pas de bonne réponse cochée. », « Choisis la mission que les élèves
+  vont réaliser. »
+
+5.4 Production vidéo (dossier lesson-videos/)
+---------------------------------------------
+  Projet Remotion séparé qui fabrique les vidéos de leçon aux couleurs de la
+  marque (fond encre, particules, police Funnel Display, dégradé iris), calées
+  mot à mot sur la transcription de la vidéo source. Zone de l'avatar laissée
+  libre en bas à gauche ; avatar et voix ajoutés au montage. 6 leçons
+  existent. Le MP4 produit est ensuite envoyé dans le champ « Vidéo ».
+  Méthode : lesson-videos/README.md.
+
+
+================================================================================
+6. LES EXERCICES (« PRATIQUER »)
+================================================================================
+
+Page « Exercices » : « {N} ateliers pour affûter ton regard sur l'IA
+générative. Chaque essai est corrigé par l'IA, à refaire autant que tu veux. »
+
+  Atelier                 Étiquette                    Visible élève
+  ----------------------  ---------------------------  ----------------------
+  Exercices prompts       « 20 exercices »             oui
+  Images & vidéos         « IA · Image & vidéo »       oui
+  Battle Ground           « Comparaison de modèles »   oui
+  Rétro-ingénierie        « Reverse prompting »        oui (si crédits IA)
+  Détection Image IA      « Vrai ou faux »             non (admin, « Bientôt »)
+  Exercices pour vous     « Playground »               non (admin, « Bientôt »)
+
+Règles communes :
+  - Aucun atelier n'est rattaché à une leçon ; rien ne compte dans la
+    progression, les badges ou la certification.
+  - Tentatives illimitées, sans délai.
+  - Les tentatives sont privées : le formateur et l'admin ne peuvent pas voir
+    les notes ni les essais d'un élève.
+  - Fermés pendant l'épreuve de certification.
+
+6.1 Mécanique « dossiers de test » (prompts, images)
+----------------------------------------------------
+  L'élève crée un « Nouveau test » (dossier « Test n°X »), peut le renommer
+  ou le supprimer avec ses tentatives. Statistiques : « Tests »,
+  « Tentatives », « Meilleure note », « Moyenne actuelle » (/20).
+  Chaque nouvelle tentative d'un même dossier est comparée à la précédente.
+
+6.2 Exercices prompts
+---------------------
+  « Écris un prompt, l'IA le note sur 20, te montre quoi corriger, et tu
+  l'améliores jusqu'à la bonne note. »
+  Étapes : « Choisis une mission » → « Écris ton prompt » → « Améliore-le ».
+
+  - 6 missions proposées (facultatives, écrites dans le code) : « Offre
+    d'emploi », « Compte rendu », « Réponse client », « Post LinkedIn »,
+    « Plan de formation », « Analyse ». [!] La mission choisie n'est pas
+    transmise au correcteur. [!] L'étiquette « 20 exercices » ne correspond à
+    aucune banque de 20 exercices.
+  - Prompt : 4 000 caractères maximum. « Cmd + Entrée pour envoyer ».
+  - « Repères d'un bon prompt » : 6 pastilles qui s'allument par détection de
+    mots-clés : Rôle, Contexte, Tâche, Format, Ton & public, Contraintes.
+  - « Faire noter mon prompt ».
+
+  Correction par IA (Gemini) :
+  - Posture : « expert reconnu en prompt engineering, niveau professoral »,
+    cadre certification RS6776 : « aider l'élève à progresser, pas le
+    rassurer ».
+  - Retour : note entière de 0 à 20 « sans complaisance », corrections
+    (extrait, reformulation, explication), éléments manquants (pourquoi, et
+    impact dans ce prompt), verdict.
+  - Référentiel : le contenu de cours des leçons accessibles à l'élève.
+  - Comparaison avec la tentative précédente : problèmes « corrigés,
+    partiellement corrigés ou toujours présents ». « Ne complimente pas une
+    réécriture cosmétique ».
+  - Le ton suit le style de tuteur de l'élève (doux / strict / synthétique) ;
+    la note, elle, ne change pas selon le style.
+
+  Restitution :
+  - Anneau de note : vert ≥ 16, orange 10–15, rouge < 10.
+  - « Tentative n°X · Verdict », écart vs tentative précédente.
+  - « Ton prompt, annoté », « Corrections détaillées », « Ce qu'il manque ».
+  - Frise « Ta progression ».
+  - « Améliorer ce prompt » (éditeur pré-rempli + panneau « À corriger » /
+    « À ajouter »), « Repartir de zéro », « Copier le prompt ».
+  - Pas de seuil de réussite.
+
+6.3 Images & vidéos
+-------------------
+  « Décris une image, l'IA note ton prompt, le corrige et génère les deux
+  versions : compare le résultat avant et après. »
+  - Choix Image / Vidéo : [!] la vidéo est désactivée (« bientôt »).
+  - « En panne d'idée ? » : « Visuel produit », « Bannière LinkedIn »,
+    « Illustration d'article », « Affiche d'événement ».
+  - Prompt : 2 000 caractères. Repères : Sujet, Style, Lumière, Cadrage,
+    Couleurs, Ambiance.
+  - « Noter et générer » : même grille de correction que les prompts, avec des
+    critères image (composition, style, éclairage, cadrage, détail, format ;
+    décrire une action dans le temps = « erreur de medium »).
+  - L'IA produit un « Prompt corrigé par l'IA » ; les deux images (prompt de
+    l'élève / prompt corrigé) sont générées (~30 s).
+  - Curseur avant/après, « Partir du prompt corrigé par l'IA », « Repartir de
+    cette version ».
+
+6.4 Battle Ground
+-----------------
+  « Un seul prompt, trois IA de même niveau : Gemini, GPT et Claude. Compare
+  leurs réponses côte à côte et apprends à reconnaître une bonne réponse. »
+
+  Gammes :
+    « Rapide »      Gemini 3.5 Flash-Lite / GPT-5.4 mini / Claude Haiku 4.5
+    « Polyvalent »  Gemini 3.8 Flash / GPT-5.4 / Claude Sonnet 4.6  (défaut)
+    « Expert »      Gemini 3.1 Pro / GPT-5.5 / Claude Opus 5
+
+  Prompt libre (2 000 caractères) ou défi (4 par gamme, avec « À surveiller :
+  … », bouton « Au hasard ») :
+    Rapide : Reformulation, Définition, Traduction, Piège
+    Polyvalent : Rédaction, Vulgarisation, Consigne stricte, Créativité
+    Expert : Logique, Calcul de ROI, Décision, Esprit critique
+
+  « Lancer le combat » : les 3 colonnes se remplissent en parallèle (chrono,
+  nombre de mots, « Copier »). Badges « La plus rapide », « Ta préférée ».
+  Pas de note : l'élève vote (« Juge l'exactitude, le respect de la consigne,
+  la clarté et le ton, puis désigne ta préférée. »). Historique des 12
+  derniers combats, « Ton classement · N votes ». Consomme des crédits IA.
+
+6.5 Rétro-ingénierie (reverse prompting)
+----------------------------------------
+  « Observe l'image cible, devine le prompt qui l'a créée, et rapproche-toi
+  d'essai en essai. »
+  - Image cible générée automatiquement à partir d'un thème tiré au hasard
+    parmi 13 (animal insolite, nature morte, paysage futuriste, portrait
+    stylisé, scène culinaire, architecture, objet en gros plan,
+    science-fiction, décor fantastique, scène urbaine nocturne, jouet mis en
+    scène, scène sous-marine, véhicule imaginaire). Le prompt source n'est
+    jamais révélé.
+  - L'élève décrit l'image (2 000 caractères), « Générer mon image » (~30 s),
+    curseur « Cible » / « Essai N », frise des essais, « Nouvelle image ».
+  - Pas de note automatique : la comparaison visuelle est laissée à l'élève.
+    Consomme des crédits IA.
+
+6.6 Détection Image IA (préparé, pas encore ouvert aux élèves)
+--------------------------------------------------------------
+  L'équipe alimente la « Galerie Détection Image IA » : image, « Statut »
+  (« Réelle » / « Générée par IA »), « Explication » obligatoire.
+  L'élève voit les images dans un ordre aléatoire, répond « Réelle » /
+  « Générée par IA », reçoit « Bonne réponse ! » ou « Raté — … ». Explication
+  affichée seulement pour les images IA. Score de séance non conservé.
+  [!] Pas de niveau de difficulté ; non utilisable comme évaluation.
+
+6.7 « Exercices pour vous » — bac à sable HTML (préparé, admin pour l'instant)
+------------------------------------------------------------------------------
+  Création : « Nom », « Consigne affichée à l'élève », « Code HTML de
+  l'exercice » (ou fichier .txt/.html/.docx), « Visibilité » (« Globale » ou
+  « Privée » avec choix des élèves), « Tags ».
+  Côté élève : « Vos exercices personnalisés » puis « Autres exercices »,
+  filtre par tag. Aucune note ni retour IA.
+
+
+================================================================================
+7. LE STUDIO
+================================================================================
+
+« Discute avec ChatGPT, Gemini et Claude, et crée avec de vrais modèles d'IA :
+image, vidéo, musique, voix et avatar. »
+
+[!] Les modèles tiers (hors FLUX.1 Dev/Schnell) nécessitent un portefeuille
+Runware crédité. À vérifier avant de bâtir une activité sur un modèle précis.
+Les noms de modèles ci-dessous sont ceux configurés au moment de la rédaction.
+
+7.1 « Discuter » — ChatGPT, Gemini, Claude
+------------------------------------------
+  « Discute librement avec X, joins tes fichiers et compare les modèles. »
+
+  Modèles (défaut en premier) :
+    ChatGPT : GPT-5.5, GPT-5.4, GPT-5.4 Pro (raisonnement), GPT-5.4 Mini
+    Gemini  : Gemini 3.8 Flash, Gemini 3.6 Flash, Gemini 3.1 Pro (preview),
+              Gemini 3.5 Flash-Lite
+    Claude  : Claude Opus 5, Claude Fable 5, Claude Sonnet 4.6,
+              Claude Haiku 4.5
+
+  Fonctions :
+  - Changement de modèle en cours de conversation ; chaque réponse indique le
+    modèle utilisé (comparaison possible).
+  - Historique par assistant : « Nouvelle conversation », liste datée,
+    suppression.
+  - Pièces jointes : 3 fichiers max par message, 10 Mo max chacun. Images
+    PNG/JPEG/WEBP/GIF, PDF, Word .docx, fichiers texte (.txt, .md, .csv,
+    .json, .html, .xml, .yaml, code…). Copier-coller possible.
+  - Réponses en Markdown (titres, tableaux, code), jusqu'à ~8 000 tokens.
+  - Le modèle se comporte « exactement comme sur son application officielle »
+    (ce n'est pas un tuteur de la plateforme).
+  - [!] Pas de recherche web, pas de prompt système modifiable, pas de réglage
+    de température.
+  - Gemini est gratuit pour l'élève et reste accessible crédits épuisés ;
+    ChatGPT et Claude sont décomptés du budget IA.
+
+7.2 « Créer vos images »
+------------------------
+  Text-to-Image et Image-to-Image. Champs : « Modèle », « Format », « Ajouter
+  une image » (source, 8 Mo max), prompt (2 000 caractères), « Générer ».
+  Formats : jusqu'à 7 ratios (1:1, 4:3, 3:4, 3:2, 2:3, 16:9, 9:16) ou 3
+  (16:9, 9:16, 1:1) selon le modèle.
+
+  Modèles : FLUX.1 Dev (défaut), FLUX.1 Schnell, FLUX.2 [pro] / [max] /
+  [flex] / [dev] / [klein] 9B / [klein] 9B Base, GPT Image 1.5, GPT Image 2,
+  Nano Banana Pro, Nano Banana 2, Recraft V4 Pro, Recraft V4 Pro Vector (SVG),
+  Seedream 4.5, Seedream 5.0 Lite, Runway Gen-4 Image, ImagineArt 1.5 Pro
+  (4K), Wan2.7 Image Pro, Z-Image-Turbo, Z-Image, Kling IMAGE 3.0, Kling
+  IMAGE O3, Qwen-Image-2512, UNI-1 (Luma), Stable Diffusion 3.
+  Texte seul (sans image source) : Recraft V4 Pro, Recraft V4 Pro Vector,
+  ImagineArt 1.5 Pro.
+
+  Galerie « Mes créations » : prompt, modèle, format, date, image source.
+
+7.3 « Imaginez vos vidéos »
+---------------------------
+  Text-to-Video et Image-to-Video, rendu en 1 à 5 minutes. Champs : modèle,
+  format, durée, image de référence (8 Mo), prompt (2 000 caractères).
+
+  Modèles (formats / durées en secondes) :
+    Veo 3.1 (défaut)        16:9, 9:16          4, 6, 8
+    Veo 3.1 Fast            16:9, 9:16          4, 6, 7, 8
+    Kling                   16:9, 9:16, 1:1     5, 10   (image obligatoire)
+    Kling VIDEO 3.0 Pro     16:9, 9:16, 1:1     5, 10
+    Kling VIDEO 3.0 4K      16:9, 9:16, 1:1     5, 10   (3840×2160)
+    Kling VIDEO O1 Pro      16:9, 9:16, 1:1     5, 10
+    Kling VIDEO O1 Standard 16:9, 9:16, 1:1     5, 10
+    FLUX Video              16:9, 9:16, 1:1     5, 10, 15, 20 (texte seul)
+    Sora 2                  16:9, 9:16          4, 8, 12, 16, 20 (audio)
+    Runway Gen-4.5          16:9, 9:16, 4:3, 3:4, 1:1   5, 8, 10
+    Seedance 2.0 / 2.0 Fast / 1.5 Pro   16:9, 9:16, 1:1   5, 10
+    LTX-2.5 Pro / Fast      16:9, 9:16          6, 8, 10
+    MiniMax Hailuo 2.3 / 02 paysage             6, 10
+    Wan2.7, HappyHorse-1.0, Vidu Q3, SkyReels V4, Grok Imagine Video
+                            16:9, 9:16, 1:1     5, 10
+    PixVerse V5.5           16:9, 9:16, 1:1     5, 8
+    PixVerse V6             16:9, 9:16, 1:1     5, 8, 10
+
+7.4 « Concevez vos propres musiques »
+-------------------------------------
+  Modèle MiniMax Music 2.6, sortie MP3.
+  - « Style & Ambiance » (ex. « Synthwave 80s, synthés rétro, 120 BPM,
+    ambiance nocturne… »), 2 000 caractères.
+  - « Chansons » / « Instrumental ».
+  - « Paroles » (facultatives : l'IA les écrit ou les améliore et les
+    structure en [Intro], [Verse], [Chorus], [Bridge], [Outro]).
+  - Titre et pochette générés automatiquement.
+  Galerie : lecteur, pochette, « Voir les paroles ».
+
+7.5 « Faites parler vos images » (talking head)
+-----------------------------------------------
+  Photo (requise, 8 Mo) + texte à prononcer (1 000 caractères) + voix (langue
+  et voix) + modèle. Rendu 1 à 5 minutes.
+  Modèles : P-Video Avatar (défaut, rapide et économique), HeyGen Avatar IV
+  (premium), OmniHuman 1.5 (réalisme du lip-sync), KlingAI Avatar 2.0 Pro
+  (équilibre qualité/prix), Aurora v1 (corps entier).
+
+7.6 « Du texte à l'audio » (text-to-speech)
+-------------------------------------------
+  Modèle MiniMax Speech 2.8, MP3. Texte jusqu'à 4 000 caractères, « Langue »,
+  « Voix ».
+  « Réglages de la voix » : « Émotion » (Automatique, Joyeux, Triste, En
+  colère, Apeuré, Dégoûté, Surpris, Neutre), « Vitesse » ×0,5 à ×2,
+  « Tonalité » −12 à +12, « Volume » ×0,1 à ×10.
+  ~250 voix sur 15 langues. Français : 4 voix (Casual Man, Female Anchor,
+  Male Narrator — défaut, Movie Lead Female). Anglais 29, espagnol 44,
+  portugais 71, coréen 49, japonais 15, etc. + 2 « voix spéciales ».
+
+7.7 « Parlez n'importe quelle langue » (doublage)
+-------------------------------------------------
+  Vidéo (requise, 60 s max, 40 Mo max), « Langue d'origine », « Langue cible »
+  (français, anglais, espagnol, allemand, italien, portugais, russe), modèle
+  « Sync Lipsync 2 » (défaut) ou « Sync Lipsync 2 Pro ».
+  L'IA transcrit, traduit, double (voix fixe par langue) et resynchronise les
+  lèvres. Rendu 1 à 5 minutes.
+
+7.8 « Face swap »
+-----------------
+  Pas encore disponible (masqué pour les élèves).
+
+7.9 Suivi par l'équipe
+----------------------
+  Sur la fiche élève : galeries en lecture seule des images, vidéos et
+  musiques créées. Pas de galerie pour talking head, voix ni doublage.
+
+
+================================================================================
+8. LE HUB IA
+================================================================================
+
+Catalogue de recommandations de modèles, écrit dans le code (pas
+d'administration). « Que souhaitez-vous faire ? » → 8 catégories, chacune
+avec « N modèles recommandés » et un filtre.
+
+Carte d'un modèle : nom, éditeur, prix (Gratuit / Freemium / Payant), niveau
+(« Idéal Débutant / Intermédiaire / Expert »), notes sur 5 « Raisonnement »,
+« Accès », « Vitesse », « Découvrir la fiche », « Essayer dans le studio »
+(ou « Bientôt disponible dans le Studio! »).
+
+Fiche détaillée : accroche, description, date de sortie, « Points forts »,
+« Points faibles », quand le choisir, idée de prompt copiable, lien Studio
+avec modèle présélectionné.
+
+Catégories (35 modèles) :
+  « Générer du texte »      GPT-5.1, Claude Sonnet 5, Claude Opus 5,
+                            Gemini 3.1 Pro, Mistral Large 3, Grok 4.3
+  « Analyser des données »  Julius AI, ChatGPT — Analyse de données,
+                            NotebookLM, Claude — Exécution de code
+  « Générer une image »     FLUX.2 [pro], GPT Image 2, Nano Banana Pro,
+                            Seedream 4.5, Recraft V4 Pro (liés au Studio),
+                            Midjourney V8.1
+  « Générer une vidéo »     Veo 3.1, Kling VIDEO 3.0 Pro, Seedance 2.0
+                            (liés au Studio), Sora 2
+  « Faire du code »         GitHub Copilot, Cursor, Claude Code,
+                            GPT-5.1-Codex
+  « Générer de l'audio »    ElevenLabs, GPT-5.1 Realtime Voice,
+                            Gemini Live Audio, Murf AI
+  « Faire de la musique »   Suno, Udio, ElevenLabs Music
+  « Rechercher & veiller »  Perplexity AI, ChatGPT Deep Research,
+                            Gemini — Deep Research, Grok — Recherche temps réel
+
+[!] Seules les catégories image et vidéo renvoient vers le Studio. Certains
+noms diffèrent entre Hub et Studio (ex. GPT-5.1 dans le Hub, GPT-5.5 dans le
+Studio). Sora 2 est dans le Studio mais n'y est pas lié depuis le Hub.
+
+Usage pédagogique : support idéal pour une leçon « choisir le bon outil » ;
+renvoyer l'élève vers une catégorie précise (/hub/<catégorie>).
+
+
+================================================================================
+9. MON AGENT IA
+================================================================================
+
+Mentor unique par élève, sur toute la formation. « Une question ?
+Demande-moi. » — « Par écrit ou par la voix : je connais ta progression sur
+toutes tes formations et je me souviens de nos échanges. »
+
+Ce qu'il sait :
+  - le contenu de toutes les leçons de la formation rattachée ;
+  - la progression (leçons terminées, score moyen aux quiz) ;
+  - une mémoire long terme (synthèse régénérée de toutes les conversations,
+    texte et voix) ;
+  - le métier et l'objectif professionnel ;
+  - le style pédagogique (« Pédagogue doux », « Expert strict », « Mode
+    Synthétique ») ;
+  - les 40 derniers messages de la conversation.
+
+Comportement : reste dans le périmètre de la formation et du métier de
+l'élève ; décline poliment le hors sujet (marqué en base) ; tutoiement,
+réponses de 3 à 6 phrases, exemples tirés du métier.
+
+Interface :
+  - conversations groupées par formation, « Nouvelle conversation à propos de :
+    [formation] » ;
+  - questions de départ : « Résume ma dernière leçon », « Donne-moi un exercice
+    de prompt », « Comment utiliser l'IA dans mon métier ? », « Où en suis-je
+    dans ma formation ? » ;
+  - appel vocal (micro ouvert en continu, détection de la parole,
+    transcriptions ajoutées au fil).
+  - Même conversation que le Copilote et l'onglet Agent des leçons.
+  - Hors budget IA.
+
+
+================================================================================
+10. BUDGET IA (CRÉDITS RUNWARE)
+================================================================================
+
+  - Plafond personnel en dollars : 50 $ par défaut.
+  - Consommation décomptée au coût réel à chaque génération.
+  - Blocage dès que le plafond est atteint : « Vous avez atteint votre limite
+    de crédits. » / bandeau « Crédits IA épuisés — … contacte ton formateur ou
+    l'administrateur. »
+  - Pas de remise à zéro automatique ; seul l'admin ajuste le plafond
+    (« Ajouter » / « Retirer », 10 000 $ max par opération, journal des
+    ajustements).
+
+  Décompté : images, vidéos, musique, talking head, synthèse vocale, doublage,
+  chats ChatGPT et Claude, Battle Ground, Rétro-ingénierie.
+  Non décompté : chat Gemini, Mon Agent IA, agent vocal, Copilote, correction
+  des Exercices prompts et Images.
+
+  Vue élève, onglet « Mon utilisation IA » de l'Accueil : « Crédits IA
+  restants », jauge, estimation « De quoi créer encore environ N images,
+  vidéos… », activité sur 7 jours / 30 jours / tout, consommation par outil,
+  graphique, modèles utilisés, activité récente.
+
+  Conseil de conception : une vidéo coûte bien plus qu'une image ; doser les
+  activités vidéo/avatar dans le parcours pour ne pas épuiser les 50 $ avant
+  la certification (où le Studio images reste utile).
+
+
+================================================================================
+11. CERTIFICATION RS6776
+================================================================================
+
+Page « Ma certification » :
+  - les 3 compétences visées ;
+  - « Étape 1 · Écrit » : « 6 mises en situation, 10 jours », « Note minimale
+    de 3,5/5 à chaque compétence. » ;
+  - « Étape 2 · Soutenance orale » : « Environ 20 minutes, ~5 jours après tes
+    écrits », « Note minimale de 10/20. » ;
+  - « Compte environ 15 jours entre la réception du sujet et la soutenance. »
+  - Tant que des leçons restent : « Encore N leçons à valider… ».
+
+Lancement (admin) : possible seulement quand toutes les leçons de toutes les
+formations actives sont terminées (dernière mission comprise). Une épreuve par
+élève. Délai : 10 jours. L'annulation supprime les réponses et la soutenance.
+
+Mode épreuve : l'accueil devient un décompte « N jours restants » avec la
+progression ; leçons et exercices fermés ; Studio (chats + images) ouvert.
+Le délai n'est pas bloquant : après la date, « Le délai de 10 jours est
+dépassé », mais l'élève peut encore rendre (l'admin voit « Rendu après la date
+limite »).
+
+L'écrit :
+  - étapes « Introduction », « Exercice 1 » à « Exercice 6 », « Validation » ;
+  - identité pré-remplie (nom, organisme « Les Formateurs IA ») ;
+  - types de champ : ligne, paragraphe, tableau (exercice 1 : « Tâche à
+    optimiser », « Fréquence », « Outil d'IA », « Utilisation/justification »,
+    « Budget »), image (exercice 2, depuis le Studio ou un fichier) ;
+  - enregistrement automatique 20 s après chaque modification + « Enregistrer
+    le brouillon » ;
+  - validation : liste des réponses vides (non bloquante), puis « Choisir mon
+    créneau et valider » : réservation obligatoire d'un créneau de soutenance
+    (1 h, sur 45 jours) ; l'écrit n'est plus modifiable ensuite.
+
+Relecture admin : réponses en lecture seule, date de rendu, soutenance,
+« Télécharger le PDF ». [!] Aucune saisie de note dans la plateforme.
+
+Conseil de conception : les leçons et missions doivent préparer directement
+les 6 mises en situation (tableau d'optimisation des tâches avec outils et
+budget, production d'un visuel, etc.). Le Studio chats + images étant le seul
+outil disponible pendant l'écrit, l'élève doit le maîtriser avant.
+
+
+================================================================================
+12. PARCOURS CPF : DE LA CONVERSION AU TABLEAU DE BORD
+================================================================================
+
+12.1 Création du dossier (admin, conversion d'un prospect)
+----------------------------------------------------------
+  Mode « CPF » : « Mon Compte Formation : pas de devis ni de programme, juste
+  ses accès. »
+  Champs : prénom, nom, e-mail (obligatoire), téléphone, programme,
+  « Formation attribuée », « Date de début (ouverture) », « Date de fin ».
+  « Valider et envoyer les accès » :
+    1. compte élève créé (ou réutilisé) ;
+    2. copie personnelle de la formation, fermée jusqu'à l'ouverture ;
+    3. dossier de session CPF (financeur Caisse des Dépôts, modalité FOAD,
+       sans devis) ;
+    4. pas d'e-mails automatiques (convocation, rappel, certificat) ;
+    5. envoi immédiat de l'e-mail « Accès e-learning ».
+
+12.2 E-mail « Accès e-learning »
+--------------------------------
+  Objet « Créez votre compte e-learning · {formation} » (ou « Vos accès
+  e-learning · … »). « Bienvenue {prénom} ! », formation, ouverture, fin,
+  identifiant, bouton « Créer mon compte » / « Me connecter ». Lien de création
+  de mot de passe valable 14 jours. Mention handicap / aménagement. Pied de
+  page Qualiopi.
+  Autres e-mails envoyables à la main : « Convocation », « Rappel »,
+  « Certificat », « Espace client ». Historique des e-mails consultable par
+  l'admin.
+
+12.3 Lien d'accès direct /acces/:jeton
+--------------------------------------
+  Connexion automatique sans mot de passe pour un stagiaire dont le compte
+  existe déjà.
+
+12.4 Questionnaire d'inscription (/signup)
+------------------------------------------
+  4 étapes : compte (e-mail, téléphone, mot de passe) ; profil (prénom, âge,
+  « Profession / Poste », « Objectif professionnel ») ; « Comment apprends-tu
+  le mieux ? » (« Visuel & Vidéo », « Podcast & Audio », « Projets
+  pratiques », « Résumés express ») ; « Choisis ton style de Tuteur IA »
+  (« Pédagogue doux », « Expert strict », « Mode Synthétique »).
+  Bouton « Générer mon parcours IA ».
+
+  Le style de tuteur règle le ton de l'Agent, des corrections, des podcasts.
+  Il est verrouillé ensuite (modifiable par le staff : « Mode de pédagogie de
+  l'IA » sur la fiche élève). Le métier et l'objectif alimentent l'Agent, le
+  podcast et la mindmap.
+
+  [!] Un élève CPF créé par conversion NE PASSE PAS par ce questionnaire : il
+  n'a ni métier, ni âge, ni style de tuteur. Les IA utilisent alors un ton par
+  défaut et ne personnalisent pas les exemples. => Renseigner ces champs sur la
+  fiche élève, ou prévoir de corriger ce comportement.
+  [!] Le « style d'apprentissage » (étape 3) n'est utilisé nulle part.
+  [!] « Formuler mon objectif avec l'IA » affiche un texte type, sans IA.
+
+12.5 Décompte avant ouverture
+-----------------------------
+  « Votre formation ouvre bientôt », « Ouverture le {date} », « Votre compte
+  est prêt : ce jour-là, toute la formation se débloque automatiquement. »
+  Compteur jours / heures / minutes / secondes ; ouverture à minuit (heure de
+  Paris) sans recharger. Seul /profile est accessible en attendant.
+  Admin : champ « Ouverture » sur la fiche élève, bouton « Ouvrir » pour ouvrir
+  immédiatement.
+  [!] La date de fin n'est pas appliquée : l'accès ne se ferme pas tout seul
+  (seulement si la formation passe en « En pause » / « Terminée »).
+  [!] « Toute la formation se débloque » est trompeur : seul le premier module
+  s'ouvre, les suivants restent à ouvrir à la main.
+
+12.6 Tableau de bord (« Accueil »)
+----------------------------------
+  - Salutation, « X leçons validées sur N. Encore Y avant la certification. »
+  - Onglets « Vue d'ensemble » et « Mon utilisation IA ».
+  - Bloc de reprise : « Reprendre · Module 0X · Leçon i sur n », « Commencer /
+    Reprendre la leçon », anneau « % du parcours ».
+  - « Ton parcours — Module par module, jusqu'à la certification » (frise).
+  - Chiffres clés : temps de formation, leçons validées, modules validés,
+    réussite aux quiz.
+  - « Ce qu'on apprend, on le pratique » : Exercices, Le Studio, Mon Agent IA.
+  - Badges.
+  - Fin de parcours : « Il te reste à préparer ta soutenance pour obtenir la
+    certification. »
+
+
+================================================================================
+13. SUIVI DU TEMPS, ASSIDUITÉ ET DOCUMENTS CPF
+================================================================================
+
+13.1 Temps passé dans les leçons (source officielle)
+----------------------------------------------------
+  Compté uniquement quand l'onglet de la leçon est visible, envoyé toutes les
+  30 s et à la sortie, journalisé par jour et par leçon. C'est la seule
+  source des heures réalisées : « Relevé de connexions (e-learning) »,
+  « Attestation d'assiduité », suivi à distance du dossier.
+
+13.2 Historique des connexions
+------------------------------
+  Signal de présence chaque minute, partout dans l'espace (onglet visible).
+  Une pause de plus de 15 minutes ouvre une nouvelle connexion. Heure, IP et
+  navigateur enregistrés côté serveur. Carte « Connexions » sur la fiche élève
+  (admin seulement) : temps total, connexions, jours actifs, tableau, export
+  CSV. N'alimente pas les documents officiels.
+
+13.3 Documents du dossier CPF
+-----------------------------
+  Pas de devis, de contrat ni de feuille d'émargement (FOAD). Documents :
+  programme, CGV, règlement intérieur, convocation, relevé de connexions
+  (e-learning), attestation d'assiduité, certificat de réalisation, attestation
+  de fin de formation.
+  Étapes du dossier : Dossier client → Programme → Planning → Convocations →
+  « Suivi à distance » → « Évaluation des acquis » → « Clôture ».
+
+13.4 Évaluations
+----------------
+  - Évaluation d'impact « à froid » : disponible sur tout dossier, CPF compris.
+    Questions QCM, note 1 à 5, Oui/Non avec précision, texte libre. Lien public
+    /evaluation/:jeton (prénom + nom seulement) et tableau de résultats. Envoi
+    du lien à la main.
+  - [!] Tests de positionnement et de satisfaction : réservés aux entreprises,
+    rien pour le CPF.
+
+Conseil de conception : la durée déclarée de la formation doit être couverte
+par le temps réellement passé dans les leçons. Prévoir des leçons
+suffisamment riches (vidéo, Playground, contenu) et intégrer la pratique dans
+les leçons plutôt que dans les Exercices et le Studio, dont le temps n'est
+pas compté.
+
+
+================================================================================
+14. AUTRES PAGES
+================================================================================
+
+« Rendez-vous »
+  « Un échange en visio avec [formateur], ton formateur, pour faire le point
+  et avancer sur ton projet. » Environ 1 heure, sur Google Meet, réservable
+  dès le lendemain, un rendez-vous à la fois (déplacer / annuler). Le
+  formateur peut proposer un autre créneau. Section « Les bilans de ton
+  formateur » (« Sujet », « Point fort », « Prochaine étape »).
+
+« Mon profil »
+  Onglet « Profil » : informations (prénom, e-mail, téléphone, âge,
+  profession, photo), « Mon objectif professionnel », « Mon tuteur IA »
+  (verrouillé). Onglet « Badges » (débloqués / à débloquer). Onglet
+  « Préférences » : apparence (Clair, Sombre, Système), déconnexion.
+
+
+================================================================================
+15. RÉCAPITULATIF DES LIMITES ET INCOHÉRENCES CONNUES
+================================================================================
+
+  Leçons et parcours
+   - Leçon classique sans quiz = parcours bloqué.
+   - Pas de réordonnancement des leçons dans l'éditeur.
+   - Modules suivants à ouvrir manuellement, élève par élève.
+   - Modifier un modèle ne met pas à jour les copies existantes.
+   - Quiz : une seule bonne réponse, pas de mélange, pas de chrono.
+   - Vidéo : envoi de fichier uniquement (pas d'URL dans l'éditeur).
+   - Playground : modifiable par l'admin seulement.
+   - « Prompt de référence (exercice pratique) » : non utilisé.
+   - Onglets Mindmap et Vidéo IA : masqués.
+
+  Missions
+   - 3 missions seulement, écrites dans le code ; pas de notation intégrée.
+
+  Exercices
+   - « 20 exercices » : libellé trompeur (prompts libres + 6 missions).
+   - Missions des exercices prompts non transmises au correcteur.
+   - Battle Ground et Rétro-ingénierie non notés.
+   - Vidéo désactivée dans « Images & vidéos ».
+   - Détection IA et bac à sable HTML non ouverts aux élèves.
+   - Résultats d'exercices invisibles pour l'équipe.
+   - Idées, défis, thèmes et missions écrits dans le code.
+
+  Studio / Hub
+   - Modèles tiers dépendants du solde Runware.
+   - Pas de recherche web ni de prompt système dans les chats.
+   - Hub statique ; noms parfois différents du Studio.
+
+  Parcours CPF
+   - Élèves CPF convertis : pas de questionnaire (métier, style de tuteur).
+   - Style d'apprentissage non utilisé ; « formulation IA » simulée.
+   - Date de fin CPF non appliquée.
+   - Pas d'e-mails automatiques CPF, pas de positionnement ni de satisfaction.
+   - Temps hors leçons non compté dans l'assiduité.
+   - Connexions et e-mails visibles par l'admin seulement.
+   - Certification : pas de saisie de note dans la plateforme.
+
+
+================================================================================
+16. CHECK-LIST DE CONCEPTION D'UNE FORMATION
+================================================================================
+
+  Structure
+   [ ] Découper en modules ; chaque module se termine par une Mission
+       (choisir parmi les 3 existantes, ou prévoir un développement).
+   [ ] Créer les leçons dans l'ordre définitif (pas de réordonnancement).
+   [ ] Renseigner une durée réaliste par leçon ; la somme doit correspondre à
+       la durée déclarée au CPF.
+
+  Chaque leçon classique
+   [ ] Titre + identifiant.
+   [ ] Vidéo MP4 (H.264), produite via lesson-videos/ si besoin.
+   [ ] Contenu du cours (HTML) : notions + méthodes et règles explicites,
+       l'essentiel dans les 6 000 premiers caractères (référentiel de
+       correction des exercices).
+   [ ] Notes internes éventuelles dans une section « Lien avec la
+       certification… » (masquée à l'élève).
+   [ ] Prompt de référence (contenu IA) pour orienter le podcast.
+   [ ] Playground HTML pour la pratique comptée dans l'assiduité (admin).
+   [ ] Quiz : au moins 1 question (idéalement 4 à 10), une bonne réponse par
+       question, explication pour chaque question, position de la bonne
+       réponse variée. Import CSV possible.
+
+  Pratique
+   [ ] Renvoyer explicitement, dans le cours, vers les ateliers adaptés :
+       Exercices prompts, Images, Battle Ground (gamme et défi conseillés),
+       Rétro-ingénierie, Studio (outil et modèle), Hub (catégorie).
+   [ ] Doser les activités coûteuses (vidéo, avatar, doublage) au regard du
+       budget de 50 $.
+
+  Certification
+   [ ] Aligner les missions et leçons sur les 6 mises en situation de l'écrit
+       et les 3 compétences RS6776.
+   [ ] Faire pratiquer le Studio (chats + images), seul outil disponible
+       pendant l'épreuve.
+
+  Suivi CPF
+   [ ] Vérifier/compléter le profil de l'élève converti (métier, objectif,
+       style de pédagogie de l'IA).
+   [ ] Planifier l'ouverture des modules suivants.
+   [ ] Prévoir les rendez-vous formateur après chaque mission.
+   [ ] Envoyer le lien d'évaluation d'impact à froid.
+
+================================================================================
+  Fin du document
+================================================================================
