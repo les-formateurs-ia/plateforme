@@ -51,8 +51,16 @@ export function StudioImagesPage() {
     preselectedModel && STUDIO_MODELS.some((m) => m.id === preselectedModel) ? preselectedModel : STUDIO_MODELS[0].id,
   );
   const model = STUDIO_MODELS.find((m) => m.id === modelId)!;
-  const [aspectRatio, setAspectRatio] = useState(model.defaultAspectRatio);
-  const [prompt, setPrompt] = useState("");
+  // ?prompt= et ?ratio= : pré-remplissage depuis les Astuces IA (« Essayer
+  // dans le Studio »). Le ratio n'est retenu que s'il existe pour ce modèle.
+  const preselectedRatio = searchParams.get("ratio");
+  const [aspectRatio, setAspectRatio] = useState(
+    preselectedRatio && model.aspectRatios.includes(preselectedRatio) ? preselectedRatio : model.defaultAspectRatio,
+  );
+  const [prompt, setPrompt] = useState(() => searchParams.get("prompt") ?? "");
+  // ?photo=1 : le prompt des Astuces suppose une image importée — on met le
+  // bouton d'import en avant tant qu'aucune image n'est jointe.
+  const needsPhoto = searchParams.get("photo") === "1";
   const [sourceFile, setSourceFile] = useState<File | null>(null);
   const [sourcePreview, setSourcePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -175,8 +183,8 @@ export function StudioImagesPage() {
                 </div>
               ) : (
                 <button onClick={() => fileInputRef.current?.click()} disabled={generating} className="flex items-center gap-1.5 px-3.5 py-2 rounded-[2px] text-xs font-semibold transition-all hover:opacity-80 disabled:opacity-50 shrink-0"
-                  style={{ background: th.inputBg, border: `1px dashed ${th.inputB}`, color: th.fg2 }}>
-                  <Upload className="w-3.5 h-3.5" />Ajouter une image
+                  style={needsPhoto ? { background: th.ink, border: `1px solid ${th.ink}`, color: th.onInk } : { background: th.inputBg, border: `1px dashed ${th.inputB}`, color: th.fg2 }}>
+                  <Upload className="w-3.5 h-3.5" />{needsPhoto ? "Ajoute ta photo" : "Ajouter une image"}
                 </button>
               )
             )}

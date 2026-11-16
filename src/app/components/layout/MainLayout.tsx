@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useState } from "react";
 import { Link, Navigate, NavLink, Outlet, useLocation } from "react-router";
-import { Menu, X, Bug, ScanEye, LogOut, LayoutDashboard, CalendarClock, ClipboardList, Users, GraduationCap, Target, FileText, Code2, Sparkles, LayoutGrid, BookOpen, Megaphone, type LucideIcon } from "lucide-react";
+import { Menu, X, Bug, ScanEye, LogOut, LayoutDashboard, CalendarClock, ClipboardList, Users, GraduationCap, Target, FileText, Code2, Sparkles, LayoutGrid, BookOpen, Megaphone, Lightbulb, type LucideIcon } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
@@ -46,6 +46,7 @@ function staffNav(admin: boolean, base: string): { title: string; items: StaffNa
       { to: "/practice", label: "Exercices", Icon: Code2, end: true },
       { to: "/studio", label: "Le Studio", Icon: Sparkles, end: true },
       { to: "/hub", label: "Hub IA", Icon: LayoutGrid, end: true },
+      { to: "/astuces", label: "Astuces IA", Icon: Lightbulb },
     ] },
     ...(admin ? [{ title: "Administration", items: [
       { to: "/sessions/modeles", label: "Modèles de documents", Icon: FileText },

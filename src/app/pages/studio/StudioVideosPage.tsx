@@ -57,10 +57,16 @@ export function StudioVideosPage() {
     preselectedModel && STUDIO_VIDEO_MODELS.some((m) => m.id === preselectedModel) ? preselectedModel : STUDIO_VIDEO_MODELS[0].id,
   );
   const model = STUDIO_VIDEO_MODELS.find((m) => m.id === modelId)!;
-  const [optionValues, setOptionValues] = useState<Record<string, string>>(
-    Object.fromEntries(model.options.map((o) => [o.key, o.default])),
+  // ?prompt= et ?ratio= : pré-remplissage depuis les Astuces IA (« Essayer
+  // dans le Studio »). Le ratio n'est retenu que s'il est proposé par le modèle.
+  const preselectedRatio = searchParams.get("ratio");
+  const [optionValues, setOptionValues] = useState<Record<string, string>>(() =>
+    Object.fromEntries(model.options.map((o) => [
+      o.key,
+      o.key === "aspectRatio" && preselectedRatio && o.choices.includes(preselectedRatio) ? preselectedRatio : o.default,
+    ])),
   );
-  const [prompt, setPrompt] = useState("");
+  const [prompt, setPrompt] = useState(() => searchParams.get("prompt") ?? "");
   const [sourceFile, setSourceFile] = useState<File | null>(null);
   const [sourcePreview, setSourcePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);

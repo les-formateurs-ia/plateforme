@@ -36,6 +36,10 @@ import { StudioChatPage } from "@/app/pages/studio/StudioChatPage";
 import { AiBudgetGate } from "@/app/components/common/AiBudgetGate";
 import { HubPage } from "@/app/pages/hub/HubPage";
 import { HubCategoryPage } from "@/app/pages/hub/HubCategoryPage";
+import { AstucesPage } from "@/app/pages/astuces/AstucesPage";
+import { AstucesCasPage } from "@/app/pages/astuces/AstucesCasPage";
+import { AstucesBriquePage } from "@/app/pages/astuces/AstucesBriquePage";
+import { AstucesBuilderPage } from "@/app/pages/astuces/AstucesBuilderPage";
 import { AgentPage } from "@/app/pages/agent/AgentPage";
 import { PromptSessionsPage } from "@/app/pages/practice/PromptSessionsPage";
 import { PromptExercisePage } from "@/app/pages/practice/PromptExercisePage";
@@ -256,6 +260,11 @@ function AppRoutes() {
         <Route path="studio/:tool" element={<StudioToolPage />} />
         <Route path="hub" element={<HubPage />} />
         <Route path="hub/:category" element={<HubCategoryPage />} />
+        <Route path="astuces" element={<AstucesPage />} />
+        <Route path="astuces/cas/:casId" element={<AstucesCasPage />} />
+        <Route path="astuces/:domain/briques/:briqueId" element={<AstucesBriquePage />} />
+        <Route path="astuces/:domain/constructeur" element={<AstucesBuilderPage />} />
+        <Route path="astuces/*" element={<Navigate to="/astuces" replace />} />
         <Route path="agent" element={<AgentPage />} />
         <Route path="agent/:conversationId" element={<AgentPage />} />
         <Route path="calendar" element={<CalendarPage />} />
