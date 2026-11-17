@@ -139,6 +139,41 @@
     "ext": "jpg",
     "v": 1794913419700
   },
+  "cas/logo-anime/avant": {
+    "kind": "video",
+    "ext": "mp4",
+    "v": 1794928364410
+  },
+  "cas/logo-anime/camera/fixe": {
+    "kind": "video",
+    "ext": "mp4",
+    "v": 1794928152028
+  },
+  "cas/logo-anime/camera/rotation": {
+    "kind": "video",
+    "ext": "mp4",
+    "v": 1794928146200
+  },
+  "cas/logo-anime/effet/encre": {
+    "kind": "video",
+    "ext": "mp4",
+    "v": 1794928415940
+  },
+  "cas/logo-anime/effet/particules": {
+    "kind": "video",
+    "ext": "mp4",
+    "v": 1794928069453
+  },
+  "cas/logo-anime/fond/lumiere": {
+    "kind": "video",
+    "ext": "mp4",
+    "v": 1794928229150
+  },
+  "cas/logo-anime/fond/noir": {
+    "kind": "video",
+    "ext": "mp4",
+    "v": 1794928186353
+  },
   "cas/logo-anime/resultat": {
     "kind": "video",
     "ext": "mp4",
@@ -429,6 +464,46 @@
     "ext": "mp4",
     "v": 1794924528750
   },
+  "cas/portrait-anime/ambiance/bokeh": {
+    "kind": "video",
+    "ext": "mp4",
+    "v": 1794927983247
+  },
+  "cas/portrait-anime/ambiance/rayon": {
+    "kind": "video",
+    "ext": "mp4",
+    "v": 1794927956726
+  },
+  "cas/portrait-anime/avant": {
+    "kind": "video",
+    "ext": "mp4",
+    "v": 1794928041241
+  },
+  "cas/portrait-anime/camera/arc": {
+    "kind": "video",
+    "ext": "mp4",
+    "v": 1794928028676
+  },
+  "cas/portrait-anime/camera/fixe": {
+    "kind": "video",
+    "ext": "mp4",
+    "v": 1794927917756
+  },
+  "cas/portrait-anime/expression/rire": {
+    "kind": "video",
+    "ext": "mp4",
+    "v": 1794927846717
+  },
+  "cas/portrait-anime/expression/salut": {
+    "kind": "video",
+    "ext": "mp4",
+    "v": 1794927873781
+  },
+  "cas/portrait-anime/resultat": {
+    "kind": "video",
+    "ext": "mp4",
+    "v": 1794927830180
+  },
   "cas/shooting-perso/_source": {
     "kind": "image",
     "ext": "jpg",
@@ -609,10 +684,20 @@
     "ext": "jpg",
     "v": 1794921816574
   },
+  "cas/video-produit/action/brume": {
+    "kind": "video",
+    "ext": "mp4",
+    "v": 1794927710585
+  },
   "cas/video-produit/action/goutte": {
     "kind": "video",
     "ext": "mp4",
     "v": 1794927611087
+  },
+  "cas/video-produit/avant": {
+    "kind": "video",
+    "ext": "mp4",
+    "v": 1794927729491
   },
   "cas/video-produit/camera/fixe": {
     "kind": "video",
@@ -623,6 +708,16 @@
     "kind": "video",
     "ext": "mp4",
     "v": 1794927622780
+  },
+  "cas/video-produit/lumiere/contre-jour": {
+    "kind": "video",
+    "ext": "mp4",
+    "v": 1794927787010
+  },
+  "cas/video-produit/lumiere/soleil": {
+    "kind": "video",
+    "ext": "mp4",
+    "v": 1794927742009
   },
   "cas/video-produit/resultat": {
     "kind": "video",
