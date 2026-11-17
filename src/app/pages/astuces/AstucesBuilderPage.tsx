@@ -11,7 +11,7 @@ import { studioLink } from "@/app/lib/astucesMedia";
 import { cx } from "@/app/lib/cx";
 
 const PROMPT_MAX = 2000;
-const RATIOS: Record<AstuceDomain["id"], { value: MediaRatio; label: string }[]> = {
+const RATIOS: Partial<Record<AstuceDomain["id"], { value: MediaRatio; label: string }[]>> = {
   image: [{ value: "1:1", label: "Carré" }, { value: "3:4", label: "Portrait" }, { value: "16:9", label: "Paysage" }, { value: "9:16", label: "Story" }],
   video: [{ value: "16:9", label: "Paysage" }, { value: "9:16", label: "Vertical" }, { value: "1:1", label: "Carré" }],
 };
@@ -54,7 +54,7 @@ function Builder({ domain }: { domain: AstuceDomain }) {
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-8 space-y-8">
       <div className="fade-up space-y-5">
-        <AstucesCrumbs items={[{ label: "Astuces IA", to: "/astuces" }, BRIQUES_CRUMB, { label: "Constructeur" }]} />
+        <AstucesCrumbs items={[{ label: "Guide IA", to: "/astuces" }, BRIQUES_CRUMB, { label: "Constructeur" }]} />
         <div className="max-w-3xl">
           <p className="eyebrow" style={{ color: th.fg3 }}>Constructeur de prompt · {domain.label}</p>
           <h1 className="mt-2 text-[2rem] sm:text-[2.6rem] leading-[1.02] font-black" style={{ color: th.fg }}>Assemble ton prompt</h1>

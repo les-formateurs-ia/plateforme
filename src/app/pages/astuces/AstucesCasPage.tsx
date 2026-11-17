@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router";
-import { ArrowRight, Camera, Check, Clock, Lightbulb, RotateCcw, Sparkles, TriangleAlert, Upload } from "lucide-react";
+import { ArrowRight, Camera, Check, Clock, Lightbulb, MessageSquare, RotateCcw, Sparkles, TriangleAlert, Upload } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { GCard } from "@/app/components/common/GCard";
 import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
@@ -14,6 +14,8 @@ import { casStudioLink } from "@/app/lib/astucesMedia";
 import { cx } from "@/app/lib/cx";
 
 const PROMPT_MAX = 2000;
+
+const DOMAIN_LABELS: Record<string, string> = { image: "Image", video: "Vidéo", web: "Web" };
 
 const ANCHORS = [
   { id: "prompt", label: "Le prompt" },
@@ -104,14 +106,22 @@ function CasView({ cas }: { cas: AstuceCas }) {
   const refDomain = getDomain(cas.domain);
   const others = ASTUCE_CAS.filter((c) => c.id !== cas.id);
   const touched = Object.values(values).some((v) => v.trim());
+  // Cas Web : la page d'exemple est générée par Claude ; l'élève copie le
+  // prompt dans Claude (pas de génération dans la plateforme, pas de limite
+  // de 2 000 caractères). Le résultat et l'« avant » sont des vidéos.
+  const web = cas.domain === "web";
+  const wide = cas.ratio === "16:9" || cas.ratio === "16:10";
+  const video = cas.domain === "video";
+  const resultKind = web || video ? "video" : "image";
+  const tooLong = !web && text.length > PROMPT_MAX;
 
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-8 space-y-14">
-      <div id="cas-top" className="fade-up grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(240px,360px)] gap-8 items-start scroll-mt-6">
+      <div id="cas-top" className={cx("fade-up grid grid-cols-1 gap-8 items-start scroll-mt-6", web ? "lg:grid-cols-[minmax(0,1fr)_minmax(320px,560px)]" : "lg:grid-cols-[minmax(0,1fr)_minmax(240px,360px)]")}>
         <div className="space-y-5 min-w-0">
-          <AstucesCrumbs items={[{ label: "Astuces IA", to: "/astuces" }, { label: cas.title }]} />
+          <AstucesCrumbs items={[{ label: "Guide IA", to: "/astuces" }, { label: cas.title }]} />
           <div className="max-w-3xl">
-            <p className="eyebrow" style={{ color: th.fg3 }}>Cas pratique · Image</p>
+            <p className="eyebrow" style={{ color: th.fg3 }}>Cas pratique · {DOMAIN_LABELS[cas.domain]}</p>
             <h1 className="mt-2 text-[2rem] sm:text-[2.6rem] leading-[1.02] font-black" style={{ color: th.fg }}>{cas.title}</h1>
             <p className="mt-3 text-[15px] sm:text-base leading-relaxed" style={{ color: th.fg2 }}>{cas.intro}</p>
           </div>
@@ -130,8 +140,8 @@ function CasView({ cas }: { cas: AstuceCas }) {
             ))}
           </div>
         </div>
-        <div className="relative max-w-[360px] w-full lg:justify-self-end">
-          <AstuceMediaFrame mediaKey={casMediaKeys.result(cas)} ratio={cas.ratio} kind="image" label={`Résultat — ${cas.title}`} />
+        <div className={cx("relative w-full lg:justify-self-end", web ? "max-w-[560px]" : "max-w-[360px]")}>
+          <AstuceMediaFrame mediaKey={casMediaKeys.result(cas)} ratio={cas.ratio} kind={resultKind} withSound={cas.video?.sound} label={`Résultat — ${cas.title}`} />
           {cas.source && (
             <div className="absolute left-3 bottom-3 w-[32%] shadow-lg">
               <AstuceMediaFrame mediaKey={casMediaKeys.source(cas)} ratio="1:1" kind="image" label="Photo de départ" className="rounded-[6px]" />
@@ -147,7 +157,7 @@ function CasView({ cas }: { cas: AstuceCas }) {
             <div className="grid grid-cols-1 sm:grid-cols-[160px_minmax(0,1fr)] gap-5 items-start">
               <div className="max-w-[160px]">
                 <AstuceMediaFrame mediaKey={casMediaKeys.source(cas)} ratio="1:1" kind="image" label="Photo de départ des exemples" />
-                <p className="mt-2 text-[11.5px] leading-snug" style={{ color: th.fg3 }}>La photo de départ des exemples de cette page (fictive).</p>
+                <p className="mt-2 text-[11.5px] leading-snug" style={{ color: th.fg3 }}>{cas.source.fromKey ? "Le résultat d'un cas Image, repris comme image de départ des exemples de cette page." : "La photo de départ des exemples de cette page (fictive)."}</p>
               </div>
               <div className="min-w-0">
                 <ul className="space-y-2.5">
@@ -159,7 +169,9 @@ function CasView({ cas }: { cas: AstuceCas }) {
                 </ul>
                 <p className="mt-4 flex items-start gap-2 text-[13px] leading-relaxed rounded-[6px] px-3 py-2.5" style={{ background: th.isDark ? "rgba(255,255,255,0.04)" : th.gradShadow(0.03), color: th.fg2 }}>
                   <Upload className="w-4 h-4 shrink-0 mt-0.5" style={{ color: th.fg3 }} />
-                  <span>Dans Le Studio, clique sur <span className="font-semibold" style={{ color: th.fg }}>« Ajouter une image »</span> et importe ta photo : {cas.model.label} s'en sert comme référence, le prompt décrit ce qu'il doit en faire.</span>
+                  {video
+                    ? <span>Dans Le Studio Vidéos, clique sur <span className="font-semibold" style={{ color: th.fg }}>« Ajouter une photo »</span> et importe ton image : {cas.model.label} l'anime, le prompt décrit le mouvement.</span>
+                    : <span>Dans Le Studio, clique sur <span className="font-semibold" style={{ color: th.fg }}>« Ajouter une image »</span> et importe ta photo : {cas.model.label} s'en sert comme référence, le prompt décrit ce qu'il doit en faire.</span>}
                 </p>
               </div>
             </div>
@@ -188,7 +200,7 @@ function CasView({ cas }: { cas: AstuceCas }) {
               </span>
             )}
           </div>
-          <PromptBlock text={examplePrompt} studioTo={cas.fields.length ? undefined : casStudioLink(cas, examplePrompt)} />
+          <PromptBlock text={examplePrompt} studioTo={web || cas.fields.length ? undefined : casStudioLink(cas, examplePrompt)} />
           <p className="text-[13.5px] leading-relaxed" style={{ color: th.fg2 }}>
             <span className="font-black" style={{ color: th.fg }}>Modèle conseillé : {cas.model.label}. </span>{cas.model.why}
           </p>
@@ -196,9 +208,11 @@ function CasView({ cas }: { cas: AstuceCas }) {
       </section>
 
       <section aria-labelledby="cas-briques" className="fade-up scroll-mt-6">
-        <SectionHead id="cas-briques" eyebrow={`${cas.briques.length} briques`} title="Ce que chaque brique change" />
+        <SectionHead id="cas-briques" eyebrow={`${cas.briques.length + (cas.retouche ? 1 : 0)} briques`} title="Ce que chaque brique change" />
         <p className="text-sm max-w-3xl -mt-2 mb-8 leading-relaxed" style={{ color: th.fg2 }}>
-          Dans chaque série, tout le prompt reste identique sauf la brique en couleur. Clique sur l'option qui te plaît : elle est reprise dans ton prompt, plus bas.
+          {web
+            ? "Dans chaque série, tout le prompt reste identique sauf la brique en couleur. Claude réécrit toute la page à chaque fois : regarde surtout ce que cette brique a changé. Clique sur l'option qui te plaît : elle est reprise dans ton prompt, plus bas."
+            : "Dans chaque série, tout le prompt reste identique sauf la brique en couleur. Clique sur l'option qui te plaît : elle est reprise dans ton prompt, plus bas."}
         </p>
         <div className="space-y-12">
           {cas.briques.map((brique, index) => {
@@ -218,7 +232,7 @@ function CasView({ cas }: { cas: AstuceCas }) {
                     </div>
                   )}
                 </div>
-                <div className={cx("mt-4 grid gap-3 sm:gap-4", GRID_BY_RATIO[cas.ratio], cas.ratio !== "16:9" && "max-w-4xl")}>
+                <div className={cx("mt-4 grid gap-3 sm:gap-4", GRID_BY_RATIO[cas.ratio], !wide && "max-w-4xl")}>
                   {brique.options.map((option, i) => {
                     const active = current === option.snippet;
                     return (
@@ -226,7 +240,7 @@ function CasView({ cas }: { cas: AstuceCas }) {
                         className="text-left rounded-[10px] p-2 transition-colors"
                         style={{ background: th.card, border: `1px solid ${active ? th.ink : th.sep}` }}>
                         <div className="relative">
-                          <AstuceMediaFrame mediaKey={casMediaKeys.option(cas, brique, option)} ratio={cas.ratio} kind="image" label={option.label} />
+                          <AstuceMediaFrame mediaKey={casMediaKeys.option(cas, brique, option)} ratio={cas.ratio} kind={video ? "video" : "image"} withSound={brique.sound} label={option.label} />
                           {active && (
                             <span className="absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-1 rounded-[2px] text-[10px] font-bold uppercase tracking-wide" style={{ background: th.ink, color: th.onInk }}>
                               <Check className="w-3 h-3" />Choisi
@@ -255,19 +269,44 @@ function CasView({ cas }: { cas: AstuceCas }) {
               </div>
             );
           })}
+          {cas.retouche && (
+            <div id={`cas-brique-${cas.retouche.id}`} className="scroll-mt-6">
+              <div className="flex items-center gap-3">
+                <span className="w-7 h-7 rounded-full shrink-0 inline-flex items-center justify-center text-xs font-black" style={{ background: tintAt(cas.briques.length), color: "#000" }}>{cas.briques.length + 1}</span>
+                <h3 className="text-[1.2rem] sm:text-[1.35rem] font-black leading-tight" style={{ color: th.fg }}>{cas.retouche.title}</h3>
+              </div>
+              <p className="mt-2 text-[14.5px] leading-relaxed max-w-3xl" style={{ color: th.fg2 }}>{cas.retouche.why}</p>
+              {/* Seule brique animée : c'est le mouvement qu'on compare. */}
+              <div className={cx("mt-4 grid gap-3 sm:gap-4", GRID_BY_RATIO[cas.ratio])}>
+                {cas.retouche.options.map((option) => (
+                  <div key={option.id} className="rounded-[10px] p-2 flex flex-col" style={{ background: th.card, border: `1px solid ${th.sep}` }}>
+                    <AstuceMediaFrame mediaKey={casMediaKeys.retouche(cas, cas.retouche!, option)} ratio={cas.ratio} kind="video" label={option.label} />
+                    <div className="px-1.5 pt-3 pb-1.5 flex-1 flex flex-col">
+                      <p className="text-sm font-black" style={{ color: th.fg }}>{option.label}</p>
+                      <p className="mt-1 text-[12.5px] leading-snug" style={{ color: th.fg2 }}>{option.note}</p>
+                      <div className="mt-3 rounded-[6px] p-2.5 text-[12px] leading-relaxed flex-1" style={{ background: th.isDark ? "rgba(255,255,255,0.04)" : th.gradShadow(0.025), color: th.fg2 }}>
+                        <span className="font-semibold" style={{ color: th.fg3 }}>Message envoyé à Claude : </span>{option.prompt}
+                      </div>
+                      <div className="mt-2"><CopyButton text={option.prompt} label="Copier ce message" /></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
       <section aria-labelledby="cas-avant-apres" className="fade-up scroll-mt-6">
         <SectionHead id="cas-avant-apres" eyebrow="Avant / après" title="Le même besoin, deux prompts" />
-        <div className={cx("grid gap-4", cas.ratio === "16:9" ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 sm:grid-cols-2 max-w-3xl")}>
+        <div className={cx("grid gap-4", wide ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 sm:grid-cols-2 max-w-3xl")}>
           {([
             { key: casMediaKeys.weak(cas), title: "Prompt vague", text: cas.weak.prompt, color: th.danger },
             { key: casMediaKeys.result(cas), title: "Prompt précis", text: examplePrompt, color: th.success },
           ]).map((col) => (
             <div key={col.title} className="space-y-3 min-w-0">
               <p className="text-xs font-black uppercase tracking-wide" style={{ color: col.color }}>{col.title}</p>
-              <AstuceMediaFrame mediaKey={col.key} ratio={cas.ratio} kind="image" label={col.title} />
+              <AstuceMediaFrame mediaKey={col.key} ratio={cas.ratio} kind={resultKind} withSound={cas.video?.sound} label={col.title} />
               <PromptBlock text={col.text} />
             </div>
           ))}
@@ -331,17 +370,26 @@ function CasView({ cas }: { cas: AstuceCas }) {
             <GCard accent className="p-5 space-y-4">
               <div className="flex items-center justify-between gap-3">
                 <p className="text-base font-black" style={{ color: th.fg }}>Ton prompt</p>
-                <span className="text-xs font-semibold" style={{ color: text.length > PROMPT_MAX ? th.danger : th.fg3 }}>{text.length} car.</span>
+                <span className="text-xs font-semibold" style={{ color: tooLong ? th.danger : th.fg3 }}>{text.length} car.</span>
               </div>
               <div className="rounded-[6px] p-3 text-[14px] leading-[1.8]" style={{ background: th.isDark ? "rgba(255,255,255,0.04)" : th.gradShadow(0.025) }}>
                 <PromptParts cas={cas} parts={parts} />
               </div>
-              <p className="text-xs font-semibold" style={{ color: th.fg3 }}>Modèle : {cas.model.label} · Format {cas.ratio}</p>
+              <p className="text-xs font-semibold" style={{ color: th.fg3 }}>Modèle : {cas.model.label} · {web ? "Une page HTML" : `Format ${cas.ratio}${cas.video ? ` · ${cas.video.duration} s` : ""}`}</p>
               <div className="flex flex-wrap gap-2">
-                <ShimBtn sm disabled={missing.length > 0 || text.length > PROMPT_MAX} onClick={() => navigate(casStudioLink(cas, text))}>
-                  <Sparkles className="w-4 h-4" />Essayer dans le Studio
-                </ShimBtn>
-                <CopyButton text={text} label="Copier" />
+                {web ? (
+                  <>
+                    <CopyButton text={text} label="Copier le prompt" />
+                    <VBtn sm onClick={() => navigate("/studio/claude")}><MessageSquare className="w-4 h-4" />Ouvrir Claude</VBtn>
+                  </>
+                ) : (
+                  <>
+                    <ShimBtn sm disabled={missing.length > 0 || tooLong} onClick={() => navigate(casStudioLink(cas, text))}>
+                      <Sparkles className="w-4 h-4" />Essayer dans le Studio
+                    </ShimBtn>
+                    <CopyButton text={text} label="Copier" />
+                  </>
+                )}
                 {touched && <VBtn sm onClick={() => setValues({})}><RotateCcw className="w-4 h-4" />Réinitialiser</VBtn>}
               </div>
               {missing.length > 0 && (
@@ -354,7 +402,9 @@ function CasView({ cas }: { cas: AstuceCas }) {
                 </p>
               )}
               <p className="text-xs leading-relaxed" style={{ color: th.fg3 }}>
-                Astuce : génère une première fois, puis ne change qu'une seule brique à la fois pour voir précisément son effet.
+                {web
+                  ? "Colle ce prompt dans Claude (claude.ai ou Le Studio). Sur claude.ai, la page s'affiche en direct à côté de la conversation : demande ensuite tes retouches une par une."
+                  : "Astuce : génère une première fois, puis ne change qu'une seule brique à la fois pour voir précisément son effet."}
               </p>
             </GCard>
           </aside>

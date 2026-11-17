@@ -7,15 +7,35 @@ import { GCard } from "@/app/components/common/GCard";
 import { SectionHead } from "@/app/components/common/SectionHead";
 import { AstuceMediaFrame } from "@/app/components/astuces/AstuceMediaFrame";
 import { BriquesLibrary } from "@/app/components/astuces/BriquesLibrary";
-import { ASTUCE_CAS, ASTUCE_DOMAINS, casMediaKeys, type AstuceCas } from "@/app/data/astuces";
+import { ASTUCE_CAS, ASTUCE_DOMAINS, casMediaKeys, type AstuceCas, type AstuceDomainId } from "@/app/data/astuces";
+
+// Une section par domaine : Images (photo de l'élève, logo…), puis Web
+// (pages générées par Claude, montrées en vidéo).
+const CAS_SECTIONS: { domain: AstuceDomainId; eyebrow: string; title: string; intro?: string }[] = [
+  { domain: "image", eyebrow: "Images", title: "Que veux-tu créer ?" },
+  {
+    domain: "video",
+    eyebrow: "Vidéos",
+    title: "Fais bouger tes images",
+    intro: "Une vidéo se prépare comme une image, avec en plus le mouvement, la caméra et parfois le son. Plusieurs cas partent d'une image : celles des cas ci-dessus prennent vie.",
+  },
+  {
+    domain: "web",
+    eyebrow: "Web · avec Claude",
+    title: "Ton site, ta page de vente",
+    intro: "Ici, pas de génération dans la plateforme : tu découvres comment demander une page à Claude, avec de vraies pages qu'il a créées à partir de ces prompts. Tu n'as plus qu'à copier le tien.",
+  },
+];
 
 function CasCard({ cas }: { cas: AstuceCas }) {
   const th = useTh();
   const navigate = useNavigate();
+  const web = cas.domain === "web";
   return (
     <GCard onClick={() => navigate(`/astuces/cas/${cas.id}`)} className="group flex flex-col">
       <div className="relative">
-        <AstuceMediaFrame mediaKey={casMediaKeys.result(cas)} ratio="1:1" kind="image" label={cas.title} className="rounded-none border-0" />
+        {/* Vignette fixe : la version animée est réservée à la page du cas. */}
+        <AstuceMediaFrame mediaKey={casMediaKeys.still(cas)} ratio={web ? "16:10" : "1:1"} kind={cas.domain === "video" ? "video" : "image"} label={cas.title} className="rounded-none border-0" />
         {/* Avec une photo de départ : on montre d'où l'on part. */}
         {cas.source && (
           <div className="absolute left-3 bottom-3 w-[30%] shadow-lg">
@@ -54,18 +74,25 @@ export function AstucesPage() {
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-8 space-y-12">
       <div className="fade-up">
         <p className="eyebrow" style={{ color: th.fg3 }}>Pratiquer</p>
-        <h1 className="mt-2 text-[2rem] sm:text-[2.6rem] leading-[1.02] font-black" style={{ color: th.fg }}>Astuces <GT>IA</GT></h1>
+        <h1 className="mt-2 text-[2rem] sm:text-[2.6rem] leading-[1.02] font-black" style={{ color: th.fg }}>Guide <GT>IA</GT></h1>
         <p className="text-[15px] sm:text-base mt-3 max-w-2xl leading-relaxed" style={{ color: th.fg2 }}>
-          Choisis ce que tu veux créer. Pour chaque cas, on te donne le prompt complet, on le décortique brique par brique avec des exemples, et tu l'adaptes à ton projet avant de le lancer dans Le Studio.
+          Choisis ce que tu veux créer. Pour chaque cas, on te donne le prompt complet, on le décortique brique par brique avec des exemples, et tu l'adaptes à ton projet avant de le lancer dans Le Studio ou dans Claude.
         </p>
       </div>
 
-      <section aria-labelledby="astuces-cas" className="fade-up">
-        <SectionHead id="astuces-cas" eyebrow={`Images · ${ASTUCE_CAS.length} cas pratiques`} title="Que veux-tu créer ?" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {ASTUCE_CAS.map((cas) => <CasCard key={cas.id} cas={cas} />)}
-        </div>
-      </section>
+      {CAS_SECTIONS.map((section) => {
+        const cases = ASTUCE_CAS.filter((c) => c.domain === section.domain);
+        if (cases.length === 0) return null;
+        return (
+          <section key={section.domain} aria-labelledby={`astuces-cas-${section.domain}`} className="fade-up">
+            <SectionHead id={`astuces-cas-${section.domain}`} eyebrow={`${section.eyebrow} · ${cases.length} cas pratiques`} title={section.title} />
+            {section.intro && <p className="text-sm max-w-3xl -mt-2 mb-5 leading-relaxed" style={{ color: th.fg2 }}>{section.intro}</p>}
+            <div className={section.domain === "web" ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"}>
+              {cases.map((cas) => <CasCard key={cas.id} cas={cas} />)}
+            </div>
+          </section>
+        );
+      })}
 
       <div id="briques" className="scroll-mt-6 pt-4">
         <div role="separator" className="flex items-center gap-4">
@@ -74,9 +101,9 @@ export function AstucesPage() {
           <div className="h-px flex-1" style={{ background: th.sep }} />
         </div>
         <div className="mt-8 max-w-3xl">
-          <h2 className="text-[1.6rem] sm:text-[2rem] leading-[1.08] font-black" style={{ color: th.fg }}>Les briques d'un prompt</h2>
+          <h2 className="text-[1.6rem] sm:text-[2rem] leading-[1.08] font-black" style={{ color: th.fg }}>Les briques d'un prompt image</h2>
           <p className="mt-3 text-[15px] leading-relaxed" style={{ color: th.fg2 }}>
-            Tous les cas ci-dessus utilisent les mêmes briques : le sujet, la lumière, le cadrage, les couleurs… Ici, chaque brique est expliquée en détail, avec son vocabulaire, ses pièges et des variations contrôlées. De quoi écrire n'importe quel prompt, même pour un besoin qui n'est pas dans la liste.
+            Tous les cas Images ci-dessus utilisent les mêmes briques : le sujet, la lumière, le cadrage, les couleurs… Ici, chaque brique est expliquée en détail, avec son vocabulaire, ses pièges et des variations contrôlées. De quoi écrire n'importe quel prompt, même pour un besoin qui n'est pas dans la liste.
           </p>
         </div>
       </div>

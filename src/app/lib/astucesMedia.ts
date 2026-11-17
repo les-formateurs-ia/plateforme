@@ -8,6 +8,13 @@ interface ManifestEntry { kind: "image" | "video"; ext: string; v: number }
 
 const ENTRIES = manifest as Record<string, ManifestEntry>;
 const BASE = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/astuces-media`;
+// Images servies via la transformation Supabase : les originaux du Studio
+// (JPEG/PNG de 1 à 2 Mo) sortent redimensionnés et en WEBP (~10× plus
+// légers). 800 px couvre les plus grands cadres de la page en écran Retina.
+// `resize=contain` est indispensable : avec la largeur seule, Supabase garde
+// la hauteur d'origine et recadre (« cover ») — l'image apparaît zoomée.
+const RENDER = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/render/image/public/astuces-media`;
+const RENDER_PARAMS = "width=800&resize=contain&quality=75";
 
 export interface AstuceMedia { url: string; kind: "image" | "video" }
 
@@ -15,11 +22,14 @@ export function astuceMedia(key: string | undefined): AstuceMedia | null {
   if (!key) return null;
   const entry = ENTRIES[key];
   if (!entry) return null;
-  return { url: `${BASE}/${key}.${entry.ext}?v=${entry.v}`, kind: entry.kind };
+  const url = entry.kind === "image"
+    ? `${RENDER}/${key}.${entry.ext}?${RENDER_PARAMS}&v=${entry.v}`
+    : `${BASE}/${key}.${entry.ext}?v=${entry.v}`;
+  return { url, kind: entry.kind };
 }
 
 export const RATIO_CSS: Record<MediaRatio, string> = {
-  "1:1": "1 / 1", "3:4": "3 / 4", "2:3": "2 / 3", "4:5": "4 / 5", "16:9": "16 / 9", "9:16": "9 / 16",
+  "1:1": "1 / 1", "3:4": "3 / 4", "2:3": "2 / 3", "4:5": "4 / 5", "16:9": "16 / 9", "9:16": "9 / 16", "16:10": "16 / 10",
 };
 
 // Le Studio Images n'a pas de 4:5 : on retombe sur le 3:4 le plus proche.
@@ -35,5 +45,5 @@ export function studioLink(target: { path: string; modelId: string }, prompt: st
 }
 
 export function casStudioLink(cas: AstuceCas, prompt: string): string {
-  return studioLink({ path: "images", modelId: cas.model.id }, prompt, cas.ratio, !!cas.source);
+  return studioLink({ path: cas.domain === "video" ? "videos" : "images", modelId: cas.model.id }, prompt, cas.ratio, !!cas.source);
 }

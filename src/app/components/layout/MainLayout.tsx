@@ -46,7 +46,7 @@ function staffNav(admin: boolean, base: string): { title: string; items: StaffNa
       { to: "/practice", label: "Exercices", Icon: Code2, end: true },
       { to: "/studio", label: "Le Studio", Icon: Sparkles, end: true },
       { to: "/hub", label: "Hub IA", Icon: LayoutGrid, end: true },
-      { to: "/astuces", label: "Astuces IA", Icon: Lightbulb },
+      { to: "/astuces", label: "Guide IA", Icon: Lightbulb },
     ] },
     ...(admin ? [{ title: "Administration", items: [
       { to: "/sessions/modeles", label: "Modèles de documents", Icon: FileText },

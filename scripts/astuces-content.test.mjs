@@ -3,10 +3,13 @@
 // avant qu'elles n'arrivent à l'écran ou dans le script de génération.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { loadAstuces, loadStudioModels } from "./lib/load-astuces.mjs";
+import { loadAstuces, loadStudioChatModels, loadStudioModels, loadStudioVideoModels } from "./lib/load-astuces.mjs";
 
 const { ASTUCE_DOMAINS, ASTUCE_CAS, collectMedia, assemblePrompt, SUBJECT_KEY, templateSlots, casParts, partsText, casExamplePrompt } = await loadAstuces();
 const { STUDIO_MODELS, aspectRatiosForModel } = await loadStudioModels();
+const { STUDIO_CHAT_MODELS } = await loadStudioChatModels();
+const CLAUDE_MODELS = STUDIO_CHAT_MODELS.anthropic.models;
+const { STUDIO_VIDEO_MODELS } = await loadStudioVideoModels();
 const STUDIO_PROMPT_MAX = 2000; // cf. generate-studio-image / generate-studio-video
 
 const dupes = (values) => values.filter((v, i) => values.indexOf(v) !== i);
@@ -43,19 +46,42 @@ test("cas pratiques : template, champs et briques cohérents", () => {
     assert.deepEqual(dupes(slots), [], `${c.id} : emplacement utilisé deux fois`);
     assert.deepEqual(dupes(declared), [], `${c.id} : champ/brique en double`);
     assert.deepEqual([...slots].sort(), [...declared].sort(), `${c.id} : emplacements du template ≠ champs + briques`);
+    // Les cas Web n'ont pas (encore) de bibliothèque de briques : pas de ref.
     const domain = ASTUCE_DOMAINS.find((d) => d.id === c.domain);
-    assert.ok(domain, `${c.id} : domaine ${c.domain} non publié`);
     for (const b of c.briques) {
       assert.ok(b.options.length >= 2, `${c.id}/${b.id} : au moins deux options pour comparer`);
       assert.deepEqual(dupes(b.options.map((o) => o.id)), [], `${c.id}/${b.id} : options en double`);
       assert.deepEqual(dupes(b.options.map((o) => o.snippet)), [], `${c.id}/${b.id} : snippets en double`);
-      if (b.ref) assert.ok(domain.briques.some((x) => x.id === b.ref), `${c.id}/${b.id} → brique ${b.ref} inexistante`);
+      if (b.ref) assert.ok(domain?.briques.some((x) => x.id === b.ref), `${c.id}/${b.id} → brique ${b.ref} inexistante`);
+    }
+    if (c.retouche) {
+      assert.equal(c.domain, "web", `${c.id} : la retouche part d'une page générée`);
+      assert.ok(!declared.includes(c.retouche.id), `${c.id} : la retouche porte l'id d'une brique`);
+      assert.ok(c.retouche.options.length >= 2, `${c.id} : au moins deux retouches pour comparer`);
+      assert.deepEqual(dupes(c.retouche.options.map((o) => o.id)), [], `${c.id} : retouches en double`);
+      for (const o of c.retouche.options) assert.ok(o.prompt.trim(), `${c.id}/${o.id} : message de retouche vide`);
     }
   }
 });
 
 test("cas pratiques : modèle et format disponibles dans Le Studio", () => {
   for (const c of ASTUCE_CAS) {
+    if (c.domain === "video") {
+      const model = STUDIO_VIDEO_MODELS[c.model.id];
+      assert.ok(model, `${c.id} : modèle ${c.model.id} absent du Studio Vidéos`);
+      assert.ok(model.resolutions[c.ratio], `${c.id} : format ${c.ratio} indisponible pour ${c.model.id}`);
+      const duration = model.options.find((o) => o.key === "duration");
+      assert.ok(!duration || duration.choices.includes(c.video?.duration), `${c.id} : durée ${c.video?.duration} indisponible pour ${c.model.id}`);
+      if (c.source) assert.ok(model.supportsSourceImage, `${c.id} : ${c.model.id} n'accepte pas d'image de départ`);
+      else assert.ok(!model.requiresSourceImage, `${c.id} : ${c.model.id} exige une image de départ`);
+      continue;
+    }
+    if (c.domain === "web") {
+      assert.ok(CLAUDE_MODELS.includes(c.model.id), `${c.id} : ${c.model.id} absent de « Discutez avec Claude »`);
+      assert.equal(c.ratio, "16:10", `${c.id} : les pages web sont filmées en 16:10`);
+      assert.ok(!c.source, `${c.id} : pas d'image importée pour un cas Web`);
+      continue;
+    }
     const model = STUDIO_MODELS[c.model.id];
     assert.ok(model, `${c.id} : modèle ${c.model.id} absent du Studio`);
     assert.ok(aspectRatiosForModel(c.model.id).includes(c.ratio), `${c.id} : format ${c.ratio} indisponible pour ${c.model.id}`);
@@ -84,14 +110,17 @@ test("médias : clés uniques, prompts acceptés par Le Studio, dépendances ré
   assert.deepEqual(dupes(specs.map((s) => s.key)), []);
   const byKey = new Map(specs.map((s) => [s.key, s]));
   for (const s of specs) {
-    assert.ok(s.prompt.length <= STUDIO_PROMPT_MAX, `${s.key} : prompt trop long (${s.prompt.length})`);
+    if (!s.page) assert.ok(s.prompt.length <= STUDIO_PROMPT_MAX, `${s.key} : prompt trop long (${s.prompt.length})`);
     assert.ok(!/\{x\}|\{[a-z0-9-]+\}/.test(s.prompt), `${s.key} : emplacement non remplacé`);
-    if (s.model) assert.ok(STUDIO_MODELS[s.model], `${s.key} : modèle ${s.model} absent du Studio`);
-    // Le script traite les images sans dépendance avant les autres : une
-    // dépendance doit donc elle-même être une image sans dépendance.
+    const known = s.page ? CLAUDE_MODELS.includes(s.model) : s.kind === "video" ? STUDIO_VIDEO_MODELS[s.model] : STUDIO_MODELS[s.model];
+    if (s.model) assert.ok(known, `${s.key} : modèle ${s.model} absent du Studio`);
+    // Ordre du script : images sans dépendance, images Image-to-Image, puis
+    // vidéos. Une image ne peut donc dépendre que d'une image sans dépendance ;
+    // une vidéo, de n'importe quelle image (ex. un résultat d'un cas Image).
     for (const dep of [s.sourceKey, s.startKey].filter(Boolean)) {
       const target = byKey.get(dep);
-      assert.ok(target && target.kind === "image" && !target.sourceKey, `${s.key} : dépendance ${dep} absente ou elle-même dépendante`);
+      const ok = target && target.kind === "image" && !target.page && (s.kind === "video" || !target.sourceKey);
+      assert.ok(ok, `${s.key} : dépendance ${dep} absente ou mal ordonnée`);
     }
   }
 });

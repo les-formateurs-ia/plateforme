@@ -6,25 +6,25 @@ import type { MediaRatio } from "@/app/data/astuces";
 import { cx } from "@/app/lib/cx";
 
 // Vidéo d'exemple : muette, en boucle, lue uniquement quand elle est à
-// l'écran (une page de brique en affiche jusqu'à six). `withSound` passe en
-// lecteur avec contrôles pour les exemples dont le son est le sujet.
+// l'écran (une page en affiche plusieurs). `withSound` ajoute les contrôles
+// pour activer le son, pour les exemples dont le son compte.
 function LoopVideo({ src, withSound, label }: { src: string; withSound?: boolean; label: string }) {
   const ref = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const el = ref.current;
-    if (!el || withSound) return;
+    if (!el) return;
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) el.play().catch(() => { /* lecture auto bloquée : l'image reste */ });
       else el.pause();
     }, { threshold: 0.35 });
     observer.observe(el);
     return () => observer.disconnect();
-  }, [withSound]);
+  }, []);
 
   return (
     <video ref={ref} src={src} aria-label={label} className="absolute inset-0 w-full h-full object-cover"
-      muted={!withSound} loop={!withSound} playsInline preload="metadata" controls={withSound} />
+      muted loop playsInline preload="metadata" controls={withSound} />
   );
 }
 

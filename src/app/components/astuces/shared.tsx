@@ -1,10 +1,10 @@
 import { Fragment, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { ChevronRight, ImageIcon, Video, type LucideIcon } from "lucide-react";
+import { ChevronRight, Globe, ImageIcon, Video, type LucideIcon } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import type { AstuceDomain, AstuceDomainId, MediaRatio } from "@/app/data/astuces";
 
-export const DOMAIN_ICONS: Record<AstuceDomainId, LucideIcon> = { image: ImageIcon, video: Video };
+export const DOMAIN_ICONS: Record<AstuceDomainId, LucideIcon> = { image: ImageIcon, video: Video, web: Globe };
 
 // Pastels de la charte (rôles + iris) : une teinte par brique dans
 // l'anatomie d'un prompt. Sur fond clair comme sombre, le texte reste à
@@ -23,6 +23,7 @@ export const GRID_BY_RATIO: Record<MediaRatio, string> = {
   "2:3": "grid-cols-2 lg:grid-cols-3",
   "4:5": "grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5",
   "9:16": "grid-cols-2 sm:grid-cols-3",
+  "16:10": "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3",
 };
 
 export function briqueTint(domain: AstuceDomain, briqueId: string): string {

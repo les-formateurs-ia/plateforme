@@ -2,6 +2,8 @@
 // est aussi chargé hors Vite par scripts/generate-astuces-media.mjs.
 import { IMAGE_DOMAIN } from "./image";
 import { IMAGE_CAS } from "./cas-image";
+import { WEB_CAS } from "./cas-web";
+import { VIDEO_CAS } from "./cas-video";
 import type { AstuceCas, AstuceDomain, AstuceDomainId } from "./types";
 
 export * from "./types";
@@ -13,7 +15,9 @@ export * from "./cas";
 // mais pas encore publié — l'ajouter ici le rend visible partout.
 export const ASTUCE_DOMAINS: AstuceDomain[] = [IMAGE_DOMAIN];
 
-export const ASTUCE_CAS: AstuceCas[] = [...IMAGE_CAS];
+// Cas Vidéo et Web : pas encore de bibliothèque de briques publiée. Les
+// exemples Vidéo sont générés dans Le Studio, ceux du Web par Claude.
+export const ASTUCE_CAS: AstuceCas[] = [...IMAGE_CAS, ...VIDEO_CAS, ...WEB_CAS];
 
 export function getDomain(id: string | undefined): AstuceDomain | undefined {
   return ASTUCE_DOMAINS.find((d) => d.id === (id as AstuceDomainId));

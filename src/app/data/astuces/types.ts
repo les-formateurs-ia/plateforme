@@ -12,11 +12,12 @@
 // jamais saisies à la main — renommer un id = régénérer le média.
 // ═══════════════════════════════════════════════════════════════════════════
 
-export type AstuceDomainId = "image" | "video";
+export type AstuceDomainId = "image" | "video" | "web";
 
 // Formats d'exemple — traduits en pixels par le script de génération. Les
-// cas pratiques n'utilisent que des formats du Studio Images (pas de 4:5).
-export type MediaRatio = "1:1" | "3:4" | "2:3" | "4:5" | "16:9" | "9:16";
+// cas pratiques Image n'utilisent que des formats du Studio Images (pas de
+// 4:5) ; 16:10 = capture d'une page web sur écran d'ordinateur.
+export type MediaRatio = "1:1" | "3:4" | "2:3" | "4:5" | "16:9" | "9:16" | "16:10";
 
 export interface VocabTerm {
   // Le mot ou l'expression à retenir (affiché en gras).
@@ -151,7 +152,28 @@ export interface CasBrique {
   why: string;
   // Brique de la bibliothèque du domaine, pour aller plus loin.
   ref?: string;
+  // Vidéo : la brique porte sur la bande son — exemples lus avec le son.
+  sound?: boolean;
   options: CasOption[];
+}
+
+// Cas Web : une brique « retouche ». On ne réécrit pas le prompt : on garde
+// la page obtenue et on demande à Claude, dans un second message, de n'en
+// changer qu'un aspect (ici les animations). Les exemples partent tous du
+// même code — le design est identique, seul l'aspect retouché change.
+export interface CasRetoucheOption {
+  id: string;
+  label: string;
+  // Le message de retouche, tel que l'élève l'envoie à Claude.
+  prompt: string;
+  note: string;
+}
+
+export interface CasRetouche {
+  id: string;
+  title: string;
+  why: string;
+  options: CasRetoucheOption[];
 }
 
 export interface AstuceCas {
@@ -162,18 +184,27 @@ export interface AstuceCas {
   tagline: string;
   intro: string;
   duration: string;
-  // Modèle du Studio (id de STUDIO_MODELS) présélectionné via « Essayer ».
+  // Image : modèle du Studio (id de STUDIO_MODELS) présélectionné via
+  // « Essayer ». Web : modèle de chat du Studio (id de STUDIO_CHAT_MODELS) qui
+  // génère la page d'exemple — l'élève copie le prompt dans Claude.
   model: { id: string; label: string; why: string };
   // Doit faire partie des formats proposés par ce modèle dans le Studio.
   ratio: MediaRatio;
   // Graine des exemples (ignorée par les modèles qui n'en acceptent pas).
   seed?: number;
+  // Vidéo : durée en secondes (option du modèle dans Le Studio) et présence
+  // d'une bande son générée (Veo).
+  video?: { duration: string; sound?: boolean };
   // Image à importer dans le Studio (photo de l'élève, de son produit…).
-  // `example` décrit la photo de départ fictive générée pour les exemples.
-  source?: { label: string; tips: string[]; example: string };
+  // `example` décrit la photo de départ fictive générée pour les exemples ;
+  // `fromKey` réutilise à la place un exemple déjà généré (ex. le portrait
+  // du cas « photo de profil » animé par le cas vidéo).
+  source?: { label: string; tips: string[]; example?: string; fromKey?: string };
   template: string;
   fields: CasField[];
   briques: CasBrique[];
+  // Cas Web : retouche de la page obtenue (affichée après les briques).
+  retouche?: CasRetouche;
   // Le prompt « naïf » qu'on écrit spontanément, pour l'avant/après.
   weak: { prompt: string; explanation: string };
   pitfalls: string[];

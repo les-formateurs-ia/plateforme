@@ -19,3 +19,11 @@ async function bundleAndImport(entry) {
 
 export const loadAstuces = () => bundleAndImport(ENTRY);
 export const loadStudioModels = () => bundleAndImport(STUDIO_MODELS_ENTRY);
+
+// Modèles de chat du Studio (cas Web : la page d'exemple est écrite par Claude).
+const STUDIO_CHAT_MODELS_ENTRY = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../supabase/functions/_shared/studio-chat-models.ts");
+export const loadStudioChatModels = () => bundleAndImport(STUDIO_CHAT_MODELS_ENTRY);
+
+// Modèles vidéo du Studio (cas Vidéo : exemples générés dans « Créer vos vidéos »).
+const STUDIO_VIDEO_MODELS_ENTRY = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../supabase/functions/_shared/studio-video-models.ts");
+export const loadStudioVideoModels = () => bundleAndImport(STUDIO_VIDEO_MODELS_ENTRY);

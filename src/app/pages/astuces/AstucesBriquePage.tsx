@@ -42,7 +42,7 @@ export function AstucesBriquePage() {
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-8 space-y-14">
       <div id="astuces-brique-top" className="fade-up space-y-5 scroll-mt-6">
-        <AstucesCrumbs items={[{ label: "Astuces IA", to: "/astuces" }, BRIQUES_CRUMB, { label: brique.title }]} />
+        <AstucesCrumbs items={[{ label: "Guide IA", to: "/astuces" }, BRIQUES_CRUMB, { label: brique.title }]} />
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(260px,380px)] gap-6 lg:gap-10 items-center">
         <div className="max-w-3xl">
           <div className="flex items-center gap-2">

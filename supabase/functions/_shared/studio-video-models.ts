@@ -51,6 +51,13 @@ function resolveRatio(resolutions: Record<string, StudioVideoResolution>, defaul
   return resolutions[key];
 }
 
+// Image de départ : format actuel de l'API Runware, inputs.frameImages avec
+// le champ `image` (vérifié le 2026-11-17 sur runware.ai/docs/models/
+// bytedance-seedance-2-0). L'ancien format (frameImages à la racine, champ
+// inputImage) était ignoré sans erreur par Seedance — vidéo générée depuis
+// le texte seul — et refusé par Kling VIDEO 3.0 Pro.
+const firstFrame = (imageUrl: string) => ({ inputs: { frameImages: [{ image: imageUrl, frame: "first" }] } });
+
 // frameImages optionnel (image de référence facultative) — modèle générique
 // réutilisé par la grande majorité des modèles vidéo tiers.
 function framesTask(modelId: string, resolutions: Record<string, StudioVideoResolution>, defaultRatio: string) {
@@ -63,7 +70,7 @@ function framesTask(modelId: string, resolutions: Record<string, StudioVideoReso
       width,
       height,
       duration: Number(optionValues.duration ?? "5"),
-      ...(sourceImageUrl ? { frameImages: [{ inputImage: sourceImageUrl, frame: "first" }] } : {}),
+      ...(sourceImageUrl ? firstFrame(sourceImageUrl) : {}),
     };
   };
 }
@@ -81,7 +88,7 @@ function requiredFrameTask(modelId: string, resolutions: Record<string, StudioVi
       width,
       height,
       duration: Number(optionValues.duration ?? "5"),
-      frameImages: [{ inputImage: sourceImageUrl, frame: "first" }],
+      ...firstFrame(sourceImageUrl!),
     };
   };
 }

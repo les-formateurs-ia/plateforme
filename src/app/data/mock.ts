@@ -24,7 +24,7 @@ export const NAV_ITEMS: { id: NavId; Icon: LucideIcon; label: string; path: stri
   { id: "practice",  Icon: Code2,      label: "Exercices",       path: "/practice",  group: "practice" },
   { id: "studio",    Icon: Sparkles,   label: "Le Studio",       path: "/studio",    group: "practice" },
   { id: "hub",       Icon: LayoutGrid, label: "Hub IA",          path: "/hub",       group: "practice" },
-  { id: "astuces",   Icon: Lightbulb,  label: "Astuces IA",      path: "/astuces",   group: "practice" },
+  { id: "astuces",   Icon: Lightbulb,  label: "Guide IA",      path: "/astuces",   group: "practice" },
   { id: "agent",     Icon: Bot,        label: "Mon Agent IA",    path: "/agent",     group: "support" },
   { id: "calendar",  Icon: Calendar,   label: "Rendez-vous",     path: "/calendar",  group: "support" },
   { id: "profile",   Icon: User,       label: "Mon profil",      path: "/profile" },

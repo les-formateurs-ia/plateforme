@@ -67,6 +67,9 @@ export function StudioVideosPage() {
     ])),
   );
   const [prompt, setPrompt] = useState(() => searchParams.get("prompt") ?? "");
+  // ?photo=1 : le prompt du Guide IA anime une image — on met le bouton
+  // d'import en avant tant qu'aucune image n'est jointe.
+  const needsPhoto = searchParams.get("photo") === "1";
   const [sourceFile, setSourceFile] = useState<File | null>(null);
   const [sourcePreview, setSourcePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -197,8 +200,8 @@ export function StudioVideosPage() {
                 </div>
               ) : (
                 <button onClick={() => fileInputRef.current?.click()} disabled={generating} className="flex items-center gap-1.5 px-3.5 py-2 rounded-[2px] text-xs font-semibold transition-all hover:opacity-80 disabled:opacity-50 shrink-0"
-                  style={{ background: th.inputBg, border: `1px dashed ${th.inputB}`, color: th.fg2 }}>
-                  <Upload className="w-3.5 h-3.5" />Ajouter une photo{model.requiresSourceImage && <span className="opacity-70">(requis)</span>}
+                  style={needsPhoto ? { background: th.ink, border: `1px solid ${th.ink}`, color: th.onInk } : { background: th.inputBg, border: `1px dashed ${th.inputB}`, color: th.fg2 }}>
+                  <Upload className="w-3.5 h-3.5" />{needsPhoto ? "Ajoute ton image" : "Ajouter une photo"}{model.requiresSourceImage && <span className="opacity-70">(requis)</span>}
                 </button>
               )
             )}
