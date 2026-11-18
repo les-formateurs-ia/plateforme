@@ -19,7 +19,7 @@ export const IMAGE_DOMAIN: AstuceDomain = {
     { title: "Le mot juste du métier", text: "Les termes de photographes et de graphistes (contre-jour, 85 mm, flat lay) sont des raccourcis très efficaces : l'IA les connaît." },
   ],
   anatomy: {
-    ratio: "4:5",
+    ratio: "3:4",
     seed: 7,
     segments: [
       { text: "Photographie éditoriale", brique: "style" },
@@ -60,7 +60,7 @@ export const IMAGE_DOMAIN: AstuceDomain = {
       variations: {
         intro: "Même scène, même graine : seule la précision de la description du sujet change.",
         base: "Photographie en plan rapproché de {x}, dans un café lumineux, lumière naturelle douce.",
-        ratio: "4:5",
+        ratio: "3:4",
         seed: 1,
         items: [
           { id: "vague", label: "Vague", snippet: "un homme", note: "Sujet générique : âge, style et allure sont tirés au hasard." },
@@ -81,7 +81,7 @@ export const IMAGE_DOMAIN: AstuceDomain = {
         weak: "Une bouteille de vin.",
         strong: "Une bouteille de vin rouge à l'étiquette blanche minimaliste, verre vert foncé, bouchon scellé de cire rouge, posée sur une table en chêne à côté d'un verre à moitié plein.",
         explanation: "La version précise fixe la couleur du verre, le style d'étiquette, la finition du bouchon et le contexte : l'IA n'a plus rien à deviner.",
-        ratio: "4:5",
+        ratio: "3:4",
         illustrated: true,
       },
       pitfalls: [
@@ -106,7 +106,7 @@ export const IMAGE_DOMAIN: AstuceDomain = {
       variations: {
         intro: "Même personne, même cuisine, même graine : seuls le geste et l'expression changent.",
         base: "Photographie d'une femme de 30 ans aux cheveux bruns mi-longs, en pull crème, dans une cuisine lumineuse, {x}, lumière naturelle douce.",
-        ratio: "4:5",
+        ratio: "3:4",
         seed: 11,
         items: [
           { id: "statique", label: "Sans action", snippet: "debout", note: "Pose statique : l'image ne raconte rien." },
@@ -128,7 +128,7 @@ export const IMAGE_DOMAIN: AstuceDomain = {
         weak: "Un homme au bureau.",
         strong: "Un homme de 35 ans en chemise blanche, riant au téléphone, accoudé à son bureau en bois, le regard tourné vers la fenêtre.",
         explanation: "Le verbe (« riant au téléphone »), la posture (« accoudé ») et le regard créent une scène, là où la version faible ne donne qu'une pose.",
-        ratio: "4:5",
+        ratio: "3:4",
         illustrated: true,
       },
       pitfalls: [
@@ -153,7 +153,7 @@ export const IMAGE_DOMAIN: AstuceDomain = {
       variations: {
         intro: "Même apiculteur, même champ, même graine : seule la distance de la caméra change.",
         base: "{x} d'un apiculteur d'une cinquantaine d'années en combinaison blanche, tenant un cadre de ruche couvert d'abeilles, dans un champ de lavande en fin d'après-midi.",
-        ratio: "4:5",
+        ratio: "3:4",
         seed: 21,
         items: [
           { id: "tres-gros-plan", label: "Très gros plan", snippet: "Photographie en très gros plan des mains", note: "On ne voit que le geste et la matière : idéal pour montrer un savoir-faire." },
@@ -177,7 +177,7 @@ export const IMAGE_DOMAIN: AstuceDomain = {
         weak: "Un chef dans sa cuisine.",
         strong: "Plan rapproché poitrine d'un chef en veste blanche, concentré, goûtant une sauce à la cuillère, cuisine de restaurant floue en arrière-plan.",
         explanation: "Le plan rapproché met l'expression au premier plan ; le flou d'arrière-plan garde le contexte sans le laisser dominer.",
-        ratio: "4:5",
+        ratio: "3:4",
         illustrated: true,
       },
       pitfalls: [
@@ -250,7 +250,7 @@ export const IMAGE_DOMAIN: AstuceDomain = {
       variations: {
         intro: "Même fleuriste, même rue, même graine : seuls l'objectif et la netteté changent.",
         base: "Portrait d'une fleuriste de 28 ans aux cheveux roux courts, tablier en lin, tenant un bouquet de pivoines devant sa boutique, {x}.",
-        ratio: "4:5",
+        ratio: "3:4",
         seed: 41,
         items: [
           { id: "grand-angle", label: "Grand-angle 24 mm", snippet: "photographiée au grand-angle 24 mm, toute la rue nette", note: "Beaucoup de décor, perspective accentuée." },
@@ -275,7 +275,7 @@ export const IMAGE_DOMAIN: AstuceDomain = {
         weak: "Portrait d'une avocate, fond flou.",
         strong: "Portrait d'une avocate de 45 ans en tailleur gris, bras croisés, souriante, photographiée au téléobjectif 85 mm à f/2, arrière-plan de bureau vitré très flou avec bokeh.",
         explanation: "« Fond flou » est vague. La focale et l'ouverture donnent immédiatement le rendu d'un portrait de photographe professionnel.",
-        ratio: "4:5",
+        ratio: "3:4",
         illustrated: true,
       },
       pitfalls: [
@@ -353,7 +353,7 @@ export const IMAGE_DOMAIN: AstuceDomain = {
       variations: {
         intro: "Mêmes baskets, même muret, même graine : seule la palette change.",
         base: "Photographie d'une paire de baskets en toile posée sur un muret en ville, {x}.",
-        ratio: "4:5",
+        ratio: "3:4",
         seed: 61,
         items: [
           { id: "sans-consigne", label: "Sans consigne", snippet: "en extérieur", note: "L'IA choisit seule : des couleurs moyennes, sans identité." },
@@ -379,7 +379,7 @@ export const IMAGE_DOMAIN: AstuceDomain = {
         weak: "Un comptoir de café coloré.",
         strong: "Photographie d'un comptoir de café avec tasses et pâtisseries, palette vert sapin, crème et laiton doré, couleurs légèrement désaturées, contraste doux.",
         explanation: "« Coloré » laisse l'IA tout saturer. Une palette nommée donne un rendu cohérent, compatible avec une identité de marque.",
-        ratio: "4:5",
+        ratio: "3:4",
         illustrated: true,
       },
       pitfalls: [
@@ -404,7 +404,7 @@ export const IMAGE_DOMAIN: AstuceDomain = {
       variations: {
         intro: "Même gourde, même graine : seul le décor change… et avec lui, le public visé.",
         base: "Photographie d'une gourde isotherme en inox mat bleu marine posée {x}.",
-        ratio: "4:5",
+        ratio: "3:4",
         seed: 71,
         items: [
           { id: "studio", label: "Fond studio", snippet: "sur un fond uni gris clair en studio", note: "Aucun contexte : on regarde le produit, pas l'histoire." },
@@ -428,7 +428,7 @@ export const IMAGE_DOMAIN: AstuceDomain = {
         weak: "Une femme qui fait du yoga dehors.",
         strong: "Une femme d'une trentaine d'années en tenue de yoga vert sauge, en posture de l'arbre sur un ponton en bois au bord d'un lac de montagne, brume légère sur l'eau, sapins au loin, au lever du soleil.",
         explanation: "« Dehors » ne dit rien. Le ponton, le lac, la brume et le lever du soleil créent une scène désirable et cohérente.",
-        ratio: "4:5",
+        ratio: "3:4",
         illustrated: true,
       },
       pitfalls: [
@@ -600,7 +600,7 @@ export const IMAGE_DOMAIN: AstuceDomain = {
       variations: {
         intro: "Le même pêcheur, la même graine : seul le rendu demandé change.",
         base: "Portrait en plan rapproché d'un pêcheur âgé au visage buriné, bonnet de laine, sur un port breton, {x}.",
-        ratio: "4:5",
+        ratio: "3:4",
         seed: 111,
         items: [
           { id: "lisse", label: "Trop lisse", snippet: "peau parfaitement lisse, rendu numérique très retouché", note: "L'effet « IA » : beau, mais faux." },
@@ -623,7 +623,7 @@ export const IMAGE_DOMAIN: AstuceDomain = {
         weak: "Photo ultra réaliste 8K chef-d'œuvre d'une grand-mère.",
         strong: "Portrait d'une grand-mère de 80 ans aux cheveux blancs, souriante, dans sa cuisine, peau naturelle aux rides visibles, sans retouche, photo argentique au grain léger.",
         explanation: "« 8K » et « chef-d'œuvre » ne décrivent rien. Le réalisme vient des imperfections : les rides, le grain, l'absence de retouche.",
-        ratio: "4:5",
+        ratio: "3:4",
         illustrated: true,
       },
       pitfalls: [
@@ -647,7 +647,7 @@ export const IMAGE_DOMAIN: AstuceDomain = {
       variations: {
         intro: "La même affiche, la même graine : seule la consigne de texte change.",
         base: "Affiche publicitaire pour une boulangerie artisanale, baguettes et croissants sur un plan de travail en bois, {x}.",
-        ratio: "4:5",
+        ratio: "3:4",
         seed: 121,
         items: [
           { id: "vague", label: "Vague", snippet: "avec un slogan", note: "L'IA invente un texte, souvent illisible ou faux." },
@@ -790,7 +790,7 @@ export const IMAGE_DOMAIN: AstuceDomain = {
         weak: "La même femme que tout à l'heure, mais au bureau.",
         strong: "Même personnage que sur l'image de référence (Léa, 32 ans, cheveux châtains au carré, lunettes rondes en écaille, pull moutarde), cette fois assise à un bureau en bois clair dans un espace de coworking lumineux, en train de taper sur son ordinateur. Photographie lifestyle lumineuse, palette crème et terracotta.",
         explanation: "L'IA n'a aucune mémoire entre deux images : la fiche d'identité et l'image de référence lui redonnent toutes les informations à chaque fois.",
-        ratio: "4:5",
+        ratio: "3:4",
         illustrated: false,
       },
       pitfalls: [

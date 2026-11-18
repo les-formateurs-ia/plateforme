@@ -4,13 +4,17 @@ import { CheckCircle2, AlertCircle, Compass, Lightbulb, Copy, Check, ArrowRight 
 import { useTh } from "@/app/theme/theme";
 import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/app/components/ui/sheet";
-import { RatingBar, Pill, LEVEL_COLORS } from "@/app/components/aiModels/ModelCard";
+import { Pill, LEVEL_COLORS } from "@/app/components/aiModels/ModelCard";
+import { BenchmarkDetails, getModelScores, RankBadge } from "@/app/components/aiModels/BenchmarkScores";
 import type { AiModel } from "@/app/data/aiModels";
+import { useAiBenchmarks } from "@/app/lib/aiBenchmarks";
 
 export function ModelDetailSheet({ model, open, onOpenChange }: { model: AiModel | null; open: boolean; onOpenChange: (open: boolean) => void }) {
   const th = useTh();
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
+  const snapshot = useAiBenchmarks();
+  const primary = model ? getModelScores(model, snapshot).primary : null;
 
   const copyPrompt = async () => {
     if (!model) return;
@@ -44,19 +48,16 @@ export function ModelDetailSheet({ model, open, onOpenChange }: { model: AiModel
                 </div>
               </div>
               <div className="flex flex-wrap gap-1.5 mt-3">
+                {primary && <RankBadge result={primary} />}
                 <Pill>{model.priceBadge}</Pill>
                 <Pill color={LEVEL_COLORS[model.levelBadge]}>{model.levelBadge}</Pill>
               </div>
             </SheetHeader>
 
             <div className="flex-1 p-5 sm:p-6 space-y-6">
-              <div className="flex items-center gap-5">
-                <RatingBar label="Raisonnement" value={model.reasoning} />
-                <RatingBar label="Accès" value={model.access} />
-                <RatingBar label="Vitesse" value={model.speed} />
-              </div>
-
               <p className="text-sm leading-relaxed" style={{ color: th.fg2 }}>{model.description}</p>
+
+              <BenchmarkDetails scores={getModelScores(model, snapshot)} snapshot={snapshot} />
 
               <div>
                 <h3 className="text-sm font-bold mb-2.5" style={{ color: th.fg }}>Points forts</h3>

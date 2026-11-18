@@ -5,7 +5,10 @@ import { useTh } from "@/app/theme/theme";
 import { VBtn } from "@/app/components/common/Buttons";
 import { ModelCard } from "@/app/components/aiModels/ModelCard";
 import { ModelDetailSheet } from "@/app/components/aiModels/ModelDetailSheet";
+import { BenchmarkCharts } from "@/app/components/aiModels/BenchmarkCharts";
+import { getModelScores } from "@/app/components/aiModels/BenchmarkScores";
 import { AI_CATEGORIES, getModelsByCategory, type AiCategoryId, type AiModel } from "@/app/data/aiModels";
+import { useAiBenchmarks } from "@/app/lib/aiBenchmarks";
 
 export function HubCategoryPage() {
   const th = useTh();
@@ -15,11 +18,18 @@ export function HubCategoryPage() {
   const models = getModelsByCategory((category ?? "") as AiCategoryId);
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<AiModel | null>(null);
+  const snapshot = useAiBenchmarks();
 
-  const filtered = useMemo(
-    () => models.filter((m) => `${m.name} ${m.provider}`.toLowerCase().includes(query.toLowerCase())),
-    [models, query],
-  );
+  // Modèles classés par le benchmark d'abord (du mieux noté au moins bien),
+  // puis les modèles en avis éditorial, dans l'ordre du catalogue.
+  const filtered = useMemo(() => {
+    const note = (m: AiModel) => getModelScores(m, snapshot).primary?.note ?? -1;
+    return models
+      .filter((m) => `${m.name} ${m.provider}`.toLowerCase().includes(query.toLowerCase()))
+      .map((m, i) => ({ m, i, n: note(m) }))
+      .sort((a, b) => b.n - a.n || a.i - b.i)
+      .map(({ m }) => m);
+  }, [models, query, snapshot]);
 
   if (!cat) {
     return (
@@ -60,6 +70,8 @@ export function HubCategoryPage() {
           />
         </div>
       </div>
+
+      <BenchmarkCharts models={models} snapshot={snapshot} onOpenModel={setSelected} />
 
       <div className="space-y-3">
         {filtered.map((model) => (
