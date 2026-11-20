@@ -10,7 +10,7 @@ import { BriqueSchema, hasBriqueSchema } from "@/app/components/astuces/BriqueSc
 import { CopyButton, PromptBlock } from "@/app/components/astuces/PromptBlock";
 import { AstucesCrumbs, GRID_BY_RATIO, tintAt } from "@/app/components/astuces/shared";
 import { useAuth } from "@/app/state/auth-context";
-import { VisitorClosed } from "@/app/components/common/Visitor";
+import { VisitorClosed, VisitorMoreNotice } from "@/app/components/common/Visitor";
 import { isCasOpenToVisitor } from "@/app/lib/visitor";
 import { ASTUCE_CAS, casExamplePrompt, casMediaKeys, casParts, getCas, getDomain, partsText, type AstuceCas, type CasBrique, type CasPart } from "@/app/data/astuces";
 import { casStudioLink } from "@/app/lib/astucesMedia";
@@ -90,6 +90,8 @@ function PromptParts({ cas, parts, active, onHover, onPick }: {
 function CasView({ cas }: { cas: AstuceCas }) {
   const th = useTh();
   const navigate = useNavigate();
+  // Mode Visiteur : l'atelier « Adapte le prompt » est en lecture seule.
+  const readOnly = useAuth().isVisitor;
   const [values, setValues] = useState<Record<string, string>>(() => readDraft(cas.id));
   const [hovered, setHovered] = useState<string | null>(null);
 
@@ -331,8 +333,8 @@ function CasView({ cas }: { cas: AstuceCas }) {
                 <GCard className="p-4 sm:p-5">
                   <label className="block">
                     <span className="text-[15px] font-black" style={{ color: th.fg }}>{field.label}<span style={{ color: th.danger }}> *</span></span>
-                    <input value={values[field.id] ?? ""} onChange={(e) => set(field.id, e.target.value)} placeholder={field.placeholder}
-                      className="mt-3 w-full px-3 py-2.5 rounded-[6px] text-sm outline-none"
+                    <input value={values[field.id] ?? ""} onChange={(e) => set(field.id, e.target.value)} placeholder={field.placeholder} disabled={readOnly}
+                      className="mt-3 w-full px-3 py-2.5 rounded-[6px] text-sm outline-none disabled:opacity-60 disabled:cursor-not-allowed"
                       style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg }} />
                   </label>
                 </GCard>
@@ -354,17 +356,17 @@ function CasView({ cas }: { cas: AstuceCas }) {
                       {brique.options.map((option) => {
                         const active = current === option.snippet;
                         return (
-                          <button key={option.id} type="button" title={option.snippet} onClick={() => set(brique.id, option.snippet)} aria-pressed={active}
-                            className={cx("px-2.5 py-1 rounded-[2px] text-xs font-semibold transition-colors", !active && "hover:opacity-70")}
+                          <button key={option.id} type="button" title={option.snippet} onClick={() => set(brique.id, option.snippet)} aria-pressed={active} disabled={readOnly}
+                            className={cx("px-2.5 py-1 rounded-[2px] text-xs font-semibold transition-colors disabled:cursor-not-allowed", !active && !readOnly && "hover:opacity-70")}
                             style={active ? { background: th.ink, color: th.onInk, border: `1px solid ${th.ink}` } : { border: `1px solid ${th.sep}`, color: th.fg2 }}>
                             {option.label}
                           </button>
                         );
                       })}
                     </div>
-                    <input value={custom} onChange={(e) => set(brique.id, e.target.value)} placeholder="Ou écris ta propre version…"
+                    <input value={custom} onChange={(e) => set(brique.id, e.target.value)} placeholder="Ou écris ta propre version…" disabled={readOnly}
                       aria-label={`${brique.title} : ta propre version`}
-                      className="mt-3 w-full px-3 py-2.5 rounded-[6px] text-sm outline-none"
+                      className="mt-3 w-full px-3 py-2.5 rounded-[6px] text-sm outline-none disabled:opacity-60 disabled:cursor-not-allowed"
                       style={{ background: th.inputBg, border: `1px solid ${th.inputB}`, color: th.fg }} />
                   </GCard>
                 </li>
@@ -382,6 +384,9 @@ function CasView({ cas }: { cas: AstuceCas }) {
                 <PromptParts cas={cas} parts={parts} />
               </div>
               <p className="text-xs font-semibold" style={{ color: th.fg3 }}>Modèle : {cas.model.label} · {web ? "Une page HTML" : `Format ${cas.ratio}${cas.video ? ` · ${cas.video.duration} s` : ""}`}</p>
+              {readOnly ? (
+                <VisitorMoreNotice>Mode visiteur : adapter ce prompt à ton projet et le lancer dans Le Studio est réservé aux apprenants de la formation.</VisitorMoreNotice>
+              ) : (
               <div className="flex flex-wrap gap-2">
                 {web ? (
                   <>
@@ -398,7 +403,8 @@ function CasView({ cas }: { cas: AstuceCas }) {
                 )}
                 {touched && <VBtn sm onClick={() => setValues({})}><RotateCcw className="w-4 h-4" />Réinitialiser</VBtn>}
               </div>
-              {missing.length > 0 && (
+              )}
+              {!readOnly && missing.length > 0 && (
                 <p className="text-xs" style={{ color: th.fg3 }}>À compléter : {missing.map((p) => p.text.slice(1, -1)).join(", ")}.</p>
               )}
               {cas.source && (

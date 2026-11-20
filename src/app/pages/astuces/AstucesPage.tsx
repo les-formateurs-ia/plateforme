@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
-import { ArrowRight, Camera, Clock } from "lucide-react";
+import { ArrowRight, Camera, Clock, Lock } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { GT } from "@/app/components/common/GT";
 import { GCard } from "@/app/components/common/GCard";
@@ -30,13 +30,19 @@ const CAS_SECTIONS: { domain: AstuceDomainId; eyebrow: string; title: string; in
   },
 ];
 
-function CasCard({ cas }: { cas: AstuceCas }) {
+// locked (mode Visiteur) : aperçu seul, la carte ne s'ouvre pas.
+function CasCard({ cas, locked = false }: { cas: AstuceCas; locked?: boolean }) {
   const th = useTh();
   const navigate = useNavigate();
   const web = cas.domain === "web";
   return (
-    <GCard onClick={() => navigate(`/astuces/cas/${cas.id}`)} className="group flex flex-col">
+    <GCard onClick={locked ? undefined : () => navigate(`/astuces/cas/${cas.id}`)} className="group flex flex-col">
       <div className="relative">
+        {locked && (
+          <span className="absolute right-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-[2px] px-2.5 py-1 text-[11px] font-bold" style={{ background: th.ink, color: th.onInk }}>
+            <Lock className="w-3 h-3" />En formation
+          </span>
+        )}
         {/* Vignette fixe : la version animée est réservée à la page du cas. */}
         <AstuceMediaFrame mediaKey={casMediaKeys.still(cas)} ratio={web ? "16:10" : "1:1"} kind={cas.domain === "video" ? "video" : "image"} label={cas.title} className="rounded-none border-0" />
         {/* Avec une photo de départ : on montre d'où l'on part. */}
@@ -53,9 +59,15 @@ function CasCard({ cas }: { cas: AstuceCas }) {
           <span className="inline-flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{cas.duration}</span>
           {cas.source && <span className="inline-flex items-center gap-1"><Camera className="w-3.5 h-3.5" />Avec ta photo</span>}
         </div>
-        <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold" style={{ color: th.fg }}>
-          <span className="ink-link">Voir le pas-à-pas</span><ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-        </span>
+        {locked ? (
+          <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold" style={{ color: th.fg3 }}>
+            <Lock className="w-3.5 h-3.5" />Disponible en formation
+          </span>
+        ) : (
+          <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold" style={{ color: th.fg }}>
+            <span className="ink-link">Voir le pas-à-pas</span><ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+          </span>
+        )}
       </div>
     </GCard>
   );
@@ -85,21 +97,24 @@ export function AstucesPage() {
       </div>
 
       {CAS_SECTIONS.map((section) => {
-        const allCases = ASTUCE_CAS.filter((c) => c.domain === section.domain);
-        // Mode Visiteur : un cas pratique par type d'astuce.
-        const cases = isVisitor ? allCases.filter((c) => isCasOpenToVisitor(c.id)) : allCases;
-        const hiddenCount = allCases.length - cases.length;
+        const cases = ASTUCE_CAS.filter((c) => c.domain === section.domain);
         if (cases.length === 0) return null;
+        // Mode Visiteur : un cas pratique ouvert par type d'astuce, les autres en aperçu.
+        const lockedCount = isVisitor ? cases.filter((c) => !isCasOpenToVisitor(c.id)).length : 0;
         return (
           <section key={section.domain} aria-labelledby={`astuces-cas-${section.domain}`} className="fade-up">
-            <SectionHead id={`astuces-cas-${section.domain}`} eyebrow={`${section.eyebrow} · ${allCases.length} cas pratiques`} title={section.title} />
+            <SectionHead id={`astuces-cas-${section.domain}`} eyebrow={`${section.eyebrow} · ${cases.length} cas pratiques`} title={section.title} />
             {section.intro && <p className="text-sm max-w-3xl -mt-2 mb-5 leading-relaxed" style={{ color: th.fg2 }}>{section.intro}</p>}
             <div className={section.domain === "web" ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"}>
-              {cases.map((cas) => <CasCard key={cas.id} cas={cas} />)}
+              {cases.map((cas) => <CasCard key={cas.id} cas={cas} locked={isVisitor && !isCasOpenToVisitor(cas.id)} />)}
             </div>
-            {hiddenCount > 0 && (
+            {lockedCount > 0 && (
               <div className="mt-4">
-                <VisitorMoreNotice>Mode visiteur : {hiddenCount} autre{hiddenCount > 1 ? "s" : ""} cas pratique{hiddenCount > 1 ? "s" : ""} de cette rubrique {hiddenCount > 1 ? "sont disponibles" : "est disponible"} en formation.</VisitorMoreNotice>
+                <VisitorMoreNotice>
+                  {lockedCount === cases.length
+                    ? "Mode visiteur : ces cas pratiques sont présentés en aperçu, leur pas-à-pas complet est disponible en formation."
+                    : `Mode visiteur : un cas pratique est ouvert pour essayer, ${lockedCount > 1 ? `les ${lockedCount} autres de cette rubrique sont disponibles` : "l'autre cas de cette rubrique est disponible"} en formation.`}
+                </VisitorMoreNotice>
               </div>
             )}
           </section>

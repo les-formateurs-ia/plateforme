@@ -8,16 +8,12 @@
 // (checkAiBudget), Agent IA en mode test, pas de réservation de rendez-vous.
 // Le reste (Hub, Guide, Exercices) est un aperçu limité côté interface.
 import { supabase } from "@/app/lib/supabase/client";
-import { ASTUCE_CAS } from "@/app/data/astuces";
 
 export const VISITOR_PATH = "/visite";
 
-// Leçons ouvertes : seulement la première du programme.
+// Leçons ouvertes : seulement la première du programme, complète (vidéo,
+// fiche, quiz…) ; une fois son quiz réussi, rien ne se débloque.
 export const VISITOR_OPEN_LESSONS = 1;
-// Vidéo de la leçon ouverte au visiteur : null tant qu'aucune vidéo de
-// démonstration n'est prête (emplacement affiché à la place, et la vidéo
-// habituelle de la leçon n'est pas chargée).
-export const VISITOR_LESSON_VIDEO_URL: string | null = null;
 // Hub IA : les premiers modèles de chaque catégorie.
 export const VISITOR_HUB_MODELS = 3;
 // Exercices : Battle Ground uniquement.
@@ -28,10 +24,9 @@ export const VISITOR_DEFAULT_BUDGET_USD = 3;
 // Nombre maximal de visiteurs proposé par défaut pour un lien.
 export const VISITOR_DEFAULT_MAX_ACCOUNTS = 50;
 
-// Guide IA : le premier cas pratique de chaque type (Images, Vidéos, Web).
-const VISITOR_CAS_IDS = new Set(
-  [...new Set(ASTUCE_CAS.map((c) => c.domain))].map((domain) => ASTUCE_CAS.find((c) => c.domain === domain)!.id),
-);
+// Guide IA : un cas pratique ouvert en Images et en Vidéos ; les autres, et
+// toute la rubrique Web, restent en vitrine (aperçu non cliquable).
+const VISITOR_CAS_IDS = new Set(["photo-profil", "portrait-anime"]);
 export function isCasOpenToVisitor(casId: string): boolean {
   return VISITOR_CAS_IDS.has(casId);
 }

@@ -31,7 +31,7 @@ import { MissionPlayer } from "@/app/components/lesson/MissionPlayer";
 import { MindmapView } from "@/app/components/lesson/MindmapView";
 import { LessonPager } from "@/app/components/lesson/LessonPager";
 import { LessonVideo } from "@/app/components/lesson/LessonVideo";
-import { VISITOR_LESSON_VIDEO_URL } from "@/app/lib/visitor";
+import { VisitorNextStep } from "@/app/components/common/Visitor";
 import { LessonPodcast } from "@/app/components/lesson/LessonPodcast";
 import { LessonVoiceAgent } from "@/app/components/lesson/LessonVoiceAgent";
 import { GT } from "@/app/components/common/GT";
@@ -165,9 +165,7 @@ export function LessonPage() {
   // sinon un admin/élève inscrit à plusieurs cours resterait bloqué sur une leçon
   // d'un cours différent de celui utilisé pour calculer sa progression "active".
   const course = useCourseProgress(lesson?.instanceId);
-  // Visiteur : vidéo de démonstration dédiée (emplacement vide tant qu'elle
-  // n'existe pas), jamais la vidéo de la formation.
-  const videoUrl = isVisitor ? VISITOR_LESSON_VIDEO_URL : lesson?.videoUrl ?? null;
+  const videoUrl = lesson?.videoUrl ?? null;
   // HTML rédigé par le formateur (voir AdminLessonEditorPage), rendu comme le Playground :
   // vrai document dans une iframe sandboxée plutôt qu'un fragment injecté dans la page — pas
   // d'assainissement ici, la sandbox (sans allow-same-origin) est la frontière de sécurité,
@@ -192,8 +190,8 @@ export function LessonPage() {
   // Mindmap masquée partout pour le moment (onglet retiré ci-dessous) — le code de
   // génération/lecture reste en place, comme pour l'onglet "Vidéo IA" plus haut.
   useEffect(() => {
-    if (lesson && !videoUrl && !isVisitor && tab === "video") setTab(revisionSheet ? "revision" : "podcast");
-  }, [lesson, tab, videoUrl, isVisitor]);
+    if (lesson && !videoUrl && tab === "video") setTab(revisionSheet ? "revision" : "podcast");
+  }, [lesson, tab, videoUrl]);
 
   // Leçon "Mission" : brouillon existant (s'il y en a un) affiché à la place
   // du reference_content brut — priorité à ce que l'élève a déjà rempli.
@@ -808,7 +806,8 @@ export function LessonPage() {
   // Pas de « Leçon suivante » vers un module fermé : terminer un module n'ouvre
   // pas le suivant (le staff, lui, peut toujours naviguer).
   const nextLessonModuleLocked = !!course.lessonStates.find((s) => s.lesson.id === nextCandidate?.id)?.moduleLocked;
-  const nextLesson = nextLessonModuleLocked && !isStaff(role) ? undefined : nextCandidate;
+  // Visiteur : la leçon d'essai est la seule ouverte, rien ne se débloque après.
+  const nextLesson = isVisitor || (nextLessonModuleLocked && !isStaff(role)) ? undefined : nextCandidate;
   const currentLessonState = course.lessonStates.find((s) => s.lesson.id === lessonId);
   const isCompleted = currentLessonState?.state === "completed" || !!quizResult?.passed;
 
@@ -821,7 +820,7 @@ export function LessonPage() {
   // Onglet "Vidéo IA" masqué partout pour le moment (cf. LessonsPage GEN_TYPES) —
   // le code de génération/lecture reste en place, seul l'onglet est retiré.
   const TABS: { id: LTab; Icon: typeof Monitor; label: string }[] = [
-    ...(videoUrl || isVisitor ? [{ id: "video" as const, Icon: Monitor, label: "Vidéo" }] : []),
+    ...(videoUrl ? [{ id: "video" as const, Icon: Monitor, label: "Vidéo" }] : []),
     ...(lesson?.customVideoUrl ? [{ id: "customVideo" as const, Icon: Video, label: "Votre vidéo personnalisée" }] : []),
     ...(revisionSheet ? [{ id: "revision" as const, Icon: ListChecks, label: "Fiche de révision" }] : []),
     { id: "podcast", Icon: Headphones, label: "Podcast" },
@@ -1035,7 +1034,7 @@ export function LessonPage() {
                     <div className="w-16 h-16 rounded-full flex items-center justify-center border border-white/15" style={{ background: "rgba(255,255,255,0.08)", backdropFilter: "blur(20px)" }}>
                       <Play className="w-6 h-6 text-white ml-1" />
                     </div>
-                    <span className="text-xs text-white/40">{isVisitor ? "La vidéo de cette leçon sera bientôt disponible" : "Vidéo pas encore ajoutée pour cette leçon"}</span>
+                    <span className="text-xs text-white/40">Vidéo pas encore ajoutée pour cette leçon</span>
                   </div>
                 </>
               )}
@@ -1281,6 +1280,7 @@ export function LessonPage() {
                     {currentLessonState.progress?.bestQuizScore != null ? `Meilleur score : ${currentLessonState.progress.bestQuizScore}%` : ""}
                   </p>
                   <VBtn onClick={() => setRetaking(true)} sm><span className="flex items-center gap-2"><RotateCcw className="w-3.5 h-3.5" />Refaire le quiz</span></VBtn>
+                  {isVisitor && <VisitorNextStep />}
                 </div>
               )}
 
@@ -1291,11 +1291,12 @@ export function LessonPage() {
                     {quizResult.passed ? <GT>{quizResult.score}%</GT> : <>{quizResult.score}%</>}
                   </p>
                   <p className="text-sm mt-3 mb-5" style={{ color: th.fg2 }}>
-                    {quizResult.passed ? (nextLesson ? "Bravo ! La leçon suivante est débloquée." : "Bravo, c'était la dernière leçon de ce module.") : `Il faut au moins ${QUIZ_PASS_THRESHOLD} % pour valider cette leçon. Relis le cours, puis retente ta chance.`}
+                    {quizResult.passed ? (isVisitor ? "Bravo, vous avez terminé la leçon d'essai !" : nextLesson ? "Bravo ! La leçon suivante est débloquée." : "Bravo, c'était la dernière leçon de ce module.") : `Il faut au moins ${QUIZ_PASS_THRESHOLD} % pour valider cette leçon. Relis le cours, puis retente ta chance.`}
                   </p>
                   {quizResult.passed
                     ? nextLesson && <ShimBtn onClick={() => navigate(`/lesson/${nextLesson.id}`)} sm><span className="flex items-center gap-2">Leçon suivante<ChevronRight className="w-3.5 h-3.5" /></span></ShimBtn>
                     : <VBtn onClick={retryQuiz} sm><span className="flex items-center gap-2"><RotateCcw className="w-3.5 h-3.5" />Réessayer le quiz</span></VBtn>}
+                  {quizResult.passed && isVisitor && <VisitorNextStep />}
                 </div>
               )}
 

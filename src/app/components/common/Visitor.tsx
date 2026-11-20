@@ -152,3 +152,23 @@ export function VisitorTrialDialog() {
     </Dialog>
   );
 }
+
+// Fin de la leçon d'essai (quiz réussi) : la suite du parcours est réservée
+// à la formation, on invite à nous contacter.
+export function VisitorNextStep() {
+  const th = useTh();
+  return (
+    <div className="mt-6 rounded-[10px] px-5 py-5 space-y-3 text-center" style={{ background: th.navA, border: `1px solid ${th.sep}` }}>
+      <p className="eyebrow flex items-center justify-center gap-1.5" style={{ color: th.fg3 }}><Lock className="w-3.5 h-3.5" />Mode visiteur</p>
+      <p className="text-base font-black" style={{ color: th.fg }}>La suite du parcours est réservée à la formation</p>
+      <p className="text-sm leading-relaxed" style={{ color: th.fg2 }}>
+        Vous venez de découvrir une leçon complète. Pour débloquer toutes les leçons, les exercices, la certification et l'accompagnement de votre formateur, contactez-nous.
+      </p>
+      <a href={SIGNUP_URL} target="_blank" rel="noreferrer" className="sweep inline-flex items-center gap-2 rounded-[2px] px-5 min-h-11 text-sm font-semibold"
+        style={{ background: th.ink, color: th.onInk }}>
+        <Sparkles className="w-4 h-4" />Nous contacter pour continuer
+      </a>
+      <VisitorContacts />
+    </div>
+  );
+}
