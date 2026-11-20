@@ -40,6 +40,7 @@ export function CommandPalette() {
   const groups = useMemo(() => {
     const byGroup = new Map<string, typeof NAV_ITEMS>();
     for (const item of NAV_ITEMS) {
+      if (item.id === "astuces") continue; // Guide IA : admin seulement, pour l'instant.
       const key = item.group ? NAV_GROUP_LABELS[item.group] : "Compte";
       byGroup.set(key, [...(byGroup.get(key) ?? []), item]);
     }
