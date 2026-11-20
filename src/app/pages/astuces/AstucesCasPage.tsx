@@ -9,6 +9,9 @@ import { AstuceMediaFrame } from "@/app/components/astuces/AstuceMediaFrame";
 import { BriqueSchema, hasBriqueSchema } from "@/app/components/astuces/BriqueSchema";
 import { CopyButton, PromptBlock } from "@/app/components/astuces/PromptBlock";
 import { AstucesCrumbs, GRID_BY_RATIO, tintAt } from "@/app/components/astuces/shared";
+import { useAuth } from "@/app/state/auth-context";
+import { VisitorClosed } from "@/app/components/common/Visitor";
+import { isCasOpenToVisitor } from "@/app/lib/visitor";
 import { ASTUCE_CAS, casExamplePrompt, casMediaKeys, casParts, getCas, getDomain, partsText, type AstuceCas, type CasBrique, type CasPart } from "@/app/data/astuces";
 import { casStudioLink } from "@/app/lib/astucesMedia";
 import { cx } from "@/app/lib/cx";
@@ -38,7 +41,10 @@ function readDraft(id: string): Record<string, string> {
 export function AstucesCasPage() {
   const { casId } = useParams<{ casId: string }>();
   const cas = getCas(casId);
+  const { isVisitor } = useAuth();
   if (!cas) return <Navigate to="/astuces" replace />;
+  // Mode Visiteur : un cas pratique par type d'astuce (cf. lib/visitor.ts).
+  if (isVisitor && !isCasOpenToVisitor(cas.id)) return <VisitorClosed feature="guide" backTo="/astuces" backLabel="Guide IA" />;
   return <CasView key={cas.id} cas={cas} />;
 }
 

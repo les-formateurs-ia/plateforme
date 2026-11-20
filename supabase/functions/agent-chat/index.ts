@@ -9,6 +9,7 @@ import { parsePedagogyStyle, pedagogyStyleBlock } from "../_shared/pedagogy-styl
 import { buildCourseContext } from "../_shared/course-context.ts";
 import { buildStudentOverview } from "../_shared/student-overview.ts";
 import { getStudentMemoryText, scheduleStudentMemoryUpdate } from "../_shared/student-memory.ts";
+import { buildVisitorSystemPrompt, isVisitorUser, loadVisitorCourseContext, VISITOR_TEST_NOTICE } from "../_shared/visitor.ts";
 
 const GEMINI_TEXT_MODEL = "gemini-3.6-flash";
 const HISTORY_WINDOW = 40;
@@ -119,11 +120,19 @@ Deno.serve(async (req) => {
       .order("created_at", { ascending: false }).limit(HISTORY_WINDOW);
     const history = (historyRows ?? []).reverse();
 
-    const systemPrompt = buildSystemPrompt({ courseTitle, courseContent, profession: onboarding?.profession ?? null, objectifProfessionnel, pedagogyStyle, overviewText, memoryText });
+    // Mode Visiteur : prompt « mode test » (ni profil, ni résultats, ni
+    // mémoire), contenu limité à la première leçon.
+    const visitor = await isVisitorUser(supabase, userId);
+    const systemPrompt = visitor
+      ? buildVisitorSystemPrompt(await loadVisitorCourseContext(supabase, userId, resolvedInstanceId))
+      : buildSystemPrompt({ courseTitle, courseContent, profession: onboarding?.profession ?? null, objectifProfessionnel, pedagogyStyle, overviewText, memoryText });
+    const ack = visitor
+      ? '{"reply":"Compris, je réponds en mode test, sur la première leçon et le fonctionnement de la formation.","offTopic":false}'
+      : '{"reply":"Compris, je reste sur le périmètre de la formation et le métier de l\'élève.","offTopic":false}';
 
     const contents = [
       { role: "user", parts: [{ text: systemPrompt }] },
-      { role: "model", parts: [{ text: '{"reply":"Compris, je reste sur le périmètre de la formation et le métier de l\'élève.","offTopic":false}' }] },
+      { role: "model", parts: [{ text: ack }] },
       ...history.map((m) => ({ role: m.role === "ai" ? "model" : "user", parts: [{ text: m.content }] })),
       { role: "user", parts: [{ text: message.trim() }] },
     ];
@@ -151,10 +160,13 @@ Deno.serve(async (req) => {
       reply = rawText;
       offTopic = false;
     }
+    // Première réponse d'une conversation visiteur : l'avertissement « mode
+    // test » est garanti, quoi qu'ait produit le modèle.
+    if (visitor && history.length === 0 && !/mode test/i.test(reply)) reply = `${VISITOR_TEST_NOTICE}\n\n${reply}`;
 
     await supabase.from("agent_messages").insert({ conversation_id: resolvedConversationId, role: "user", content: message.trim(), modality: "text", is_off_topic: false });
     await supabase.from("agent_messages").insert({ conversation_id: resolvedConversationId, role: "ai", content: reply, modality: "text", is_off_topic: offTopic });
-    scheduleStudentMemoryUpdate(supabase, userId);
+    if (!visitor) scheduleStudentMemoryUpdate(supabase, userId);
 
     return jsonResponse({ conversationId: resolvedConversationId, reply, offTopic });
   } catch (err) {

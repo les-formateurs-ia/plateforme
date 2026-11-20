@@ -15,6 +15,9 @@ interface AuthContextValue {
   // Non-null pour un collaborateur entreprise (module Entreprise) — jamais
   // renseigné pour un compte CPF classique.
   companyId: string | null;
+  // Compte de démonstration ouvert par un lien Visiteur (profiles.is_visitor) :
+  // élève aux accès limités (cf. lib/visitor.ts).
+  isVisitor: boolean;
   mustOnboard: boolean;
   // true tant que le profil (role/must_onboard) n'a pas encore été chargé pour la
   // session courante — tant que c'est vrai, `mustOnboard` peut encore valoir sa
@@ -36,6 +39,7 @@ const AuthContext = createContext<AuthContextValue>({
   user: null,
   role: null,
   companyId: null,
+  isVisitor: false,
   mustOnboard: true,
   profileLoading: true,
   themeMode: null,
@@ -57,12 +61,26 @@ function translateAuthError(message: string) {
   return message;
 }
 
+// Dev uniquement : ?apercu-visiteur=1 force l'interface du mode Visiteur sur
+// le compte connecté (=0 pour revenir), sans toucher à la base.
+function devVisitorPreview(): boolean {
+  if (!import.meta.env.DEV) return false;
+  try {
+    const param = new URLSearchParams(window.location.search).get("apercu-visiteur");
+    if (param !== null) localStorage.setItem("apercu-visiteur", param);
+    return localStorage.getItem("apercu-visiteur") === "1";
+  } catch {
+    return false;
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   // User conservé tel quel tant que c'est le même compte (voir onAuthStateChange).
   const [user, setUser] = useState<User | null>(null);
   const userIdRef = useRef<string | null>(null);
   const [role, setRole] = useState<Role | null>(null);
   const [companyId, setCompanyId] = useState<string | null>(null);
+  const [isVisitor, setIsVisitor] = useState(false);
   const [mustOnboard, setMustOnboard] = useState(true);
   const [profileLoading, setProfileLoading] = useState(true);
   const [status, setStatus] = useState<AuthStatus>("loading");
@@ -73,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setRole(null);
     setCompanyId(null);
+    setIsVisitor(false);
     setMustOnboard(true);
     setProfileLoading(true);
     setThemeModeState(null);
@@ -80,12 +99,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const loadProfile = async (userId: string) => {
-    const { data, error } = await supabase.from("profiles").select("role, must_onboard, theme_preference, company_id").eq("id", userId).maybeSingle();
+    let { data, error } = await supabase.from("profiles").select("role, must_onboard, theme_preference, company_id, is_visitor").eq("id", userId).maybeSingle();
+    // Base pas encore migrée (colonne is_visitor absente) : on ne bloque pas
+    // la connexion de tout le monde pour autant.
+    if (error) {
+      const fallback = await supabase.from("profiles").select("role, must_onboard, theme_preference, company_id").eq("id", userId).maybeSingle();
+      if (!fallback.error) ({ data, error } = { data: fallback.data ? { ...fallback.data, is_visitor: false } : null, error: null });
+    }
     if (error) {
       console.warn("Unable to load profile", error);
     }
     setRole((data?.role as Role) ?? "student");
     setCompanyId(data?.company_id ?? null);
+    setIsVisitor(!!data?.is_visitor || devVisitorPreview());
     setMustOnboard(data?.must_onboard ?? true);
     setThemeModeState((data?.theme_preference as ThemeMode | null) ?? "system");
     setProfileLoading(false);
@@ -167,7 +193,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ status, user, role, companyId, mustOnboard, profileLoading, themeMode, setThemeMode, signIn, signUp, signOut, markOnboarded }}>
+    <AuthContext.Provider value={{ status, user, role, companyId, isVisitor, mustOnboard, profileLoading, themeMode, setThemeMode, signIn, signUp, signOut, markOnboarded }}>
       {children}
     </AuthContext.Provider>
   );

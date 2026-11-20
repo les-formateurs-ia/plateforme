@@ -6,13 +6,20 @@ import { VBtn } from "@/app/components/common/Buttons";
 import { ModelCard } from "@/app/components/aiModels/ModelCard";
 import { ModelDetailSheet } from "@/app/components/aiModels/ModelDetailSheet";
 import { AI_CATEGORIES, getModelsByCategory, type AiCategoryId, type AiModel } from "@/app/data/aiModels";
+import { useAuth } from "@/app/state/auth-context";
+import { VisitorMoreNotice } from "@/app/components/common/Visitor";
+import { VISITOR_HUB_MODELS } from "@/app/lib/visitor";
 
 export function HubCategoryPage() {
   const th = useTh();
   const navigate = useNavigate();
   const { category } = useParams<{ category: string }>();
   const cat = AI_CATEGORIES.find((c) => c.id === category);
-  const models = getModelsByCategory((category ?? "") as AiCategoryId);
+  const { isVisitor } = useAuth();
+  const allModels = getModelsByCategory((category ?? "") as AiCategoryId);
+  // Mode Visiteur : aperçu des premiers modèles de la catégorie.
+  const models = isVisitor ? allModels.slice(0, VISITOR_HUB_MODELS) : allModels;
+  const hiddenCount = allModels.length - models.length;
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<AiModel | null>(null);
 
@@ -65,6 +72,11 @@ export function HubCategoryPage() {
         {filtered.map((model) => (
           <ModelCard key={model.id} model={model} onOpenDetail={() => setSelected(model)} />
         ))}
+        {hiddenCount > 0 && (
+          <VisitorMoreNotice>
+            Mode visiteur : {hiddenCount} autre{hiddenCount > 1 ? "s" : ""} modèle{hiddenCount > 1 ? "s" : ""} de cette catégorie {hiddenCount > 1 ? "sont disponibles" : "est disponible"} en formation, avec leur fiche détaillée et nos recommandations.
+          </VisitorMoreNotice>
+        )}
         {filtered.length === 0 && (
           <p className="text-sm py-8 text-center" style={{ color: th.fg3 }}>Aucun modèle ne correspond à cette recherche.</p>
         )}

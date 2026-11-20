@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useState } from "react";
 import { Link, Navigate, NavLink, Outlet, useLocation } from "react-router";
-import { Menu, X, Bug, ScanEye, LogOut, LayoutDashboard, CalendarClock, ClipboardList, Users, GraduationCap, Target, FileText, Code2, Sparkles, LayoutGrid, BookOpen, Megaphone, Lightbulb, type LucideIcon } from "lucide-react";
+import { Menu, X, Bug, ScanEye, LogOut, LayoutDashboard, CalendarClock, ClipboardList, Users, GraduationCap, Target, FileText, Code2, Sparkles, LayoutGrid, BookOpen, Megaphone, Lightbulb, Link2, Lock, type LucideIcon } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
@@ -14,6 +14,7 @@ import { Avatar } from "@/app/components/common/Avatar";
 import { AiBudgetBar } from "@/app/components/common/AiBudgetBar";
 import { NotificationBell } from "@/app/components/layout/NotificationBell";
 import { ImpersonationBanner } from "@/app/components/layout/ImpersonationBanner";
+import { VisitorBanner } from "@/app/components/common/Visitor";
 import { useBulkGeneration } from "@/app/state/bulk-generation-context";
 import { ReportIncidentDialog } from "@/app/components/layout/ReportIncidentDialog";
 import { CommandPalette, CommandTrigger } from "@/app/components/layout/CommandPalette";
@@ -33,7 +34,7 @@ function staffNav(admin: boolean, base: string): { title: string; items: StaffNa
     { title: "Pilotage", items: [
       { to: "/pilotage", label: "Tableau de bord", Icon: LayoutDashboard },
       { to: "/planning", label: "Disponibilités & RDV", Icon: CalendarClock },
-      ...(admin ? [{ to: "/prospects", label: "Prospects", Icon: Target }] : []),
+      ...(admin ? [{ to: "/prospects", label: "Prospects", Icon: Target }, { to: "/admin/visiteurs", label: "Liens visiteurs", Icon: Link2 }] : []),
     ] },
     { title: "Formations", items: [
       { to: "/sessions", label: admin ? "Sessions" : "Mes sessions", Icon: ClipboardList },
@@ -57,7 +58,7 @@ function staffNav(admin: boolean, base: string): { title: string; items: StaffNa
 
 export function MainLayout() {
   const th = useTh();
-  const { role, user, companyId, signOut } = useAuth();
+  const { role, user, companyId, isVisitor, signOut } = useAuth();
   // Onglet actif : fond gris léger, texte à l'encre et filet vertical à la
   // couleur du rôle (le seul endroit où elle apparaît dans la navigation).
   const navItemClass = ({ isActive }: { isActive: boolean }) => cx(
@@ -144,6 +145,7 @@ export function MainLayout() {
       }}
     >
       <ImpersonationBanner />
+      <VisitorBanner />
       {!examMode && <CommandPalette />}
       <div className="main-layout-body flex flex-1 min-h-0 overflow-hidden">
       <Background />
@@ -176,7 +178,7 @@ export function MainLayout() {
             {/* Repère de l'espace courant : pastille à la couleur du rôle. */}
             <span className="eyebrow flex items-center gap-2" style={{ color: th.fg3 }}>
               <span className="w-2 h-2 rounded-full shrink-0" style={{ background: th.roleGrad }} />
-              {role === "admin" ? "Administration" : role === "formateur" ? "Espace formateur" : "Espace apprenant"}
+              {role === "admin" ? "Administration" : role === "formateur" ? "Espace formateur" : isVisitor ? "Mode visiteur" : "Espace apprenant"}
             </span>
           </Link>
           <button aria-label="Fermer le menu" className="lg:hidden w-8 h-8 -mr-1.5 rounded-[2px] flex items-center justify-center shrink-0" onClick={() => setNavOpen(false)} style={{ color: th.fg }}>
@@ -212,6 +214,8 @@ export function MainLayout() {
                 <NavLink to={path} end onClick={() => setNavOpen(false)} className={navItemClass}
                   style={navItemStyle}>
                   <Icon className="w-4 h-4 shrink-0" />{label}
+                  {/* Mode Visiteur : rubriques réservées à la formation. */}
+                  {isVisitor && (id === "certification" || id === "calendar") && <Lock className="w-3.5 h-3.5 ml-auto shrink-0" style={{ color: th.fg3 }} />}
                 </NavLink>
               </div>
             );
@@ -285,7 +289,7 @@ export function MainLayout() {
             </button>
           </header>
         ) : (
-        <button aria-label="Ouvrir le menu" aria-expanded={navOpen} className={cx("fixed left-3 z-30 h-10 px-3 gap-2 rounded-[2px] flex items-center justify-center shrink-0 text-[13px] font-semibold lg:hidden", isImpersonating ? "top-[calc(env(safe-area-inset-top)+52px)]" : "top-[calc(env(safe-area-inset-top)+0.75rem)]")} style={{ background: th.card, border: `1px solid ${th.ink}`, color: th.fg }} onClick={() => setNavOpen(true)}>
+        <button aria-label="Ouvrir le menu" aria-expanded={navOpen} className={cx("fixed left-3 z-30 h-10 px-3 gap-2 rounded-[2px] flex items-center justify-center shrink-0 text-[13px] font-semibold lg:hidden", isImpersonating || isVisitor ? "top-[calc(env(safe-area-inset-top)+52px)]" : "top-[calc(env(safe-area-inset-top)+0.75rem)]")} style={{ background: th.card, border: `1px solid ${th.ink}`, color: th.fg }} onClick={() => setNavOpen(true)}>
           <Menu className="w-4 h-4" />Menu
         </button>
         )}

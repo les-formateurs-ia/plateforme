@@ -18,6 +18,10 @@ verify_jwt = false
 [functions.learner-access]
 verify_jwt = false
 
+# Visitor demo link (/visite/:token): the visitor link token is the credential.
+[functions.visitor-access]
+verify_jwt = false
+
 # Daily cron call (pg_net): authenticated by the CRON_SECRET header instead.
 [functions.formation-email-automations]
 verify_jwt = false

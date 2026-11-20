@@ -31,6 +31,7 @@ import { MissionPlayer } from "@/app/components/lesson/MissionPlayer";
 import { MindmapView } from "@/app/components/lesson/MindmapView";
 import { LessonPager } from "@/app/components/lesson/LessonPager";
 import { LessonVideo } from "@/app/components/lesson/LessonVideo";
+import { VISITOR_LESSON_VIDEO_URL } from "@/app/lib/visitor";
 import { LessonPodcast } from "@/app/components/lesson/LessonPodcast";
 import { LessonVoiceAgent } from "@/app/components/lesson/LessonVoiceAgent";
 import { GT } from "@/app/components/common/GT";
@@ -78,7 +79,7 @@ export function LessonPage() {
   // fond racine = fond de la page de leçon.
   const htmlTheme = useHtmlTheme("page");
   const { profile } = useProfile();
-  const { user, role } = useAuth();
+  const { user, role, isVisitor } = useAuth();
   const navigate = useNavigate();
   const { lessonId } = useParams<{ lessonId: string }>();
   // Un admin/formateur qui prévisualise une leçon (depuis AdminFormationPreviewPage)
@@ -164,6 +165,9 @@ export function LessonPage() {
   // sinon un admin/élève inscrit à plusieurs cours resterait bloqué sur une leçon
   // d'un cours différent de celui utilisé pour calculer sa progression "active".
   const course = useCourseProgress(lesson?.instanceId);
+  // Visiteur : vidéo de démonstration dédiée (emplacement vide tant qu'elle
+  // n'existe pas), jamais la vidéo de la formation.
+  const videoUrl = isVisitor ? VISITOR_LESSON_VIDEO_URL : lesson?.videoUrl ?? null;
   // HTML rédigé par le formateur (voir AdminLessonEditorPage), rendu comme le Playground :
   // vrai document dans une iframe sandboxée plutôt qu'un fragment injecté dans la page — pas
   // d'assainissement ici, la sandbox (sans allow-same-origin) est la frontière de sécurité,
@@ -188,8 +192,8 @@ export function LessonPage() {
   // Mindmap masquée partout pour le moment (onglet retiré ci-dessous) — le code de
   // génération/lecture reste en place, comme pour l'onglet "Vidéo IA" plus haut.
   useEffect(() => {
-    if (lesson && !lesson.videoUrl && tab === "video") setTab(revisionSheet ? "revision" : "podcast");
-  }, [lesson, tab]);
+    if (lesson && !videoUrl && !isVisitor && tab === "video") setTab(revisionSheet ? "revision" : "podcast");
+  }, [lesson, tab, videoUrl, isVisitor]);
 
   // Leçon "Mission" : brouillon existant (s'il y en a un) affiché à la place
   // du reference_content brut — priorité à ce que l'élève a déjà rempli.
@@ -399,7 +403,7 @@ export function LessonPage() {
           // illisible, on explique pourquoi plutôt que « introuvable ».
           if (await isLessonInLockedModule(lessonId)) {
             if (cancelled) return;
-            toast.error("Ce module n'est pas encore ouvert — ton formateur te donnera l'accès.");
+            toast.error(isVisitor ? "Mode visiteur : cette leçon est disponible en formation." : "Ce module n'est pas encore ouvert — ton formateur te donnera l'accès.");
             navigate("/lessons", { replace: true });
             return;
           }
@@ -430,7 +434,9 @@ export function LessonPage() {
     }
     if (state.state === "locked" && !isStaff(role)) {
       setAccess("denied");
-      toast.error(state.moduleLocked
+      toast.error(isVisitor
+        ? "Mode visiteur : cette leçon est disponible en formation."
+        : state.moduleLocked
         ? "Ce module n'est pas encore ouvert — ton formateur te donnera l'accès."
         : "Cette leçon n'est pas encore débloquée — termine les précédentes d'abord.");
       navigate("/lessons", { replace: true });
@@ -815,7 +821,7 @@ export function LessonPage() {
   // Onglet "Vidéo IA" masqué partout pour le moment (cf. LessonsPage GEN_TYPES) —
   // le code de génération/lecture reste en place, seul l'onglet est retiré.
   const TABS: { id: LTab; Icon: typeof Monitor; label: string }[] = [
-    ...(lesson?.videoUrl ? [{ id: "video" as const, Icon: Monitor, label: "Vidéo" }] : []),
+    ...(videoUrl || isVisitor ? [{ id: "video" as const, Icon: Monitor, label: "Vidéo" }] : []),
     ...(lesson?.customVideoUrl ? [{ id: "customVideo" as const, Icon: Video, label: "Votre vidéo personnalisée" }] : []),
     ...(revisionSheet ? [{ id: "revision" as const, Icon: ListChecks, label: "Fiche de révision" }] : []),
     { id: "podcast", Icon: Headphones, label: "Podcast" },
@@ -1019,17 +1025,17 @@ export function LessonPage() {
           ) : (
           <div className="relative rounded-[10px] overflow-hidden mb-5" style={{ paddingBottom: tab === "video" || tab === "customVideo" ? "56.25%" : "40%", background: "#000", border: `1px solid ${th.sep}` }}>
             <div className="absolute inset-0 overflow-hidden">
-              {tab === "video" && lesson.videoUrl && (
-                <LessonVideo src={lesson.videoUrl} title={lesson.title} />
+              {tab === "video" && videoUrl && (
+                <LessonVideo src={videoUrl} title={lesson.title} />
               )}
-              {tab === "video" && !lesson.videoUrl && (
+              {tab === "video" && !videoUrl && (
                 <>
                   <div className="absolute inset-0" style={{ background: "#101017" }} />
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
                     <div className="w-16 h-16 rounded-full flex items-center justify-center border border-white/15" style={{ background: "rgba(255,255,255,0.08)", backdropFilter: "blur(20px)" }}>
                       <Play className="w-6 h-6 text-white ml-1" />
                     </div>
-                    <span className="text-xs text-white/40">Vidéo pas encore ajoutée pour cette leçon</span>
+                    <span className="text-xs text-white/40">{isVisitor ? "La vidéo de cette leçon sera bientôt disponible" : "Vidéo pas encore ajoutée pour cette leçon"}</span>
                   </div>
                 </>
               )}

@@ -44,7 +44,7 @@ export async function loadFormationsHub(mine: { formateurId: string } | null = n
   const [companies, sessions, studentsRes, instancesRes, traineesRes, docsRes, slotsRes] = await Promise.all([
     listCompanies(),
     listSessions(!!mine),
-    supabase.from("profiles").select("id, first_name, last_name, email, formateur_id").eq("role", "student").is("company_id", null).order("last_name"),
+    supabase.from("profiles").select("id, first_name, last_name, email, formateur_id").eq("role", "student").eq("is_visitor", false).is("company_id", null).order("last_name"),
     supabase.from("formation_instances").select("id, user_id, name").eq("status", "active").order("assigned_at", { ascending: false }),
     supabase.from("training_session_trainees").select("*"),
     mine ? noDocs : supabase.from("session_documents").select("id, session_id, template_id, title, signer_name, issued_at, requires_signature, signed_at")

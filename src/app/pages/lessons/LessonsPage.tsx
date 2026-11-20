@@ -35,6 +35,7 @@ const greenBtn = { background: "rgba(106,222,177,0.12)", border: "1px solid rgba
 export function LessonsPage() {
   const th = useTh();
   const { loading, error: errorMsg, courses } = useAllCourseProgress();
+  const { isVisitor } = useAuth();
   const [openIds, setOpenIds] = useState<Set<string>>(new Set());
 
   // La première formation est ouverte par défaut, les suivantes repliées —
@@ -83,7 +84,9 @@ export function LessonsPage() {
         <p className="eyebrow" style={{ color: th.fg3 }}>Apprendre</p>
         <h1 className="mt-2 text-[2rem] sm:text-[2.6rem] leading-[1.02] font-black" style={{ color: th.fg }}>Mes <GT>leçons</GT></h1>
         <p className="text-[15px] sm:text-base mt-3 max-w-2xl leading-relaxed" style={{ color: th.fg2 }}>
-          Ton parcours module par module. Les leçons s'ouvrent dans l'ordre : chaque leçon validée débloque la suivante.
+          {isVisitor
+            ? "Voici le programme complet de la formation. En mode visiteur, la première leçon est ouverte : les suivantes sont disponibles en formation."
+            : "Ton parcours module par module. Les leçons s'ouvrent dans l'ordre : chaque leçon validée débloque la suivante."}
         </p>
       </div>
 
@@ -99,7 +102,7 @@ export function LessonsPage() {
 function FormationAccordion({ entry, open, onToggle }: { entry: CourseProgressEntry; open: boolean; onToggle: () => void }) {
   const th = useTh();
   const navigate = useNavigate();
-  const { user, role } = useAuth();
+  const { user, role, isVisitor } = useAuth();
   const { outline, lessonStates } = entry;
   const [openSection, setOpenSection] = useState<string | null>(null);
 
@@ -281,7 +284,7 @@ function FormationAccordion({ entry, open, onToggle }: { entry: CourseProgressEn
                       {m.done}/{m.total} leçon{m.total > 1 ? "s" : ""}{m.minutes ? ` · ${m.minutes} min` : ""}
                     </p>
                     {m.status === "locked" && !m.section.isUnlocked && (
-                      <p className="mt-2 text-sm" style={{ color: th.fg2 }}>Ton formateur ouvrira ce module le moment venu.</p>
+                      <p className="mt-2 text-sm" style={{ color: th.fg2 }}>{isVisitor ? "Disponible en formation." : "Ton formateur ouvrira ce module le moment venu."}</p>
                     )}
                     {m.section.lessons.length === 0 && (
                       <p className="mt-3 text-sm" style={{ color: th.fg3 }}>Aucune leçon dans ce module pour le moment.</p>

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/app/state/auth-context";
+import { VISITOR_OPEN_LESSONS } from "@/app/lib/visitor";
 import {
   getMyInstances, getCourseOutline, getLessonProgressMap, computeLessonStates, flattenLessons,
   type CourseOutline, type LessonWithState,
@@ -20,7 +21,9 @@ export interface CourseProgress {
 // laquelle est la plus récente — utilisé par LessonPage, pour que l'accès à
 // une leçon dépende du duplicata auquel ELLE appartient.
 export function useCourseProgress(instanceId?: string): CourseProgress {
-  const { user } = useAuth();
+  const { user, isVisitor } = useAuth();
+  // Mode Visiteur : seule la première leçon du programme est ouverte.
+  const lessonOpts = isVisitor ? { maxOpenLessons: VISITOR_OPEN_LESSONS } : {};
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [outline, setOutline] = useState<CourseOutline | null>(null);
@@ -48,7 +51,7 @@ export function useCourseProgress(instanceId?: string): CourseProgress {
         const progress = await getLessonProgressMap(user.id, lessons.map((l) => l.id));
         if (cancelled) return;
         setOutline(outlineData);
-        setLessonStates(computeLessonStates(outlineData, progress));
+        setLessonStates(computeLessonStates(outlineData, progress, lessonOpts));
       } catch (err) {
         console.error(err);
         if (!cancelled) setError("Impossible de charger votre progression.");
@@ -57,7 +60,7 @@ export function useCourseProgress(instanceId?: string): CourseProgress {
       }
     })();
     return () => { cancelled = true; };
-  }, [user, instanceId, refreshToken]);
+  }, [user, isVisitor, instanceId, refreshToken]);
 
   const refresh = useCallback(() => setRefreshToken((t) => t + 1), []);
 

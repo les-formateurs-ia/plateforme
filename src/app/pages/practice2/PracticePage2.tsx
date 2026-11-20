@@ -4,13 +4,14 @@ import { useTh } from "@/app/theme/theme";
 import { GT } from "@/app/components/common/GT";
 import { SymbolCard } from "@/app/components/common/SymbolCard";
 import { useAuth } from "@/app/state/auth-context";
+import { VISITOR_PRACTICE_PATHS } from "@/app/lib/visitor";
 
 const COUNT_WORDS = ["Aucun", "Un", "Deux", "Trois", "Quatre", "Cinq", "Six", "Sept", "Huit"];
 
 export function PracticePage2() {
   const th = useTh();
   const navigate = useNavigate();
-  const { role } = useAuth();
+  const { role, isVisitor } = useAuth();
   const isAdminRole = role === "admin";
   // `restricted` : même règle que les modules non prêts du Studio (cf. StudioPage) —
   // visibles en aperçu (grisé, non cliquable) pour l'admin seulement, masqués
@@ -25,6 +26,8 @@ export function PracticePage2() {
   ];
   const visibleBlocks = BLOCKS.filter((b) => !b.restricted || isAdminRole);
   const availableCount = visibleBlocks.filter((b) => !b.restricted).length;
+  // Mode Visiteur : les ateliers restent visibles, seul Battle Ground s'ouvre.
+  const closedToVisitor = (path: string) => isVisitor && !VISITOR_PRACTICE_PATHS.includes(path);
 
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-8 space-y-10">
@@ -32,14 +35,16 @@ export function PracticePage2() {
         <p className="eyebrow" style={{ color: th.fg3 }}>Pratiquer</p>
         <h1 className="mt-2 text-[2rem] sm:text-[2.6rem] leading-[1.02] font-black" style={{ color: th.fg }}><GT>Exercices</GT></h1>
         <p className="text-[15px] sm:text-base mt-3 max-w-2xl leading-relaxed" style={{ color: th.fg2 }}>
-          {COUNT_WORDS[availableCount] ?? availableCount} ateliers pour affûter ton regard sur l'IA générative. Chaque essai est corrigé par l'IA, à refaire autant que tu veux.
+          {isVisitor
+            ? "En visite, essayez Battle Ground : envoyez un même prompt à plusieurs IA et comparez leurs réponses. Les autres ateliers sont inclus dans la formation."
+            : `${COUNT_WORDS[availableCount] ?? availableCount} ateliers pour affûter ton regard sur l'IA générative. Chaque essai est corrigé par l'IA, à refaire autant que tu veux.`}
         </p>
       </div>
 
       <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 fade-up ${visibleBlocks.length % 3 === 0 ? "xl:grid-cols-3" : ""}`} style={{ animationDelay: "80ms" }}>
         {visibleBlocks.map(({ demo, theme, title, desc, tag, path, restricted }) => (
           <SymbolCard key={title} demo={demo} theme={theme} eyebrow={tag} title={title} desc={desc}
-            cta={restricted ? "Bientôt disponible" : "Commencer"} disabled={restricted} onClick={() => navigate(path)} />
+            cta={restricted ? "Bientôt disponible" : closedToVisitor(path) ? "Inclus dans la formation" : "Commencer"} disabled={restricted || closedToVisitor(path)} onClick={() => navigate(path)} />
         ))}
       </div>
     </div>

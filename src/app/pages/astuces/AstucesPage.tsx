@@ -8,6 +8,9 @@ import { SectionHead } from "@/app/components/common/SectionHead";
 import { AstuceMediaFrame } from "@/app/components/astuces/AstuceMediaFrame";
 import { BriquesLibrary } from "@/app/components/astuces/BriquesLibrary";
 import { ASTUCE_CAS, ASTUCE_DOMAINS, casMediaKeys, type AstuceCas, type AstuceDomainId } from "@/app/data/astuces";
+import { useAuth } from "@/app/state/auth-context";
+import { VisitorMoreNotice } from "@/app/components/common/Visitor";
+import { isCasOpenToVisitor } from "@/app/lib/visitor";
 
 // Une section par domaine : Images (photo de l'élève, logo…), puis Web
 // (pages générées par Claude, montrées en vidéo).
@@ -61,6 +64,7 @@ function CasCard({ cas }: { cas: AstuceCas }) {
 export function AstucesPage() {
   const th = useTh();
   const { hash } = useLocation();
+  const { isVisitor } = useAuth();
 
   // /astuces#briques (fil d'Ariane des pages de brique) : on descend
   // directement à la bibliothèque.
@@ -81,19 +85,30 @@ export function AstucesPage() {
       </div>
 
       {CAS_SECTIONS.map((section) => {
-        const cases = ASTUCE_CAS.filter((c) => c.domain === section.domain);
+        const allCases = ASTUCE_CAS.filter((c) => c.domain === section.domain);
+        // Mode Visiteur : un cas pratique par type d'astuce.
+        const cases = isVisitor ? allCases.filter((c) => isCasOpenToVisitor(c.id)) : allCases;
+        const hiddenCount = allCases.length - cases.length;
         if (cases.length === 0) return null;
         return (
           <section key={section.domain} aria-labelledby={`astuces-cas-${section.domain}`} className="fade-up">
-            <SectionHead id={`astuces-cas-${section.domain}`} eyebrow={`${section.eyebrow} · ${cases.length} cas pratiques`} title={section.title} />
+            <SectionHead id={`astuces-cas-${section.domain}`} eyebrow={`${section.eyebrow} · ${allCases.length} cas pratiques`} title={section.title} />
             {section.intro && <p className="text-sm max-w-3xl -mt-2 mb-5 leading-relaxed" style={{ color: th.fg2 }}>{section.intro}</p>}
             <div className={section.domain === "web" ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"}>
               {cases.map((cas) => <CasCard key={cas.id} cas={cas} />)}
             </div>
+            {hiddenCount > 0 && (
+              <div className="mt-4">
+                <VisitorMoreNotice>Mode visiteur : {hiddenCount} autre{hiddenCount > 1 ? "s" : ""} cas pratique{hiddenCount > 1 ? "s" : ""} de cette rubrique {hiddenCount > 1 ? "sont disponibles" : "est disponible"} en formation.</VisitorMoreNotice>
+              </div>
+            )}
           </section>
         );
       })}
 
+      {isVisitor ? (
+        <VisitorMoreNotice>Mode visiteur : la bibliothèque des briques de prompt (anatomie, règles d'or, briques détaillées et constructeur) est disponible en formation.</VisitorMoreNotice>
+      ) : (<>
       <div id="briques" className="scroll-mt-6 pt-4">
         <div role="separator" className="flex items-center gap-4">
           <div className="h-px flex-1" style={{ background: th.sep }} />
@@ -109,6 +124,7 @@ export function AstucesPage() {
       </div>
 
       {ASTUCE_DOMAINS.map((domain) => <BriquesLibrary key={domain.id} domain={domain} />)}
+      </>)}
     </div>
   );
 }

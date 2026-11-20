@@ -23,7 +23,7 @@ export interface StudentCard extends PersonCard {
 // `cpfOnly` exclut les salariés créés depuis l'espace Entreprise
 // (profiles.company_id renseigné).
 export async function listStudentCards(formateurId?: string, { cpfOnly = false }: { cpfOnly?: boolean } = {}): Promise<StudentCard[]> {
-  let studentsQuery = supabase.from("profiles").select("id, first_name, last_name, email, avatar_url, formateur_id, phone, created_at").eq("role", "student").order("first_name");
+  let studentsQuery = supabase.from("profiles").select("id, first_name, last_name, email, avatar_url, formateur_id, phone, created_at").eq("role", "student").eq("is_visitor", false).order("first_name");
   if (formateurId) studentsQuery = studentsQuery.eq("formateur_id", formateurId);
   if (cpfOnly) studentsQuery = studentsQuery.is("company_id", null);
 

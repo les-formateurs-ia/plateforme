@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/app/state/auth-context";
+import { VISITOR_OPEN_LESSONS } from "@/app/lib/visitor";
 import {
   getMyInstances, getCourseOutline, getLessonProgressMap, computeLessonStates, flattenLessons,
   type CourseOutline, type LessonWithState, type MyInstance,
@@ -24,7 +25,9 @@ export interface AllCourseProgress {
 // formation sélectionnée à la fois. Cf. useCourseProgress, gardé tel quel
 // pour Dashboard/LessonPage qui ne raisonnent que sur UNE formation précise.
 export function useAllCourseProgress(): AllCourseProgress {
-  const { user } = useAuth();
+  const { user, isVisitor } = useAuth();
+  // Mode Visiteur : seule la première leçon du programme est ouverte.
+  const lessonOpts = isVisitor ? { maxOpenLessons: VISITOR_OPEN_LESSONS } : {};
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [courses, setCourses] = useState<CourseProgressEntry[]>([]);
@@ -44,7 +47,7 @@ export function useAllCourseProgress(): AllCourseProgress {
         if (cancelled) return;
         const entries: CourseProgressEntry[] = instances.reduce<CourseProgressEntry[]>((acc, instance, i) => {
           const outline = outlines[i];
-          if (outline) acc.push({ instance, outline, lessonStates: computeLessonStates(outline, progress) });
+          if (outline) acc.push({ instance, outline, lessonStates: computeLessonStates(outline, progress, lessonOpts) });
           return acc;
         }, []);
         setCourses(entries);
@@ -56,7 +59,7 @@ export function useAllCourseProgress(): AllCourseProgress {
       }
     })();
     return () => { cancelled = true; };
-  }, [user, refreshToken]);
+  }, [user, isVisitor, refreshToken]);
 
   const refresh = useCallback(() => setRefreshToken((t) => t + 1), []);
 

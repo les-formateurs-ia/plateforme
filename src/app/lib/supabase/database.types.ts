@@ -328,6 +328,7 @@ export interface Database {
           company_id: string | null;
           spent_usd: number;
           ai_budget_usd: number;
+          is_visitor: boolean;
           created_at: string;
         };
         Insert: {
@@ -345,9 +346,40 @@ export interface Database {
           company_id?: string | null;
           spent_usd?: number;
           ai_budget_usd?: number;
+          is_visitor?: boolean;
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
+        Relationships: never[];
+      };
+      visitor_links: {
+        Row: {
+          id: string;
+          token: string;
+          label: string;
+          profile_id: string;
+          template_id: string | null;
+          created_by: string | null;
+          created_at: string;
+          expires_at: string | null;
+          revoked_at: string | null;
+          open_count: number;
+          last_opened_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          token?: string;
+          label: string;
+          profile_id: string;
+          template_id?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          expires_at?: string | null;
+          revoked_at?: string | null;
+          open_count?: number;
+          last_opened_at?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["visitor_links"]["Insert"]>;
         Relationships: never[];
       };
       student_onboarding: {

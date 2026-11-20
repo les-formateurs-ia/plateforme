@@ -83,7 +83,8 @@ export async function listStudentInstancesForTemplate(): Promise<StudentInstance
     .from("profiles")
     .select("id, first_name, last_name, email")
     .in("id", userIds)
-    .eq("role", "student");
+    .eq("role", "student")
+    .eq("is_visitor", false);
   if (studentsError) throw studentsError;
   const names = new Map((students ?? []).map((s) => [s.id, [s.first_name, s.last_name].filter(Boolean).join(" ").trim() || s.email]));
   return (instances ?? [])

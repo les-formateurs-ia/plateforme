@@ -14,12 +14,19 @@ const ACCESS_ERRORS: Record<string, string> = {
   compte_non_apprenant: "Ce lien est réservé aux apprenants : connecte-toi avec ton mot de passe.",
 };
 
+// Échec d'un lien Visiteur (visitor-access → /login?visite=…).
+const VISIT_ERRORS: Record<string, string> = {
+  lien_invalide: "Ce lien de visite n'est pas valable. Demande un nouveau lien à ton contact Les Formateurs IA.",
+  lien_expire: "Ce lien de visite a expiré. Demande un nouveau lien à ton contact Les Formateurs IA.",
+};
+
 export function LoginPage() {
   const th = useTh();
   const navigate = useNavigate();
   const { signIn } = useAuth();
   const [searchParams] = useSearchParams();
   const accessError = searchParams.get("acces");
+  const visitError = searchParams.get("visite");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -46,6 +53,11 @@ export function LoginPage() {
         {accessError && (
           <p className="text-sm mb-6 rounded-[4px] px-4 py-3" style={{ background: th.navA, color: th.fg }}>
             {ACCESS_ERRORS[accessError] ?? "La connexion directe n'a pas abouti. Réessaie depuis le lien de l'e-mail, ou connecte-toi ci-dessous."}
+          </p>
+        )}
+        {visitError && (
+          <p className="text-sm mb-6 rounded-[4px] px-4 py-3" style={{ background: th.navA, color: th.fg }}>
+            {VISIT_ERRORS[visitError] ?? "L'ouverture du lien de visite n'a pas abouti. Réessaie dans un instant depuis le lien reçu."}
           </p>
         )}
 

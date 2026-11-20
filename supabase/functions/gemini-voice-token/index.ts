@@ -17,9 +17,10 @@
 // Vérifié empiriquement (curl + script Node) avant d'écrire ce code.
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
-import { buildLockedSystemInstruction, type VoiceAgentVars } from "../_shared/voice-agent-prompt.ts";
+import { buildLockedSystemInstruction, START_TRIGGER, type VoiceAgentVars } from "../_shared/voice-agent-prompt.ts";
 import { buildStudentOverview } from "../_shared/student-overview.ts";
 import { getStudentMemoryText, scheduleStudentMemoryUpdate } from "../_shared/student-memory.ts";
+import { buildVisitorVoiceInstruction, isVisitorUser, loadVisitorCourseContext } from "../_shared/visitor.ts";
 
 const HISTORY_WINDOW = 10;
 
@@ -63,12 +64,14 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const userId = userData.user.id;
+    // Mode Visiteur : prompt « mode test », sans profil ni mémoire.
+    const visitor = await isVisitorUser(supabase, userId);
     const [{ text: overviewText }, memoryText, recentHistory] = await Promise.all([
       buildStudentOverview(supabase, userId),
       getStudentMemoryText(supabase, userId),
       buildRecentHistoryText(supabase, body.conversation_id),
     ]);
-    scheduleStudentMemoryUpdate(supabase, userId);
+    if (!visitor) scheduleStudentMemoryUpdate(supabase, userId);
     const vars: VoiceAgentVars = {
       student_name: body.student_name || "l'élève",
       profession: body.profession || "non renseigné",
@@ -83,7 +86,9 @@ Deno.serve(async (req) => {
     };
 
     const model = Deno.env.get("GEMINI_LIVE_MODEL") || DEFAULT_LIVE_MODEL;
-    const systemInstruction = buildLockedSystemInstruction(vars);
+    const systemInstruction = visitor
+      ? buildVisitorVoiceInstruction(await loadVisitorCourseContext(supabase, userId, body.formation_instance_id ?? null), START_TRIGGER)
+      : buildLockedSystemInstruction(vars);
 
     const now = Date.now();
     const expireTime = new Date(now + 30 * 60 * 1000).toISOString();

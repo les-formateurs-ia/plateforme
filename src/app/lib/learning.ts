@@ -183,9 +183,11 @@ export interface LessonWithState {
 // - Dans un module ouvert, les leçons se débloquent dans l'ordre : une leçon
 //   est accessible seulement si les précédentes DU MÊME MODULE sont terminées.
 //   Terminer un module n'ouvre donc jamais le suivant.
+// - Mode Visiteur (maxOpenLessons) : seules les N premières leçons du
+//   programme sont ouvertes, les suivantes restent verrouillées.
 // L'ordre du résultat suit flattenLessons(outline).
-export function computeLessonStates(outline: CourseOutline, progress: Map<string, LessonProgressRow>): LessonWithState[] {
-  return outline.sections.flatMap((section) => {
+export function computeLessonStates(outline: CourseOutline, progress: Map<string, LessonProgressRow>, opts: { maxOpenLessons?: number } = {}): LessonWithState[] {
+  const states = outline.sections.flatMap((section) => {
     let unlocked = true;
     return section.lessons.map((lesson) => {
       const p = progress.get(lesson.id) ?? null;
@@ -196,6 +198,9 @@ export function computeLessonStates(outline: CourseOutline, progress: Map<string
       return { lesson, progress: p, state, moduleLocked: false };
     });
   });
+  const max = opts.maxOpenLessons;
+  if (max === undefined) return states;
+  return states.map((s, i) => (i < max ? s : { ...s, state: "locked" as const }));
 }
 
 // Progression enregistrée, indépendante de l'accès : une leçon terminée dans

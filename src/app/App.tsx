@@ -71,7 +71,10 @@ import { ClientsPage } from "@/app/pages/equipe/ClientsPage";
 import { AdminSessionDetailPage } from "@/app/pages/admin/AdminSessionDetailPage";
 import { SignDocumentPage } from "@/app/pages/SignDocumentPage";
 import { ClientPortalPage } from "@/app/pages/ClientPortalPage";
-import { LearnerAccessPage } from "@/app/pages/LearnerAccessPage";
+import { LearnerAccessPage, VisitorAccessPage } from "@/app/pages/LearnerAccessPage";
+import { NotForVisitor } from "@/app/components/common/Visitor";
+import { VISITOR_PATH } from "@/app/lib/visitor";
+import { AdminVisitorLinksPage } from "@/app/pages/admin/AdminVisitorLinksPage";
 import { ImpactSurveyPage } from "@/app/pages/ImpactSurveyPage";
 import { ImpactResultsPage } from "@/app/pages/ImpactResultsPage";
 import { ProspectsPage } from "@/app/pages/prospects/ProspectsPage";
@@ -229,23 +232,24 @@ function AppRoutes() {
       <Route path="/signer/:token" element={<SignDocumentPage />} />
       <Route path="/espace-client/:token" element={<ClientPortalPage />} />
       <Route path="/acces/:token" element={<LearnerAccessPage />} />
+      <Route path={`${VISITOR_PATH}/:token`} element={<VisitorAccessPage />} />
       <Route path="/evaluation/resultats/:token" element={<ImpactResultsPage />} />
       <Route path="/evaluation/:token" element={<ImpactSurveyPage />} />
       <Route path="/" element={<RequireAuth><RootGate /></RequireAuth>} />
       <Route element={<RequireAuth><MainLayout /></RequireAuth>}>
         <Route path="dashboard" element={<DashboardRoute />} />
         <Route path="lessons" element={<LessonsPage />} />
-        <Route path="certification" element={<CertificationPage />} />
-        <Route path="certification/ecrit" element={<CertificationExamPage />} />
+        <Route path="certification" element={<NotForVisitor feature="certification"><CertificationPage /></NotForVisitor>} />
+        <Route path="certification/ecrit" element={<NotForVisitor feature="certification"><CertificationExamPage /></NotForVisitor>} />
         <Route path="practice" element={<PracticePage2 />} />
-        <Route path="practice/prompts" element={<PromptSessionsPage />} />
-        <Route path="practice/prompts/:sessionId" element={<PromptExercisePage />} />
-        <Route path="practice/media" element={<MediaExerciseSessionsPage />} />
-        <Route path="practice/media/:sessionId" element={<MediaExercisePage />} />
+        <Route path="practice/prompts" element={<NotForVisitor feature="practice" backTo="/practice" backLabel="Exercices"><PromptSessionsPage /></NotForVisitor>} />
+        <Route path="practice/prompts/:sessionId" element={<NotForVisitor feature="practice" backTo="/practice" backLabel="Exercices"><PromptExercisePage /></NotForVisitor>} />
+        <Route path="practice/media" element={<NotForVisitor feature="practice" backTo="/practice" backLabel="Exercices"><MediaExerciseSessionsPage /></NotForVisitor>} />
+        <Route path="practice/media/:sessionId" element={<NotForVisitor feature="practice" backTo="/practice" backLabel="Exercices"><MediaExercisePage /></NotForVisitor>} />
         <Route path="practice/html" element={<RequireAdmin><HtmlExerciseSessionsPage /></RequireAdmin>} />
         <Route path="practice/html/:sessionId" element={<RequireAdmin><HtmlExercisePage /></RequireAdmin>} />
         <Route path="practice/battle-ground" element={<BattleGroundPage />} />
-        <Route path="practice/reverse-prompting" element={<AiBudgetGate><ReversePromptingPage /></AiBudgetGate>} />
+        <Route path="practice/reverse-prompting" element={<NotForVisitor feature="practice" backTo="/practice" backLabel="Exercices"><AiBudgetGate><ReversePromptingPage /></AiBudgetGate></NotForVisitor>} />
         <Route path="practice/ai-detection" element={<RequireAdmin><AiDetectionPage /></RequireAdmin>} />
         <Route path="studio" element={<StudioPage />} />
         <Route path="studio/chatgpt" element={<StudioChatPage key="openai" provider="openai" />} />
@@ -262,12 +266,12 @@ function AppRoutes() {
         <Route path="hub/:category" element={<HubCategoryPage />} />
         <Route path="astuces" element={<AstucesPage />} />
         <Route path="astuces/cas/:casId" element={<AstucesCasPage />} />
-        <Route path="astuces/:domain/briques/:briqueId" element={<AstucesBriquePage />} />
-        <Route path="astuces/:domain/constructeur" element={<AstucesBuilderPage />} />
+        <Route path="astuces/:domain/briques/:briqueId" element={<NotForVisitor feature="briques" backTo="/astuces" backLabel="Guide IA"><AstucesBriquePage /></NotForVisitor>} />
+        <Route path="astuces/:domain/constructeur" element={<NotForVisitor feature="builder" backTo="/astuces" backLabel="Guide IA"><AstucesBuilderPage /></NotForVisitor>} />
         <Route path="astuces/*" element={<Navigate to="/astuces" replace />} />
         <Route path="agent" element={<AgentPage />} />
         <Route path="agent/:conversationId" element={<AgentPage />} />
-        <Route path="calendar" element={<CalendarPage />} />
+        <Route path="calendar" element={<NotForVisitor feature="calendar"><CalendarPage /></NotForVisitor>} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="admin/courses" element={<RequireAdmin><AdminCoursesPage /></RequireAdmin>} />
         <Route path="admin/courses/trash" element={<RequireAdmin><AdminTrashPage /></RequireAdmin>} />
@@ -300,6 +304,7 @@ function AppRoutes() {
         {/* Ancienne liste "Demandes IA", remplacée par l'espace Prospects. */}
         <Route path="admin/project-advisor-leads" element={<Navigate to="/prospects" replace />} />
         <Route path="prospects" element={<RequireAdmin><ProspectsPage /></RequireAdmin>} />
+        <Route path="admin/visiteurs" element={<RequireAdmin><AdminVisitorLinksPage /></RequireAdmin>} />
 
         <Route path="formateur/courses" element={<RequireFormateur><AdminCoursesPage /></RequireFormateur>} />
         <Route path="formateur/courses/new" element={<RequireFormateur><AdminCourseEditorPage /></RequireFormateur>} />
