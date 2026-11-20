@@ -31,7 +31,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
 import { submitAndAwaitRunwareText } from "../_shared/runware.ts";
 import { checkAiBudget, recordAiUsage } from "../_shared/ai-budget.ts";
-import { serveWithVisitorTrial } from "../_shared/visitor-trial.ts";
+import { refundVisitorTrial, serveWithVisitorTrial } from "../_shared/visitor-trial.ts";
 
 type Provider = "gemini" | "openai" | "anthropic";
 
@@ -137,8 +137,12 @@ serveWithVisitorTrial(async (req, trial) => {
       if (!budget.ok) return jsonResponse({ error: budget.error }, 402);
     }
 
-    // Mode Visiteur : un essai de cet outil (rendu si la génération échoue).
-    const trialRefused = await trial.claim(supabase, "battle_ground");
+    // Mode Visiteur : un combat à l'essai. La page lance un appel par modèle
+    // (persist: false), l'essai est donc compté par modèle : sinon le premier
+    // appel le prend et les deux autres sont refusés dès le premier combat.
+    // Rendu si la génération échoue.
+    const trialTool = selected.length === 1 ? `battle_ground_${selected[0]}` : "battle_ground";
+    const trialRefused = await trial.claim(supabase, trialTool);
     if (trialRefused) return trialRefused;
 
     const keys = {
@@ -147,6 +151,10 @@ serveWithVisitorTrial(async (req, trial) => {
     };
 
     const responses = await Promise.all(selected.map((provider) => callProvider(provider, modelIds[provider], prompt.trim(), keys)));
+
+    // Aucun modèle n'a répondu : la réponse reste en 200 (erreur affichée dans
+    // la colonne), l'essai du visiteur est rendu pour qu'il puisse relancer.
+    if (!responses.some((r) => r.text)) await refundVisitorTrial(userId, trialTool);
 
     await Promise.all(responses.filter((r) => r.provider !== "gemini" && r.text).map((r) =>
       recordAiUsage(supabase, { userId, mediaType: "text", model: r.model, cost: r.cost, source: "battle_ground" }),

@@ -251,6 +251,10 @@ export const VISITOR_TOOLS: Record<string, VisitorToolInfo> = {
 };
 VISITOR_TOOLS.agent_voice = VISITOR_TOOLS.agent_chat;
 VISITOR_TOOLS.reverse_prompt = VISITOR_TOOLS.practice;
+// Battle Ground : l'essai est compté par modèle (cf. generate-battle-responses).
+VISITOR_TOOLS.battle_ground_gemini = VISITOR_TOOLS.battle_ground;
+VISITOR_TOOLS.battle_ground_openai = VISITOR_TOOLS.battle_ground;
+VISITOR_TOOLS.battle_ground_anthropic = VISITOR_TOOLS.battle_ground;
 
 export const VISITOR_FALLBACK_TOOL: VisitorToolInfo = {
   name: "Cet outil IA",

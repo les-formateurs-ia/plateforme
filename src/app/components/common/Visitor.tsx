@@ -7,6 +7,7 @@ import { ArrowLeft, Check, Globe, Lock, Mail, Phone, Sparkles } from "lucide-rea
 import { useTh } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/app/components/ui/dialog";
+import { NeuralField } from "@/app/components/particles/NeuralField";
 import {
   VISITOR_CLOSED_FEATURES, VISITOR_FALLBACK_TOOL, VISITOR_TOOLS, VISITOR_TRIAL_EVENT, type VisitorClosedFeature,
 } from "@/app/lib/visitor";
@@ -27,6 +28,37 @@ export function VisitorContacts() {
       <a href={CONTACT_PHONE_HREF} className="flex items-center gap-1.5 hover:opacity-70"><Phone className="w-3.5 h-3.5" />{CONTACT_PHONE}</a>
       <a href={CONTACT_HREF} className="flex items-center gap-1.5 hover:opacity-70"><Mail className="w-3.5 h-3.5" />{CONTACT_EMAIL}</a>
       <a href={WEBSITE_URL} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 hover:opacity-70"><Globe className="w-3.5 h-3.5" />les-formateurs-ia.fr</a>
+    </div>
+  );
+}
+
+// Leçon d'essai : à la place du lecteur vidéo (même cadre 16:9, posé par la
+// page en position absolue), un fond très coloré animé avec le réseau de
+// particules de la marque, et l'annonce de la vidéo personnalisée.
+export function VisitorVideoTeaser() {
+  return (
+    <div className="visitor-video-teaser absolute inset-0 overflow-hidden isolate flex items-center justify-center p-6 text-center">
+      <style>{`
+        .visitor-video-teaser {
+          background: linear-gradient(120deg, #b58de0, #dbacf0, #78d5e2, #6adeb1, #fbc2ad, #b58de0);
+          background-size: 300% 300%;
+          animation: visitor-teaser-flow 14s ease-in-out infinite;
+        }
+        @keyframes visitor-teaser-flow {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+        @media (prefers-reduced-motion: reduce) { .visitor-video-teaser { animation: none; } }
+      `}</style>
+      <NeuralField dark={false} density={6} band={0.9} active className="-z-10" />
+      <div className="flex flex-col items-center gap-4 max-w-xl">
+        <span className="w-14 h-14 rounded-full flex items-center justify-center bg-white/70 backdrop-blur-sm" style={{ color: "#1a1424" }}>
+          <Sparkles className="w-6 h-6" />
+        </span>
+        <p className="text-xl sm:text-2xl font-bold leading-snug" style={{ color: "#1a1424" }}>
+          Tu retrouveras ici une vidéo personnalisée selon ton profil
+        </p>
+      </div>
     </div>
   );
 }
