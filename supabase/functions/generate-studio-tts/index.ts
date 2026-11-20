@@ -9,7 +9,8 @@ import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
 import { TTS_VOICES, DEFAULT_TTS_VOICE, TTS_MODEL_ID, buildTtsTask } from "../_shared/studio-tts-voices.ts";
 import { submitRunwareTask, finalizeRunwareResult } from "../_shared/runware.ts";
-import { checkAiBudget, recordAiUsage } from "../_shared/ai-budget.ts";
+import { checkAiBudget, checkVisitorCost, recordAiUsage } from "../_shared/ai-budget.ts";
+import { serveWithVisitorTrial } from "../_shared/visitor-trial.ts";
 
 // Un type invalide (ex. une chaîne au lieu d'un nombre) est simplement
 // ignoré plutôt que rejeté en 400 : buildTtsTask ramène de toute façon toute
@@ -25,7 +26,7 @@ function readNumberParam(value: unknown): number | undefined {
 // reste prudent pour garder un temps de génération raisonnable.
 const SCRIPT_MAX_LENGTH = 4000;
 
-Deno.serve(async (req) => {
+serveWithVisitorTrial(async (req, trial) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
 
   try {
@@ -56,6 +57,12 @@ Deno.serve(async (req) => {
 
     const budget = await checkAiBudget(userClient, userId);
     if (!budget.ok) return jsonResponse({ error: budget.error }, 402);
+
+    // Mode Visiteur : un essai de cet outil (rendu si la génération échoue).
+    const trialRefused = await trial.claim(userClient, "studio_tts");
+    if (trialRefused) return trialRefused;
+    const tooHeavy = await checkVisitorCost(userClient, userId, [TTS_MODEL_ID]);
+    if (tooHeavy) return tooHeavy;
 
     const apiKey = Deno.env.get("RUNWARE_API_KEY");
     if (!apiKey) return jsonResponse({ error: "Configuration Runware manquante." }, 500);

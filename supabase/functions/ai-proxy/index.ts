@@ -10,11 +10,12 @@
 // tels quels : le HTML personnalisé garde le contrôle total du prompt).
 import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
+import { serveWithVisitorTrial } from "../_shared/visitor-trial.ts";
 
 const ALLOWED_MODELS = new Set(["gemini-3.6-flash", "gemini-3-flash-preview"]);
 const DEFAULT_MODEL = "gemini-3.6-flash";
 
-Deno.serve(async (req) => {
+serveWithVisitorTrial(async (req, trial) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
 
   try {
@@ -31,6 +32,10 @@ Deno.serve(async (req) => {
     );
     const { data: userData, error: userErr } = await supabase.auth.getUser();
     if (userErr || !userData?.user) return jsonResponse({ error: "Session invalide." }, 401);
+
+    // Mode Visiteur : quelques appels pour tester les Playgrounds de la leçon.
+    const trialRefused = await trial.claim(supabase, "playground", 30);
+    if (trialRefused) return trialRefused;
 
     const body = await req.json();
     if (!body?.contents) return jsonResponse({ error: "contents manquant." }, 400);

@@ -18,6 +18,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse, runInBackground, base64ToUint8Array } from "../_shared/podcast-utils.ts";
 import { buildCourseContext } from "../_shared/course-context.ts";
 import { parsePedagogyStyle, pedagogyFeedbackToneBlock } from "../_shared/pedagogy-style.ts";
+import { serveWithVisitorTrial } from "../_shared/visitor-trial.ts";
 
 const GEMINI_TEXT_MODEL = "gemini-3.6-flash";
 const GEMINI_IMAGE_MODEL = "gemini-3.1-flash-image";
@@ -157,7 +158,7 @@ async function startVideoOperation(apiKey: string, prompt: string): Promise<stri
   return json.name as string;
 }
 
-Deno.serve(async (req) => {
+serveWithVisitorTrial(async (req, trial) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
 
   try {
@@ -183,6 +184,10 @@ Deno.serve(async (req) => {
     const { data: userData, error: userErr } = await supabase.auth.getUser();
     if (userErr || !userData?.user) return jsonResponse({ error: "Session invalide." }, 401);
     const userId = userData.user.id;
+
+    // Mode Visiteur : outil réservé à la formation.
+    const trialRefused = await trial.claim(supabase, "practice", 0);
+    if (trialRefused) return trialRefused;
 
     const { data: lessonRows } = await supabase.from("instance_lessons").select("title, reference_content").order("order_index");
     const courseContext = buildCourseContext(lessonRows ?? []);

@@ -17,7 +17,8 @@ import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
 import { STUDIO_MUSIC_MODELS, MUSIC_MODEL_ID } from "../_shared/studio-music-models.ts";
 import { STUDIO_MODELS } from "../_shared/studio-models.ts";
 import { submitRunwareTask, uploadRunwareAsset } from "../_shared/runware.ts";
-import { checkAiBudget, recordAiUsage } from "../_shared/ai-budget.ts";
+import { checkAiBudget, checkVisitorCost, recordAiUsage } from "../_shared/ai-budget.ts";
+import { serveWithVisitorTrial } from "../_shared/visitor-trial.ts";
 
 const GEMINI_TEXT_MODEL = "gemini-3.6-flash";
 // Pochette : modèle natif Runware (fonctionne sans solde crédité, cf.
@@ -52,7 +53,7 @@ Réponds UNIQUEMENT avec un objet JSON strict, sans texte autour, de cette forme
 }`;
 }
 
-Deno.serve(async (req) => {
+serveWithVisitorTrial(async (req, trial) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
 
   try {
@@ -77,6 +78,12 @@ Deno.serve(async (req) => {
 
     const budget = await checkAiBudget(userClient, userId);
     if (!budget.ok) return jsonResponse({ error: budget.error }, 402);
+
+    // Mode Visiteur : un essai de cet outil (rendu si la génération échoue).
+    const trialRefused = await trial.claim(userClient, "studio_music");
+    if (trialRefused) return trialRefused;
+    const tooHeavy = await checkVisitorCost(userClient, userId, [STUDIO_MUSIC_MODELS[MUSIC_MODEL_ID].runwareModel, STUDIO_MODELS[COVER_MODEL_ID].runwareModel]);
+    if (tooHeavy) return tooHeavy;
 
     const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
     if (!geminiApiKey) return jsonResponse({ error: "GEMINI_API_KEY non configurée côté serveur." }, 500);

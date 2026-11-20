@@ -21,6 +21,7 @@ import { buildLockedSystemInstruction, START_TRIGGER, type VoiceAgentVars } from
 import { buildStudentOverview } from "../_shared/student-overview.ts";
 import { getStudentMemoryText, scheduleStudentMemoryUpdate } from "../_shared/student-memory.ts";
 import { buildVisitorVoiceInstruction, isVisitorUser, loadVisitorCourseContext } from "../_shared/visitor.ts";
+import { serveWithVisitorTrial } from "../_shared/visitor-trial.ts";
 
 const HISTORY_WINDOW = 10;
 
@@ -44,7 +45,7 @@ async function buildRecentHistoryText(
 // secret, pas de redéployer.
 const DEFAULT_LIVE_MODEL = "models/gemini-2.5-flash-native-audio-preview-09-2025";
 
-Deno.serve(async (req) => {
+serveWithVisitorTrial(async (req, trial) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
 
   try {
@@ -64,6 +65,10 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const userId = userData.user.id;
+
+    // Mode Visiteur : un essai de cet outil (rendu si la génération échoue).
+    const trialRefused = await trial.claim(supabase, "agent_voice");
+    if (trialRefused) return trialRefused;
     // Mode Visiteur : prompt « mode test », sans profil ni mémoire.
     const visitor = await isVisitorUser(supabase, userId);
     const [{ text: overviewText }, memoryText, recentHistory] = await Promise.all([
@@ -91,7 +96,8 @@ Deno.serve(async (req) => {
       : buildLockedSystemInstruction(vars);
 
     const now = Date.now();
-    const expireTime = new Date(now + 30 * 60 * 1000).toISOString();
+    // Visiteur : une courte conversation d'essai (3 min), au lieu de 30 min.
+    const expireTime = new Date(now + (visitor ? 3 : 30) * 60 * 1000).toISOString();
     const newSessionExpireTime = new Date(now + 60 * 1000).toISOString();
 
     const resp = await fetch("https://generativelanguage.googleapis.com/v1alpha/auth_tokens", {

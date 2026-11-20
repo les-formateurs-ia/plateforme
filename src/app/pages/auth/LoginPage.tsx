@@ -18,6 +18,10 @@ const ACCESS_ERRORS: Record<string, string> = {
 const VISIT_ERRORS: Record<string, string> = {
   lien_invalide: "Ce lien de visite n'est pas valable. Demande un nouveau lien à ton contact Les Formateurs IA.",
   lien_expire: "Ce lien de visite a expiré. Demande un nouveau lien à ton contact Les Formateurs IA.",
+  lien_complet: "Ce lien de visite a atteint son nombre maximal de visiteurs. Demande un nouveau lien à ton contact Les Formateurs IA.",
+  lien_sature: "Trop de visites ont été ouvertes depuis cette connexion aujourd'hui. Réessaie demain ou contacte Les Formateurs IA.",
+  creation: "La visite n'a pas pu être ouverte. Réessaie dans quelques instants.",
+  lien_connexion: "La visite n'a pas pu être ouverte. Réessaie dans quelques instants.",
 };
 
 export function LoginPage() {

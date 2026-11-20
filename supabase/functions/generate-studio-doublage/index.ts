@@ -19,9 +19,10 @@ import { TTS_MODEL_ID, buildTtsTask } from "../_shared/studio-tts-voices.ts";
 import { STUDIO_DOUBLAGE_MODELS, DEFAULT_DOUBLAGE_MODEL, DOUBLAGE_LANGUAGES, DEFAULT_DOUBLAGE_LANGUAGE } from "../_shared/studio-doublage-models.ts";
 import { transcribeAndTranslateVideo } from "../_shared/gemini-video.ts";
 import { submitAndAwaitRunware, submitRunwareTask, finalizeRunwareResult } from "../_shared/runware.ts";
-import { checkAiBudget, recordAiUsage } from "../_shared/ai-budget.ts";
+import { checkAiBudget, checkVisitorCost, recordAiUsage } from "../_shared/ai-budget.ts";
+import { serveWithVisitorTrial } from "../_shared/visitor-trial.ts";
 
-Deno.serve(async (req) => {
+serveWithVisitorTrial(async (req, trial) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
 
   try {
@@ -47,6 +48,12 @@ Deno.serve(async (req) => {
 
     const budget = await checkAiBudget(userClient, userId);
     if (!budget.ok) return jsonResponse({ error: budget.error }, 402);
+
+    // Mode Visiteur : un essai de cet outil (rendu si la génération échoue).
+    const trialRefused = await trial.claim(userClient, "studio_doublage");
+    if (trialRefused) return trialRefused;
+    const tooHeavy = await checkVisitorCost(userClient, userId, [TTS_MODEL_ID, modelConfig.runwareModel]);
+    if (tooHeavy) return tooHeavy;
 
     // Octets bruts pour Gemini (upload direct, pas de re-passage par une URL
     // signée pour cette étape) + URL signée séparée pour Runware à l'étape 3

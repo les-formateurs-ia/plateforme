@@ -11,6 +11,7 @@ import { pollRunwareTask, uploadRunwareAsset } from "../_shared/runware.ts";
 import { STUDIO_MUSIC_MODELS, MUSIC_MODEL_ID } from "../_shared/studio-music-models.ts";
 import { STUDIO_MODELS } from "../_shared/studio-models.ts";
 import { recordAiUsage } from "../_shared/ai-budget.ts";
+import { refundVisitorTrial } from "../_shared/visitor-trial.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
@@ -72,6 +73,7 @@ Deno.serve(async (req) => {
 
     if (audioFailedError) {
       await userClient.from("studio_music_generations").update({ status: "failed", error_message: audioFailedError }).eq("id", generationId);
+      await refundVisitorTrial(userId, "studio_music");
       return jsonResponse({ status: "failed", error: audioFailedError });
     }
 

@@ -5,6 +5,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
 import { pollRunwareTask, finalizeRunwareResult } from "../_shared/runware.ts";
 import { TTS_MODEL_ID } from "../_shared/studio-tts-voices.ts";
+import { refundVisitorTrial } from "../_shared/visitor-trial.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
@@ -45,6 +46,7 @@ Deno.serve(async (req) => {
     if (polled.status === "pending") return jsonResponse({ status: "pending" });
     if (polled.status === "failed") {
       await userClient.from("studio_tts_generations").update({ status: "failed", error_message: polled.error }).eq("id", generationId);
+      await refundVisitorTrial(userId, "studio_tts");
       return jsonResponse({ status: "failed", error: polled.error });
     }
 
@@ -57,7 +59,10 @@ Deno.serve(async (req) => {
       kind: "audio",
       usage: { userId, mediaType: "audio", model: TTS_MODEL_ID, cost: polled.cost, source: "studio_tts" },
     });
-    if (!result.ok) return jsonResponse({ status: "failed", error: result.error });
+    if (!result.ok) {
+      await refundVisitorTrial(userId, "studio_tts");
+      return jsonResponse({ status: "failed", error: result.error });
+    }
     return jsonResponse({ status: "ready", audioPath: result.path });
   } catch (err) {
     return jsonResponse({ error: err instanceof Error ? err.message : "Erreur inconnue." }, 500);

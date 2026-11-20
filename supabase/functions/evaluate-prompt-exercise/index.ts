@@ -10,6 +10,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
 import { buildCourseContext } from "../_shared/course-context.ts";
 import { parsePedagogyStyle, pedagogyFeedbackToneBlock } from "../_shared/pedagogy-style.ts";
+import { serveWithVisitorTrial } from "../_shared/visitor-trial.ts";
 
 const GEMINI_TEXT_MODEL = "gemini-3.6-flash";
 
@@ -101,7 +102,7 @@ function sanitizeFeedback(raw: unknown): Feedback | null {
   };
 }
 
-Deno.serve(async (req) => {
+serveWithVisitorTrial(async (req, trial) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
 
   try {
@@ -125,6 +126,10 @@ Deno.serve(async (req) => {
     const { data: userData, error: userErr } = await supabase.auth.getUser();
     if (userErr || !userData?.user) return jsonResponse({ error: "Session invalide." }, 401);
     const userId = userData.user.id;
+
+    // Mode Visiteur : outil réservé à la formation.
+    const trialRefused = await trial.claim(supabase, "practice", 0);
+    if (trialRefused) return trialRefused;
 
     // RLS (instance_lessons_select) restreint déjà cette lecture aux leçons
     // des duplicatas attribués à l'élève — pas de filtre supplémentaire ici.

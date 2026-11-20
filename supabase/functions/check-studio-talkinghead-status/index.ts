@@ -6,6 +6,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
 import { pollRunwareTask, finalizeRunwareResult } from "../_shared/runware.ts";
 import { STUDIO_TALKINGHEAD_MODELS } from "../_shared/studio-talkinghead-models.ts";
+import { refundVisitorTrial } from "../_shared/visitor-trial.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
@@ -46,6 +47,7 @@ Deno.serve(async (req) => {
     if (polled.status === "pending") return jsonResponse({ status: "pending" });
     if (polled.status === "failed") {
       await userClient.from("studio_talkinghead_generations").update({ status: "failed", error_message: polled.error }).eq("id", generationId);
+      await refundVisitorTrial(userId, "studio_talkinghead");
       return jsonResponse({ status: "failed", error: polled.error });
     }
 
@@ -59,7 +61,10 @@ Deno.serve(async (req) => {
       kind: "video",
       usage: { userId, mediaType: "video", model: runwareModel, cost: polled.cost, source: "studio_talkinghead" },
     });
-    if (!result.ok) return jsonResponse({ status: "failed", error: result.error });
+    if (!result.ok) {
+      await refundVisitorTrial(userId, "studio_talkinghead");
+      return jsonResponse({ status: "failed", error: result.error });
+    }
     return jsonResponse({ status: "ready", videoPath: result.path });
   } catch (err) {
     return jsonResponse({ error: err instanceof Error ? err.message : "Erreur inconnue." }, 500);

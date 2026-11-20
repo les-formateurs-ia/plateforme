@@ -6,6 +6,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse, getCallerRole, isStaffRole } from "../_shared/podcast-utils.ts";
 import { resolvePodcastFormat, type PodcastFormatSpec } from "../_shared/podcast-formats.ts";
 import { parsePedagogyStyle, pedagogyStyleBlock } from "../_shared/pedagogy-style.ts";
+import { serveWithVisitorTrial } from "../_shared/visitor-trial.ts";
 
 const GEMINI_TEXT_MODEL = "gemini-3.6-flash";
 export const SPEAKER_A = "Alex";
@@ -56,7 +57,7 @@ ${SPEAKER_B}: ...
 Ne produis aucun autre texte que les répliques (pas de titre, pas de note, pas de balise markdown).`;
 }
 
-Deno.serve(async (req) => {
+serveWithVisitorTrial(async (req, trial) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
 
   try {
@@ -79,6 +80,10 @@ Deno.serve(async (req) => {
     const { data: userData, error: userErr } = await supabase.auth.getUser();
     if (userErr || !userData?.user) return jsonResponse({ error: "Session invalide." }, 401);
     const userId = userData.user.id;
+
+    // Mode Visiteur : un essai de cet outil (rendu si la génération échoue).
+    const trialRefused = await trial.claim(supabase, "lesson_podcast");
+    if (trialRefused) return trialRefused;
 
     // admin/formateur peuvent régénérer librement ; un élève ne peut générer
     // chaque format qu'une seule fois (pas de bouton "Régénérer" côté front,

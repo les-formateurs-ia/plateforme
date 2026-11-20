@@ -72,7 +72,7 @@ import { AdminSessionDetailPage } from "@/app/pages/admin/AdminSessionDetailPage
 import { SignDocumentPage } from "@/app/pages/SignDocumentPage";
 import { ClientPortalPage } from "@/app/pages/ClientPortalPage";
 import { LearnerAccessPage, VisitorAccessPage } from "@/app/pages/LearnerAccessPage";
-import { NotForVisitor } from "@/app/components/common/Visitor";
+import { NotForVisitor, VisitorTrialDialog } from "@/app/components/common/Visitor";
 import { VISITOR_PATH } from "@/app/lib/visitor";
 import { AdminVisitorLinksPage } from "@/app/pages/admin/AdminVisitorLinksPage";
 import { ImpactSurveyPage } from "@/app/pages/ImpactSurveyPage";
@@ -348,6 +348,7 @@ export default function App() {
               <CertificationProvider>
                 <BrowserRouter>
                   <LearnerPresence />
+                  <VisitorTrialDialog />
                   <AppRoutes />
                 </BrowserRouter>
               </CertificationProvider>

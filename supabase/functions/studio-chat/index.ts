@@ -24,6 +24,7 @@ import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
 import { submitRunwareText } from "../_shared/runware.ts";
 import { checkAiBudget } from "../_shared/ai-budget.ts";
 import { STUDIO_CHAT_MODELS, isChatProvider, type ChatProvider } from "../_shared/studio-chat-models.ts";
+import { serveWithVisitorTrial } from "../_shared/visitor-trial.ts";
 import {
   CHAT_REPLY_TIMEOUT_MS, CONVERSATION_COLUMNS, completeTurn,
   type Attachment, type AttachmentKind, type ChatMessage, type PendingTask, type TraceFile, type TraceStep,
@@ -121,7 +122,7 @@ async function extractPdfText(geminiKey: string | undefined, bytes: Uint8Array):
   });
 }
 
-Deno.serve(async (req) => {
+serveWithVisitorTrial(async (req, trial) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
 
   try {
@@ -163,6 +164,10 @@ Deno.serve(async (req) => {
       const budget = await checkAiBudget(supabase, userId);
       if (!budget.ok) return jsonResponse({ error: budget.error }, 402);
     }
+
+    // Mode Visiteur : un essai de cet outil (rendu si la génération échoue).
+    const trialRefused = await trial.claim(supabase, `studio_chat_${provider}`);
+    if (trialRefused) return trialRefused;
 
     let existing: ChatMessage[] = [];
     if (conversationId) {

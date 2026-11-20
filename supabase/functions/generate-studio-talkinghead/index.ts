@@ -11,11 +11,12 @@ import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
 import { STUDIO_TALKINGHEAD_MODELS, TTS_VOICES, DEFAULT_TTS_VOICE, buildTtsTask } from "../_shared/studio-talkinghead-models.ts";
 import { submitAndAwaitRunware, submitRunwareTask, finalizeRunwareResult } from "../_shared/runware.ts";
-import { checkAiBudget, recordAiUsage } from "../_shared/ai-budget.ts";
+import { checkAiBudget, checkVisitorCost, recordAiUsage } from "../_shared/ai-budget.ts";
+import { serveWithVisitorTrial } from "../_shared/visitor-trial.ts";
 
 const SCRIPT_MAX_LENGTH = 1000;
 
-Deno.serve(async (req) => {
+serveWithVisitorTrial(async (req, trial) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
 
   try {
@@ -45,6 +46,12 @@ Deno.serve(async (req) => {
 
     const budget = await checkAiBudget(userClient, userId);
     if (!budget.ok) return jsonResponse({ error: budget.error }, 402);
+
+    // Mode Visiteur : un essai de cet outil (rendu si la génération échoue).
+    const trialRefused = await trial.claim(userClient, "studio_talkinghead");
+    if (trialRefused) return trialRefused;
+    const tooHeavy = await checkVisitorCost(userClient, userId, ["minimax:speech@2.8", modelConfig.runwareModel]);
+    if (tooHeavy) return tooHeavy;
 
     const { data: signed, error: signError } = await userClient.storage
       .from("studio-talkinghead")

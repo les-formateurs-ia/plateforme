@@ -31,6 +31,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
 import { submitAndAwaitRunwareText } from "../_shared/runware.ts";
 import { checkAiBudget, recordAiUsage } from "../_shared/ai-budget.ts";
+import { serveWithVisitorTrial } from "../_shared/visitor-trial.ts";
 
 type Provider = "gemini" | "openai" | "anthropic";
 
@@ -104,7 +105,7 @@ async function callProvider(provider: Provider, model: string, prompt: string, k
   }
 }
 
-Deno.serve(async (req) => {
+serveWithVisitorTrial(async (req, trial) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
 
   try {
@@ -135,6 +136,10 @@ Deno.serve(async (req) => {
       const budget = await checkAiBudget(supabase, userId);
       if (!budget.ok) return jsonResponse({ error: budget.error }, 402);
     }
+
+    // Mode Visiteur : un essai de cet outil (rendu si la génération échoue).
+    const trialRefused = await trial.claim(supabase, "battle_ground");
+    if (trialRefused) return trialRefused;
 
     const keys = {
       GEMINI_API_KEY: Deno.env.get("GEMINI_API_KEY"),

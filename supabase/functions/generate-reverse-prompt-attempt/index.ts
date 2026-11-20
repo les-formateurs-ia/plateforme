@@ -7,6 +7,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
 import { submitAndAwaitRunware, downloadBytes } from "../_shared/runware.ts";
 import { checkAiBudget, recordAiUsage } from "../_shared/ai-budget.ts";
+import { serveWithVisitorTrial } from "../_shared/visitor-trial.ts";
 
 const RUNWARE_IMAGE_MODEL = "runware:101@1"; // FLUX.1 dev — cf. generate-reverse-prompt-target
 
@@ -22,7 +23,7 @@ async function generateImageBytes(runwareApiKey: string, prompt: string): Promis
   return { bytes, cost };
 }
 
-Deno.serve(async (req) => {
+serveWithVisitorTrial(async (req, trial) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
 
   try {
@@ -48,6 +49,10 @@ Deno.serve(async (req) => {
 
     const budget = await checkAiBudget(supabase, userId);
     if (!budget.ok) return jsonResponse({ error: budget.error }, 402);
+
+    // Mode Visiteur : outil réservé à la formation.
+    const trialRefused = await trial.claim(supabase, "reverse_prompt", 0);
+    if (trialRefused) return trialRefused;
 
     const { data: sessionRow, error: sessionErr } = await supabase
       .from("reverse_prompt_sessions")

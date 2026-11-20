@@ -109,6 +109,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) {
       console.warn("Unable to load profile", error);
     }
+    // Lien visiteur désactivé ou expiré : la visite déjà ouverte se ferme aussi.
+    if (data?.is_visitor) {
+      const { data: active, error: activeError } = await supabase.rpc("visitor_link_active");
+      if (!activeError && active === false) {
+        await supabase.auth.signOut();
+        window.location.replace("/login?visite=lien_expire");
+        return;
+      }
+    }
     setRole((data?.role as Role) ?? "student");
     setCompanyId(data?.company_id ?? null);
     setIsVisitor(!!data?.is_visitor || devVisitorPreview());

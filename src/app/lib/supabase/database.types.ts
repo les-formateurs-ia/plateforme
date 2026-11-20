@@ -357,8 +357,10 @@ export interface Database {
           id: string;
           token: string;
           label: string;
-          profile_id: string;
           template_id: string | null;
+          budget_usd: number;
+          max_accounts: number | null;
+          accounts_count: number;
           created_by: string | null;
           created_at: string;
           expires_at: string | null;
@@ -370,8 +372,10 @@ export interface Database {
           id?: string;
           token?: string;
           label: string;
-          profile_id: string;
           template_id?: string | null;
+          budget_usd?: number;
+          max_accounts?: number | null;
+          accounts_count?: number;
           created_by?: string | null;
           created_at?: string;
           expires_at?: string | null;
@@ -380,6 +384,22 @@ export interface Database {
           last_opened_at?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["visitor_links"]["Insert"]>;
+        Relationships: never[];
+      };
+      visitor_accounts: {
+        Row: {
+          profile_id: string;
+          link_id: string;
+          ip_hash: string | null;
+          created_at: string;
+        };
+        Insert: {
+          profile_id: string;
+          link_id: string;
+          ip_hash?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["visitor_accounts"]["Insert"]>;
         Relationships: never[];
       };
       student_onboarding: {
@@ -2132,6 +2152,10 @@ export interface Database {
       assign_formation_to_student: {
         Args: { p_template_id: string; p_student_id: string };
         Returns: string;
+      };
+      visitor_link_active: {
+        Args: Record<string, never>;
+        Returns: boolean;
       };
       preview_formation_as_staff: {
         Args: { p_template_id: string };

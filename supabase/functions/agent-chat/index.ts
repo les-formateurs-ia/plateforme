@@ -10,6 +10,7 @@ import { buildCourseContext } from "../_shared/course-context.ts";
 import { buildStudentOverview } from "../_shared/student-overview.ts";
 import { getStudentMemoryText, scheduleStudentMemoryUpdate } from "../_shared/student-memory.ts";
 import { buildVisitorSystemPrompt, isVisitorUser, loadVisitorCourseContext, VISITOR_TEST_NOTICE } from "../_shared/visitor.ts";
+import { serveWithVisitorTrial } from "../_shared/visitor-trial.ts";
 
 const GEMINI_TEXT_MODEL = "gemini-3.6-flash";
 const HISTORY_WINDOW = 40;
@@ -48,7 +49,7 @@ Pédagogue, concret, encourageant, tutoie l'élève. Réponses courtes (3-6 phra
 Réponds UNIQUEMENT avec un objet JSON strict, sans texte autour : {"reply": "ta réponse ici", "offTopic": true ou false}`;
 }
 
-Deno.serve(async (req) => {
+serveWithVisitorTrial(async (req, trial) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
 
   try {
@@ -70,6 +71,10 @@ Deno.serve(async (req) => {
     const { data: userData, error: userErr } = await supabase.auth.getUser();
     if (userErr || !userData?.user) return jsonResponse({ error: "Session invalide." }, 401);
     const userId = userData.user.id;
+
+    // Mode Visiteur : un essai de cet outil (rendu si la génération échoue).
+    const trialRefused = await trial.claim(supabase, "agent_chat");
+    if (trialRefused) return trialRefused;
 
     // Résout la conversation : existante (l'élève a pu commencer en vocal, ou
     // reprendre une conversation passée) ou nouvelle, rattachée au projet actif.

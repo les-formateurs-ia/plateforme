@@ -5,9 +5,10 @@ import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
 import { STUDIO_VIDEO_MODELS } from "../_shared/studio-video-models.ts";
 import { submitRunwareTask, finalizeRunwareResult } from "../_shared/runware.ts";
-import { checkAiBudget } from "../_shared/ai-budget.ts";
+import { checkAiBudget, checkVisitorCost } from "../_shared/ai-budget.ts";
+import { serveWithVisitorTrial } from "../_shared/visitor-trial.ts";
 
-Deno.serve(async (req) => {
+serveWithVisitorTrial(async (req, trial) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
 
   try {
@@ -41,6 +42,12 @@ Deno.serve(async (req) => {
 
     const budget = await checkAiBudget(userClient, userId);
     if (!budget.ok) return jsonResponse({ error: budget.error }, 402);
+
+    // Mode Visiteur : un essai de cet outil (rendu si la génération échoue).
+    const trialRefused = await trial.claim(userClient, "studio_video");
+    if (trialRefused) return trialRefused;
+    const tooHeavy = await checkVisitorCost(userClient, userId, [modelConfig.runwareModel]);
+    if (tooHeavy) return tooHeavy;
 
     let sourceImageUrl: string | undefined;
     if (sourceImagePath) {

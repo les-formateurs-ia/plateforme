@@ -7,6 +7,8 @@ import { ArrowLeft, Lock } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
 import { useProfile } from "@/app/state/profile-context";
 import { isAiBudgetExhausted } from "@/app/lib/aiUsage";
+import { useAuth } from "@/app/state/auth-context";
+import { SIGNUP_URL, VisitorContacts } from "@/app/components/common/Visitor";
 
 export function useAiBudgetExhausted(): boolean {
   const { profile } = useProfile();
@@ -16,6 +18,23 @@ export function useAiBudgetExhausted(): boolean {
 export function AiBudgetExhaustedNotice({ compact = false }: { compact?: boolean }) {
   const th = useTh();
   const { profile } = useProfile();
+  const { isVisitor } = useAuth();
+  if (isVisitor) {
+    return (
+      <div className={`space-y-3 rounded-2xl ${compact ? "px-3.5 py-2.5" : "px-5 py-4"}`} style={{ background: th.navA, border: `1px solid ${th.sep}` }}>
+        <div className="flex items-start gap-3">
+          <Lock className="w-4 h-4 mt-0.5 shrink-0" style={{ color: th.fg3 }} />
+          <div className="text-sm" style={{ color: th.fg }}>
+            <p className="font-bold">Crédits d'essai utilisés</p>
+            <p style={{ color: th.fg2 }}>Vous avez profité de vos essais gratuits du Studio. Inscrivez-vous à la formation pour créer images, vidéos, musiques et voix sans limite.</p>
+          </div>
+        </div>
+        <a href={SIGNUP_URL} target="_blank" rel="noreferrer" className="sweep inline-flex items-center gap-2 rounded-[2px] px-4 min-h-10 text-sm font-semibold"
+          style={{ background: th.ink, color: th.onInk }}>Je m'inscris à la formation</a>
+        <VisitorContacts />
+      </div>
+    );
+  }
   return (
     <div className={`flex items-start gap-3 rounded-2xl ${compact ? "px-3.5 py-2.5" : "px-5 py-4"}`} style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)" }}>
       <Lock className="w-4 h-4 mt-0.5 shrink-0" style={{ color: th.danger }} />
