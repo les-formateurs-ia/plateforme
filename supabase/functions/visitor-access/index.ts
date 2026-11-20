@@ -16,7 +16,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.48.1";
 import { CORS_HEADERS, jsonResponse } from "../_shared/podcast-utils.ts";
 
 const VISITOR_EMAIL_DOMAIN = "visiteur.les-formateurs-ia.fr";
-const IP_DAILY_LIMIT = 5;
+const IP_DAILY_LIMIT = 25;
 
 async function sha256(text: string): Promise<string> {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
