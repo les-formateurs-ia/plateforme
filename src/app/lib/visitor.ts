@@ -22,7 +22,7 @@ export const VISITOR_PRACTICE_PATHS = ["/practice/battle-ground"];
 // essai par outil (cf. Essais IA plus bas).
 export const VISITOR_DEFAULT_BUDGET_USD = 3;
 // Nombre maximal de visiteurs proposé par défaut pour un lien.
-export const VISITOR_DEFAULT_MAX_ACCOUNTS = 50;
+export const VISITOR_DEFAULT_MAX_ACCOUNTS = 25;
 
 // Guide IA : un cas pratique ouvert en Images et en Vidéos ; les autres, et
 // toute la rubrique Web, restent en vitrine (aperçu non cliquable).
