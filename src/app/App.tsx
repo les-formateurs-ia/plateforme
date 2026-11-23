@@ -40,6 +40,8 @@ import { AstucesPage } from "@/app/pages/astuces/AstucesPage";
 import { AstucesCasPage } from "@/app/pages/astuces/AstucesCasPage";
 import { AstucesBriquePage } from "@/app/pages/astuces/AstucesBriquePage";
 import { AstucesBuilderPage } from "@/app/pages/astuces/AstucesBuilderPage";
+import { AstucesOutilPage } from "@/app/pages/astuces/AstucesOutilPage";
+import { AstucesArticlePage } from "@/app/pages/astuces/AstucesArticlePage";
 import { AgentPage } from "@/app/pages/agent/AgentPage";
 import { PromptSessionsPage } from "@/app/pages/practice/PromptSessionsPage";
 import { PromptExercisePage } from "@/app/pages/practice/PromptExercisePage";
@@ -262,6 +264,8 @@ function AppRoutes() {
         <Route path="hub/:category" element={<HubCategoryPage />} />
         <Route path="astuces" element={<AstucesPage />} />
         <Route path="astuces/cas/:casId" element={<AstucesCasPage />} />
+        <Route path="astuces/outils/:outilId" element={<AstucesOutilPage />} />
+        <Route path="astuces/outils/:outilId/:articleId" element={<AstucesArticlePage />} />
         <Route path="astuces/:domain/briques/:briqueId" element={<AstucesBriquePage />} />
         <Route path="astuces/:domain/constructeur" element={<AstucesBuilderPage />} />
         <Route path="astuces/*" element={<Navigate to="/astuces" replace />} />

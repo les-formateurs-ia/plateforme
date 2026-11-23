@@ -27,3 +27,7 @@ export const loadStudioChatModels = () => bundleAndImport(STUDIO_CHAT_MODELS_ENT
 // Modèles vidéo du Studio (cas Vidéo : exemples générés dans « Créer vos vidéos »).
 const STUDIO_VIDEO_MODELS_ENTRY = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../supabase/functions/_shared/studio-video-models.ts");
 export const loadStudioVideoModels = () => bundleAndImport(STUDIO_VIDEO_MODELS_ENTRY);
+
+// Guide « Comprendre les outils » (ChatGPT, Claude, Gemini).
+const GUIDE_OUTILS_ENTRY = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../src/app/data/guide-outils/index.ts");
+export const loadGuideOutils = () => bundleAndImport(GUIDE_OUTILS_ENTRY);

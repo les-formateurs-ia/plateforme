@@ -7,7 +7,9 @@ import { GCard } from "@/app/components/common/GCard";
 import { SectionHead } from "@/app/components/common/SectionHead";
 import { AstuceMediaFrame } from "@/app/components/astuces/AstuceMediaFrame";
 import { BriquesLibrary } from "@/app/components/astuces/BriquesLibrary";
+import { OutilLogo, outilAccent } from "@/app/components/astuces/OutilLogo";
 import { ASTUCE_CAS, ASTUCE_DOMAINS, casMediaKeys, type AstuceCas, type AstuceDomainId } from "@/app/data/astuces";
+import { GUIDE_OUTILS, articleCount, type GuideOutil } from "@/app/data/guide-outils";
 
 // Une section par domaine : Images (photo de l'élève, logo…), puis Web
 // (pages générées par Claude, montrées en vidéo).
@@ -58,15 +60,46 @@ function CasCard({ cas }: { cas: AstuceCas }) {
   );
 }
 
+// « Comprendre les outils » : une carte par IA, ses chapitres en aperçu.
+function OutilCard({ outil }: { outil: GuideOutil }) {
+  const th = useTh();
+  const navigate = useNavigate();
+  return (
+    <GCard onClick={() => navigate(`/astuces/outils/${outil.id}`)} className="group flex flex-col">
+      <div className="h-1" style={{ background: outilAccent(outil.id) }} />
+      <div className="p-5 flex-1 flex flex-col">
+        <div className="flex items-center gap-3">
+          <OutilLogo id={outil.id} className="w-12 h-12" />
+          <div>
+            <h3 className="text-lg font-black leading-tight" style={{ color: th.fg }}>{outil.name}</h3>
+            <p className="text-[12px] font-semibold" style={{ color: th.fg3 }}>{outil.vendor} · {articleCount(outil)} articles</p>
+          </div>
+        </div>
+        <p className="mt-3 text-[13.5px] leading-relaxed" style={{ color: th.fg2 }}>{outil.tagline}</p>
+        <ul className="mt-3 space-y-1 flex-1">
+          {outil.chapters.map((c) => (
+            <li key={c.id} className="text-[13px] leading-snug pl-4 relative" style={{ color: th.fg }}>
+              <span className="absolute left-0" style={{ color: outilAccent(outil.id) }}>›</span>{c.title}
+            </li>
+          ))}
+        </ul>
+        <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold" style={{ color: th.fg }}>
+          <span className="ink-link">Explorer {outil.name}</span><ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+        </span>
+      </div>
+    </GCard>
+  );
+}
+
 export function AstucesPage() {
   const th = useTh();
   const { hash } = useLocation();
 
-  // /astuces#briques (fil d'Ariane des pages de brique) : on descend
-  // directement à la bibliothèque.
+  // /astuces#briques ou #outils (fils d'Ariane) : on descend directement
+  // à la section.
   useEffect(() => {
-    if (hash !== "#briques") return;
-    const timer = setTimeout(() => document.getElementById("briques")?.scrollIntoView({ block: "start" }), 50);
+    if (hash !== "#briques" && hash !== "#outils") return;
+    const timer = setTimeout(() => document.getElementById(hash.slice(1))?.scrollIntoView({ block: "start" }), 50);
     return () => clearTimeout(timer);
   }, [hash]);
 
@@ -79,6 +112,16 @@ export function AstucesPage() {
           Choisis ce que tu veux créer. Pour chaque cas, on te donne le prompt complet, on le décortique brique par brique avec des exemples, et tu l'adaptes à ton projet avant de le lancer dans Le Studio ou dans Claude.
         </p>
       </div>
+
+      <section id="outils" aria-labelledby="astuces-outils" className="fade-up scroll-mt-6">
+        <SectionHead id="astuces-outils" eyebrow="Comprendre les outils · Les bases, ChatGPT, Claude, Gemini" title="Comment marche chaque IA" />
+        <p className="text-sm max-w-3xl -mt-2 mb-5 leading-relaxed" style={{ color: th.fg2 }}>
+          Ce qu'on n'a pas le temps de détailler en vidéo : comment une IA fonctionne vraiment, puis les fonctionnalités, les modèles et les réglages de chaque outil, avec le pourquoi de chaque chose. Commence par « Les bases » si tu débutes. Tout est tiré de la documentation officielle.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+          {GUIDE_OUTILS.map((outil) => <OutilCard key={outil.id} outil={outil} />)}
+        </div>
+      </section>
 
       {CAS_SECTIONS.map((section) => {
         const cases = ASTUCE_CAS.filter((c) => c.domain === section.domain);
