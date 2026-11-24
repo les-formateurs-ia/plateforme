@@ -40,6 +40,8 @@ import { AstucesPage } from "@/app/pages/astuces/AstucesPage";
 import { AstucesCasPage } from "@/app/pages/astuces/AstucesCasPage";
 import { AstucesBriquePage } from "@/app/pages/astuces/AstucesBriquePage";
 import { AstucesBuilderPage } from "@/app/pages/astuces/AstucesBuilderPage";
+import { AstucesOutilPage } from "@/app/pages/astuces/AstucesOutilPage";
+import { AstucesArticlePage } from "@/app/pages/astuces/AstucesArticlePage";
 import { AgentPage } from "@/app/pages/agent/AgentPage";
 import { PromptSessionsPage } from "@/app/pages/practice/PromptSessionsPage";
 import { PromptExercisePage } from "@/app/pages/practice/PromptExercisePage";
@@ -266,6 +268,9 @@ function AppRoutes() {
         <Route path="hub/:category" element={<HubCategoryPage />} />
         <Route path="astuces" element={<AstucesPage />} />
         <Route path="astuces/cas/:casId" element={<AstucesCasPage />} />
+        {/* « Comprendre les outils » : réservé à l'admin tant que le Guide IA n'est pas ouvert. */}
+        <Route path="astuces/outils/:outilId" element={<RequireAdmin><AstucesOutilPage /></RequireAdmin>} />
+        <Route path="astuces/outils/:outilId/:articleId" element={<RequireAdmin><AstucesArticlePage /></RequireAdmin>} />
         <Route path="astuces/:domain/briques/:briqueId" element={<NotForVisitor feature="briques" backTo="/astuces" backLabel="Guide IA"><AstucesBriquePage /></NotForVisitor>} />
         <Route path="astuces/:domain/constructeur" element={<NotForVisitor feature="builder" backTo="/astuces" backLabel="Guide IA"><AstucesBuilderPage /></NotForVisitor>} />
         <Route path="astuces/*" element={<Navigate to="/astuces" replace />} />
