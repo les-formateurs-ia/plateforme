@@ -12,7 +12,6 @@ import { ASTUCE_CAS, ASTUCE_DOMAINS, casMediaKeys, type AstuceCas, type AstuceDo
 import { useAuth } from "@/app/state/auth-context";
 import { VisitorMoreNotice } from "@/app/components/common/Visitor";
 import { isCasOpenToVisitor } from "@/app/lib/visitor";
-import { isAdmin } from "@/app/lib/permissions";
 import { GUIDE_OUTILS, articleCount, type GuideOutil } from "@/app/data/guide-outils";
 
 // Une section par domaine : Images (photo de l'élève, logo…), puis Web
@@ -110,9 +109,7 @@ function OutilCard({ outil }: { outil: GuideOutil }) {
 export function AstucesPage() {
   const th = useTh();
   const { hash } = useLocation();
-  const { isVisitor, role } = useAuth();
-  // « Comprendre les outils » : visible de l'admin seulement pour l'instant.
-  const showOutils = isAdmin(role);
+  const { isVisitor } = useAuth();
 
   // /astuces#briques ou #outils (fils d'Ariane) : on descend directement
   // à la section.
@@ -132,7 +129,6 @@ export function AstucesPage() {
         </p>
       </div>
 
-      {showOutils && (
       <section id="outils" aria-labelledby="astuces-outils" className="fade-up scroll-mt-6">
         <SectionHead id="astuces-outils" eyebrow="Comprendre les outils · Les bases, ChatGPT, Claude, Gemini" title="Comment marche chaque IA" />
         <p className="text-sm max-w-3xl -mt-2 mb-5 leading-relaxed" style={{ color: th.fg2 }}>
@@ -142,7 +138,6 @@ export function AstucesPage() {
           {GUIDE_OUTILS.map((outil) => <OutilCard key={outil.id} outil={outil} />)}
         </div>
       </section>
-      )}
 
       {CAS_SECTIONS.map((section) => {
         const cases = ASTUCE_CAS.filter((c) => c.domain === section.domain);

@@ -268,9 +268,8 @@ function AppRoutes() {
         <Route path="hub/:category" element={<HubCategoryPage />} />
         <Route path="astuces" element={<AstucesPage />} />
         <Route path="astuces/cas/:casId" element={<AstucesCasPage />} />
-        {/* « Comprendre les outils » : réservé à l'admin tant que le Guide IA n'est pas ouvert. */}
-        <Route path="astuces/outils/:outilId" element={<RequireAdmin><AstucesOutilPage /></RequireAdmin>} />
-        <Route path="astuces/outils/:outilId/:articleId" element={<RequireAdmin><AstucesArticlePage /></RequireAdmin>} />
+        <Route path="astuces/outils/:outilId" element={<AstucesOutilPage />} />
+        <Route path="astuces/outils/:outilId/:articleId" element={<AstucesArticlePage />} />
         <Route path="astuces/:domain/briques/:briqueId" element={<NotForVisitor feature="briques" backTo="/astuces" backLabel="Guide IA"><AstucesBriquePage /></NotForVisitor>} />
         <Route path="astuces/:domain/constructeur" element={<NotForVisitor feature="builder" backTo="/astuces" backLabel="Guide IA"><AstucesBuilderPage /></NotForVisitor>} />
         <Route path="astuces/*" element={<Navigate to="/astuces" replace />} />
