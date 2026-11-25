@@ -71,6 +71,7 @@ import { StaffHomePage } from "@/app/pages/equipe/StaffHomePage";
 import { SessionsPage } from "@/app/pages/equipe/SessionsPage";
 import { ClientsPage } from "@/app/pages/equipe/ClientsPage";
 import { AdminSessionDetailPage } from "@/app/pages/admin/AdminSessionDetailPage";
+import { SessionMessagesPage } from "@/app/pages/admin/SessionMessagesPage";
 import { SignDocumentPage } from "@/app/pages/SignDocumentPage";
 import { ClientPortalPage } from "@/app/pages/ClientPortalPage";
 import { LearnerAccessPage, VisitorAccessPage } from "@/app/pages/LearnerAccessPage";
@@ -297,6 +298,7 @@ function AppRoutes() {
         <Route path="sessions" element={<RequireStaff><SessionsPage /></RequireStaff>} />
         <Route path="sessions/modeles" element={<RequireAdmin><AdminDocumentsPage /></RequireAdmin>} />
         <Route path="sessions/:sessionId" element={<RequireStaff><AdminSessionDetailPage /></RequireStaff>} />
+        <Route path="sessions/:sessionId/echanges" element={<RequireStaff><SessionMessagesPage /></RequireStaff>} />
         <Route path="clients" element={<RequireStaff><ClientsPage /></RequireStaff>} />
         <Route path="clients/entreprises/:companyId" element={<RequireStaff><CompanyDetailPage /></RequireStaff>} />
         <Route path="clients/entreprises/:companyId/preview" element={<RequireStaff><CompanyPreviewPage /></RequireStaff>} />
