@@ -100,6 +100,15 @@ export async function deleteSession(id: string): Promise<void> {
   if (!data?.length) throw new Error("La suppression a été refusée.");
 }
 
+// La session seule (en-têtes de page) ; pour un formateur, sans ses données financières.
+export async function getSession(id: string, mine = false): Promise<TrainingSession | null> {
+  const { data, error } = mine
+    ? await supabase.rpc("my_formateur_sessions", { p_session_id: id }).then((r) => ({ data: r.data?.[0] ?? null, error: r.error }))
+    : await supabase.from("training_sessions").select("*").eq("id", id).maybeSingle();
+  if (error) throw error;
+  return data ? mapSession(data) : null;
+}
+
 export async function getSessionBundle(id: string, mine = false): Promise<SessionBundle | null> {
   const [sessionRes, slotsRes, traineesRes, docsRes] = await Promise.all([
     mine

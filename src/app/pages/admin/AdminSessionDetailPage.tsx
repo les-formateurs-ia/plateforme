@@ -30,6 +30,7 @@ import { useAuth } from "@/app/state/auth-context";
 import { isAdmin } from "@/app/lib/permissions";
 import { listCoachAssignableCards, type PersonCard } from "@/app/lib/planning";
 import { ArchiveCard, CommercialCard } from "@/app/components/sessions/DigiformaCards";
+import { SessionChatButton } from "@/app/components/sessions/SessionChat";
 
 // Dossier d'une formation : un seul tableau de bord. En haut la
 // progression et la carte du parcours en trois phases ; au centre l'étape
@@ -252,6 +253,7 @@ export function AdminSessionDetailPage() {
           <h1 className="text-[1.7rem] sm:text-[2.1rem] leading-[1.1] font-black mt-1" style={{ color: th.fg }}><GT>{bundle.session.client.nom}</GT></h1>
           <p className="text-sm mt-1" style={{ color: th.fg2 }}>{bundle.session.formation.intitule} · {periodeFr(bundle.session.dateDebut, bundle.session.dateFin)}</p>
         </div>
+        <div className="self-start"><SessionChatButton sessionId={bundle.session.id} /></div>
       </div>
 
       <JourneyHero journey={journey} dateDebut={bundle.session.dateDebut} dateFin={bundle.session.dateFin} onStep={select} />
@@ -868,11 +870,14 @@ function FormateurSessionView({ bundle, activity, busy, run }: { bundle: Session
 
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6 pb-24">
-      <div>
-        <Link to="/sessions" className="flex items-center gap-1.5 text-sm w-fit hover:opacity-70 mb-3" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />Mes sessions</Link>
-        <p className="text-xs font-bold" style={{ color: th.fg3 }}>{session.reference} · {FINANCEMENT_LABELS[session.financement]}</p>
-        <h1 className="text-[1.7rem] sm:text-[2.1rem] leading-[1.1] font-black mt-1" style={{ color: th.fg }}><GT>{session.client.nom}</GT></h1>
-        <p className="text-sm mt-1" style={{ color: th.fg2 }}>{f.intitule} · {periodeFr(session.dateDebut, session.dateFin)}</p>
+      <div className="flex items-start gap-4 flex-wrap">
+        <div className="flex-1 min-w-0">
+          <Link to="/sessions" className="flex items-center gap-1.5 text-sm w-fit hover:opacity-70 mb-3" style={{ color: th.fg3 }}><ChevronLeft className="w-4 h-4" />Mes sessions</Link>
+          <p className="text-xs font-bold" style={{ color: th.fg3 }}>{session.reference} · {FINANCEMENT_LABELS[session.financement]}</p>
+          <h1 className="text-[1.7rem] sm:text-[2.1rem] leading-[1.1] font-black mt-1" style={{ color: th.fg }}><GT>{session.client.nom}</GT></h1>
+          <p className="text-sm mt-1" style={{ color: th.fg2 }}>{f.intitule} · {periodeFr(session.dateDebut, session.dateFin)}</p>
+        </div>
+        <SessionChatButton sessionId={session.id} />
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">

@@ -264,6 +264,13 @@ export interface Database {
         Update: never;
         Relationships: never[];
       };
+      session_messages: {
+        Row: { id: string; session_id: string; author_id: string | null; author_name: string; author_role: "admin" | "formateur"; body: string; created_at: string };
+        // Auteur, rôle et heure fixés par le trigger session_messages_set_author.
+        Insert: { session_id: string; body: string };
+        Update: never;
+        Relationships: never[];
+      };
       impact_surveys: {
         Row: {
           id: string; session_id: string; title: string; description: string | null; questions: Json;
