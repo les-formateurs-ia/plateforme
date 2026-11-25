@@ -4,6 +4,8 @@ import { useTh } from "@/app/theme/theme";
 import { GCard } from "@/app/components/common/GCard";
 import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
 import { AI_CATEGORIES, type AiModel } from "@/app/data/aiModels";
+import { useAiBenchmarks } from "@/app/lib/aiBenchmarks";
+import { getModelScores, RankBadge, ScoreBarView, SourceBadge } from "@/app/components/aiModels/BenchmarkScores";
 
 export const LEVEL_COLORS: Record<string, string> = {
   "Idéal Débutant": "#22c55e",
@@ -46,6 +48,8 @@ export function ModelCard({ model, onOpenDetail, dense = false }: { model: AiMod
   const studioTarget = model.studioTarget;
   const category = AI_CATEGORIES.find((c) => c.id === model.category);
   const initials = model.name.replace(/[^A-Za-z0-9]/g, "").slice(0, 2).toUpperCase();
+  const snapshot = useAiBenchmarks();
+  const scores = getModelScores(model, snapshot);
 
   return (
     <GCard className={dense ? "@container p-3.5" : "@container p-4 sm:p-6"}>
@@ -67,12 +71,12 @@ export function ModelCard({ model, onOpenDetail, dense = false }: { model: AiMod
         )}
 
         <div className="flex min-w-0 w-full max-w-[164px] justify-self-center flex-col gap-1.5">
-          <RatingBar label="Raisonnement" value={model.reasoning} />
-          <RatingBar label="Accès" value={model.access} />
-          <RatingBar label="Vitesse" value={model.speed} />
+          {scores.bars.map((bar) => <ScoreBarView key={bar.label} bar={bar} />)}
         </div>
 
         <div className="flex w-full flex-wrap items-center justify-center gap-1.5 @[1080px]:flex-col">
+          <SourceBadge source={scores.source} />
+          {scores.primary && <RankBadge result={scores.primary} />}
           <Pill>{model.priceBadge}</Pill>
           <Pill color={LEVEL_COLORS[model.levelBadge]}>{model.levelBadge}</Pill>
         </div>
@@ -85,7 +89,7 @@ export function ModelCard({ model, onOpenDetail, dense = false }: { model: AiMod
               Essayer dans le studio
             </ShimBtn>
           ) : (
-            <VBtn sm full disabled>Bientôt disponible dans le Studio!</VBtn>
+            <VBtn sm full disabled>Bientôt dans le Studio</VBtn>
           )}
         </div>
       </div>

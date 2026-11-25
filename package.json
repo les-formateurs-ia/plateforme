@@ -18,7 +18,8 @@
     "preview": "vite preview",
     "seed:users": "node scripts/seed-users.mjs",
     "seed:course": "node scripts/seed-course.mjs",
-    "astuces:media": "node scripts/generate-astuces-media.mjs"
+    "astuces:media": "node scripts/generate-astuces-media.mjs",
+    "benchmarks:sync": "node scripts/sync-ai-benchmarks.mjs"
   },
   "engines": {
     "node": ">=18.18.0"
