@@ -47,8 +47,7 @@ function staffNav(admin: boolean, base: string): { title: string; items: StaffNa
       { to: "/practice", label: "Exercices", Icon: Code2, end: true },
       { to: "/studio", label: "Le Studio", Icon: Sparkles, end: true },
       { to: "/hub", label: "Hub IA", Icon: LayoutGrid, end: true },
-      // Guide IA : visible pour l'admin seulement, pour l'instant.
-      ...(admin ? [{ to: "/astuces", label: "Guide IA", Icon: Lightbulb }] : []),
+      { to: "/astuces", label: "Guide IA", Icon: Lightbulb },
     ] },
     ...(admin ? [{ title: "Administration", items: [
       { to: "/sessions/modeles", label: "Modèles de documents", Icon: FileText },
@@ -198,7 +197,7 @@ export function MainLayout() {
               ))}
             </div>
           ))}
-          {!staff && NAV_ITEMS.filter(({ id }) => id !== "profile" && id !== "astuces").map(({ id, Icon, label, path, group }, index, items) => {
+          {!staff && NAV_ITEMS.filter(({ id }) => id !== "profile").map(({ id, Icon, label, path, group }, index, items) => {
             if (examMode && id !== "dashboard" && id !== "studio") return null;
             // Collaborateur entreprise : parcours CPF (leçons, pratique,
             // agent, RDV) hors-sujet, seul "Tableau de bord" (son espace
