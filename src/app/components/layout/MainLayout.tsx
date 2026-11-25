@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useState } from "react";
 import { Link, Navigate, NavLink, Outlet, useLocation } from "react-router";
 import { Menu, X, Bug, ScanEye, LogOut, LayoutDashboard, CalendarClock, ClipboardList, Users, GraduationCap, Target, FileText, Code2, Sparkles, LayoutGrid, BookOpen, Megaphone, Lightbulb, Link2, Lock, type LucideIcon } from "lucide-react";
-import { useTh } from "@/app/theme/theme";
+import { useTh, IRIS } from "@/app/theme/theme";
 import { useAuth } from "@/app/state/auth-context";
 import { useProfile } from "@/app/state/profile-context";
 import { useImpersonation } from "@/app/state/impersonation-context";
@@ -29,6 +29,16 @@ import { isPathAllowedDuringExam, useCertification } from "@/app/state/certifica
 // clients, ses élèves) ; prospects, modèles de documents, studio de contenu
 // et incidents sont réservés à l'admin.
 type StaffNavItem = { to: string; label: string; Icon: LucideIcon; end?: boolean };
+// Rubriques récentes : pastille « NEW » à côté du libellé, dans les deux menus.
+const NEW_PATHS = new Set(["/hub", "/astuces"]);
+function NewBadge() {
+  return (
+    <span className="ml-auto shrink-0 rounded-[3px] px-1.5 py-[1px] text-[10px] font-extrabold leading-[14px] tracking-[0.06em]" style={{ background: IRIS, color: "#000" }}>
+      NEW
+    </span>
+  );
+}
+
 function staffNav(admin: boolean, base: string): { title: string; items: StaffNavItem[] }[] {
   return [
     { title: "Pilotage", items: [
@@ -193,6 +203,7 @@ export function MainLayout() {
               {group.items.map(({ to, label, Icon, end }) => (
                 <NavLink key={to} to={to} end={end} onClick={() => setNavOpen(false)} className={navItemClass} style={navItemStyle}>
                   <Icon className="w-4 h-4 shrink-0" />{label}
+                  {NEW_PATHS.has(to) && <NewBadge />}
                 </NavLink>
               ))}
             </div>
@@ -214,6 +225,7 @@ export function MainLayout() {
                 <NavLink to={path} end onClick={() => setNavOpen(false)} className={navItemClass}
                   style={navItemStyle}>
                   <Icon className="w-4 h-4 shrink-0" />{label}
+                  {NEW_PATHS.has(path) && <NewBadge />}
                   {/* Mode Visiteur : rubriques réservées à la formation. */}
                   {isVisitor && (id === "certification" || id === "calendar") && <Lock className="w-3.5 h-3.5 ml-auto shrink-0" style={{ color: th.fg3 }} />}
                 </NavLink>
