@@ -10,6 +10,7 @@ import { GCard } from "@/app/components/common/GCard";
 import { GT } from "@/app/components/common/GT";
 import { NeuralField } from "@/app/components/particles/NeuralField";
 import { AgentOrb } from "@/app/components/agent/AgentOrb";
+import { MarkdownText } from "@/app/components/common/MarkdownText";
 import { cx } from "@/app/lib/cx";
 import {
   listAgentConversations, getAgentMessages, sendAgentMessage, ensureConversation, insertAgentVoiceMessage,
@@ -321,13 +322,18 @@ export function AgentPage() {
           )}
           {messages.map((m) => (
             <div key={m.id} className={cx("flex", m.role === "user" ? "justify-end" : "justify-start")}>
-              <div className="max-w-[85%] sm:max-w-[70%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-line flex items-start gap-2"
+              <div className={cx("max-w-[85%] sm:max-w-[70%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed flex items-start gap-2", m.role === "user" && "whitespace-pre-line")}
                 style={m.role === "user"
                   ? { background: th.ink, color: th.onInk, borderRadius: "12px 12px 2px 12px" }
                   // Réponse de l'agent cerclée du dégradé iris (démo de la plateforme sur le site public).
                   : { background: `linear-gradient(${th.card},${th.card}) padding-box, ${th.iris} border-box`, border: "1.5px solid transparent", color: th.fg, borderRadius: "12px 12px 12px 2px" }}>
                 {m.modality === "voice" && <AudioLines className="w-3.5 h-3.5 shrink-0 mt-0.5 opacity-60" />}
-                <span>{m.content}</span>
+                {/* Les réponses de l'agent arrivent en Markdown (titres, gras,
+                    listes) : on les rend formatées au lieu d'afficher les
+                    "**"/"####" littéraux. Le message de l'élève reste brut. */}
+                {m.role === "ai"
+                  ? <div className="min-w-0 flex-1"><MarkdownText>{m.content}</MarkdownText></div>
+                  : <span>{m.content}</span>}
               </div>
             </div>
           ))}

@@ -16,6 +16,7 @@ export function MarkdownText({ children }: { children: string }) {
           h1: ({ children }) => <h1 className="text-base font-black mt-4 first:mt-0" style={{ color: th.fg }}>{children}</h1>,
           h2: ({ children }) => <h2 className="text-sm font-black mt-4 first:mt-0" style={{ color: th.fg }}>{children}</h2>,
           h3: ({ children }) => <h3 className="text-sm font-bold mt-3 first:mt-0" style={{ color: th.fg }}>{children}</h3>,
+          h4: ({ children }) => <h4 className="text-sm font-bold mt-3 first:mt-0" style={{ color: th.fg }}>{children}</h4>,
           p: ({ children }) => <p className="leading-relaxed">{children}</p>,
           strong: ({ children }) => <strong className="font-bold" style={{ color: th.fg }}>{children}</strong>,
           em: ({ children }) => <em className="italic">{children}</em>,
