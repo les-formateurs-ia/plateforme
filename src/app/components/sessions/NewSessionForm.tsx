@@ -7,17 +7,25 @@ import { Segmented, ShimBtn, VBtn } from "@/app/components/common/Buttons";
 import { VSelect } from "@/app/components/common/Select";
 import { FORMATION_PRESETS } from "@/app/lib/documents/samples";
 import { FINANCEMENT_LABELS } from "@/app/lib/documents/render";
-import type { Financement } from "@/app/lib/documents/types";
+import type { Financement, Formation } from "@/app/lib/documents/types";
 import { addTrainee, createSession, nextReference, todayIso, type TrainingSession } from "@/app/lib/trainingSessions";
 import type { HubClient } from "@/app/lib/formationsHub";
 import { clientFromCompany, getCompanyProfile } from "@/app/lib/entreprise/companies";
+import type { ProgrammeImport } from "@/app/lib/documents/programmeImport";
 import { Field, TextInput } from "./fields";
+import { ProgrammeEditor, contenuToText, textToContenu } from "./ProgrammeEditor";
+import { ProgrammeImportSummary, ProgrammeImportZone } from "./ProgrammeImport";
 
 // Création d'une session (une formation vendue à un client). Ouverte depuis
 // la fiche d'un client, elle arrive préremplie : entreprise ou élève CPF.
 
 const FINANCEMENTS: Financement[] = ["entreprise", "opco", "cpf", "particulier"];
 const MANUAL = "__manuel";
+// Programme de départ lu dans un document du client (PDF ou Word).
+const IMPORT = "import";
+const FORMATEUR = { nom: "Yanis SOUICI", qualite: "Formateur IA générative, dirigeant de Les Formateurs IA" };
+
+type Imported = { result: ProgrammeImport; fileName: string; formation: Formation; contenuText: string; key: number };
 
 export function NewSessionForm({ clients, sessions, initial, onCancel }: {
   clients: HubClient[];
@@ -39,6 +47,8 @@ export function NewSessionForm({ clients, sessions, initial, onCancel }: {
     dateDebut: todayIso(), dateFin: todayIso(),
   });
   const [saving, setSaving] = useState(false);
+  const [imported, setImported] = useState<Imported | null>(null);
+  const [showEditor, setShowEditor] = useState(false);
   const set = <K extends keyof typeof form>(k: K) => (v: (typeof form)[K]) => setForm((f) => ({ ...f, [k]: v }));
   const b2b = form.financement === "entreprise" || form.financement === "opco";
   const manual = form.studentId === MANUAL || form.studentId === "";
@@ -51,7 +61,12 @@ export function NewSessionForm({ clients, sessions, initial, onCancel }: {
     const email = student?.studentEmail ?? form.clientEmail.trim();
     if (!b2b && (!nom || !email)) return toast.error("Choisissez l'élève, ou renseignez son nom et son e-mail.");
     if (form.dateFin < form.dateDebut) return toast.error("La date de fin précède la date de début.");
-    const preset = FORMATION_PRESETS.find((p) => p.id === form.preset)!;
+    if (form.preset === IMPORT && !imported) return toast.error("Importez le programme (PDF ou Word), ou choisissez un autre programme de départ.");
+    const preset = FORMATION_PRESETS.find((p) => p.id === form.preset);
+    const formation = imported && form.preset === IMPORT
+      ? { ...imported.formation, contenu: textToContenu(imported.contenuText) }
+      : preset!.formation;
+    const prix = imported && form.preset === IMPORT ? imported.result.prixHt ?? 0 : preset!.prix;
     setSaving(true);
     try {
       // La fiche de l'entreprise (adresse, SIRET, signataire) préremplit le dossier client.
@@ -65,14 +80,14 @@ export function NewSessionForm({ clients, sessions, initial, onCancel }: {
           type: b2b ? "entreprise" : "particulier", nom: b2b ? company!.name : nom,
           adresse: "", codePostal: "", ville: "", siret: null, representant: null, email: b2b ? "" : email,
         },
-        formation: preset.formation,
-        lignes: [{ designation: preset.formation.intitule, quantite: 1, prixUnitaireHt: preset.prix }],
+        formation,
+        lignes: [{ designation: formation.intitule, quantite: 1, prixUnitaireHt: prix }],
         conditionsPaiement: form.financement === "cpf"
           ? "Prise en charge par la Caisse des dépôts selon les conditions générales de Mon Compte Formation."
           : "Facture émise à l'issue de la formation, payable à 30 jours par virement.",
         dateDebut: form.dateDebut, dateFin: form.dateFin,
-        lieu: preset.formation.modalite === "presentiel" ? "" : "Plateforme e-learning et visioconférence", lienConnexion: null,
-        intervenants: [{ nom: "Yanis SOUICI", qualite: "Formateur IA générative, dirigeant de Les Formateurs IA" }],
+        lieu: formation.modalite === "presentiel" ? "" : "Plateforme e-learning et visioconférence", lienConnexion: null,
+        intervenants: [FORMATEUR],
         formateurId: null,
         statutCommercial: "gagne", factures: [], chargesHt: 0, effectifPrevu: null,
       });
@@ -99,8 +114,34 @@ export function NewSessionForm({ clients, sessions, initial, onCancel }: {
           options={FINANCEMENTS.map((f) => ({ value: f, label: FINANCEMENT_LABELS[f] }))} />
       </Field>
       <Field label="Programme de départ" hint="Copié dans la formation, modifiable ensuite.">
-        <Segmented value={form.preset} onChange={set("preset")} options={FORMATION_PRESETS.map((p) => ({ value: p.id, label: p.label }))} />
+        <Segmented value={form.preset} onChange={set("preset")} options={[...FORMATION_PRESETS.map((p) => ({ value: p.id, label: p.label })), { value: IMPORT, label: "Importer un document" }]} />
       </Field>
+      {form.preset === IMPORT && (
+        <div className="space-y-3">
+          <ProgrammeImportZone
+            // Les rubriques absentes du document gardent les mentions du programme type.
+            base={FORMATION_PRESETS.find((p) => p.id === (b2b ? "entreprise" : "rs6776"))!.formation}
+            onImported={(result, fileName) => setImported((prev) => ({
+              result, fileName, formation: result.formation, contenuText: contenuToText(result.formation.contenu), key: (prev?.key ?? 0) + 1,
+            }))} />
+          {imported && (
+            <>
+              <ProgrammeImportSummary result={imported.result} fileName={imported.fileName} intervenants={[FORMATEUR]}
+                formation={{ ...imported.formation, contenu: textToContenu(imported.contenuText) }} />
+              <button type="button" onClick={() => setShowEditor((v) => !v)} className="text-xs font-bold hover:underline" style={{ color: th.fg2 }}>
+                {showEditor ? "Masquer les champs du programme" : "Vérifier et corriger les champs du programme"}
+              </button>
+              {showEditor && (
+                <div className="rounded-[10px] p-4" style={{ border: `1px solid ${th.sep}` }}>
+                  <ProgrammeEditor key={imported.key} value={imported.formation}
+                    onChange={(formation) => setImported((i) => (i ? { ...i, formation } : i))}
+                    contenuText={imported.contenuText} onContenuText={(contenuText) => setImported((i) => (i ? { ...i, contenuText } : i))} />
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
       {b2b ? (
         <Field label="Entreprise cliente">
           <VSelect value={form.companyId} onValueChange={set("companyId")} placeholder="Choisir une entreprise"

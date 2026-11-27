@@ -10,6 +10,8 @@ import { GT } from "@/app/components/common/GT";
 import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
 import { Field, ParsedArea, TextArea, TextInput } from "@/app/components/sessions/fields";
 import { ProgrammeEditor, contenuToText, textToContenu } from "@/app/components/sessions/ProgrammeEditor";
+import { ProgrammeImportSummary, ProgrammeImportZone } from "@/app/components/sessions/ProgrammeImport";
+import type { ProgrammeImport } from "@/app/lib/documents/programmeImport";
 import { ActionButtons, GREEN, JourneyHero } from "@/app/components/sessions/JourneyView";
 import { computeJourney, type JourneyAction, type JourneyStep } from "@/app/lib/documents/journey";
 import { countTodos, DOCUMENT_TEMPLATES, renderTemplate } from "@/app/lib/documents/catalog";
@@ -98,6 +100,9 @@ export function AdminSessionDetailPage() {
   const [bundle, setBundle] = useState<SessionBundle | null>(null);
   const [draft, setDraft] = useState<TrainingSession | null>(null);
   const [contenuText, setContenuText] = useState("");
+  // Dernier programme importé (PDF ou Word) : l'éditeur est remonté (key)
+  // pour reprendre ses champs, enregistrés ensuite comme toute saisie.
+  const [programmeImport, setProgrammeImport] = useState<{ result: ProgrammeImport; fileName: string; key: number } | null>(null);
   const [activity, setActivity] = useState<Record<string, ActivityRow[]>>({});
   const [selected, setSelected] = useState<string | null>(null);
   // Envoi d'e-mail en cours de confirmation (fenêtre d'aperçu).
@@ -221,7 +226,25 @@ export function AdminSessionDetailPage() {
   const panel = (step: JourneyStep): ReactNode => {
     switch (step.id) {
       case "client": return <ClientPanel draft={draft} setDraft={setDraft} />;
-      case "programme": return <ProgrammeEditor value={draft.formation} onChange={(formation) => setDraft({ ...draft, formation })} contenuText={contenuText} onContenuText={setContenuText} />;
+      case "programme": return (
+        <div className="space-y-4">
+          <ProgrammeImportZone base={draft.formation} onImported={(result, fileName) => {
+            const ligne = draft.lignes[0];
+            // Le prix relevé ne remplace qu'un devis encore à zéro.
+            const lignes = result.prixHt != null && (!ligne || !ligne.prixUnitaireHt)
+              ? [{ designation: result.formation.intitule, quantite: 1, prixUnitaireHt: result.prixHt }, ...draft.lignes.slice(1)]
+              : draft.lignes;
+            setDraft({ ...draft, formation: result.formation, lignes });
+            setContenuText(contenuToText(result.formation.contenu));
+            setProgrammeImport((prev) => ({ result, fileName, key: (prev?.key ?? 0) + 1 }));
+          }} />
+          {programmeImport && (
+            <ProgrammeImportSummary result={programmeImport.result} fileName={programmeImport.fileName}
+              formation={merged.formation} intervenants={draft.intervenants} />
+          )}
+          <ProgrammeEditor key={programmeImport?.key ?? 0} value={draft.formation} onChange={(formation) => setDraft({ ...draft, formation })} contenuText={contenuText} onContenuText={setContenuText} />
+        </div>
+      );
       case "devis": return <><PrixPanel draft={draft} setDraft={setDraft} /><DocLines kit={kit} ids={["devis", "programme"]} /></>;
       case "planning": return <PlanningPanel bundle={bundle} busy={busy} run={run} />;
       case "convention": case "contrat-particulier": return <DocLines kit={kit} ids={[step.id]} />;

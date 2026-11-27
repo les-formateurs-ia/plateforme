@@ -7,14 +7,14 @@ import { build } from 'esbuild';
 // mémoire avec esbuild pour les exécuter sous Node.
 const { outputFiles } = await build({
   stdin: {
-    contents: `export * from './src/app/lib/documents/catalog'; export * from './src/app/lib/documents/samples'; export * from './src/app/lib/documents/session'; export * from './src/app/lib/documents/journey'; export { withSignatureProof, stampSignature } from './src/app/lib/documents/render';`,
+    contents: `export * from './src/app/lib/documents/catalog'; export * from './src/app/lib/documents/samples'; export * from './src/app/lib/documents/session'; export * from './src/app/lib/documents/journey'; export { withSignatureProof, stampSignature } from './src/app/lib/documents/render'; export * from './src/app/lib/documents/programmeImport';`,
     resolveDir: fileURLToPath(new URL('..', import.meta.url)),
     loader: 'ts',
   },
   bundle: true, format: 'esm', platform: 'node', write: false,
 });
 const mod = await import(`data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString('base64')}`);
-const { DOCUMENT_TEMPLATES, SAMPLES, renderTemplate, buildDocumentContext, isSlotOpen, isSlotUpcoming, withSignatureProof, FORMATION_RS6776, FORMATION_ENTREPRISE, computeJourney, stampSignature } = mod;
+const { DOCUMENT_TEMPLATES, SAMPLES, renderTemplate, buildDocumentContext, isSlotOpen, isSlotUpcoming, withSignatureProof, FORMATION_RS6776, FORMATION_ENTREPRISE, computeJourney, stampSignature, mergeImportedProgramme, extractJson, htmlToPlainText } = mod;
 
 const byId = (id) => SAMPLES.find((s) => s.id === id).ctx;
 const ids = (ctx) => DOCUMENT_TEMPLATES.filter((t) => t.applicable(ctx)).map((t) => t.id);
@@ -245,4 +245,55 @@ test('a file closed in Digiforma counts as complete; one still in progress does 
   assert.deepEqual(closed.missingFields, []);
   const open = computeJourney({ ...bundle, session: { ...bundle.session, archive: { ...archive, cloture: false } } }, [], {}, new Date('2026-12-20T10:00:00Z'));
   assert.equal(open.next.id, 'client');
+});
+
+// ── Import d'un programme (PDF / Word) ───────────────────────────────
+
+test('imported programme fills the fields found and keeps the template for the rest', () => {
+  const raw = extractJson('Voici le programme :\n```json\n' + JSON.stringify({
+    intitule: 'Excel avancé', accroche: null, dureeHeures: 14, dureeJours: null, modalite: 'presentiel',
+    publicVise: ['Comptables'], prerequis: [], objectifs: ['1. Construire un tableau croisé dynamique.', '- Automatiser un rapport.'],
+    contenu: [{ titre: 'Jour 1', duree: '7 h', objectif: null, points: ['Tableaux croisés'] }, { titre: null, points: [] }],
+    methodes: [], moyensTechniques: [], modalitesEvaluation: ['Quiz final'], delaiAcces: null, accessibilite: null,
+    tarif: '1 200 € HT', prixHt: '1 200', indicateurs: [{ libelle: 'Satisfaction', valeur: '' }],
+    certification: { intitule: 'X', code: 'pas un code' }, manquants: ['prérequis'],
+  }) + '\n```');
+  const r = mergeImportedProgramme(FORMATION_ENTREPRISE, raw);
+  assert.equal(r.formation.intitule, 'Excel avancé');
+  assert.equal(r.formation.dureeJours, 2);
+  assert.deepEqual(r.formation.objectifs, ['Construire un tableau croisé dynamique.', 'Automatiser un rapport.']);
+  assert.equal(r.formation.contenu.length, 1);
+  assert.deepEqual(r.formation.prerequis, FORMATION_ENTREPRISE.prerequis);
+  assert.deepEqual(r.formation.indicateurs, FORMATION_ENTREPRISE.indicateurs);
+  assert.equal(r.formation.certification, null);
+  assert.equal(r.prixHt, 1200);
+  assert.ok(r.reprises.includes('Prérequis') && r.reprises.includes('Accessibilité (handicap)'));
+  assert.ok(!r.reprises.includes('Objectifs pédagogiques'));
+  assert.deepEqual(r.manquants, ['prérequis']);
+  // Le programme rendu reste complet, sans valeur manquante.
+  const html = renderTemplate(DOCUMENT_TEMPLATES.find((t) => t.id === 'programme'), { ...byId('entreprise'), formation: r.formation });
+  assert.doesNotMatch(html, /undefined|NaN|\[object Object\]/);
+  assert.match(html, /Excel avancé/);
+});
+
+test('imported programme rejects a document without a title', () => {
+  assert.throws(() => mergeImportedProgramme(FORMATION_ENTREPRISE, { intitule: '  ' }), /intitulé/);
+  assert.throws(() => extractJson('pas de JSON'), /lisible/);
+});
+
+test('distance mentions are only kept for a distance programme', () => {
+  const r = mergeImportedProgramme(FORMATION_RS6776, { intitule: 'E-learning', modalite: 'foad', assistance: null, activitesDistance: [] });
+  assert.equal(r.formation.assistance, FORMATION_RS6776.assistance);
+  const p = mergeImportedProgramme(FORMATION_RS6776, { intitule: 'Salle', modalite: 'presentiel' });
+  assert.equal(p.formation.assistance, null);
+  assert.deepEqual(p.formation.activitesDistance, []);
+});
+
+test('word html becomes structured plain text', () => {
+  const text = htmlToPlainText('<h1>Programme</h1><p>Intro&nbsp;&amp; suite</p><ul><li>Point A</li><li>Point B</li></ul><table><tr><td>Jour 1</td><td>7 h</td></tr></table><img src="data:x">');
+  assert.match(text, /^# Programme/);
+  assert.match(text, /Intro & suite/);
+  assert.match(text, /- Point A\n- Point B/);
+  assert.match(text, /Jour 1 \| 7 h/);
+  assert.doesNotMatch(text, /<|data:/);
 });
