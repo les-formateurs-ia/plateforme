@@ -54,7 +54,7 @@ export function ConvertProspectDialog({ lead, open, onOpenChange, onConverted }:
   const navigate = useNavigate();
   const [kind, setKind] = useState<Kind | null>(null);
   const [f, setF] = useState(() => initialFields(lead));
-  const [presetId, setPresetId] = useState("entreprise");
+  const [presetId, setPresetId] = useState("vierge");
   const [companies, setCompanies] = useState<CompanyRow[]>([]);
   const [companyId, setCompanyId] = useState(NEW_COMPANY);
   const [contactSigns, setContactSigns] = useState(true);
@@ -69,7 +69,7 @@ export function ConvertProspectDialog({ lead, open, onOpenChange, onConverted }:
   const choose = (k: Kind) => {
     setKind(k);
     setError(null);
-    setPresetId(k === "particulier" ? "rs6776" : "entreprise");
+    setPresetId(k === "particulier" ? "rs6776" : "vierge");
   };
 
   // Une fiche du même nom existe déjà : on la propose plutôt qu'un doublon.
@@ -299,11 +299,15 @@ export function ConvertProspectDialog({ lead, open, onOpenChange, onConverted }:
             <Group title="Formation">
               <Field label="Programme de départ" group>
                 <div className="flex flex-wrap gap-2">
-                  {FORMATION_PRESETS.map((p) => (
+                  {/* Plus de programme type : une entreprise part du sien, importé ou rédigé dans le dossier. */}
+                  {FORMATION_PRESETS.filter((p) => p.id !== "entreprise").map((p) => (
                     <button key={p.id} type="button" onClick={() => setPresetId(p.id)} aria-pressed={presetId === p.id}
-                      className="rounded-[4px] border px-3 py-1.5 text-sm font-semibold" style={chip(presetId === p.id)}>{p.label}</button>
+                      className="rounded-[4px] border px-3 py-1.5 text-sm font-semibold" style={chip(presetId === p.id)}>{p.id === "vierge" ? "Programme du client (à importer dans le dossier)" : p.label}</button>
                   ))}
                 </div>
+                {presetId === "vierge" && (
+                  <p className="text-[11px] mt-1.5" style={{ color: th.fg3 }}>Le devis et le programme seront émis depuis le dossier, une fois le programme importé (PDF ou Word) ou rédigé.</p>
+                )}
               </Field>
               <div className={`grid gap-3 ${kind === "entreprise" ? "sm:grid-cols-4" : "sm:grid-cols-3"}`}>
                 <Field label="Début">{input("dateDebut", { type: "date" })}</Field>

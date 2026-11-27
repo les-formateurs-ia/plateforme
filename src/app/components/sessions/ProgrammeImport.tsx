@@ -67,19 +67,22 @@ export function ProgrammeImportZone({ base, onImported }: {
   );
 }
 
+// Le programme tel que le client le recevra (modèle de la plateforme), dans un nouvel onglet.
+export function previewProgramme(formation: Formation, intervenants?: Intervenant[]) {
+  const template = DOCUMENT_TEMPLATES.find((t) => t.id === "programme")!;
+  const ctx = {
+    ...SAMPLE_ENTREPRISE, formation, dateDocument: todayIso(),
+    session: { ...SAMPLE_ENTREPRISE.session, intervenants: intervenants ?? SAMPLE_ENTREPRISE.session.intervenants },
+  };
+  openDocument(renderTemplate(template, ctx, logoSvg)).catch((err) => toast.error(err instanceof Error ? err.message : String(err)));
+}
+
 // Ce que l'import a trouvé, et ce qu'il reste à vérifier.
 export function ProgrammeImportSummary({ result, fileName, formation, intervenants }: {
   result: ImportResult; fileName: string; formation: Formation; intervenants?: Intervenant[];
 }) {
   const th = useTh();
-  const preview = () => {
-    const template = DOCUMENT_TEMPLATES.find((t) => t.id === "programme")!;
-    const ctx = {
-      ...SAMPLE_ENTREPRISE, formation, dateDocument: todayIso(),
-      session: { ...SAMPLE_ENTREPRISE.session, intervenants: intervenants ?? SAMPLE_ENTREPRISE.session.intervenants },
-    };
-    openDocument(renderTemplate(template, ctx, logoSvg)).catch((err) => toast.error(err instanceof Error ? err.message : String(err)));
-  };
+  const preview = () => previewProgramme(formation, intervenants);
   return (
     <div className="rounded-[10px] p-4 space-y-2.5" style={{ background: th.navA }}>
       <div className="flex items-center gap-2 flex-wrap">

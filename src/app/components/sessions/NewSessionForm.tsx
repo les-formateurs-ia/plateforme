@@ -8,7 +8,7 @@ import { VSelect } from "@/app/components/common/Select";
 import { FORMATION_PRESETS } from "@/app/lib/documents/samples";
 import { FINANCEMENT_LABELS } from "@/app/lib/documents/render";
 import type { Financement, Formation } from "@/app/lib/documents/types";
-import { addTrainee, createSession, nextReference, todayIso, type TrainingSession } from "@/app/lib/trainingSessions";
+import { addProgrammeVersion, addTrainee, createSession, nextReference, todayIso, type TrainingSession } from "@/app/lib/trainingSessions";
 import type { HubClient } from "@/app/lib/formationsHub";
 import { clientFromCompany, getCompanyProfile } from "@/app/lib/entreprise/companies";
 import type { ProgrammeImport } from "@/app/lib/documents/programmeImport";
@@ -25,6 +25,16 @@ const MANUAL = "__manuel";
 const IMPORT = "import";
 const FORMATEUR = { nom: "Yanis SOUICI", qualite: "Formateur IA générative, dirigeant de Les Formateurs IA" };
 
+// Entreprise et OPCO : pas de programme type, chaque client a le sien
+// (importé, ou écrit à partir d'un programme vierge). Le RS6776 reste le
+// point de départ d'un dossier CPF ou particulier.
+const isB2b = (f: Financement) => f === "entreprise" || f === "opco";
+const presetOptions = (f: Financement) => isB2b(f)
+  ? [{ value: IMPORT, label: "Importer un document" }, { value: "vierge", label: "Programme vierge" }]
+  : [...FORMATION_PRESETS.filter((p) => p.id !== "entreprise").map((p) => ({ value: p.id, label: p.label })), { value: IMPORT, label: "Importer un document" }];
+const presetFor = (f: Financement, current: string) =>
+  f === "cpf" ? "rs6776" : presetOptions(f).some((o) => o.value === current) ? current : isB2b(f) ? IMPORT : "rs6776";
+
 type Imported = { result: ProgrammeImport; fileName: string; formation: Formation; contenuText: string; key: number };
 
 export function NewSessionForm({ clients, sessions, initial, onCancel }: {
@@ -40,7 +50,7 @@ export function NewSessionForm({ clients, sessions, initial, onCancel }: {
   const startFinancement = (initial?.kind === "cpf" ? "cpf" : "entreprise") as Financement;
   const [form, setForm] = useState({
     financement: startFinancement,
-    preset: startFinancement === "cpf" ? "rs6776" : "entreprise",
+    preset: presetFor(startFinancement, ""),
     companyId: initial?.companyId ?? "",
     studentId: initial?.studentId ?? "",
     clientNom: "", clientEmail: "",
@@ -91,6 +101,9 @@ export function NewSessionForm({ clients, sessions, initial, onCancel }: {
         formateurId: null,
         statutCommercial: "gagne", factures: [], chargesHt: 0, effectifPrevu: null,
       });
+      // Version 1 du programme (versions : étape Programme du dossier).
+      await addProgrammeVersion(id, formation, imported && form.preset === IMPORT ? "import" : "creation",
+        imported && form.preset === IMPORT ? imported.fileName : null).catch((err) => console.error("Version du programme non créée :", err));
       // Un élève de la plateforme est aussi le stagiaire : son compte relie
       // la session à ses relevés de connexion.
       if (!b2b) {
@@ -110,17 +123,18 @@ export function NewSessionForm({ clients, sessions, initial, onCancel }: {
       <p className="text-sm font-black" style={{ color: th.fg }}>Nouvelle formation{initial ? ` · ${initial.name}` : ""}</p>
       <Field label="Financement">
         <Segmented value={form.financement}
-          onChange={(v) => setForm((f) => ({ ...f, financement: v as Financement, preset: v === "cpf" ? "rs6776" : f.preset }))}
+          onChange={(v) => setForm((f) => ({ ...f, financement: v as Financement, preset: presetFor(v as Financement, f.preset) }))}
           options={FINANCEMENTS.map((f) => ({ value: f, label: FINANCEMENT_LABELS[f] }))} />
       </Field>
       <Field label="Programme de départ" hint="Copié dans la formation, modifiable ensuite.">
-        <Segmented value={form.preset} onChange={set("preset")} options={[...FORMATION_PRESETS.map((p) => ({ value: p.id, label: p.label })), { value: IMPORT, label: "Importer un document" }]} />
+        <Segmented value={form.preset} onChange={set("preset")} options={presetOptions(form.financement)} />
       </Field>
       {form.preset === IMPORT && (
         <div className="space-y-3">
           <ProgrammeImportZone
-            // Les rubriques absentes du document gardent les mentions du programme type.
-            base={FORMATION_PRESETS.find((p) => p.id === (b2b ? "entreprise" : "rs6776"))!.formation}
+            // Rubriques absentes du document : entreprise, seules les mentions
+            // générales de l'organisme (délais d'accès, accessibilité) ; CPF, celles du RS6776.
+            base={FORMATION_PRESETS.find((p) => p.id === (b2b ? "vierge" : "rs6776"))!.formation}
             onImported={(result, fileName) => setImported((prev) => ({
               result, fileName, formation: result.formation, contenuText: contenuToText(result.formation.contenu), key: (prev?.key ?? 0) + 1,
             }))} />

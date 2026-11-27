@@ -11,6 +11,7 @@ import { ShimBtn, VBtn } from "@/app/components/common/Buttons";
 import { Field, ParsedArea, TextArea, TextInput } from "@/app/components/sessions/fields";
 import { ProgrammeEditor, contenuToText, textToContenu } from "@/app/components/sessions/ProgrammeEditor";
 import { ProgrammeImportSummary, ProgrammeImportZone } from "@/app/components/sessions/ProgrammeImport";
+import { ProgrammeVersionsCard } from "@/app/components/sessions/ProgrammeVersions";
 import type { ProgrammeImport } from "@/app/lib/documents/programmeImport";
 import { ActionButtons, GREEN, JourneyHero } from "@/app/components/sessions/JourneyView";
 import { computeJourney, type JourneyAction, type JourneyStep } from "@/app/lib/documents/journey";
@@ -18,7 +19,7 @@ import { countTodos, DOCUMENT_TEMPLATES, renderTemplate } from "@/app/lib/docume
 import { creneauDuree, dateLongueFr, FINANCEMENT_LABELS, heureFr, heures, MODALITE_LABELS, periodeFr, withSignatureProof } from "@/app/lib/documents/render";
 import type { DocumentContext } from "@/app/lib/documents/types";
 import {
-  addSlot, addTrainee, assignSessionFormateur, buildDocumentContext, clientPortalUrl, deleteDocument, deleteSession, deleteSlot, deleteTrainee, findProfileIdByEmail,
+  addProgrammeVersion, addSlot, addTrainee, assignSessionFormateur, buildDocumentContext, clientPortalUrl, deleteDocument, deleteSession, deleteSlot, deleteTrainee, findProfileIdByEmail,
   createCompanyAccess, getDocumentHtml, getSessionActivity, getSessionBundle, importCompanyEmployees, isSlotOpen, issueDocument, listSessionEmails,
   setAutoEmails, signAttendanceAsTrainer, updateSession, updateTraineeResult, STATUT_COMMERCIAL_LABELS,
   type ActivityRow, type EmailKind, type SessionBundle, type SessionDocument, type SessionEmail, type TrainingSession,
@@ -27,6 +28,7 @@ import { VSwitch } from "@/app/components/common/VSwitch";
 import { EmailComposer } from "@/app/components/sessions/EmailComposer";
 import { EmailHistoryList } from "@/app/components/sessions/EmailHistory";
 import { ImpactSurveysCard } from "@/app/components/sessions/ImpactSurveysCard";
+import { MeetingsCard } from "@/app/components/sessions/MeetingsCard";
 import { VSelect } from "@/app/components/common/Select";
 import { useAuth } from "@/app/state/auth-context";
 import { isAdmin } from "@/app/lib/permissions";
@@ -40,6 +42,17 @@ import { SessionChatButton } from "@/app/components/sessions/SessionChat";
 // la séance du jour, l'espace client et l'archive des documents.
 // Un formateur n'ouvre que ses sessions attribuées, dans une vue réduite à
 // la partie pédagogique (FormateurSessionView) : ni prix, ni documents.
+
+// Même contenu, quel que soit l'ordre des clés (jsonb les réordonne) et
+// les champs facultatifs vides (undefined disparaît à l'enregistrement).
+function canonical(v: unknown): unknown {
+  if (Array.isArray(v)) return v.map(canonical);
+  if (v && typeof v === "object") {
+    return Object.fromEntries(Object.entries(v).filter(([, x]) => x !== undefined).sort(([a], [b]) => a.localeCompare(b)).map(([k, x]) => [k, canonical(x)]));
+  }
+  return v;
+}
+const sameJson = (a: unknown, b: unknown) => JSON.stringify(canonical(a)) === JSON.stringify(canonical(b));
 
 const dateHeure = (iso: string) => new Intl.DateTimeFormat("fr-FR", { dateStyle: "short", timeStyle: "short", timeZone: "Europe/Paris" }).format(new Date(iso));
 
@@ -100,9 +113,12 @@ export function AdminSessionDetailPage() {
   const [bundle, setBundle] = useState<SessionBundle | null>(null);
   const [draft, setDraft] = useState<TrainingSession | null>(null);
   const [contenuText, setContenuText] = useState("");
-  // Dernier programme importé (PDF ou Word) : l'éditeur est remonté (key)
-  // pour reprendre ses champs, enregistrés ensuite comme toute saisie.
-  const [programmeImport, setProgrammeImport] = useState<{ result: ProgrammeImport; fileName: string; key: number } | null>(null);
+  // Dernier programme importé (PDF ou Word), enregistré ensuite comme toute
+  // saisie ; pending : la prochaine version enregistrée vient de ce fichier.
+  const [programmeImport, setProgrammeImport] = useState<{ result: ProgrammeImport; fileName: string; pending: boolean } | null>(null);
+  // L'éditeur est remonté (key) pour reprendre un programme importé ou une version rendue active.
+  const [editorKey, setEditorKey] = useState(0);
+  const [versionsKey, setVersionsKey] = useState(0);
   const [activity, setActivity] = useState<Record<string, ActivityRow[]>>({});
   const [selected, setSelected] = useState<string | null>(null);
   // Envoi d'e-mail en cours de confirmation (fenêtre d'aperçu).
@@ -159,8 +175,25 @@ export function AdminSessionDetailPage() {
   if (!admin) return <FormateurSessionView bundle={bundle} activity={activity} busy={busy} run={run} />;
 
   const merged: TrainingSession = { ...draft, formation: { ...draft.formation, contenu: textToContenu(contenuText) } };
-  const dirty = JSON.stringify(draft) !== JSON.stringify(bundle.session) || contenuText !== contenuToText(bundle.session.formation.contenu);
-  const save = () => run(() => updateSession(merged), "Modifications enregistrées.");
+  // Comparaison sans l'ordre des clés : un programme importé puis enregistré
+  // revient de la base avec ses clés réordonnées, sans être modifié pour autant.
+  const dirty = !sameJson(draft, bundle.session) || contenuText !== contenuToText(bundle.session.formation.contenu);
+  // Enregistre le dossier ; un programme modifié devient une nouvelle
+  // version, active (celle que reçoit le client).
+  const persist = async () => {
+    await updateSession(merged);
+    if (sameJson(merged.formation, bundle.session.formation)) return;
+    const fromImport = programmeImport?.pending ? programmeImport.fileName : null;
+    try {
+      await addProgrammeVersion(merged.id, merged.formation, fromImport ? "import" : "modification", fromImport);
+      if (fromImport) setProgrammeImport((i) => (i ? { ...i, pending: false } : i));
+      setVersionsKey((k) => k + 1);
+    } catch (err) {
+      console.error(err);
+      toast.warning("Programme enregistré, mais sans nouvelle version (migration 20261127120000_programme_versions à appliquer ?).");
+    }
+  };
+  const save = () => run(persist, "Modifications enregistrées.");
   const ctx = buildDocumentContext(bundle, activity);
   const hasSignatures = bundle.signatures.length > 0 || bundle.documents.some((d) => d.signed_at);
 
@@ -180,7 +213,7 @@ export function AdminSessionDetailPage() {
   const issue = (templateIds: string[]) => void run(async () => {
     let source = bundle;
     if (dirty) {
-      await updateSession(merged);
+      await persist();
       source = { ...bundle, session: merged };
     }
     const docCtx = buildDocumentContext(source, activity);
@@ -236,13 +269,22 @@ export function AdminSessionDetailPage() {
               : draft.lignes;
             setDraft({ ...draft, formation: result.formation, lignes });
             setContenuText(contenuToText(result.formation.contenu));
-            setProgrammeImport((prev) => ({ result, fileName, key: (prev?.key ?? 0) + 1 }));
+            setProgrammeImport({ result, fileName, pending: true });
+            setEditorKey((k) => k + 1);
           }} />
           {programmeImport && (
             <ProgrammeImportSummary result={programmeImport.result} fileName={programmeImport.fileName}
               formation={merged.formation} intervenants={draft.intervenants} />
           )}
-          <ProgrammeEditor key={programmeImport?.key ?? 0} value={draft.formation} onChange={(formation) => setDraft({ ...draft, formation })} contenuText={contenuText} onContenuText={setContenuText} />
+          <ProgrammeVersionsCard sessionId={draft.id} refreshKey={versionsKey} dirty={dirty} intervenants={draft.intervenants}
+            onActivated={(formation) => {
+              setDraft({ ...draft, formation });
+              setContenuText(contenuToText(formation.contenu));
+              setProgrammeImport(null);
+              setEditorKey((k) => k + 1);
+              void reload();
+            }} />
+          <ProgrammeEditor key={editorKey} value={draft.formation} onChange={(formation) => setDraft({ ...draft, formation })} contenuText={contenuText} onContenuText={setContenuText} />
         </div>
       );
       case "devis": return <><PrixPanel draft={draft} setDraft={setDraft} /><DocLines kit={kit} ids={["devis", "programme"]} /></>;
@@ -414,6 +456,8 @@ export function AdminSessionDetailPage() {
           </div></GCard>
 
           <EmailsCard bundle={bundle} busy={busy} onCompose={(kind) => setComposer({ kind })} />
+
+          <MeetingsCard sessionId={bundle.session.id} />
 
           <ImpactSurveysCard sessionId={bundle.session.id} />
 

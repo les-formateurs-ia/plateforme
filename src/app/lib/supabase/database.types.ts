@@ -271,6 +271,25 @@ export interface Database {
         Update: never;
         Relationships: never[];
       };
+      session_meetings: {
+        Row: {
+          id: string; session_id: string; meeting_date: string; title: string; notes: string | null;
+          file_path: string | null; file_name: string | null; created_by: string | null; created_at: string;
+        };
+        Insert: { session_id: string; meeting_date: string; title: string; notes?: string | null; file_path?: string | null; file_name?: string | null; created_by?: string | null };
+        Update: Partial<Database["public"]["Tables"]["session_meetings"]["Insert"]>;
+        Relationships: never[];
+      };
+      programme_versions: {
+        Row: {
+          id: string; session_id: string; numero: number; source: "origine" | "creation" | "import" | "modification";
+          file_name: string | null; formation: Json; is_active: boolean; created_by: string | null; created_at: string;
+        };
+        // Écritures par add_programme_version et activate_programme_version.
+        Insert: never;
+        Update: never;
+        Relationships: never[];
+      };
       impact_surveys: {
         Row: {
           id: string; session_id: string; title: string; description: string | null; questions: Json;
@@ -2105,6 +2124,14 @@ export interface Database {
         Args: Record<string, never>;
         Returns: { id: string; template_id: string; title: string; issued_at: string; intitule: string | null; date_debut: string; date_fin: string }[];
       };
+      add_programme_version: {
+        Args: { p_session_id: string; p_formation: Json; p_source: "creation" | "import" | "modification"; p_file_name?: string | null; p_activate?: boolean };
+        Returns: string;
+      };
+      activate_programme_version: {
+        Args: { p_version_id: string };
+        Returns: undefined;
+      };
       get_my_training_document: {
         Args: { p_document_id: string };
         Returns: { title: string; html: string }[];
@@ -2122,6 +2149,10 @@ export interface Database {
       };
       sign_client_document: {
         Args: { p_token: string; p_document_id: string };
+        Returns: string;
+      };
+      sign_client_document_as: {
+        Args: { p_token: string; p_document_id: string; p_prenom: string; p_nom: string; p_fonction: string };
         Returns: string;
       };
       my_attendance_slots: {

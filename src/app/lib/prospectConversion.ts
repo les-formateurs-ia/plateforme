@@ -14,7 +14,7 @@ import { DOCUMENT_TEMPLATES } from "@/app/lib/documents/catalog";
 import { computeJourney } from "@/app/lib/documents/journey";
 import { FORMATION_PRESETS } from "@/app/lib/documents/samples";
 import {
-  addTrainee, buildDocumentContext, createSession, findProfileIdByEmail, getSessionBundle, issueDocument, listSessions, nextReference,
+  addProgrammeVersion, addTrainee, buildDocumentContext, createSession, findProfileIdByEmail, getSessionBundle, issueDocument, listSessions, nextReference,
   sendFormationEmail, setAutoEmails,
 } from "@/app/lib/trainingSessions";
 import { createStudent } from "@/app/lib/students";
@@ -144,10 +144,13 @@ export async function convertProspect(lead: Lead, input: ConversionInput): Promi
     });
   }
 
+  await addProgrammeVersion(sessionId, preset.formation, "creation").catch((err) => console.error("Version du programme non créée :", err));
+
   // Devis et programme, dès que le dossier client et le programme le permettent ;
-  // sinon le parcours du dossier indique ce qu'il manque.
+  // sinon le parcours du dossier indique ce qu'il manque. Programme vierge :
+  // rien n'est émis, le programme du client reste à importer dans le dossier.
   const issued: string[] = [];
-  const bundle = await getSessionBundle(sessionId);
+  const bundle = input.presetId === "vierge" ? null : await getSessionBundle(sessionId);
   if (bundle) {
     const step = computeJourney(bundle, [], {}).steps.find((s) => s.id === "devis");
     const action = step?.actions[0];

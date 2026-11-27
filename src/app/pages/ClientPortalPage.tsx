@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useParams, useSearchParams } from "react-router";
 import {
-  Activity, Award, BadgeCheck, BookOpen, CalendarDays, Check, CheckCircle2, ChevronDown, ClipboardCheck, Clock, Download, FileSignature, FileText,
+  Activity, Award, BadgeCheck, BookOpen, CalendarCheck, CalendarDays, ClipboardList, LayoutDashboard, Check, CheckCircle2, ChevronDown, ClipboardCheck, Clock, Download, FileSignature, FileText,
   GraduationCap, Lock, Mail, MapPin, PenLine, Phone, Receipt, Scale, Send, ShieldCheck, Users, Video, X, type LucideIcon,
 } from "lucide-react";
 import { useTh } from "@/app/theme/theme";
@@ -17,14 +17,18 @@ import { DOCUMENT_TEMPLATES, renderTemplate } from "@/app/lib/documents/catalog"
 import { ORGANISME } from "@/app/lib/documents/organisme";
 import type { DocumentContext, Financement } from "@/app/lib/documents/types";
 import {
-  getClientDocument, getClientPortal, signClientDocument, todayIso, type ClientDocument, type ClientPortal, type PortalDocument, type PortalTrainee,
+  clientMeetingFileUrl, getClientDocument, getClientPortal, signClientDocument, signClientDocumentAs, todayIso,
+  type ClientDocument, type ClientPortal, type PortalDocument, type PortalMeeting, type PortalPositioning, type PortalTrainee,
 } from "@/app/lib/trainingSessions";
 
-// Espace client d'une formation, ouvert par lien personnel et sans compte :
-// un tableau de bord pour suivre la formation (étapes, prochaine séance,
-// planning et présence des collaborateurs, programme) et retrouver tous ses
-// documents, à signer sur place. Après la formation, les attestations et le
-// certificat de réalisation y restent disponibles.
+// Espace client d'une formation, ouvert par lien personnel et sans compte.
+// En haut, l'essentiel (formation, compte à rebours, parcours, documents à
+// signer) ; dessous, des onglets : vue d'ensemble, documents (à signer sur
+// place), programme, planning et présence, test de positionnement des
+// collaborateurs, rendez-vous avec l'organisme. L'onglet ouvert est dans
+// l'adresse (?onglet=documents) pour pouvoir y renvoyer directement.
+
+type Tab = "apercu" | "documents" | "programme" | "planning" | "positionnement" | "rendez-vous";
 
 const GREEN = "#1BAF7A";
 const AVATAR_COLORS = ["#2A78D6", "#EB6834", "#1BAF7A", "#9b6fd6", "#e0a526", "#d6456b", "#2fb3c4"];
@@ -204,6 +208,7 @@ export function ClientPortalPage() {
   const [state, setState] = useState<"loading" | "ready" | "missing">("loading");
   const [viewing, setViewing] = useState<{ meta: PortalDocument; doc: ClientDocument } | null>(null);
   const [openModule, setOpenModule] = useState<number | null>(0);
+  const [params, setParams] = useSearchParams();
 
   const load = async () => {
     if (!token) return;
@@ -255,8 +260,12 @@ export function ClientPortalPage() {
   // Dernière version émise de chaque document.
   const latest = new Map<string, PortalDocument>();
   for (const d of portal.documents) if (!latest.has(d.templateId)) latest.set(d.templateId, d);
+  // Documents d'information : toujours la version à jour, générée depuis la
+  // fiche de la formation, même si une version a été émise plus tôt (un
+  // programme modifié ou importé ensuite doit apparaître tel quel au client).
+  // Les versions émises restent dans l'archive du dossier côté backoffice.
   for (const id of ALWAYS_AVAILABLE) {
-    if (latest.has(id)) continue;
+    if (latest.get(id)?.signedAt) continue;
     const template = DOCUMENT_TEMPLATES.find((t) => t.id === id)!;
     latest.set(id, { id: `${LIVE_PREFIX}${id}`, templateId: id, title: template.titre, issuedAt: new Date().toISOString(), requiresSignature: false, signedAt: null, signerName: null });
   }
@@ -307,62 +316,7 @@ export function ClientPortalPage() {
     .sort((a, b) => Number(stateOf(b) === "signed") - Number(stateOf(a) === "signed"));
   const upcomingTiles = tiles.filter((t) => stateOf(t) === "upcoming");
 
-  return (
-    <div className="min-h-dvh relative" style={{ background: th.bg, ["--avatar-ring" as string]: th.card }}>
-      <Background />
-      <header className="relative z-10 px-5 sm:px-8 py-4 flex items-center gap-4" style={{ borderBottom: `1px solid ${th.sep}` }}>
-        <Logo h={24} />
-        <span className="text-xs font-semibold ml-auto" style={{ color: th.fg3 }}>Espace formation · {portal.client}</span>
-      </header>
-
-      <main className="relative z-10 max-w-6xl mx-auto px-4 sm:px-8 py-6 sm:py-8 space-y-8">
-        {/* Où en est la formation. */}
-        <section className="fade-up relative overflow-hidden rounded-[14px] bg-black text-white">
-          <NeuralField dark density={3.2} band={0.9} />
-          <div aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(90deg,rgba(0,0,0,0.93) 0%,rgba(0,0,0,0.62) 60%,rgba(0,0,0,0.2) 100%)" }} />
-          <div className="relative p-6 sm:p-8 space-y-6">
-            <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
-              <div>
-                <p className="eyebrow text-white/55">Votre formation · {portal.client}</p>
-                <h1 className="text-[1.7rem] sm:text-[2.3rem] font-extrabold leading-[1.05] mt-2.5 tracking-[-0.03em]">{f.intitule}</h1>
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {[
-                    { Icon: CalendarDays, text: periodeFr(portal.dateDebut, portal.dateFin) },
-                    { Icon: Clock, text: `${f.dureeHeures} h · ${MODALITE_LABELS[f.modalite]?.split(" (")[0] ?? f.modalite}` },
-                    ...(portal.lieu ? [{ Icon: MapPin, text: portal.lieu }] : []),
-                    ...(portal.stagiaires.length ? [{ Icon: Users, text: `${portal.stagiaires.length} collaborateur${portal.stagiaires.length > 1 ? "s" : ""}` }] : []),
-                  ].map(({ Icon, text }) => (
-                    <span key={text} className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm bg-white/10 text-white/85"><Icon className="w-4 h-4" />{text}</span>
-                  ))}
-                </div>
-              </div>
-              <div className="lg:text-right">
-                <p className="text-[2.6rem] sm:text-[3.2rem] font-extrabold leading-none tracking-[-0.04em]">{status.big}</p>
-                <p className="text-sm text-white/60 mt-2">{status.label}</p>
-              </div>
-            </div>
-            <div>
-              <div className="flex items-center justify-between text-xs text-white/60 mb-3">
-                <span className="font-semibold text-white/80">Votre parcours</span><span className="tabular-nums">{progress} %</span>
-              </div>
-              <ol className="grid gap-2" style={{ gridTemplateColumns: `repeat(${milestones.length}, minmax(0, 1fr))` }}>
-                {milestones.map((m, i) => (
-                  <li key={m.label} className="space-y-2">
-                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.15)" }}>
-                      <div className="h-full rounded-full" style={{ width: m.done ? "100%" : "0%", background: GREEN, transition: `width 700ms ease ${200 + i * 120}ms` }} />
-                    </div>
-                    <p className="flex items-start gap-1.5 text-[11px] sm:text-xs leading-tight" style={{ color: m.done ? "#fff" : "rgba(255,255,255,0.5)" }}>
-                      {m.done ? <CheckCircle2 className="w-3.5 h-3.5 shrink-0" style={{ color: GREEN }} /> : <span className="w-3.5 text-center shrink-0 font-bold">{i + 1}</span>}
-                      {m.label}
-                    </p>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          </div>
-        </section>
-
-        {/* Les documents, au premier plan, rangés par état. */}
+  const docsSection = (
         <section className="space-y-6">
           <div className="flex items-end gap-4 flex-wrap">
             <div className="flex-1 min-w-[200px]">
@@ -409,10 +363,8 @@ export function ClientPortalPage() {
             )}
           </div>
         </section>
-
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_330px] items-start">
-          <div className="space-y-6 min-w-0">
-            {/* Prochaine séance. */}
+  );
+  const seanceCard = (<>
             {nextSeance ? (
               <GCard><div className="fade-up p-5 sm:p-6 flex gap-5 items-center flex-wrap">
                 <div className="w-[84px] shrink-0 text-center rounded-[10px] py-3" style={{ background: th.ink, color: th.onInk }}>
@@ -450,8 +402,8 @@ export function ClientPortalPage() {
                 </div>
               </div></GCard>
             )}
-
-            {/* Planning et présence. */}
+  </>);
+  const planningCard = (<>
             {seances.length > 0 && (
               <GCard><div className="fade-up p-5 sm:p-6">
                 <div className="flex items-baseline justify-between mb-4">
@@ -489,9 +441,8 @@ export function ClientPortalPage() {
                 </ol>
               </div></GCard>
             )}
-          </div>
-
-          <aside className="space-y-4">
+  </>);
+  const collabCard = (<>
             {portal.stagiaires.length > 0 && (
               <GCard><div className="fade-up p-4 space-y-3">
                 <div className="flex items-baseline justify-between">
@@ -522,6 +473,8 @@ export function ClientPortalPage() {
                 {pastSeances.length > 0 && <p className="text-[11px]" style={{ color: th.fg3 }}>Taux de présence aux séances passées, d'après l'émargement en ligne.</p>}
               </div></GCard>
             )}
+  </>);
+  const formateurCard = (
             <GCard><div className="fade-up p-4 space-y-3">
               <p className="text-sm font-black" style={{ color: th.fg }}>Votre formateur</p>
               {portal.intervenants.map((it) => (
@@ -538,10 +491,8 @@ export function ClientPortalPage() {
                 <a href="tel:+33980874046" className="flex items-center gap-2 text-xs hover:opacity-70" style={{ color: th.fg2 }}><Phone className="w-3.5 h-3.5" />09 80 87 40 46</a>
               </div>
             </div></GCard>
-          </aside>
-        </div>
-
-        {/* Programme. */}
+  );
+  const programmeCard = (
         <GCard><div className="p-5 sm:p-7 space-y-5">
           <div className="flex items-center gap-3 flex-wrap">
             <span className="w-10 h-10 rounded-[10px] flex items-center justify-center" style={{ background: "#2A78D61f", color: "#2A78D6" }}><BookOpen className="w-5 h-5" /></span>
@@ -603,30 +554,213 @@ export function ClientPortalPage() {
             ))}
           </div>
         </div></GCard>
+  );
+
+  const tabs: { id: Tab; label: string; Icon: LucideIcon; badge?: number; urgent?: boolean }[] = [
+    { id: "apercu", label: "Vue d'ensemble", Icon: LayoutDashboard },
+    { id: "documents", label: "Documents", Icon: FileText, badge: toSignTiles.length || undefined, urgent: toSignTiles.length > 0 },
+    { id: "programme", label: "Programme", Icon: BookOpen },
+    { id: "planning", label: "Planning et présence", Icon: CalendarDays },
+    ...(b2b ? [{ id: "positionnement" as Tab, label: "Test de positionnement", Icon: ClipboardList }] : []),
+    { id: "rendez-vous", label: "Vos rendez-vous", Icon: CalendarCheck, badge: portal.rendezVous.length || undefined },
+  ];
+  const tab: Tab = tabs.some((t) => t.id === params.get("onglet")) ? params.get("onglet") as Tab : "apercu";
+  const goTo = (id: Tab) => {
+    setParams(id === "apercu" ? {} : { onglet: id }, { replace: true });
+    document.getElementById("onglets")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+  const positioningDone = portal.positionnement ? new Set(portal.positionnement.resultats.map((r) => r.traineeId)).size : 0;
+
+  return (
+    <div className="min-h-dvh relative" style={{ background: th.bg, ["--avatar-ring" as string]: th.card }}>
+      <Background />
+      <header className="relative z-10 px-5 sm:px-8 py-4 flex items-center gap-4" style={{ borderBottom: `1px solid ${th.sep}` }}>
+        <Logo h={24} />
+        <span className="text-xs font-semibold ml-auto" style={{ color: th.fg3 }}>Espace formation · {portal.client}</span>
+      </header>
+
+      <main className="relative z-10 max-w-6xl mx-auto px-4 sm:px-8 py-6 sm:py-8 space-y-6">
+        {/* Où en est la formation. */}
+        <section className="fade-up relative overflow-hidden rounded-[14px] bg-black text-white">
+          <NeuralField dark density={3.2} band={0.9} />
+          <div aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(90deg,rgba(0,0,0,0.93) 0%,rgba(0,0,0,0.62) 60%,rgba(0,0,0,0.2) 100%)" }} />
+          <div className="relative p-6 sm:p-8 space-y-6">
+            <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
+              <div>
+                <p className="eyebrow text-white/55">Votre formation · {portal.client}</p>
+                <h1 className="text-[1.7rem] sm:text-[2.3rem] font-extrabold leading-[1.05] mt-2.5 tracking-[-0.03em]">{f.intitule}</h1>
+                <div className="flex flex-wrap gap-2 mt-4">
+                  {[
+                    { Icon: CalendarDays, text: periodeFr(portal.dateDebut, portal.dateFin) },
+                    { Icon: Clock, text: `${f.dureeHeures} h · ${MODALITE_LABELS[f.modalite]?.split(" (")[0] ?? f.modalite}` },
+                    ...(portal.lieu ? [{ Icon: MapPin, text: portal.lieu }] : []),
+                    ...(portal.stagiaires.length ? [{ Icon: Users, text: `${portal.stagiaires.length} collaborateur${portal.stagiaires.length > 1 ? "s" : ""}` }] : []),
+                  ].map(({ Icon, text }) => (
+                    <span key={text} className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm bg-white/10 text-white/85"><Icon className="w-4 h-4" />{text}</span>
+                  ))}
+                </div>
+              </div>
+              <div className="lg:text-right">
+                <p className="text-[2.6rem] sm:text-[3.2rem] font-extrabold leading-none tracking-[-0.04em]">{status.big}</p>
+                <p className="text-sm text-white/60 mt-2">{status.label}</p>
+              </div>
+            </div>
+            <div>
+              <div className="flex items-center justify-between text-xs text-white/60 mb-3">
+                <span className="font-semibold text-white/80">Votre parcours</span><span className="tabular-nums">{progress} %</span>
+              </div>
+              <ol className="grid gap-2" style={{ gridTemplateColumns: `repeat(${milestones.length}, minmax(0, 1fr))` }}>
+                {milestones.map((m, i) => (
+                  <li key={m.label} className="space-y-2">
+                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.15)" }}>
+                      <div className="h-full rounded-full" style={{ width: m.done ? "100%" : "0%", background: GREEN, transition: `width 700ms ease ${200 + i * 120}ms` }} />
+                    </div>
+                    <p className="flex items-start gap-1.5 text-[11px] sm:text-xs leading-tight" style={{ color: m.done ? "#fff" : "rgba(255,255,255,0.5)" }}>
+                      {m.done ? <CheckCircle2 className="w-3.5 h-3.5 shrink-0" style={{ color: GREEN }} /> : <span className="w-3.5 text-center shrink-0 font-bold">{i + 1}</span>}
+                      {m.label}
+                    </p>
+                  </li>
+                ))}
+              </ol>
+            </div>
+            {toSignTiles.length > 0 && (
+              <div className="rounded-[10px] p-3 sm:p-4 flex items-center gap-3 flex-wrap" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.18)" }}>
+                <PenLine className="w-5 h-5 shrink-0" />
+                <p className="text-sm font-semibold flex-1 min-w-[200px]">
+                  {toSignTiles.length === 1 ? "1 document attend votre signature" : `${toSignTiles.length} documents attendent votre signature`}
+                </p>
+                <div className="flex gap-2 flex-wrap">
+                  {toSignTiles.map((t) => (
+                    <button key={t.templateId} type="button" onClick={() => void open(t.doc!)}
+                      className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-[2px] bg-white text-black hover:opacity-80">
+                      Signer : {DOC_META[t.templateId].label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Tout le reste, par onglet. */}
+        <nav id="onglets" className="sticky top-0 z-20 -mx-4 sm:mx-0 px-4 sm:px-0 py-2 overflow-x-auto" style={{ background: th.bg }}>
+          <div className="flex gap-1.5 w-max sm:w-auto sm:flex-wrap" role="tablist">
+            {tabs.map((t) => {
+              const active = t.id === tab;
+              return (
+                <button key={t.id} type="button" role="tab" aria-selected={active} onClick={() => goTo(t.id)}
+                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-colors"
+                  style={active ? { background: th.ink, color: th.onInk } : { background: th.navA, color: th.fg2 }}>
+                  <t.Icon className="w-4 h-4" />{t.label}
+                  {t.badge ? (
+                    <span className="text-[11px] tabular-nums px-1.5 rounded-full" style={t.urgent ? { background: th.danger, color: "#fff" } : { background: active ? "rgba(255,255,255,0.2)" : th.card, color: active ? th.onInk : th.fg2 }}>{t.badge}</span>
+                  ) : null}
+                </button>
+              );
+            })}
+          </div>
+        </nav>
+
+        {tab === "apercu" && (
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_330px] items-start">
+            <div className="space-y-6 min-w-0">
+              {nextSeance || ended ? seanceCard : (
+                <GCard><div className="fade-up p-6 flex items-center gap-4">
+                  <CalendarDays className="w-8 h-8 shrink-0" style={{ color: th.fg3 }} />
+                  <div>
+                    <p className="text-base font-black" style={{ color: th.fg }}>Formation du {periodeFr(portal.dateDebut, portal.dateFin)}</p>
+                    <p className="text-sm" style={{ color: th.fg2 }}>Les horaires des séances apparaîtront ici dès qu'ils seront planifiés.</p>
+                  </div>
+                </div></GCard>
+              )}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <OverviewTile Icon={FileText} title="Documents" onClick={() => goTo("documents")}
+                  value={toSignTiles.length ? `${toSignTiles.length} à signer` : `${availableTiles.length} disponible${availableTiles.length > 1 ? "s" : ""}`}
+                  hint={upcomingTiles.length ? `${upcomingTiles.length} à venir au fil de la formation` : "Tous vos documents sont disponibles"} urgent={toSignTiles.length > 0} />
+                <OverviewTile Icon={CalendarDays} title="Planning et présence" onClick={() => goTo("planning")}
+                  value={seances.length ? `${pastSeances.length}/${seances.length} séance${seances.length > 1 ? "s" : ""}` : "À planifier"}
+                  hint={portal.stagiaires.length ? `${portal.stagiaires.length} collaborateur${portal.stagiaires.length > 1 ? "s" : ""} inscrit${portal.stagiaires.length > 1 ? "s" : ""}` : "Inscriptions en cours"} />
+                {b2b && (
+                  <OverviewTile Icon={ClipboardList} title="Test de positionnement" onClick={() => goTo("positionnement")}
+                    value={positioningDone ? `${positioningDone}/${portal.stagiaires.length} réalisé${positioningDone > 1 ? "s" : ""}` : "Pas encore démarré"}
+                    hint="Le niveau de vos collaborateurs avant la formation" />
+                )}
+                <OverviewTile Icon={CalendarCheck} title="Vos rendez-vous" onClick={() => goTo("rendez-vous")}
+                  value={portal.rendezVous.length ? `${portal.rendezVous.length} rendez-vous` : "Aucun pour l'instant"}
+                  hint={portal.rendezVous[0] ? `Dernier : ${dateCourte(portal.rendezVous[0].date)}` : "Comptes rendus de nos échanges"} />
+              </div>
+            </div>
+            <aside className="space-y-4">{formateurCard}</aside>
+          </div>
+        )}
+
+        {tab === "documents" && docsSection}
+
+        {tab === "programme" && programmeCard}
+
+        {tab === "planning" && (
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_330px] items-start">
+            <div className="space-y-6 min-w-0">
+              {seanceCard}
+              {seances.length > 0 ? planningCard : (
+                <p className="text-sm" style={{ color: th.fg3 }}>Le planning des séances n'est pas encore établi.</p>
+              )}
+            </div>
+            <aside className="space-y-4">{collabCard}</aside>
+          </div>
+        )}
+
+        {tab === "positionnement" && <PositioningPanel data={portal.positionnement} stagiaires={portal.stagiaires} />}
+
+        {tab === "rendez-vous" && <MeetingsPanel token={token!} meetings={portal.rendezVous} />}
       </main>
 
       {viewing && token && (
-        <DocumentViewer token={token} meta={viewing.meta} doc={viewing.doc} onClose={() => setViewing(null)}
-          onSigned={(signedAt) => { setViewing({ ...viewing, doc: { ...viewing.doc, signedAt } }); void load(); }} />
+        <DocumentViewer token={token} meta={viewing.meta} doc={viewing.doc} signataire={portal.signataire} onClose={() => setViewing(null)}
+          onSigned={(signedAt, signerName) => { setViewing({ ...viewing, doc: { ...viewing.doc, signedAt, signerName } }); void load(); }} />
       )}
     </div>
   );
 }
 
-function DocumentViewer({ token, meta, doc, onClose, onSigned }: {
-  token: string; meta: PortalDocument; doc: ClientDocument; onClose: () => void; onSigned: (signedAt: string) => void;
+// Signataire proposé : le nom prévu à l'émission du document (représentant
+// du client), découpé en prénom et nom, et sa fonction.
+function proposedSigner(signerName: string | null, signataire: ClientPortal["signataire"]) {
+  const full = (signerName || signataire?.nom || "").trim();
+  const [prenom = "", ...reste] = full.split(/\s+/);
+  return { prenom, nom: reste.join(" "), fonction: signataire?.qualite ?? "" };
+}
+
+function DocumentViewer({ token, meta, doc, signataire, onClose, onSigned }: {
+  token: string; meta: PortalDocument; doc: ClientDocument; signataire: ClientPortal["signataire"];
+  onClose: () => void; onSigned: (signedAt: string, signerName: string) => void;
 }) {
   const th = useTh();
+  const [dialog, setDialog] = useState(false);
+  const [signer, setSigner] = useState(() => proposedSigner(doc.signerName, signataire));
   const [accepted, setAccepted] = useState(false);
   const [signing, setSigning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const html = doc.signedAt ? stampSignature(doc.html, "client", doc.signerName ?? "", doc.signedAt) : doc.html;
+  const signerLabel = `${signer.prenom.trim()} ${signer.nom.trim().toUpperCase()}${signer.fonction.trim() ? `, ${signer.fonction.trim()}` : ""}`;
+  const complete = !!signer.prenom.trim() && !!signer.nom.trim();
 
   const sign = async () => {
     setSigning(true);
     setError(null);
     try {
-      onSigned(await signClientDocument(token, meta.id));
+      let signedAt: string;
+      let signedAs = signerLabel;
+      try {
+        signedAt = await signClientDocumentAs(token, meta.id, { prenom: signer.prenom.trim(), nom: signer.nom.trim(), fonction: signer.fonction.trim() });
+      } catch (err) {
+        // Base pas encore migrée (20261128120000) : signature au nom prévu.
+        if ((err as { code?: string })?.code !== "PGRST202") throw err;
+        signedAt = await signClientDocument(token, meta.id);
+        signedAs = doc.signerName ?? "";
+      }
+      setDialog(false);
+      onSigned(signedAt, signedAs);
     } catch (err) {
       console.error(err);
       setError("La signature n'a pas pu être enregistrée. Réessayez dans un instant.");
@@ -634,6 +768,13 @@ function DocumentViewer({ token, meta, doc, onClose, onSigned }: {
       setSigning(false);
     }
   };
+  const field = (key: keyof typeof signer, label: string, placeholder?: string) => (
+    <label className="block">
+      <span className="block text-xs font-bold mb-1.5" style={{ color: th.fg2 }}>{label}</span>
+      <input value={signer[key]} placeholder={placeholder} onChange={(e) => setSigner((x) => ({ ...x, [key]: e.target.value }))}
+        className="w-full rounded-[4px] px-3 py-2 text-sm g-input" />
+    </label>
+  );
 
   // Le document seul, puis la boîte d'impression : « Enregistrer au format PDF ».
   const download = () => {
@@ -651,6 +792,34 @@ function DocumentViewer({ token, meta, doc, onClose, onSigned }: {
           <button type="button" onClick={onClose} aria-label="Fermer" className="w-9 h-9 flex items-center justify-center hover:opacity-70" style={{ color: th.fg }}><X className="w-5 h-5" /></button>
         </div>
         <iframe title={doc.title} srcDoc={html} sandbox="allow-same-origin allow-modals" className="flex-1 w-full" style={{ border: 0, background: "#eef0f4" }} />
+        {dialog && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.55)" }} role="dialog" aria-modal="true" aria-labelledby="sign-title">
+            <div className="w-full max-w-md rounded-[12px] p-5 sm:p-6 space-y-4" style={{ background: th.card }}>
+              <div className="flex items-start gap-3">
+                <span className="w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0" style={{ background: th.navA, color: th.fg }}><PenLine className="w-5 h-5" /></span>
+                <div className="flex-1 min-w-0">
+                  <p id="sign-title" className="text-base font-black" style={{ color: th.fg }}>Qui signe ce document ?</p>
+                  <p className="text-xs mt-0.5" style={{ color: th.fg3 }}>{doc.title}. Corrigez les champs si ce n'est pas vous qui étiez prévu(e).</p>
+                </div>
+                <button type="button" onClick={() => setDialog(false)} aria-label="Fermer" className="p-1 hover:opacity-70" style={{ color: th.fg }}><X className="w-5 h-5" /></button>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {field("prenom", "Prénom")}
+                {field("nom", "Nom")}
+              </div>
+              {field("fonction", "Fonction", "Directrice des ressources humaines")}
+              <label className="flex items-start gap-2.5 text-sm cursor-pointer" style={{ color: th.fg }}>
+                <input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} className="mt-0.5 w-4 h-4 shrink-0" />
+                <span>Je soussigné(e) <strong>{complete ? signerLabel : "…"}</strong>, j'ai lu le document et j'en accepte les termes. Je reconnais que cette validation vaut signature.</span>
+              </label>
+              {error && <p className="text-sm" style={{ color: th.danger }}>{error}</p>}
+              <div className="flex gap-2 justify-end">
+                <button type="button" onClick={() => setDialog(false)} className="text-sm font-semibold px-4 py-2 hover:opacity-70" style={{ color: th.fg2 }}>Annuler</button>
+                <ShimBtn sm onClick={() => void sign()} disabled={!complete || !accepted || signing}><PenLine className="w-4 h-4" />{signing ? "Signature…" : "Signer"}</ShimBtn>
+              </div>
+            </div>
+          </div>
+        )}
         {doc.requiresSignature && (
           <div className="px-4 py-4" style={{ borderTop: `1px solid ${th.sep}` }}>
             {doc.signedAt ? (
@@ -659,17 +828,169 @@ function DocumentViewer({ token, meta, doc, onClose, onSigned }: {
               </p>
             ) : (
               <div className="flex items-center gap-4 flex-wrap">
-                <label className="flex items-start gap-2.5 text-sm flex-1 min-w-[260px] cursor-pointer" style={{ color: th.fg }}>
-                  <input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} className="mt-0.5 w-4 h-4 shrink-0" />
-                  <span>{doc.signerName ? <>Je soussigné(e) <strong>{doc.signerName}</strong>, </> : null}j'ai lu le document et j'en accepte les termes. Je reconnais que cette validation vaut signature.</span>
-                </label>
-                <ShimBtn sm onClick={sign} disabled={!accepted || signing}><PenLine className="w-4 h-4" />{signing ? "Signature…" : "Signer"}</ShimBtn>
-                {error && <p className="w-full text-sm" style={{ color: th.danger }}>{error}</p>}
+                <p className="text-sm flex-1 min-w-[240px]" style={{ color: th.fg2 }}>Lisez le document, puis signez-le en ligne.</p>
+                <ShimBtn sm onClick={() => { setAccepted(false); setError(null); setDialog(true); }}><PenLine className="w-4 h-4" />Signer le document</ShimBtn>
               </div>
             )}
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// Raccourci de la vue d'ensemble vers un onglet.
+function OverviewTile({ Icon, title, value, hint, urgent, onClick }: {
+  Icon: LucideIcon; title: string; value: string; hint: string; urgent?: boolean; onClick: () => void;
+}) {
+  const th = useTh();
+  return (
+    <button type="button" onClick={onClick} className="fade-up text-left rounded-[10px] p-4 flex items-start gap-3 transition-all hover:-translate-y-0.5 hover:shadow-lg"
+      style={{ background: th.card, border: `1px solid ${urgent ? th.danger : th.sep}` }}>
+      <span className="w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0" style={{ background: urgent ? `${th.danger}1f` : th.navA, color: urgent ? th.danger : th.fg2 }}><Icon className="w-5 h-5" /></span>
+      <span className="min-w-0">
+        <span className="block text-xs font-bold" style={{ color: th.fg3 }}>{title}</span>
+        <span className="block text-lg font-black leading-tight mt-0.5" style={{ color: urgent ? th.danger : th.fg }}>{value}</span>
+        <span className="block text-[11px] mt-1" style={{ color: th.fg3 }}>{hint}</span>
+      </span>
+    </button>
+  );
+}
+
+// Niveau indicatif d'après le score du test de positionnement.
+const niveau = (score: number) => score >= 70
+  ? { label: "Avancé", color: GREEN }
+  : score >= 40 ? { label: "Intermédiaire", color: "#e0a526" } : { label: "Débutant", color: "#2A78D6" };
+
+function EmptyPanel({ Icon, title, text }: { Icon: LucideIcon; title: string; text: string }) {
+  const th = useTh();
+  return (
+    <GCard><div className="fade-up p-8 sm:p-10 flex flex-col items-center text-center gap-3">
+      <span className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: th.navA, color: th.fg3 }}><Icon className="w-7 h-7" /></span>
+      <p className="text-lg font-black" style={{ color: th.fg }}>{title}</p>
+      <p className="text-sm max-w-md" style={{ color: th.fg2 }}>{text}</p>
+    </div></GCard>
+  );
+}
+
+// Résultats du test de positionnement des collaborateurs inscrits.
+function PositioningPanel({ data, stagiaires }: { data: PortalPositioning | null; stagiaires: PortalTrainee[] }) {
+  const th = useTh();
+  const tests = (data?.tests ?? []).filter((t) => t.ouvert || data!.resultats.some((r) => r.testId === t.id));
+  if (!data || !tests.length || !data.resultats.length) {
+    return (
+      <EmptyPanel Icon={ClipboardList} title="Le test de positionnement n'a pas encore démarré"
+        text={tests.length
+          ? "Vos collaborateurs peuvent le passer depuis leur espace de formation. Leurs résultats s'afficheront ici au fur et à mesure."
+          : "Avant la formation, vos collaborateurs passeront un court test pour situer leur niveau. Leurs résultats s'afficheront ici dès qu'ils l'auront réalisé."} />
+    );
+  }
+  return (
+    <div className="space-y-5">
+      {tests.map((test) => {
+        const results = new Map(data.resultats.filter((r) => r.testId === test.id).map((r) => [r.traineeId, r]));
+        const scores = [...results.values()].map((r) => r.score);
+        const moyenne = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
+        const total = Math.max(stagiaires.length, results.size);
+        return (
+          <GCard key={test.id}><div className="fade-up p-5 sm:p-6 space-y-5">
+            <div className="flex items-start gap-4 flex-wrap">
+              <div className="flex-1 min-w-[220px]">
+                <p className="eyebrow" style={{ color: th.fg3 }}>Test de positionnement · {test.questions} question{test.questions > 1 ? "s" : ""}</p>
+                <p className="text-lg font-black mt-1" style={{ color: th.fg }}>{test.titre}</p>
+              </div>
+              <div className="flex gap-6">
+                <div><p className="text-2xl font-black tabular-nums" style={{ color: th.fg }}>{results.size}/{total}</p><p className="text-[11px]" style={{ color: th.fg3 }}>réalisés</p></div>
+                {moyenne !== null && <div><p className="text-2xl font-black tabular-nums" style={{ color: niveau(moyenne).color }}>{moyenne} %</p><p className="text-[11px]" style={{ color: th.fg3 }}>score moyen</p></div>}
+              </div>
+            </div>
+            <div className="h-2 rounded-full overflow-hidden" style={{ background: th.navA }}>
+              <div className="h-full rounded-full" style={{ width: `${total ? (results.size / total) * 100 : 0}%`, background: GREEN }} />
+            </div>
+            {stagiaires.length === 0 ? (
+              <p className="text-sm" style={{ color: th.fg3 }}>Aucun collaborateur inscrit pour le moment.</p>
+            ) : (
+              <ul className="space-y-2.5">
+                {stagiaires.map((t, i) => {
+                  const r = results.get(t.id);
+                  const n = r ? niveau(r.score) : null;
+                  return (
+                    <li key={t.id} className="flex items-center gap-3 flex-wrap">
+                      <Avatar t={t} index={i} />
+                      <div className="w-44 min-w-0">
+                        <p className="text-sm font-semibold truncate" style={{ color: th.fg }}>{t.prenom} {t.nom}</p>
+                        <p className="text-[11px] truncate" style={{ color: th.fg3 }}>{r ? `Réalisé le ${dateCourte(r.date)}` : t.fonction ?? "Inscrit(e)"}</p>
+                      </div>
+                      {r && n ? (
+                        <div className="flex-1 min-w-[160px] flex items-center gap-3">
+                          <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: th.navA }}>
+                            <div className="h-full rounded-full" style={{ width: `${r.score}%`, background: n.color }} />
+                          </div>
+                          <span className="text-sm font-black tabular-nums w-12 text-right" style={{ color: th.fg }}>{Math.round(r.score)} %</span>
+                          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full w-24 text-center" style={{ background: `${n.color}1f`, color: n.color }}>{n.label}</span>
+                        </div>
+                      ) : (
+                        <span className="flex-1 text-xs italic" style={{ color: th.fg3 }}>Pas encore réalisé</span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+            <p className="text-[11px]" style={{ color: th.fg3 }}>Le test situe le niveau de départ : il sert à adapter la formation, pas à noter vos collaborateurs.</p>
+          </div></GCard>
+        );
+      })}
+    </div>
+  );
+}
+
+// Rendez-vous tenus avec l'organisme, avec leur compte rendu et document.
+function MeetingsPanel({ token, meetings }: { token: string; meetings: PortalMeeting[] }) {
+  const th = useTh();
+  const [busy, setBusy] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  if (!meetings.length) {
+    return <EmptyPanel Icon={CalendarCheck} title="Aucun rendez-vous pour le moment"
+      text="Les rendez-vous tenus avec Les Formateurs IA (cadrage, point d'étape, bilan) apparaîtront ici, avec leur compte rendu." />;
+  }
+  const download = async (m: PortalMeeting) => {
+    // L'onglet s'ouvre dans le geste de l'utilisateur, puis reçoit le lien signé.
+    const w = window.open("", "_blank");
+    setBusy(m.id);
+    setError(null);
+    try {
+      const url = await clientMeetingFileUrl(token, m.id);
+      if (w) w.location.href = url; else window.location.href = url;
+    } catch (err) {
+      w?.close();
+      setError(err instanceof Error ? err.message : "Téléchargement impossible.");
+    } finally {
+      setBusy(null);
+    }
+  };
+  return (
+    <div className="space-y-3">
+      {error && <p className="text-sm" style={{ color: th.danger }}>{error}</p>}
+      {meetings.map((m, i) => (
+        <GCard key={m.id}><div className="fade-up p-5 flex gap-5 items-start flex-wrap" style={{ animationDelay: `${i * 40}ms` }}>
+          <div className="w-[72px] shrink-0 text-center rounded-[10px] py-2.5" style={{ background: th.navA }}>
+            <p className="text-[11px] font-bold uppercase" style={{ color: th.fg3 }}>{new Date(`${m.date}T12:00:00`).toLocaleDateString("fr-FR", { month: "short" })}</p>
+            <p className="text-[1.8rem] font-black leading-none" style={{ color: th.fg }}>{Number(m.date.slice(8))}</p>
+            <p className="text-[11px]" style={{ color: th.fg3 }}>{m.date.slice(0, 4)}</p>
+          </div>
+          <div className="flex-1 min-w-[220px] space-y-2">
+            <p className="text-base font-black" style={{ color: th.fg }}>{m.titre}</p>
+            {m.notes && <p className="text-sm whitespace-pre-line leading-relaxed" style={{ color: th.fg2 }}>{m.notes}</p>}
+            {m.fichier && (
+              <button type="button" onClick={() => void download(m)} disabled={busy === m.id}
+                className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-[2px] hover:opacity-70 disabled:opacity-50 max-w-full" style={{ border: `1px solid ${th.sep}`, color: th.fg }}>
+                <FileText className="w-3.5 h-3.5 shrink-0" /><span className="truncate">{busy === m.id ? "Préparation…" : m.fichier}</span><Download className="w-3.5 h-3.5 shrink-0" />
+              </button>
+            )}
+          </div>
+        </div></GCard>
+      ))}
     </div>
   );
 }

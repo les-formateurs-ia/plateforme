@@ -87,6 +87,35 @@ export async function updateSession(s: TrainingSession): Promise<void> {
   if (error) throw error;
 }
 
+// ── Versions du programme (migration 20261127120000_programme_versions) ──
+// La version active est recopiée dans la session (formation) par la base.
+
+export type ProgrammeVersion = {
+  id: string; numero: number; source: "origine" | "creation" | "import" | "modification";
+  fileName: string | null; formation: Formation; isActive: boolean; createdAt: string;
+};
+
+export async function listProgrammeVersions(sessionId: string): Promise<ProgrammeVersion[]> {
+  const { data, error } = await supabase.from("programme_versions").select("*").eq("session_id", sessionId).order("numero", { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map((v) => ({
+    id: v.id, numero: v.numero, source: v.source, fileName: v.file_name, formation: v.formation as unknown as Formation, isActive: v.is_active, createdAt: v.created_at,
+  }));
+}
+
+export async function addProgrammeVersion(sessionId: string, formation: Formation, source: "creation" | "import" | "modification", fileName: string | null = null): Promise<string> {
+  const { data, error } = await supabase.rpc("add_programme_version", {
+    p_session_id: sessionId, p_formation: formation as unknown as Json, p_source: source, p_file_name: fileName, p_activate: true,
+  });
+  if (error) throw error;
+  return data;
+}
+
+export async function activateProgrammeVersion(versionId: string): Promise<void> {
+  const { error } = await supabase.rpc("activate_programme_version", { p_version_id: versionId });
+  if (error) throw error;
+}
+
 // Attribution du formateur seule, sans réécrire le reste de la session.
 export async function assignSessionFormateur(id: string, formateurId: string | null): Promise<void> {
   const { error } = await supabase.from("training_sessions").update({ formateur_id: formateurId }).eq("id", id);
@@ -339,7 +368,18 @@ export type ClientPortal = {
   stagiaires: PortalTrainee[];
   seances: PortalSeance[];
   documents: PortalDocument[];
+  // Représentant du client, proposé dans la fenêtre de signature.
+  signataire: { nom: string; qualite: string } | null;
+  // null : pas d'entreprise rattachée (CPF, particulier).
+  positionnement: PortalPositioning | null;
+  rendezVous: PortalMeeting[];
 };
+
+export type PortalPositioning = {
+  tests: { id: string; titre: string; ouvert: boolean; questions: number }[];
+  resultats: { traineeId: string; testId: string; score: number; date: string }[];
+};
+export type PortalMeeting = { id: string; date: string; titre: string; notes: string | null; fichier: string | null };
 
 export async function getClientPortal(token: string): Promise<ClientPortal | null> {
   const { data, error } = await supabase.rpc("get_client_portal", { p_token: token });
@@ -347,8 +387,10 @@ export async function getClientPortal(token: string): Promise<ClientPortal | nul
   if (!data) return null;
   // Tolère l'ancienne réponse (avant 20261102120000) : compteur de
   // stagiaires et séances sans présence, programme partiel.
-  const raw = data as unknown as Omit<ClientPortal, "stagiaires" | "seances" | "formation"> & {
+  // signataire, positionnement et rendezVous : absents avant 20261128120000.
+  const raw = data as unknown as Omit<ClientPortal, "stagiaires" | "seances" | "formation" | "signataire" | "positionnement" | "rendezVous"> & {
     stagiaires: PortalTrainee[] | number; seances: Partial<PortalSeance>[]; formation: Partial<Formation>;
+    signataire?: { nom?: string; qualite?: string } | null; positionnement?: PortalPositioning | null; rendezVous?: PortalMeeting[];
   };
   const f = raw.formation;
   return {
@@ -363,6 +405,12 @@ export async function getClientPortal(token: string): Promise<ClientPortal | nul
       id: s.id ?? String(i), date: s.date ?? "", debut: hhmm(s.debut ?? "00:00"), fin: hhmm(s.fin ?? "00:00"),
       presents: s.presents ?? [], intervenantSigne: s.intervenantSigne ?? false,
     })),
+    signataire: raw.signataire?.nom ? { nom: raw.signataire.nom, qualite: raw.signataire.qualite ?? "" } : null,
+    positionnement: raw.positionnement ? {
+      tests: raw.positionnement.tests ?? [],
+      resultats: (raw.positionnement.resultats ?? []).map((r) => ({ ...r, score: Number(r.score) })),
+    } : null,
+    rendezVous: raw.rendezVous ?? [],
   };
 }
 
@@ -379,6 +427,23 @@ export async function getClientDocument(token: string, documentId: string): Prom
     title: r.title, html: r.html, sha256: r.html_sha256, issuedAt: r.issued_at, requiresSignature: r.requires_signature,
     signerName: r.signer_name, signedAt: r.signed_at, signedIp: r.signed_ip, signedUserAgent: r.signed_user_agent,
   } : null;
+}
+
+// Signature par la personne qui signe vraiment (nom, prénom, fonction saisis
+// dans la fenêtre de signature).
+export async function signClientDocumentAs(token: string, documentId: string, signer: { prenom: string; nom: string; fonction: string }): Promise<string> {
+  const { data, error } = await supabase.rpc("sign_client_document_as", {
+    p_token: token, p_document_id: documentId, p_prenom: signer.prenom, p_nom: signer.nom, p_fonction: signer.fonction,
+  });
+  if (error) throw error;
+  return data;
+}
+
+// Document d'un rendez-vous, depuis l'espace client : URL signée de courte durée.
+export async function clientMeetingFileUrl(token: string, meetingId: string): Promise<string> {
+  const { data, error } = await supabase.functions.invoke("client-portal-file", { body: { token, meetingId } });
+  if (error || !data?.url) throw new Error(data?.error ?? "Téléchargement impossible pour le moment.");
+  return data.url;
 }
 
 export async function signClientDocument(token: string, documentId: string): Promise<string> {
