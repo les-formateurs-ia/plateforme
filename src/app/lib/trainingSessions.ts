@@ -379,7 +379,8 @@ export type PortalPositioning = {
   tests: { id: string; titre: string; ouvert: boolean; questions: number }[];
   resultats: { traineeId: string; testId: string; score: number; date: string }[];
 };
-export type PortalMeeting = { id: string; date: string; titre: string; notes: string | null; fichier: string | null };
+// Rendez-vous vu du client : son résumé (Markdown), jamais le document joint.
+export type PortalMeeting = { id: string; date: string; titre: string; resume: string | null };
 
 export async function getClientPortal(token: string): Promise<ClientPortal | null> {
   const { data, error } = await supabase.rpc("get_client_portal", { p_token: token });
@@ -410,7 +411,8 @@ export async function getClientPortal(token: string): Promise<ClientPortal | nul
       tests: raw.positionnement.tests ?? [],
       resultats: (raw.positionnement.resultats ?? []).map((r) => ({ ...r, score: Number(r.score) })),
     } : null,
-    rendezVous: raw.rendezVous ?? [],
+    // Avant 20261129120000, le résumé arrivait sous le nom notes.
+    rendezVous: (raw.rendezVous ?? []).map((m) => ({ id: m.id, date: m.date, titre: m.titre, resume: m.resume ?? (m as { notes?: string | null }).notes ?? null })),
   };
 }
 
@@ -437,13 +439,6 @@ export async function signClientDocumentAs(token: string, documentId: string, si
   });
   if (error) throw error;
   return data;
-}
-
-// Document d'un rendez-vous, depuis l'espace client : URL signée de courte durée.
-export async function clientMeetingFileUrl(token: string, meetingId: string): Promise<string> {
-  const { data, error } = await supabase.functions.invoke("client-portal-file", { body: { token, meetingId } });
-  if (error || !data?.url) throw new Error(data?.error ?? "Téléchargement impossible pour le moment.");
-  return data.url;
 }
 
 export async function signClientDocument(token: string, documentId: string): Promise<string> {

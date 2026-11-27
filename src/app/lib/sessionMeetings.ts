@@ -1,10 +1,12 @@
-// Rendez-vous avec le client (migration 20261128120000_client_portal_tabs) :
-// saisis par l'administrateur dans le dossier, avec un document joint (PDF
-// ou Word), et consultables dans l'espace client (onglet « Vos rendez-vous »).
+// Rendez-vous avec le client (migrations 20261128120000 et 20261129120000) :
+// saisis par l'administrateur dans le dossier avec leur document (PDF ou
+// Word). Le client n'en voit que le résumé (notes, Markdown), rédigé par
+// Claude à partir du document puis relu : le fichier reste ici, côté admin.
 import { supabase } from "@/app/lib/supabase/client";
+import { DOCUMENT_ACCEPT, runDocumentTask, type DocumentStep } from "@/app/lib/claudeDocumentTask";
 
 const BUCKET = "session-meetings";
-export const MEETING_FILE_ACCEPT = ".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+export const MEETING_FILE_ACCEPT = DOCUMENT_ACCEPT;
 const MAX_BYTES = 20 * 1024 * 1024;
 
 export type SessionMeeting = {
@@ -45,6 +47,22 @@ export async function addMeeting(sessionId: string, input: { date: string; title
     if (filePath) await supabase.storage.from(BUCKET).remove([filePath]);
     throw error;
   }
+}
+
+export async function updateMeetingSummary(id: string, notes: string): Promise<void> {
+  const { error } = await supabase.from("session_meetings").update({ notes: notes.trim() || null }).eq("id", id);
+  if (error) throw error;
+}
+
+// Résumé structuré et fidèle du document, par Claude (fonction summarize-meeting).
+export async function summarizeMeetingFile(file: File, context: { title: string; date: string }, onStep?: (s: DocumentStep) => void): Promise<string> {
+  const quand = context.date ? new Date(`${context.date}T12:00:00`).toLocaleDateString("fr-FR", { dateStyle: "long" }) : "";
+  const text = await runDocumentTask("summarize-meeting", file, {
+    context: [context.title.trim() && `objet « ${context.title.trim()} »`, quand && `rendez-vous du ${quand}`].filter(Boolean).join(", "),
+    onStep,
+  });
+  // Bloc de code éventuel autour de la réponse.
+  return text.trim().replace(/^```(?:markdown|md)?\s*\n/i, "").replace(/\n```\s*$/, "").trim();
 }
 
 export async function deleteMeeting(m: SessionMeeting): Promise<void> {

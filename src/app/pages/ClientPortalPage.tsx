@@ -9,6 +9,7 @@ import { Logo } from "@/app/components/common/Logo";
 import { GCard } from "@/app/components/common/GCard";
 import { ShimBtn } from "@/app/components/common/Buttons";
 import { NeuralField } from "@/app/components/particles/NeuralField";
+import { MarkdownText } from "@/app/components/common/MarkdownText";
 import { Background } from "@/app/components/common/Background";
 import logoSvg from "@/imports/logo-les-formateurs-ia.svg?raw";
 import { openDocument } from "@/app/lib/documents/openDocument";
@@ -17,7 +18,7 @@ import { DOCUMENT_TEMPLATES, renderTemplate } from "@/app/lib/documents/catalog"
 import { ORGANISME } from "@/app/lib/documents/organisme";
 import type { DocumentContext, Financement } from "@/app/lib/documents/types";
 import {
-  clientMeetingFileUrl, getClientDocument, getClientPortal, signClientDocument, signClientDocumentAs, todayIso,
+  getClientDocument, getClientPortal, signClientDocument, signClientDocumentAs, todayIso,
   type ClientDocument, type ClientPortal, type PortalDocument, type PortalMeeting, type PortalPositioning, type PortalTrainee,
 } from "@/app/lib/trainingSessions";
 
@@ -712,7 +713,7 @@ export function ClientPortalPage() {
 
         {tab === "positionnement" && <PositioningPanel data={portal.positionnement} stagiaires={portal.stagiaires} />}
 
-        {tab === "rendez-vous" && <MeetingsPanel token={token!} meetings={portal.rendezVous} />}
+        {tab === "rendez-vous" && <MeetingsPanel meetings={portal.rendezVous} />}
       </main>
 
       {viewing && token && (
@@ -945,52 +946,41 @@ function PositioningPanel({ data, stagiaires }: { data: PortalPositioning | null
   );
 }
 
-// Rendez-vous tenus avec l'organisme, avec leur compte rendu et document.
-function MeetingsPanel({ token, meetings }: { token: string; meetings: PortalMeeting[] }) {
+// Rendez-vous tenus avec l'organisme : leur résumé structuré (rédigé à partir
+// du document du rendez-vous, qui n'est pas diffusé).
+function MeetingsPanel({ meetings }: { meetings: PortalMeeting[] }) {
   const th = useTh();
-  const [busy, setBusy] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [openId, setOpenId] = useState<string | null>(meetings[0]?.id ?? null);
   if (!meetings.length) {
     return <EmptyPanel Icon={CalendarCheck} title="Aucun rendez-vous pour le moment"
       text="Les rendez-vous tenus avec Les Formateurs IA (cadrage, point d'étape, bilan) apparaîtront ici, avec leur compte rendu." />;
   }
-  const download = async (m: PortalMeeting) => {
-    // L'onglet s'ouvre dans le geste de l'utilisateur, puis reçoit le lien signé.
-    const w = window.open("", "_blank");
-    setBusy(m.id);
-    setError(null);
-    try {
-      const url = await clientMeetingFileUrl(token, m.id);
-      if (w) w.location.href = url; else window.location.href = url;
-    } catch (err) {
-      w?.close();
-      setError(err instanceof Error ? err.message : "Téléchargement impossible.");
-    } finally {
-      setBusy(null);
-    }
-  };
   return (
     <div className="space-y-3">
-      {error && <p className="text-sm" style={{ color: th.danger }}>{error}</p>}
-      {meetings.map((m, i) => (
-        <GCard key={m.id}><div className="fade-up p-5 flex gap-5 items-start flex-wrap" style={{ animationDelay: `${i * 40}ms` }}>
-          <div className="w-[72px] shrink-0 text-center rounded-[10px] py-2.5" style={{ background: th.navA }}>
-            <p className="text-[11px] font-bold uppercase" style={{ color: th.fg3 }}>{new Date(`${m.date}T12:00:00`).toLocaleDateString("fr-FR", { month: "short" })}</p>
-            <p className="text-[1.8rem] font-black leading-none" style={{ color: th.fg }}>{Number(m.date.slice(8))}</p>
-            <p className="text-[11px]" style={{ color: th.fg3 }}>{m.date.slice(0, 4)}</p>
-          </div>
-          <div className="flex-1 min-w-[220px] space-y-2">
-            <p className="text-base font-black" style={{ color: th.fg }}>{m.titre}</p>
-            {m.notes && <p className="text-sm whitespace-pre-line leading-relaxed" style={{ color: th.fg2 }}>{m.notes}</p>}
-            {m.fichier && (
-              <button type="button" onClick={() => void download(m)} disabled={busy === m.id}
-                className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-[2px] hover:opacity-70 disabled:opacity-50 max-w-full" style={{ border: `1px solid ${th.sep}`, color: th.fg }}>
-                <FileText className="w-3.5 h-3.5 shrink-0" /><span className="truncate">{busy === m.id ? "Préparation…" : m.fichier}</span><Download className="w-3.5 h-3.5 shrink-0" />
-              </button>
+      {meetings.map((m, i) => {
+        const isOpen = openId === m.id;
+        return (
+          <GCard key={m.id}><div className="fade-up" style={{ animationDelay: `${i * 40}ms` }}>
+            <button type="button" onClick={() => setOpenId(isOpen ? null : m.id)} className="w-full p-5 flex gap-5 items-center text-left" aria-expanded={isOpen}>
+              <div className="w-[72px] shrink-0 text-center rounded-[10px] py-2.5" style={{ background: th.navA }}>
+                <p className="text-[11px] font-bold uppercase" style={{ color: th.fg3 }}>{new Date(`${m.date}T12:00:00`).toLocaleDateString("fr-FR", { month: "short" })}</p>
+                <p className="text-[1.8rem] font-black leading-none" style={{ color: th.fg }}>{Number(m.date.slice(8))}</p>
+                <p className="text-[11px]" style={{ color: th.fg3 }}>{m.date.slice(0, 4)}</p>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-base font-black" style={{ color: th.fg }}>{m.titre}</p>
+                <p className="text-xs mt-0.5" style={{ color: th.fg3 }}>{m.resume ? (isOpen ? "Compte rendu du rendez-vous" : "Voir le compte rendu") : "Compte rendu à venir"}</p>
+              </div>
+              {m.resume && <ChevronDown className="w-5 h-5 shrink-0 transition-transform" style={{ color: th.fg3, transform: isOpen ? "rotate(180deg)" : undefined }} />}
+            </button>
+            {isOpen && m.resume && (
+              <div className="px-5 pb-6 sm:pl-[117px]" style={{ borderTop: `1px solid ${th.sep}` }}>
+                <div className="pt-4"><MarkdownText>{m.resume}</MarkdownText></div>
+              </div>
             )}
-          </div>
-        </div></GCard>
-      ))}
+          </div></GCard>
+        );
+      })}
     </div>
   );
 }

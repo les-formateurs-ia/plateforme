@@ -22,10 +22,6 @@ verify_jwt = false
 [functions.visitor-access]
 verify_jwt = false
 
-# Client portal download (/espace-client/:token): the personal portal token is the credential.
-[functions.client-portal-file]
-verify_jwt = false
-
 # Daily cron call (pg_net): authenticated by the CRON_SECRET header instead.
 [functions.formation-email-automations]
 verify_jwt = false
